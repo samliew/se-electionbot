@@ -261,7 +261,7 @@ const main = async () => {
         cron.schedule(
             cs,
             async (election) => {
-                await room.sendMessage(`The [election phase](${election.url}?tab=election) is now open. You may now cast your election ballot in order of your top three preferred candidates.`);
+                await room.sendMessage(`The [election phase](${election.url}?tab=election) is now open. You may now cast your election ballot for your top three preferred candidates.`);
             },
             {
                 timezone: "Etc/UTC"
@@ -276,7 +276,7 @@ const main = async () => {
         cron.schedule(
             cs,
             async (election) => {
-                await room.sendMessage(`The [primary phase](${election.url}?tab=primary) is now open. You may vote on the candidates' nomination posts, and come back in four days to vote in the final election phase.`);
+                await room.sendMessage(`The [primary phase](${election.url}?tab=primary) is now open. We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
             },
             {
                 timezone: "Etc/UTC"
