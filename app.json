@@ -1,0 +1,6 @@
+{
+    "name": "Stack Exchange Election Bot",
+    "description": "A Node.js chat bot for Stack Exchange election chat rooms",
+    "repository": "https://github.com/samliew/se-electionbot",
+    "keywords": ["Stack Overflow", "election", "chat", "node", "express"]
+}
