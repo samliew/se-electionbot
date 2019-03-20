@@ -207,14 +207,14 @@ const main = async () => {
                 responseText = `An [election](${election.url}) is where users nominate themselves as candidates for the role of [community moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
             }
 
-            // How/where to vote
-            else if(msg.content.match(/(where|how) (do I|can I|to)(\s+cast.+)? vote/i)) {
-                responseText = `If you have at least ${election.repVote} reputation, you can vote for the candidates in the election here: ${election.url}. If you want to make an informed decision, you can read the candidates' Q&A here: ${election.qnaUrl}`;
-            }
-
             // How to nominate self/vote for self
             else if(msg.content.match(/(nominate|vote)/i) && msg.content.includes('myself')) {
                 responseText = `You can nominate yourself as a candidate during the nomination phase only. You'll need at least ${election.repNominate} reputation, these badges (Civic Duty, Strunk & White, Deputy, Convention), and cannot have been suspended in the past year.`;
+            }
+
+            // How/where to vote
+            else if(msg.content.match(/(where|how) (do I|can I|to)(\s+cast.+)? vote/i)) {
+                responseText = `If you have at least ${election.repVote} reputation, you can vote for the candidates in the election here: ${election.url}. If you want to make an informed decision, you can read the candidates' Q&A here: ${election.qnaUrl}`;
             }
 
             // Status
