@@ -164,8 +164,8 @@ const main = async () => {
     // Event listener
     room.on('message', async msg => {
 
-        // Ignore stuff from Community or Feeds users
-        if([-1, -2].includes(msg.userId)) return;
+        // Ignore stuff from self, Community or Feeds users
+        if([me.id, -1, -2].includes(msg.userId)) return;
 
         // Ignore unnecessary events
         if(ignoredEventTypes.includes(msg.eventType)) return;
