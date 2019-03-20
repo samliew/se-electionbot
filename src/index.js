@@ -189,18 +189,16 @@ const main = async () => {
             console.log('Throttling...');
             return;
         }
-        else {
-            lastMessageTime = Date.now();
-        }
 
         // Mentioned bot (not replied to existing message)
         if (msg.eventType === 8 && msg.targetUserId === me.id) {
-            await msg.reply(`Hello ${msg.userName}! I'm ${myProfile.name} and ${myProfile.about}.`);
+            //await msg.reply(`Hello ${msg.userName}! I'm ${myProfile.name} and ${myProfile.about}.`);
         }
 
         // Any new message that does not reply-to or mention any user
-        let responseText = null;
-        if (msg.eventType === 1 && !msg.targetUserId) {
+        else if (msg.eventType === 1 && !msg.targetUserId) {
+            
+            let responseText = null;
 
             // What is election
             if(msg.content.match(/what is.*election/i) || msg.content.match(/how does.*(election|it).*work/i)) {
@@ -242,7 +240,12 @@ const main = async () => {
                 }
             }
             
-            if(responseText != null) await msg.reply(responseText);
+            if(responseText != null) {
+                await room.sendMessage(responseText);
+
+                // Record last sent message time so we don't flood the room
+                lastMessageTime = Date.now();
+            }
         }
     });
 
