@@ -212,7 +212,21 @@ const main = async () => {
 
             // How/where to vote
             else if(msg.content.match(/(where|how) (do I|can I|to)(\s+cast.+)? vote/i)) {
-                responseText = `If you have at least ${election.repVote} reputation, you can vote for the candidates in the election here: ${election.url}. If you want to make an informed decision, you can read the candidates' Q&A here: ${election.qnaUrl}`;
+
+                switch(election.phase) {
+                    case 'election':
+                    case 'primary':
+                        responseText = `If you have at least ${election.repVote} reputation, you can vote for the candidates in the election here: ${election.url}. If you want to make an informed decision, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
+                        break;
+                    case 'nomination':
+                        responseText = `You cannot vote yet. In the meantime you can leave comments below the [candidates' nominations](${election.url}?tab=nomination), as well as read the candidates' [answers to your questions](${election.qnaUrl}).`;
+                        break;
+                    case 'ended':
+                        responseText = `The [moderator election](${election.url}) has ended. You can no longer vote.`;
+                        break;
+                    default:
+                        responseText = `The election hasn't begun. Come back later.`;
+                }
             }
 
             // Status
@@ -264,7 +278,7 @@ const main = async () => {
         cron.schedule(
             cs,
             async (election) => {
-                await room.sendMessage(`The [election phase](${election.url}?tab=election) is now open. You may now cast your election ballot for your top three preferred candidates.`);
+                await room.sendMessage(`**PSA:** The [election phase](${election.url}?tab=election) is now open. You may now cast your election ballot for your top three preferred candidates.`);
             },
             {
                 timezone: "Etc/UTC"
@@ -279,7 +293,7 @@ const main = async () => {
         cron.schedule(
             cs,
             async (election) => {
-                await room.sendMessage(`The [primary phase](${election.url}?tab=primary) is now open. We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
+                await room.sendMessage(`**PSA:** The [primary phase](${election.url}?tab=primary) is now open. We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
             },
             {
                 timezone: "Etc/UTC"
@@ -294,7 +308,7 @@ const main = async () => {
         cron.schedule(
             cs,
             async (election) => {
-                await room.sendMessage(`The [nomination phase](${election.url}?tab=nomination) is now open. Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
+                await room.sendMessage(`**PSA:** The [nomination phase](${election.url}?tab=nomination) is now open. Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
             },
             {
                 timezone: "Etc/UTC"
