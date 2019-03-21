@@ -345,11 +345,9 @@ if (scriptHostname.indexOf('herokuapp.com')) {
     // Keep-alive interval to prevent sleeping every 30 minutes
     setInterval(function() {
         https.get(scriptHostname, function(res) {
-            res.on('data', function(chunk) {
-                console.log(`> keep-alive`);
-            });
+            console.log(` keep-alive`);
         }).on('error', function(err) {
-            console.log("keep-alive error: " + err.message);
+            console.log("> keep-alive error: " + err.message);
         });
     }, 20 * 60 * 1000); // every 20 minutes
 }
