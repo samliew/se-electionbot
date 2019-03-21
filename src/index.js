@@ -10,7 +10,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Environment variables
-const scriptHostname = process.env.SCRIPT_HOSTNAME;
+const scriptHostname = process.env.SCRIPT_HOSTNAME || '';
 const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
 const accountEmail = process.env.ACCOUNT_EMAIL;
