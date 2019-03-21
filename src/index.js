@@ -331,6 +331,7 @@ if (scriptHostname.indexOf('herokuapp.com')) {
     // Required to keep Heroku free web dyno alive for more than 60 seconds,
     //   or to serve static content
     const express = require('express');
+    const http = require("http");
     const path = require('path');
     const app = express().set('port', process.env.PORT || 5000);
     
@@ -341,16 +342,14 @@ if (scriptHostname.indexOf('herokuapp.com')) {
         console.log(`Node app ${staticPath} is listening on port ${app.get('port')}.\n`);
     });
 
-    // Keep-alive cron to prevent sleeping every 30 minutes
-    cron.schedule(
-        "0/10 * 1/1 * *",
-        async () => {
-            const https = require('https');
-            https.get(scriptHostname);
-            console.log('CRON: keep-alive');
-        },
-        {
-            timezone: "Etc/UTC"
-        }
-    );
+    // Keep-alive interval to prevent sleeping every 30 minutes
+    setInterval(function() {
+        http.get(scriptHostname, function(res) {
+            res.on('data', function(chunk) {
+                console.log(`> keep-alive`);
+            });
+        }).on('error', function(err) {
+            console.log("keep-alive error: " + err.message);
+        });
+    }, 20 * 60 * 1000); // every 20 minutes
 }
