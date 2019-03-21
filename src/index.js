@@ -347,7 +347,7 @@ if (scriptHostname.indexOf('herokuapp.com')) {
         async () => {
             const https = require('https');
             https.get(scriptHostname);
-            console.log('CRON: keep-alive (internal)');
+            console.log('CRON: keep-alive');
         },
         {
             timezone: "Etc/UTC"
