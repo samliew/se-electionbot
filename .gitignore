@@ -6,23 +6,20 @@ npm-debug.log*
 # Dependency directories
 node_modules/
 
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
 # Output of 'npm pack'
 *.tgz
-
-# Yarn Integrity file
-.yarn-integrity
 
 # dotenv environment variables file
 .env
 
-# parcel-bundler cache (https://parceljs.org/)
+# caches and temp directories
+tmp
+temp
+cache
 .cache
+.autogit
+.eslintcache
+.npm
 
 # Distribution folder
 dist/
