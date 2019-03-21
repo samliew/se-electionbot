@@ -343,7 +343,7 @@ if (scriptHostname.indexOf('herokuapp.com')) {
 
     // Keep-alive cron to prevent sleeping every 30 minutes
     cron.schedule(
-        "20 0 * * *",
+        "0/20 * 1/1 * *",
         async () => {
             const https = require('https');
             https.get(scriptHostname);
