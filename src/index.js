@@ -267,7 +267,7 @@ const main = async () => {
     // Connect to the room, and listen for new events
     await room.watch();
 
-    console.log(`Initialized and standing by in room ${chatRoomId}...\n`);
+    console.log(`Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}...\n`);
 
         
     // Set cron jobs to announce the different phases
