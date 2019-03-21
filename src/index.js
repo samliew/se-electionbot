@@ -10,6 +10,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Environment variables
+const scriptHostname = process.env.SCRIPT_HOSTNAME;
 const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
 const accountEmail = process.env.ACCOUNT_EMAIL;
@@ -324,10 +325,11 @@ const main = async () => {
 main();
 
 
-// Required to keep Heroku free web dyno alive for more than 60 seconds,
-//   or to serve static content
-if (process.env.NODE_ENV === 'production') {
+// If running on Heroku
+if (scriptHostname.indexOf('herokuapp.com')) {
 
+    // Required to keep Heroku free web dyno alive for more than 60 seconds,
+    //   or to serve static content
     const express = require('express');
     const path = require('path');
     const app = express().set('port', process.env.PORT || 5000);
@@ -338,4 +340,16 @@ if (process.env.NODE_ENV === 'production') {
     app.listen(app.get('port'), () => {
         console.log(`Node app ${staticPath} is listening on port ${app.get('port')}.\n`);
     });
+
+    // Keep-alive cron to prevent sleeping every 30 minutes
+    cron.schedule(
+        "20 0 * * *",
+        async () => {
+            const https = require('https');
+            https.get(scriptHostname);
+        },
+        {
+            timezone: "Etc/UTC"
+        }
+    );
 }
