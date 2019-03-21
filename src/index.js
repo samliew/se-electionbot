@@ -62,7 +62,7 @@ const getElectionPage = async (electionUrl) => {
 
     if(election != null) return;
 
-    const electionPageUrl = `${electionUrl}/?tab=nomination`;
+    const electionPageUrl = `${electionUrl}?tab=nomination`;
     console.log(`Attempting to fetch ${electionPageUrl}.`);
 
     try {
@@ -331,7 +331,7 @@ if (scriptHostname.indexOf('herokuapp.com')) {
     // Required to keep Heroku free web dyno alive for more than 60 seconds,
     //   or to serve static content
     const express = require('express');
-    const http = require("http");
+    var https = require('https');
     const path = require('path');
     const app = express().set('port', process.env.PORT || 5000);
     
@@ -344,7 +344,7 @@ if (scriptHostname.indexOf('herokuapp.com')) {
 
     // Keep-alive interval to prevent sleeping every 30 minutes
     setInterval(function() {
-        http.get(scriptHostname, function(res) {
+        https.get(scriptHostname, function(res) {
             res.on('data', function(chunk) {
                 console.log(`> keep-alive`);
             });
