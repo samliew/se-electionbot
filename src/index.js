@@ -314,8 +314,9 @@ const main = async () => {
     // Test if getElectionPage() can be called from cron.schedule
     if(debug) {
         const dNow = new Date();
+        const cs = `${dNow.getHours() + 2} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`;
         cron.schedule(
-            `${dNow.getMinutes() + 2} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`,
+            cs,
             async (election, room) => {
                 console.log('TEST CRON START');
                 await getElectionPage(electionUrl);
