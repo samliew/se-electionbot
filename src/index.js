@@ -239,11 +239,6 @@ const main = async () => {
                 responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need at least ${election.repNominate} reputation, these badges (Civic Duty, Strunk & White, Deputy, Convention), and cannot have been suspended in the past year.`;
             }
 
-            // What is election
-            else if(['how', 'what'].some(x => msg.content.includes(x)) && ['election', 'it work'].some(x => msg.content.includes(x))) {
-                responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
-            }
-
             // How/where to vote
             else if(['where', 'how'].some(x => msg.content.includes(x)) && ['do I', 'can I', 'to'].some(x => msg.content.includes(x)) && msg.content.includes('vote')) {
 
@@ -286,6 +281,11 @@ const main = async () => {
                     if(election.phase === 'primary') responseText += ` You may vote on the candidates' nomination posts, and come back ${textToElection} to vote in the final election phase.`;
                     else if(election.phase === 'election') responseText += ` You may now cast your election ballot in order of your top three preferred candidates.`;
                 }
+            }
+
+            // What is election
+            else if(['how', 'what'].some(x => msg.content.includes(x)) && ['is', 'an', 'does'].some(x => msg.content.includes(x)) && ['election', 'it work'].some(x => msg.content.includes(x))) {
+                responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
             }
             
             if(responseText != null) {
