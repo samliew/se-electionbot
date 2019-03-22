@@ -1,6 +1,7 @@
 import Client from 'chatexchange';
 import cron from "node-cron";
 const cheerio = require('cheerio');
+const flatCache = require('flat-cache');
 const Entities = require('html-entities').AllHtmlEntities;
 
 // If running locally, load env vars from .env file
@@ -10,6 +11,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Environment variables
+const debug = process.env.DEBUG.toLowerCase() == 'true' || false;
 const scriptHostname = process.env.SCRIPT_HOSTNAME || '';
 const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
@@ -22,6 +24,7 @@ const throttleSecs = Number(process.env.THROTTLE_SECS) || 10;
 
 // App variables
 const entities = new Entities();
+const cache = flatCache.load('election-cache', path.resolve('../cache'));
 const electionUrl = electionSite + '/election/' + electionNum;
 const ignoredEventTypes = [
 //  1,  // MessagePosted
@@ -59,8 +62,6 @@ const pluralize = (str, num) => str + (num !== 1 ? 's' : str);
 // Get election page, parse it, and insert results into variable election
 let election = null;
 const getElectionPage = async (electionUrl) => {
-
-    if(election != null) return;
 
     const electionPageUrl = `${electionUrl}?tab=nomination`;
     console.log(`Attempting to fetch ${electionPageUrl}.`);
@@ -136,6 +137,9 @@ const getElectionPage = async (electionUrl) => {
         }
 
         console.log(`Election page ${electionUrl} has been scraped successfully.\n`);
+
+        // Cache election into a json file
+        cache.setKey('election', election);
     }
     catch(err) {
         console.log(`Error with request: ${electionUrl}\n`, err);
@@ -201,9 +205,29 @@ const main = async () => {
             
             let responseText = null;
 
+            // Moderation badges
+            if(msg.content.includes('what') && msg.content.includes('moderation badges')) {
+                responseText = `The 8 moderation badges counting towards candidate score are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward`;
+            }
+
+            // Participation badges
+            else if(msg.content.includes('what') && msg.content.includes('participation badges')) {
+                responseText = `The 6 participation badges counting towards candidate score are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling`;
+            }
+
+            // Editing badges
+            else if(msg.content.includes('what') && msg.content.includes('editing badges')) {
+                responseText = `The 6 editing badges counting towards candidate score are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White`;
+            }
+
+            // Candidate score calculation
+            else if(msg.content.includes('how') && (msg.content.includes('candidate score') || msg.content.includes('score calculated'))) {
+                responseText = `The candidate score is calculated as such: 1 point for each 1,000 reputation up to 20,000 reputation (maximum of 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges. See https://meta.stackexchange.com/a/252643`;
+            }
+
             // What is election
-            if(msg.content.match(/what is.*election/i) || msg.content.match(/how does.*(election|it).*work/i)) {
-                responseText = `An [election](${election.url}) is where users nominate themselves as candidates for the role of [community moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
+            else if(msg.content.match(/what is.*election/i) || msg.content.match(/how does.*(election|it).*work/i)) {
+                responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
             }
 
             // How to nominate self/vote for self
@@ -269,9 +293,38 @@ const main = async () => {
 
     console.log(`Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}...\n`);
 
+
+    // Interval to re-scrape election data
+    setInterval(async function() {
+        await getElectionPage(electionUrl);
+    }, 10 * 60000, ); // every 10 minutes
+
         
     // Set cron jobs to announce the different phases
     const now = Date.now();
+
+    const _endedDate = new Date(election.dateEnded);
+    if(_endedDate > now) {
+        let cs = `0 ${_endedDate.getHours()} ${_endedDate.getDate()} ${_endedDate.getMonth() + 1} *`;
+
+        if(debug) {
+            // Test if function can be called from cron.schedule
+            cs = `0/5 ${now.getHours()} ${now.getDate()} ${now.getMonth() + 1} *`;
+        }
+
+        cron.schedule(
+            cs,
+            async (election) => {
+                await getElectionPage(electionUrl);
+                const flatCache = require('flat-cache');
+                const cache = flatCache.load('election-cache', path.resolve('../cache'));
+                const election = cache.getKey('election', election);
+                await room.sendMessage(`**The [election](${election.url}?tab=election) has ended.** Congrats to the winners ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}! You can [view the results online via OpaVote](${election.resultsUrl}).`);
+            },
+            { timezone: "Etc/UTC" }
+        );
+        console.log('CRON - election end', cs);
+    }
 
     const _electionDate = new Date(election.dateElection);
     if(_electionDate > now) {
@@ -279,13 +332,12 @@ const main = async () => {
         cron.schedule(
             cs,
             async (election) => {
-                await room.sendMessage(`**PSA:** The [election phase](${election.url}?tab=election) is now open. You may now cast your election ballot for your top three preferred candidates.`);
+                await room.sendMessage(`**The [election phase](${election.url}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
+                await getElectionPage(electionUrl);
             },
-            {
-                timezone: "Etc/UTC"
-            }
+            { timezone: "Etc/UTC" }
         );
-        console.log('CRON - election', cs);
+        console.log('CRON - election start', cs);
     }
     
     const _primaryDate = new Date(election.datePrimary);
@@ -294,13 +346,12 @@ const main = async () => {
         cron.schedule(
             cs,
             async (election) => {
-                await room.sendMessage(`**PSA:** The [primary phase](${election.url}?tab=primary) is now open. We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
+                await room.sendMessage(`**The [primary phase](${election.url}?tab=primary) is now open.** We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
+                await getElectionPage(electionUrl);
             },
-            {
-                timezone: "Etc/UTC"
-            }
+            { timezone: "Etc/UTC" }
         );
-        console.log('CRON - primary', cs);
+        console.log('CRON - primary start', cs);
     }
     
     const _nominationDate = new Date(election.dateNomination);
@@ -310,16 +361,14 @@ const main = async () => {
             cs,
             async (election) => {
                 await room.sendMessage(`**PSA:** The [nomination phase](${election.url}?tab=nomination) is now open. Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
+                await getElectionPage(electionUrl);
             },
-            {
-                timezone: "Etc/UTC"
-            }
+            { timezone: "Etc/UTC" }
         );
-        console.log('CRON - nomination', cs);
+        console.log('CRON - nomination start', cs);
     }
 
     // End cron stuff
-
 
 }
 main();
@@ -344,10 +393,8 @@ if (scriptHostname.indexOf('herokuapp.com')) {
 
     // Keep-alive interval to prevent sleeping every 30 minutes
     setInterval(function() {
-        https.get(scriptHostname, function(res) {
-            console.log(` keep-alive`);
-        }).on('error', function(err) {
-            console.log("> keep-alive error: " + err.message);
+        https.get(scriptHostname).on('error', function(err) {
+            console.log(">> keep-alive error! " + err.message);
         });
-    }, 20 * 60 * 1000); // every 20 minutes
+    }, 20 * 60000); // every 20 minutes
 }

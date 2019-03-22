@@ -26,6 +26,7 @@
     "chatexchange": "^0.1.6",
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.4",
+    "flat-cache": "^2.0.1",
     "html-entities": "^1.2.1",
     "node-cron": "^2.0.3",
     "request": "^2.88.0",
