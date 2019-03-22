@@ -21,6 +21,7 @@ const accountPassword = process.env.ACCOUNT_PASSWORD;
 const electionSite = process.env.ELECTION_SITE;
 const electionNum = process.env.ELECTION_NUM;
 const electionQa = process.env.ELECTION_QA;
+const electionChatroom = process.env.ELECTION_CHATROOM;
 const throttleSecs = Number(process.env.THROTTLE_SECS) || 10;
 
 // App variables
@@ -116,7 +117,7 @@ const getElectionPage = async (electionUrl) => {
                 }
             }).get(),
             qnaUrl: electionPost.find('a[href*="questionnaire"]').attr('href') || electionQa,
-            chatUrl: electionPost.find('a[href*="/rooms/"]').attr('href') || `https://chat.${chatDomain}/rooms/${chatRoomId}`,
+            chatUrl: electionPost.find('a[href*="/rooms/"]').attr('href') || electionChatroom,
         };
 
         // Calculate phase of election
