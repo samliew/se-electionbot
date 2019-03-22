@@ -187,8 +187,8 @@ const main = async () => {
         // Get details of user who triggered the message
         //const user = msg.userId == me.id ? myProfile : await client._browser.getProfile(msg.userId);
 
-        // Decode HTML entities in messages
-        msg.content = entities.decode(msg.content);
+        // Decode HTML entities in messages, lowercase for matching
+        msg.content = entities.decode(msg.content).toLowerCase();
 
         console.log(`EVENT`, {
             eventType: msg.eventType,
@@ -215,17 +215,17 @@ const main = async () => {
             let responseText = null;
 
             // Moderation badges
-            if(['what', 'moderation badges'].every(x => msg.content.includes(x))) {
+            if(['what', 'mod', 'badges'].every(x => msg.content.includes(x))) {
                 responseText = `The 8 moderation badges counting towards candidate score are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward`;
             }
 
             // Participation badges
-            else if(['what', 'participation badges'].every(x => msg.content.includes(x))) {
+            else if(['what', 'participation', 'badges'].every(x => msg.content.includes(x))) {
                 responseText = `The 6 participation badges counting towards candidate score are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling`;
             }
 
             // Editing badges
-            else if(['what', 'editing badges'].every(x => msg.content.includes(x))) {
+            else if(['what', 'editing', 'badges'].every(x => msg.content.includes(x))) {
                 responseText = `The 6 editing badges counting towards candidate score are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White`;
             }
 
