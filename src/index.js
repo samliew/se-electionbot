@@ -314,16 +314,16 @@ const main = async () => {
     // Test if getElectionPage() can be called from cron.schedule
     if(debug) {
         const dNow = new Date();
-        const cs = `0/5 ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`;
         cron.schedule(
-            cs,
-            async (election) => {
+            `0/5 ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`,
+            async (election, room) => {
+                console.log('TEST CRON START');
                 await getElectionPage(electionUrl);
-                await room.sendMessage(`**TEST**`, election);
+                console.log('TEST CRON END', election, room);
             },
             { timezone: "Etc/UTC" }
         );
-        console.log('CRON - testing', cs);
+        console.log('CRON - testing - ', cs);
     }
 
     const _endedDate = new Date(election.dateEnded);
@@ -331,13 +331,13 @@ const main = async () => {
         const cs = `0 ${_endedDate.getHours()} ${_endedDate.getDate()} ${_endedDate.getMonth() + 1} *`;
         cron.schedule(
             cs,
-            async (election) => {
+            async (election, room) => {
                 await getElectionPage(electionUrl);
                 await room.sendMessage(`**The [election](${election.url}?tab=election) has ended.** Congrats to the winners ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}! You can [view the results online via OpaVote](${election.resultsUrl}).`);
             },
             { timezone: "Etc/UTC" }
         );
-        console.log('CRON - election end', cs);
+        console.log('CRON - election end - ', cs);
     }
 
     const _electionDate = new Date(election.dateElection);
@@ -345,13 +345,13 @@ const main = async () => {
         const cs = `0 ${_electionDate.getHours()} ${_electionDate.getDate()} ${_electionDate.getMonth() + 1} *`;
         cron.schedule(
             cs,
-            async (election) => {
+            async (election, room) => {
                 await room.sendMessage(`**The [election phase](${election.url}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
                 await getElectionPage(electionUrl);
             },
             { timezone: "Etc/UTC" }
         );
-        console.log('CRON - election start', cs);
+        console.log('CRON - election start - ', cs);
     }
     
     const _primaryDate = new Date(election.datePrimary);
@@ -359,13 +359,13 @@ const main = async () => {
         const cs = `0 ${_primaryDate.getHours()} ${_primaryDate.getDate()} ${_primaryDate.getMonth() + 1} *`;
         cron.schedule(
             cs,
-            async (election) => {
+            async (election, room) => {
                 await room.sendMessage(`**The [primary phase](${election.url}?tab=primary) is now open.** We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
                 await getElectionPage(electionUrl);
             },
             { timezone: "Etc/UTC" }
         );
-        console.log('CRON - primary start', cs);
+        console.log('CRON - primary start - ', cs);
     }
     
     const _nominationDate = new Date(election.dateNomination);
@@ -373,13 +373,13 @@ const main = async () => {
         const cs = `0 ${_nominationDate.getHours()} ${_nominationDate.getDate()} ${_nominationDate.getMonth() + 1} *`;
         cron.schedule(
             cs,
-            async (election) => {
+            async (election, room) => {
                 await room.sendMessage(`**PSA:** The [nomination phase](${election.url}?tab=nomination) is now open. Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
                 await getElectionPage(electionUrl);
             },
             { timezone: "Etc/UTC" }
         );
-        console.log('CRON - nomination start', cs);
+        console.log('CRON - nomination start - ', cs);
     }
 
     // End cron stuff
