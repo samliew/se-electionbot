@@ -236,7 +236,7 @@ const main = async () => {
             else if(msg.content.includes('commands')) {
                 responseText = `\nFAQ topics I can help with:\n- what are the moderation badges\n- what are the participation badges\n- what are the editing badges\n` +
                     `- how is the candidate score calculated\n- how does the election work\n- who are the candidates\n- how to nominate\n- how to vote\n` +
-                    `- how to decide who to vote for\n- election status`;
+                    `- how to decide who to vote for\n- how many voted\n- election status`;
             }
             
             if(responseText != null) {
@@ -282,8 +282,8 @@ const main = async () => {
             }
 
             // Stats/How many voted/participated
-            else if(['how', 'many'].every(x => msg.content.includes(x)) && ['voted', 'participants'].every(x => msg.content.includes(x))) {
-                responseText = `${election.statVoters}`;
+            else if(['how', 'many'].every(x => msg.content.includes(x)) && ['voted', 'participants'].some(x => msg.content.includes(x))) {
+                responseText = election.phase == 'ended' ? election.statVoters : `We won't know for sure until the election ends.`;
             }
 
             // How to choose/pick/decide who to vote for
@@ -318,7 +318,7 @@ const main = async () => {
                         responseText = `The [moderator election](${election.url}) has ended. You can no longer vote.`;
                         break;
                     default:
-                        responseText = `The election hasn't begun. Come back later.`;
+                        responseText = `The [election](${election.url}) hasn't begun. Come back at ${election.dateNomination}.`;
                 }
             }
 
