@@ -63,7 +63,7 @@ const pluralize = (str, num) => str + (num !== 1 ? 's' : str);
 
 // App setup
 (function() {
-    if(debug) console.log('WARN: Debug mode is on.');
+    if(debug) console.log('WARN: Debug mode is on.\n');
 })();
 
 
@@ -318,7 +318,7 @@ const main = async () => {
                         responseText = `The [moderator election](${election.url}) has ended. You can no longer vote.`;
                         break;
                     default:
-                        responseText = `The [election](${election.url}) hasn't begun. Come back at ${election.dateNomination}.`;
+                        responseText = `The [moderator election](${election.url}) has not started yet. Come back at ${election.dateNomination}.`;
                 }
             }
 
@@ -326,7 +326,7 @@ const main = async () => {
             else if(['what\'s the', 'whats the', 'election'].some(x => msg.content.includes(x)) && ['status', 'process', 'progress', 'going'].some(x => msg.content.includes(x))) {
 
                 if(election.phase == null) {
-                    responseText = `The [moderator election](${election.url}) has not started yet.`;
+                    responseText = `The [moderator election](${election.url}) has not started yet. Come back at ${election.dateNomination}.`;
                 }
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
                     responseText = `The [moderator election](${election.url}) is now concluded. The winners are: ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
