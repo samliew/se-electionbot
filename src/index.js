@@ -198,17 +198,26 @@ const main = async () => {
             content: msg.content
         }, '\n');
 
-        // If too close to previous message, ignore
-        if(Date.now() < lastMessageTime + throttleSecs * 1000) {
-            console.log('Throttling...');
+        // If message was too long, ignore (most likely FP)
+        if(msg.content.length > 120) {
+            console.log('Ignoring due to message length...\n');
             return;
         }
 
-        // If message was too long, ignore (most likely FP)
-        if(msg.content.length > 90) {
-            console.log('Ignoring due to message length...');
+        // If too close to previous message, ignore
+        if(Date.now() < lastMessageTime + throttleSecs * 1000) {
+            console.log('Throttling... (too close to previous message)\n');
             return;
         }
+
+        // Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
+        const now = Date.now();
+        const toElection = new Date(election.dateElection) - now;
+        const daysToElection = Math.floor(toElection / (24 * 60 * 60 * 1000));
+        const hoursToElection = Math.floor(toElection / 60 * 60 * 1000);
+        const textToElection = daysToElection > 1 ? 'in ' + daysToElection + pluralize(' day', daysToElection) :
+            hoursToElection > 1 ? 'in ' + hoursToElection + pluralize(' hour', hoursToElection) :
+            'soon';
 
         // Mentioned bot (not replied to existing message, which is 18)
         if (msg.eventType === 8 && msg.targetUserId === me.id) {
@@ -283,22 +292,22 @@ const main = async () => {
             }
 
             // How to nominate self/others
-            else if(['how', 'where'].some(x => msg.content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply'].some(x => msg.content.includes(x)) && ['myself', 'name', 'user', 'people', 'someone', 'body', 'others'].some(x => msg.content.includes(x))) {
-                responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need at least ${election.repNominate} reputation, these badges (Civic Duty, Strunk & White, Deputy, Convention), and cannot have been suspended in the past year.`;
+            else if(['how', 'where'].some(x => msg.content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => msg.content.includes(x)) && ['myself', 'name', 'user', 'people', 'someone', 'body', 'others', 'candidate'].some(x => msg.content.includes(x))) {
+                responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need at least ${election.repNominate} reputation, these badges (Civic Duty, Strunk & White, Deputy, Convention), and cannot have been suspended in the past year. You cannot nominate another user.`;
             }
 
             // How/where to vote
-            else if(['where', 'how'].some(x => msg.content.includes(x)) && ['do', 'can', 'to'].some(x => msg.content.includes(x)) && ['vote', 'elect'].some(x => msg.content.includes(x))) {
+            else if(['where', 'how', 'want'].some(x => msg.content.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => msg.content.includes(x)) && ['vote', 'elect'].some(x => msg.content.includes(x))) {
 
                 switch(election.phase) {
                     case 'election':
-                        responseText = `If you have at least ${election.repVote} reputation, you can vote for up to three candidates in [the election](${election.url}?tab=election). If you want to make an informed decision, you can also read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
+                        responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.url}?tab=election). If you want to make an informed decision, you can also read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
                         break;
                     case 'primary':
-                        responseText = `If you have at least ${election.repVote} reputation, you can vote on as many of the candidates in [the primary](${election.url}?tab=primary). If you want to make an informed decision, you can also read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
+                        responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.url}?tab=primary). If you want to make an informed decision, you can also read the candidates' answers in the [election Q&A](${election.qnaUrl}). Don't forget to come back ${textToElection} to also vote in the actual election!`;
                         break;
                     case 'nomination':
-                        responseText = `You cannot vote yet. In the meantime you can leave comments below the [candidates' nominations](${election.url}?tab=nomination), as well as read the candidates' [answers to your questions](${election.qnaUrl}).`;
+                        responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.url}?tab=nomination), as well as read the candidates' [answers to your questions](${election.qnaUrl}).`;
                         break;
                     case 'ended':
                         responseText = `The [moderator election](${election.url}) has ended. You can no longer vote.`;
@@ -309,7 +318,7 @@ const main = async () => {
             }
 
             // Status
-            else if(['what\'s the', 'election'].some(x => msg.content.includes(x)) && ['status', 'process', 'progress'].some(x => msg.content.includes(x))) {
+            else if(['what\'s the', 'whats the', 'election'].some(x => msg.content.includes(x)) && ['status', 'process', 'progress', 'going'].some(x => msg.content.includes(x))) {
 
                 if(election.phase == null) {
                     responseText = `The [moderator election](${election.url}) has not started yet.`;
@@ -320,15 +329,7 @@ const main = async () => {
                 else {
                     responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. There are currently ${election.arrNominees.length} candidates.`;
 
-                    const now = Date.now();
-                    const toElection = new Date(election.dateElection) - now;
-                    const daysToElection = Math.floor(toElection / (24 * 60 * 60 * 1000));
-                    const hoursToElection = Math.floor(toElection / 60 * 60 * 1000);
-                    const textToElection = daysToElection > 1 ? 'in ' + daysToElection + pluralize(' day', daysToElection) :
-                        hoursToElection > 1 ? 'in ' + hoursToElection + pluralize(' hour', hoursToElection) :
-                        'soon';
-
-                    if(election.phase === 'primary') responseText += ` You may vote on the candidates' nomination posts, and come back ${textToElection} to vote in the final election phase.`;
+                    if(election.phase === 'primary') responseText += ` You may freely cast up/down votes on the candidates' nominations, and come back ${textToElection} to vote in the actual election.`;
                     else if(election.phase === 'election') responseText += ` You may now cast your election ballot in order of your top three preferred candidates.`;
                 }
             }
