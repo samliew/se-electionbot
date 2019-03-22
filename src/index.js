@@ -267,8 +267,8 @@ const main = async () => {
                 responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
             }
 
-            // How to nominate self/vote for self
-            else if(['how', 'where'].some(x => msg.content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply'].some(x => msg.content.includes(x)) && ['self', 'name', 'user', 'mod'].some(x => msg.content.includes(x))) {
+            // How to nominate self/others
+            else if(['how', 'where'].some(x => msg.content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply'].some(x => msg.content.includes(x)) && ['self', 'name', 'user', 'mod', 'people', 'someone', 'body', 'others'].some(x => msg.content.includes(x))) {
                 responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need at least ${election.repNominate} reputation, these badges (Civic Duty, Strunk & White, Deputy, Convention), and cannot have been suspended in the past year.`;
             }
 
