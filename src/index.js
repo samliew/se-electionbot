@@ -219,8 +219,8 @@ const main = async () => {
                 responseText = `about, alive, **commands**, help`;
             }
             else if(msg.content.includes('commands')) {
-                responseText = `\`\`\`\nFAQ topics:\n\nwhat are the moderation badges\nwhat are the participation badges\nwhat are the editing badges\n` +
-                    `how is the candidate score calculated\nhow to nominate\nhow to vote\nelection status\nhow does the election work\`\`\``;
+                responseText = `\nFAQ topics I can help with:\n- what are the moderation badges\n- what are the participation badges\n- what are the editing badges\n` +
+                    `- how is the candidate score calculated\n- how does the election work\n- how to nominate\n- how to vote\n- election status`;
             }
             
             if(responseText != null) {
