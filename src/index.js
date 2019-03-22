@@ -315,7 +315,7 @@ const main = async () => {
     if(debug) {
         const dNow = new Date();
         cron.schedule(
-            `0/5 ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`,
+            `${dNow.getMinutes() + 2} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`,
             async (election, room) => {
                 console.log('TEST CRON START');
                 await getElectionPage(electionUrl);
