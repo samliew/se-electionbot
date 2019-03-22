@@ -321,6 +321,7 @@ const main = async () => {
             async () => {
                 console.log('TEST CRON START');
                 await getElectionPage(electionUrl);
+                await room.sendMessage(`This is a test message.`);
                 console.log('TEST CRON END', election, room);
             },
             { timezone: "Etc/UTC" }
@@ -335,7 +336,7 @@ const main = async () => {
             cs,
             async (election, room) => {
                 await getElectionPage(electionUrl);
-                await room.sendMessage(`**The [election](${election.url}?tab=election) has ended.** Congrats to the winners ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}! You can [view the results online via OpaVote](${election.resultsUrl}).`);
+                await room.sendMessage(`**The [election](${election.url}?tab=election) has now ended.** Congratulations to the winners ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}! You can [view the results online via OpaVote](${election.resultsUrl}).`);
             },
             { timezone: "Etc/UTC" }
         );
@@ -348,8 +349,8 @@ const main = async () => {
         cron.schedule(
             cs,
             async (election, room) => {
-                await room.sendMessage(`**The [election phase](${election.url}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
                 await getElectionPage(electionUrl);
+                await room.sendMessage(`**The [election phase](${election.url}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
             },
             { timezone: "Etc/UTC" }
         );
@@ -362,8 +363,8 @@ const main = async () => {
         cron.schedule(
             cs,
             async (election, room) => {
-                await room.sendMessage(`**The [primary phase](${election.url}?tab=primary) is now open.** We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
                 await getElectionPage(electionUrl);
+                await room.sendMessage(`**The [primary phase](${election.url}?tab=primary) is now open.** We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
             },
             { timezone: "Etc/UTC" }
         );
@@ -376,8 +377,8 @@ const main = async () => {
         cron.schedule(
             cs,
             async (election, room) => {
-                await room.sendMessage(`**PSA:** The [nomination phase](${election.url}?tab=nomination) is now open. Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
                 await getElectionPage(electionUrl);
+                await room.sendMessage(`**The [nomination phase](${election.url}?tab=nomination) is now open.** Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
             },
             { timezone: "Etc/UTC" }
         );
