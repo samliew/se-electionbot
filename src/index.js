@@ -230,7 +230,7 @@ const main = async () => {
             }
 
             // Candidate score calculation
-            else if(['how', 'what'].any(x => msg.content.includes(x)) && ['candidate score', 'score calculated'].any(x => msg.content.includes(x))) {
+            else if(['how', 'what'].some(x => msg.content.includes(x)) && ['candidate score', 'score calculated'].some(x => msg.content.includes(x))) {
                 responseText = `The candidate score is calculated as such: 1 point for each 1,000 reputation up to 20,000 reputation (maximum of 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges. See https://meta.stackexchange.com/a/252643`;
             }
 
@@ -240,12 +240,12 @@ const main = async () => {
             }
 
             // What is election
-            else if(['how', 'what'].any(x => msg.content.includes(x)) && ['election', 'it work'].any(x => msg.content.includes(x))) {
+            else if(['how', 'what'].some(x => msg.content.includes(x)) && ['election', 'it work'].some(x => msg.content.includes(x))) {
                 responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
             }
 
             // How/where to vote
-            else if(['where', 'how'].any(x => msg.content.includes(x)) && ['do I', 'can I', 'to'].any(x => msg.content.includes(x)) && msg.content.includes('vote')) {
+            else if(['where', 'how'].some(x => msg.content.includes(x)) && ['do I', 'can I', 'to'].some(x => msg.content.includes(x)) && msg.content.includes('vote')) {
 
                 switch(election.phase) {
                     case 'election':
