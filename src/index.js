@@ -293,7 +293,12 @@ const main = async () => {
 
             // How to nominate self/others
             else if(['how', 'where'].some(x => msg.content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => msg.content.includes(x)) && ['myself', 'name', 'user', 'people', 'someone', 'body', 'others', 'candidate'].some(x => msg.content.includes(x))) {
-                responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need at least ${election.repNominate} reputation, these badges (Civic Duty, Strunk & White, Deputy, Convention), and cannot have been suspended in the past year. You cannot nominate another user.`;
+                let reqs = [`at least ${election.repNominate} reputation`];
+                if(electionSite.includes('stackoverflow.com')) reqs.push(`awarded these badges (Civic Duty, Strunk & White, Deputy, Convention)`);
+                if(electionSite.includes('askubuntu.com'))     reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
+                reqs.push(`and cannot have been suspended in the past year`);
+
+                responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need ${reqs.join(', ')}. You cannot nominate another user.`;
             }
 
             // How/where to vote
