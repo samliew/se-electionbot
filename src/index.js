@@ -220,7 +220,8 @@ const main = async () => {
             }
             else if(msg.content.includes('commands')) {
                 responseText = `\nFAQ topics I can help with:\n- what are the moderation badges\n- what are the participation badges\n- what are the editing badges\n` +
-                    `- how is the candidate score calculated\n- how does the election work\n- how to nominate\n- how to vote\n- election status`;
+                    `- how is the candidate score calculated\n- how does the election work\n- who are the candidates\n- how to nominate\n- how to vote\n` +
+                    `- how to decide who to vote for\n- election status`;
             }
             
             if(responseText != null) {
@@ -237,7 +238,12 @@ const main = async () => {
             let responseText = null;
 
             // Moderation badges
-            if(['what', 'mod', 'badges'].every(x => msg.content.includes(x))) {
+            if(msg.content.includes('who') && ['nominees', 'candidates'].some(x => msg.content.includes(x))) {
+                responseText = `Here are the current candidates: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
+            }
+
+            // Moderation badges
+            else if(['what', 'mod', 'badges'].every(x => msg.content.includes(x))) {
                 responseText = `The 8 moderation badges counting towards candidate score are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward`;
             }
 
@@ -256,13 +262,18 @@ const main = async () => {
                 responseText = `The candidate score is calculated as such: 1 point for each 1,000 reputation up to 20,000 reputation (maximum of 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges. See https://meta.stackexchange.com/a/252643`;
             }
 
+            // How to choose/pick/decide who to vote for
+            else if((msg.content.includes('how') && ['choose', 'pick', 'decide'].some(x => msg.content.includes(x))) || (msg.content.includes('who') && ['vote', 'for'].every(x => msg.content.includes(x)))) {
+                responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
+            }
+
             // How to nominate self/vote for self
-            else if(msg.content.includes('how') && (msg.content.includes('nominate') || ['vote', 'self'].every(x => msg.content.includes(x)))) {
+            else if(['how', 'where'].some(x => msg.content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply'].some(x => msg.content.includes(x)) && ['self', 'name', 'user', 'mod'].some(x => msg.content.includes(x))) {
                 responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need at least ${election.repNominate} reputation, these badges (Civic Duty, Strunk & White, Deputy, Convention), and cannot have been suspended in the past year.`;
             }
 
             // How/where to vote
-            else if(['where', 'how'].some(x => msg.content.includes(x)) && ['do I', 'can I', 'to'].some(x => msg.content.includes(x)) && msg.content.includes('vote')) {
+            else if(['where', 'how'].some(x => msg.content.includes(x)) && ['do', 'can', 'to'].some(x => msg.content.includes(x)) && ['vote', 'elect'].some(x => msg.content.includes(x))) {
 
                 switch(election.phase) {
                     case 'election':
@@ -281,7 +292,7 @@ const main = async () => {
             }
 
             // Status
-            else if(['election', 'status'].every(x => msg.content.includes(x))) {
+            else if(['what\'s the', 'election'].some(x => msg.content.includes(x)) && ['status', 'process', 'progress'].some(x => msg.content.includes(x))) {
 
                 if(election.phase == null) {
                     responseText = `The [moderator election](${election.url}) has not started yet.`;
