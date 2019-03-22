@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Environment variables
-const debug = process.env.DEBUG.toLowerCase() == 'false' || true;
+const debug = process.env.DEBUG.toLowerCase() !== 'false';
 const scriptHostname = process.env.SCRIPT_HOSTNAME || '';
 const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
