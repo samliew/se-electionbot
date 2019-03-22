@@ -236,7 +236,7 @@ const main = async () => {
             else if(msg.content.includes('commands')) {
                 responseText = `\nFAQ topics I can help with:\n- what are the moderation badges\n- what are the participation badges\n- what are the editing badges\n` +
                     `- how is the candidate score calculated\n- how does the election work\n- who are the candidates\n- how to nominate\n- how to vote\n` +
-                    `- how to decide who to vote for\n- how many voted\n- election status`;
+                    `- how to decide who to vote for\n- how many voted\n- election status\n- who are the current moderators`;
             }
             
             if(responseText != null) {
@@ -289,6 +289,11 @@ const main = async () => {
             // How to choose/pick/decide who to vote for
             else if((msg.content.includes('how') && ['choose', 'pick', 'decide'].some(x => msg.content.includes(x))) || (msg.content.includes('who') && ['vote', 'for'].every(x => msg.content.includes(x)))) {
                 responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
+            }
+
+            // Current mods
+            else if(['who', 'current', 'mod'].every(x => msg.content.includes(x))) {
+                responseText = `The current moderators can be found here: (${electionSite}/users?tab=moderators)`;
             }
 
             // How to nominate self/others
