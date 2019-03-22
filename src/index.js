@@ -1,5 +1,6 @@
 import Client from 'chatexchange';
 import cron from "node-cron";
+const path = require('path');
 const cheerio = require('cheerio');
 const flatCache = require('flat-cache');
 const Entities = require('html-entities').AllHtmlEntities;
@@ -393,7 +394,6 @@ if (scriptHostname.indexOf('herokuapp.com')) {
     //   or to serve static content
     const express = require('express');
     var https = require('https');
-    const path = require('path');
     const app = express().set('port', process.env.PORT || 5000);
     
     const staticPath = path.join(__dirname, '../static');
