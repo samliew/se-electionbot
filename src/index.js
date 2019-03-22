@@ -204,6 +204,12 @@ const main = async () => {
             return;
         }
 
+        // If message was too long, ignore (most likely FP)
+        if(msg.content.length > 90) {
+            console.log('Ignoring due to message length...');
+            return;
+        }
+
         // Mentioned bot (not replied to existing message, which is 18)
         if (msg.eventType === 8 && msg.targetUserId === me.id) {
             
@@ -238,8 +244,12 @@ const main = async () => {
             let responseText = null;
 
             // Moderation badges
-            if(msg.content.includes('who') && ['nominees', 'candidates'].some(x => msg.content.includes(x))) {
-                responseText = `Here are the current candidates: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
+            if(msg.content.includes('who are') && ['nominees', 'candidates'].some(x => msg.content.includes(x))) {
+
+                if(election.arrNominees.length > 0)
+                    responseText = `Here are the current candidates: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
+                else
+                    responseText = `There are no users who have nominated themselves yet.`;
             }
 
             // Moderation badges
@@ -262,13 +272,18 @@ const main = async () => {
                 responseText = `The candidate score is calculated as such: 1 point for each 1,000 reputation up to 20,000 reputation (maximum of 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges. See https://meta.stackexchange.com/a/252643`;
             }
 
+            // Stats/How many voted/participated
+            else if(['how', 'many'].every(x => msg.content.includes(x)) && ['voted', 'participants'].every(x => msg.content.includes(x))) {
+                responseText = `${election.statVoters}`;
+            }
+
             // How to choose/pick/decide who to vote for
             else if((msg.content.includes('how') && ['choose', 'pick', 'decide'].some(x => msg.content.includes(x))) || (msg.content.includes('who') && ['vote', 'for'].every(x => msg.content.includes(x)))) {
                 responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
             }
 
             // How to nominate self/others
-            else if(['how', 'where'].some(x => msg.content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply'].some(x => msg.content.includes(x)) && ['self', 'name', 'user', 'mod', 'people', 'someone', 'body', 'others'].some(x => msg.content.includes(x))) {
+            else if(['how', 'where'].some(x => msg.content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply'].some(x => msg.content.includes(x)) && ['myself', 'name', 'user', 'people', 'someone', 'body', 'others'].some(x => msg.content.includes(x))) {
                 responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need at least ${election.repNominate} reputation, these badges (Civic Duty, Strunk & White, Deputy, Convention), and cannot have been suspended in the past year.`;
             }
 
@@ -277,8 +292,10 @@ const main = async () => {
 
                 switch(election.phase) {
                     case 'election':
+                        responseText = `If you have at least ${election.repVote} reputation, you can vote for up to three candidates in [the election](${election.url}?tab=election). If you want to make an informed decision, you can also read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
+                        break;
                     case 'primary':
-                        responseText = `If you have at least ${election.repVote} reputation, you can vote for the candidates in the election here: ${election.url}. If you want to make an informed decision, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
+                        responseText = `If you have at least ${election.repVote} reputation, you can vote on as many of the candidates in [the primary](${election.url}?tab=primary). If you want to make an informed decision, you can also read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
                         break;
                     case 'nomination':
                         responseText = `You cannot vote yet. In the meantime you can leave comments below the [candidates' nominations](${election.url}?tab=nomination), as well as read the candidates' [answers to your questions](${election.qnaUrl}).`;
