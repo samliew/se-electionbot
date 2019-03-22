@@ -204,9 +204,31 @@ const main = async () => {
             return;
         }
 
-        // Mentioned bot (not replied to existing message)
+        // Mentioned bot (not replied to existing message, which is 18)
         if (msg.eventType === 8 && msg.targetUserId === me.id) {
-            //await msg.reply(`Hello ${msg.userName}! I'm ${myProfile.name} and ${myProfile.about}.`);
+            
+            let responseText = null;
+
+            if(msg.content.includes('alive')) {
+                responseText = `I'm alive and standing by...`;
+            }
+            else if(msg.content.includes('about')) {
+                responseText = `I'm ${myProfile.name} and ${myProfile.about}.`;
+            }
+            else if(msg.content.includes('help')) {
+                responseText = `about, alive, **commands**, help`;
+            }
+            else if(msg.content.includes('commands')) {
+                responseText = `\`\`\`\nFAQ topics:\n\nwhat are the moderation badges\nwhat are the participation badges\nwhat are the editing badges\n` +
+                    `how is the candidate score calculated\nhow to nominate\nhow to vote\nelection status\nhow does the election work\`\`\``;
+            }
+            
+            if(responseText != null) {
+                await msg.reply(responseText);
+
+                // Record last sent message time so we don't flood the room
+                lastMessageTime = Date.now();
+            }
         }
 
         // Any new message that does not reply-to or mention any user
