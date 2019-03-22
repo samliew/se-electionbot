@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Environment variables
-const debug = process.env.DEBUG.toLowerCase() == 'true' || false;
+const debug = process.env.DEBUG.toLowerCase() == 'false' || true;
 const scriptHostname = process.env.SCRIPT_HOSTNAME || '';
 const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
@@ -314,7 +314,7 @@ const main = async () => {
     // Test if getElectionPage() can be called from cron.schedule
     if(debug) {
         const dNow = new Date();
-        const cs = `${dNow.getHours() + 2} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`;
+        const cs = `${dNow.getMinutes() + 2} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`;
         cron.schedule(
             cs,
             async () => {
