@@ -59,6 +59,12 @@ const ignoredEventTypes = [
 const pluralize = (str, num) => str + (num !== 1 ? 's' : str);
 
 
+// App setup
+(function() {
+    if(debug) console.log('WARN: Debug mode is on.');
+})();
+
+
 // Get election page, parse it, and insert results into variable election
 let election = null;
 const getElectionPage = async (electionUrl) => {
@@ -86,6 +92,7 @@ const getElectionPage = async (electionUrl) => {
         if(sidebarValues.length == 5) sidebarValues.splice(1, 0, null); // for elections with no primary phase
 
         election = {
+            updated: Date.now(),
             url: electionUrl,
             title: $('#content h1').first().text().trim(),
             dateNomination: sidebarValues[0],
@@ -136,7 +143,7 @@ const getElectionPage = async (electionUrl) => {
             election.arrWinners = election.arrNominees.filter(v => winners.includes(v.userId));
         }
 
-        console.log(`Election page ${electionUrl} has been scraped successfully.\n`);
+        console.log(`Election page ${electionUrl} has been scraped successfully at ${election.updated}.\n`);
 
         // Cache election into a json file
         cache.setKey('election', election);
@@ -303,22 +310,27 @@ const main = async () => {
     // Set cron jobs to announce the different phases
     const now = Date.now();
 
-    const _endedDate = new Date(election.dateEnded);
-    if(_endedDate > now) {
-        let cs = `0 ${_endedDate.getHours()} ${_endedDate.getDate()} ${_endedDate.getMonth() + 1} *`;
-
-        if(debug) {
-            // Test if function can be called from cron.schedule
-            cs = `0/5 ${now.getHours()} ${now.getDate()} ${now.getMonth() + 1} *`;
-        }
-
+    // Test if getElectionPage() can be called from cron.schedule
+    if(debug) {
+        const cs = `0/5 ${now.getHours()} ${now.getDate()} ${now.getMonth() + 1} *`;
         cron.schedule(
             cs,
             async (election) => {
                 await getElectionPage(electionUrl);
-                const flatCache = require('flat-cache');
-                const cache = flatCache.load('election-cache', path.resolve('../cache'));
-                const election = cache.getKey('election', election);
+                await room.sendMessage(`**TEST**`, election);
+            },
+            { timezone: "Etc/UTC" }
+        );
+        console.log('CRON - testing', cs);
+    }
+
+    const _endedDate = new Date(election.dateEnded);
+    if(_endedDate > now) {
+        const cs = `0 ${_endedDate.getHours()} ${_endedDate.getDate()} ${_endedDate.getMonth() + 1} *`;
+        cron.schedule(
+            cs,
+            async (election) => {
+                await getElectionPage(electionUrl);
                 await room.sendMessage(`**The [election](${election.url}?tab=election) has ended.** Congrats to the winners ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}! You can [view the results online via OpaVote](${election.resultsUrl}).`);
             },
             { timezone: "Etc/UTC" }
