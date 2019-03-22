@@ -215,37 +215,37 @@ const main = async () => {
             let responseText = null;
 
             // Moderation badges
-            if(msg.content.includes('what') && msg.content.includes('moderation badges')) {
+            if(['what', 'moderation badges'].every(x => msg.content.includes(x))) {
                 responseText = `The 8 moderation badges counting towards candidate score are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward`;
             }
 
             // Participation badges
-            else if(msg.content.includes('what') && msg.content.includes('participation badges')) {
+            else if(['what', 'participation badges'].every(x => msg.content.includes(x))) {
                 responseText = `The 6 participation badges counting towards candidate score are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling`;
             }
 
             // Editing badges
-            else if(msg.content.includes('what') && msg.content.includes('editing badges')) {
+            else if(['what', 'editing badges'].every(x => msg.content.includes(x))) {
                 responseText = `The 6 editing badges counting towards candidate score are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White`;
             }
 
             // Candidate score calculation
-            else if(msg.content.includes('how') && (msg.content.includes('candidate score') || msg.content.includes('score calculated'))) {
+            else if(['how', 'what'].any(x => msg.content.includes(x)) && ['candidate score', 'score calculated'].any(x => msg.content.includes(x))) {
                 responseText = `The candidate score is calculated as such: 1 point for each 1,000 reputation up to 20,000 reputation (maximum of 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges. See https://meta.stackexchange.com/a/252643`;
             }
 
+            // How to nominate self/vote for self
+            else if(msg.content.includes('how') && (msg.content.includes('nominate') || ['vote', 'self'].every(x => msg.content.includes(x)))) {
+                responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need at least ${election.repNominate} reputation, these badges (Civic Duty, Strunk & White, Deputy, Convention), and cannot have been suspended in the past year.`;
+            }
+
             // What is election
-            else if(msg.content.match(/what is.*election/i) || msg.content.match(/how does.*(election|it).*work/i)) {
+            else if(['how', 'what'].any(x => msg.content.includes(x)) && ['election', 'it work'].any(x => msg.content.includes(x))) {
                 responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
             }
 
-            // How to nominate self/vote for self
-            else if(msg.content.match(/(nominate|vote)/i) && msg.content.includes('myself')) {
-                responseText = `You can nominate yourself as a candidate during the nomination phase only. You'll need at least ${election.repNominate} reputation, these badges (Civic Duty, Strunk & White, Deputy, Convention), and cannot have been suspended in the past year.`;
-            }
-
             // How/where to vote
-            else if(msg.content.match(/(where|how) (do I|can I|to)(\s+cast.+)? vote/i)) {
+            else if(['where', 'how'].any(x => msg.content.includes(x)) && ['do I', 'can I', 'to'].any(x => msg.content.includes(x)) && msg.content.includes('vote')) {
 
                 switch(election.phase) {
                     case 'election':
@@ -264,7 +264,7 @@ const main = async () => {
             }
 
             // Status
-            else if(msg.content.match(/election status/i) || msg.content.match(/(what's( the status of)?|how's) the election(\sgoing)?\?/i)) {
+            else if(['election', 'status'].every(x => msg.content.includes(x))) {
 
                 if(election.phase == null) {
                     responseText = `The [moderator election](${election.url}) has not started yet.`;
