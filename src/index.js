@@ -382,7 +382,7 @@ const main = async () => {
     // Test if getElectionPage() can be called from cron.schedule
     if(debug) {
         const dNow = new Date();
-        const cs = `${dNow.getMinutes() + 2} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`;
+        const cs = `${dNow.getMinutes() + 1} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`;
         cron.schedule(
             cs,
             async () => {
