@@ -195,18 +195,18 @@ const main = async () => {
         //const user = msg.userId == me.id ? myProfile : await client._browser.getProfile(msg.userId);
 
         // Decode HTML entities in messages, lowercase for matching
-        msg.content = entities.decode(msg.content).toLowerCase();
+        const message = entities.decode(msg.content).toLowerCase();
 
         console.log(`EVENT`, {
             eventType: msg.eventType,
             user: msg.userName,
             userId: msg.userId,
             targetUser: msg.targetUserId,
-            content: msg.content
+            content: message
         }, '\n');
 
         // If message was too long, ignore (most likely FP)
-        if(msg.content.length > 120) {
+        if(message.length > 120) {
             console.log('Ignoring due to message length...\n');
             return;
         }
@@ -232,13 +232,13 @@ const main = async () => {
             
             let responseText = null;
 
-            if(msg.content.includes('alive')) {
+            if(message.includes('alive')) {
                 responseText = `I'm alive and standing by with a ${throttleSecs}-second throttle.` + (debug ? ' I am in debug mode.' : '');
             }
-            else if(msg.content.includes('about')) {
+            else if(message.includes('about')) {
                 responseText = `I'm ${myProfile.name} and ${myProfile.about}.`;
             }
-            else if(['help', 'commands', 'faq', 'info', 'list'].some(x => msg.content.includes(x))) {
+            else if(['help', 'commands', 'faq', 'info', 'list'].some(x => message.includes(x))) {
                 responseText = `\nFAQ topics I can help with:\n- what are the moderation badges\n- what are the participation badges\n- what are the editing badges\n` +
                     `- how is the candidate score calculated\n- how does the election work\n- who are the candidates\n- how to nominate\n- how to vote\n` +
                     `- how to decide who to vote for\n- how many voted\n- election status\n- who are the current moderators`;
@@ -258,7 +258,7 @@ const main = async () => {
             let responseText = null;
 
             // Moderation badges
-            if(msg.content.includes('who are') && ['nominees', 'candidates'].some(x => msg.content.includes(x))) {
+            if(message.includes('who are') && ['nominees', 'candidates'].some(x => message.includes(x))) {
 
                 if(election.arrNominees.length > 0)
                     responseText = `Here are the current candidates: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
@@ -267,43 +267,43 @@ const main = async () => {
             }
 
             // Moderation badges
-            else if(['what', 'mod', 'badges'].every(x => msg.content.includes(x))) {
+            else if(['what', 'mod', 'badges'].every(x => message.includes(x))) {
                 responseText = `The 8 moderation badges counting towards candidate score are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward`;
             }
 
             // Participation badges
-            else if(['what', 'participation', 'badges'].every(x => msg.content.includes(x))) {
+            else if(['what', 'participation', 'badges'].every(x => message.includes(x))) {
                 responseText = `The 6 participation badges counting towards candidate score are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling`;
             }
 
             // Editing badges
-            else if(['what', 'editing', 'badges'].every(x => msg.content.includes(x))) {
+            else if(['what', 'editing', 'badges'].every(x => message.includes(x))) {
                 responseText = `The 6 editing badges counting towards candidate score are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White`;
             }
 
             // Candidate score calculation
-            else if(['how', 'what'].some(x => msg.content.includes(x)) && ['candidate score', 'score calculated'].some(x => msg.content.includes(x))) {
+            else if(['how', 'what'].some(x => message.includes(x)) && ['candidate score', 'score calculated'].some(x => message.includes(x))) {
                 responseText = `The candidate score is calculated as such: 1 point for each 1,000 reputation up to 20,000 reputation (maximum of 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges. See https://meta.stackexchange.com/a/252643`;
             }
 
             // Stats/How many voted/participated
-            else if(['how', 'many'].every(x => msg.content.includes(x)) && ['voted', 'participants'].some(x => msg.content.includes(x))) {
+            else if(['how', 'many'].every(x => message.includes(x)) && ['voted', 'participants'].some(x => message.includes(x))) {
                 responseText = election.phase == 'ended' ? election.statVoters : `We won't know for sure until the election ends.`;
             }
 
             // How to choose/pick/decide who to vote for
-            else if((msg.content.includes('how') && ['choose', 'pick', 'decide'].some(x => msg.content.includes(x))) || (msg.content.includes('who') && ['vote', 'for'].every(x => msg.content.includes(x)))) {
+            else if((message.includes('how') && ['choose', 'pick', 'decide'].some(x => message.includes(x))) || (message.includes('who') && ['vote', 'for'].every(x => message.includes(x)))) {
                 responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
                 if(election.phase == null) responseText = notStartedYet;
             }
 
             // Current mods
-            else if(['who', 'current', 'mod'].every(x => msg.content.includes(x))) {
+            else if(['who', 'current', 'mod'].every(x => message.includes(x))) {
                 responseText = `The current moderators can be found here: (${electionSite}/users?tab=moderators)`;
             }
 
             // How to nominate self/others
-            else if(['how', 'where'].some(x => msg.content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => msg.content.includes(x)) && ['myself', 'name', 'user', 'someone', 'somebody', 'others', 'another'].some(x => msg.content.includes(x))) {
+            else if(['how', 'where'].some(x => message.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => message.includes(x)) && ['myself', 'name', 'user', 'someone', 'somebody', 'others', 'another'].some(x => message.includes(x))) {
                 let reqs = [`at least ${election.repNominate} reputation`];
                 if(electionSite.includes('stackoverflow.com')) reqs.push(`awarded these badges (Civic Duty, Strunk & White, Deputy, Convention)`);
                 if(electionSite.includes('askubuntu.com'))     reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
@@ -313,7 +313,7 @@ const main = async () => {
             }
 
             // How/where to vote
-            else if(['where', 'how', 'want'].some(x => msg.content.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => msg.content.includes(x)) && ['vote', 'elect'].some(x => msg.content.includes(x))) {
+            else if(['where', 'how', 'want'].some(x => message.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => message.includes(x)) && ['vote', 'elect'].some(x => message.includes(x))) {
 
                 switch(election.phase) {
                     case 'election':
@@ -334,7 +334,7 @@ const main = async () => {
             }
 
             // Status
-            else if(['what\'s the', 'whats the', 'election'].some(x => msg.content.includes(x)) && ['status', 'process', 'progress', 'going'].some(x => msg.content.includes(x))) {
+            else if(['what\'s the', 'whats the', 'election'].some(x => message.includes(x)) && ['status', 'process', 'progress', 'going'].some(x => message.includes(x))) {
 
                 if(election.phase == null) {
                     responseText = notStartedYet;
@@ -351,7 +351,7 @@ const main = async () => {
             }
 
             // What is election
-            else if(['how', 'what'].some(x => msg.content.includes(x)) && ['is', 'an', 'does'].some(x => msg.content.includes(x)) && ['election', 'it work'].some(x => msg.content.includes(x))) {
+            else if(['how', 'what'].some(x => message.includes(x)) && ['is', 'an', 'does'].some(x => message.includes(x)) && ['election', 'it work'].some(x => message.includes(x))) {
                 responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
             }
             
