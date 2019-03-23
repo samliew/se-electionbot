@@ -69,7 +69,7 @@ Number.prototype.padZeros = function(n) {
 
 // Helper functions
 const pluralize = n => n !== 1 ? 's' : '';
-const strToUptime = n => Math.floor(ut/86400).padZeros(2) +':'+ (Math.floor(ut/3600)%24).padZeros(2) +':'+ (ut%60).padZeros(2);
+const secsToDuration = n => Math.floor(n/86400).padZeros(2) +':'+ (Math.floor(n/3600)%24).padZeros(2) +':'+ (n%60).padZeros(2);
 
 
 // Overrides console.log/.error to insert newlines
@@ -256,7 +256,7 @@ const main = async () => {
             let responseText = null;
 
             if(content.includes('alive')) {
-                responseText = `I'm alive on ${os.hostname}, ${os.type}/${os.platform}/${os.arch}, uptime of ${strToUptime(os.uptime)}` + 
+                responseText = `I'm alive on ${os.hostname}-${os.type}, uptime of ${secsToDuration(os.uptime)}.` + 
                     (debug ? ' I am in debug mode.' : '');
             }
             else if(content.includes('about')) {
