@@ -256,7 +256,7 @@ const main = async () => {
             let responseText = null;
 
             if(content.includes('alive')) {
-                responseText = `I'm alive on ${os.hostname}-${os.type}, uptime of ${secsToDuration(os.uptime)}.` + 
+                responseText = `I'm alive on ${os.type}/${os.arch}/${os.platform} with an uptime of ${secsToDuration(os.uptime)}.` + 
                     (debug ? ' I am in debug mode.' : '');
             }
             else if(content.includes('about')) {
