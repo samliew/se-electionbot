@@ -195,7 +195,7 @@ const main = async () => {
         //const user = msg.userId == me.id ? myProfile : await client._browser.getProfile(msg.userId);
 
         // Decode HTML entities in messages, lowercase for matching
-        const message = entities.decode(await msg.content).toLowerCase();
+        const message = entities.decode(msg._content).toLowerCase();
 
         console.log('EVENT', {
             eventType: msg._eventType,
