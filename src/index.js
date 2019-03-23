@@ -175,6 +175,9 @@ const main = async () => {
     // Variable to store last message for throttling
     let lastMessageTime = -1;
 
+    // Default election message
+    const notStartedYet = `The [moderator election](${election.url}) has not started yet. Come back at ${election.dateNomination}.`;
+
     // Event listener
     room.on('message', async msg => {
 
@@ -289,6 +292,7 @@ const main = async () => {
             // How to choose/pick/decide who to vote for
             else if((msg.content.includes('how') && ['choose', 'pick', 'decide'].some(x => msg.content.includes(x))) || (msg.content.includes('who') && ['vote', 'for'].every(x => msg.content.includes(x)))) {
                 responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
+                if(election.phase == null) responseText = notStartedYet;
             }
 
             // Current mods
@@ -323,7 +327,7 @@ const main = async () => {
                         responseText = `The [moderator election](${election.url}) has ended. You can no longer vote.`;
                         break;
                     default:
-                        responseText = `The [moderator election](${election.url}) has not started yet. Come back at ${election.dateNomination}.`;
+                        responseText = notStartedYet;
                 }
             }
 
@@ -331,7 +335,7 @@ const main = async () => {
             else if(['what\'s the', 'whats the', 'election'].some(x => msg.content.includes(x)) && ['status', 'process', 'progress', 'going'].some(x => msg.content.includes(x))) {
 
                 if(election.phase == null) {
-                    responseText = `The [moderator election](${election.url}) has not started yet. Come back at ${election.dateNomination}.`;
+                    responseText = notStartedYet;
                 }
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
                     responseText = `The [moderator election](${election.url}) is now concluded. The winners are: ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
