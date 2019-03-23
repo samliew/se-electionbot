@@ -60,9 +60,7 @@ const ignoredEventTypes = [
 
 
 // Helper functions
-String.prototype.pluralize = function(n) {
-    return this.concat(Number(n) !== 1 ? 's' : '');
-}
+const pluralize = n => n !== 1 ? 's' : '';
 
 
 // App setup
@@ -227,8 +225,8 @@ const main = async () => {
         const toElection = new Date(election.dateElection) - now;
         const daysToElection = Math.floor(toElection / (24 * 60 * 60 * 1000));
         const hoursToElection = Math.floor(toElection / 60 * 60 * 1000);
-        const textToElection = daysToElection > 1 ? 'in ' + daysToElection + (' day'.pluralize(daysToElection)) :
-            hoursToElection > 1 ? 'in ' + hoursToElection + (' hour'.pluralize(hoursToElection)) :
+        const textToElection = daysToElection > 1 ? 'in ' + daysToElection + ' day' + pluralize(daysToElection) :
+            hoursToElection > 1 ? 'in ' + hoursToElection + ' hour' + pluralize(hoursToElection) :
             'soon';
 
         // Mentioned bot (not replied to existing message, which is 18)
@@ -264,10 +262,10 @@ const main = async () => {
             let responseText = null;
 
             // Moderation badges
-            if(content.includes('who are') && ['nominees', 'candidates'].some(x => content.includes(x))) {
+            if(content.includes('who are') && ['nominees', 'candidate'].some(x => content.includes(x))) {
 
                 if(election.arrNominees.length > 0)
-                    responseText = `Here are the current candidates: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
+                    responseText = `Here are the current [candidates](${election.url}): ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
                 else
                     responseText = `There are no users who have nominated themselves yet.`;
             }
@@ -289,7 +287,7 @@ const main = async () => {
 
             // Candidate score calculation
             else if(['how', 'what'].some(x => content.includes(x)) && ['candidate score', 'score calculated'].some(x => content.includes(x))) {
-                responseText = `The candidate score is calculated as such: 1 point for each 1,000 reputation up to 20,000 reputation (maximum of 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges. See https://meta.stackexchange.com/a/252643`;
+                responseText = `The [candidate score](https://meta.stackexchange.com/a/252643) is calculated as such: 1 point for each 1,000 reputation up to 20,000 reputation (maximum of 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges.`;
             }
 
             // Stats/How many voted/participated
@@ -305,7 +303,7 @@ const main = async () => {
 
             // Current mods
             else if(['who', 'current', 'mod'].every(x => content.includes(x))) {
-                responseText = `The current moderators can be found here: (${electionSite}/users?tab=moderators)`;
+                responseText = `The current moderators can be found here: [${electionSite}/users?tab=moderators](${electionSite}/users?tab=moderators)`;
             }
 
             // How to nominate self/others
