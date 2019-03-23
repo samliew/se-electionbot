@@ -185,28 +185,31 @@ const main = async () => {
     // Main event listener
     room.on('message', async msg => {
 
-        // Ignore stuff from self, Community or Feeds users
-        if([me.id, -1, -2].includes(msg.userId)) return;
-
-        // Ignore unnecessary events
-        if(ignoredEventTypes.includes(msg._eventType)) return;
-        
-        // Get details of user who triggered the message
-        //const user = msg.userId == me.id ? myProfile : await client._browser.getProfile(msg.userId);
-
         // Decode HTML entities in messages, lowercase for matching
-        const message = entities.decode(msg._content).toLowerCase();
+        const content = entities.decode(msg._content).toLowerCase();
 
-        console.log('EVENT', {
+        // Resolve required fields
+        const resolvedMsg = {
             eventType: msg._eventType,
-            user: await msg.userName,
+            userName: await msg.userName,
             userId: await msg.userId,
             targetUserId: await msg.targetUserId,
-            content: message
-        }, '\n');
+            content: content
+        };
+
+        // Ignore stuff from self, Community or Feeds users
+        if([me.id, -1, -2].includes(resolvedMsg.userId)) return;
+
+        // Ignore unnecessary events
+        if(ignoredEventTypes.includes(resolvedMsg.eventType)) return;
+        
+        // Get details of user who triggered the message
+        //const user = resolvedMsg.userId == me.id ? myProfile : await client._browser.getProfile(resolvedMsg.userId);
+
+        console.log('EVENT', resolvedMsg, '\n');
 
         // If message was too long, ignore (most likely FP)
-        if(message.length > 120) {
+        if(content.length > 120) {
             console.log('Ignoring due to message length...\n');
             return;
         }
@@ -228,17 +231,17 @@ const main = async () => {
 
         // Mentioned bot (not replied to existing message, which is 18)
         // Needs a lower throttle rate to work
-        if (msg._eventType === 8 && msg.targetUserId === me.id && throttleSecs <= 15) {
+        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && throttleSecs <= 15) {
             
             let responseText = null;
 
-            if(message.includes('alive')) {
+            if(content.includes('alive')) {
                 responseText = `I'm alive and standing by with a ${throttleSecs}-second throttle.` + (debug ? ' I am in debug mode.' : '');
             }
-            else if(message.includes('about')) {
+            else if(content.includes('about')) {
                 responseText = `I'm ${myProfile.name} and ${myProfile.about}.`;
             }
-            else if(['help', 'commands', 'faq', 'info', 'list'].some(x => message.includes(x))) {
+            else if(['help', 'commands', 'faq', 'info', 'list'].some(x => content.includes(x))) {
                 responseText = `\nFAQ topics I can help with:\n- what are the moderation badges\n- what are the participation badges\n- what are the editing badges\n` +
                     `- how is the candidate score calculated\n- how does the election work\n- who are the candidates\n- how to nominate\n- how to vote\n` +
                     `- how to decide who to vote for\n- how many voted\n- election status\n- who are the current moderators`;
@@ -254,12 +257,12 @@ const main = async () => {
         }
 
         // Any new message that does not reply-to or mention any user
-        else if (msg._eventType === 1 && !msg.targetUserId) {
+        else if (resolvedMsg.eventType === 1 && !resolvedMsg.targetUserId) {
             
             let responseText = null;
 
             // Moderation badges
-            if(message.includes('who are') && ['nominees', 'candidates'].some(x => message.includes(x))) {
+            if(content.includes('who are') && ['nominees', 'candidates'].some(x => content.includes(x))) {
 
                 if(election.arrNominees.length > 0)
                     responseText = `Here are the current candidates: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
@@ -268,43 +271,43 @@ const main = async () => {
             }
 
             // Moderation badges
-            else if(['what', 'mod', 'badges'].every(x => message.includes(x))) {
+            else if(['what', 'mod', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 8 moderation badges counting towards candidate score are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward`;
             }
 
             // Participation badges
-            else if(['what', 'participation', 'badges'].every(x => message.includes(x))) {
+            else if(['what', 'participation', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 6 participation badges counting towards candidate score are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling`;
             }
 
             // Editing badges
-            else if(['what', 'editing', 'badges'].every(x => message.includes(x))) {
+            else if(['what', 'editing', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 6 editing badges counting towards candidate score are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White`;
             }
 
             // Candidate score calculation
-            else if(['how', 'what'].some(x => message.includes(x)) && ['candidate score', 'score calculated'].some(x => message.includes(x))) {
+            else if(['how', 'what'].some(x => content.includes(x)) && ['candidate score', 'score calculated'].some(x => content.includes(x))) {
                 responseText = `The candidate score is calculated as such: 1 point for each 1,000 reputation up to 20,000 reputation (maximum of 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges. See https://meta.stackexchange.com/a/252643`;
             }
 
             // Stats/How many voted/participated
-            else if(['how', 'many'].every(x => message.includes(x)) && ['voted', 'participants'].some(x => message.includes(x))) {
+            else if(['how', 'many'].every(x => content.includes(x)) && ['voted', 'participants'].some(x => content.includes(x))) {
                 responseText = election.phase == 'ended' ? election.statVoters : `We won't know for sure until the election ends.`;
             }
 
             // How to choose/pick/decide who to vote for
-            else if((message.includes('how') && ['choose', 'pick', 'decide'].some(x => message.includes(x))) || (message.includes('who') && ['vote', 'for'].every(x => message.includes(x)))) {
+            else if((content.includes('how') && ['choose', 'pick', 'decide'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
                 responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
                 if(election.phase == null) responseText = notStartedYet;
             }
 
             // Current mods
-            else if(['who', 'current', 'mod'].every(x => message.includes(x))) {
+            else if(['who', 'current', 'mod'].every(x => content.includes(x))) {
                 responseText = `The current moderators can be found here: (${electionSite}/users?tab=moderators)`;
             }
 
             // How to nominate self/others
-            else if(['how', 'where'].some(x => message.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => message.includes(x)) && ['myself', 'name', 'user', 'someone', 'somebody', 'others', 'another'].some(x => message.includes(x))) {
+            else if(['how', 'where'].some(x => content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && ['myself', 'name', 'user', 'someone', 'somebody', 'others', 'another'].some(x => content.includes(x))) {
                 let reqs = [`at least ${election.repNominate} reputation`];
                 if(electionSite.includes('stackoverflow.com')) reqs.push(`awarded these badges (Civic Duty, Strunk & White, Deputy, Convention)`);
                 if(electionSite.includes('askubuntu.com'))     reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
@@ -314,7 +317,7 @@ const main = async () => {
             }
 
             // How/where to vote
-            else if(['where', 'how', 'want'].some(x => message.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => message.includes(x)) && ['vote', 'elect'].some(x => message.includes(x))) {
+            else if(['where', 'how', 'want'].some(x => content.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => content.includes(x)) && ['vote', 'elect'].some(x => content.includes(x))) {
 
                 switch(election.phase) {
                     case 'election':
@@ -335,7 +338,7 @@ const main = async () => {
             }
 
             // Status
-            else if(['what\'s the', 'whats the', 'election'].some(x => message.includes(x)) && ['status', 'process', 'progress', 'going'].some(x => message.includes(x))) {
+            else if(['what\'s the', 'whats the', 'election'].some(x => content.includes(x)) && ['status', 'process', 'progress', 'going'].some(x => content.includes(x))) {
 
                 if(election.phase == null) {
                     responseText = notStartedYet;
@@ -352,7 +355,7 @@ const main = async () => {
             }
 
             // What is election
-            else if(['how', 'what'].some(x => message.includes(x)) && ['is', 'an', 'does'].some(x => message.includes(x)) && ['election', 'it work'].some(x => message.includes(x))) {
+            else if(['how', 'what'].some(x => content.includes(x)) && ['is', 'an', 'does'].some(x => content.includes(x)) && ['election', 'it work'].some(x => content.includes(x))) {
                 responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
             }
             
@@ -383,6 +386,7 @@ const main = async () => {
 
     // Test if getElectionPage() can be called from cron.schedule
     if(debug) {
+
         const dNow = new Date();
         const cs = `${dNow.getMinutes() + 1} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`;
         cron.schedule(
@@ -396,64 +400,67 @@ const main = async () => {
             { timezone: "Etc/UTC" }
         );
         console.log('CRON - testing cron   - ', cs);
-    }
 
-    const _endedDate = new Date(election.dateEnded);
-    if(_endedDate > now) {
-        const cs = `0 ${_endedDate.getHours()} ${_endedDate.getDate()} ${_endedDate.getMonth() + 1} *`;
-        cron.schedule(
-            cs,
-            async () => {
-                await getElectionPage(electionUrl);
-                await room.sendMessage(`**The [election](${election.url}?tab=election) has now ended.** Congratulations to the winners ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}! You can [view the results online via OpaVote](${election.resultsUrl}).`);
-            },
-            { timezone: "Etc/UTC" }
-        );
-        console.log('CRON - election end   - ', cs);
     }
+    else {
+        
+        const _endedDate = new Date(election.dateEnded);
+        if(_endedDate > now) {
+            const cs = `0 ${_endedDate.getHours()} ${_endedDate.getDate()} ${_endedDate.getMonth() + 1} *`;
+            cron.schedule(
+                cs,
+                async () => {
+                    await getElectionPage(electionUrl);
+                    await room.sendMessage(`**The [election](${election.url}?tab=election) has now ended.** Congratulations to the winners ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}! You can [view the results online via OpaVote](${election.resultsUrl}).`);
+                },
+                { timezone: "Etc/UTC" }
+            );
+            console.log('CRON - election end   - ', cs);
+        }
 
-    const _electionDate = new Date(election.dateElection);
-    if(_electionDate > now) {
-        const cs = `0 ${_electionDate.getHours()} ${_electionDate.getDate()} ${_electionDate.getMonth() + 1} *`;
-        cron.schedule(
-            cs,
-            async () => {
-                await getElectionPage(electionUrl);
-                await room.sendMessage(`**The [election phase](${election.url}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
-            },
-            { timezone: "Etc/UTC" }
-        );
-        console.log('CRON - election start - ', cs);
-    }
-    
-    const _primaryDate = new Date(election.datePrimary);
-    if(_primaryDate > now) {
-        const cs = `0 ${_primaryDate.getHours()} ${_primaryDate.getDate()} ${_primaryDate.getMonth() + 1} *`;
-        cron.schedule(
-            cs,
-            async () => {
-                await getElectionPage(electionUrl);
-                await room.sendMessage(`**The [primary phase](${election.url}?tab=primary) is now open.** We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
-            },
-            { timezone: "Etc/UTC" }
-        );
-        console.log('CRON - primary start  - ', cs);
-    }
-    
-    const _nominationDate = new Date(election.dateNomination);
-    if(_nominationDate > now) {
-        const cs = `0 ${_nominationDate.getHours()} ${_nominationDate.getDate()} ${_nominationDate.getMonth() + 1} *`;
-        cron.schedule(
-            cs,
-            async () => {
-                await getElectionPage(electionUrl);
-                await room.sendMessage(`**The [nomination phase](${election.url}?tab=nomination) is now open.** Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
-            },
-            { timezone: "Etc/UTC" }
-        );
-        console.log('CRON - nomination start - ', cs);
-    }
-    // End cron stuff
+        const _electionDate = new Date(election.dateElection);
+        if(_electionDate > now) {
+            const cs = `0 ${_electionDate.getHours()} ${_electionDate.getDate()} ${_electionDate.getMonth() + 1} *`;
+            cron.schedule(
+                cs,
+                async () => {
+                    await getElectionPage(electionUrl);
+                    await room.sendMessage(`**The [election phase](${election.url}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
+                },
+                { timezone: "Etc/UTC" }
+            );
+            console.log('CRON - election start - ', cs);
+        }
+        
+        const _primaryDate = new Date(election.datePrimary);
+        if(_primaryDate > now) {
+            const cs = `0 ${_primaryDate.getHours()} ${_primaryDate.getDate()} ${_primaryDate.getMonth() + 1} *`;
+            cron.schedule(
+                cs,
+                async () => {
+                    await getElectionPage(electionUrl);
+                    await room.sendMessage(`**The [primary phase](${election.url}?tab=primary) is now open.** We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
+                },
+                { timezone: "Etc/UTC" }
+            );
+            console.log('CRON - primary start  - ', cs);
+        }
+        
+        const _nominationDate = new Date(election.dateNomination);
+        if(_nominationDate > now) {
+            const cs = `0 ${_nominationDate.getHours()} ${_nominationDate.getDate()} ${_nominationDate.getMonth() + 1} *`;
+            cron.schedule(
+                cs,
+                async () => {
+                    await getElectionPage(electionUrl);
+                    await room.sendMessage(`**The [nomination phase](${election.url}?tab=nomination) is now open.** Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
+                },
+                { timezone: "Etc/UTC" }
+            );
+            console.log('CRON - nomination start - ', cs);
+        }
+
+    } // End cron stuff
 
 } // End main fn
 main();
