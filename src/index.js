@@ -197,13 +197,23 @@ const main = async () => {
         // Decode HTML entities in messages, lowercase for matching
         const message = entities.decode(msg.content).toLowerCase();
 
-        console.log(`EVENT`, {
-            eventType: msg.eventType,
-            user: msg.userName,
-            userId: msg.userId,
-            targetUser: msg.targetUserId,
-            content: message
-        }, '\n');
+        if(debug) {
+            console.log('EVENT', await msg.eventType);
+            console.log('EVENT', await msg.userName);
+            console.log('EVENT', await msg.userId);
+            console.log('EVENT', await msg.targetUserId);
+            console.log('EVENT', await message);
+            console.log('\n');
+        }
+        else {
+            console.log('EVENT', {
+                eventType: await msg.eventType,
+                user: await msg.userName,
+                userId: await msg.userId,
+                targetUser: await msg.targetUserId,
+                content: await message
+            }, '\n');
+        }
 
         // If message was too long, ignore (most likely FP)
         if(message.length > 120) {
