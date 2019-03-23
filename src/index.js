@@ -12,8 +12,10 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Environment variables
-const debug = process.env.DEBUG.toLowerCase() !== 'false';
-const scriptHostname = process.env.SCRIPT_HOSTNAME || '';
+const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
+const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
+const throttleSecs = debug ? 5 : Number(process.env.THROTTLE_SECS) || 10; // to stop bot from replying to too many messages in a short time, unless in debug
+
 const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
 const accountEmail = process.env.ACCOUNT_EMAIL;
@@ -22,7 +24,7 @@ const electionSite = process.env.ELECTION_SITE;
 const electionNum = process.env.ELECTION_NUM;
 const electionQa = process.env.ELECTION_QA;
 const electionChatroom = process.env.ELECTION_CHATROOM;
-const throttleSecs = Number(process.env.THROTTLE_SECS) || 10;
+
 
 // App variables
 const entities = new Entities();
@@ -154,7 +156,8 @@ const getElectionPage = async (electionUrl) => {
         console.log(`Error with request: ${electionUrl}\n`, err);
         process.exit(1);
     }
-}
+
+} // End election scraper fn
 
 
 const main = async () => {
@@ -178,7 +181,8 @@ const main = async () => {
     // Default election message
     const notStartedYet = `The [moderator election](${election.url}) has not started yet. Come back at ${election.dateNomination}.`;
 
-    // Event listener
+
+    // Main event listener
     room.on('message', async msg => {
 
         // Ignore stuff from self, Community or Feeds users
@@ -223,20 +227,18 @@ const main = async () => {
             'soon';
 
         // Mentioned bot (not replied to existing message, which is 18)
-        if (msg.eventType === 8 && msg.targetUserId === me.id) {
+        // Needs a lower throttle rate to work
+        if (msg.eventType === 8 && msg.targetUserId === me.id && throttleSecs <= 15) {
             
             let responseText = null;
 
             if(msg.content.includes('alive')) {
-                responseText = `I'm alive and standing by...`;
+                responseText = `I'm alive and standing by with a ${throttleSecs}-second throttle.` + (debug ? ' I am in debug mode.' : '');
             }
             else if(msg.content.includes('about')) {
                 responseText = `I'm ${myProfile.name} and ${myProfile.about}.`;
             }
-            else if(msg.content.includes('help')) {
-                responseText = `about, alive, **commands**, help`;
-            }
-            else if(msg.content.includes('commands')) {
+            else if(['help', 'commands', 'faq', 'info', 'list'].some(x => msg.content.includes(x))) {
                 responseText = `\nFAQ topics I can help with:\n- what are the moderation badges\n- what are the participation badges\n- what are the editing badges\n` +
                     `- how is the candidate score calculated\n- how does the election work\n- who are the candidates\n- how to nominate\n- how to vote\n` +
                     `- how to decide who to vote for\n- how many voted\n- election status\n- who are the current moderators`;
@@ -362,9 +364,9 @@ const main = async () => {
         }
     });
 
+
     // Connect to the room, and listen for new events
     await room.watch();
-
     console.log(`Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}...\n`);
 
 
@@ -391,7 +393,7 @@ const main = async () => {
             },
             { timezone: "Etc/UTC" }
         );
-        console.log('CRON - testing - ', cs);
+        console.log('CRON - testing cron   - ', cs);
     }
 
     const _endedDate = new Date(election.dateEnded);
@@ -405,7 +407,7 @@ const main = async () => {
             },
             { timezone: "Etc/UTC" }
         );
-        console.log('CRON - election end - ', cs);
+        console.log('CRON - election end   - ', cs);
     }
 
     const _electionDate = new Date(election.dateElection);
@@ -433,7 +435,7 @@ const main = async () => {
             },
             { timezone: "Etc/UTC" }
         );
-        console.log('CRON - primary start - ', cs);
+        console.log('CRON - primary start  - ', cs);
     }
     
     const _nominationDate = new Date(election.dateNomination);
@@ -449,10 +451,9 @@ const main = async () => {
         );
         console.log('CRON - nomination start - ', cs);
     }
-
     // End cron stuff
 
-}
+} // End main fn
 main();
 
 
