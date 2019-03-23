@@ -60,12 +60,14 @@ const ignoredEventTypes = [
 
 
 // Helper functions
-const pluralize = (str, num) => str + (num !== 1 ? 's' : str);
+String.prototype.pluralize = function(n) {
+    return this.concat(Number(n) !== 1 ? 's' : '');
+}
 
 
 // App setup
 (function() {
-    if(debug) console.log('WARN: Debug mode is on.\n');
+    if(debug) console.warn('WARN: Debug mode is on.\n');
 })();
 
 
@@ -153,7 +155,7 @@ const getElectionPage = async (electionUrl) => {
         cache.setKey('election', election);
     }
     catch(err) {
-        console.log(`Error with request: ${electionUrl}\n`, err);
+        console.error(`Error with request: ${electionUrl}\n`, err);
         process.exit(1);
     }
 
@@ -206,17 +208,17 @@ const main = async () => {
         // Get details of user who triggered the message
         //const user = resolvedMsg.userId == me.id ? myProfile : await client._browser.getProfile(resolvedMsg.userId);
 
-        console.log('EVENT', resolvedMsg, '\n');
+        console.trace('EVENT', resolvedMsg, '\n');
 
         // If message was too long, ignore (most likely FP)
         if(content.length > 120) {
-            console.log('Ignoring due to message length...\n');
+            console.trace('Ignoring due to message length...\n');
             return;
         }
 
         // If too close to previous message, ignore
         if(Date.now() < lastMessageTime + throttleSecs * 1000) {
-            console.log('Throttling... (too close to previous message)\n');
+            console.trace('Throttling... (too close to previous message)\n');
             return;
         }
 
@@ -225,8 +227,8 @@ const main = async () => {
         const toElection = new Date(election.dateElection) - now;
         const daysToElection = Math.floor(toElection / (24 * 60 * 60 * 1000));
         const hoursToElection = Math.floor(toElection / 60 * 60 * 1000);
-        const textToElection = daysToElection > 1 ? 'in ' + daysToElection + pluralize(' day', daysToElection) :
-            hoursToElection > 1 ? 'in ' + hoursToElection + pluralize(' hour', hoursToElection) :
+        const textToElection = daysToElection > 1 ? 'in ' + daysToElection + (' day'.pluralize(daysToElection)) :
+            hoursToElection > 1 ? 'in ' + hoursToElection + (' hour'.pluralize(hoursToElection)) :
             'soon';
 
         // Mentioned bot (not replied to existing message, which is 18)
@@ -248,7 +250,7 @@ const main = async () => {
             }
             
             if(responseText != null) {
-                if (debug) console.log(responseText);
+                console.trace(responseText, '\n');
                 await msg.reply(responseText);
 
                 // Record last sent message time so we don't flood the room
@@ -360,7 +362,7 @@ const main = async () => {
             }
             
             if(responseText != null) {
-                if (debug) console.log(responseText);
+                console.trace(responseText, '\n');
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room
@@ -392,10 +394,10 @@ const main = async () => {
         cron.schedule(
             cs,
             async () => {
-                console.log('TEST CRON START');
+                console.log('TEST CRON STARTED');
                 await getElectionPage(electionUrl);
                 await room.sendMessage(`This is a test message.`);
-                console.log('TEST CRON END', election, '\n', room);
+                console.log('TEST CRON ENDED', election, '\n', room);
             },
             { timezone: "Etc/UTC" }
         );
@@ -485,7 +487,7 @@ if (scriptHostname.indexOf('herokuapp.com')) {
     // Keep-alive interval to prevent sleeping every 30 minutes
     setInterval(function() {
         https.get(scriptHostname).on('error', function(err) {
-            console.log(">> keep-alive error! " + err.message);
+            console.error(">> keep-alive error! " + err.message);
         });
     }, 20 * 60000); // every 20 minutes
 }
