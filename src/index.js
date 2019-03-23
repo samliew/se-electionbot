@@ -1,8 +1,8 @@
 import Client from 'chatexchange';
 import cron from "node-cron";
+const os = require('os');
 const path = require('path');
 const cheerio = require('cheerio');
-const flatCache = require('flat-cache');
 const Entities = require('html-entities').AllHtmlEntities;
 
 // If running locally, load env vars from .env file
@@ -28,7 +28,6 @@ const electionChatroom = process.env.ELECTION_CHATROOM;
 
 // App variables
 const entities = new Entities();
-const cache = flatCache.load('election-cache', path.resolve('../cache'));
 const electionUrl = electionSite + '/election/' + electionNum;
 const ignoredEventTypes = [
 //  1,  // MessagePosted
@@ -59,13 +58,36 @@ const ignoredEventTypes = [
 ];
 
 
+// Prototype overrides
+String.prototype.padZeros = function(n) {
+    return String.prototype.padStart.call(this, n, '0');
+}
+Number.prototype.padZeros = function(n) {
+    return String.prototype.padStart.call(this.toString(), n, '0');
+}
+
+
 // Helper functions
 const pluralize = n => n !== 1 ? 's' : '';
+const strToUptime = n => Math.floor(ut/86400).padZeros(2) +':'+ (Math.floor(ut/3600)%24).padZeros(2) +':'+ (ut%60).padZeros(2);
+
+
+// Overrides console.log/.error to insert newlines
+(function() {
+    var _origLog = console.log;
+    var _origErr = console.error;
+    console.log = function(message) {
+        _origLog.call(console, ...arguments, '\n');
+    };
+    console.error = function(message) {
+        _origErr.call(console, ...arguments, '\n');
+    };
+})();
 
 
 // App setup
 (function() {
-    if(debug) console.warn('WARN: Debug mode is on.\n');
+    if(debug) console.error('WARN: Debug mode is on.');
 })();
 
 
@@ -146,16 +168,13 @@ const getElectionPage = async (electionUrl) => {
             let winners = winnerElem.find('a').map((i, el) => Number($(el).attr('href').split('/')[2])).get();
             election.arrWinners = election.arrNominees.filter(v => winners.includes(v.userId));
         }
-
-        console.log(`Election page ${electionUrl} has been scraped successfully at ${election.updated}.\n`);
-
-        // Cache election into a json file
-        cache.setKey('election', election);
     }
     catch(err) {
-        console.error(`Error with request: ${electionUrl}\n`, err);
+        console.error(`Error with request: ${electionUrl}`, err);
         process.exit(1);
     }
+
+    console.log(`Election page ${electionUrl} has been scraped successfully at ${election.updated}.`);
 
 } // End election scraper fn
 
@@ -164,14 +183,15 @@ const main = async () => {
 
     // Wait for election page to be scraped
     await getElectionPage(electionUrl);
-    console.log(`The election is currently in the "${election.phase}" phase.\n`);
+    console.log(`The election is currently in the "${election.phase}" phase.`);
 
     const client = new Client(chatDomain);
     await client.login(accountEmail, accountPassword);
 
-    const me = await client.getMe();
-    const myProfile = await client._browser.getProfile(me.id);
-    console.log(`Logged in to ${chatDomain} as `, me, '\n');
+    const _me = await client.getMe();
+    const me = await client._browser.getProfile(_me.id);
+    me.id = _me.id; // because getProfile() doesn't return id
+    console.log(`Logged in to ${chatDomain} as ${me.name} (${me.id})`);
     
     const room = await client.joinRoom(chatRoomId);
 
@@ -204,19 +224,19 @@ const main = async () => {
         if(ignoredEventTypes.includes(resolvedMsg.eventType)) return;
         
         // Get details of user who triggered the message
-        //const user = resolvedMsg.userId == me.id ? myProfile : await client._browser.getProfile(resolvedMsg.userId);
+        //const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
 
-        console.trace('EVENT', resolvedMsg, '\n');
+        console.log('EVENT', resolvedMsg);
 
         // If message was too long, ignore (most likely FP)
         if(content.length > 120) {
-            console.trace('Ignoring due to message length...\n');
+            console.log('Ignoring due to message length...');
             return;
         }
 
         // If too close to previous message, ignore
         if(Date.now() < lastMessageTime + throttleSecs * 1000) {
-            console.trace('Throttling... (too close to previous message)\n');
+            console.log('Throttling... (too close to previous message)');
             return;
         }
 
@@ -230,25 +250,28 @@ const main = async () => {
             'soon';
 
         // Mentioned bot (not replied to existing message, which is 18)
-        // Needs a lower throttle rate to work
-        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && throttleSecs <= 15) {
+        // Needs a lower throttle rate to work well
+        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && throttleSecs <= 10) {
             
             let responseText = null;
 
             if(content.includes('alive')) {
-                responseText = `I'm alive and standing by with a ${throttleSecs}-second throttle.` + (debug ? ' I am in debug mode.' : '');
+                responseText = `I'm alive on ${os.hostname}, ${os.type}/${os.platform}/${os.arch}, uptime of ${strToUptime(os.uptime)}` + 
+                    (debug ? ' I am in debug mode.' : '');
             }
             else if(content.includes('about')) {
                 responseText = `I'm ${myProfile.name} and ${myProfile.about}.`;
             }
             else if(['help', 'commands', 'faq', 'info', 'list'].some(x => content.includes(x))) {
-                responseText = `\nFAQ topics I can help with:\n- what are the moderation badges\n- what are the participation badges\n- what are the editing badges\n` +
-                    `- how is the candidate score calculated\n- how does the election work\n- who are the candidates\n- how to nominate\n- how to vote\n` +
-                    `- how to decide who to vote for\n- how many voted\n- election status\n- who are the current moderators`;
+                responseText = '\n' + [
+                    'FAQ topics I can help with:', 'what are the moderation badges', 'what are the participation badges',
+                    'what are the editing badges', '- how is the candidate score calculated', 'how does the election work',
+                    'who are the candidates', 'how to nominate', 'how to vote', '- how to decide who to vote for', 
+                    'how many voted', 'election status', 'who are the current moderators'].join('\n- ');
             }
             
             if(responseText != null) {
-                console.trace(responseText, '\n');
+                console.log(responseText);
                 await msg.reply(responseText);
 
                 // Record last sent message time so we don't flood the room
@@ -360,7 +383,7 @@ const main = async () => {
             }
             
             if(responseText != null) {
-                console.trace(responseText, '\n');
+                console.log(responseText);
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room
@@ -372,7 +395,7 @@ const main = async () => {
 
     // Connect to the room, and listen for new events
     await room.watch();
-    console.log(`Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}...\n`);
+    console.log(`Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}`);
 
 
     // Interval to re-scrape election data
@@ -384,7 +407,7 @@ const main = async () => {
     // Set cron jobs to announce the different phases
     const now = Date.now();
 
-    // Test if getElectionPage() can be called from cron.schedule
+    // Test if cron works and if getElectionPage() can be called from cron.schedule
     if(debug) {
 
         const dNow = new Date();
@@ -479,7 +502,7 @@ if (scriptHostname.indexOf('herokuapp.com')) {
     app.use('/', express.static(staticPath));
             
     app.listen(app.get('port'), () => {
-        console.log(`Node app ${staticPath} is listening on port ${app.get('port')}.\n`);
+        console.log(`Node app ${staticPath} is listening on port ${app.get('port')}.`);
     });
 
     // Keep-alive interval to prevent sleeping every 30 minutes
