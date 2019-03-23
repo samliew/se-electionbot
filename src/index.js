@@ -251,7 +251,7 @@ const main = async () => {
 
         // Mentioned bot (not replied to existing message, which is 18)
         // Needs a lower throttle rate to work well
-        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && throttleSecs <= 10) {
+        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && throttleSecs <= 15) {
             
             let responseText = null;
 
