@@ -189,20 +189,20 @@ const main = async () => {
         if([me.id, -1, -2].includes(msg.userId)) return;
 
         // Ignore unnecessary events
-        if(ignoredEventTypes.includes(msg._eventId)) return;
+        if(ignoredEventTypes.includes(msg._eventType)) return;
         
         // Get details of user who triggered the message
         //const user = msg.userId == me.id ? myProfile : await client._browser.getProfile(msg.userId);
 
         // Decode HTML entities in messages, lowercase for matching
-        const message = entities.decode(msg._content).toLowerCase();
+        const message = entities.decode(await msg.content).toLowerCase();
 
         console.log('EVENT', {
-            eventType: await msg._eventId,
+            eventType: msg._eventType,
             user: await msg.userName,
             userId: await msg.userId,
-            targetUser: await msg.targetUserId,
-            content: await message
+            targetUserId: await msg.targetUserId,
+            content: message
         }, '\n');
 
         // If message was too long, ignore (most likely FP)
@@ -228,7 +228,7 @@ const main = async () => {
 
         // Mentioned bot (not replied to existing message, which is 18)
         // Needs a lower throttle rate to work
-        if (msg._eventId === 8 && msg.targetUserId === me.id && throttleSecs <= 15) {
+        if (msg._eventType === 8 && msg.targetUserId === me.id && throttleSecs <= 15) {
             
             let responseText = null;
 
@@ -245,6 +245,7 @@ const main = async () => {
             }
             
             if(responseText != null) {
+                if (debug) console.log(responseText);
                 await msg.reply(responseText);
 
                 // Record last sent message time so we don't flood the room
@@ -253,7 +254,7 @@ const main = async () => {
         }
 
         // Any new message that does not reply-to or mention any user
-        else if (msg._eventId === 1 && !msg.targetUserId) {
+        else if (msg._eventType === 1 && !msg.targetUserId) {
             
             let responseText = null;
 
@@ -356,6 +357,7 @@ const main = async () => {
             }
             
             if(responseText != null) {
+                if (debug) console.log(responseText);
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room
