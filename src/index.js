@@ -193,7 +193,7 @@ const main = async () => {
             eventType: msg._eventType,
             userName: await msg.userName,
             userId: await msg.userId,
-            targetUserId: await msg.targetUserId,
+            targetUserId: [8, 18].includes(msg._eventType) ? await msg.targetUserId : undefined,
             content: content
         };
 
