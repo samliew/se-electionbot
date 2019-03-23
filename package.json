@@ -23,7 +23,7 @@
     "node": "10.x"
   },
   "dependencies": {
-    "chatexchange": "^0.1.6",
+    "chatexchange": "^0.2.3-dev",
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.4",
     "flat-cache": "^2.0.1",
