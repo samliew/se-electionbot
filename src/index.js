@@ -1,9 +1,8 @@
 import Client from 'chatexchange';
-import cron from "node-cron";
-const os = require('os');
 const path = require('path');
 const cheerio = require('cheerio');
 const Entities = require('html-entities').AllHtmlEntities;
+const ScheduledAnnouncement = require('./ScheduledAnnouncement').default;
 
 // If running locally, load env vars from .env file
 if (process.env.NODE_ENV !== 'production') {
@@ -28,6 +27,7 @@ const electionChatroom = process.env.ELECTION_CHATROOM;
 
 // App variables
 const entities = new Entities();
+const announcement = new ScheduledAnnouncement();
 const electionUrl = electionSite + '/election/' + electionNum;
 const ignoredEventTypes = [
 //  1,  // MessagePosted
@@ -56,6 +56,7 @@ const ignoredEventTypes = [
     34, // UserNameOrAvatarChanged
     7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
 ];
+let hasPrimary = false;
 
 
 // Helper functions
@@ -105,11 +106,16 @@ const getElectionPage = async (electionUrl) => {
 
         let electionPost = $('#mainbar .post-text .wiki-ph-content');
         let sidebarValues = $('#sidebar').find('.label-value').map((i, el) => $(el).attr('title') || $(el).text()).get();
-        if(sidebarValues.length == 5) sidebarValues.splice(1, 0, null); // for elections with no primary phase
+
+        // for elections with no primary phase
+        if(sidebarValues.length == 5) {
+            sidebarValues.splice(1, 0, null); 
+        }
 
         election = {
             updated: Date.now(),
             url: electionUrl,
+            siteurl: 'https://' + electionUrl.split('/')[2],
             title: $('#content h1').first().text().trim(),
             dateNomination: sidebarValues[0],
             datePrimary: sidebarValues[1],
@@ -250,7 +256,7 @@ const main = async () => {
                     (debug ? ' I am in debug mode.' : '');
             }
             else if(content.includes('about')) {
-                responseText = `I'm ${myProfile.name} and ${myProfile.about}.`;
+                responseText = `I'm ${me.name} and ${me.about}.`;
             }
             else if(['help', 'commands', 'faq', 'info', 'list'].some(x => content.includes(x))) {
                 responseText = '\n' + [
@@ -387,100 +393,37 @@ const main = async () => {
     await room.watch();
     console.log(`Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}`);
 
+        
+    // Set cron jobs to announce the different phases
+    announcement.setRoom(room);
+    announcement.setElection(election);
+    announcement.initAll(election);
+
+    // Test if cron works and if getElectionPage() can be called from cron.schedule
+    if(debug) {
+        announcement.initTest();
+    }
+
 
     // Interval to re-scrape election data
     setInterval(async function() {
         await getElectionPage(electionUrl);
+        announcement.setElection(election);
+        
+        // previously had no primary, but after re-scraping there is one
+        if (!announcement.hasPrimary && election.datePrimary != null) {
+            announcement.initPrimary(election.datePrimary);
+        }
+
     }, 10 * 60000, ); // every 10 minutes
 
-        
-    // Set cron jobs to announce the different phases
-    const now = Date.now();
-
-    // Test if cron works and if getElectionPage() can be called from cron.schedule
-    if(debug) {
-
-        const dNow = new Date();
-        const cs = `${dNow.getMinutes() + 1} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`;
-        cron.schedule(
-            cs,
-            async () => {
-                console.log('TEST CRON STARTED');
-                await getElectionPage(electionUrl);
-                await room.sendMessage(`This is a test message.`);
-                console.log('TEST CRON ENDED', election, '\n', room);
-            },
-            { timezone: "Etc/UTC" }
-        );
-        console.log('CRON - testing cron   - ', cs);
-
-    }
-    else {
-        
-        const _endedDate = new Date(election.dateEnded);
-        if(_endedDate > now) {
-            const cs = `0 ${_endedDate.getHours()} ${_endedDate.getDate()} ${_endedDate.getMonth() + 1} *`;
-            cron.schedule(
-                cs,
-                async () => {
-                    await getElectionPage(electionUrl);
-                    await room.sendMessage(`**The [election](${election.url}?tab=election) has now ended.** Congratulations to the winners ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}! You can [view the results online via OpaVote](${election.resultsUrl}).`);
-                },
-                { timezone: "Etc/UTC" }
-            );
-            console.log('CRON - election end   - ', cs);
-        }
-
-        const _electionDate = new Date(election.dateElection);
-        if(_electionDate > now) {
-            const cs = `0 ${_electionDate.getHours()} ${_electionDate.getDate()} ${_electionDate.getMonth() + 1} *`;
-            cron.schedule(
-                cs,
-                async () => {
-                    await getElectionPage(electionUrl);
-                    await room.sendMessage(`**The [election phase](${election.url}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
-                },
-                { timezone: "Etc/UTC" }
-            );
-            console.log('CRON - election start - ', cs);
-        }
-        
-        const _primaryDate = new Date(election.datePrimary);
-        if(_primaryDate > now) {
-            const cs = `0 ${_primaryDate.getHours()} ${_primaryDate.getDate()} ${_primaryDate.getMonth() + 1} *`;
-            cron.schedule(
-                cs,
-                async () => {
-                    await getElectionPage(electionUrl);
-                    await room.sendMessage(`**The [primary phase](${election.url}?tab=primary) is now open.** We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
-                },
-                { timezone: "Etc/UTC" }
-            );
-            console.log('CRON - primary start  - ', cs);
-        }
-        
-        const _nominationDate = new Date(election.dateNomination);
-        if(_nominationDate > now) {
-            const cs = `0 ${_nominationDate.getHours()} ${_nominationDate.getDate()} ${_nominationDate.getMonth() + 1} *`;
-            cron.schedule(
-                cs,
-                async () => {
-                    await getElectionPage(electionUrl);
-                    await room.sendMessage(`**The [nomination phase](${election.url}?tab=nomination) is now open.** Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
-                },
-                { timezone: "Etc/UTC" }
-            );
-            console.log('CRON - nomination start - ', cs);
-        }
-
-    } // End cron stuff
 
 } // End main fn
 main();
 
 
 // If running on Heroku
-if (scriptHostname.indexOf('herokuapp.com')) {
+if (scriptHostname.includes('herokuapp.com')) {
 
     // Required to keep Heroku free web dyno alive for more than 60 seconds,
     //   or to serve static content
