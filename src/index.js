@@ -255,8 +255,8 @@ const main = async () => {
             else if(['help', 'commands', 'faq', 'info', 'list'].some(x => content.includes(x))) {
                 responseText = '\n' + [
                     'FAQ topics I can help with:', 'what are the moderation badges', 'what are the participation badges',
-                    'what are the editing badges', '- how is the candidate score calculated', 'how does the election work',
-                    'who are the candidates', 'how to nominate', 'how to vote', '- how to decide who to vote for', 
+                    'what are the editing badges', 'how is the candidate score calculated', 'how does the election work',
+                    'who are the candidates', 'how to nominate', 'how to vote', 'how to decide who to vote for', 
                     'how many voted', 'election status', 'who are the current moderators'].join('\n- ');
             }
             
