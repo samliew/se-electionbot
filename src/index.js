@@ -304,7 +304,7 @@ const main = async () => {
     announcement.setElection(election);
     announcement.initAll(election);
 
-    // Test if cron works and if getElectionPage() can be called from cron.schedule
+    // Test if cron works and if scrapeElection() can be called from cron.schedule
     if(debug) {
         announcement.initTest();
     }
@@ -312,7 +312,7 @@ const main = async () => {
 
     // Interval to re-scrape election data
     setInterval(async function() {
-        await getElectionPage(electionUrl);
+        await election.scrapeElection();
         announcement.setElection(election);
         
         // previously had no primary, but after re-scraping there is one
