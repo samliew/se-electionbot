@@ -1,7 +1,6 @@
 import Client from 'chatexchange';
-const path = require('path');
-const cheerio = require('cheerio');
 const Entities = require('html-entities').AllHtmlEntities;
+const Election = require('./Election').default;
 const ScheduledAnnouncement = require('./ScheduledAnnouncement').default;
 
 // If running locally, load env vars from .env file
@@ -21,8 +20,6 @@ const accountEmail = process.env.ACCOUNT_EMAIL;
 const accountPassword = process.env.ACCOUNT_PASSWORD;
 const electionSite = process.env.ELECTION_SITE;
 const electionNum = process.env.ELECTION_NUM;
-const electionQa = process.env.ELECTION_QA;
-const electionChatroom = process.env.ELECTION_CHATROOM;
 
 
 // App variables
@@ -56,7 +53,7 @@ const ignoredEventTypes = [
     34, // UserNameOrAvatarChanged
     7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
 ];
-let hasPrimary = false;
+let election = null;
 
 
 // Helper functions
@@ -82,103 +79,11 @@ const pluralize = n => n !== 1 ? 's' : '';
 })();
 
 
-// Get election page, parse it, and insert results into variable election
-let election = null;
-const getElectionPage = async (electionUrl) => {
-
-    const electionPageUrl = `${electionUrl}?tab=nomination`;
-    console.log(`Attempting to fetch ${electionPageUrl}.`);
-
-    try {
-        const request = require('request-promise');
-        const html = await request({
-            gzip: true,
-            simple: false,
-            resolveWithFullResponse: false,
-            headers: {
-                'User-Agent': 'Node.js/TestChatbot1',
-            },
-            uri: electionPageUrl
-        });
-
-        // Parse election page
-        const $ = cheerio.load(html);
-
-        let electionPost = $('#mainbar .post-text .wiki-ph-content');
-        let sidebarValues = $('#sidebar').find('.label-value').map((i, el) => $(el).attr('title') || $(el).text()).get();
-
-        // for elections with no primary phase
-        if(sidebarValues.length == 5) {
-            sidebarValues.splice(1, 0, null); 
-        }
-
-        election = {
-            updated: Date.now(),
-            url: electionUrl,
-            siteurl: 'https://' + electionUrl.split('/')[2],
-            title: $('#content h1').first().text().trim(),
-            dateNomination: sidebarValues[0],
-            datePrimary: sidebarValues[1],
-            dateElection: sidebarValues[2],
-            dateEnded: sidebarValues[3],
-            numCandidates: Number(sidebarValues[4]),
-            numPositions: Number(sidebarValues[5]),
-            repVote: 150,
-            repNominate: Number($('#sidebar .module.newuser b').eq(1).text().replace(/\D+/g, '')),
-            arrNominees: $('#mainbar .candidate-row').map((i, el) => {
-                return {
-                    userId: Number($(el).find('.user-details a').attr('href').split('/')[2]),
-                    userName: $(el).find('.user-details a').text(),
-                    userYears: $(el).find('.user-details').contents().map(function() {
-                        if(this.type === 'text') return this.data.trim();
-                    }).get().join(' ').trim(),
-                    userScore: $(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)[0],
-                    permalink: electionPageUrl + '#' + $(el).attr('id'),
-                }
-            }).get(),
-            qnaUrl: electionPost.find('a[href*="questionnaire"]').attr('href') || electionQa,
-            chatUrl: electionPost.find('a[href*="/rooms/"]').attr('href') || electionChatroom,
-        };
-
-        // Calculate phase of election
-        const now = Date.now();
-        election.phase = new Date(election.dateEnded) < now ? 'ended' :
-            new Date(election.dateElection) < now ? 'election' : 
-            election.datePrimary && new Date(election.datePrimary) < now ? 'primary' : 
-            new Date(election.dateNomination) < now ? 'nomination' : 
-            null;
-
-        // If election has ended,
-        if(election.phase === 'ended') {
-
-            // Get results URL
-            election.resultsUrl = $('#mainbar').find('.question-status h2').first().find('a').first().attr('href');
-            
-            // Get election stats
-            let winnerElem = $('#mainbar').find('.question-status h2').eq(1);
-            election.statVoters = winnerElem.contents().map(function() {
-                if(this.type === 'text') return this.data.trim();
-            }).get().join(' ').trim();
-
-            // Get winners
-            let winners = winnerElem.find('a').map((i, el) => Number($(el).attr('href').split('/')[2])).get();
-            election.arrWinners = election.arrNominees.filter(v => winners.includes(v.userId));
-        }
-    }
-    catch(err) {
-        console.error(`Error with request: ${electionUrl}`, err);
-        process.exit(1);
-    }
-
-    console.log(`Election page ${electionUrl} has been scraped successfully at ${election.updated}.`);
-
-} // End election scraper fn
-
-
 const main = async () => {
 
     // Wait for election page to be scraped
-    await getElectionPage(electionUrl);
+    const election = new Election(electionUrl);
+    await election.scrapeElection();
     console.log(`The election is currently in the "${election.phase}" phase.`);
 
     const client = new Client(chatDomain);
@@ -425,23 +330,7 @@ main();
 // If running on Heroku
 if (scriptHostname.includes('herokuapp.com')) {
 
-    // Required to keep Heroku free web dyno alive for more than 60 seconds,
-    //   or to serve static content
-    const express = require('express');
-    var https = require('https');
-    const app = express().set('port', process.env.PORT || 5000);
-    
-    const staticPath = path.join(__dirname, '../static');
-    app.use('/', express.static(staticPath));
-            
-    app.listen(app.get('port'), () => {
-        console.log(`Node app ${staticPath} is listening on port ${app.get('port')}.`);
-    });
-
-    // Keep-alive interval to prevent sleeping every 30 minutes
-    setInterval(function() {
-        https.get(scriptHostname).on('error', function(err) {
-            console.error(">> keep-alive error! " + err.message);
-        });
-    }, 20 * 60000); // every 20 minutes
+    const utils = require('./utils');
+    utils.staticServer();
+    utils.keepAlive();
 }
