@@ -34,7 +34,7 @@ export default class ScheduledAnnouncement {
             cron.schedule(
                 cs,
                 async () => {
-                    await getElectionPage(electionUrl);
+                    await this._election.getElectionPage(electionUrl);
                     await this._room.sendMessage(`**The [election](${this._election.url}?tab=election) has now ended.** Congratulations to the winners ${this._election.arrWinners.map(v => `[${v.userName}](${this._election.siteUrl + '/users/' + v.userId})`).join(', ')}! You can [view the results online via OpaVote](${this._election.resultsUrl}).`);
                 },
                 { timezone: "Etc/UTC" }
@@ -53,7 +53,7 @@ export default class ScheduledAnnouncement {
             cron.schedule(
                 cs,
                 async () => {
-                    await getElectionPage(electionUrl);
+                    await this._election.getElectionPage(electionUrl);
                     await this._room.sendMessage(`**The [election phase](${this._election.url}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
                 },
                 { timezone: "Etc/UTC" }
@@ -72,7 +72,7 @@ export default class ScheduledAnnouncement {
             cron.schedule(
                 cs,
                 async () => {
-                    await getElectionPage(this._election.url);
+                    await this._election.getElectionPage(this._election.url);
                     await this._room.sendMessage(`**The [nomination phase](${this._election.url}?tab=nomination) is now open.** Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
                 },
                 { timezone: "Etc/UTC" }
@@ -91,7 +91,7 @@ export default class ScheduledAnnouncement {
             cron.schedule(
                 cs,
                 async () => {
-                    await getElectionPage(this._election.url);
+                    await this._election.getElectionPage(this._election.url);
                     await this._room.sendMessage(`**The [primary phase](${this._election.url}?tab=primary) is now open.** We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
                 },
                 { timezone: "Etc/UTC" }
@@ -108,7 +108,7 @@ export default class ScheduledAnnouncement {
             cs,
             async () => {
                 console.log('TEST CRON STARTED');
-                await getElectionPage(electionUrl);
+                await this._election.getElectionPage(electionUrl);
                 await this._room.sendMessage(`This is a test message.`);
                 console.log('TEST CRON ENDED', this._election, '\n', this._room);
             },
