@@ -58,18 +58,8 @@ const ignoredEventTypes = [
 ];
 
 
-// Prototype overrides
-String.prototype.padZeros = function(n) {
-    return String.prototype.padStart.call(this, n, '0');
-}
-Number.prototype.padZeros = function(n) {
-    return String.prototype.padStart.call(this.toString(), n, '0');
-}
-
-
 // Helper functions
 const pluralize = n => n !== 1 ? 's' : '';
-const secsToDuration = n => Math.floor(n/86400).padZeros(2) +':'+ (Math.floor(n/3600)%24).padZeros(2) +':'+ (n%60).padZeros(2);
 
 
 // Overrides console.log/.error to insert newlines
@@ -256,7 +246,7 @@ const main = async () => {
             let responseText = null;
 
             if(content.includes('alive')) {
-                responseText = `I'm alive on ${os.type}/${os.arch}/${os.platform} with an uptime of ${secsToDuration(os.uptime)}.` + 
+                responseText = `I'm alive on ${scriptHostname}.` + 
                     (debug ? ' I am in debug mode.' : '');
             }
             else if(content.includes('about')) {
