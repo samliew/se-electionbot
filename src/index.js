@@ -126,8 +126,7 @@ const main = async () => {
         if(ignoredEventTypes.includes(resolvedMsg.eventType)) return;
         
         // Get details of user who triggered the message
-        //const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
-        const user = resolvedMsg.userId == me.id ? me : new User(client, resolvedMsg.userId);
+        const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
 
         // If message was too long, ignore (most likely FP)
         if(content.length > 120) {
@@ -138,7 +137,7 @@ const main = async () => {
         console.log('EVENT', resolvedMsg);
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
-        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || await user.isModerator)) {
+        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
 
             if(content.includes('alive')) {
                 msg.reply(`I'm alive on ${scriptHostname} with a throttle duration of ${throttleSecs}s.` + (debug ? ' I am in debug mode.' : ''));
