@@ -118,7 +118,7 @@ export default class ScheduledAnnouncement {
             async () => {
                 console.log('TEST CRON STARTED');
                 await this._election.scrapeElection();
-                await this._room.sendMessage(`This is a test message.`);
+                await this._room.sendMessage(`Test cron job succesfully completed at ${this._election.updated}.`);
                 console.log('TEST CRON ENDED', this._election, '\n', this._room);
             },
             { timezone: "Etc/UTC" }

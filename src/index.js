@@ -143,8 +143,12 @@ const main = async () => {
             if(content.includes('alive')) {
                 msg.reply(`I'm alive on ${scriptHostname} with a throttle duration of ${throttleSecs}s.` + (debug ? ' I am in debug mode.' : ''));
             }
+            else if(content.includes('test cron')) {
+                msg.reply(`Setting up test cron job.`);
+                announcement.initTest();
+            }
             else if(content.includes('cron')) {
-                msg.reply(`Currently scheduled announcements: ` + JSON.stringify(announcement.schedules));
+                msg.reply('Currently scheduled announcements: ```' + JSON.stringify(announcement.schedules)) + '```';
             }
             else if(content.includes('shutdown')) {
                 msg.reply(`*shutting down...*`);
