@@ -147,7 +147,7 @@ const main = async () => {
                 announcement.initTest();
             }
             else if(content.includes('cron')) {
-                msg.reply('Currently scheduled announcements: ```' + JSON.stringify(announcement.schedules)) + '```';
+                msg.reply('Currently scheduled announcements: `' + JSON.stringify(announcement.schedules) + '`');
             }
             else if(content.includes('shutdown')) {
                 msg.reply(`*shutting down...*`);
