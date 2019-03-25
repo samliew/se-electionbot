@@ -35,6 +35,7 @@ export default class Election {
 
             this.updated = Date.now();
             this.url = this.electionUrl;
+            this.sitename = $('meta[property="og:site_name"]').attr('content').replace('Stack Exchange', '').trim();
             this.siteurl = 'https://' + this.electionUrl.split('/')[2];
             this.title = $('#content h1').first().text().trim();
             this.dateNomination = sidebarValues[0];
@@ -62,10 +63,10 @@ export default class Election {
 
             // Calculate phase of election
             const now = Date.now();
-            this.phase = new Date(this.dateEnded) < now ? 'ended' :
-                new Date(this.dateElection) < now ? 'election' : 
-                this.datePrimary && new Date(this.datePrimary) < now ? 'primary' : 
-                new Date(this.dateNomination) < now ? 'nomination' : 
+            this.phase = new Date(this.dateEnded) <= now ? 'ended' :
+                new Date(this.dateElection) <= now ? 'election' : 
+                this.datePrimary && new Date(this.datePrimary) <= now ? 'primary' : 
+                new Date(this.dateNomination) <= now ? 'nomination' : 
                 null;
 
             // If election has ended,

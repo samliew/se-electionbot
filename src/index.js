@@ -1,7 +1,7 @@
 import Client from 'chatexchange';
-const Entities = require('html-entities').AllHtmlEntities;
 const Election = require('./Election').default;
-const ScheduledAnnouncement = require('./ScheduledAnnouncement').default;
+const entities = new (require('html-entities').AllHtmlEntities);
+const announcement = new (require('./ScheduledAnnouncement').default);
 
 // If running locally, load env vars from .env file
 if (process.env.NODE_ENV !== 'production') {
@@ -24,8 +24,6 @@ const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(v => Number(v));
 
 
 // App variables
-const entities = new Entities();
-const announcement = new ScheduledAnnouncement();
 const electionUrl = electionSite + '/election/' + electionNum;
 const ignoredEventTypes = [
 //  1,  // MessagePosted
@@ -63,8 +61,8 @@ const pluralize = n => n !== 1 ? 's' : '';
 
 // Overrides console.log/.error to insert newlines
 (function() {
-    var _origLog = console.log;
-    var _origErr = console.error;
+    const _origLog = console.log;
+    const _origErr = console.error;
     console.log = function(message) {
         _origLog.call(console, ...arguments, '\n');
     };
@@ -87,28 +85,32 @@ const main = async () => {
     await election.scrapeElection();
     console.log(`The election is currently in the "${election.phase}" phase.`);
 
+    // Login to site
     const client = new Client(chatDomain);
     await client.login(accountEmail, accountPassword);
 
+    // Get chat profile
     const _me = await client.getMe();
     const me = await client._browser.getProfile(_me.id);
     me.id = _me.id; // because getProfile() doesn't return id
     console.log(`Logged in to ${chatDomain} as ${me.name} (${me.id})`);
     
+    // Join room
     const room = await client.joinRoom(chatRoomId);
 
     // Variable to store last message for throttling
     let lastMessageTime = -1;
 
     // Default election message
-    const notStartedYet = `The [moderator election](${election.url}) has not started yet. Come back at ${election.dateNomination}.`;
+    const notStartedYet = `The ${election.sitename} [Moderator Election](${election.url}) has not started yet. Come back at ${election.dateNomination}.`;
 
 
     // Main event listener
     room.on('message', async msg => {
 
-        // Decode HTML entities in messages, lowercase for matching
-        const content = entities.decode(msg._content).toLowerCase();
+        // Decode HTML entities in messages, lowercase version for matching
+        const origContent = entities.decode(msg._content);
+        const content = origContent.toLowerCase();
 
         // Resolve required fields
         const resolvedMsg = {
@@ -136,34 +138,6 @@ const main = async () => {
 
         console.log('EVENT', resolvedMsg);
 
-        // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
-        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
-
-            if(content.includes('alive')) {
-                msg.reply(`I'm alive on ${scriptHostname} with a throttle duration of ${throttleSecs}s.` + (debug ? ' I am in debug mode.' : ''));
-            }
-            else if(content.includes('test cron')) {
-                msg.reply(`Setting up test cron job.`);
-                announcement.initTest();
-            }
-            else if(content.includes('cron')) {
-                msg.reply('Currently scheduled announcements: `' + JSON.stringify(announcement.schedules) + '`');
-            }
-            else if(content.includes('shutdown')) {
-                msg.reply(`*shutting down...*`);
-                process.exit(0);
-            }
-
-            // Don't do anything else
-            return;
-        }
-        
-        // If too close to previous message, ignore
-        if(Date.now() < lastMessageTime + throttleSecs * 1000) {
-            console.log('Throttling... (too close to previous message)');
-            return;
-        }
-
         // Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
         const now = Date.now();
         const toElection = new Date(election.dateElection) - now;
@@ -171,7 +145,51 @@ const main = async () => {
         const hoursToElection = Math.floor(toElection / 60 * 60 * 1000);
         const textToElection = daysToElection > 1 ? 'in ' + daysToElection + ' day' + pluralize(daysToElection) :
             hoursToElection > 1 ? 'in ' + hoursToElection + ' hour' + pluralize(hoursToElection) :
-            'soon';
+            'shortly';
+
+        // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
+        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
+
+            if(content.includes('alive')) {
+                await msg.reply(`I'm alive on ${scriptHostname} with a throttle duration of ${throttleSecs}s.` + (debug ? ' I am in debug mode.' : ''));
+                return;
+            }
+            else if(content.includes('test cron')) {
+                await msg.reply(`Setting up test cron job.`);
+                announcement.initTest();
+            }
+            else if(content.includes('cron')) {
+                await msg.reply('Currently scheduled announcements: `' + JSON.stringify(announcement.schedules) + '`');
+            }
+            else if(content.includes('set timeout')) {
+                let num = content.match(/\d+$/);
+                num = num ? Number(num[0]) : 5; // defaulting to 5
+                await room.sendMessage(`*silenced for ${num} minutes*`);
+                lastMessageTime = Date.now() + (num * 60000) - (throttleSecs * 1000);
+            }
+            else if(content.includes('clear timeout')) {
+                await room.sendMessage(`*timeout cleared*`);
+                lastMessageTime = -1;
+            }
+            else if(content.includes('say') && content.split(' say ').length == 2) {
+                let c = origContent.split(' say ')[1];
+                await room.sendMessage(c);
+                return;
+            }
+            else if(content.includes('shutdown')) {
+                await room.sendMessage(`*goodbye...*`);
+                process.exit(0);
+            }
+            else if(content.includes('time')) {
+                await msg.reply(`UTC time: ${new Date().toISOString().replace('T', ' ').replace(/\.\d+/, '')} (election starts ${textToElection})`);
+            }
+        }
+        
+        // If too close to previous message, ignore
+        if(Date.now() < lastMessageTime + throttleSecs * 1000) {
+            console.log('Throttling... (too close to previous message)');
+            return;
+        }
 
         // Mentioned bot (8), not replied to existing message (18)
         // Needs a lower throttle rate to work well
@@ -190,7 +208,7 @@ const main = async () => {
                     'FAQ topics I can help with:', 'what are the moderation badges', 'what are the participation badges',
                     'what are the editing badges', 'how is the candidate score calculated', 'how does the election work',
                     'who are the candidates', 'how to nominate', 'how to vote', 'how to decide who to vote for', 
-                    'how many voted', 'election status', 'who are the current moderators'].join('\n- ');
+                    'how many voted', 'election status', 'election schedule', 'who are the current moderators'].join('\n- ');
             }
             
             if(responseText != null) {
@@ -257,7 +275,7 @@ const main = async () => {
                 let reqs = [`at least ${election.repNominate} reputation`];
                 if(electionSite.includes('stackoverflow.com')) reqs.push(`awarded these badges (Civic Duty, Strunk & White, Deputy, Convention)`);
                 if(electionSite.includes('askubuntu.com'))     reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
-                reqs.push(`and cannot have been suspended in the past year`);
+                reqs.push(`and cannot have been suspended anywhere on the Stack Exchange Network within the past year`);
 
                 responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need ${reqs.join(', ')}. You cannot nominate another user.`;
             }
@@ -290,7 +308,11 @@ const main = async () => {
                     responseText = notStartedYet;
                 }
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The [moderator election](${election.url}) is now concluded. The winners are: ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
+                    responseText = `The [moderator election](${election.url}) has ended. The winners are: ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
+                }
+                 // Possible to have ended but no winners in cache yet? or will the cron job resolve this?
+                else if(election.phase === 'ended') {
+                    responseText = `The [moderator election](${election.url}) has ended.`;
                 }
                 else {
                     responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. There are currently ${election.arrNominees.length} candidates.`;
@@ -303,6 +325,17 @@ const main = async () => {
             // What is election
             else if(['how', 'what'].some(x => content.includes(x)) && ['is', 'an', 'does'].some(x => content.includes(x)) && ['election', 'it work'].some(x => content.includes(x))) {
                 responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
+            }
+            
+            // Election schedule
+            else if(content.includes('election schedule')) {
+                responseText = [
+                    `    Election Schedule -`,
+                    `    Nomination: ${election.dateNomination}` + (election.phase == 'nomination' ? ' <---':''),
+                    `    Primary:    ${election.datePrimary || '(none)'}` + (election.phase == 'primary' ? ' <---':''),
+                    `    Election:   ${election.dateElection}` + (election.phase == 'election' ? ' <---':''),
+                    `    End:        ${election.dateEnded}` + (election.phase == 'ended' ? ' <---':'')
+                ].join('\n');
             }
             
             if(responseText != null) {
@@ -325,11 +358,6 @@ const main = async () => {
     announcement.setRoom(room);
     announcement.setElection(election);
     announcement.initAll(election);
-
-    // Test if cron works and if scrapeElection() can be called from cron.schedule
-    if(debug) {
-        announcement.initTest();
-    }
 
 
     // Interval to re-scrape election data
