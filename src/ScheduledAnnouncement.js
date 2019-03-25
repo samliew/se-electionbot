@@ -44,7 +44,12 @@ export default class ScheduledAnnouncement {
                 cs,
                 async () => {
                     await this._election.scrapeElection();
-                    await this._room.sendMessage(`**The [election](${this._election.url}?tab=election) has now ended.** Congratulations to the winners ${this._election.arrWinners.map(v => `[${v.userName}](${this._election.siteUrl + '/users/' + v.userId})`).join(', ')}! You can [view the results online via OpaVote](${this._election.resultsUrl}).`);
+                    await this._room.sendMessage(`**The [election](${this._election.url}?tab=election) has now ended.** You can [view the results online via OpaVote](${this._election.resultsUrl}).`);
+
+                    // Congratulate the winners
+                    if(this._election.arrWinners.length > 0) {
+                        await this._room.sendMessage(`Congratulations to the winners ${this._election.arrWinners.map(v => `[${v.userName}](${this._election.siteUrl + '/users/' + v.userId})`).join(', ')}!`);
+                    }
                 },
                 { timezone: "Etc/UTC" }
             );
@@ -72,25 +77,6 @@ export default class ScheduledAnnouncement {
         }
     }
 
-    initNomination(date) {
-        if(this._nominationSchedule != null || typeof date == 'undefined') return false;
-
-        const _nominationDate = new Date(date);
-        if(_nominationDate > Date.now()) {
-            const cs = `0 ${_nominationDate.getHours()} ${_nominationDate.getDate()} ${_nominationDate.getMonth() + 1} *`;
-            cron.schedule(
-                cs,
-                async () => {
-                    await this._election.scrapeElection();
-                    await this._room.sendMessage(`**The [nomination phase](${this._election.url}?tab=nomination) is now open.** Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
-                },
-                { timezone: "Etc/UTC" }
-            );
-            console.log('CRON - nomination start - ', cs);
-            this._nominationSchedule = cs;
-        }
-    }
-
     initPrimary(date) {
         if(this._primarySchedule != null || typeof date == 'undefined') return false;
 
@@ -107,6 +93,25 @@ export default class ScheduledAnnouncement {
             );
             console.log('CRON - primary start    - ', cs);
             this._primarySchedule = cs;
+        }
+    }
+
+    initNomination(date) {
+        if(this._nominationSchedule != null || typeof date == 'undefined') return false;
+
+        const _nominationDate = new Date(date);
+        if(_nominationDate > Date.now()) {
+            const cs = `0 ${_nominationDate.getHours()} ${_nominationDate.getDate()} ${_nominationDate.getMonth() + 1} *`;
+            cron.schedule(
+                cs,
+                async () => {
+                    await this._election.scrapeElection();
+                    await this._room.sendMessage(`**The [nomination phase](${this._election.url}?tab=nomination) is now open.** Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
+                },
+                { timezone: "Etc/UTC" }
+            );
+            console.log('CRON - nomination start - ', cs);
+            this._nominationSchedule = cs;
         }
     }
 

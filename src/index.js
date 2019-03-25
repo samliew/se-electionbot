@@ -152,36 +152,44 @@ const main = async () => {
 
             if(content.includes('alive')) {
                 await msg.reply(`I'm alive on ${scriptHostname} with a throttle duration of ${throttleSecs}s.` + (debug ? ' I am in debug mode.' : ''));
-                return;
+                return; // no further action
             }
             else if(content.includes('test cron')) {
-                await msg.reply(`Setting up test cron job.`);
+                await msg.reply(`*setting up test cron job*`);
                 announcement.initTest();
             }
             else if(content.includes('cron')) {
                 await msg.reply('Currently scheduled announcements: `' + JSON.stringify(announcement.schedules) + '`');
             }
-            else if(content.includes('set timeout')) {
-                let num = content.match(/\d+$/);
-                num = num ? Number(num[0]) : 5; // defaulting to 5
-                await room.sendMessage(`*silenced for ${num} minutes*`);
-                lastMessageTime = Date.now() + (num * 60000) - (throttleSecs * 1000);
+            else if(content.includes('throttle')) {
+                let match = content.match(/\d+$/);
+                let num = num ? Number(num[0]) : null;
+                if(!isNaN(num)) {
+                    await msg.reply(`*throttle set to ${num} seconds*`);
+                    throttleSecs = num;
+                }
             }
             else if(content.includes('clear timeout')) {
                 await room.sendMessage(`*timeout cleared*`);
                 lastMessageTime = -1;
             }
+            else if(content.includes('timeout')) {
+                let num = content.match(/\d+$/);
+                num = num ? Number(num[0]) : null; // defaulting to 5
+                await room.sendMessage(`*silenced for ${num} minutes*`);
+                lastMessageTime = Date.now() + (num * 60000) - (throttleSecs * 1000);
+            }
             else if(content.includes('say') && content.split(' say ').length == 2) {
                 let c = origContent.split(' say ')[1];
                 await room.sendMessage(c);
-                return;
+                return; // no further action
             }
             else if(content.includes('shutdown')) {
-                await room.sendMessage(`*goodbye...*`);
-                process.exit(0);
+                await room.sendMessage(`*farewell...*`);
+                process.exit(0); // no further action
             }
             else if(content.includes('time')) {
-                await msg.reply(`UTC time: ${new Date().toISOString().replace('T', ' ').replace(/\.\d+/, '')} (election starts ${textToElection})`);
+                await msg.reply(`UTC time: ${new Date().toISOString().replace('T', ' ').replace(/\.\d+/, '')} (election phase starts ${textToElection})`);
             }
         }
         
@@ -204,15 +212,15 @@ const main = async () => {
                 responseText = `I'm ${me.name} and ${me.about}.`;
             }
             else if(['help', 'commands', 'faq', 'info', 'list'].some(x => content.includes(x))) {
-                responseText = '\n' + [
-                    'FAQ topics I can help with:', 'what are the moderation badges', 'what are the participation badges',
-                    'what are the editing badges', 'how is the candidate score calculated', 'how does the election work',
-                    'who are the candidates', 'how to nominate', 'how to vote', 'how to decide who to vote for', 
-                    'how many voted', 'election status', 'election schedule', 'who are the current moderators'].join('\n- ');
+                responseText = '\n' + ['FAQ topics I can help with:', 
+                    'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote', 'how to decide who to vote for', 
+                    'how many voted', 'who are the current moderators', 'election status', 'election schedule', 
+                    'how is candidate score calculated', 'moderation badges', 'participation badges', 'editing badges',
+                ].join('\n- ');
             }
             
             if(responseText != null) {
-                console.log(`RESPONSE `, responseText);
+                console.log('RESPONSE', responseText);
                 await msg.reply(responseText);
 
                 // Record last sent message time so we don't flood the room
@@ -236,22 +244,22 @@ const main = async () => {
 
             // Moderation badges
             else if(['what', 'mod', 'badges'].every(x => content.includes(x))) {
-                responseText = `The 8 moderation badges counting towards candidate score are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward`;
+                responseText = `The 8 moderation badges are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward. (1 point each to candidate score)`;
             }
 
             // Participation badges
             else if(['what', 'participation', 'badges'].every(x => content.includes(x))) {
-                responseText = `The 6 participation badges counting towards candidate score are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling`;
+                responseText = `The 6 participation badges are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling. (1 point each to candidate score)`;
             }
 
             // Editing badges
             else if(['what', 'editing', 'badges'].every(x => content.includes(x))) {
-                responseText = `The 6 editing badges counting towards candidate score are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White`;
+                responseText = `The 6 editing badges are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White. (1 point each to candidate score)`;
             }
 
             // Candidate score calculation
-            else if(['how', 'what'].some(x => content.includes(x)) && ['candidate score', 'score calculated'].some(x => content.includes(x))) {
-                responseText = `The [candidate score](https://meta.stackexchange.com/a/252643) is calculated as such: 1 point for each 1,000 reputation up to 20,000 reputation (maximum of 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges.`;
+            else if(['how', 'what'].some(x => content.includes(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
+                responseText = `The [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way:\n1 point for each 1,000 reputation up to 20,000 reputation (max 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges (total 20 points).`;
             }
 
             // Stats/How many voted/participated
@@ -260,14 +268,14 @@ const main = async () => {
             }
 
             // How to choose/pick/decide who to vote for
-            else if((content.includes('how') && ['choose', 'pick', 'decide'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
-                responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
+            else if((content.includes('how') && ['choose', 'pick', 'decide', 'deciding'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
+                responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q & A](${election.qnaUrl}).`;
                 if(election.phase == null) responseText = notStartedYet;
             }
 
             // Current mods
             else if(['who', 'current', 'mod'].every(x => content.includes(x))) {
-                responseText = `The current moderators can be found here: [${electionSite}/users?tab=moderators](${electionSite}/users?tab=moderators)`;
+                responseText = `The current moderators on ${election.sitename} can be found on this page: [${electionSite}/users?tab=moderators](${electionSite}/users?tab=moderators)`;
             }
 
             // How to nominate self/others
@@ -285,16 +293,16 @@ const main = async () => {
 
                 switch(election.phase) {
                     case 'election':
-                        responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.url}?tab=election). If you want to make an informed decision, you can also read the candidates' answers in the [election Q&A](${election.qnaUrl}).`;
+                        responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.url}?tab=election). If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).`;
                         break;
                     case 'primary':
-                        responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.url}?tab=primary). If you want to make an informed decision, you can also read the candidates' answers in the [election Q&A](${election.qnaUrl}). Don't forget to come back ${textToElection} to also vote in the actual election!`;
+                        responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.url}?tab=primary). If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}). Don't forget to come back ${textToElection} to also vote in the actual election phase!`;
                         break;
                     case 'nomination':
-                        responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.url}?tab=nomination), as well as read the candidates' [answers to your questions](${election.qnaUrl}).`;
+                        responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.url}?tab=nomination), as well as read the candidates' [answers to your questions](${election.qnaUrl}) to find out more.`;
                         break;
                     case 'ended':
-                        responseText = `The [moderator election](${election.url}) has ended. You can no longer vote.`;
+                        responseText = `The [election](${election.url}) has ended. You can no longer vote.`;
                         break;
                     default:
                         responseText = notStartedYet;
@@ -308,11 +316,11 @@ const main = async () => {
                     responseText = notStartedYet;
                 }
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The [moderator election](${election.url}) has ended. The winners are: ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
+                    responseText = `The [election](${election.url}) has ended. The winners are: ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
                 }
                  // Possible to have ended but no winners in cache yet? or will the cron job resolve this?
                 else if(election.phase === 'ended') {
-                    responseText = `The [moderator election](${election.url}) has ended.`;
+                    responseText = `The [election](${election.url}) has ended.`;
                 }
                 else {
                     responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. There are currently ${election.arrNominees.length} candidates.`;
@@ -329,17 +337,18 @@ const main = async () => {
             
             // Election schedule
             else if(content.includes('election schedule')) {
+                const arrow = ' **<---**';
                 responseText = [
                     `    Election Schedule -`,
-                    `    Nomination: ${election.dateNomination}` + (election.phase == 'nomination' ? ' <---':''),
-                    `    Primary:    ${election.datePrimary || '(none)'}` + (election.phase == 'primary' ? ' <---':''),
-                    `    Election:   ${election.dateElection}` + (election.phase == 'election' ? ' <---':''),
-                    `    End:        ${election.dateEnded}` + (election.phase == 'ended' ? ' <---':'')
+                    `    Nomination: ${election.dateNomination}` + (election.phase == 'nomination' ? arrow:''),
+                    `    Primary:    ${election.datePrimary || '(none)'}` + (election.phase == 'primary' ? arrow:''),
+                    `    Election:   ${election.dateElection}` + (election.phase == 'election' ? arrow:''),
+                    `    End:        ${election.dateEnded}` + (election.phase == 'ended' ? arrow:'')
                 ].join('\n');
             }
             
             if(responseText != null) {
-                console.log(`RESPONSE `, responseText);
+                console.log('RESPONSE', responseText);
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room
