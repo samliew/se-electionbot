@@ -20,6 +20,7 @@ const accountEmail = process.env.ACCOUNT_EMAIL;
 const accountPassword = process.env.ACCOUNT_PASSWORD;
 const electionSite = process.env.ELECTION_SITE;
 const electionNum = process.env.ELECTION_NUM;
+const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(v => Number(v));
 
 
 // App variables
@@ -43,7 +44,7 @@ const ignoredEventTypes = [
     15, // AccessLevelChanged
     16, // UserNotification
     17, // Invitation
-//  18, // MessageReply
+    18, // MessageReply
     19, // MessageMovedOut
     20, // MessageMovedIn
     21, // TimeBreak
@@ -126,8 +127,7 @@ const main = async () => {
         
         // Get details of user who triggered the message
         //const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
-
-        console.log('EVENT', resolvedMsg);
+        const user = resolvedMsg.userId == me.id ? me : new User(client, resolvedMsg.userId);
 
         // If message was too long, ignore (most likely FP)
         if(content.length > 120) {
@@ -135,6 +135,26 @@ const main = async () => {
             return;
         }
 
+        console.log('EVENT', resolvedMsg);
+
+        // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
+        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || await user.isModerator)) {
+
+            if(content.includes('alive')) {
+                msg.reply(`I'm alive on ${scriptHostname} with a throttle duration of ${throttleSecs}s.` + (debug ? ' I am in debug mode.' : ''));
+            }
+            else if(content.includes('cron')) {
+                msg.reply(`Currently scheduled announcements: ` + JSON.stringify(announcement.schedules));
+            }
+            else if(content.includes('shutdown')) {
+                msg.reply(`*shutting down...*`);
+                process.exit(0);
+            }
+
+            // Don't do anything else
+            return;
+        }
+        
         // If too close to previous message, ignore
         if(Date.now() < lastMessageTime + throttleSecs * 1000) {
             console.log('Throttling... (too close to previous message)');
@@ -150,15 +170,14 @@ const main = async () => {
             hoursToElection > 1 ? 'in ' + hoursToElection + ' hour' + pluralize(hoursToElection) :
             'soon';
 
-        // Mentioned bot (not replied to existing message, which is 18)
+        // Mentioned bot (8), not replied to existing message (18)
         // Needs a lower throttle rate to work well
-        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && throttleSecs <= 15) {
+        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && throttleSecs <= 10) {
             
             let responseText = null;
 
             if(content.includes('alive')) {
-                responseText = `I'm alive on ${scriptHostname}.` + 
-                    (debug ? ' I am in debug mode.' : '');
+                responseText = `I'm alive on ${scriptHostname}.`;
             }
             else if(content.includes('about')) {
                 responseText = `I'm ${me.name} and ${me.about}.`;
@@ -170,12 +189,9 @@ const main = async () => {
                     'who are the candidates', 'how to nominate', 'how to vote', 'how to decide who to vote for', 
                     'how many voted', 'election status', 'who are the current moderators'].join('\n- ');
             }
-            else if(content.includes('cron')) {
-                responseText = `Currently scheduled announcements: ` + JSON.stringify(announcement.schedules);
-            }
             
             if(responseText != null) {
-                console.log(responseText);
+                console.log(`RESPONSE `, responseText);
                 await msg.reply(responseText);
 
                 // Record last sent message time so we don't flood the room
@@ -183,7 +199,7 @@ const main = async () => {
             }
         }
 
-        // Any new message that does not reply-to or mention any user
+        // Any new message that does not reply-to or mention any user (1)
         else if (resolvedMsg.eventType === 1 && !resolvedMsg.targetUserId) {
             
             let responseText = null;
@@ -287,7 +303,7 @@ const main = async () => {
             }
             
             if(responseText != null) {
-                console.log(responseText);
+                console.log(`RESPONSE `, responseText);
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room

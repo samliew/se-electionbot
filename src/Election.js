@@ -1,3 +1,6 @@
+const request = require('request-promise');
+const cheerio = require('cheerio');
+
 export default class Election {
 
     constructor(electionUrl) {
@@ -7,28 +10,25 @@ export default class Election {
     async scrapeElection() {
         
         const electionPageUrl = `${this.electionUrl}?tab=nomination`;
-        console.log(`Attempting to fetch ${electionPageUrl}.`);
 
         try {
-            const request = require('request-promise');
             const html = await request({
                 gzip: true,
                 simple: false,
                 resolveWithFullResponse: false,
                 headers: {
-                    'User-Agent': 'Node.js/TestChatbot1',
+                    'User-Agent': 'Node.js/ElectionBot',
                 },
                 uri: electionPageUrl
             });
 
             // Parse election page
-            const cheerio = require('cheerio');
             const $ = cheerio.load(html);
 
             let electionPost = $('#mainbar .post-text .wiki-ph-content');
             let sidebarValues = $('#sidebar').find('.label-value').map((i, el) => $(el).attr('title') || $(el).text()).get();
 
-            // for elections with no primary phase
+            // Insert null value in second position for elections with no primary phase
             if(sidebarValues.length == 5) {
                 sidebarValues.splice(1, 0, null); 
             }
@@ -84,13 +84,12 @@ export default class Election {
                 let winners = winnerElem.find('a').map((i, el) => Number($(el).attr('href').split('/')[2])).get();
                 this.arrWinners = this.arrNominees.filter(v => winners.includes(v.userId));
             }
+
+            console.log(`Election page ${this.electionUrl} has been scraped successfully at ${this.updated}.`);
         }
         catch(err) {
-            console.error(`Error with request: ${this.electionUrl}`, err);
-            process.exit(1);
+            console.error(`Failed scraping ${this.electionUrl}`, err);
         }
-
-        console.log(`Election page ${this.electionUrl} has been scraped successfully at ${this.updated}.`);
     }
 
 }
