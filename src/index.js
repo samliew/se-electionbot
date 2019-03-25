@@ -170,6 +170,9 @@ const main = async () => {
                     'who are the candidates', 'how to nominate', 'how to vote', 'how to decide who to vote for', 
                     'how many voted', 'election status', 'who are the current moderators'].join('\n- ');
             }
+            else if(content.includes('cron')) {
+                responseText = `Currently scheduled announcements: ` + JSON.stringify(announcement.schedules);
+            }
             
             if(responseText != null) {
                 console.log(responseText);

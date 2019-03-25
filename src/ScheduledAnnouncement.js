@@ -7,14 +7,23 @@ export default class ScheduledAnnouncement {
         this._election = election;
     
         // Run the sub-functions once only
-        this._nominationInit = false;
-        this._primaryInit = false;
-        this._electionInit = false;
-        this._winnerInit = false;
+        this._nominationSchedule = null;
+        this._primarySchedule = null;
+        this._electionSchedule = null;
+        this._winnerSchedule = null;
     }
 
     get hasPrimary() {
-        return !this._primaryInit;
+        return !this._primarySchedule;
+    }
+
+    get schedules() {
+        return {
+            nomination: this._nominationSchedule,
+            primary: this._primarySchedule,
+            election: this._electionSchedule,
+            ended: this._winnerSchedule
+        }
     }
 
     setRoom(room) {
@@ -26,7 +35,7 @@ export default class ScheduledAnnouncement {
     }
     
     initWinner(date) {
-        if(this._winnerInit) return false;
+        if(this._winnerSchedule != null) return false;
 
         const _endedDate = new Date(date);
         if(_endedDate > Date.now()) {
@@ -40,12 +49,12 @@ export default class ScheduledAnnouncement {
                 { timezone: "Etc/UTC" }
             );
             console.log('CRON - election end     - ', cs);
-            this._winnerInit = true;
+            this._winnerSchedule = cs;
         }
     }
 
     initElection(date) {
-        if(this._electionInit || typeof date == 'undefined') return false;
+        if(this._electionSchedule != null || typeof date == 'undefined') return false;
 
         const _electionDate = new Date(date);
         if(_electionDate > Date.now()) {
@@ -59,12 +68,12 @@ export default class ScheduledAnnouncement {
                 { timezone: "Etc/UTC" }
             );
             console.log('CRON - election start   - ', cs);
-            this._electionInit = true;
+            this._electionSchedule = cs;
         }
     }
 
     initNomination(date) {
-        if(this._nominationInit || typeof date == 'undefined') return false;
+        if(this._nominationSchedule != null || typeof date == 'undefined') return false;
 
         const _nominationDate = new Date(date);
         if(_nominationDate > Date.now()) {
@@ -78,12 +87,12 @@ export default class ScheduledAnnouncement {
                 { timezone: "Etc/UTC" }
             );
             console.log('CRON - nomination start - ', cs);
-            this._nominationInit = true;
+            this._nominationSchedule = cs;
         }
     }
 
     initPrimary(date) {
-        if(this._primaryInit || typeof date == 'undefined') return false;
+        if(this._primarySchedule != null || typeof date == 'undefined') return false;
 
         const _primaryDate = new Date(date);
         if(_primaryDate > Date.now()) {
@@ -97,7 +106,7 @@ export default class ScheduledAnnouncement {
                 { timezone: "Etc/UTC" }
             );
             console.log('CRON - primary start    - ', cs);
-            this._primaryInit = true;
+            this._primarySchedule = cs;
         }
     }
 
