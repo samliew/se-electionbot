@@ -337,7 +337,7 @@ const main = async () => {
             
             // Election schedule
             else if(content.includes('election schedule')) {
-                const arrow = ' **<---**';
+                const arrow = ' <---';
                 responseText = [
                     `    Election Schedule -`,
                     `    Nomination: ${election.dateNomination}` + (election.phase == 'nomination' ? arrow:''),
