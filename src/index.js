@@ -163,10 +163,13 @@ const main = async () => {
             }
             else if(content.includes('throttle')) {
                 let match = content.match(/\d+$/);
-                let num = num ? Number(num[0]) : null;
-                if(!isNaN(num)) {
+                let num = match ? Number(match[0]) : null;
+                if(num != null && !isNaN(num) && num >= 0) {
                     await msg.reply(`*throttle set to ${num} seconds*`);
                     throttleSecs = num;
+                }
+                else {
+                    await msg.reply(`*invalid throttle value*`);
                 }
             }
             else if(content.includes('clear timeout')) {
@@ -175,7 +178,7 @@ const main = async () => {
             }
             else if(content.includes('timeout')) {
                 let num = content.match(/\d+$/);
-                num = num ? Number(num[0]) : null; // defaulting to 5
+                num = num ? Number(num[0]) : 5; // defaulting to 5
                 await room.sendMessage(`*silenced for ${num} minutes*`);
                 lastMessageTime = Date.now() + (num * 60000) - (throttleSecs * 1000);
             }
