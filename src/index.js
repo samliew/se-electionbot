@@ -245,7 +245,7 @@ const main = async () => {
             let responseText = null;
 
             // Current candidates
-            if(content.includes('who are') && ['nominees', 'candidate'].some(x => content.includes(x))) {
+            if(['who are', 'how many'].some(x => content.includes(x)) && ['nominees', 'candidate'].some(x => content.includes(x))) {
 
                 if(election.arrNominees.length > 0)
                     responseText = `There are currently **[${election.arrNominees.length} candidates](${election.url})**: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
