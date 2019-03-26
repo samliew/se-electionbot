@@ -434,7 +434,7 @@ const main = async () => {
             const newNominees = election.arrNominees.filter(v => prevIds.includes(v.userId == false));
 
             // Announce
-            newNominees.forEach(nominee => {
+            newNominees.forEach(async nominee => {
                 await room.sendMessage(`**We have a new election nomination!** Please welcome our latest candidate [${nominee.userName}](${electionSite + '/users/' + nominee.userId})!`);
             });
         }
