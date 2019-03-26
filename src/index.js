@@ -217,10 +217,10 @@ const main = async () => {
             let responseText = null;
 
             if(content.includes('alive')) {
-                responseText = `I'm alive on ${scriptHostname}.`;
+                responseText = `I'm alive on ${scriptHostname}`;
             }
             else if(content.includes('about')) {
-                responseText = `I'm ${me.name} and ${me.about}.`;
+                responseText = `I'm ${me.name} and ${me.about}`;
             }
             else if(['help', 'commands', 'faq', 'info', 'list'].some(x => content.includes(x))) {
                 responseText = '\n' + ['FAQ topics I can help with:', 
@@ -244,11 +244,11 @@ const main = async () => {
             
             let responseText = null;
 
-            // Moderation badges
+            // Current candidates
             if(content.includes('who are') && ['nominees', 'candidate'].some(x => content.includes(x))) {
 
                 if(election.arrNominees.length > 0)
-                    responseText = `Here are the current [candidates](${election.url}): ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
+                    responseText = `There are currently **[${election.arrNominees.length} candidates](${election.url})**: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
                 else
                     responseText = `There are no users who have nominated themselves yet.`;
             }
@@ -270,7 +270,7 @@ const main = async () => {
 
             // Candidate score calculation
             else if(['how', 'what'].some(x => content.includes(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
-                responseText = `The [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way:\n1 point for each 1,000 reputation up to 20,000 reputation (max 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges (total 20 points).`;
+                responseText = `The [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way:\n1 point for each 1,000 reputation up to 20,000 reputation (max 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges (total 20 points)`;
             }
 
             // Stats/How many voted/participated
@@ -280,7 +280,7 @@ const main = async () => {
 
             // How to choose/pick/decide who to vote for
             else if((content.includes('how') && ['choose', 'pick', 'decide', 'deciding'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
-                responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q & A](${election.qnaUrl}).`;
+                responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q & A](${election.qnaUrl})`;
                 if(election.phase == null) responseText = notStartedYet;
             }
 
