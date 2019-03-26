@@ -192,7 +192,7 @@ const main = async () => {
                 responseText = `UTC time: ${new Date().toISOString().replace('T', ' ').replace(/\.\d+/, '')} (election phase starts ${textToElection})`;
             }
             else if(content.includes('shutdown')) {
-                responseText = `*farewell...*`;
+                await room.sendMessage(`*farewell...*`);
                 process.exit(0); // no further action
             }
             
