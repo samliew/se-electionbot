@@ -248,7 +248,7 @@ const main = async () => {
             if(['who are', 'how many'].some(x => content.includes(x)) && ['nominees', 'candidate'].some(x => content.includes(x))) {
 
                 if(election.arrNominees.length > 0)
-                    responseText = `There are currently **[${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url})**: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
+                    responseText = `Currently, there ${election.arrNominees.length == 1 ? 'is' : 'are'} **[${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url})**: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
                 else
                     responseText = `There are no users who have nominated themselves yet.`;
             }
