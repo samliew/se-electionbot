@@ -11,7 +11,7 @@ export default class Election {
     }
 
     get prev() {
-        return _prevObj;
+        return this._prevObj;
     }
 
     async scrapeElection() {
