@@ -271,10 +271,29 @@ const main = async () => {
             // Current candidates
             if(['who are', 'who is', 'who has', 'how many'].some(x => content.includes(x)) && ['nominees', 'nominated', 'candidate'].some(x => content.includes(x))) {
 
-                if(election.arrNominees.length > 0)
-                    responseText = `Currently, there ${election.arrNominees.length == 1 ? 'is' : 'are'} **[${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url})**: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
-                else
+                if(election.arrNominees.length > 0) {
+
+                    responseText = `Currently, there ${election.arrNominees.length == 1 ? 'is' : 'are'} **[${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url})**: `;
+
+                    // If there are more than 7 candidates, split into two messages otherwise we hit the 500-char limit
+                    if(election.arrNominees.length <= 7) {
+                        responseText += election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ');
+                    }
+                    else {
+                        let arrTemp = election.arrNominees;
+                        responseText += arrTemp.slice(0, 7).map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ') + ', ';
+
+                        // Send first message
+                        console.log('RESPONSE', responseText);
+                        await room.sendMessage(responseText);
+
+                        // Set second message
+                        responseText += arrTemp.slice(7).map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ');
+                    }
+                }
+                else {
                     responseText = `There are no users who have nominated themselves yet.`;
+                }
             }
 
             // Moderation badges
