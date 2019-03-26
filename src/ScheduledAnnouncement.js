@@ -48,7 +48,7 @@ export default class ScheduledAnnouncement {
 
                     // Congratulate the winners
                     if(this._election.arrWinners.length > 0) {
-                        await this._room.sendMessage(`Congratulations to the winners ${this._election.arrWinners.map(v => `[${v.userName}](${this._election.siteUrl + '/users/' + v.userId})`).join(', ')}!`);
+                        await this._room.sendMessage(`Congratulations to the winner${this._election.arrWinners.length == 1 ? '' : 's'} ${this._election.arrWinners.map(v => `[${v.userName}](${this._election.siteUrl + '/users/' + v.userId})`).join(', ')}!`);
                     }
                 },
                 { timezone: "Etc/UTC" }

@@ -248,7 +248,7 @@ const main = async () => {
             if(['who are', 'how many'].some(x => content.includes(x)) && ['nominees', 'candidate'].some(x => content.includes(x))) {
 
                 if(election.arrNominees.length > 0)
-                    responseText = `There are currently **[${election.arrNominees.length} candidates](${election.url})**: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
+                    responseText = `There are currently **[${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url})**: ${election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}`;
                 else
                     responseText = `There are no users who have nominated themselves yet.`;
             }
@@ -327,7 +327,7 @@ const main = async () => {
                     responseText = notStartedYet;
                 }
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The [election](${election.url}) has ended. The winners are: ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
+                    responseText = `The [election](${election.url}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
                 }
                  // Possible to have ended but no winners in cache yet? or will the cron job resolve this?
                 else if(election.phase === 'ended') {
