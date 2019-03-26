@@ -12,7 +12,9 @@ if (process.env.NODE_ENV !== 'production') {
 // Environment variables
 const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
 const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
-const throttleSecs = debug ? 5 : Number(process.env.THROTTLE_SECS) || 10; // to stop bot from replying to too many messages in a short time, unless in debug
+
+// to stop bot from replying to too many messages in a short time, unless in debug
+let throttleSecs = debug ? 3 : Number(process.env.THROTTLE_SECS) || 10;
 
 const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
