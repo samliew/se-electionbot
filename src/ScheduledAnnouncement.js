@@ -11,6 +11,12 @@ export default class ScheduledAnnouncement {
         this._primarySchedule = null;
         this._electionSchedule = null;
         this._winnerSchedule = null;
+        
+        // Store task so we can stop if needed
+        this._nominationTask = null;
+        this._primaryTask = null;
+        this._electionTask = null;
+        this._winnerTask = null;
     }
 
     get hasPrimary() {
@@ -35,12 +41,12 @@ export default class ScheduledAnnouncement {
     }
     
     initWinner(date) {
-        if(this._winnerSchedule != null) return false;
+        if(this._winnerSchedule != null || this._winnerTask != null) return false;
 
         const _endedDate = new Date(date);
         if(_endedDate > Date.now()) {
             const cs = `0 ${_endedDate.getHours()} ${_endedDate.getDate()} ${_endedDate.getMonth() + 1} *`;
-            cron.schedule(
+            this._winnerTask = cron.schedule(
                 cs,
                 async () => {
                     await this._election.scrapeElection();
@@ -59,12 +65,12 @@ export default class ScheduledAnnouncement {
     }
 
     initElection(date) {
-        if(this._electionSchedule != null || typeof date == 'undefined') return false;
+        if(this._electionSchedule != null || this._electionTask != null || typeof date == 'undefined') return false;
 
         const _electionDate = new Date(date);
         if(_electionDate > Date.now()) {
             const cs = `0 ${_electionDate.getHours()} ${_electionDate.getDate()} ${_electionDate.getMonth() + 1} *`;
-            cron.schedule(
+            this._electionTask = cron.schedule(
                 cs,
                 async () => {
                     await this._election.scrapeElection();
@@ -78,12 +84,12 @@ export default class ScheduledAnnouncement {
     }
 
     initPrimary(date) {
-        if(this._primarySchedule != null || typeof date == 'undefined') return false;
+        if(this._primarySchedule != null || this._primaryTask != null || typeof date == 'undefined') return false;
 
         const _primaryDate = new Date(date);
         if(_primaryDate > Date.now()) {
             const cs = `0 ${_primaryDate.getHours()} ${_primaryDate.getDate()} ${_primaryDate.getMonth() + 1} *`;
-            cron.schedule(
+            this._primaryTask = cron.schedule(
                 cs,
                 async () => {
                     await this._election.scrapeElection();
@@ -97,12 +103,12 @@ export default class ScheduledAnnouncement {
     }
 
     initNomination(date) {
-        if(this._nominationSchedule != null || typeof date == 'undefined') return false;
+        if(this._nominationSchedule != null || this._nominationTask != null || typeof date == 'undefined') return false;
 
         const _nominationDate = new Date(date);
         if(_nominationDate > Date.now()) {
             const cs = `0 ${_nominationDate.getHours()} ${_nominationDate.getDate()} ${_nominationDate.getMonth() + 1} *`;
-            cron.schedule(
+            this._nominationTask = cron.schedule(
                 cs,
                 async () => {
                     await this._election.scrapeElection();
@@ -137,5 +143,17 @@ export default class ScheduledAnnouncement {
         this.initPrimary(this._election.datePrimary);
         this.initElection(this._election.dateElection);
         this.initWinner(this._election.dateEnded);
+    }
+
+    cancelAll() {
+        if(this._nominationTask == null) this._nominationTask.stop();
+        if(this._primaryTask == null) this._primaryTask.stop();
+        if(this._electionTask == null) this._electionTask.stop();
+        if(this._winnerTask == null) this._winnerTask.stop();
+        
+        this._nominationSchedule = null;
+        this._primarySchedule = null;
+        this._electionSchedule = null;
+        this._winnerSchedule = null;
     }
 }

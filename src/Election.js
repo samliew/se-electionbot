@@ -5,9 +5,19 @@ export default class Election {
 
     constructor(electionUrl) {
         this.electionUrl = electionUrl;
+
+        // private
+        this._prevObj = null;
+    }
+
+    get prev() {
+        return _prevObj;
     }
 
     async scrapeElection() {
+
+        // Save prev values so we can compare changes after
+        this._prevObj = this;
         
         const electionPageUrl = `${this.electionUrl}?tab=nomination`;
 
@@ -69,21 +79,30 @@ export default class Election {
                 new Date(this.dateNomination) <= now ? 'nomination' : 
                 null;
 
-            // If election has ended,
+            // If election has ended (or cancelled)
             if(this.phase === 'ended') {
 
                 // Get results URL
                 this.resultsUrl = $('#mainbar').find('.question-status h2').first().find('a').first().attr('href');
                 
-                // Get election stats
+                // Election cancelled??
                 let winnerElem = $('#mainbar').find('.question-status h2').eq(1);
-                this.statVoters = winnerElem.contents().map(function() {
-                    if(this.type === 'text') return this.data.trim();
-                }).get().join(' ').trim();
-
-                // Get winners
-                let winners = winnerElem.find('a').map((i, el) => Number($(el).attr('href').split('/')[2])).get();
-                this.arrWinners = this.arrNominees.filter(v => winners.includes(v.userId));
+                if(winnerElem.text().includes('cancelled')) {
+                    this.phase = 'cancelled';
+                    this.statVoters = winnerElem.html()
+                        .replace(/<a href="/g, 'See [meta](')
+                        .replace(/">.+/g, ') for details.').trim();
+                }
+                else {
+                    // Get election stats
+                    this.statVoters = winnerElem.contents().map(function() {
+                        if(this.type === 'text') return this.data.trim();
+                    }).get().join(' ').trim();
+                    
+                    // Get winners
+                    let winners = winnerElem.find('a').map((i, el) => Number($(el).attr('href').split('/')[2])).get();
+                    this.arrWinners = this.arrNominees.filter(v => winners.includes(v.userId));
+                }
             }
 
             console.log(`Election page ${this.electionUrl} has been scraped successfully at ${this.updated}.`);

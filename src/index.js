@@ -54,7 +54,9 @@ const ignoredEventTypes = [
     34, // UserNameOrAvatarChanged
     7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
 ];
+let rescrapeInterval = null;
 let election = null;
+let room = null;
 
 
 // Helper functions
@@ -80,6 +82,23 @@ const pluralize = n => n !== 1 ? 's' : '';
 })();
 
 
+// Election cancelled
+async function announceCancelled() {
+
+    // Stop all cron jobs
+    announcement.cancelAll();
+
+    // Stop scraper
+    if(rescrapeInterval) {
+        clearInterval(rescrapeInterval);
+        rescrapeInterval = null;
+    }
+
+    // Announce
+    await room.sendMessage(election.statVoters);
+}
+
+
 const main = async () => {
 
     // Wait for election page to be scraped
@@ -98,7 +117,7 @@ const main = async () => {
     console.log(`Logged in to ${chatDomain} as ${me.name} (${me.id})`);
     
     // Join room
-    const room = await client.joinRoom(chatRoomId);
+    room = await client.joinRoom(chatRoomId);
 
     // Variable to store last message for throttling
     let lastMessageTime = -1;
@@ -315,6 +334,9 @@ const main = async () => {
                     case 'ended':
                         responseText = `The [election](${election.url}) has ended. You can no longer vote.`;
                         break;
+                    case 'cancelled':
+                        responseText = election.statVoters;
+                        break;
                     default:
                         responseText = notStartedYet;
                 }
@@ -329,9 +351,12 @@ const main = async () => {
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
                     responseText = `The [election](${election.url}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
                 }
-                 // Possible to have ended but no winners in cache yet? or will the cron job resolve this?
+                // Possible to have ended but no winners in cache yet? or will the cron job resolve this?
                 else if(election.phase === 'ended') {
                     responseText = `The [election](${election.url}) has ended.`;
+                }
+                else if(election.phase === 'cancelled') {
+                    responseText = election.statVoters;
                 }
                 else {
                     responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. There are currently ${election.arrNominees.length} candidates.`;
@@ -373,7 +398,7 @@ const main = async () => {
     await room.watch();
     console.log(`Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}`);
 
-        
+
     // Set cron jobs to announce the different phases
     announcement.setRoom(room);
     announcement.setElection(election);
@@ -381,13 +406,18 @@ const main = async () => {
 
 
     // Interval to re-scrape election data
-    setInterval(async function() {
+    rescrapeInterval = setInterval(async function() {
         await election.scrapeElection();
         announcement.setElection(election);
         
         // previously had no primary, but after re-scraping there is one
         if (!announcement.hasPrimary && election.datePrimary != null) {
             announcement.initPrimary(election.datePrimary);
+        }
+        
+        // after re-scraping the election date changed - possible cancellation??
+        if (election.phase == 'cancelled') {
+            announceCancelled();
         }
 
     }, 10 * 60000, ); // every 10 minutes
