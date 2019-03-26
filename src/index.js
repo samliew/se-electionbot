@@ -435,7 +435,7 @@ const main = async () => {
 
             // Announce
             newNominees.forEach(async nominee => {
-                await room.sendMessage(`**We have a new election nomination!** Please welcome our latest candidate [${nominee.userName}](${electionSite + '/users/' + nominee.userId})!`);
+                await room.sendMessage(`**We have a new [nomination](${election.url}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${electionSite + '/users/' + nominee.userId})!`);
             });
         }
 
