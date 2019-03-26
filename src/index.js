@@ -82,7 +82,6 @@ const scriptInitDate = new Date();
 if(debug) console.error('WARN: Debug mode is on.');
 
 
-
 // Election cancelled
 async function announceCancelled() {
 
@@ -100,6 +99,7 @@ async function announceCancelled() {
 }
 
 
+// Main fn
 const main = async () => {
 
     // Wait for election page to be scraped
@@ -420,9 +420,23 @@ const main = async () => {
             announcement.initPrimary(election.datePrimary);
         }
         
-        // after re-scraping the election date changed - possible cancellation??
+        // after re-scraping the election was cancelled
         if (election.phase == 'cancelled') {
             announceCancelled();
+            return;
+        }
+        
+        // new nominations?
+        if (election.phase == 'nomination' && election.arrNominees.length !== election.prev.arrNominees.length) {
+            
+            // get diff between the arrays
+            const prevIds = election.prev.arrNominees.map(v => v.userId);
+            const newNominees = election.arrNominees.filter(v => prevIds.includes(v.userId == false));
+
+            // Announce
+            newNominees.forEach(nominee => {
+                await room.sendMessage(`**We have a new election nomination!** Please welcome our latest candidate [${nominee.userName}](${electionSite + '/users/' + nominee.userId})!`);
+            });
         }
 
     }, 10 * 60000, ); // every 10 minutes

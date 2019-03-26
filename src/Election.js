@@ -85,14 +85,18 @@ export default class Election {
                 // Get results URL
                 this.resultsUrl = $('#mainbar').find('.question-status h2').first().find('a').first().attr('href');
                 
-                // Election cancelled??
                 let winnerElem = $('#mainbar').find('.question-status h2').eq(1);
+
+                // Election cancelled?
                 if(winnerElem.text().includes('cancelled')) {
                     this.phase = 'cancelled';
+                    
+                    // convert link to chat-friendly markup
                     this.statVoters = winnerElem.html()
                         .replace(/<a href="/g, 'See [meta](')
                         .replace(/">.+/g, ') for details.').trim();
                 }
+                // Election ended
                 else {
                     // Get election stats
                     this.statVoters = winnerElem.contents().map(function() {
