@@ -24,5 +24,13 @@ module.exports = {
                 console.error(">> keep-alive error! " + err.message);
             });
         }, mins * 60000); // every 20 minutes
+    },
+
+    dateToTimestamp: function(date)
+    {
+        if(typeof date === 'number') date = new Date(date); // from int
+        if(typeof date !== 'object') date = new Date(); // invalid, default to now
+
+        return date.toISOString().replace('T', ' ').replace(/\.\d+/, '');
     }
 }

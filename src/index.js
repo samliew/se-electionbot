@@ -2,6 +2,7 @@ import Client from 'chatexchange';
 const Election = require('./Election').default;
 const entities = new (require('html-entities').AllHtmlEntities);
 const announcement = new (require('./ScheduledAnnouncement').default);
+const utils = require('./utils');
 
 // If running locally, load env vars from .env file
 if (process.env.NODE_ENV !== 'production') {
@@ -77,9 +78,9 @@ const pluralize = n => n !== 1 ? 's' : '';
 
 
 // App setup
-(function() {
-    if(debug) console.error('WARN: Debug mode is on.');
-})();
+const scriptInitDate = new Date();
+if(debug) console.error('WARN: Debug mode is on.');
+
 
 
 // Election cancelled
@@ -177,7 +178,8 @@ const main = async () => {
                 responseText = origContent.split(' say ')[1];
             }
             else if(content.includes('alive')) {
-                responseText = `I'm alive on ${scriptHostname} with a throttle duration of ${throttleSecs}s.` + (debug ? ' I am in debug mode.' : '');
+                responseText = `I'm alive on ${scriptHostname}, started on ${utils.dateToTimestamp(scriptInitDate)} with an uptime of ${Math.floor(Date.now() - scriptInitDate.getTime()) / 1000} seconds.` + 
+                    (debug ? ' I am in debug mode.' : '');
             }
             else if(content.includes('test cron')) {
                 responseText = `*setting up test cron job*`;
@@ -186,7 +188,7 @@ const main = async () => {
             else if(content.includes('cron')) {
                 responseText = 'Currently scheduled announcements: `' + JSON.stringify(announcement.schedules) + '`';
             }
-            else if(content.includes('throttle')) {
+            else if(content.includes('set throttle')) {
                 let match = content.match(/\d+$/);
                 let num = match ? Number(match[0]) : null;
                 if(num != null && !isNaN(num) && num >= 0) {
@@ -196,6 +198,9 @@ const main = async () => {
                 else {
                     responseText = `*invalid throttle value*`;
                 }
+            }
+            else if(content.includes('throttle')) {
+                responseText = `Reply throttle is currently ${num} seconds`;
             }
             else if(content.includes('clear timeout')) {
                 responseText = `*timeout cleared*`;
@@ -208,7 +213,7 @@ const main = async () => {
                 lastMessageTime = Date.now() + (num * 60000) - (throttleSecs * 1000);
             }
             else if(content.includes('time')) {
-                responseText = `UTC time: ${new Date().toISOString().replace('T', ' ').replace(/\.\d+/, '')} (election phase starts ${textToElection})`;
+                responseText = `UTC time: ${utils.dateToTimestamp()} (election phase starts ${textToElection})`;
             }
             else if(content.includes('shutdown')) {
                 await room.sendMessage(`*farewell...*`);
@@ -429,8 +434,6 @@ main();
 
 // If running on Heroku
 if (scriptHostname.includes('herokuapp.com')) {
-
-    const utils = require('./utils');
 
     // Heroku requires binding/listening to the port otherwise it will shutdown
     utils.staticServer();
