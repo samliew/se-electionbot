@@ -178,7 +178,7 @@ const main = async () => {
                 responseText = origContent.split(' say ')[1];
             }
             else if(content.includes('alive')) {
-                responseText = `I'm alive on ${scriptHostname}, started on ${utils.dateToTimestamp(scriptInitDate)} with an uptime of ${Math.floor(Date.now() - scriptInitDate.getTime()) / 1000} seconds.` + 
+                responseText = `I'm alive on ${scriptHostname}, started on ${utils.dateToTimestamp(scriptInitDate)} with an uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1000)} seconds.` + 
                     (debug ? ' I am in debug mode.' : '');
             }
             else if(content.includes('test cron')) {
