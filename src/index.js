@@ -390,6 +390,10 @@ main();
 if (scriptHostname.includes('herokuapp.com')) {
 
     const utils = require('./utils');
+
+    // Heroku requires binding/listening to the port otherwise it will shutdown
     utils.staticServer();
-    utils.keepAlive();
+
+    // Heroku free dyno will shutdown when idle for 30 mins, so keep-alive is necessary
+    utils.keepAlive(scriptHostname, 20);
 }

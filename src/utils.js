@@ -16,13 +16,13 @@ module.exports = {
         });
     },
 
-    keepAlive: function(scriptHostname) 
+    keepAlive: function(url, mins = 20) 
     {
-        
+        // Fetch endpoint to prevent server from idling
         setInterval(function() {
-            https.get(scriptHostname).on('error', function(err) {
+            https.get(url).on('error', function(err) {
                 console.error(">> keep-alive error! " + err.message);
             });
-        }, 20 * 60000); // every 20 minutes
+        }, mins * 60000); // every 20 minutes
     }
 }
