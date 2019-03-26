@@ -288,7 +288,7 @@ const main = async () => {
                         await room.sendMessage(responseText);
 
                         // Set second message
-                        responseText += arrTemp.slice(7).map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ');
+                        responseText = arrTemp.slice(7).map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ');
                     }
                 }
                 else {
