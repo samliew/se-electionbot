@@ -151,50 +151,56 @@ const main = async () => {
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
+            
+            let responseText = null;
 
-            if(content.includes('alive')) {
-                await msg.reply(`I'm alive on ${scriptHostname} with a throttle duration of ${throttleSecs}s.` + (debug ? ' I am in debug mode.' : ''));
-                return; // no further action
+            if(content.includes('say') && content.split(' say ').length == 2) {
+                responseText = origContent.split(' say ')[1];
+            }
+            else if(content.includes('alive')) {
+                responseText = `I'm alive on ${scriptHostname} with a throttle duration of ${throttleSecs}s.` + (debug ? ' I am in debug mode.' : '');
             }
             else if(content.includes('test cron')) {
-                await msg.reply(`*setting up test cron job*`);
+                responseText = `*setting up test cron job*`;
                 announcement.initTest();
             }
             else if(content.includes('cron')) {
-                await msg.reply('Currently scheduled announcements: `' + JSON.stringify(announcement.schedules) + '`');
+                responseText = 'Currently scheduled announcements: `' + JSON.stringify(announcement.schedules) + '`';
             }
             else if(content.includes('throttle')) {
                 let match = content.match(/\d+$/);
                 let num = match ? Number(match[0]) : null;
                 if(num != null && !isNaN(num) && num >= 0) {
-                    await msg.reply(`*throttle set to ${num} seconds*`);
+                    responseText = `*throttle set to ${num} seconds*`;
                     throttleSecs = num;
                 }
                 else {
-                    await msg.reply(`*invalid throttle value*`);
+                    responseText = `*invalid throttle value*`;
                 }
             }
             else if(content.includes('clear timeout')) {
-                await room.sendMessage(`*timeout cleared*`);
+                responseText = `*timeout cleared*`;
                 lastMessageTime = -1;
             }
             else if(content.includes('timeout')) {
                 let num = content.match(/\d+$/);
                 num = num ? Number(num[0]) : 5; // defaulting to 5
-                await room.sendMessage(`*silenced for ${num} minutes*`);
+                responseText = `*silenced for ${num} minutes*`;
                 lastMessageTime = Date.now() + (num * 60000) - (throttleSecs * 1000);
             }
-            else if(content.includes('say') && content.split(' say ').length == 2) {
-                let c = origContent.split(' say ')[1];
-                await room.sendMessage(c);
-                return; // no further action
+            else if(content.includes('time')) {
+                responseText = `UTC time: ${new Date().toISOString().replace('T', ' ').replace(/\.\d+/, '')} (election phase starts ${textToElection})`;
             }
             else if(content.includes('shutdown')) {
-                await room.sendMessage(`*farewell...*`);
+                responseText = `*farewell...*`;
                 process.exit(0); // no further action
             }
-            else if(content.includes('time')) {
-                await msg.reply(`UTC time: ${new Date().toISOString().replace('T', ' ').replace(/\.\d+/, '')} (election phase starts ${textToElection})`);
+            
+            if(responseText != null) {
+                console.log('RESPONSE', responseText);
+                await room.sendMessage(responseText);
+
+                return; // no further action
             }
         }
         
