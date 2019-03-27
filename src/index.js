@@ -433,6 +433,13 @@ const main = async () => {
     rescrapeInterval = setInterval(async function() {
         await election.scrapeElection();
         announcement.setElection(election);
+
+        if(debug) {
+            
+            // Log prev and current scraped info
+            console.log('PREVIOUS:', election.prev.updated, election.prev);
+            console.log('CURRENT :', election.updated, election);
+        }
         
         // previously had no primary, but after re-scraping there is one
         if (!announcement.hasPrimary && election.datePrimary != null) {
