@@ -17,7 +17,8 @@ export default class Election {
     async scrapeElection() {
 
         // Save prev values so we can compare changes after
-        this._prevObj = this;
+        this._prevObj = Object.assign({}, this); // fast way of cloning an object
+        this._prevObj._prevObj = null;
         
         const electionPageUrl = `${this.electionUrl}?tab=nomination`;
 
