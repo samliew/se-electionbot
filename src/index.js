@@ -435,7 +435,6 @@ const main = async () => {
         announcement.setElection(election);
 
         if(debug) {
-            
             // Log prev and current scraped info
             console.log('PREVIOUS:', election.prev.updated, election.prev);
             console.log('CURRENT :', election.updated, election);
@@ -447,13 +446,13 @@ const main = async () => {
         }
         
         // after re-scraping the election was cancelled
-        if (election.phase == 'cancelled') {
+        if (typeof election.prev !== 'undefined' && election.prev.phase !== 'cancelled' && election.phase === 'cancelled') {
             announceCancelled();
             return;
         }
         
         // new nominations?
-        if (election.phase == 'nomination' && election.arrNominees.length !== election.prev.arrNominees.length) {
+        if (election.phase == 'nomination' && typeof election.prev !== 'undefined' && election.arrNominees.length !== election.prev.arrNominees.length) {
             
             // get diff between the arrays
             const prevIds = election.prev.arrNominees.map(v => v.userId);
@@ -465,7 +464,7 @@ const main = async () => {
             });
         }
 
-    }, 10 * 60000, ); // every 10 minutes
+    }, (debug ? 5 : 10) * 60000, ); // every 10 minutes (debug - 5 minutes)
 
 
 } // End main fn
