@@ -16,6 +16,7 @@ const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive pin
 
 // to stop bot from replying to too many messages in a short time, unless in debug
 let throttleSecs = debug ? 3 : Number(process.env.THROTTLE_SECS) || 10;
+if(throttleSecs < 3) throttleSecs = 3; // min of 3 seconds
 
 const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
@@ -106,7 +107,6 @@ const main = async () => {
     // Wait for election page to be scraped
     const election = new Election(electionUrl);
     await election.scrapeElection();
-    console.log(`INIT - The election is currently in the "${election.phase}" phase.`);
 
     // Login to site
     const client = new Client(chatDomain);
@@ -155,7 +155,7 @@ const main = async () => {
 
         // If message was too long, ignore (most likely FP)
         if(content.length > 120) {
-            console.log('EVENT - Ignoring due to message length...', resolvedMsg.content);
+            console.log('EVENT - Ignoring due to message length:', resolvedMsg.content);
             return;
         }
 
@@ -422,7 +422,7 @@ const main = async () => {
 
     // Connect to the room, and listen for new events
     await room.watch();
-    console.log(`INIT - Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}`);
+    console.log(`INIT - Joined and listening in room https://chat.${chatDomain}/rooms/${chatRoomId}`);
 
 
     // Set cron jobs to announce the different phases
