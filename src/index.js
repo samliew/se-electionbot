@@ -383,10 +383,11 @@ const main = async () => {
                     responseText = election.statVoters;
                 }
                 else {
-                    responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. There are currently ${election.arrNominees.length} candidates.`;
+                    responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. `;
 
-                    if(election.phase === 'primary') responseText += ` You may freely cast up/down votes on the candidates' nominations, and come back ${textToElection} to vote in the actual election.`;
-                    else if(election.phase === 'election') responseText += ` You may now cast your election ballot in order of your top three preferred candidates.`;
+                    if(election.phase === 'nomination') responseText += `There are currently ${election.arrNominees.length} candidates.`;
+                    else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${textToElection} to vote in the actual election.`;
+                    else if(election.phase === 'election') responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
                 }
             }
 
