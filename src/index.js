@@ -79,7 +79,7 @@ const pluralize = n => n !== 1 ? 's' : '';
 
 // App setup
 const scriptInitDate = new Date();
-if(debug) console.error('WARN: Debug mode is on.');
+if(debug) console.error('WARN - Debug mode is on.');
 
 
 // Election cancelled
@@ -105,7 +105,7 @@ const main = async () => {
     // Wait for election page to be scraped
     const election = new Election(electionUrl);
     await election.scrapeElection();
-    console.log(`The election is currently in the "${election.phase}" phase.`);
+    console.log(`INIT - The election is currently in the "${election.phase}" phase.`);
 
     // Login to site
     const client = new Client(chatDomain);
@@ -115,7 +115,7 @@ const main = async () => {
     const _me = await client.getMe();
     const me = await client._browser.getProfile(_me.id);
     me.id = _me.id; // because getProfile() doesn't return id
-    console.log(`Logged in to ${chatDomain} as ${me.name} (${me.id})`);
+    console.log(`INIT - Logged in to ${chatDomain} as ${me.name} (${me.id})`);
     
     // Join room
     room = await client.joinRoom(chatRoomId);
@@ -154,7 +154,7 @@ const main = async () => {
 
         // If message was too long, ignore (most likely FP)
         if(content.length > 120) {
-            console.log('Ignoring due to message length...');
+            console.log('EVENT - Ignoring due to message length...', resolvedMsg.content);
             return;
         }
 
@@ -230,7 +230,7 @@ const main = async () => {
         
         // If too close to previous message, ignore
         if(Date.now() < lastMessageTime + throttleSecs * 1000) {
-            console.log('Throttling... (too close to previous message)');
+            console.log('THROTTLE - too close to previous message');
             return;
         }
 
@@ -421,7 +421,7 @@ const main = async () => {
 
     // Connect to the room, and listen for new events
     await room.watch();
-    console.log(`Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}`);
+    console.log(`INIT - Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}`);
 
 
     // Set cron jobs to announce the different phases
@@ -437,8 +437,7 @@ const main = async () => {
 
         if(debug) {
             // Log prev and current scraped info
-            console.log('PREVIOUS:', election.prev.updated, election.prev);
-            console.log('CURRENT :', election.updated, election);
+            console.log('SCRAPE', election.updated, election);
         }
         
         // previously had no primary, but after re-scraping there is one
