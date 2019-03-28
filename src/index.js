@@ -452,15 +452,15 @@ const main = async () => {
         }
         
         // new nominations?
-        if (election.phase == 'nomination' && typeof election.prev !== 'undefined' && election.arrNominees.length !== election.prev.arrNominees.length) {
+        if (election.phase == 'nomination' && typeof election.prev === 'object' && election.arrNominees.length !== election.prev.arrNominees.length) {
             
             // get diff between the arrays
             const prevIds = election.prev.arrNominees.map(v => v.userId);
-            const newNominees = election.arrNominees.filter(v => prevIds.includes(v.userId == false));
+            const newNominees = election.arrNominees.filter(v => !prevIds.includes(v.userId));
 
             // Announce
             newNominees.forEach(async nominee => {
-                await room.sendMessage(`**We have a new [nomination](${election.url}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${electionSite + '/users/' + nominee.userId})!`);
+                await room.sendMessage(`**We have a new [nomination](${election.url}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${nominee.permalink})!`);
                 console.log(`NOMINATION`, nominee);
             });
         }
