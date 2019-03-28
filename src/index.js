@@ -24,6 +24,7 @@ const accountPassword = process.env.ACCOUNT_PASSWORD;
 const electionSite = process.env.ELECTION_SITE;
 const electionNum = process.env.ELECTION_NUM;
 const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(v => Number(v));
+const scrapeInterval = debug ? 3 : 5;
 
 
 // App variables
@@ -465,7 +466,7 @@ const main = async () => {
             });
         }
 
-    }, (debug ? 5 : 10) * 60000, ); // every 10 minutes (debug - 5 minutes)
+    }, scrapeInterval * 60000, );
 
 
 } // End main fn
