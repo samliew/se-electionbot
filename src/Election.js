@@ -111,7 +111,7 @@ export default class Election {
                 }
             }
 
-            console.log(`SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${this.updated}.\nPHASE ${this.phase} | CANDIDATES \n`, this.arrNominees);
+            console.log(`SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${this.updated}.\nPHASE ${this.phase} | CANDIDATES ${this.arrNominees.length}, prev ${this.prev.arrNominees.length}`);
         }
         catch(err) {
             console.error(`SCRAPE - Failed scraping ${this.electionUrl}`, err);
