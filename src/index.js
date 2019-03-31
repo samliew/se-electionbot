@@ -16,6 +16,7 @@ const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive pin
 
 // to stop bot from replying to too many messages in a short time, unless in debug
 let throttleSecs = debug ? 3 : Number(process.env.THROTTLE_SECS) || 10;
+if(throttleSecs < 3) throttleSecs = 3; // min of 3 seconds
 
 const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
@@ -24,6 +25,7 @@ const accountPassword = process.env.ACCOUNT_PASSWORD;
 const electionSite = process.env.ELECTION_SITE;
 const electionNum = process.env.ELECTION_NUM;
 const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(v => Number(v));
+const scrapeInterval = debug ? 3 : 5;
 
 
 // App variables
@@ -105,7 +107,6 @@ const main = async () => {
     // Wait for election page to be scraped
     const election = new Election(electionUrl);
     await election.scrapeElection();
-    console.log(`INIT - The election is currently in the "${election.phase}" phase.`);
 
     // Login to site
     const client = new Client(chatDomain);
@@ -154,7 +155,7 @@ const main = async () => {
 
         // If message was too long, ignore (most likely FP)
         if(content.length > 120) {
-            console.log('EVENT - Ignoring due to message length...', resolvedMsg.content);
+            console.log('EVENT - Ignoring due to message length:', resolvedMsg.content);
             return;
         }
 
@@ -441,7 +442,7 @@ const main = async () => {
 
     // Connect to the room, and listen for new events
     await room.watch();
-    console.log(`INIT - Initialized and standing by in room https://chat.${chatDomain}/rooms/${chatRoomId}`);
+    console.log(`INIT - Joined and listening in room https://chat.${chatDomain}/rooms/${chatRoomId}`);
 
 
     // Set cron jobs to announce the different phases
@@ -472,20 +473,20 @@ const main = async () => {
         }
         
         // new nominations?
-        if (election.phase == 'nomination' && typeof election.prev !== 'undefined' && election.arrNominees.length !== election.prev.arrNominees.length) {
+        if (election.phase == 'nomination' && typeof election.prev === 'object' && election.arrNominees.length !== election.prev.arrNominees.length) {
             
             // get diff between the arrays
             const prevIds = election.prev.arrNominees.map(v => v.userId);
-            const newNominees = election.arrNominees.filter(v => prevIds.includes(v.userId == false));
+            const newNominees = election.arrNominees.filter(v => !prevIds.includes(v.userId));
 
             // Announce
             newNominees.forEach(async nominee => {
-                await room.sendMessage(`**We have a new [nomination](${election.url}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${electionSite + '/users/' + nominee.userId})!`);
+                await room.sendMessage(`**We have a new [nomination](${election.url}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${nominee.permalink})!`);
                 console.log(`NOMINATION`, nominee);
             });
         }
 
-    }, (debug ? 5 : 10) * 60000, ); // every 10 minutes (debug - 5 minutes)
+    }, scrapeInterval * 60000, );
 
 
 } // End main fn

@@ -17,7 +17,7 @@ module.exports = {
         app.use('/', express.static(staticPath));
                 
         app.listen(app.get('port'), () => {
-            console.log(`Node app ${staticPath} is listening on port ${app.get('port')}.`);
+            console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
         });
     },
 
@@ -26,9 +26,9 @@ module.exports = {
         // Fetch endpoint to prevent server from idling
         setInterval(function() {
             https.get(url).on('error', function(err) {
-                console.error(">> keep-alive error! " + err.message);
+                console.error("ERROR - Keep-alive failed." + err.message);
             });
-        }, mins * 60000); // every 20 minutes
+        }, mins * 60000);
     },
 
     dateToTimestamp: function(date)
