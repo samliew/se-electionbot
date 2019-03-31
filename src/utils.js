@@ -15,6 +15,13 @@ module.exports = {
             console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
         });
 
+        process.on('SIGINT', function() {
+            app.close(function() {
+                console.log('gracefully shutting down');
+                process.exit();
+            });
+        });
+
         return app;
     },
 

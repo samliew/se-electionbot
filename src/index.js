@@ -57,7 +57,6 @@ const ignoredEventTypes = [
     34, // UserNameOrAvatarChanged
     7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
 ];
-let staticServer;
 let rescrapeInterval = null;
 let election = null;
 let room = null;
@@ -226,13 +225,6 @@ const main = async () => {
 
                 // stop scraping
                 clearInterval(rescrapeInterval);
-
-                // stop static server
-                if(staticServer) {
-                    staticServer.close( function(){
-                        process.exit();
-                    });
-                }
                 
                 // kill process
                 setTimeout(process.exit, 1000);
