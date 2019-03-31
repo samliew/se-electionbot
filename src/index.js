@@ -200,7 +200,7 @@ const main = async () => {
                 }
             }
             else if(content.includes('throttle')) {
-                responseText = `Reply throttle is currently ${num} seconds`;
+                responseText = `Reply throttle is currently ${num} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
             }
             else if(content.includes('clear timeout')) {
                 responseText = `*timeout cleared*`;
@@ -216,8 +216,28 @@ const main = async () => {
                 responseText = `UTC time: ${utils.dateToTimestamp()} (election phase starts ${textToElection})`;
             }
             else if(content.includes('shutdown')) {
+
+                 // stop listening to new messages
+                room.off('message');
+
+                // stop scraping
+                clearInterval(rescrapeInterval);
+
+                // stop static server
+                utils.stopServer();
+
                 await room.sendMessage(`*farewell...*`);
-                process.exit(0); // no further action
+                
+                // kill process
+                setTimeout(() => process.exit(0), 1000);
+                
+                // no further action
+                return;
+            }
+            else if(content.includes('commands')) {
+                responseText = '\n' + ['commands:', 
+                    'say', 'alive', 'cron', 'test cron', 'throttle', 'set throttle X (seconds)', 'clear timeout', 'timeout X (minutes)', 'time', 'shutdown'
+                ].join(', ');
             }
             
             if(responseText != null) {
