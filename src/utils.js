@@ -1,17 +1,12 @@
 const path = require('path');
 const https = require('https');
 const express = require('express');
-let app;
 
 module.exports = {
 
-    shutdownServer: function(app) {
-        if(app) app.close();
-    },
-
     staticServer: function() 
     {
-        app = express().set('port', process.env.PORT || 5000);
+        const app = express().set('port', process.env.PORT || 5000);
         
         const staticPath = path.join(__dirname, '../static');
         app.use('/', express.static(staticPath));

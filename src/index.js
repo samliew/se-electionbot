@@ -219,6 +219,8 @@ const main = async () => {
             }
             else if(content.includes('shutdown')) {
 
+                await room.sendMessage(`*farewell...*`);
+
                  // stop listening to new messages
                 room.removeAllListeners('message');
 
@@ -226,12 +228,14 @@ const main = async () => {
                 clearInterval(rescrapeInterval);
 
                 // stop static server
-                if(staticServer) utils.stopServer(staticServer);
-
-                await room.sendMessage(`*farewell...*`);
+                if(staticServer) {
+                    staticServer.close( function(){
+                        process.exit();
+                    });
+                }
                 
                 // kill process
-                setTimeout(() => process.exit(0), 1000);
+                setTimeout(process.exit, 1000);
                 
                 // no further action
                 return;
