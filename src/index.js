@@ -57,6 +57,7 @@ const ignoredEventTypes = [
     34, // UserNameOrAvatarChanged
     7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
 ];
+let staticServer;
 let rescrapeInterval = null;
 let election = null;
 let room = null;
@@ -225,7 +226,7 @@ const main = async () => {
                 clearInterval(rescrapeInterval);
 
                 // stop static server
-                utils.stopServer();
+                if(staticServer) utils.stopServer(staticServer);
 
                 await room.sendMessage(`*farewell...*`);
                 
@@ -497,7 +498,7 @@ main();
 if (scriptHostname.includes('herokuapp.com')) {
 
     // Heroku requires binding/listening to the port otherwise it will shutdown
-    utils.staticServer();
+    staticServer = utils.staticServer();
 
     // Heroku free dyno will shutdown when idle for 30 mins, so keep-alive is necessary
     utils.keepAlive(scriptHostname, 20);

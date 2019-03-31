@@ -5,8 +5,8 @@ let app;
 
 module.exports = {
 
-    stopServer: function() {
-        app.close();
+    shutdownServer: function(app) {
+        if(app) app.close();
     },
 
     staticServer: function() 
@@ -19,6 +19,8 @@ module.exports = {
         app.listen(app.get('port'), () => {
             console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
         });
+
+        return app;
     },
 
     keepAlive: function(url, mins = 20) 
