@@ -219,7 +219,7 @@ const main = async () => {
             else if(content.includes('shutdown')) {
 
                  // stop listening to new messages
-                room.off('message');
+                room.removeAllListeners('message');
 
                 // stop scraping
                 clearInterval(rescrapeInterval);
