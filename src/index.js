@@ -165,7 +165,7 @@ const main = async () => {
         const now = Date.now();
         const toElection = new Date(election.dateElection) - now;
         const daysToElection = Math.floor(toElection / (24 * 60 * 60 * 1000));
-        const hoursToElection = Math.floor(toElection / 60 * 60 * 1000);
+        const hoursToElection = Math.floor(toElection / (60 * 60 * 1000));
         const textToElection = daysToElection > 1 ? 'in ' + daysToElection + ' day' + pluralize(daysToElection) :
             hoursToElection > 1 ? 'in ' + hoursToElection + ' hour' + pluralize(hoursToElection) :
             'shortly';
