@@ -291,9 +291,9 @@ const main = async () => {
 
                 if(election.arrNominees.length > 0) {
 
-                    responseText = `Currently, there ${election.arrNominees.length == 1 ? 'is' : 'are'} **[${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url})**: `;
+                    responseText = `The current candidates ${election.arrNominees.length == 1 ? 'is' : 'are'} **[${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url})**: `;
 
-                    responseText = election.arrNominees.map(v => v.userName).join(', ');
+                    responseText += election.arrNominees.map(v => v.userName).join(', ');
 
                     // If there are more than 6 candidates, split into two messages otherwise we hit the 500-char limit
                     /*
