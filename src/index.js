@@ -233,9 +233,9 @@ const main = async () => {
                 return;
             }
             else if(content.includes('commands')) {
-                responseText = '\n' + ['commands:', 
+                responseText = 'admin commands: *' + [
                     'say', 'alive', 'cron', 'test cron', 'throttle', 'set throttle X (seconds)', 'clear timeout', 'timeout X (minutes)', 'time', 'shutdown'
-                ].join(', ');
+                ].join(', ') + '*';
             }
             
             if(responseText != null) {
