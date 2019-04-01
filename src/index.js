@@ -294,7 +294,7 @@ const main = async () => {
                     responseText = `Currently, there ${election.arrNominees.length == 1 ? 'is' : 'are'} **[${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url})**: `;
 
                     responseText = election.arrNominees.map(v => v.userName).join(', ');
-                    
+
                     // If there are more than 6 candidates, split into two messages otherwise we hit the 500-char limit
                     /*
                     if(election.arrNominees.length <= 6) {
@@ -320,17 +320,17 @@ const main = async () => {
 
             // Moderation badges
             else if(['what', 'mod', 'badges'].every(x => content.includes(x))) {
-                responseText = `The 8 moderation badges are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward. (1 point each to candidate score)`;
+                responseText = `The 8 moderation badges are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward.`;
             }
 
             // Participation badges
             else if(['what', 'participation', 'badges'].every(x => content.includes(x))) {
-                responseText = `The 6 participation badges are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling. (1 point each to candidate score)`;
+                responseText = `The 6 participation badges are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling.`;
             }
 
             // Editing badges
             else if(['what', 'editing', 'badges'].every(x => content.includes(x))) {
-                responseText = `The 6 editing badges are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White. (1 point each to candidate score)`;
+                responseText = `The 6 editing badges are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White.`;
             }
 
             // Candidate score calculation
