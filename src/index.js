@@ -293,7 +293,10 @@ const main = async () => {
 
                     responseText = `Currently, there ${election.arrNominees.length == 1 ? 'is' : 'are'} **[${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url})**: `;
 
+                    responseText = election.arrNominees.map(v => v.userName).join(', ');
+                    
                     // If there are more than 6 candidates, split into two messages otherwise we hit the 500-char limit
+                    /*
                     if(election.arrNominees.length <= 6) {
                         responseText += election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ');
                     }
@@ -308,6 +311,7 @@ const main = async () => {
                         // Set second message
                         responseText = arrTemp.slice(6).map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ');
                     }
+                    */
                 }
                 else {
                     responseText = `There are no users who have nominated themselves yet.`;
