@@ -94,7 +94,7 @@ export default class Election {
                     this.phase = 'cancelled';
                     
                     // convert link to chat-friendly markup
-                    this.statVoters = winnerElem.html()
+                    this.cancelledText = winnerElem.html()
                         .replace(/<a href="/g, 'See [meta](')
                         .replace(/">.+/g, ') for details.').trim();
                 }
