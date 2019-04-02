@@ -227,7 +227,7 @@ const main = async () => {
                 clearInterval(rescrapeInterval);
                 
                 // kill process
-                setTimeout(process.exit, 1000);
+                setTimeout(process.exit, 3000);
                 
                 // no further action
                 return;
@@ -291,7 +291,7 @@ const main = async () => {
 
                 if(election.arrNominees.length > 0) {
 
-                    responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} **[${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url})**: `;
+                    responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url}): `;
 
                     responseText += election.arrNominees.map(v => v.userName).join(', ');
 

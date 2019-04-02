@@ -18,7 +18,6 @@ module.exports = {
         process.on('SIGINT', function() {
             app.close(function() {
                 console.log('gracefully shutting down');
-                process.exit();
             });
         });
 
