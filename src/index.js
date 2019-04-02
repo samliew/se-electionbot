@@ -168,7 +168,7 @@ const main = async () => {
         const hoursToElection = Math.floor(toElection / (60 * 60 * 1000));
         const textToElection = daysToElection > 1 ? 'in ' + daysToElection + ' day' + pluralize(daysToElection) :
             hoursToElection > 1 ? 'in ' + hoursToElection + ' hour' + pluralize(hoursToElection) :
-            'shortly';
+            'soon';
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
@@ -214,7 +214,8 @@ const main = async () => {
                 lastMessageTime = Date.now() + (num * 60000) - (throttleSecs * 1000);
             }
             else if(content.includes('time')) {
-                responseText = `UTC time: ${utils.dateToTimestamp()} (election phase starts ${textToElection})`;
+                responseText = `UTC time: ${utils.dateToTimestamp()}`;
+                if(toElection <= 0) responseText += ` (election phase starts ${textToElection})`;
             }
             else if(content.includes('shutdown')) {
 
