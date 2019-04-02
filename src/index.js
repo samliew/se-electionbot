@@ -218,7 +218,7 @@ const main = async () => {
             }
             else if(content.includes('time')) {
                 responseText = `UTC time: ${utils.dateToTimestamp()}`;
-                if(toElection <= 0) responseText += ` (election phase starts ${textToElection})`;
+                if(toElection > 0) responseText += ` (election phase starts ${textToElection})`;
             }
             else if(content.includes('shutdown')) {
 
