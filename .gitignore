@@ -20,5 +20,8 @@ cache
 .eslintcache
 .npm
 
+# Distribution folder
+dist/
+
 # Debug folder
 debug/
