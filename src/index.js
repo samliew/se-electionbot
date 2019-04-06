@@ -1,4 +1,4 @@
-import Client from '../lib/chatexchange/dist/Client';
+import Client from 'chatexchange';
 const Election = require('./Election').default;
 const entities = new (require('html-entities').AllHtmlEntities);
 const announcement = new (require('./ScheduledAnnouncement').default);
