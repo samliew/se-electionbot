@@ -29,6 +29,7 @@ const scrapeInterval = debug ? 3 : 5;
 
 
 // App variables
+const scriptInitDate = new Date();
 const electionUrl = electionSite + '/election/' + electionNum;
 const ignoredEventTypes = [
 //  1,  // MessagePosted
@@ -80,12 +81,14 @@ const pluralize = n => n !== 1 ? 's' : '';
 
 
 // App setup
-const scriptInitDate = new Date();
 if(debug) console.error('WARN - Debug mode is on.');
 
 
 // Election cancelled
 async function announceCancelled() {
+
+    // Needs to be cancelled
+    if(typeof election.cancelledText == 'undefined' || election.phase == 'cancelled') return; 
 
     // Stop all cron jobs
     announcement.cancelAll();
@@ -97,7 +100,7 @@ async function announceCancelled() {
     }
 
     // Announce
-    await room.sendMessage(election.statVoters);
+    await room.sendMessage(election.cancelledText);
 }
 
 
@@ -215,7 +218,7 @@ const main = async () => {
             }
             else if(content.includes('time')) {
                 responseText = `UTC time: ${utils.dateToTimestamp()}`;
-                if(toElection <= 0) responseText += ` (election phase starts ${textToElection})`;
+                if(toElection > 0) responseText += ` (election phase starts ${textToElection})`;
             }
             else if(content.includes('shutdown')) {
 
