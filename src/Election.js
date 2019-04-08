@@ -69,7 +69,7 @@ export default class Election {
                         permalink: electionPageUrl + '#' + $(el).attr('id'),
                     }
                 }).get();
-            this.qnaUrl = electionPost.find('a[href*="questionnaire"], a[href*="uestion"]').attr('href'); 
+            this.qnaUrl = electionPost.find('li a').filter((i,el) => el.href.includes('meta.') && /\/questions\/\d+\//.test(el.href)).attr('href'); 
             if(typeof this.qnaUrl === 'undefined') this.qnaUrl = process.env.ELECTION_QA; // if cannot be found (esp on non-eng sites), needs to be set via env var
             this.chatUrl = electionPost.find('a[href*="/rooms/"]').attr('href') || process.env.ELECTION_CHATROOM;
 
