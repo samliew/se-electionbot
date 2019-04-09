@@ -38,10 +38,13 @@ export default class Election {
 
             let electionPost = $('#mainbar .post-text .wiki-ph-content');
             let sidebarValues = $('#sidebar').find('.label-value').map((i, el) => $(el).attr('title') || $(el).text()).get();
-            let metalinks = $('#mainbar .post-text .wiki-ph-content li a').map((i, el) => el.href).get().filter(url => {
+
+            // Get election Q&A (largest meta link id)
+            const metalinks = electionPost.find('a').map((i, el) => el.href).get().filter(url => {
                 return url.includes('meta.') && /\/questions\/\d+\//.test(url);
             });
-            let largestMetalink = Math.max.apply(Math, metalinks.map(v => Number(v.match(/\d+/))));
+            const largestMetaId = Math.max.apply(Math, metalinks.map(v => Number(v.match(/\d+/))));
+            const largestMetalink = metalinks.filter(v => v.includes(largestMetaId))[0];
 
             // Insert null value in second position for elections with no primary phase
             if(sidebarValues.length == 5) {
@@ -73,7 +76,7 @@ export default class Election {
                         permalink: electionPageUrl + '#' + $(el).attr('id'),
                     }
                 }).get();
-            this.qnaUrl = metalinks.length > 0 ? metalinks[largestMetalink] : process.env.ELECTION_QA;
+            this.qnaUrl = metalinks.length > 0 ? largestMetalink : process.env.ELECTION_QA;
             this.chatUrl = electionPost.find('a[href*="/rooms/"]').attr('href') || process.env.ELECTION_CHATROOM;
 
             // Calculate phase of election
