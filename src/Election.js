@@ -39,13 +39,6 @@ export default class Election {
             let electionPost = $('#mainbar .post-text .wiki-ph-content');
             let sidebarValues = $('#sidebar').find('.label-value').map((i, el) => $(el).attr('title') || $(el).text()).get();
 
-            // Get election Q&A (largest meta link id)
-            const metalinks = $('.wiki-ph-content a').map((i, el) => el.href).get().filter(url => {
-                return url.includes('meta.') && /\/questions\/\d+\//.test(url);
-            });
-            const largestMetaId = Math.max.apply(Math, metalinks.map(v => Number(v.match(/\d+/)[0])));
-            const largestMetalink = metalinks.filter(v => v.includes(largestMetaId))[0];
-
             // Insert null value in second position for elections with no primary phase
             if(sidebarValues.length == 5) {
                 sidebarValues.splice(1, 0, null); 
@@ -77,9 +70,9 @@ export default class Election {
                     }
                 }).get();
 
-            this.qnaUrl = metalinks.length > 0 ? largestMetalink || metalinks[0] : process.env.ELECTION_QA;
+            this.qnaUrl = electionPost.find('a[href*="uestion"]').attr('href'); 
+            if(typeof this.qnaUrl === 'undefined') this.qnaUrl = process.env.ELECTION_QA; // if cannot be found (esp on non-eng sites), needs to be set via env var
             this.chatUrl = electionPost.find('a[href*="/rooms/"]').attr('href') || process.env.ELECTION_CHATROOM;
-            console.log("Meta Links    ", metalinks, largestMetalink);
             console.log("Election Links", this.qnaUrl, this.chatUrl);
 
             // Calculate phase of election
