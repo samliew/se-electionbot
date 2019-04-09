@@ -40,10 +40,10 @@ export default class Election {
             let sidebarValues = $('#sidebar').find('.label-value').map((i, el) => $(el).attr('title') || $(el).text()).get();
 
             // Get election Q&A (largest meta link id)
-            const metalinks = electionPost.find('a').map((i, el) => el.href).get().filter(url => {
+            const metalinks = electionPost.find('a').get().map(el => el.href).filter(url => {
                 return url.includes('meta.') && /\/questions\/\d+\//.test(url);
             });
-            const largestMetaId = Math.max.apply(Math, metalinks.map(v => Number(v.match(/\d+/))));
+            const largestMetaId = Math.max.apply(Math, metalinks.map(v => Number(v.match(/\d+/)[0])));
             const largestMetalink = metalinks.filter(v => v.includes(largestMetaId))[0];
 
             // Insert null value in second position for elections with no primary phase
