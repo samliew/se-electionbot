@@ -349,7 +349,7 @@ const main = async () => {
 
             // How to choose/pick/decide who to vote for
             else if((content.includes('how') && ['choose', 'pick', 'decide', 'deciding'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
-                responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q & A](${election.qnaUrl})`;
+                if(election.qnaUrl) responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q & A](${election.qnaUrl})`;
                 if(election.phase == null) responseText = notStartedYet;
             }
 
@@ -373,13 +373,17 @@ const main = async () => {
 
                 switch(election.phase) {
                     case 'election':
-                        responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.url}?tab=election). If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).`;
+                        responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.url}?tab=election).`;
+                        if(election.qnaUrl) responseText += ` If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).`;
                         break;
                     case 'primary':
-                        responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.url}?tab=primary). If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}). Don't forget to come back ${textToElection} to also vote in the actual election phase!`;
+                        responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.url}?tab=primary).`;
+                        if(election.qnaUrl) responseText += ` If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).`;
+                        responseText += ` Don't forget to come back ${textToElection} to also vote in the actual election phase!`;
                         break;
                     case 'nomination':
-                        responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.url}?tab=nomination), as well as read the candidates' [answers to your questions](${election.qnaUrl}) to find out more.`;
+                        responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.url}?tab=nomination)`;
+                        if(election.qnaUrl) responseText += `, as well as read the candidates' [answers to your questions](${election.qnaUrl}) to find out more.`;
                         break;
                     case 'ended':
                         responseText = `The [election](${election.url}) has ended. You can no longer vote.`;
