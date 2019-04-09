@@ -76,8 +76,11 @@ export default class Election {
                         permalink: electionPageUrl + '#' + $(el).attr('id'),
                     }
                 }).get();
-            this.qnaUrl = metalinks.length > 0 ? largestMetalink : process.env.ELECTION_QA;
+
+            this.qnaUrl = metalinks.length > 0 ? largestMetalink || metalinks[0] : process.env.ELECTION_QA;
             this.chatUrl = electionPost.find('a[href*="/rooms/"]').attr('href') || process.env.ELECTION_CHATROOM;
+            console.log("Meta Links    ", metalinks, largestMetalink);
+            console.log("Election Links", this.qnaUrl, this.chatUrl);
 
             // Calculate phase of election
             const now = Date.now();
