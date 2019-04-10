@@ -51,12 +51,7 @@ export default class ScheduledAnnouncement {
                 cs,
                 async () => {
                     await this._election.scrapeElection();
-                    await this._room.sendMessage(`**The [election](${this._election.url}?tab=election) has now ended.** You can [view the results online via OpaVote](${this._election.resultsUrl}).`);
-
-                    // Congratulate the winners
-                    if(this._election.arrWinners.length > 0) {
-                        await this._room.sendMessage(`Congratulations to the winner${this._election.arrWinners.length == 1 ? '' : 's'} ${this._election.arrWinners.map(v => `[${v.userName}](${this._election.siteUrl + '/users/' + v.userId})`).join(', ')}!`);
-                    }
+                    await this._room.sendMessage(`**The [election](${this._election.url}?tab=election) has now ended.** The winners will be announced shortly.`);
                 },
                 { timezone: "Etc/UTC" }
             );

@@ -104,6 +104,36 @@ async function announceCancelled() {
 }
 
 
+// Announce winners when available
+async function announceWinners() {
+
+    // Needs to have ended
+    if(election.phase != 'ended') return; 
+
+    // Stop all cron jobs
+    announcement.cancelAll();
+
+    // Stop scraper
+    if(rescrapeInterval) {
+        clearInterval(rescrapeInterval);
+        rescrapeInterval = null;
+    }
+
+    // Build the message
+    let msg = '';
+    if(election.arrWinners.length > 0) {
+        msg += ` Congratulations to the winner${election.arrWinners.length == 1 ? '' : 's'} ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}!`;
+    }
+
+    if(election.resultsUrl) {
+        msg += ` You can [view the results online via OpaVote](${election.resultsUrl}).`;
+    }
+
+    // Announce
+    await room.sendMessage(msg);
+}
+
+
 // Main fn
 const main = async () => {
 
@@ -478,6 +508,12 @@ const main = async () => {
         // after re-scraping the election was cancelled
         if (typeof election.prev !== 'undefined' && election.prev.phase !== 'cancelled' && election.phase === 'cancelled') {
             announceCancelled();
+            return;
+        }
+        
+        // after re-scraping we have winners
+        if (typeof election.prev !== 'undefined' && election.phase === 'ended' && election.prev.arrWinners.length == 0 && election.arrWinners.length > 0) {
+            announceWinners();
             return;
         }
         

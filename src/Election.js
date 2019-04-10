@@ -88,6 +88,7 @@ export default class Election {
 
                 // Get results URL
                 this.resultsUrl = $('#mainbar').find('.question-status h2').first().find('a').first().attr('href');
+                if(!this.resultsUrl.includes('opavote.com')) this.resultsUrl = ''; // incorrect/not available immediately
                 
                 let winnerElem = $('#mainbar').find('.question-status h2').eq(1);
 
