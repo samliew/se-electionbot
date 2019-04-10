@@ -254,8 +254,10 @@ const main = async () => {
 
                 await room.sendMessage(`*farewell...*`);
 
-                 // stop listening to new messages
+                // stop listening to new messages
                 room.removeAllListeners('message');
+
+                // TODO: leave room?
 
                 // stop scraping
                 clearInterval(rescrapeInterval);
