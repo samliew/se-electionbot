@@ -250,6 +250,9 @@ const main = async () => {
                 responseText = `UTC time: ${utils.dateToTimestamp()}`;
                 if(toElection > 0) responseText += ` (election phase starts ${textToElection})`;
             }
+            else if(content.includes('chatroom')) {
+                responseText = `The election chat room is at ${election.chatUrl}`;
+            }
             else if(content.includes('shutdown')) {
 
                 await room.sendMessage(`*farewell...*`);
@@ -270,7 +273,7 @@ const main = async () => {
             }
             else if(content.includes('commands')) {
                 responseText = 'admin commands: *' + [
-                    'say', 'alive', 'cron', 'test cron', 'throttle', 'set throttle X (seconds)', 'clear timeout', 'timeout X (minutes)', 'time', 'shutdown'
+                    'say', 'alive', 'cron', 'test cron', 'chatroom', 'throttle', 'set throttle X (seconds)', 'clear timeout', 'timeout X (minutes)', 'time', 'shutdown'
                 ].join(', ') + '*';
             }
             
@@ -450,6 +453,17 @@ const main = async () => {
                     if(election.phase === 'nomination') responseText += `There are currently ${election.arrNominees.length} candidates.`;
                     else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${textToElection} to vote in the actual election.`;
                     else if(election.phase === 'election') responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
+                }
+            }
+
+            // Who are the winners
+            else if(['who'].some(x => content.includes(x)) && ['winners', 'won', 'new mod'].some(x => content.includes(x))) {
+                
+                if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
+                    responseText = `The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}.`;
+                }
+                else {
+                    responseText = `The election is not over yet.`;
                 }
             }
 
