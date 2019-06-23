@@ -58,7 +58,7 @@ const ignoredEventTypes = [
     34, // UserNameOrAvatarChanged
     7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
 ];
-let rescrapeInterval = null;
+let rescraperInt = null;
 let election = null;
 let room = null;
 
@@ -94,9 +94,9 @@ async function announceCancelled() {
     announcement.cancelAll();
 
     // Stop scraper
-    if(rescrapeInterval) {
-        clearInterval(rescrapeInterval);
-        rescrapeInterval = null;
+    if(rescraperInt) {
+        clearInterval(rescraperInt);
+        rescraperInt = null;
     }
 
     // Announce
@@ -114,9 +114,9 @@ async function announceWinners() {
     announcement.cancelAll();
 
     // Stop scraper
-    if(rescrapeInterval) {
-        clearInterval(rescrapeInterval);
-        rescrapeInterval = null;
+    if(rescraperInt) {
+        clearInterval(rescraperInt);
+        rescraperInt = null;
     }
 
     // Build the message
@@ -263,7 +263,7 @@ const main = async () => {
                 // TODO: leave room?
 
                 // stop scraping
-                clearInterval(rescrapeInterval);
+                clearInterval(rescraperInt);
                 
                 // kill process
                 setTimeout(process.exit, 3000);
@@ -507,7 +507,7 @@ const main = async () => {
 
 
     // Interval to re-scrape election data
-    rescrapeInterval = setInterval(async function() {
+    rescraperInt = setInterval(async function() {
         await election.scrapeElection();
         announcement.setElection(election);
 
