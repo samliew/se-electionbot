@@ -519,6 +519,7 @@ const main = async () => {
         // previously had no primary, but after re-scraping there is one
         if (!announcement.hasPrimary && election.datePrimary != null) {
             announcement.initPrimary(election.datePrimary);
+            await room.sendMessage(`There will be a primary phase before the election now, as there are at least ten candidates.`);
         }
         
         // after re-scraping the election was cancelled
@@ -528,7 +529,7 @@ const main = async () => {
         }
         
         // after re-scraping we have winners
-        if (typeof election.prev !== 'undefined' && election.phase === 'ended' && election.prev.arrWinners.length == 0 && election.arrWinners.length > 0) {
+        if (typeof election.prev !== 'undefined' && election.phase === 'ended' && typeof election.prev.arrWinners === 'undefined' && election.arrWinners && election.arrWinners.length > 0) {
             announceWinners();
             return;
         }
