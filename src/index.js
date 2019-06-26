@@ -511,6 +511,8 @@ const main = async () => {
         await election.scrapeElection();
         announcement.setElection(election);
 
+        console.log('Election winners', election.arrWinners);
+
         if(debug) {
             // Log prev and current scraped info
             console.log('SCRAPE', election.updated, election);
