@@ -511,12 +511,19 @@ const main = async () => {
         await election.scrapeElection();
         announcement.setElection(election);
 
-        console.log('Election winners', election.arrWinners);
-
         if(debug) {
             // Log prev and current scraped info
             console.log('SCRAPE', election.updated, election);
+
+            // Log election candidates
+            console.log('Election candidates', election.arrNominees);
+
+            // Log election winners
+            console.log('Election winners', election.arrWinners);
         }
+
+        // No previous scrape results yet, do not proceed
+        if(typeof election.prev === 'object') return;
         
         // previously had no primary, but after re-scraping there is one
         if (!announcement.hasPrimary && election.datePrimary != null) {
@@ -525,19 +532,19 @@ const main = async () => {
         }
         
         // after re-scraping the election was cancelled
-        if (typeof election.prev !== 'undefined' && election.prev.phase !== 'cancelled' && election.phase === 'cancelled') {
+        if (election.phase === 'cancelled' && election.prev.phase !== election.phase) {
             announceCancelled();
             return;
         }
         
         // after re-scraping we have winners
-        if (typeof election.prev !== 'undefined' && election.phase === 'ended' && typeof election.prev.arrWinners === 'undefined' && election.arrWinners && election.arrWinners.length > 0) {
+        else if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
             announceWinners();
             return;
         }
         
         // new nominations?
-        if (election.phase == 'nomination' && typeof election.prev === 'object' && election.arrNominees.length !== election.prev.arrNominees.length) {
+        else if (election.phase == 'nomination' && election.prev.arrNominees.length !== election.arrNominees.length) {
             
             // get diff between the arrays
             const prevIds = election.prev.arrNominees.map(v => v.userId);
