@@ -523,7 +523,7 @@ const main = async () => {
         }
 
         // No previous scrape results yet, do not proceed
-        if(typeof election.prev === 'object') return;
+        if(typeof election.prev === 'undefined') return;
         
         // previously had no primary, but after re-scraping there is one
         if (!announcement.hasPrimary && election.datePrimary != null) {
