@@ -57,6 +57,7 @@ export default class Election {
             this.numPositions = Number(sidebarValues[5]);
             this.repVote = 150;
             this.repNominate = Number($('#sidebar .module.newuser b').eq(1).text().replace(/\D+/g, ''));
+            this.arrWinners = [];
             this.arrNominees = $('#mainbar .candidate-row').map((i, el) => 
                 {
                     return {
