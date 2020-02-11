@@ -158,7 +158,7 @@ const main = async () => {
     let lastMessageTime = -1;
 
     // Default election message
-    const notStartedYet = `The ${election.sitename} [Moderator Election](${election.url}) has not started yet. Come back at ${election.dateNomination}.`;
+    const notStartedYet = `The [Election](${election.url}) for ${election.sitename} has not started yet. Come back at ${election.dateNomination}.`;
 
 
     // Main event listener
