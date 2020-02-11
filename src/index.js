@@ -158,7 +158,8 @@ const main = async () => {
     let lastMessageTime = -1;
 
     // Default election message
-    const notStartedYet = `The [Election](${election.url}) for ${election.sitename} has not started yet. Come back at ${election.dateNomination}.`;
+    const tadDateFormat = d => d.replace(/(-|:|\d\dZ)/gi, '').replace(/ /g, 'T');
+    const notStartedYet = `The [Election](${election.url}) for ${election.sitename} has not started yet. Come back at [${election.dateNomination}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${tadDateFormat(election.dateNomination)}).`;
 
 
     // Main event listener
@@ -202,6 +203,7 @@ const main = async () => {
         const textToElection = daysToElection > 1 ? 'in ' + daysToElection + ' day' + pluralize(daysToElection) :
             hoursToElection > 1 ? 'in ' + hoursToElection + ' hour' + pluralize(hoursToElection) :
             'soon';
+        const linkToElection = `[${textToElection}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${tadDateFormat(election.dateElection)}})`;
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
@@ -248,7 +250,7 @@ const main = async () => {
             }
             else if(content.includes('time')) {
                 responseText = `UTC time: ${utils.dateToTimestamp()}`;
-                if(toElection > 0) responseText += ` (election phase starts ${textToElection})`;
+                if(toElection > 0) responseText += ` (election phase starts ${linkToElection})`;
             }
             else if(content.includes('chatroom')) {
                 responseText = `The election chat room is at ${election.chatUrl}`;
@@ -419,7 +421,7 @@ const main = async () => {
                     case 'primary':
                         responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.url}?tab=primary).`;
                         if(election.qnaUrl) responseText += ` If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).`;
-                        responseText += ` Don't forget to come back ${textToElection} to also vote in the actual election phase!`;
+                        responseText += ` Don't forget to come back ${linkToElection} to also vote in the actual election phase!`;
                         break;
                     case 'nomination':
                         responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.url}?tab=nomination)`;
@@ -456,7 +458,7 @@ const main = async () => {
                     responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. `;
 
                     if(election.phase === 'nomination') responseText += `There are currently ${election.arrNominees.length} candidates.`;
-                    else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${textToElection} to vote in the actual election.`;
+                    else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${linkToElection} to vote in the actual election.`;
                     else if(election.phase === 'election') responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
                 }
             }
