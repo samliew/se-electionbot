@@ -376,7 +376,7 @@ const main = async () => {
 
             // Candidate score calculation
             else if(['how', 'what'].some(x => content.includes(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
-                responseText = `The [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way:\n1 point for each 1,000 reputation up to 20,000 reputation (max 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges (total 20 points)`;
+                responseText = `The [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way: 1 point for each 1,000 reputation up to 20,000 reputation (max 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges (total 20 points)`;
             }
 
             // Stats/How many voted/participated
