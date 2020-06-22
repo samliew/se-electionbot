@@ -121,7 +121,7 @@ async function announceWinners() {
 
     // Build the message
     let msg = '';
-    if(election.arrWinners.length > 0) {
+    if(election.arrWinners && election.arrWinners.length > 0) {
         msg += ` Congratulations to the winner${election.arrWinners.length == 1 ? '' : 's'} ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}!`;
     }
 
@@ -255,6 +255,10 @@ const main = async () => {
             else if(content.includes('chatroom')) {
                 responseText = `The election chat room is at ${election.chatUrl}`;
             }
+            else if(content.includes('announce winners')) {
+                announceWinners();
+                return;
+            }
             else if(content.includes('shutdown')) {
 
                 await room.sendMessage(`*farewell...*`);
@@ -275,7 +279,7 @@ const main = async () => {
             }
             else if(content.includes('commands')) {
                 responseText = 'admin commands: *' + [
-                    'say', 'alive', 'cron', 'test cron', 'chatroom', 'throttle', 'set throttle X (seconds)', 'clear timeout', 'timeout X (minutes)', 'time', 'shutdown'
+                    'say', 'alive', 'cron', 'test cron', 'chatroom', 'throttle', 'set throttle X (seconds)', 'clear timeout', 'timeout X (minutes)', 'time', 'shutdown', 'announce winners'
                 ].join(', ') + '*';
             }
             
@@ -574,9 +578,9 @@ main();
 // If running on Heroku
 if (scriptHostname.includes('herokuapp.com')) {
 
-    // Heroku requires binding/listening to the port otherwise it will shutdown
+    // Heroku requires binding/listening to the port otherwise it will shut down
     utils.staticServer();
 
     // Heroku free dyno will shutdown when idle for 30 mins, so keep-alive is necessary
-    utils.keepAlive(scriptHostname, 20);
+    utils.keepAlive(scriptHostname, 25);
 }
