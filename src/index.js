@@ -564,7 +564,7 @@ const main = async () => {
             });
         }
 
-    }, scrapeInterval * 60000, );
+    }, scrapeInterval * 60000);
 
 
 } // End main fn
