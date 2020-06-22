@@ -394,7 +394,7 @@ const main = async () => {
             }
 
             // Why be a moderator
-            else if(['why', 'what', 'are', 'is', 'should'].some(x => content.includes(x)) && ['be a', 'become', 'benefit', 'pros', 'entail'].some(x => content.includes(x)) && ['mod'].every(x => content.includes(x))) {
+            else if(['why', 'what', 'are', 'is', 'should'].some(x => content.includes(x)) && ['be a', 'become', 'benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && ['mod'].every(x => content.includes(x))) {
                 responseText = `[Elected ♦ moderators](${election.siteurl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
                   `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
             }
