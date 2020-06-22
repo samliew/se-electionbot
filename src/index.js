@@ -108,7 +108,7 @@ async function announceCancelled() {
 async function announceWinners() {
 
     // Needs to have ended
-    if(election.phase != 'ended') return; 
+    if(typeof election === 'undefined' || election.phase != 'ended') return; 
 
     // Stop all cron jobs
     announcement.cancelAll();
@@ -256,7 +256,7 @@ const main = async () => {
                 responseText = `The election chat room is at ${election.chatUrl}`;
             }
             else if(content.includes('announce winners')) {
-                announceWinners();
+                await announceWinners();
                 return;
             }
             else if(content.includes('shutdown')) {
@@ -544,13 +544,13 @@ const main = async () => {
         
         // after re-scraping the election was cancelled
         if (election.phase === 'cancelled' && election.prev.phase !== election.phase) {
-            announceCancelled();
+            await announceCancelled();
             return;
         }
         
         // after re-scraping we have winners
         else if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
-            announceWinners();
+            await announceWinners();
             return;
         }
         
