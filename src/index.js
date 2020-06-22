@@ -108,7 +108,7 @@ async function announceCancelled() {
 async function announceWinners() {
 
     // Needs to have ended
-    if(typeof election === 'undefined' || election.phase != 'ended') return; 
+    if(typeof election === 'undefined' || election == null || election.phase != 'ended') return; 
 
     // Stop all cron jobs
     announcement.cancelAll();
@@ -531,6 +531,11 @@ const main = async () => {
 
             // Log election winners
             console.log('Election winners', election.arrWinners);
+
+            if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
+                await announceWinners();
+                return;
+            }
         }
 
         // No previous scrape results yet, do not proceed
