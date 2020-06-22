@@ -471,6 +471,9 @@ const main = async () => {
                 if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
                     responseText = `The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}.`;
                 }
+                else if(election.phase === 'ended') {
+                    responseText = `The winners can be found on the [election page](${election.url}).`;
+                }
                 else {
                     responseText = `The election is not over yet.`;
                 }
