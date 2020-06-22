@@ -24,11 +24,11 @@ export default class Election {
 
         try {
             const html = await request({
-                gzip: true,
+                gzip: true, // important: https://meta.stackexchange.com/a/446
                 simple: false,
                 resolveWithFullResponse: false,
                 headers: {
-                    'User-Agent': 'Node.js/ElectionBot',
+                    'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
                 },
                 uri: electionPageUrl
             });
