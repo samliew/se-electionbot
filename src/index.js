@@ -85,10 +85,10 @@ if(debug) console.error('WARN - Debug mode is on.');
 
 
 // Election cancelled
-async function announceCancelled() {
+async function announceCancelled(election = null) {
 
     // Needs to be cancelled
-    if(typeof election.cancelledText == 'undefined' || election.phase == 'cancelled') return; 
+    if(election == null || typeof election.cancelledText == 'undefined' || election.phase == 'cancelled') return; 
 
     // Stop all cron jobs
     announcement.cancelAll();
@@ -105,12 +105,12 @@ async function announceCancelled() {
 
 
 // Announce winners when available
-async function announceWinners() {
+async function announceWinners(election = null) {
 
     console.log('announceWinners() called: ', election.arrWinners);
 
     // Needs to have ended
-    if(typeof election === 'undefined' || election == null || election.phase != 'ended') return; 
+    if(election == null || election.phase != 'ended') return; 
 
     // Stop all cron jobs
     announcement.cancelAll();
@@ -157,7 +157,7 @@ const main = async () => {
     room = await client.joinRoom(chatRoomId);
 
     // Try announce winners on startup
-    await announceWinners();
+    await announceWinners(election);
 
     // Variable to store last message for throttling
     let lastMessageTime = -1;
@@ -545,13 +545,13 @@ const main = async () => {
         
         // after re-scraping the election was cancelled
         if (election.phase === 'cancelled' && election.prev.phase !== election.phase) {
-            await announceCancelled();
+            await announceCancelled(election);
             return;
         }
         
         // after re-scraping we have winners
         else if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
-            await announceWinners();
+            await announceWinners(election);
             return;
         }
         
