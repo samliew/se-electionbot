@@ -142,10 +142,10 @@ export default class ScheduledAnnouncement {
     }
 
     cancelAll() {
-        if(this._nominationTask == null) this._nominationTask.stop();
-        if(this._primaryTask == null) this._primaryTask.stop();
-        if(this._electionTask == null) this._electionTask.stop();
-        if(this._winnerTask == null) this._winnerTask.stop();
+        if(this._nominationTask != null) this._nominationTask.stop();
+        if(this._primaryTask != null) this._primaryTask.stop();
+        if(this._electionTask != null) this._electionTask.stop();
+        if(this._winnerTask != null) this._winnerTask.stop();
         
         this._nominationSchedule = null;
         this._primarySchedule = null;
