@@ -107,6 +107,8 @@ async function announceCancelled() {
 // Announce winners when available
 async function announceWinners() {
 
+    console.log('announceWinners() called: ', election.arrWinners);
+
     // Needs to have ended
     if(typeof election === 'undefined' || election == null || election.phase != 'ended') return; 
 
@@ -526,10 +528,10 @@ const main = async () => {
             console.log('SCRAPE', election.updated, election);
 
             // Log election candidates
-            console.log('Election candidates', election.arrNominees);
+            //console.log('Election candidates', election.arrNominees);
 
             // Log election winners
-            console.log('Election winners', election.arrWinners);
+            //console.log('Election winners', election.arrWinners);
         }
 
         // No previous scrape results yet, do not proceed
