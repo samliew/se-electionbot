@@ -25,7 +25,7 @@ const accountPassword = process.env.ACCOUNT_PASSWORD;
 const electionSite = process.env.ELECTION_SITE;
 const electionNum = process.env.ELECTION_NUM;
 const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(v => Number(v));
-const scrapeInterval = debug ? 3 : 5;
+const scrapeInterval = Number(process.env.SCRAPE_INTERVAL) || 3;
 
 
 // App variables
@@ -121,7 +121,7 @@ async function announceWinners() {
 
     // Build the message
     let msg = '';
-    if(election.arrWinners && election.arrWinners.length > 0) {
+    if(election.arrWinners.length > 0) {
         msg += ` Congratulations to the winner${election.arrWinners.length == 1 ? '' : 's'} ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}!`;
     }
 
@@ -153,6 +153,9 @@ const main = async () => {
     
     // Join room
     room = await client.joinRoom(chatRoomId);
+
+    // Try announce winners on startup
+    await announceWinners();
 
     // Variable to store last message for throttling
     let lastMessageTime = -1;
@@ -255,10 +258,6 @@ const main = async () => {
             else if(content.includes('chatroom')) {
                 responseText = `The election chat room is at ${election.chatUrl}`;
             }
-            else if(content.includes('announce winners')) {
-                await announceWinners();
-                return;
-            }
             else if(content.includes('shutdown')) {
 
                 await room.sendMessage(`*farewell...*`);
@@ -279,7 +278,7 @@ const main = async () => {
             }
             else if(content.includes('commands')) {
                 responseText = 'admin commands: *' + [
-                    'say', 'alive', 'cron', 'test cron', 'chatroom', 'throttle', 'set throttle X (seconds)', 'clear timeout', 'timeout X (minutes)', 'time', 'shutdown', 'announce winners'
+                    'say', 'alive', 'cron', 'test cron', 'chatroom', 'throttle', 'set throttle X (seconds)', 'clear timeout', 'timeout X (minutes)', 'time', 'shutdown'
                 ].join(', ') + '*';
             }
             
@@ -531,11 +530,6 @@ const main = async () => {
 
             // Log election winners
             console.log('Election winners', election.arrWinners);
-
-            if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
-                await announceWinners();
-                return;
-            }
         }
 
         // No previous scrape results yet, do not proceed
