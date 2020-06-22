@@ -203,7 +203,7 @@ const main = async () => {
         const textToElection = daysToElection > 1 ? 'in ' + daysToElection + ' day' + pluralize(daysToElection) :
             hoursToElection > 1 ? 'in ' + hoursToElection + ' hour' + pluralize(hoursToElection) :
             'soon';
-        const linkToElection = `[${textToElection}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${tadDateFormat(election.dateElection)}})`;
+        const timestampLinkToElection = `[${textToElection}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${tadDateFormat(election.dateElection)}})`;
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
@@ -250,7 +250,7 @@ const main = async () => {
             }
             else if(content.includes('time')) {
                 responseText = `UTC time: ${utils.dateToTimestamp()}`;
-                if(toElection > 0) responseText += ` (election phase starts ${linkToElection})`;
+                if(toElection > 0) responseText += ` (election phase starts ${timestampLinkToElection})`;
             }
             else if(content.includes('chatroom')) {
                 responseText = `The election chat room is at ${election.chatUrl}`;
@@ -334,25 +334,8 @@ const main = async () => {
 
                     responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url}): `;
 
+                    // Can't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
                     responseText += election.arrNominees.map(v => v.userName).join(', ');
-
-                    // If there are more than 6 candidates, split into two messages otherwise we hit the 500-char limit
-                    /*
-                    if(election.arrNominees.length <= 6) {
-                        responseText += election.arrNominees.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ');
-                    }
-                    else {
-                        let arrTemp = election.arrNominees;
-                        responseText += arrTemp.slice(0, 6).map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ') + ', ';
-
-                        // Send first message
-                        console.log('RESPONSE', responseText);
-                        await room.sendMessage(responseText);
-
-                        // Set second message
-                        responseText = arrTemp.slice(6).map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ');
-                    }
-                    */
                 }
                 else {
                     responseText = `There are no users who have nominated themselves yet.`;
@@ -396,13 +379,23 @@ const main = async () => {
             }
 
             // How to nominate self/others
-            else if(['how', 'where'].some(x => content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && ['myself', 'name', 'user', 'someone', 'somebody', 'others', 'another'].some(x => content.includes(x))) {
+            else if( (['how', 'where'].some(x => content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && [' i ', 'myself', 'name', 'user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)))
+                  || (['how to', 'how can'].some(x => content.includes(x)) && ['be', 'mod'].every(x => content.includes(x))) ) {
                 let reqs = [`at least ${election.repNominate} reputation`];
                 if(electionSite.includes('stackoverflow.com')) reqs.push(`awarded these badges (Civic Duty, Strunk & White, Deputy, Convention)`);
                 if(electionSite.includes('askubuntu.com'))     reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
-                reqs.push(`and cannot have been suspended anywhere on the Stack Exchange Network within the past year`);
+                reqs.push(`and cannot have been suspended anywhere on the [Stack Exchange Network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
 
-                responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need ${reqs.join(', ')}. You cannot nominate another user.`;
+                // Bold additional text if talking about nominating others
+                const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)) ? '**' : '';
+
+                responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need ${reqs.join(', ')}. ${mentionsAnother}You cannot nominate another user.${mentionsAnother}`;
+            }
+
+            // Why be a moderator
+            else if(['why', 'what'].some(x => content.includes(x)) && [' be ', 'benefit', 'pros', 'should', 'entail', 'reward', 'compensat'].some(x => content.includes(x)) && ['mod'].every(x => content.includes(x))) {
+                responseText = `[Elected moderators](https://stackoverflow.com/help/site-moderators) are essential to keeping the site clean, fair, and friendly.` + 
+                  `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
             }
 
             // What is election
@@ -413,15 +406,17 @@ const main = async () => {
             // How/where to vote
             else if(['where', 'how', 'want'].some(x => content.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => content.includes(x)) && ['vote', 'elect'].some(x => content.includes(x))) {
 
+                const informedDecision = election.qnaUrl ? ` If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).` : '';
+
                 switch(election.phase) {
                     case 'election':
                         responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.url}?tab=election).`;
-                        if(election.qnaUrl) responseText += ` If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).`;
+                        responseText += informedDecision;
                         break;
                     case 'primary':
                         responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.url}?tab=primary).`;
-                        if(election.qnaUrl) responseText += ` If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).`;
-                        responseText += ` Don't forget to come back ${linkToElection} to also vote in the actual election phase!`;
+                        responseText += informedDecision;
+                        responseText += ` Don't forget to come back ${timestampLinkToElection} to also vote in the actual election phase!`;
                         break;
                     case 'nomination':
                         responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.url}?tab=nomination)`;
@@ -458,7 +453,7 @@ const main = async () => {
                     responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. `;
 
                     if(election.phase === 'nomination') responseText += `There are currently ${election.arrNominees.length} candidates.`;
-                    else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${linkToElection} to vote in the actual election.`;
+                    else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${timestampLinkToElection} to vote in the actual election.`;
                     else if(election.phase === 'election') responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
                 }
             }
