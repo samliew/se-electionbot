@@ -38,8 +38,8 @@ module.exports = {
     {
         if(typeof date === 'number') date = new Date(date); // from int
         if(typeof date !== 'object') date = new Date(); // invalid, default to now
-        
-        return d.replace(/(-|:|\d\dZ)/gi, '').replace(/ /g, 'T');
+
+        return date.replace(/(-|:|\d\dZ)/gi, '').replace(/ /g, 'T');
     },
 
     dateToTimestamp: function(date)
