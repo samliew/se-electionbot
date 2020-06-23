@@ -409,13 +409,24 @@ const main = async () => {
                     let repScore = Math.floor(userRep / 1000);
                     if(repScore > 20) repScore = 20;
                     const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v.name)).length;
+                    const candScore = repScore + badgeScore;
 
                     console.log(resolvedMsg.userId, userRep, repScore, badgeScore);
-                    responseText = `your candidate score is ${repScore + badgeScore}.`;
+
+                    if(candScore == 40) {
+                        responseText = `Wow! You have a maximum candidate score of 40!`;
+
+                        if(election.status == null || election.status === 'nomination') {
+                            responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
+                        }
+                    }
+                    else {
+                        responseText = `Your candidate score is ${candScore} (out of 40).`;
+                    }
                 }
                 catch(e) {
                     console.error(e);
-                    responseText = `sorry, I was unable to calculate your candidate score.`;
+                    responseText = `sorry I was unable to calculate your candidate score :(`;
                 }
 
                 if(responseText != null) {
