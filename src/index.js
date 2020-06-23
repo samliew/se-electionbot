@@ -379,7 +379,7 @@ const main = async () => {
             // Calculate own candidate score (SO only)
             else if(content.includes('my candidate score')) {
 
-                if(!siteUrl.includes('stackoverflow')) return;
+                if(!election.siteUrl.includes('stackoverflow')) return;
                 if(isNaN(resolvedMsg.userId)) return;
 
                 const electionBadges = [
@@ -401,6 +401,7 @@ const main = async () => {
 
                     if(typeof data === 'undefined' || typeof data.items === 'undefined') {
                         console.log(data);
+                        console.log(data.items);
                     }
 
                     const userBadges = data.items || [];
@@ -409,7 +410,7 @@ const main = async () => {
                     if(repScore > 20) repScore = 20;
                     const badgeScore = userBadges.filter(v => electionBadges.includes(v.name)).length;
 
-                    console.log(userBadges, userRep, repScore, badgeScore);
+                    console.log(userBadges, resolvedMsg.userId, userRep, repScore, badgeScore);
                     responseText = `your candidate score is ${repScore + badgeScore}.`;
                 }
                 catch(e) {
