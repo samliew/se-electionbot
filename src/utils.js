@@ -39,7 +39,7 @@ module.exports = {
         if(typeof date === 'number') date = new Date(date); // from int
         if(typeof date !== 'object') date = new Date(); // invalid, default to now
 
-        return date.replace(/(-|:|\d\dZ)/gi, '').replace(/ /g, 'T');
+        return date.toISOString().replace(/(-|:|\d\dZ)/gi, '').replace(/\d{2}\.\d+/, '').replace(/ /g, 'T');
     },
 
     dateToTimestamp: function(date)

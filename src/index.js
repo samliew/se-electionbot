@@ -163,7 +163,7 @@ const main = async () => {
     let lastMessageTime = -1;
 
     // Default election message
-    const notStartedYet = `The [Election](${election.url}) for ${election.sitename} has not started yet. Come back at ${utils.linkToRelativeTimestamp(election.dateNomination)}.`;
+    const notStartedYet = `The [Election](${election.url}) for ${election.sitename} has not started yet. Come back at ${utils.linkToUtcTimestamp(election.dateNomination)}.`;
 
 
     // Main event listener
@@ -200,7 +200,7 @@ const main = async () => {
         console.log('EVENT', resolvedMsg);
 
         // Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
-        const timestampLinkToElection = utils.linkToRelativeTimestamp(election.dateElection);
+        const relativeTimestampLinkToElection = utils.linkToRelativeTimestamp(election.dateElection);
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
@@ -247,7 +247,7 @@ const main = async () => {
             }
             else if(content.includes('time')) {
                 responseText = `UTC time: ${utils.dateToTimestamp()}`;
-                if(toElection > 0) responseText += ` (election phase starts ${timestampLinkToElection})`;
+                if(toElection > 0) responseText += ` (election phase starts ${relativeTimestampLinkToElection})`;
             }
             else if(content.includes('chatroom')) {
                 responseText = `The election chat room is at ${election.chatUrl}`;
@@ -420,7 +420,7 @@ const main = async () => {
                     case 'primary':
                         responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.url}?tab=primary).`;
                         responseText += informedDecision;
-                        responseText += ` Don't forget to come back ${timestampLinkToElection} to also vote in the actual election phase!`;
+                        responseText += ` Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the actual election phase!`;
                         break;
                     case 'nomination':
                         responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.url}?tab=nomination)`;
@@ -457,7 +457,7 @@ const main = async () => {
                     responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. `;
 
                     if(election.phase === 'nomination') responseText += `There are currently ${election.arrNominees.length} candidates.`;
-                    else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${timestampLinkToElection} to vote in the actual election.`;
+                    else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${relativeTimestampLinkToElection} to vote in the actual election.`;
                     else if(election.phase === 'election') responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
                 }
             }
@@ -500,11 +500,11 @@ const main = async () => {
                 }
                 else if(election.phase == 'nomination' && election.datePrimary == null) {
                     const relativetime = toRelativetime(election.dateElection);
-                    responseText = `The election is currently in the nomination phase. The next phase is the **election** at ${timestampLinkToElection} (${relativetime}).`;
+                    responseText = `The election is currently in the nomination phase. The next phase is the **election** at ${linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
                 }
                 else if(election.phase == 'primary') {
                     const relativetime = toRelativetime(election.dateElection);
-                    responseText = `The election is currently in the primary phase. The next phase is the **election** at ${timestampLinkToElection} (${relativetime}).`;
+                    responseText = `The election is currently in the primary phase. The next phase is the **election** at ${linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
                 }
                 else if(election.phase == 'election') {
                     const relativetime = toRelativetime(election.dateEnded);
