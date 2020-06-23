@@ -34,6 +34,14 @@ module.exports = {
         }, mins * 60000);
     },
 
+    toTadDateFormat: function(date)
+    {
+        if(typeof date === 'number') date = new Date(date); // from int
+        if(typeof date !== 'object') date = new Date(); // invalid, default to now
+        
+        return d.replace(/(-|:|\d\dZ)/gi, '').replace(/ /g, 'T');
+    },
+
     dateToTimestamp: function(date)
     {
         if(typeof date === 'number') date = new Date(date); // from int
@@ -61,21 +69,11 @@ module.exports = {
 
     linkToRelativeTimestamp: function(date)
     {
-        if(typeof date === 'number') date = new Date(date); // from int
-        if(typeof date !== 'object') date = new Date(); // invalid, default to now
-
-        const tadDateFormat = d => d.replace(/(-|:|\d\dZ)/gi, '').replace(/ /g, 'T');
-
-        return `[${toRelativetime(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${tadDateFormat(date)}})`
+        return `[${this.toRelativetime(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${this.toTadDateFormat(date)}})`
     },
 
     linkToUtcTimestamp: function(date)
     {
-        if(typeof date === 'number') date = new Date(date); // from int
-        if(typeof date !== 'object') date = new Date(); // invalid, default to now
-
-        const tadDateFormat = d => d.replace(/(-|:|\d\dZ)/gi, '').replace(/ /g, 'T');
-
-        return `[${dateToTimestamp(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${tadDateFormat(date)}})`
+        return `[${this.dateToTimestamp(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${this.toTadDateFormat(date)}})`
     }
 }
