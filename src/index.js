@@ -305,8 +305,9 @@ const main = async () => {
             else if(['help', 'commands', 'faq', 'info', 'list'].some(x => content.includes(x))) {
                 responseText = '\n' + ['Examples of FAQ topics I can help with:', 
                     'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote', 
-                    'how to decide who to vote for', 'how many voted', 'why be a moderator', 'what are the moderator benefits',
-                    'are moderators paid', 'who are the current moderators', 'election status', 'election schedule', 
+                    'how to decide who to vote for', 'how many users voted', 'why should I be a moderator',
+                    'are moderators paid', 'who are the current moderators', 'what is the election status',
+                    'when is the election starting', 'when is the election ending',
                     'how is candidate score calculated', 'moderation badges', 'participation badges', 'editing badges',
                 ].join('\n- ');
             }
@@ -377,7 +378,8 @@ const main = async () => {
             }
 
             // How to nominate self/others
-            else if( (['how', 'where'].some(x => content.includes(x)) && ['nominate', 'vote', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && [' i ', 'myself', 'name', 'user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)))
+            // - can't use keyword "vote" here
+            else if( (['how', 'where'].some(x => content.includes(x)) && ['nominate', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && [' i ', 'myself', 'name', 'user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)))
                   || (['how to', 'how can'].some(x => content.includes(x)) && ['be', 'mod'].every(x => content.includes(x))) ) {
                 let reqs = [`at least ${election.repNominate} reputation`];
                 if(electionSite.includes('stackoverflow.com')) reqs.push(`awarded these badges (Civic Duty, Strunk & White, Deputy, Convention)`);
@@ -400,6 +402,31 @@ const main = async () => {
             else if(['why', 'what', 'are', 'how'].some(x => content.includes(x)) && ['reward', 'paid', 'compensat', 'money'].some(x => content.includes(x)) && content.includes('mod')) {
                 responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
                   `This is a voluntary role, and moderators do not get paid by Stack Exchange.`;
+            }
+
+            // Status
+            else if(content.includes('election') && ['status', 'progress', 'going'].some(x => content.includes(x))) {
+
+                if(election.phase == null) {
+                    responseText = notStartedYet;
+                }
+                else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
+                    responseText = `The [election](${election.url}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
+                }
+                // Possible to have ended but no winners in cache yet? or will the cron job resolve this?
+                else if(election.phase === 'ended') {
+                    responseText = `The [election](${election.url}) has ended.`;
+                }
+                else if(election.phase === 'cancelled') {
+                    responseText = election.statVoters;
+                }
+                else {
+                    responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. `;
+
+                    if(election.phase === 'nomination') responseText += `There are currently ${election.arrNominees.length} candidates.`;
+                    else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${relativeTimestampLinkToElection} to vote in the actual election.`;
+                    else if(election.phase === 'election') responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
+                }
             }
 
             // What is election
@@ -437,31 +464,6 @@ const main = async () => {
                 }
             }
 
-            // Status
-            else if(['what', 'how'].some(x => content.includes(x)) && content.includes('election') && ['status', 'process', 'progress', 'going'].some(x => content.includes(x))) {
-
-                if(election.phase == null) {
-                    responseText = notStartedYet;
-                }
-                else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The [election](${election.url}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
-                }
-                // Possible to have ended but no winners in cache yet? or will the cron job resolve this?
-                else if(election.phase === 'ended') {
-                    responseText = `The [election](${election.url}) has ended.`;
-                }
-                else if(election.phase === 'cancelled') {
-                    responseText = election.statVoters;
-                }
-                else {
-                    responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. `;
-
-                    if(election.phase === 'nomination') responseText += `There are currently ${election.arrNominees.length} candidates.`;
-                    else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${relativeTimestampLinkToElection} to vote in the actual election.`;
-                    else if(election.phase === 'election') responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
-                }
-            }
-
             // Who are the winners
             else if(['who'].some(x => content.includes(x)) && ['winners', 'won', 'new mod'].some(x => content.includes(x))) {
                 
@@ -476,20 +478,8 @@ const main = async () => {
                 }
             }
             
-            // Election schedule
-            else if(content.includes('election schedule') || content.includes('when is the election')) {
-                const arrow = ' <-- current phase';
-                responseText = [
-                    `    ${election.sitename} Election ${election.electionNum} Schedule`,
-                    `    Nomination: ${election.dateNomination}` + (election.phase == 'nomination' ? arrow:''),
-                    `    Primary:    ${election.datePrimary || '(none)'}` + (election.phase == 'primary' ? arrow:''),
-                    `    Election:   ${election.dateElection}` + (election.phase == 'election' ? arrow:''),
-                    `    End:        ${election.dateEnded}` + (election.phase == 'ended' ? arrow:'')
-                ].join('\n');
-            }
-            
             // Next phase
-            else if(content.includes('next phase')) {
+            else if(content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
                 if(election.phase == null) {
                     const relativetime = utils.dateToRelativetime(election.dateNomination);
                     responseText = `The election has not started yet. The **nomination** phase is starting at ${utils.linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
@@ -511,8 +501,31 @@ const main = async () => {
                     responseText = `The election is currently in the final election phase, ending at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
                 }
                 else if(election.phase == 'ended') {
-                    responseText = `The election is over.`;
+                    responseText = `The election is already over.`;
                 }
+            }
+            
+            // When is the election ending
+            else if(content.includes('election end') || content.includes('does it end') || content.includes('is it ending')) {
+                if(election.phase == 'ended') {
+                    responseText = `The election is already over.`;
+                }
+                else {
+                    const relativetime = utils.dateToRelativetime(election.dateEnded);
+                    responseText = `The election ends at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
+                }
+            }
+            
+            // Election schedule
+            else if(content.includes('election schedule') || content.includes('when is the election')) {
+                const arrow = ' <-- current phase';
+                responseText = [
+                    `    ${election.sitename} Election ${election.electionNum} Schedule`,
+                    `    Nomination: ${election.dateNomination}` + (election.phase == 'nomination' ? arrow:''),
+                    `    Primary:    ${election.datePrimary || '(none)'}` + (election.phase == 'primary' ? arrow:''),
+                    `    Election:   ${election.dateElection}` + (election.phase == 'election' ? arrow:''),
+                    `    End:        ${election.dateEnded}` + (election.phase == 'ended' ? arrow:'')
+                ].join('\n');
             }
             
             if(responseText != null) {
