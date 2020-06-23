@@ -413,7 +413,7 @@ const main = async () => {
 
                     const missingBadges = [];
                     electionBadgeNames.forEach(electionBadge => {
-                        if(!userBadges.includes(electionBadge)) missingBadges.push(electionBadge);
+                        if(!userBadges.includes(electionBadge)) missingBadges.push(electionBadge.replace('&amp;', '&'));
                     });
 
                     console.log(resolvedMsg.userId, userRep, repScore, badgeScore, missingBadges);
