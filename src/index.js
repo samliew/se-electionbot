@@ -26,7 +26,7 @@ const accountPassword = process.env.ACCOUNT_PASSWORD;
 const electionSite = process.env.ELECTION_SITE;
 const electionNum = process.env.ELECTION_NUM;
 const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(v => Number(v));
-const scrapeInterval = Number(process.env.SCRAPE_INTERVAL) || 3;
+const scrapeInterval = Number(process.env.SCRAPE_INTERVAL_MINS) || 5;
 const stackApikey = process.env.STACK_API_KEY;
 
 
