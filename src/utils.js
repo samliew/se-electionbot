@@ -40,5 +40,42 @@ module.exports = {
         if(typeof date !== 'object') date = new Date(); // invalid, default to now
 
         return date.toISOString().replace('T', ' ').replace(/\.\d+/, '');
+    },
+
+    toRelativetime: function(date, soonText = 'soon')
+    {
+        if(typeof date === 'number') date = new Date(date); // from int
+        if(typeof date !== 'object') date = new Date(); // invalid, default to now
+
+        const pluralize = n => n !== 1 ? 's' : '';
+
+        const diff = new Date(date) - Date.now();
+        const daysTo = Math.floor(diff / (24 * 60 * 60 * 1000));
+        const hoursTo = Math.floor(diff / (60 * 60 * 1000));
+        const textLink = daysTo > 1 ? 'in ' + daysTo + ' day' + pluralize(daysTo) :
+            hoursTo > 1 ? 'in ' + hoursTo + ' hour' + pluralize(hoursTo) :
+            soonText;
+
+        return textLink;
+    },
+
+    linkToRelativeTimestamp: function(date)
+    {
+        if(typeof date === 'number') date = new Date(date); // from int
+        if(typeof date !== 'object') date = new Date(); // invalid, default to now
+
+        const tadDateFormat = d => d.replace(/(-|:|\d\dZ)/gi, '').replace(/ /g, 'T');
+
+        return `[${toRelativetime(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${tadDateFormat(date)}})`
+    },
+
+    linkToUtcTimestamp: function(date)
+    {
+        if(typeof date === 'number') date = new Date(date); // from int
+        if(typeof date !== 'object') date = new Date(); // invalid, default to now
+
+        const tadDateFormat = d => d.replace(/(-|:|\d\dZ)/gi, '').replace(/ /g, 'T');
+
+        return `[${dateToTimestamp(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${tadDateFormat(date)}})`
     }
 }

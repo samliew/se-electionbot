@@ -163,8 +163,7 @@ const main = async () => {
     let lastMessageTime = -1;
 
     // Default election message
-    const tadDateFormat = d => d.replace(/(-|:|\d\dZ)/gi, '').replace(/ /g, 'T');
-    const notStartedYet = `The [Election](${election.url}) for ${election.sitename} has not started yet. Come back at [${election.dateNomination}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${tadDateFormat(election.dateNomination)}).`;
+    const notStartedYet = `The [Election](${election.url}) for ${election.sitename} has not started yet. Come back at ${utils.linkToRelativeTimestamp(election.dateNomination)}.`;
 
 
     // Main event listener
@@ -201,14 +200,7 @@ const main = async () => {
         console.log('EVENT', resolvedMsg);
 
         // Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
-        const now = Date.now();
-        const toElection = new Date(election.dateElection) - now;
-        const daysToElection = Math.floor(toElection / (24 * 60 * 60 * 1000));
-        const hoursToElection = Math.floor(toElection / (60 * 60 * 1000));
-        const textToElection = daysToElection > 1 ? 'in ' + daysToElection + ' day' + pluralize(daysToElection) :
-            hoursToElection > 1 ? 'in ' + hoursToElection + ' hour' + pluralize(hoursToElection) :
-            'soon';
-        const timestampLinkToElection = `[${textToElection}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${tadDateFormat(election.dateElection)}})`;
+        const timestampLinkToElection = utils.linkToRelativeTimestamp(election.dateElection);
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
@@ -499,19 +491,24 @@ const main = async () => {
             // Next phase
             else if(content.includes('next phase')) {
                 if(election.phase == null) {
-                    responseText = `The election has not started yet. The **nomination** phase is starting at ${election.dateNomination}.`;
+                    const relativetime = toRelativetime(election.dateNomination);
+                    responseText = `The election has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
                 }
                 else if(election.phase == 'nomination' && election.datePrimary != null) {
-                    responseText = `The election is currently in the nomination phase. The next phase is the **primary** phase at ${election.datePrimary}.`;
+                    const relativetime = toRelativetime(election.datePrimary);
+                    responseText = `The election is currently in the nomination phase. The next phase is the **primary** at ${linkToUtcTimestamp(election.datePrimary)} (${relativetime}).`;
                 }
                 else if(election.phase == 'nomination' && election.datePrimary == null) {
-                    responseText = `The election is currently in the nomination phase. The next phase is the **election** phase at ${timestampLinkToElection}.`;
+                    const relativetime = toRelativetime(election.dateElection);
+                    responseText = `The election is currently in the nomination phase. The next phase is the **election** at ${timestampLinkToElection} (${relativetime}).`;
                 }
                 else if(election.phase == 'primary') {
-                    responseText = `The election is currently in the primary phase. The next phase is the **election** phase at ${timestampLinkToElection}.`;
+                    const relativetime = toRelativetime(election.dateElection);
+                    responseText = `The election is currently in the primary phase. The next phase is the **election** at ${timestampLinkToElection} (${relativetime}).`;
                 }
                 else if(election.phase == 'election') {
-                    responseText = `The election is currently in the election phase. The election will end at ${election.dateEnded}.`;
+                    const relativetime = toRelativetime(election.dateEnded);
+                    responseText = `The election is currently in the final election phase, ending at ${linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
                 }
                 else if(election.phase == 'ended') {
                     responseText = `The election is over.`;
