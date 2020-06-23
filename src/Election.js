@@ -54,7 +54,8 @@ export default class Election {
             this.updated = Date.now();
             this.url = this.electionUrl;
             this.sitename = $('meta[property="og:site_name"]').attr('content').replace('Stack Exchange', '').trim();
-            this.siteUrl = 'https://' + this.electionUrl.split('/')[2]; // should exclude trailing slash
+            this.siteHostname = this.electionUrl.split('/')[2]; // hostname only, exclude trailing slash
+            this.siteUrl = 'https://' + this.siteHostname; 
             this.title = $('#content h1').first().text().trim();
             this.dateNomination = sidebarValues[0];
             this.datePrimary = sidebarValues[1];

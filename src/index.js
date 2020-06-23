@@ -305,12 +305,13 @@ const main = async () => {
                 responseText = `I'm ${me.name} and ${me.about}`;
             }
             else if(['help', 'commands', 'faq', 'info', 'list'].some(x => content.includes(x))) {
-                responseText = '\n' + ['Examples of FAQ topics I can help with:', 
+                responseText = '\n' + ['Examples of election FAQs I can help with:', 
                     'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote', 
                     'how to decide who to vote for', 'how many users voted', 'why should I be a moderator',
                     'are moderators paid', 'who are the current moderators', 'what is the election status',
                     'when is the election starting', 'when is the election ending',
-                    'how is candidate score calculated', 'moderation badges', 'participation badges', 'editing badges',
+                    'how is candidate score calculated', 'what is my candidate score',
+                    'moderation badges', 'participation badges', 'editing badges',
                 ].join('\n- ');
             }
             
@@ -396,18 +397,17 @@ const main = async () => {
                         headers: {
                             'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
                         },
-                        uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?pagesize=100&order=asc&sort=type&site=stackoverflow&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`,
+                        uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${siteHostname}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`,
                         json: true
                     });
 
                     if(typeof data === 'undefined' || typeof data.items === 'undefined' || data.items.length == 0) {
-                        console.error('no data from API.');
+                        console.error('No data from API.');
                     }
 
                     const userBadges = data.items || [];
                     const userRep = userBadges ? userBadges[0].user.reputation : 0;
-                    let repScore = Math.floor(userRep / 1000);
-                    if(repScore > 20) repScore = 20;
+                    const repScore = Math.min(Math.floor(userRep / 1000), 20);
                     const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v.name)).length;
                     const candScore = repScore + badgeScore;
 
