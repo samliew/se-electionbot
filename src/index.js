@@ -405,13 +405,19 @@ const main = async () => {
                         console.error('No data from API.');
                     }
 
-                    const userBadges = data.items || [];
-                    const userRep = userBadges ? userBadges[0].user.reputation : 0;
+                    const userBadges = data.items.map(v => v.name) || [];
+                    const userRep = data.items ? data.items[0].user.reputation : 0;
+
                     const repScore = Math.min(Math.floor(userRep / 1000), 20);
-                    const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v.name)).length;
+                    const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v)).length;
                     const candScore = repScore + badgeScore;
 
-                    console.log(resolvedMsg.userId, userRep, repScore, badgeScore);
+                    const missingBadges = [];
+                    electionBadgeNames.forEach(electionBadge => {
+                        if(!userBadges.includes(electionBadge)) missingBadges.push(electionBadge);
+                    });
+
+                    console.log(resolvedMsg.userId, userRep, repScore, badgeScore, missingBadges);
 
                     if(candScore == 40) {
                         responseText = `Wow! You have a maximum candidate score of 40!`;
@@ -422,6 +428,10 @@ const main = async () => {
                     }
                     else {
                         responseText = `Your candidate score is ${candScore} (out of 40).`;
+
+                        if(missingBadges.length > 0) {
+                            responseText += ` You are missing these badges: ` + missingBadges.join(', ');
+                        }
                     }
                 }
                 catch(e) {
