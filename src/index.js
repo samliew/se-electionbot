@@ -408,7 +408,8 @@ const main = async () => {
                     responseText = `your candidate score is ${repScore + badgeScore}.`;
                 }
                 catch(e) {
-                    responseText = `sorry, I was unable to calculate your candidate score.`;
+                    console.error(e);
+                    //responseText = `sorry, I was unable to calculate your candidate score.`;
                 }
 
                 if(responseText != null) {
