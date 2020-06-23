@@ -382,10 +382,10 @@ const main = async () => {
                 if(!election.siteUrl.includes('stackoverflow')) return;
                 if(isNaN(resolvedMsg.userId)) return;
 
-                const electionBadges = [
+                const electionBadgeNames = [
                     'Civic Duty', 'Cleanup', 'Deputy', 'Electorate', 'Marshal', 'Sportsmanship', 'Reviewer', 'Steward',
                     'Constituent', 'Convention', 'Enthusiast', 'Investor', 'Quorum', 'Yearling',
-                    'Organizer', 'Copy Editor', 'Explainer', 'Refiner', 'Tag Editor', 'Strunk & White'
+                    'Organizer', 'Copy Editor', 'Explainer', 'Refiner', 'Tag Editor', 'Strunk &amp; White'
                 ];
 
                 try {
@@ -401,21 +401,21 @@ const main = async () => {
                     });
 
                     if(typeof data === 'undefined' || typeof data.items === 'undefined' || data.items.length == 0) {
-                        console.log(data);
+                        console.error('no data from API.');
                     }
 
                     const userBadges = data.items || [];
                     const userRep = userBadges ? userBadges[0].user.reputation : 0;
                     let repScore = Math.floor(userRep / 1000);
                     if(repScore > 20) repScore = 20;
-                    const badgeScore = userBadges.filter(v => electionBadges.includes(v.name)).length;
+                    const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v.name)).length;
 
-                    console.log(userBadges, resolvedMsg.userId, userRep, repScore, badgeScore);
+                    console.log(resolvedMsg.userId, userRep, repScore, badgeScore);
                     responseText = `your candidate score is ${repScore + badgeScore}.`;
                 }
                 catch(e) {
                     console.error(e);
-                    //responseText = `sorry, I was unable to calculate your candidate score.`;
+                    responseText = `sorry, I was unable to calculate your candidate score.`;
                 }
 
                 if(responseText != null) {
