@@ -79,9 +79,8 @@ export default class Election {
                     }
                 }).get();
 
-            this.qnaUrl = electionPost.find('a').not('[href*="/tagged/"]').not('[href*="/chat"]').not('[href*="stackoverflow.blog"]').last().attr('href');
-            if(typeof this.qnaUrl === 'undefined') this.qnaUrl = process.env.ELECTION_QA; // if cannot be found (esp on non-eng sites), needs to be set via env var
-            this.chatUrl = electionPost.find('a[href*="/rooms/"]').attr('href') || process.env.ELECTION_CHATROOM;
+            this.qnaUrl = process.env.ELECTION_QA_URL || electionPost.find('a').not('[href*="/tagged/"]').not('[href*="/chat"]').not('[href*="stackoverflow.blog"]').last().attr('href');
+            this.chatUrl = process.env.ELECTION_CHATROOM_URL || electionPost.find('a[href*="/rooms/"]').attr('href');
             console.log("Election Links", this.qnaUrl, this.chatUrl);
 
             // Calculate phase of election
@@ -90,7 +89,7 @@ export default class Election {
                 new Date(this.dateElection) <= now ? 'election' : 
                 this.datePrimary && new Date(this.datePrimary) <= now ? 'primary' : 
                 new Date(this.dateNomination) <= now ? 'nomination' : 
-                null;
+                null; // default
 
             // If election has ended (or cancelled)
             if(this.phase === 'ended') {
@@ -101,11 +100,11 @@ export default class Election {
                 
                 let winnerElem = $('#mainbar').find('.question-status h2').eq(1);
 
-                // Election cancelled?
+                // Check if election was cancelled?
                 if(winnerElem.text().includes('cancelled')) {
                     this.phase = 'cancelled';
                     
-                    // convert link to chat-friendly markup
+                    // Convert link to chat-friendly markup
                     this.cancelledText = winnerElem.html()
                         .replace(/<a href="/g, 'See [meta](')
                         .replace(/">.+/g, ') for details.').trim();
