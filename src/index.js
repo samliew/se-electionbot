@@ -163,9 +163,9 @@ const main = async () => {
     let lastMessageTime = -1;
 
     // Default election message
-    const notStartedYet = `The [Election](${election.url}) for ${election.sitename} has not started yet. Come back at ${utils.linkToUtcTimestamp(election.dateNomination)}.`;
-
-
+    const relativetime = utils.dateToRelativetime(election.dateNomination);
+    const notStartedYet = `The [election](${election.url}) has not started yet. The **nomination** phase is starting at ${utils.linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
+    
     // Main event listener
     room.on('message', async msg => {
 
@@ -358,7 +358,7 @@ const main = async () => {
 
             // Candidate score calculation
             else if(['how', 'what'].some(x => content.includes(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
-                responseText = `The [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way: 1 point for each 1,000 reputation up to 20,000 reputation (max 20 points), and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges (total 20 points)`;
+                responseText = `The 40-point [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way: 1 point for each 1,000 reputation up to 20,000 reputation (for 20 points); and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges`;
             }
 
             // Stats/How many voted/participated
@@ -413,19 +413,51 @@ const main = async () => {
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
                     responseText = `The [election](${election.url}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
                 }
-                // Possible to have ended but no winners in cache yet? or will the cron job resolve this?
                 else if(election.phase === 'ended') {
-                    responseText = `The [election](${election.url}) has ended.`;
+                    responseText = `The [election](${election.url}) is over.`;
                 }
                 else if(election.phase === 'cancelled') {
                     responseText = election.statVoters;
                 }
+                else if(election.phase === 'election') {
+                    responseText = `The [election](${election.url}?tab=election) is in the final election phase. `;
+                    responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
+                }
                 else {
-                    responseText = `The [moderator election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. `;
+                    responseText = `The [election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. `;
 
                     if(election.phase === 'nomination') responseText += `There are currently ${election.arrNominees.length} candidates.`;
                     else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${relativeTimestampLinkToElection} to vote in the actual election.`;
-                    else if(election.phase === 'election') responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
+                }
+            }
+            
+            // Next phase
+            else if(content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
+
+                if(election.phase == null) {
+                    responseText = notStartedYet;
+                }
+                else if(election.phase == 'nomination' && election.datePrimary != null) {
+                    const relativetime = utils.dateToRelativetime(election.datePrimary);
+                    responseText = `The next phase is the **primary** at ${utils.linkToUtcTimestamp(election.datePrimary)} (${relativetime}).`;
+                }
+                else if(election.phase == 'nomination' && election.datePrimary == null) {
+                    const relativetime = utils.dateToRelativetime(election.dateElection);
+                    responseText = `The next phase is the **election** at ${utils.linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
+                }
+                else if(election.phase == 'primary') {
+                    const relativetime = utils.dateToRelativetime(election.dateElection);
+                    responseText = `The next phase is the **election** at ${utils.linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
+                }
+                else if(election.phase == 'election') {
+                    const relativetime = utils.dateToRelativetime(election.dateEnded);
+                    responseText = `The [election](${election.url}?tab=election) is currently in the final election phase, ending at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
+                }
+                else if(election.phase == 'ended') {
+                    responseText = `The [election](${election.url}) is over.`;
+                }
+                else if(election.phase === 'cancelled') {
+                    responseText = election.statVoters;
                 }
             }
 
@@ -475,33 +507,6 @@ const main = async () => {
                 }
                 else {
                     responseText = `The election is not over yet.`;
-                }
-            }
-            
-            // Next phase
-            else if(content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
-                if(election.phase == null) {
-                    const relativetime = utils.dateToRelativetime(election.dateNomination);
-                    responseText = `The election has not started yet. The **nomination** phase is starting at ${utils.linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
-                }
-                else if(election.phase == 'nomination' && election.datePrimary != null) {
-                    const relativetime = utils.dateToRelativetime(election.datePrimary);
-                    responseText = `The election is currently in the nomination phase. The next phase is the **primary** at ${utils.linkToUtcTimestamp(election.datePrimary)} (${relativetime}).`;
-                }
-                else if(election.phase == 'nomination' && election.datePrimary == null) {
-                    const relativetime = utils.dateToRelativetime(election.dateElection);
-                    responseText = `The election is currently in the nomination phase. The next phase is the **election** at ${utils.linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
-                }
-                else if(election.phase == 'primary') {
-                    const relativetime = utils.dateToRelativetime(election.dateElection);
-                    responseText = `The election is currently in the primary phase. The next phase is the **election** at ${utils.linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
-                }
-                else if(election.phase == 'election') {
-                    const relativetime = utils.dateToRelativetime(election.dateEnded);
-                    responseText = `The election is currently in the final election phase, ending at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
-                }
-                else if(election.phase == 'ended') {
-                    responseText = `The election is already over.`;
                 }
             }
             
