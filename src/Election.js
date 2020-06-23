@@ -3,8 +3,15 @@ const cheerio = require('cheerio');
 
 export default class Election {
 
-    constructor(electionUrl) {
+    constructor(electionUrl, electionNum = null) {
         this.electionUrl = electionUrl;
+
+        if(electionNum) {
+            this.electionNum = Number(electionNum);
+        }
+        else {
+            this.electionNum = Number(electionUrl.split('/').pop()) || null;
+        }
 
         // private
         this._prevObj = null;

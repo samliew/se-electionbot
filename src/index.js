@@ -485,15 +485,37 @@ const main = async () => {
             }
             
             // Election schedule
-            else if(content.includes('election schedule')) {
+            else if(content.includes('election schedule') || content.includes('when is the election')) {
                 const arrow = ' <-- current phase';
                 responseText = [
-                    `    ${election.sitename} Election Schedule`,
+                    `    ${election.sitename} Election ${election.electionNum} Schedule`,
                     `    Nomination: ${election.dateNomination}` + (election.phase == 'nomination' ? arrow:''),
                     `    Primary:    ${election.datePrimary || '(none)'}` + (election.phase == 'primary' ? arrow:''),
                     `    Election:   ${election.dateElection}` + (election.phase == 'election' ? arrow:''),
                     `    End:        ${election.dateEnded}` + (election.phase == 'ended' ? arrow:'')
                 ].join('\n');
+            }
+            
+            // Next phase
+            else if(content.includes('next phase')) {
+                if(election.phase == null) {
+                    responseText = `The election has not started yet. The **nomination** phase is starting at ${election.dateNomination}.`;
+                }
+                else if(election.phase == 'nomination' && election.datePrimary != null) {
+                    responseText = `The election is currently in the nomination phase. The next phase is the **primary** phase at ${election.datePrimary}.`;
+                }
+                else if(election.phase == 'nomination' && election.datePrimary == null) {
+                    responseText = `The election is currently in the nomination phase. The next phase is the **election** phase at ${timestampLinkToElection}.`;
+                }
+                else if(election.phase == 'primary') {
+                    responseText = `The election is currently in the primary phase. The next phase is the **election** phase at ${timestampLinkToElection}.`;
+                }
+                else if(election.phase == 'election') {
+                    responseText = `The election is currently in the election phase. The election will end at ${election.dateEnded}.`;
+                }
+                else if(election.phase == 'ended') {
+                    responseText = `The election is over.`;
+                }
             }
             
             if(responseText != null) {
