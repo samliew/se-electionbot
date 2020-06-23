@@ -37,7 +37,7 @@ module.exports = {
     // Example URL: https://www.timeanddate.com/worldclock/fixedtime.html?iso=20201231T2359
     toTadParamFormat: function(date)
     {
-        if(typeof date === 'number') date = new Date(date); // from int
+        if(typeof date === 'string' || typeof date === 'number') date = new Date(date); // from string or int
         if(typeof date !== 'object') date = new Date(); // invalid, default to now
 
         return date.toISOString().replace(/(-|:|\d\dZ)/gi, '').replace(/\..*$/, '').replace(/ /g, 'T');
@@ -45,7 +45,7 @@ module.exports = {
 
     dateToUtcTimestamp: function(date)
     {
-        if(typeof date === 'number') date = new Date(date); // from int
+        if(typeof date === 'string' || typeof date === 'number') date = new Date(date); // from string or int
         if(typeof date !== 'object') date = new Date(); // invalid, default to now
 
         return date.toISOString().replace('T', ' ').replace(/\.\d+/, '');
@@ -53,7 +53,7 @@ module.exports = {
 
     dateToRelativetime: function(date, soonText = 'soon')
     {
-        if(typeof date === 'number') date = new Date(date); // from int
+        if(typeof date === 'string' || typeof date === 'number') date = new Date(date); // from string or int
         if(typeof date !== 'object') date = new Date(); // invalid, default to now
 
         const pluralize = n => n !== 1 ? 's' : '';
