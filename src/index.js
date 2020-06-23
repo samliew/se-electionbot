@@ -398,8 +398,11 @@ const main = async () => {
                         uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?pagesize=100&order=asc&sort=type&site=stackoverflow&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`
                     });
 
-                    const userBadges = data.items;
+                    if(typeof data === 'undefined' || typeof data.items === 'undefined' || data.items.length == 0) {
+                        console.log(data);
+                    }
 
+                    const userBadges = data.items;
                     const userRep = data.items.length > 0 ? data.items[0].user.reputation : 0;
                     let repScore = Math.floor(userRep / 1000);
                     if(repScore > 20) repScore = 20;
