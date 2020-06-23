@@ -23,8 +23,9 @@ const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
 const accountEmail = process.env.ACCOUNT_EMAIL;
 const accountPassword = process.env.ACCOUNT_PASSWORD;
-const electionSite = process.env.ELECTION_SITE;
-const electionNum = process.env.ELECTION_NUM;
+const electionUrl = process.env.ELECTION_PAGE_URL
+const electionSiteHostname = electionUrl.split('/')[2];
+const electionSiteUrl = 'https://' + electionSiteHostname;
 const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(v => Number(v));
 const scrapeInterval = Number(process.env.SCRAPE_INTERVAL_MINS) || 5;
 const stackApikey = process.env.STACK_API_KEY;
@@ -32,7 +33,6 @@ const stackApikey = process.env.STACK_API_KEY;
 
 // App variables
 const scriptInitDate = new Date();
-const electionUrl = electionSite + '/election/' + electionNum;
 const ignoredEventTypes = [
 //  1,  // MessagePosted
     2,  // MessageEdited
@@ -348,7 +348,7 @@ const main = async () => {
             else if(['what', 'mod', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 8 moderation badges are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward.`;
                 
-                if(electionSite.includes('stackoverflow.com')) {
+                if(electionSiteHostname.includes('stackoverflow.com')) {
                     responseText = `The 8 moderation badges are: `;
                     responseText += `[Civic Duty](https://stackoverflow.com/help/badges/32), [Cleanup](https://stackoverflow.com/help/badges/4), [Deputy](https://stackoverflow.com/help/badges/1002), [Electorate](https://stackoverflow.com/help/badges/155), `;
                     responseText += `[Marshal](https://stackoverflow.com/help/badges/1298), [Sportsmanship](https://stackoverflow.com/help/badges/805), [Reviewer](https://stackoverflow.com/help/badges/1478), [Steward](https://stackoverflow.com/help/badges/2279).`;
@@ -359,7 +359,7 @@ const main = async () => {
             else if(['what', 'participation', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 6 participation badges are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling.`;
                 
-                if(electionSite.includes('stackoverflow.com')) {
+                if(electionSiteHostname.includes('stackoverflow.com')) {
                     responseText = `The 6 participation badges are: `;
                     responseText += `[Constituent](https://stackoverflow.com/help/badges/1974), [Convention](https://stackoverflow.com/help/badges/901), [Enthusiast](https://stackoverflow.com/help/badges/71), `;
                     responseText += `[Investor](https://stackoverflow.com/help/badges/219), [Quorum](https://stackoverflow.com/help/badges/900), [Yearling](https://stackoverflow.com/help/badges/13).`;
@@ -370,7 +370,7 @@ const main = async () => {
             else if(['what', 'editing', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 6 editing badges are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White.`;
                 
-                if(electionSite.includes('stackoverflow.com')) {
+                if(electionSiteHostname.includes('stackoverflow.com')) {
                     responseText = `The 6 editing badges are: `;
                     responseText += `[Organizer](https://stackoverflow.com/help/badges/5), [Copy Editor](https://stackoverflow.com/help/badges/223), [Explainer](https://stackoverflow.com/help/badges/4368), `;
                     responseText += `[Refiner](https://stackoverflow.com/help/badges/4369), [Tag Editor](https://stackoverflow.com/help/badges/254), [Strunk & White](https://stackoverflow.com/help/badges/12).`;
@@ -397,7 +397,7 @@ const main = async () => {
                         headers: {
                             'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
                         },
-                        uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${siteHostname}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`,
+                        uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${electionSiteHostname}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`,
                         json: true
                     });
 
@@ -458,7 +458,7 @@ const main = async () => {
 
             // Current mods
             else if(['who', 'current', 'mod'].every(x => content.includes(x))) {
-                responseText = `The current moderators on ${election.sitename} can be found on this page: [${electionSite}/users?tab=moderators](${electionSite}/users?tab=moderators)`;
+                responseText = `The current moderators on ${election.sitename} can be found on this page: [${electionSite}/users?tab=moderators](${electionSiteUrl}/users?tab=moderators)`;
             }
 
             // How to nominate self/others
@@ -466,8 +466,8 @@ const main = async () => {
             else if( (['how', 'where'].some(x => content.includes(x)) && ['nominate', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && [' i ', 'myself', 'name', 'user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)))
                   || (['how to', 'how can'].some(x => content.includes(x)) && ['be', 'mod'].every(x => content.includes(x))) ) {
                 let reqs = [`at least ${election.repNominate} reputation`];
-                if(electionSite.includes('stackoverflow.com')) reqs.push(`awarded these badges (Civic Duty, Strunk & White, Deputy, Convention)`);
-                if(electionSite.includes('askubuntu.com'))     reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
+                if(electionSiteHostname.includes('stackoverflow.com')) reqs.push(`awarded these badges (Civic Duty, Strunk & White, Deputy, Convention)`);
+                if(electionSiteHostname.includes('askubuntu.com'))     reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
                 reqs.push(`and cannot have been suspended anywhere on the [Stack Exchange Network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
 
                 // Bold additional text if talking about nominating others
@@ -495,7 +495,7 @@ const main = async () => {
                     responseText = notStartedYet;
                 }
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The [election](${election.url}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
+                    responseText = `The [election](${election.url}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
                 }
                 else if(election.phase === 'ended') {
                     responseText = `The [election](${election.url}) is over.`;
@@ -584,7 +584,7 @@ const main = async () => {
             else if(['who'].some(x => content.includes(x)) && ['winners', 'won', 'new mod'].some(x => content.includes(x))) {
                 
                 if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSite + '/users/' + v.userId})`).join(', ')}.`;
+                    responseText = `The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}.`;
                 }
                 else if(election.phase === 'ended') {
                     responseText = `The winners can be found on the [election page](${election.url}).`;
