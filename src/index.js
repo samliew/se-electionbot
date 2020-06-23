@@ -344,19 +344,83 @@ const main = async () => {
             // Moderation badges
             else if(['what', 'mod', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 8 moderation badges are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward.`;
+                
+                if(electionSite.includes('stackoverflow.com')) {
+                    responseText = `The 8 moderation badges are: `;
+                    responseText += `[Civic Duty](https://stackoverflow.com/help/badges/32), [Cleanup](https://stackoverflow.com/help/badges/4), [Deputy](https://stackoverflow.com/help/badges/1002), [Electorate](https://stackoverflow.com/help/badges/155), `;
+                    responseText += `[Marshal](https://stackoverflow.com/help/badges/1298), [Sportsmanship](https://stackoverflow.com/help/badges/805), [Reviewer](https://stackoverflow.com/help/badges/1478), [Steward](https://stackoverflow.com/help/badges/2279).`;
+                }
             }
 
             // Participation badges
             else if(['what', 'participation', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 6 participation badges are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling.`;
+                
+                if(electionSite.includes('stackoverflow.com')) {
+                    responseText = `The 6 participation badges are: `;
+                    responseText += `[Constituent](https://stackoverflow.com/help/badges/1974), [Convention](https://stackoverflow.com/help/badges/901), [Enthusiast](https://stackoverflow.com/help/badges/71), `;
+                    responseText += `[Investor](https://stackoverflow.com/help/badges/219), [Quorum](https://stackoverflow.com/help/badges/900), [Yearling](https://stackoverflow.com/help/badges/13).`;
+                }
             }
 
             // Editing badges
             else if(['what', 'editing', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 6 editing badges are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White.`;
+                
+                if(electionSite.includes('stackoverflow.com')) {
+                    responseText = `The 6 editing badges are: `;
+                    responseText += `[Organizer](https://stackoverflow.com/help/badges/5), [Copy Editor](https://stackoverflow.com/help/badges/223), [Explainer](https://stackoverflow.com/help/badges/4368), `;
+                    responseText += `[Refiner](https://stackoverflow.com/help/badges/4369), [Tag Editor](https://stackoverflow.com/help/badges/254), [Strunk & White](https://stackoverflow.com/help/badges/12).`;
+                }
             }
 
-            // Candidate score calculation
+            // Calculate own candidate score (SO only)
+            else if(content === 'what is my candidate score') {
+
+                if(isNaN(resolvedMsg.userId)) return;
+
+                const electionBadges = [
+                    'Civic Duty', 'Cleanup', 'Deputy', 'Electorate', 'Marshal', 'Sportsmanship', 'Reviewer', 'Steward',
+                    'Constituent', 'Convention', 'Enthusiast', 'Investor', 'Quorum', 'Yearling',
+                    'Organizer', 'Copy Editor', 'Explainer', 'Refiner', 'Tag Editor', 'Strunk & White'
+                ];
+
+                try {
+                    const data = await request({
+                        gzip: true, // important: https://meta.stackexchange.com/a/446
+                        simple: false,
+                        resolveWithFullResponse: false,
+                        headers: {
+                            'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
+                        },
+                        uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?pagesize=100&order=asc&sort=type&site=stackoverflow&filter=!SWJuQzAN)_Pb81O3B)`
+                    });
+
+                    const userBadges = data.items;
+
+                    const userRep = data.items.length > 0 ? data.items[0].user.reputation : 0;
+                    let repScore = Math.floor(userRep / 1000);
+                    if(repScore > 20) repScore = 20;
+                    const badgeScore = userBadges.filter(v => electionBadges.includes(v.name));
+
+                    responseText = `your candidate score is ${repScore + badgeScore}.`;
+                }
+                catch(e) {
+                    responseText = `sorry, I was unable to calculate your candidate score.`;
+                }
+
+                if(responseText != null) {
+                    console.log('RESPONSE', responseText);
+                    await msg.reply(responseText);
+    
+                    // Record last sent message time so we don't flood the room
+                    lastMessageTime = Date.now();
+
+                    return;
+                }
+            }
+
+            // Candidate score formula
             else if(['how', 'what'].some(x => content.includes(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
                 responseText = `The 40-point [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way: 1 point for each 1,000 reputation up to 20,000 reputation (for 20 points); and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges`;
             }
@@ -437,23 +501,23 @@ const main = async () => {
                 if(election.phase == null) {
                     responseText = notStartedYet;
                 }
-                else if(election.phase == 'nomination' && election.datePrimary != null) {
+                else if(election.phase === 'nomination' && election.datePrimary != null) {
                     const relativetime = utils.dateToRelativetime(election.datePrimary);
                     responseText = `The next phase is the **primary** at ${utils.linkToUtcTimestamp(election.datePrimary)} (${relativetime}).`;
                 }
-                else if(election.phase == 'nomination' && election.datePrimary == null) {
+                else if(election.phase === 'nomination' && election.datePrimary == null) {
                     const relativetime = utils.dateToRelativetime(election.dateElection);
                     responseText = `The next phase is the **election** at ${utils.linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
                 }
-                else if(election.phase == 'primary') {
+                else if(election.phase === 'primary') {
                     const relativetime = utils.dateToRelativetime(election.dateElection);
                     responseText = `The next phase is the **election** at ${utils.linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
                 }
-                else if(election.phase == 'election') {
+                else if(election.phase === 'election') {
                     const relativetime = utils.dateToRelativetime(election.dateEnded);
                     responseText = `The [election](${election.url}?tab=election) is currently in the final election phase, ending at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
                 }
-                else if(election.phase == 'ended') {
+                else if(election.phase === 'ended') {
                     responseText = `The [election](${election.url}) is over.`;
                 }
                 else if(election.phase === 'cancelled') {
