@@ -1,5 +1,6 @@
 import Client from 'chatexchange';
 const Election = require('./Election').default;
+const request = require('request-promise');
 const entities = new (require('html-entities').AllHtmlEntities);
 const announcement = new (require('./ScheduledAnnouncement').default);
 const utils = require('./utils');
@@ -26,6 +27,7 @@ const electionSite = process.env.ELECTION_SITE;
 const electionNum = process.env.ELECTION_NUM;
 const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(v => Number(v));
 const scrapeInterval = Number(process.env.SCRAPE_INTERVAL) || 3;
+const stackApikey = process.env.STACK_API_KEY;
 
 
 // App variables
@@ -393,7 +395,7 @@ const main = async () => {
                         headers: {
                             'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
                         },
-                        uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?pagesize=100&order=asc&sort=type&site=stackoverflow&filter=!SWJuQzAN)_Pb81O3B)`
+                        uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?pagesize=100&order=asc&sort=type&site=stackoverflow&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`
                     });
 
                     const userBadges = data.items;
