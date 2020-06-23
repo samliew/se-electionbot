@@ -211,7 +211,7 @@ const main = async () => {
                 responseText = origContent.split(' say ')[1];
             }
             else if(content.includes('alive')) {
-                responseText = `I'm alive on ${scriptHostname}, started on ${utils.dateToTimestamp(scriptInitDate)} with an uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1000)} seconds.` + 
+                responseText = `I'm alive on ${scriptHostname}, started on ${utils.dateToUtcTimestamp(scriptInitDate)} with an uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1000)} seconds.` + 
                     (debug ? ' I am in debug mode.' : '');
             }
             else if(content.includes('test cron')) {
@@ -246,7 +246,7 @@ const main = async () => {
                 lastMessageTime = Date.now() + (num * 60000) - (throttleSecs * 1000);
             }
             else if(content.includes('time')) {
-                responseText = `UTC time: ${utils.dateToTimestamp()}`;
+                responseText = `UTC time: ${utils.dateToUtcTimestamp()}`;
                 if(toElection > 0) responseText += ` (election phase starts ${relativeTimestampLinkToElection})`;
             }
             else if(content.includes('chatroom')) {
@@ -491,23 +491,23 @@ const main = async () => {
             // Next phase
             else if(content.includes('next phase')) {
                 if(election.phase == null) {
-                    const relativetime = toRelativetime(election.dateNomination);
+                    const relativetime = utils.toRelativetime(election.dateNomination);
                     responseText = `The election has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
                 }
                 else if(election.phase == 'nomination' && election.datePrimary != null) {
-                    const relativetime = toRelativetime(election.datePrimary);
+                    const relativetime = utils.toRelativetime(election.datePrimary);
                     responseText = `The election is currently in the nomination phase. The next phase is the **primary** at ${linkToUtcTimestamp(election.datePrimary)} (${relativetime}).`;
                 }
                 else if(election.phase == 'nomination' && election.datePrimary == null) {
-                    const relativetime = toRelativetime(election.dateElection);
+                    const relativetime = utils.toRelativetime(election.dateElection);
                     responseText = `The election is currently in the nomination phase. The next phase is the **election** at ${linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
                 }
                 else if(election.phase == 'primary') {
-                    const relativetime = toRelativetime(election.dateElection);
+                    const relativetime = utils.toRelativetime(election.dateElection);
                     responseText = `The election is currently in the primary phase. The next phase is the **election** at ${linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
                 }
                 else if(election.phase == 'election') {
-                    const relativetime = toRelativetime(election.dateEnded);
+                    const relativetime = utils.toRelativetime(election.dateEnded);
                     responseText = `The election is currently in the final election phase, ending at ${linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
                 }
                 else if(election.phase == 'ended') {

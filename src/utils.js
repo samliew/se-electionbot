@@ -34,15 +34,16 @@ module.exports = {
         }, mins * 60000);
     },
 
-    toTadDateFormat: function(date)
+    // Example URL: https://www.timeanddate.com/worldclock/fixedtime.html?iso=20201231T2359
+    toTadParamFormat: function(date)
     {
         if(typeof date === 'number') date = new Date(date); // from int
         if(typeof date !== 'object') date = new Date(); // invalid, default to now
 
-        return date.toISOString().replace(/(-|:|\d\dZ)/gi, '').replace(/\d{2}\.\d+/, '').replace(/ /g, 'T');
+        return date.toISOString().replace(/(-|:|\d\dZ)/gi, '').replace(/\..*$/, '').replace(/ /g, 'T');
     },
 
-    dateToTimestamp: function(date)
+    dateToUtcTimestamp: function(date)
     {
         if(typeof date === 'number') date = new Date(date); // from int
         if(typeof date !== 'object') date = new Date(); // invalid, default to now
@@ -50,7 +51,7 @@ module.exports = {
         return date.toISOString().replace('T', ' ').replace(/\.\d+/, '');
     },
 
-    toRelativetime: function(date, soonText = 'soon')
+    dateToRelativeTimestamp: function(date, soonText = 'soon')
     {
         if(typeof date === 'number') date = new Date(date); // from int
         if(typeof date !== 'object') date = new Date(); // invalid, default to now
@@ -69,11 +70,11 @@ module.exports = {
 
     linkToRelativeTimestamp: function(date)
     {
-        return `[${this.toRelativetime(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${this.toTadDateFormat(date)}})`
+        return `[${this.dateToRelativeTimestamp(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${this.toTadParamFormat(date)}})`
     },
 
     linkToUtcTimestamp: function(date)
     {
-        return `[${this.dateToTimestamp(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${this.toTadDateFormat(date)}})`
+        return `[${this.dateToUtcTimestamp(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${this.toTadParamFormat(date)}})`
     }
 }
