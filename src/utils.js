@@ -51,7 +51,7 @@ module.exports = {
         return date.toISOString().replace('T', ' ').replace(/\.\d+/, '');
     },
 
-    dateToRelativeTimestamp: function(date, soonText = 'soon')
+    dateToRelativetime: function(date, soonText = 'soon')
     {
         if(typeof date === 'number') date = new Date(date); // from int
         if(typeof date !== 'object') date = new Date(); // invalid, default to now
