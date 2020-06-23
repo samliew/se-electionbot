@@ -399,13 +399,13 @@ const main = async () => {
             }
 
             // Why be a moderator
-            else if(['why', 'what', 'are', 'is', 'should'].some(x => content.includes(x)) && ['be a', 'become', 'benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && ['mod'].every(x => content.includes(x))) {
+            else if(['why', 'what', 'are', 'is', 'should'].some(x => content.includes(x)) && ['be a', 'become', 'benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && content.includes('mod')) {
                 responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
                   `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
             }
 
             // Are moderators paid
-            else if(['why', 'what', 'are', 'how'].some(x => content.includes(x)) && ['reward', 'paid', 'compensat', 'money'].some(x => content.includes(x)) && ['mod'].every(x => content.includes(x))) {
+            else if(['why', 'what', 'are', 'how'].some(x => content.includes(x)) && ['reward', 'paid', 'compensat', 'money'].some(x => content.includes(x)) && content.includes('mod')) {
                 responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
                   `This is a voluntary role, and moderators do not get paid by Stack Exchange.`;
             }
@@ -446,7 +446,7 @@ const main = async () => {
             }
 
             // Status
-            else if(['what\'s the', 'whats the', 'election'].some(x => content.includes(x)) && ['status', 'process', 'progress', 'going'].some(x => content.includes(x))) {
+            else if(['what', 'how'].some(x => content.includes(x)) && content.includes('election') && ['status', 'process', 'progress', 'going'].some(x => content.includes(x))) {
 
                 if(election.phase == null) {
                     responseText = notStartedYet;
