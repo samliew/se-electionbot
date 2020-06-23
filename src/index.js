@@ -396,12 +396,12 @@ const main = async () => {
                         headers: {
                             'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
                         },
-                        uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?pagesize=100&order=asc&sort=type&site=stackoverflow&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`
+                        uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?pagesize=100&order=asc&sort=type&site=stackoverflow&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`,
+                        json: true
                     });
 
-                    if(typeof data === 'undefined' || typeof data.items === 'undefined') {
+                    if(typeof data === 'undefined' || typeof data.items === 'undefined' || data.items.length == 0) {
                         console.log(data);
-                        console.log(data.items);
                     }
 
                     const userBadges = data.items || [];
