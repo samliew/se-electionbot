@@ -380,7 +380,6 @@ const main = async () => {
             // Calculate own candidate score (SO only)
             else if(content.includes('my candidate score')) {
 
-                if(!election.siteUrl.includes('stackoverflow')) return;
                 if(isNaN(resolvedMsg.userId)) return;
 
                 const electionBadgeNames = [
