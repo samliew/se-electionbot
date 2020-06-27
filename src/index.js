@@ -454,7 +454,7 @@ const main = async () => {
                                 missingBadges.join(', ');
                         }
                         else {
-                            responseText += `Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
+                            responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
                         }
                     }
                 }
