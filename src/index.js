@@ -66,7 +66,7 @@ let room = null;
 
 
 // Helper functions
-const pluralize = n => n !== 1 ? 's' : '';
+const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
 
 
 // Overrides console.log/.error to insert newlines
@@ -387,6 +387,9 @@ const main = async () => {
                     'Constituent', 'Convention', 'Enthusiast', 'Investor', 'Quorum', 'Yearling',
                     'Organizer', 'Copy Editor', 'Explainer', 'Refiner', 'Tag Editor', 'Strunk &amp; White'
                 ];
+                const soRequiredBadgeNames = [
+                    'Civic Duty', 'Strunk & White', 'Deputy', 'Convention'
+                ];
 
                 try {
                     const data = await request({
@@ -409,16 +412,32 @@ const main = async () => {
 
                     const repScore = Math.min(Math.floor(userRep / 1000), 20);
                     const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v)).length;
-                    const candScore = repScore + badgeScore;
+                    const candidateScore = repScore + badgeScore;
 
                     const missingBadges = [];
                     electionBadgeNames.forEach(electionBadge => {
                         if(!userBadges.includes(electionBadge)) missingBadges.push(electionBadge.replace('&amp;', '&'));
                     });
+                    const soMissingRequiredBadges = soRequiredBadgeNames.filter(requiredBadge => {
+                        missingBadges.includes(requiredBadge);
+                    });
 
-                    console.log(resolvedMsg.userId, userRep, repScore, badgeScore, missingBadges);
+                    console.log(resolvedMsg.userId, userRep, repScore, badgeScore, candidateScore, missingBadges);
 
-                    if(candScore == 40) {
+                    if(userRep < election.repNominate || 
+                       (electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) ) {
+                        responseText = `You are not eligible to nominate yourself in the election`;
+                        
+                        if(userRep < election.repNominate) {
+                            responseText += ` as you do not have at least ${election.repNominate} reputation`;
+                        }
+                        if(electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) {
+                            responseText += userRep < election.repNominate ? ' and' : ' as you are';
+                            responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
+                            soMissingRequiredBadges.join(', ');
+                        }
+                    }
+                    else if(candidateScore == 40) {
                         responseText = `Wow! You have a maximum candidate score of 40!`;
 
                         if(election.status == null || election.status === 'nomination') {
@@ -426,10 +445,11 @@ const main = async () => {
                         }
                     }
                     else {
-                        responseText = `Your candidate score is ${candScore} (out of 40).`;
+                        responseText = `Your candidate score is ${candidateScore} (out of 40).`;
 
                         if(missingBadges.length > 0) {
-                            responseText += ` You are missing these badges: ` + missingBadges.join(', ');
+                            responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
+                                missingBadges.join(', ');
                         }
                     }
                 }
