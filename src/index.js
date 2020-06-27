@@ -436,6 +436,8 @@ const main = async () => {
                             responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
                             soMissingRequiredBadges.join(', ');
                         }
+
+                        responseText += `. If you really must know, your candidate score is ${candidateScore} (out of 40).`;
                     }
                     else if(candidateScore == 40) {
                         responseText = `Wow! You have a maximum candidate score of 40!`;
@@ -450,6 +452,9 @@ const main = async () => {
                         if(missingBadges.length > 0) {
                             responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
                                 missingBadges.join(', ');
+                        }
+                        else {
+                            responseText += `Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
                         }
                     }
                 }
