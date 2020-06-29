@@ -1,6 +1,9 @@
 const path = require('path');
 const https = require('https');
 const express = require('express');
+const request = require('request-promise');
+const cheerio = require('cheerio');
+const { json } = require('express');
 
 module.exports = {
 
@@ -32,6 +35,27 @@ module.exports = {
                 console.error("ERROR - Keep-alive failed." + err.message);
             });
         }, mins * 60000);
+    },
+
+    fetchUrl: async function(url, json = false) {
+
+        try {
+            const content = await request({
+                gzip: true, // important: https://meta.stackexchange.com/a/446
+                simple: false,
+                resolveWithFullResponse: false,
+                headers: {
+                    'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
+                },
+                uri: url,
+                json: url.includes('api') || json,
+            });
+            return content;
+        }
+        catch(e) {
+            console.error('ERROR:', e);
+            return 'error';
+        }
     },
 
     // Example URL: https://www.timeanddate.com/worldclock/fixedtime.html?iso=20201231T2359
