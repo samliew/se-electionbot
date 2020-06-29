@@ -158,7 +158,7 @@ async function announceWinners(election = null) {
 const main = async () => {
 
     // Get current site moderators
-    const currSiteModApiReponse = await utils.fetchUrl(`/2.2/users/moderators/elected?pagesize=100&order=asc&sort=creation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`);
+    const currSiteModApiReponse = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/moderators/elected?pagesize=100&order=asc&sort=creation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`, true);
     currentSiteMods = currSiteModApiReponse ? currSiteModApiReponse.items : [];
     currentSiteModIds = currentSiteMods.map(v => v.user_id);
     console.log(`INIT - Fetched ${electionSiteHostname} current mods`, currentSiteModIds);
@@ -417,18 +417,9 @@ const main = async () => {
                     
                     // Retrieve user badges and rep from API
                     try {
-                        const data = await request({
-                            gzip: true, // important: https://meta.stackexchange.com/a/446
-                            simple: false,
-                            resolveWithFullResponse: false,
-                            headers: {
-                                'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
-                            },
-                            uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${electionSiteHostname}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`,
-                            json: true
-                        });
+                        const data = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${electionSiteHostname}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`, true);
 
-                        if(typeof data === 'undefined' || typeof data.items === 'undefined' || data.items.length == 0) {
+                        if(data == null || typeof data.items === 'undefined' || data.items.length == 0) {
                             console.error('No data from API.');
                         }
 

@@ -54,7 +54,7 @@ module.exports = {
         }
         catch(e) {
             console.error('ERROR:', e);
-            return 'error';
+            return null;
         }
     },
 
