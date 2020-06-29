@@ -516,7 +516,7 @@ const main = async () => {
             else if(['who', 'current', 'mod'].every(x => content.includes(x))) {
 
                 if(currentSiteMods && currentSiteMods.length > 0) {
-                    responseText = `The [current moderators](${electionSiteUrl}/users?tab=moderators) are: ` + currentSiteMods.map(v => v.display_name).join(', ');
+                    responseText = `The [current moderators](${electionSiteUrl}/users?tab=moderators) are: ` + entities.decode( currentSiteMods.map(v => v.display_name).join(', ') );
                 }
                 else {
                     responseText = `The current moderators on ${election.sitename} can be found on this page: [${electionSiteUrl}/users?tab=moderators](${electionSiteUrl}/users?tab=moderators)`;
