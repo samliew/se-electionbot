@@ -519,7 +519,7 @@ const main = async () => {
                     responseText = `The [current moderators](${electionSiteUrl}/users?tab=moderators) are: ` + currentSiteMods.map(v => v.display_name).join(', ');
                 }
                 else {
-                    responseText = `The current moderators on ${election.sitename} can be found on this page: [${electionSite}/users?tab=moderators](${electionSiteUrl}/users?tab=moderators)`;
+                    responseText = `The current moderators on ${election.sitename} can be found on this page: [${electionSiteUrl}/users?tab=moderators](${electionSiteUrl}/users?tab=moderators)`;
                 }
             }
 
