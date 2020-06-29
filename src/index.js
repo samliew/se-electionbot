@@ -158,7 +158,7 @@ async function announceWinners(election = null) {
 const main = async () => {
 
     // Get current site moderators
-    const currSiteModApiReponse = await fetchUrl(`/2.2/users/moderators/elected?pagesize=100&order=asc&sort=creation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`);
+    const currSiteModApiReponse = await utils.fetchUrl(`/2.2/users/moderators/elected?pagesize=100&order=asc&sort=creation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`);
     currentSiteMods = currSiteModApiReponse ? currSiteModApiReponse.items : [];
     currentSiteModIds = currentSiteMods.map(v => v.user_id);
     console.log(`INIT - Fetched ${electionSiteHostname} current mods`, currentSiteModIds);
