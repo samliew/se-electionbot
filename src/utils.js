@@ -2,7 +2,6 @@ const path = require('path');
 const https = require('https');
 const express = require('express');
 const request = require('request-promise');
-const cheerio = require('cheerio');
 const { json } = require('express');
 
 module.exports = {
@@ -38,6 +37,7 @@ module.exports = {
     },
 
     fetchUrl: async function(url, json = false) {
+        const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
 
         try {
             const content = await request({
@@ -50,10 +50,11 @@ module.exports = {
                 uri: url,
                 json: url.includes('api') || json,
             });
+            console.log(`FETCH - ${url}`, debug ? content : '');
             return content;
         }
         catch(e) {
-            console.error('ERROR:', e);
+            console.error('FETCH - ERROR:', e);
             return null;
         }
     },

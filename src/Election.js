@@ -1,5 +1,6 @@
 const request = require('request-promise');
 const cheerio = require('cheerio');
+const utils = require('./utils');
 
 export default class Election {
 
@@ -30,18 +31,10 @@ export default class Election {
         const electionPageUrl = `${this.electionUrl}?tab=nomination`;
 
         try {
-            const html = await request({
-                gzip: true, // important: https://meta.stackexchange.com/a/446
-                simple: false,
-                resolveWithFullResponse: false,
-                headers: {
-                    'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
-                },
-                uri: electionPageUrl
-            });
-
+            const pageHtml = await utils.fetchUrl(electionPageUrl);
+            
             // Parse election page
-            const $ = cheerio.load(html);
+            const $ = cheerio.load(pageHtml);
 
             let electionPost = $('#mainbar .post-text .wiki-ph-content');
             let sidebarValues = $('#sidebar').find('.label-value').map((i, el) => $(el).attr('title') || $(el).text()).get();
