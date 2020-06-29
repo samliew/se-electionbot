@@ -64,6 +64,22 @@ let rescraperInt = null;
 let election = null;
 let room = null;
 
+const electionBadgeNames = [
+    'Civic Duty', 'Cleanup', 'Deputy', 'Electorate', 'Marshal', 'Sportsmanship', 'Reviewer', 'Steward',
+    'Constituent', 'Convention', 'Enthusiast', 'Investor', 'Quorum', 'Yearling',
+    'Organizer', 'Copy Editor', 'Explainer', 'Refiner', 'Tag Editor', 'Strunk &amp; White'
+];
+const soRequiredBadgeNames = [
+    'Civic Duty', 'Strunk & White', 'Deputy', 'Convention'
+];
+const soPastAndPresentModIds = [
+    34397, 50049, 102937, 267, 419, 106224, 396458, 50776, 105971, 2598, 
+    298479, 19679, 16587, 246246, 707111, 168175, 208809, 59303, 237838, 426671, 716216, 256196, 
+    1114, 100297, 229044, 1252759, 444991, 871050, 2057919, 3093387, 1849664, 2193767, 4099593, 
+    541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
+];
+let currentSiteMods, currentSiteModIds;
+
 
 // Helper functions
 const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
@@ -141,8 +157,14 @@ async function announceWinners(election = null) {
 // Main fn
 const main = async () => {
 
+    // Get current site moderators
+    const currSiteModApiReponse = await fetchUrl(`/2.2/users/moderators/elected?pagesize=100&order=asc&sort=creation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`);
+    currentSiteMods = currSiteModApiReponse ? currSiteModApiReponse.items : [];
+    currentSiteModIds = currentSiteMods.map(v => v.user_id);
+    console.log(`INIT - Fetched ${electionSiteHostname} current mods`, currentSiteModIds);
+
     // Wait for election page to be scraped
-    const election = new Election(electionUrl);
+    election = new Election(electionUrl);
     await election.scrapeElection();
 
     // Login to site
@@ -382,85 +404,90 @@ const main = async () => {
 
                 if(isNaN(resolvedMsg.userId)) return;
 
-                const electionBadgeNames = [
-                    'Civic Duty', 'Cleanup', 'Deputy', 'Electorate', 'Marshal', 'Sportsmanship', 'Reviewer', 'Steward',
-                    'Constituent', 'Convention', 'Enthusiast', 'Investor', 'Quorum', 'Yearling',
-                    'Organizer', 'Copy Editor', 'Explainer', 'Refiner', 'Tag Editor', 'Strunk &amp; White'
-                ];
-                const soRequiredBadgeNames = [
-                    'Civic Duty', 'Strunk & White', 'Deputy', 'Convention'
-                ];
+                // Already a mod
+                if(currentSiteModIds.includes(resolvedMsg.userId)) {
+                    responseText = `You're already a moderator!`;
+                }
+                // Previously a mod
+                else if(soPastAndPresentModIds.includes(resolvedMsg.userId)) {
+                    responseText = `Are you really sure you want to be a moderator again?`;
+                }
+                // Default
+                else {
+                    
+                    // Retrieve user badges and rep from API
+                    try {
+                        const data = await request({
+                            gzip: true, // important: https://meta.stackexchange.com/a/446
+                            simple: false,
+                            resolveWithFullResponse: false,
+                            headers: {
+                                'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
+                            },
+                            uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${electionSiteHostname}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`,
+                            json: true
+                        });
 
-                try {
-                    const data = await request({
-                        gzip: true, // important: https://meta.stackexchange.com/a/446
-                        simple: false,
-                        resolveWithFullResponse: false,
-                        headers: {
-                            'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
-                        },
-                        uri: `https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${electionSiteHostname}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`,
-                        json: true
-                    });
-
-                    if(typeof data === 'undefined' || typeof data.items === 'undefined' || data.items.length == 0) {
-                        console.error('No data from API.');
-                    }
-
-                    const userBadges = data.items.map(v => v.name) || [];
-                    const userRep = data.items ? data.items[0].user.reputation : 0;
-
-                    const repScore = Math.min(Math.floor(userRep / 1000), 20);
-                    const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v)).length;
-                    const candidateScore = repScore + badgeScore;
-
-                    const missingBadges = [];
-                    electionBadgeNames.forEach(electionBadge => {
-                        if(!userBadges.includes(electionBadge)) missingBadges.push(electionBadge.replace('&amp;', '&'));
-                    });
-                    const soMissingRequiredBadges = soRequiredBadgeNames.filter(requiredBadge => {
-                        missingBadges.includes(requiredBadge);
-                    });
-
-                    console.log(resolvedMsg.userId, userRep, repScore, badgeScore, candidateScore, missingBadges);
-
-                    if(userRep < election.repNominate || 
-                       (electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) ) {
-                        responseText = `You are not eligible to nominate yourself in the election`;
-                        
-                        if(userRep < election.repNominate) {
-                            responseText += ` as you do not have at least ${election.repNominate} reputation`;
-                        }
-                        if(electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) {
-                            responseText += userRep < election.repNominate ? ' and' : ' as you are';
-                            responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
-                            soMissingRequiredBadges.join(', ');
+                        if(typeof data === 'undefined' || typeof data.items === 'undefined' || data.items.length == 0) {
+                            console.error('No data from API.');
                         }
 
-                        responseText += `. If you really must know, your candidate score is ${candidateScore} (out of 40).`;
-                    }
-                    else if(candidateScore == 40) {
-                        responseText = `Wow! You have a maximum candidate score of 40!`;
+                        // Calculate candidate score
+                        const userBadges = data.items.map(v => v.name) || [];
+                        const userRep = data.items ? data.items[0].user.reputation : 0;
 
-                        if(election.status == null || election.status === 'nomination') {
-                            responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
+                        const repScore = Math.min(Math.floor(userRep / 1000), 20);
+                        const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v)).length;
+                        const candidateScore = repScore + badgeScore;
+
+                        const missingBadges = [];
+                        electionBadgeNames.forEach(electionBadge => {
+                            if(!userBadges.includes(electionBadge)) missingBadges.push(electionBadge.replace('&amp;', '&'));
+                        });
+                        const soMissingRequiredBadges = soRequiredBadgeNames.filter(requiredBadge => {
+                            missingBadges.includes(requiredBadge);
+                        });
+
+                        console.log(resolvedMsg.userId, userRep, repScore, badgeScore, candidateScore, missingBadges);
+
+                        if(userRep < election.repNominate || 
+                        (electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) ) {
+                            responseText = `You are not eligible to nominate yourself in the election`;
+                            
+                            if(userRep < election.repNominate) {
+                                responseText += ` as you do not have at least ${election.repNominate} reputation`;
+                            }
+                            if(electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) {
+                                responseText += userRep < election.repNominate ? ' and' : ' as you are';
+                                responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
+                                soMissingRequiredBadges.join(', ');
+                            }
+
+                            responseText += `. If you really must know, your candidate score is ${candidateScore} (out of 40).`;
                         }
-                    }
-                    else {
-                        responseText = `Your candidate score is ${candidateScore} (out of 40).`;
+                        else if(candidateScore == 40) {
+                            responseText = `Wow! You have a maximum candidate score of 40!`;
 
-                        if(missingBadges.length > 0) {
-                            responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
-                                missingBadges.join(', ');
+                            if(election.status == null || election.status === 'nomination') {
+                                responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
+                            }
                         }
                         else {
-                            responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
+                            responseText = `Your candidate score is ${candidateScore} (out of 40).`;
+
+                            if(missingBadges.length > 0) {
+                                responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
+                                    missingBadges.join(', ');
+                            }
+                            else {
+                                responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
+                            }
                         }
                     }
-                }
-                catch(e) {
-                    console.error(e);
-                    responseText = `sorry I was unable to calculate your candidate score :(`;
+                    catch(e) {
+                        console.error(e);
+                        responseText = `sorry I was unable to calculate your candidate score :(`;
+                    }
                 }
 
                 if(responseText != null) {
