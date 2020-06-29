@@ -443,36 +443,35 @@ const main = async () => {
                         
                         if(userRep < election.repNominate || 
                             (electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) ) {
-                                responseText = `You are not eligible to nominate yourself in the election`;
-                                
-                                if(userRep < election.repNominate) {
-                                    responseText += ` as you do not have at least ${election.repNominate} reputation`;
-                                }
-                                if(electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) {
-                                    responseText += userRep < election.repNominate ? ' and' : ' as you are';
-                                    responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
-                                    soMissingRequiredBadges.join(', ');
-                                }
-                                
-                                responseText += `. If you really must know, your candidate score is ${candidateScore} (out of 40).`;
+                            responseText = `You are not eligible to nominate yourself in the election`;
+                            
+                            if(userRep < election.repNominate) {
+                                responseText += ` as you do not have at least ${election.repNominate} reputation`;
                             }
-                            else if(candidateScore == 40) {
-                                responseText = `Wow! You have a maximum candidate score of 40!`;
-                                
-                                if(election.status == null || election.status === 'nomination') {
-                                    responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
-                                }
+                            if(electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) {
+                                responseText += userRep < election.repNominate ? ' and' : ' as you are';
+                                responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
+                                soMissingRequiredBadges.join(', ');
+                            }
+                            
+                            responseText += `. If you really must know, your candidate score is ${candidateScore} (out of 40).`;
+                        }
+                        else if(candidateScore == 40) {
+                            responseText = `Wow! You have a maximum candidate score of 40!`;
+                            
+                            if(election.status == null || election.status === 'nomination') {
+                                responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
+                            }
+                        }
+                        else {
+                            responseText = `Your candidate score is ${candidateScore} (out of 40).`;
+                            
+                            if(missingBadges.length > 0) {
+                                responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
+                                missingBadges.join(', ');
                             }
                             else {
-                                responseText = `Your candidate score is ${candidateScore} (out of 40).`;
-                                
-                                if(missingBadges.length > 0) {
-                                    responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
-                                    missingBadges.join(', ');
-                                }
-                                else {
-                                    responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
-                                }
+                                responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
                             }
                         }
                     }
