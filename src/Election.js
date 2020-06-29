@@ -22,6 +22,20 @@ export default class Election {
         return this._prevObj;
     }
 
+    validate() {
+        return !(
+            this.electionUrl &&
+            !isNaN(this.electionNum) &&
+            !isNaN(this.repNominate) &&
+            !isNaN(this.numCandidates) &&
+            !isNaN(this.numPositions) &&
+            this.dateNomination &&
+            this.datePrimary &&
+            this.dateElection &&
+            this.dateEnded
+        );
+    }
+
     async scrapeElection() {
 
         // Save prev values so we can compare changes after
@@ -45,7 +59,6 @@ export default class Election {
             }
 
             this.updated = Date.now();
-            this.url = this.electionUrl;
             this.sitename = $('meta[property="og:site_name"]').attr('content').replace('Stack Exchange', '').trim();
             this.siteHostname = this.electionUrl.split('/')[2]; // hostname only, exclude trailing slash
             this.siteUrl = 'https://' + this.siteHostname; 

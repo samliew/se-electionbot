@@ -157,6 +157,11 @@ async function announceWinners(election = null) {
 // Main fn
 const main = async () => {
 
+    // Inform if in debug mode
+    if(debug) {
+        console.log('DEBUG MODE ON!');
+    }
+
     // Get current site moderators
     const currSiteModApiReponse = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/moderators/elected?pagesize=100&order=asc&sort=creation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`, true);
     currentSiteMods = currSiteModApiReponse ? currSiteModApiReponse.items : [];
@@ -165,6 +170,9 @@ const main = async () => {
     // Wait for election page to be scraped
     election = new Election(electionUrl);
     await election.scrapeElection();
+    if(election.validate() === false) {
+        console.error('FATAL - Invalid election data!');
+    }
 
     // Login to site
     const client = new Client(chatDomain);
@@ -179,7 +187,7 @@ const main = async () => {
     // Join room
     room = await client.joinRoom(chatRoomId);
 
-    // Try announce winners on startup
+    // Try announce winners on startup?
     await announceWinners(election);
 
     // Variable to store last message for throttling
@@ -187,7 +195,7 @@ const main = async () => {
 
     // Default election message
     const relativetime = utils.dateToRelativetime(election.dateNomination);
-    const notStartedYet = `The [election](${election.url}) has not started yet. The **nomination** phase is starting at ${utils.linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
+    const notStartedYet = `The [election](${election.electionUrl}) has not started yet. The **nomination** phase is starting at ${utils.linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
     
     // Main event listener
     room.on('message', async msg => {
@@ -355,7 +363,7 @@ const main = async () => {
 
                 if(election.arrNominees.length > 0) {
 
-                    responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.url}): `;
+                    responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.electionUrl}): `;
 
                     // Can't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
                     responseText += election.arrNominees.map(v => v.userName).join(', ');
@@ -543,20 +551,20 @@ const main = async () => {
                     responseText = notStartedYet;
                 }
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The [election](${election.url}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
+                    responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
                 }
                 else if(election.phase === 'ended') {
-                    responseText = `The [election](${election.url}) is over.`;
+                    responseText = `The [election](${election.electionUrl}) is over.`;
                 }
                 else if(election.phase === 'cancelled') {
                     responseText = election.statVoters;
                 }
                 else if(election.phase === 'election') {
-                    responseText = `The [election](${election.url}?tab=election) is in the final election phase. `;
+                    responseText = `The [election](${election.electionUrl}?tab=election) is in the final election phase. `;
                     responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
                 }
                 else {
-                    responseText = `The [election](${election.url}?tab=${election.phase}) is in the ${election.phase} phase. `;
+                    responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is in the ${election.phase} phase. `;
 
                     if(election.phase === 'nomination') responseText += `There are currently ${election.arrNominees.length} candidates.`;
                     else if(election.phase === 'primary') responseText += `You may freely cast up/down votes on the candidates' nominations, and come back ${relativeTimestampLinkToElection} to vote in the actual election.`;
@@ -583,10 +591,10 @@ const main = async () => {
                 }
                 else if(election.phase === 'election') {
                     const relativetime = utils.dateToRelativetime(election.dateEnded);
-                    responseText = `The [election](${election.url}?tab=election) is currently in the final election phase, ending at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
+                    responseText = `The [election](${election.electionUrl}?tab=election) is currently in the final election phase, ending at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
                 }
                 else if(election.phase === 'ended') {
-                    responseText = `The [election](${election.url}) is over.`;
+                    responseText = `The [election](${election.electionUrl}) is over.`;
                 }
                 else if(election.phase === 'cancelled') {
                     responseText = election.statVoters;
@@ -605,20 +613,20 @@ const main = async () => {
 
                 switch(election.phase) {
                     case 'election':
-                        responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.url}?tab=election).`;
+                        responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.electionUrl}?tab=election).`;
                         responseText += informedDecision;
                         break;
                     case 'primary':
-                        responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.url}?tab=primary).`;
+                        responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.electionUrl}?tab=primary).`;
                         responseText += informedDecision;
                         responseText += ` Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the actual election phase!`;
                         break;
                     case 'nomination':
-                        responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.url}?tab=nomination)`;
+                        responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.electionUrl}?tab=nomination)`;
                         if(election.qnaUrl) responseText += `, as well as read the candidates' [answers to your questions](${election.qnaUrl}) to find out more.`;
                         break;
                     case 'ended':
-                        responseText = `The [election](${election.url}) has ended. You can no longer vote.`;
+                        responseText = `The [election](${election.electionUrl}) has ended. You can no longer vote.`;
                         break;
                     case 'cancelled':
                         responseText = election.statVoters;
@@ -635,7 +643,7 @@ const main = async () => {
                     responseText = `The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}.`;
                 }
                 else if(election.phase === 'ended') {
-                    responseText = `The winners can be found on the [election page](${election.url}).`;
+                    responseText = `The winners can be found on the [election page](${election.electionUrl}).`;
                 }
                 else {
                     responseText = `The election is not over yet.`;
@@ -733,7 +741,7 @@ const main = async () => {
 
             // Announce
             newNominees.forEach(async nominee => {
-                await room.sendMessage(`**We have a new [nomination](${election.url}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${nominee.permalink})!`);
+                await room.sendMessage(`**We have a new [nomination](${election.electionUrl}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${nominee.permalink})!`);
                 console.log(`NOMINATION`, nominee);
             });
         }

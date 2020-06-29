@@ -51,7 +51,7 @@ export default class ScheduledAnnouncement {
                 cs,
                 async () => {
                     await this._election.scrapeElection();
-                    await this._room.sendMessage(`**The [election](${this._election.url}?tab=election) has now ended.** The winners will be announced shortly.`);
+                    await this._room.sendMessage(`**The [election](${this._election.electionUrl}?tab=election) has now ended.** The winners will be announced shortly.`);
                 },
                 { timezone: "Etc/UTC" }
             );
@@ -70,7 +70,7 @@ export default class ScheduledAnnouncement {
                 cs,
                 async () => {
                     await this._election.scrapeElection();
-                    await this._room.sendMessage(`**The [election phase](${this._election.url}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
+                    await this._room.sendMessage(`**The [election phase](${this._election.electionUrl}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
                 },
                 { timezone: "Etc/UTC" }
             );
@@ -89,7 +89,7 @@ export default class ScheduledAnnouncement {
                 cs,
                 async () => {
                     await this._election.scrapeElection();
-                    await this._room.sendMessage(`**The [primary phase](${this._election.url}?tab=primary) is now open.** We can begin voting on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
+                    await this._room.sendMessage(`**The [primary phase](${this._election.electionUrl}?tab=primary) is now open.** You can now vote on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
                 },
                 { timezone: "Etc/UTC" }
             );
@@ -108,7 +108,7 @@ export default class ScheduledAnnouncement {
                 cs,
                 async () => {
                     await this._election.scrapeElection();
-                    await this._room.sendMessage(`**The [nomination phase](${this._election.url}?tab=nomination) is now open.** Qualified users may now begin to submit their nominations. **You cannot vote yet.**`);
+                    await this._room.sendMessage(`**The [nomination phase](${this._election.electionUrl}?tab=nomination) is now open.** Users may now nominate themselves for the election. **You cannot vote yet.**`);
                 },
                 { timezone: "Etc/UTC" }
             );
