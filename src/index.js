@@ -412,12 +412,12 @@ const main = async () => {
                 if(isNaN(resolvedMsg.userId)) return;
 
                 // Already a mod
-                if(currentSiteModIds.includes(resolvedMsg.userId)) {
-                    responseText = `You're already a moderator!`;
+                if(user.isModerator) {
+                    responseText = `very funny, you already have a diamond!`;
                 }
                 // Previously a mod
                 else if(soPastAndPresentModIds.includes(resolvedMsg.userId)) {
-                    responseText = `Are you really sure you want to be a moderator again?`;
+                    responseText = `are you really sure you want to be a moderator again?`;
                 }
                 // Default
                 else {
@@ -514,7 +514,13 @@ const main = async () => {
 
             // Current mods
             else if(['who', 'current', 'mod'].every(x => content.includes(x))) {
-                responseText = `The current moderators on ${election.sitename} can be found on this page: [${electionSite}/users?tab=moderators](${electionSiteUrl}/users?tab=moderators)`;
+
+                if(currentSiteMods && currentSiteMods.length > 0) {
+                    responseText = `The [current moderators](${electionSiteUrl}/users?tab=moderators) are: ` + currentSiteMods.map(v => v.display_name).join(', ');
+                }
+                else {
+                    responseText = `The current moderators on ${election.sitename} can be found on this page: [${electionSite}/users?tab=moderators](${electionSiteUrl}/users?tab=moderators)`;
+                }
             }
 
             // How to nominate self/others
