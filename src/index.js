@@ -356,7 +356,7 @@ const main = async () => {
             }
 
             // Moderation badges
-            else if(['what', 'mod', 'badges'].every(x => content.includes(x))) {
+            else if(['what', 'moderation', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 8 moderation badges are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward.`;
                 
                 if(electionSiteHostname.includes('stackoverflow.com')) {
