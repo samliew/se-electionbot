@@ -450,13 +450,13 @@ const main = async () => {
                         console.log(resolvedMsg.userId, userRep, repScore, badgeScore, candidateScore, missingBadges);
                         
                         if(userRep < election.repNominate || 
-                            (electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) ) {
+                            (electionSiteHostname.includes('stackoverflow.com') && soMissingRequiredBadges.length > 0) ) {
                             responseText = `You are not eligible to nominate yourself in the election`;
                             
                             if(userRep < election.repNominate) {
                                 responseText += ` as you do not have at least ${election.repNominate} reputation`;
                             }
-                            if(electionSiteHostname.includes('stackoverflow.com') && missingSORequiredBadges.length > 0) {
+                            if(electionSiteHostname.includes('stackoverflow.com') && soMissingRequiredBadges.length > 0) {
                                 responseText += userRep < election.repNominate ? ' and' : ' as you are';
                                 responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
                                 soMissingRequiredBadges.join(', ');
