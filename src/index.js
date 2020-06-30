@@ -1,6 +1,5 @@
 import Client from 'chatexchange';
 const Election = require('./Election').default;
-const request = require('request-promise');
 const entities = new (require('html-entities').AllHtmlEntities);
 const announcement = new (require('./ScheduledAnnouncement').default);
 const utils = require('./utils');
@@ -478,7 +477,7 @@ const main = async () => {
                                 responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
                                 missingBadges.join(', ');
                             }
-                            else {
+                            else if(candidateScore >= 30 && (election.status == null || election.status === 'nomination')) {
                                 responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
                             }
                         }
