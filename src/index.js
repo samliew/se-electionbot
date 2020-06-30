@@ -14,9 +14,8 @@ if (process.env.NODE_ENV !== 'production') {
 const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
 const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
-// to stop bot from replying to too many messages in a short time, unless in debug
-let throttleSecs = debug ? 3 : Number(process.env.THROTTLE_SECS) || 10;
-if(throttleSecs < 3) throttleSecs = 3; // min of 3 seconds
+// to stop bot from replying to too many messages in a short time
+let throttleSecs = Number(process.env.THROTTLE_SECS) || 10;
 
 const chatDomain = process.env.CHAT_DOMAIN;
 const chatRoomId = process.env.CHAT_ROOM_ID;
@@ -252,24 +251,24 @@ const main = async () => {
                 responseText = 'Currently scheduled announcements: `' + JSON.stringify(announcement.schedules) + '`';
             }
             else if(content.includes('set throttle')) {
-                let match = content.match(/\d+$/);
+                let match = content.match(/(\d+\.)?\d+$/);
                 let num = match ? Number(match[0]) : null;
                 if(num != null && !isNaN(num) && num >= 0) {
-                    responseText = `*throttle set to ${num} seconds*`;
                     throttleSecs = num;
+                    responseText = `*throttle set to ${throttleSecs} seconds*`;
                 }
                 else {
                     responseText = `*invalid throttle value*`;
                 }
             }
             else if(content.includes('throttle')) {
-                responseText = `Reply throttle is currently ${num} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
+                responseText = `Reply throttle is currently ${throttleSecs} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
             }
-            else if(content.includes('clear timeout')) {
+            else if(content.includes('clear timeout') || content.includes('unmute')) {
                 responseText = `*timeout cleared*`;
                 lastMessageTime = -1;
             }
-            else if(content.includes('timeout')) {
+            else if(content.includes('timeout') || content.includes('mute')) {
                 let num = content.match(/\d+$/);
                 num = num ? Number(num[0]) : 5; // defaulting to 5
                 responseText = `*silenced for ${num} minutes*`;
@@ -277,32 +276,16 @@ const main = async () => {
             }
             else if(content.includes('time')) {
                 responseText = `UTC time: ${utils.dateToUtcTimestamp()}`;
-                if(toElection > 0) responseText += ` (election phase starts ${relativeTimestampLinkToElection})`;
+                if(['election', 'ended', 'cancelled'].includes(election.phase) == false) {
+                    responseText += ` (election phase starts ${relativeTimestampLinkToElection})`;
+                }
             }
             else if(content.includes('chatroom')) {
                 responseText = `The election chat room is at ${election.chatUrl}`;
             }
-            else if(content.includes('shutdown')) {
-
-                await room.sendMessage(`*farewell...*`);
-
-                // stop listening to new messages
-                room.removeAllListeners('message');
-
-                // TODO: leave room?
-
-                // stop scraping
-                clearInterval(rescraperInt);
-                
-                // kill process
-                setTimeout(process.exit, 3000);
-                
-                // no further action
-                return;
-            }
             else if(content.includes('commands')) {
-                responseText = 'admin commands: *' + [
-                    'say', 'alive', 'cron', 'test cron', 'chatroom', 'throttle', 'set throttle X (seconds)', 'clear timeout', 'timeout X (minutes)', 'time', 'shutdown'
+                responseText = 'moderator commands: *' + [
+                    'say', 'alive', 'cron', 'test cron', 'chatroom', 'throttle', 'set throttle X (in seconds)', 'mute', 'mute X (in minutes)', 'unmute', 'time'
                 ].join(', ') + '*';
             }
             
