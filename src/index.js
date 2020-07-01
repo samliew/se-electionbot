@@ -58,10 +58,6 @@ const ignoredEventTypes = [
     34, // UserNameOrAvatarChanged
     7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
 ];
-let rescraperInt = null;
-let election = null;
-let room = null;
-
 const electionBadgeNames = [
     'Civic Duty', 'Cleanup', 'Deputy', 'Electorate', 'Marshal', 'Sportsmanship', 'Reviewer', 'Steward',
     'Constituent', 'Convention', 'Enthusiast', 'Investor', 'Quorum', 'Yearling',
@@ -77,6 +73,9 @@ const soPastAndPresentModIds = [
     541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
 ];
 let currentSiteMods, currentSiteModIds;
+let rescraperInt, rejoinInt;
+let election = null;
+let room = null;
 
 
 // Helper functions
@@ -686,10 +685,6 @@ const main = async () => {
     // Interval to re-scrape election data
     rescraperInt = setInterval(async function() {
 
-        // Try to stay-alive
-        room = await client.joinRoom(chatRoomId);
-        console.log('Stay alive rejoin room', room);
-
         await election.scrapeElection();
         announcement.setElection(election);
 
@@ -740,6 +735,16 @@ const main = async () => {
         }
 
     }, scrapeInterval * 60000);
+
+    
+    // Interval to keep-alive
+    rejoinInt = setInterval(async function() {
+
+        // Try to stay-alive by rejoining room
+        room = await client.joinRoom(chatRoomId);
+        console.log('Stay alive rejoin room', room);
+
+    }, 5 * 60000);
 
 
 } // End main fn
