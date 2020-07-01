@@ -388,7 +388,7 @@ const main = async () => {
                 }
             }
 
-            // Calculate own candidate score (SO only)
+            // Calculate own candidate score
             else if(content.includes('my candidate score')) {
 
                 if(isNaN(resolvedMsg.userId)) return;
@@ -685,6 +685,11 @@ const main = async () => {
 
     // Interval to re-scrape election data
     rescraperInt = setInterval(async function() {
+
+        // Try to stay-alive
+        room = await client.joinRoom(chatRoomId);
+        console.log('Stay alive rejoin room', room);
+
         await election.scrapeElection();
         announcement.setElection(election);
 
