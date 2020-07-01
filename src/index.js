@@ -742,7 +742,7 @@ const main = async () => {
 
         // Try to stay-alive by rejoining room
         room = await client.joinRoom(chatRoomId);
-        console.log('Stay alive rejoin room', room);
+        if(debug) console.log('Stay alive rejoin room', room);
 
     }, 5 * 60000);
 
