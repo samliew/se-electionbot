@@ -396,8 +396,8 @@ const main = async () => {
                 if(user.isModerator) {
                     responseText = `very funny, you already have a diamond!`;
                 }
-                // Previously a mod
-                else if(soPastAndPresentModIds.includes(resolvedMsg.userId)) {
+                // Previously a mod (on SO only)
+                else if(election.electionSiteHostname.includes('stackoverflow') && soPastAndPresentModIds.includes(resolvedMsg.userId)) {
                     responseText = `are you really sure you want to be a moderator again?`;
                 }
                 // Default
