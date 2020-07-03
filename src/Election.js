@@ -87,7 +87,6 @@ export default class Election {
 
             this.qnaUrl = process.env.ELECTION_QA_URL || electionPost.find('a').not('[href*="/tagged/"]').not('[href*="/chat"]').not('[href*="stackoverflow.blog"]').last().attr('href');
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || electionPost.find('a[href*="/rooms/"]').attr('href');
-            console.log("Election Links", this.qnaUrl, this.chatUrl);
 
             // Calculate phase of election
             const now = Date.now();
@@ -128,8 +127,9 @@ export default class Election {
                 }
             }
 
-            console.log(`SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${this.updated}.\n` +
-                        `         PHASE ${this.phase}; CANDIDATES ${this.arrNominees.length}; WINNERS ${this.arrWinners.length}`);
+            console.log(`SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${this.updated}.`);
+            console.log(`\t       PHASE ${this.phase};  CANDIDATES ${this.arrNominees.length};  WINNERS ${this.arrWinners.length}`);
+            console.log(`\t       QNA ${this.qnaUrl};  CHAT ${this.chatUrl}`);
         }
         catch(err) {
             console.error(`SCRAPE - Failed scraping ${this.electionUrl}`, err);
