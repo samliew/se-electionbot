@@ -86,11 +86,11 @@ const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralTe
 (function() {
     const _origLog = console.log;
     const _origErr = console.error;
-    console.log = function(message) {
-        _origLog.call(console, ...arguments, '\n');
+    console.log = function(message, newline = true) {
+        _origLog.call(console, ...arguments, newline ? '\n' : '');
     };
-    console.error = function(message) {
-        _origErr.call(console, ...arguments, '\n');
+    console.error = function(message, newline = true) {
+        _origErr.call(console, ...arguments, newline ? '\n' : '');
     };
 })();
 
@@ -122,7 +122,7 @@ async function announceCancelled(election = null) {
 // Announce winners when available
 async function announceWinners(election = null) {
 
-    console.log('announceWinners() called: ', election.arrWinners);
+    if(debug) console.log('announceWinners() called: ', election.arrWinners);
 
     // Needs to have ended
     if(election == null || election.phase != 'ended') return; 
