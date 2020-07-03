@@ -55,7 +55,7 @@ export default class ScheduledAnnouncement {
                 },
                 { timezone: "Etc/UTC" }
             );
-            console.log('CRON - election end     - ', cs, false);
+            console.log('CRON - election end     - ', cs);
             this._winnerSchedule = cs;
         }
     }
@@ -74,7 +74,7 @@ export default class ScheduledAnnouncement {
                 },
                 { timezone: "Etc/UTC" }
             );
-            console.log('CRON - election start   - ', cs, false);
+            console.log('CRON - election start   - ', cs);
             this._electionSchedule = cs;
         }
     }
@@ -93,7 +93,7 @@ export default class ScheduledAnnouncement {
                 },
                 { timezone: "Etc/UTC" }
             );
-            console.log('CRON - primary start    - ', cs, false);
+            console.log('CRON - primary start    - ', cs);
             this._primarySchedule = cs;
         }
     }
@@ -112,7 +112,7 @@ export default class ScheduledAnnouncement {
                 },
                 { timezone: "Etc/UTC" }
             );
-            console.log('CRON - nomination start - ', cs, false);
+            console.log('CRON - nomination start - ', cs);
             this._nominationSchedule = cs;
         }
     }
@@ -139,7 +139,6 @@ export default class ScheduledAnnouncement {
         this.initPrimary(this._election.datePrimary);
         this.initElection(this._election.dateElection);
         this.initWinner(this._election.dateEnded);
-        console.log(''); // newline
     }
 
     cancelAll() {

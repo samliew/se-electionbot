@@ -127,9 +127,11 @@ export default class Election {
                 }
             }
 
-            console.log(`SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${this.updated}.`, false);
-            console.log(`-------- PHASE ${this.phase};  CANDIDATES ${this.arrNominees.length};  WINNERS ${this.arrWinners.length}`, false);
-            console.log(`-------- QNA ${this.qnaUrl};  CHAT ${this.chatUrl}`);
+            console.log(
+                `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${this.updated}.\n` +
+                `-------- PHASE ${this.phase};  CANDIDATES ${this.arrNominees.length};  WINNERS ${this.arrWinners.length}\n` +
+                `-------- QNA ${this.qnaUrl};  CHAT ${this.chatUrl}`
+            );
         }
         catch(err) {
             console.error(`SCRAPE - Failed scraping ${this.electionUrl}`, err);

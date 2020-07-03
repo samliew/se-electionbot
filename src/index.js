@@ -82,21 +82,21 @@ let room = null;
 const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
 
 
-// Overrides console.log/.error to insert newlines
+// Overrides console.log/error to insert newlines
 (function() {
     const _origLog = console.log;
     const _origErr = console.error;
-    console.log = function(message, newline = true) {
-        _origLog.call(console, ...arguments, newline ? '\n' : '');
+    console.log = function(message) {
+        _origLog.call(console, ...arguments, '\n');
     };
-    console.error = function(message, newline = true) {
-        _origErr.call(console, ...arguments, newline ? '\n' : '');
+    console.error = function(message) {
+        _origErr.call(console, ...arguments, '\n');
     };
 })();
 
 
 // App setup
-if(debug) console.error('WARN - Debug mode is on.');
+if(debug) console.error('WARNING - Debug mode is on.');
 
 
 // Election cancelled
