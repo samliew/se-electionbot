@@ -124,8 +124,8 @@ async function announceWinners(election = null) {
 
     if(debug) console.log('announceWinners() called: ', election.arrWinners);
 
-    // Needs to have ended
-    if(election == null || election.phase != 'ended') return; 
+    // Needs to have ended and have winners
+    if(election == null || election.phase != 'ended' || election.arrWinners.length == 0) return; 
 
     // Stop all cron jobs
     announcement.cancelAll();
@@ -137,10 +137,7 @@ async function announceWinners(election = null) {
     }
 
     // Build the message
-    let msg = '';
-    if(election.arrWinners.length > 0) {
-        msg += ` Congratulations to the winner${election.arrWinners.length == 1 ? '' : 's'} ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}!`;
-    }
+    let msg = `Congratulations to the winner${election.arrWinners.length == 1 ? '' : 's'} ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}!`;
 
     if(election.resultsUrl) {
         msg += ` You can [view the results online via OpaVote](${election.resultsUrl}).`;
@@ -388,7 +385,8 @@ const main = async () => {
             }
 
             // Calculate own candidate score
-            else if(content.includes('my candidate score')) {
+            else if(content.includes('my candidate score') || 
+                (['should i ', 'can i '].some(x => content.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => content.includes(x)) && ['mod', 'election'].some(x => content.includes(x))) ) {
 
                 if(isNaN(resolvedMsg.userId)) return;
 
@@ -397,7 +395,7 @@ const main = async () => {
                     responseText = `very funny, you already have a diamond!`;
                 }
                 // Previously a mod (on SO only)
-                else if(election.electionSiteHostname.includes('stackoverflow') && soPastAndPresentModIds.includes(resolvedMsg.userId)) {
+                else if(electionSiteHostname.includes('stackoverflow') && resolvedMsg.userId && soPastAndPresentModIds.includes(resolvedMsg.userId)) {
                     responseText = `are you really sure you want to be a moderator again?`;
                 }
                 // Default
@@ -520,15 +518,14 @@ const main = async () => {
             }
 
             // Why be a moderator
-            else if(['why', 'what', 'are', 'is', 'should'].some(x => content.includes(x)) && ['be a', 'become', 'benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && content.includes('mod')) {
+            else if(['why', 'what'].some(x => content.includes(x)) && ['benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && content.includes('mod')) {
                 responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
                   `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
             }
 
             // Are moderators paid
-            else if(['why', 'what', 'are', 'how'].some(x => content.includes(x)) && ['reward', 'paid', 'compensat', 'money'].some(x => content.includes(x)) && content.includes('mod')) {
-                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
-                  `This is a voluntary role, and moderators do not get paid by Stack Exchange.`;
+            else if(['why', 'what', 'are', 'how'].some(x => content.includes(x)) && ['reward', 'paid', 'compensat', 'money'].some(x => content.includes(x)) && ['mods', 'moderators'].some(x => content.includes(x)) ) {
+                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) is an entirely voluntary role, and they are not paid by Stack Exchange.`;
             }
 
             // Status
@@ -588,8 +585,8 @@ const main = async () => {
                 }
             }
 
-            // What is election
-            else if(['how', 'what'].some(x => content.includes(x)) && ['is', 'an', 'does'].some(x => content.includes(x)) && ['election', 'it work'].some(x => content.includes(x))) {
+            // What is an election
+            else if(['how', 'what'].some(x => content.includes(x)) && ['is', 'an', 'does', 'about'].some(x => content.includes(x)) && ['election', 'it work'].some(x => content.includes(x))) {
                 responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
             }
 
@@ -689,41 +686,44 @@ const main = async () => {
         announcement.setElection(election);
 
         if(debug) {
-            // Log prev and current scraped info
+            // Log scraped election info
             console.log('SCRAPE', election.updated, election);
 
-            // Log election candidates
-            //console.log('Election candidates', election.arrNominees);
-
             // Log election winners
-            //console.log('Election winners', election.arrWinners);
+            if(election.phase === 'ended') {
+                console.log('Election winners', election.arrWinners);
+            }
+            // Log election candidates
+            else {
+                console.log('Election candidates', election.arrNominees);
+            }
         }
 
         // No previous scrape results yet, do not proceed
         if(typeof election.prev === 'undefined') return;
         
-        // previously had no primary, but after re-scraping there is one
+        // Previously had no primary, but after re-scraping there is one
         if (!announcement.hasPrimary && election.datePrimary != null) {
             announcement.initPrimary(election.datePrimary);
             await room.sendMessage(`There will be a primary phase before the election now, as there are at least ten candidates.`);
         }
         
-        // after re-scraping the election was cancelled
+        // After re-scraping the election was cancelled
         if (election.phase === 'cancelled' && election.prev.phase !== election.phase) {
             await announceCancelled(election);
             return;
         }
         
-        // after re-scraping we have winners
+        // After re-scraping we have winners
         else if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
             await announceWinners(election);
             return;
         }
         
-        // new nominations?
+        // New nominations
         else if (election.phase == 'nomination' && election.prev.arrNominees.length !== election.arrNominees.length) {
             
-            // get diff between the arrays
+            // Get diff between the arrays
             const prevIds = election.prev.arrNominees.map(v => v.userId);
             const newNominees = election.arrNominees.filter(v => !prevIds.includes(v.userId));
 
