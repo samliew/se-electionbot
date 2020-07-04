@@ -207,7 +207,7 @@ const main = async () => {
             userId: await msg.userId,
             targetUserId: [8, 18].includes(msg._eventType) ? await msg.targetUserId : undefined,
             content: content,
-            roomId: await msg.roomId,
+            roomId: Number(await msg.roomId),
         };
 
         // Ignore stuff from self, Community or Feeds users
