@@ -458,6 +458,10 @@ const main = async () => {
                             if(missingBadges.length > 0) {
                                 responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
                                 missingBadges.join(', ');
+
+                                if(election.status == null || election.status === 'nomination') {
+                                    responseText += ` Having a high candidate score is not a requirement - you can still nominate yourself in the election!`;
+                                }
                             }
                             else if(candidateScore >= 30 && (election.status == null || election.status === 'nomination')) {
                                 responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
