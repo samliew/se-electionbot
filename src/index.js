@@ -206,7 +206,8 @@ const main = async () => {
             userName: await msg.userName,
             userId: await msg.userId,
             targetUserId: [8, 18].includes(msg._eventType) ? await msg.targetUserId : undefined,
-            content: content
+            content: content,
+            roomId: msg.id,
         };
 
         // Ignore stuff from self, Community or Feeds users
@@ -300,6 +301,9 @@ const main = async () => {
             console.log('THROTTLE - too close to previous message');
             return;
         }
+
+        // Ignore events from rooms that the bot isn't in
+        if(chatRoomId !== resolvedMsg.roomId) return;
 
         // Mentioned bot (8), not replied to existing message (18)
         // Needs a lower throttle rate to work well
