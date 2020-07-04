@@ -440,7 +440,7 @@ const main = async () => {
                             if(isStackOverflow && soMissingRequiredBadges.length > 0) {
                                 responseText += userRep < election.repNominate ? ' and' : ' as you are';
                                 responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
-                                soMissingRequiredBadges.join(', ');
+                                    soMissingRequiredBadges.join(', ') + '.';
                             }
                             
                             responseText += `. If you really must know, your candidate score is ${candidateScore} (out of 40).`;
@@ -457,7 +457,7 @@ const main = async () => {
                             
                             if(missingBadges.length > 0) {
                                 responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
-                                missingBadges.join(', ');
+                                    missingBadges.join(', ') + '.';
 
                                 if(election.status == null || election.status === 'nomination') {
                                     responseText += ` Having a high candidate score is not a requirement - you can still nominate yourself in the election!`;
