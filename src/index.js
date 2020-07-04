@@ -80,6 +80,7 @@ let room = null;
 
 // Helper functions
 const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
+const randomOops = () => ['very funny, ', 'oops! ', 'hmm... '].sort(() => .5 - Math.random()).pop();
 
 
 // Overrides console.log/error to insert newlines
@@ -392,10 +393,10 @@ const main = async () => {
 
                 // Already a mod
                 if(user.isModerator) {
-                    responseText = `very funny, you already have a diamond!`;
+                    responseText = randomOops() + `you already have a diamond!`;
                 }
                 // Previously a mod (on SO only)
-                else if(electionSiteHostname.includes('stackoverflow') && resolvedMsg.userId && soPastAndPresentModIds.includes(resolvedMsg.userId)) {
+                else if(electionSiteHostname.includes('stackoverflow') && soPastAndPresentModIds.includes(resolvedMsg.userId)) {
                     responseText = `are you really sure you want to be a moderator again?`;
                 }
                 // Default
@@ -406,7 +407,7 @@ const main = async () => {
 
                     if(data == null || typeof data.items === 'undefined' || data.items.length == 0) {
                         console.error('No data from API.');
-                        responseText = 'Sorry, I was unable to calculate your candidate score :(';
+                        responseText = 'sorry, I was unable to calculate your candidate score :(';
                     }
                     else {
 
