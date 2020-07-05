@@ -535,7 +535,7 @@ const main = async () => {
             }
 
             // Status
-            else if(content.includes('election') && ['status', 'progress', 'going'].some(x => content.includes(x))) {
+            else if(content.includes('election') && ['status', 'progress'].some(x => content.includes(x))) {
 
                 if(election.phase == null) {
                     responseText = notStartedYet;
