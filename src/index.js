@@ -190,8 +190,10 @@ const main = async () => {
     let lastMessageTime = -1;
 
     // Default election message
-    const relativetime = utils.dateToRelativetime(election.dateNomination);
-    const notStartedYet = `The [election](${election.electionUrl}) has not started yet. The **nomination** phase is starting at ${utils.linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
+    const notStartedYet = () => {
+        const relativetime = utils.dateToRelativetime(election.dateNomination);
+        return `The [election](${election.electionUrl}) has not started yet. The **nomination** phase is starting at ${utils.linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
+    };
     
     // Main event listener
     room.on('message', async msg => {
@@ -494,7 +496,7 @@ const main = async () => {
             // How to choose/pick/decide who to vote for
             else if((content.includes('how') && ['choose', 'pick', 'decide', 'deciding'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
                 if(election.qnaUrl) responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q & A](${election.qnaUrl})`;
-                if(election.phase == null) responseText = notStartedYet;
+                if(election.phase == null) responseText = notStartedYet();
             }
 
             // Current mods
@@ -538,7 +540,7 @@ const main = async () => {
             else if(content.includes('election') && ['status', 'progress'].some(x => content.includes(x))) {
 
                 if(election.phase == null) {
-                    responseText = notStartedYet;
+                    responseText = notStartedYet();
                 }
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
                     responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
@@ -565,7 +567,7 @@ const main = async () => {
             else if(content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
 
                 if(election.phase == null) {
-                    responseText = notStartedYet;
+                    responseText = notStartedYet();
                 }
                 else if(election.phase === 'nomination' && election.datePrimary != null) {
                     const relativetime = utils.dateToRelativetime(election.datePrimary);
@@ -622,7 +624,7 @@ const main = async () => {
                         responseText = election.statVoters;
                         break;
                     default:
-                        responseText = notStartedYet;
+                        responseText = notStartedYet();
                 }
             }
 
