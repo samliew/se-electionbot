@@ -1,6 +1,6 @@
 {
   "name": "se-electionbot",
-  "version": "0.1",
+  "version": "0.1.0",
   "description": "Stack Exchange Election Bot",
   "main": "src/index.js",
   "scripts": {
