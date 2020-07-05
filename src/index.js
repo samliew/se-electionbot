@@ -321,8 +321,8 @@ const main = async () => {
                     'how to decide who to vote for', 'how many users voted', 'why should I be a moderator',
                     'are moderators paid', 'who are the current moderators', 'what is the election status',
                     'when is the election starting', 'when is the election ending',
-                    'how is candidate score calculated', 'what is my candidate score',
-                    'moderation badges', 'participation badges', 'editing badges',
+                    'how is the candidate score calculated', 'what is my candidate score',
+                    'what are the moderation badges', 'what are the participation badges', 'what are the editing badges',
                 ].join('\n- ');
             }
             
