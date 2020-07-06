@@ -81,7 +81,7 @@ let room = null;
 
 // Helper functions
 const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
-const randomOops = () => ['very funny, ', 'oops! ', 'hmm... '].sort(() => .5 - Math.random()).pop();
+const randomOops = () => ['very funny, ', 'oops! ', 'hmm... ', 'hey, ', 'sorry, '].sort(() => .5 - Math.random()).pop();
 
 
 // Overrides console.log/error to insert newlines
@@ -204,11 +204,12 @@ const main = async () => {
 
         // Resolve required fields
         const resolvedMsg = {
+            roomId: Number(await msg.roomId),
             eventType: msg._eventType,
             userName: await msg.userName,
             userId: await msg.userId,
             targetUserId: [8, 18].includes(msg._eventType) ? await msg.targetUserId : undefined,
-            content: content
+            content: content,
         };
 
         // Ignore stuff from self, Community or Feeds users
@@ -284,8 +285,10 @@ const main = async () => {
                 responseText = `The election chat room is at ${election.chatUrl}`;
             }
             else if(content.includes('commands')) {
-                responseText = 'moderator commands: *' + [
-                    'say', 'alive', 'cron', 'test cron', 'chatroom', 'throttle', 'set throttle X (in seconds)', 'mute', 'mute X (in minutes)', 'unmute', 'time'
+                responseText = 'moderator commands (requires mention): *' + [
+                    'say', 'alive', 'cron', 'test cron', 'chatroom',
+                    'throttle', 'set throttle X (in seconds)',
+                    'mute', 'mute X (in minutes)', 'unmute', 'time'
                 ].join(', ') + '*';
             }
             
@@ -315,7 +318,7 @@ const main = async () => {
             else if(content.includes('about')) {
                 responseText = `I'm ${me.name} and ${me.about}`;
             }
-            else if(['help', 'commands', 'faq', 'info', 'list'].some(x => content.includes(x))) {
+            else if(['help', 'commands', 'faq', 'info'].some(x => content.includes(x))) {
                 responseText = '\n' + ['Examples of election FAQs I can help with:', 
                     'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote', 
                     'how to decide who to vote for', 'how many users voted', 'why should I be a moderator',
@@ -342,16 +345,12 @@ const main = async () => {
 
             // Current candidates
             if(['who are', 'who is', 'who has', 'how many'].some(x => content.includes(x)) && ['nominees', 'nominated', 'candidate'].some(x => content.includes(x))) {
+                responseText = `No users have nominated themselves yet.`;
 
                 if(election.arrNominees.length > 0) {
-
-                    responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.electionUrl}): `;
-
                     // Can't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
-                    responseText += election.arrNominees.map(v => v.userName).join(', ');
-                }
-                else {
-                    responseText = `There are no users who have nominated themselves yet.`;
+                    responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.electionUrl}): ` +
+                        election.arrNominees.map(v => v.userName).join(', ');
                 }
             }
 
@@ -359,6 +358,7 @@ const main = async () => {
             else if(['what', 'moderation', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 8 moderation badges are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward.`;
                 
+                // Hard-coded links to badges on Stack Overflow
                 if(isStackOverflow) {
                     responseText = `The 8 moderation badges are: `;
                     responseText += `[Civic Duty](https://stackoverflow.com/help/badges/32), [Cleanup](https://stackoverflow.com/help/badges/4), [Deputy](https://stackoverflow.com/help/badges/1002), [Electorate](https://stackoverflow.com/help/badges/155), `;
@@ -370,6 +370,7 @@ const main = async () => {
             else if(['what', 'participation', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 6 participation badges are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling.`;
                 
+                // Hard-coded links to badges on Stack Overflow
                 if(isStackOverflow) {
                     responseText = `The 6 participation badges are: `;
                     responseText += `[Constituent](https://stackoverflow.com/help/badges/1974), [Convention](https://stackoverflow.com/help/badges/901), [Enthusiast](https://stackoverflow.com/help/badges/71), `;
@@ -381,6 +382,7 @@ const main = async () => {
             else if(['what', 'editing', 'badges'].every(x => content.includes(x))) {
                 responseText = `The 6 editing badges are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White.`;
                 
+                // Hard-coded links to badges on Stack Overflow
                 if(isStackOverflow) {
                     responseText = `The 6 editing badges are: `;
                     responseText += `[Organizer](https://stackoverflow.com/help/badges/5), [Copy Editor](https://stackoverflow.com/help/badges/223), [Explainer](https://stackoverflow.com/help/badges/4368), `;
@@ -390,7 +392,10 @@ const main = async () => {
 
             // SO required badges
             else if(isStackOverflow && ['what', 'required', 'badges'].every(x => content.includes(x))) {
-                responseText = `The ${soRequiredBadgeNames.length} required badges to nominate yourself are: ${soRequiredBadgeNames.join(', ')}. You'll also need ${election.repNominate} reputation.`;
+
+                // Hard-coded links to badges on Stack Overflow
+                responseText = `The 4 required badges to nominate yourself are: [Civic Duty](https://stackoverflow.com/help/badges/32), [Strunk & White](https://stackoverflow.com/help/badges/12), ` +
+                    `[Deputy](https://stackoverflow.com/help/badges/1002), [Convention](https://stackoverflow.com/help/badges/901). You'll also need ${election.repNominate} reputation.`;
             }
 
             // Calculate own candidate score
