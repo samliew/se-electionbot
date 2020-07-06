@@ -388,6 +388,11 @@ const main = async () => {
                 }
             }
 
+            // SO required badges
+            else if(isStackOverflow && ['what', 'required', 'badges'].every(x => content.includes(x))) {
+                responseText = `The ${soRequiredBadgeNames.length} required badges to nominate yourself are: ${soRequiredBadgeNames.join(', ')}. You'll also need ${election.repNominate} reputation.`;
+            }
+
             // Calculate own candidate score
             else if(content.includes('my candidate score') || 
                 (['should i ', 'can i '].some(x => content.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => content.includes(x)) && ['mod', 'election'].some(x => content.includes(x))) ) {
@@ -515,9 +520,9 @@ const main = async () => {
             else if( (['how', 'where'].some(x => content.includes(x)) && ['nominate', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && [' i ', 'myself', 'name', 'user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)))
                   || (['how to', 'how can'].some(x => content.includes(x)) && ['be', 'mod'].every(x => content.includes(x))) ) {
                 let reqs = [`at least ${election.repNominate} reputation`];
-                if(isStackOverflow) reqs.push(`awarded these badges (Civic Duty, Strunk & White, Deputy, Convention)`);
-                if(electionSiteHostname.includes('askubuntu.com'))     reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
-                reqs.push(`and cannot have been suspended anywhere on the [Stack Exchange Network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
+                if(isStackOverflow) reqs.push(`have these badges (*${soRequiredBadgeNames.join(', ')}*)`);
+                if(electionSiteHostname.includes('askubuntu.com')) reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
+                reqs.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
 
                 // Bold additional text if talking about nominating others
                 const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)) ? '**' : '';
