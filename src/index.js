@@ -345,12 +345,17 @@ const main = async () => {
 
             // Current candidates
             if(['who are', 'who is', 'who has', 'how many'].some(x => content.includes(x)) && ['nominees', 'nominated', 'candidate'].some(x => content.includes(x))) {
-                responseText = `No users have nominated themselves yet.`;
-
-                if(election.arrNominees.length > 0) {
+                
+                if(election.phase === null) {
+                    responseText = notStartedYet();
+                }
+                else if(election.arrNominees.length > 0) {
                     // Can't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
                     responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.electionUrl}): ` +
                         election.arrNominees.map(v => v.userName).join(', ');
+                }
+                else {
+                    responseText = `No users have nominated themselves yet.`;
                 }
             }
 
@@ -641,7 +646,10 @@ const main = async () => {
             // Who are the winners
             else if(['who'].some(x => content.includes(x)) && ['winners', 'won', 'new mod'].some(x => content.includes(x))) {
                 
-                if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
+                if(election.phase === null) {
+                    responseText = notStartedYet();
+                }
+                else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
                     responseText = `The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}.`;
                 }
                 else if(election.phase === 'ended') {
@@ -654,6 +662,7 @@ const main = async () => {
             
             // When is the election ending
             else if(content.includes('election end') || content.includes('does it end') || content.includes('is it ending')) {
+                
                 if(election.phase == 'ended') {
                     responseText = `The election is already over.`;
                 }
