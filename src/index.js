@@ -222,7 +222,7 @@ const main = async () => {
         const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
 
         // If message was too long, ignore (most likely FP)
-        if(content.length > 120) {
+        if(content.length > 110) {
             console.log('EVENT - Ignoring due to message length:', resolvedMsg.content);
             return;
         }
