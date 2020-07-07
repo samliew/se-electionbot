@@ -2,7 +2,6 @@ const path = require('path');
 const https = require('https');
 const express = require('express');
 const request = require('request-promise');
-const cheerio = require('cheerio');
 const { json } = require('express');
 
 module.exports = {
@@ -57,26 +56,6 @@ module.exports = {
         catch(e) {
             console.error('FETCH - ERROR:', e);
             return null;
-        }
-    },
-
-    getSiteModerators: async function(siteHostname) {
-        const url = `https://${siteHostname}/users?tab=moderators`;
-
-        try {
-            const pageHtml = await module.exports.fetchUrl(url);
-            
-            // Parse moderators page
-            const $ = cheerio.load(pageHtml);
-            
-            const mods = $('#user-browser .user-details a').text().filter(v => v !== '').get();
-            console.log(`FETCH - ${url}`, mods);
-
-            return mods;
-        }
-        catch(err) {
-            console.error(`SCRAPE - Failed scraping ${url}`, err);
-            return [];
         }
     },
 
