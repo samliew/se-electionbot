@@ -482,11 +482,11 @@ const main = async () => {
                             // If nomination phase, ask user to nominate themselves
                             if(election.status == null || election.status === 'nomination') {
 
-                                if(candidateScore <= 20) {
-                                    responseText += ` Having a high candidate score is not a requirement - you can still nominate yourself in the election!`;
-                                }
-                                else if(candidateScore >= 30) {
+                                if(candidateScore >= 30) {
                                     responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
+                                }
+                                else {
+                                    responseText += ` Having a high candidate score is not a requirement - you can still nominate yourself in the election!`;
                                 }
                             }
                         }
