@@ -59,6 +59,23 @@ module.exports = {
         }
     },
 
+    getSiteModerators: async function(siteHostname) {
+        const url = `https://${siteHostname}/users?tab=moderators`;
+
+        try {
+            const pageHtml = await exports.fetchUrl(url);
+            
+            // Parse moderators page
+            const $ = cheerio.load(pageHtml);
+            
+            const mods = $('#user-browser .user-details > a').get().map(el => el.innerText);
+            return mods;
+        }
+        catch(err) {
+            console.error(`SCRAPE - Failed scraping ${url}`, err);
+        }
+    },
+
     // Example URL: https://www.timeanddate.com/worldclock/fixedtime.html?iso=20201231T2359
     toTadParamFormat: function(date)
     {
