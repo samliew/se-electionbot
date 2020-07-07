@@ -63,7 +63,7 @@ module.exports = {
         const url = `https://${siteHostname}/users?tab=moderators`;
 
         try {
-            const pageHtml = await exports.fetchUrl(url);
+            const pageHtml = await module.exports.fetchUrl(url);
             
             // Parse moderators page
             const $ = cheerio.load(pageHtml);
