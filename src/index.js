@@ -159,7 +159,8 @@ const main = async () => {
     }
 
     // Get current site moderators
-    const currSiteModApiResponse = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/moderators/elected?pagesize=100&order=asc&sort=creation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`, true);
+    // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
+    const currSiteModApiResponse = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/moderators?pagesize=100&order=asc&sort=reputation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`, true);
     currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(v => v.is_employee === false) : [];
     currentSiteModIds = currentSiteMods.map(v => v.user_id);
 
@@ -524,7 +525,7 @@ const main = async () => {
             else if(['who', 'current', 'mod'].every(x => content.includes(x))) {
 
                 if(currentSiteMods && currentSiteMods.length > 0) {
-                    responseText = `The [current moderators](${electionSiteUrl}/users?tab=moderators) are: ` + entities.decode( currentSiteMods.map(v => v.display_name).join(', ') );
+                    responseText = `The [current ${currentSiteMods.length} moderators](${electionSiteUrl}/users?tab=moderators) are: ` + entities.decode( currentSiteMods.map(v => v.display_name).join(', ') );
                 }
                 else {
                     responseText = `The current moderators on ${election.sitename} can be found on this page: [${electionSiteUrl}/users?tab=moderators](${electionSiteUrl}/users?tab=moderators)`;
