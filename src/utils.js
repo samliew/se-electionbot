@@ -2,6 +2,7 @@ const path = require('path');
 const https = require('https');
 const express = require('express');
 const request = require('request-promise');
+const cheerio = require('cheerio');
 const { json } = require('express');
 
 module.exports = {
