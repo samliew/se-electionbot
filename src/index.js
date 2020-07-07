@@ -562,6 +562,11 @@ const main = async () => {
                 if(election.phase == null) responseText = notStartedYet();
             }
 
+            // Who is the best mod
+            else if(['who', 'which'].some(x => content.includes(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
+                responseText = `All the mods are great!!! I love all our mods equally!`;
+            }
+
             // Current mods
             else if(['who', 'current', 'mod'].every(x => content.includes(x))) {
 
@@ -586,6 +591,11 @@ const main = async () => {
                 const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)) ? '**' : '';
 
                 responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need ${reqs.join(', ')}. ${mentionsAnother}You cannot nominate another user.${mentionsAnother}`;
+            }
+
+            // Why was nomination removed
+            else if(['why', 'what'].some(x => content.includes(x)) && ['nomination', 'nominees', 'candidate'].some(x => content.includes(x)) && ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(x => content.includes(x))) {
+                responseText = `Candidates may withdraw their nomination any time before the election phase. Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
             }
 
             // Why be a moderator
@@ -732,22 +742,9 @@ const main = async () => {
                 ].join('\n');
             }
 
-
-            /* ===== OTHER MISC REPLIES ===== */
-
-            // Why was nomination removed
-            else if(['why', 'what'].some(x => content.includes(x)) && ['nomination', 'nominees', 'candidate'].some(x => content.includes(x)) && ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(x => content.includes(x))) {
-                responseText = `Candidates may withdraw their nomination any time before the election phase. Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
-            }
-
             // Edit diamond into username
             else if(['edit', 'insert', 'add'].some(x => content.includes(x)) && ['♦', 'diamond'].some(x => content.includes(x)) && content.includes('name')) {
                 responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
-            }
-
-            // Who is the best moderator
-            else if(['who', 'which'].some(x => content.includes(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
-                responseText = `All the mods are great!!! I love all our mods equally!`;
             }
 
             
