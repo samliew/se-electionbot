@@ -159,8 +159,8 @@ const main = async () => {
     }
 
     // Get current site moderators
-    const currSiteModApiReponse = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/moderators/elected?pagesize=100&order=asc&sort=creation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`, true);
-    currentSiteMods = currSiteModApiReponse ? currSiteModApiReponse.items : [];
+    const currSiteModApiResponse = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/moderators/elected?pagesize=100&order=asc&sort=creation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`, true);
+    currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(v => v.is_employee === false) : [];
     currentSiteModIds = currentSiteMods.map(v => v.user_id);
 
     // Wait for election page to be scraped
@@ -200,7 +200,7 @@ const main = async () => {
 
         // Decode HTML entities in messages, lowercase version for matching
         const origContent = entities.decode(msg._content);
-        const content = origContent.toLowerCase();
+        const content = origContent.toLowerCase().replace(/^@\S+/, '');
 
         // Resolve required fields
         const resolvedMsg = {
@@ -221,9 +221,9 @@ const main = async () => {
         // Get details of user who triggered the message
         const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
 
-        // If message was too long, ignore (most likely FP)
-        if(content.length > 110) {
-            console.log('EVENT - Ignoring due to message length:', resolvedMsg.content);
+        // If message is too short or long, ignore (most likely FP)
+        if(content.length < 4 || content.length > 69) {
+            console.log('EVENT - Ignoring due to message length:', resolvedMsg.content.length, resolvedMsg.content);
             return;
         }
 
@@ -441,12 +441,11 @@ const main = async () => {
                         electionBadgeNames.forEach(electionBadge => {
                             if(!userBadges.includes(electionBadge)) missingBadges.push(electionBadge.replace('&amp;', '&'));
                         });
-                        const soMissingRequiredBadges = soRequiredBadgeNames.filter(requiredBadge => {
-                            missingBadges.includes(requiredBadge);
-                        });
+                        const soMissingRequiredBadges = soRequiredBadgeNames.filter(requiredBadge => missingBadges.includes(requiredBadge));
                         
                         console.log(resolvedMsg.userId, userRep, repScore, badgeScore, candidateScore, missingBadges);
                         
+                        // Does not meet minimum requirements
                         if(userRep < election.repNominate || 
                             (isStackOverflow && soMissingRequiredBadges.length > 0) ) {
                             responseText = `You are not eligible to nominate yourself in the election`;
@@ -462,26 +461,33 @@ const main = async () => {
                             
                             responseText += `. If you really must know, your candidate score is ${candidateScore} (out of 40).`;
                         }
+                        // Exceeds expectations
                         else if(candidateScore == 40) {
                             responseText = `Wow! You have a maximum candidate score of 40!`;
                             
+                            // If nomination phase, ask user to nominate themselves
                             if(election.status == null || election.status === 'nomination') {
                                 responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
                             }
                         }
+                        // Still can nominate themselves
                         else {
                             responseText = `Your candidate score is ${candidateScore} (out of 40).`;
                             
                             if(missingBadges.length > 0) {
                                 responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
                                     missingBadges.join(', ') + '.';
+                            }
+                             
+                            // If nomination phase, ask user to nominate themselves
+                            if(election.status == null || election.status === 'nomination') {
 
-                                if(election.status == null || election.status === 'nomination') {
+                                if(candidateScore <= 20) {
                                     responseText += ` Having a high candidate score is not a requirement - you can still nominate yourself in the election!`;
                                 }
-                            }
-                            else if(candidateScore >= 30 && (election.status == null || election.status === 'nomination')) {
-                                responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
+                                else if(candidateScore >= 30) {
+                                    responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
+                                }
                             }
                         }
                     }
@@ -644,7 +650,7 @@ const main = async () => {
             }
 
             // Who are the winners
-            else if(['who'].some(x => content.includes(x)) && ['winners', 'won', 'new mod'].some(x => content.includes(x))) {
+            else if(['who'].some(x => content.includes(x)) && ['winners', 'new mod'].some(x => content.includes(x))) {
                 
                 if(election.phase === null) {
                     responseText = notStartedYet();
@@ -661,7 +667,7 @@ const main = async () => {
             }
             
             // When is the election ending
-            else if(content.includes('election end') || content.includes('does it end') || content.includes('is it ending')) {
+            else if(['when'].some(x => content.includes(x)) && (content.includes('election end') || content.includes('does it end') || content.includes('is it ending'))) {
                 
                 if(election.phase == 'ended') {
                     responseText = `The election is already over.`;
@@ -683,6 +689,20 @@ const main = async () => {
                     `    End:        ${election.dateEnded}` + (election.phase == 'ended' ? arrow:'')
                 ].join('\n');
             }
+
+
+            /* ===== OTHER MISC REPLIES ===== */
+
+            // Why was nomination removed
+            else if(['why'].some(x => content.includes(x)) && ['nomination', 'nominees', 'candidate'].some(x => content.includes(x)) && ['removed', 'withdraw', 'fewer', 'lesser'].some(x => content.includes(x))) {
+                responseText = `Candidates may withdraw their nomination any time before the election phase. Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
+            }
+
+            // Edit diamond into username
+            else if(['edit', 'insert', 'add'].some(x => content.includes(x)) && ['♦', 'diamond'].some(x => content.includes(x)) && content.includes('name')) {
+                responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
+            }
+
             
             if(responseText != null) {
                 console.log('RESPONSE', responseText);
