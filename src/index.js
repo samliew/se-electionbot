@@ -343,7 +343,7 @@ const main = async () => {
             let responseText = null;
 
             // Current candidates
-            if(['who are', 'who is', 'who has', 'how many'].some(x => content.includes(x)) && ['nominees', 'nominated', 'candidate'].some(x => content.includes(x))) {
+            if(['who are', 'who is', 'who has', 'how many'].some(x => content.includes(x)) && ['nominees', 'nominated', 'nominations', 'candidate'].some(x => content.includes(x))) {
                 
                 if(election.phase === null) {
                     responseText = notStartedYet();
