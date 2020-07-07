@@ -736,7 +736,7 @@ const main = async () => {
             /* ===== OTHER MISC REPLIES ===== */
 
             // Why was nomination removed
-            else if(['why'].some(x => content.includes(x)) && ['nomination', 'nominees', 'candidate'].some(x => content.includes(x)) && ['removed', 'withdraw', 'fewer', 'lesser'].some(x => content.includes(x))) {
+            else if(['why', 'what'].some(x => content.includes(x)) && ['nomination', 'nominees', 'candidate'].some(x => content.includes(x)) && ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(x => content.includes(x))) {
                 responseText = `Candidates may withdraw their nomination any time before the election phase. Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
             }
 
