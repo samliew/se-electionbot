@@ -200,7 +200,7 @@ const main = async () => {
 
         // Decode HTML entities in messages, lowercase version for matching
         const origContent = entities.decode(msg._content);
-        const content = origContent.toLowerCase().replace(/^@\S+/, '');
+        const content = origContent.toLowerCase().replace(/^@\S+\s+/, '');
 
         // Resolve required fields
         const resolvedMsg = {
