@@ -337,7 +337,7 @@ const main = async () => {
                     `good, and you?`,
                     `I'm fine, thank you.`,
                     `I'm bored. Amuse me.`,
-                ].sort(randomSort).pop();
+                ].sort(byRandom).pop();
             }
             else if(content.equals(`where are you?`)) {
                 responseText = [
