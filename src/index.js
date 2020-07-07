@@ -161,7 +161,7 @@ const main = async () => {
     // Get current site moderators
     // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
     const currSiteModApiResponse = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/moderators?pagesize=100&order=asc&sort=reputation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`, true);
-    currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(v => v.is_employee === false) : [];
+    currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(v => v.is_employee === false && v.account_id !== -1) : [];
     currentSiteModIds = currentSiteMods.map(v => v.user_id);
 
     // Wait for election page to be scraped
