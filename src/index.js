@@ -82,7 +82,7 @@ let room = null;
 // Helper functions
 const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
 const byRandom = () => .5 - Math.random();
-const randomPlop = () => [`I'm back.`, '*plop*', 'Hello there!', 'Hello World', 'testing... 1 2 3', randomName()].sort(byRandom).pop();
+const randomPlop = () => [`I'm back.`, '*plop*', 'Hello there!', 'Hello World', 'testing... 1 2 3'].sort(byRandom).pop();
 const randomOops = () => ['very funny,', 'oops!', 'hmm...', 'hey,', 'sorry,'].sort(byRandom).pop() + ' ';
 
 
