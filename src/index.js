@@ -81,6 +81,7 @@ let room = null;
 
 // Helper functions
 const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
+const randomPlop = () => ['I\'m back.', '*plop*', 'Hello there!', 'Hello World', 'testing... 1 2 3'].sort(() => .5 - Math.random()).pop();
 const randomOops = () => ['very funny, ', 'oops! ', 'hmm... ', 'hey, ', 'sorry, '].sort(() => .5 - Math.random()).pop();
 
 
@@ -105,7 +106,7 @@ if(debug) console.error('WARNING - Debug mode is on.');
 async function announceCancelled(election = null) {
 
     // Needs to be cancelled
-    if(election == null || typeof election.cancelledText == 'undefined' || election.phase == 'cancelled') return; 
+    if(election == null || typeof election.cancelledText == 'undefined' || election.phase == 'cancelled') return false; 
 
     // Stop all cron jobs
     announcement.cancelAll();
@@ -118,6 +119,8 @@ async function announceCancelled(election = null) {
 
     // Announce
     await room.sendMessage(election.cancelledText);
+
+    return true;
 }
 
 
@@ -127,7 +130,7 @@ async function announceWinners(election = null) {
     if(debug) console.log('announceWinners() called: ', election.arrWinners);
 
     // Needs to have ended and have winners
-    if(election == null || election.phase != 'ended' || election.arrWinners.length == 0) return; 
+    if(election == null || election.phase != 'ended' || election.arrWinners.length == 0) return false; 
 
     // Stop all cron jobs
     announcement.cancelAll();
@@ -147,6 +150,8 @@ async function announceWinners(election = null) {
 
     // Announce
     await room.sendMessage(msg);
+
+    return true;
 }
 
 
@@ -185,7 +190,11 @@ const main = async () => {
     room = await client.joinRoom(chatRoomId);
 
     // Try announce winners on startup?
-    await announceWinners(election);
+    const announcedWinners = await announceWinners(election);
+    if(!announcedWinners) {
+        // Announce arrival
+        await room.sendMessage(randomPlop());
+    }
 
     // Variable to store last message for throttling
     let lastMessageTime = -1;
