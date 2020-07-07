@@ -81,8 +81,13 @@ let room = null;
 
 // Helper functions
 const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
-const randomPlop = () => ['I\'m back.', '*plop*', 'Hello there!', 'Hello World', 'testing... 1 2 3'].sort(() => .5 - Math.random()).pop();
-const randomOops = () => ['very funny, ', 'oops! ', 'hmm... ', 'hey, ', 'sorry, '].sort(() => .5 - Math.random()).pop();
+const byRandom = () => .5 - Math.random();
+const randomPlop = () => [`I'm back.`, '*plop*', 'Hello there!', 'Hello World', 'testing... 1 2 3', randomName()].sort(byRandom).pop();
+const randomOops = () => ['very funny,', 'oops!', 'hmm...', 'hey,', 'sorry,'].sort(byRandom).pop() + ' ';
+
+
+// Prototype functions
+String.prototype.equals = function(n) { return this == n };
 
 
 // Overrides console.log/error to insert newlines
@@ -214,7 +219,6 @@ const main = async () => {
 
         // Resolve required fields
         const resolvedMsg = {
-            roomId: Number(await msg.roomId),
             eventType: msg._eventType,
             userName: await msg.userName,
             userId: await msg.userId,
@@ -325,8 +329,36 @@ const main = async () => {
             if(content.includes('alive')) {
                 responseText = `I'm alive on ${scriptHostname}`;
             }
-            else if(content.includes('about')) {
+            else if(content.includes('about') || content.equals('who are you?')) {
                 responseText = `I'm ${me.name} and ${me.about}`;
+            }
+            else if(content.equals(`how are you?`)) {
+                responseText = [
+                    `good, and you?`,
+                    `I'm fine, thank you.`,
+                    `I'm bored. Amuse me.`,
+                ].sort(randomSort).pop();
+            }
+            else if(content.equals(`where are you?`)) {
+                responseText = [
+                    `I'm on the interwebs`,
+                    `I'm here, aren't I?`,
+                    `I'm here and everywhere`,
+                ].sort(byRandom).pop();
+            }
+            else if(content.includes(`what's your name?`) || content.equals(`what are you?`)) {
+                responseText = [
+                    `I'm a robot. Bleep bloop.`,
+                    `I'm a teacup, short and stout. Here is my handle, here is my sprout.`,
+                    `I'm a crystal ball; I already know the winners.`,
+                ].sort(byRandom).pop();
+            }
+            else if(content.equals('why are you?')) {
+                responseText = [
+                    `because.`,
+                    `why what???`,
+                    `Why am I here? To serve the community`,
+                ].sort(byRandom).pop();
             }
             else if(['help', 'commands', 'faq', 'info'].some(x => content.includes(x))) {
                 responseText = '\n' + ['Examples of election FAQs I can help with:', 
@@ -660,7 +692,7 @@ const main = async () => {
             }
 
             // Who are the winners
-            else if(['who'].some(x => content.includes(x)) && ['winners', 'new mod'].some(x => content.includes(x))) {
+            else if(['who'].some(x => content.includes(x)) && ['winners', 'new mod', 'will win', 'future mod'].some(x => content.includes(x))) {
                 
                 if(election.phase === null) {
                     responseText = notStartedYet();
@@ -711,6 +743,11 @@ const main = async () => {
             // Edit diamond into username
             else if(['edit', 'insert', 'add'].some(x => content.includes(x)) && ['♦', 'diamond'].some(x => content.includes(x)) && content.includes('name')) {
                 responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
+            }
+
+            // Who is the best moderator
+            else if(['who', 'which'].some(x => content.includes(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
+                responseText = `All the mods are great!!! I love all our mods equally!`;
             }
 
             
