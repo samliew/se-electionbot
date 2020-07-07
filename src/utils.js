@@ -73,6 +73,7 @@ module.exports = {
         }
         catch(err) {
             console.error(`SCRAPE - Failed scraping ${url}`, err);
+            return [];
         }
     },
 
