@@ -160,7 +160,7 @@ const main = async () => {
 
     // Get current site moderators
     // Scrape mod page on site, which is sorted by name
-    currentSiteMods = await utils.getSiteModerators();
+    currentSiteMods = await utils.getSiteModerators(electionSiteHostname);
 
     // Wait for election page to be scraped
     election = new Election(electionUrl);
