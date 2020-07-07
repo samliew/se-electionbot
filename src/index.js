@@ -456,7 +456,7 @@ const main = async () => {
                             if(isStackOverflow && soMissingRequiredBadges.length > 0) {
                                 responseText += userRep < election.repNominate ? ' and' : ' as you are';
                                 responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
-                                    soMissingRequiredBadges.join(', ') + '.';
+                                    soMissingRequiredBadges.join(', ');
                             }
                             
                             responseText += `. If you really must know, your candidate score is ${candidateScore} (out of 40).`;
