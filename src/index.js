@@ -247,8 +247,8 @@ const main = async () => {
             
             let responseText = null;
 
-            if(content.includes('say') && content.split(' say ').length == 2) {
-                responseText = origContent.split(' say ')[1];
+            if(content.indexOf('say ') === 0) {
+                responseText = origContent.replace('say ', '');
             }
             else if(content.includes('alive')) {
                 responseText = `I'm alive on ${scriptHostname}, started on ${utils.dateToUtcTimestamp(scriptInitDate)} with an uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1000)} seconds.` + 
