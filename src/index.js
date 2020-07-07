@@ -292,7 +292,7 @@ const main = async () => {
                 ].join(', ') + '*';
             }
             
-            if(responseText != null) {
+            if(responseText != null && responseText.length <= 500) {
                 console.log('RESPONSE', responseText);
                 await room.sendMessage(responseText);
 
@@ -321,15 +321,15 @@ const main = async () => {
             else if(['help', 'commands', 'faq', 'info'].some(x => content.includes(x))) {
                 responseText = '\n' + ['Examples of election FAQs I can help with:', 
                     'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote', 
-                    'how to decide who to vote for', 'how many users voted', 'why should I be a moderator',
-                    'are moderators paid', 'who are the current moderators', 'what is the election status',
+                    'how to decide who to vote for', 'why should I be a moderator',
+                    'are moderators paid', 'what is the election status',
                     'when is the election starting', 'when is the election ending',
-                    'how is the candidate score calculated', 'what is my candidate score',
-                    'what are the moderation badges', 'what are the participation badges', 'what are the editing badges',
+                    'how is candidate score calculated', 'what is my candidate score',
+                    'what are moderation badges', 'what are participation badges', 'what are editing badges',
                 ].join('\n- ');
             }
             
-            if(responseText != null) {
+            if(responseText != null && responseText.length <= 500) {
                 console.log('RESPONSE', responseText);
                 await msg.reply(responseText);
 
@@ -704,7 +704,7 @@ const main = async () => {
             }
 
             
-            if(responseText != null) {
+            if(responseText != null && responseText.length <= 500) {
                 console.log('RESPONSE', responseText);
                 await room.sendMessage(responseText);
 
