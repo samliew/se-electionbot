@@ -69,7 +69,7 @@ module.exports = {
             // Parse moderators page
             const $ = cheerio.load(pageHtml);
             
-            const mods = $('#user-browser .user-details a').get().map(el => el.innerText.trim()).filter(v => v !== '');
+            const mods = $('#user-browser .user-details a').get().map(el => el.textContent.trim()).filter(v => v !== '');
             console.log(`FETCH - ${url}`, mods);
 
             return mods;
