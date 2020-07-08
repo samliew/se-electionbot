@@ -332,6 +332,12 @@ const main = async () => {
             else if(content.includes('about') || content.equals('who are you?')) {
                 responseText = `I'm ${me.name} and ${me.about}`;
             }
+            else if(content.includes('who') && ['made', 'created', 'owner', 'serve'].some(x => content.includes(x)) && content.includes('you')) {
+                responseText = `[Samuel](https://so-user.com/584192?tab=profile) created me. Isn't he awesome?`;
+            }
+            else if(content.equals(`i love you`) || content.equals(`i like you`)) {
+                responseText = `I love you 3000`;
+            }
             else if(content.equals(`how are you?`)) {
                 responseText = [
                     `good, and you?`,
@@ -349,7 +355,7 @@ const main = async () => {
             else if(content.includes(`what's your name?`) || content.equals(`what are you?`)) {
                 responseText = [
                     `I'm a robot. Bleep bloop.`,
-                    `I'm a teacup, short and stout. Here is my handle, here is my sprout.`,
+                    `I'm a teacup, short and stout. Here is my handle, here is my spout.`,
                     `I'm a crystal ball; I already know the winners.`,
                 ].sort(byRandom).pop();
             }
@@ -457,7 +463,7 @@ const main = async () => {
                 }
                 // Previously a mod (on SO only)
                 else if(isStackOverflow && soPastAndPresentModIds.includes(resolvedMsg.userId)) {
-                    responseText = `are you really sure you want to be a moderator again?`;
+                    responseText = `are you really sure you want to be a moderator again???`;
                 }
                 // Default
                 else {
@@ -714,7 +720,7 @@ const main = async () => {
                     responseText = `The winners can be found on the [election page](${election.electionUrl}).`;
                 }
                 else {
-                    responseText = `The election is not over yet.`;
+                    responseText = `The election is not over yet. Stay tuned for the winners!`;
                 }
             }
             
