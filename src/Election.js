@@ -128,7 +128,7 @@ export default class Election {
             }
 
             console.log(
-                `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${this.updated}.\n` +
+                `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${utils.dateToUtcTimestamp(this.updated)}.\n` +
                 `-------- PHASE ${this.phase};  CANDIDATES ${this.arrNominees.length};  WINNERS ${this.arrWinners.length}\n` +
                 `-------- QNA ${this.qnaUrl};  CHAT ${this.chatUrl}`
             );
