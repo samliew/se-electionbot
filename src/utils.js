@@ -52,7 +52,7 @@ module.exports = {
                 uri: url,
                 json: url.includes('api') || json,
             });
-            console.log(`FETCH - ${url}`, debug ? content : '');
+            console.log(`FETCH - ${url}`, debug ? (json ? JSON.stringify(content) : content) : '');
             return content;
         }
         catch(e) {

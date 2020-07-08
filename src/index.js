@@ -237,11 +237,11 @@ const main = async () => {
 
         // If message is too short or long, ignore (most likely FP)
         if(content.length < 4 || content.length > 69) {
-            console.log('EVENT - Ignoring due to message length:', resolvedMsg.content.length, resolvedMsg.content);
+            console.log(`EVENT - Ignoring due to message length ${resolvedMsg.content.length}: `, resolvedMsg.content);
             return;
         }
 
-        console.log('EVENT', resolvedMsg);
+        console.log('EVENT', JSON.stringify(resolvedMsg));
 
         // Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
         const relativeTimestampLinkToElection = utils.linkToRelativeTimestamp(election.dateElection);
