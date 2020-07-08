@@ -252,7 +252,7 @@ const main = async () => {
             let responseText = null;
 
             if(content.indexOf('say ') === 0) {
-                responseText = origContent.replace('say ', '');
+                responseText = origContent.replace(/^@\S+\s+say /i, '');
             }
             else if(content.includes('alive')) {
                 responseText = `I'm alive on ${scriptHostname}, started on ${utils.dateToUtcTimestamp(scriptInitDate)} with an uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1000)} seconds.` + 
