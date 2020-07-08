@@ -23,6 +23,7 @@
     "node": "10.x"
   },
   "dependencies": {
+    "body-parser": "^1.19.0",
     "chatexchange": "^0.2.3-dev",
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.4",

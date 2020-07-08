@@ -1,0 +1,30 @@
+* {
+    font: 16px sans-serif;
+    color: #333;
+}
+body {
+    margin: 0;
+    padding: 20px;
+}
+form {
+    max-width: 500px;
+}
+form input {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+form button {
+    padding: 5px 10px;
+}
+.result {
+    margin-top: 10px;
+}
+.result.success {
+    color: darkgreen;
+}
+.result.error {
+    color: indianred;
+}

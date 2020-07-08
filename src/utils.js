@@ -2,16 +2,17 @@ const path = require('path');
 const https = require('https');
 const express = require('express');
 const request = require('request-promise');
-const { json } = require('express');
+const bodyParser = require('body-parser');
 
 module.exports = {
 
-    staticServer: function() 
+    startServer: function(room) 
     {
         const app = express().set('port', process.env.PORT || 5000);
         
         const staticPath = path.join(__dirname, '../static');
         app.use('/', express.static(staticPath));
+        app.use(bodyParser.urlencoded({ extended: true }));
                 
         app.listen(app.get('port'), () => {
             console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
@@ -36,7 +37,8 @@ module.exports = {
         }, mins * 60000);
     },
 
-    fetchUrl: async function(url, json = false) {
+    fetchUrl: async function(url, json = false)
+    {
         const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
 
         try {

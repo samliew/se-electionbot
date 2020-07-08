@@ -843,6 +843,46 @@ const main = async () => {
 
     }, 5 * 60000);
 
+    
+    // Listen to requests
+    const app = utils.startServer();
+    app.get('/say', function(req, res) {
+        let postHtml = '';
+
+        if(req.query.success == 'true') {
+            postHtml = `<div class="result success">Success!</div>`;
+        }
+        else if(req.query.success == 'false') {
+            postHtml = `<div class="result error">Error. Could not send message.</div>`
+        }
+
+        res.send(`
+            <link rel="stylesheet" href="css/styles.css" />
+            <h3>ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatRoomId}</a>:</h3>
+            <form method="post">
+                <input type="text" name="message" placeholder="message" maxlength="500" value="${req.query.message ? decodeURIComponent(req.query.message) : ''}" />
+                <input type="hidden" name="password" value="${req.query.password || ''}" />
+                <button>Send</button>
+            </form>
+            ${postHtml}
+        `);
+        return;
+    });
+    app.post('/say', async function(req, res) {
+        const validPassword = req.body.password === process.env.PASSWORD;
+        const message = (req.body.message || '').trim();
+
+        // Validation
+        if(!validPassword || message == '') {
+            res.redirect(`/say?message=${encodeURIComponent(message)}&success=false`);
+        }
+        else {
+            await room.sendMessage(message);
+            res.redirect(`/say?password=${req.body.password}&success=true`);
+        }
+        return;
+    });
+
 
 } // End main fn
 main();
@@ -850,9 +890,6 @@ main();
 
 // If running on Heroku
 if (scriptHostname.includes('herokuapp.com')) {
-
-    // Heroku requires binding/listening to the port otherwise it will shut down
-    utils.staticServer();
 
     // Heroku free dyno will shutdown when idle for 30 mins, so keep-alive is necessary
     utils.keepAlive(scriptHostname, 25);
