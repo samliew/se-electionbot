@@ -25,6 +25,7 @@ const electionUrl = process.env.ELECTION_PAGE_URL;
 const electionSiteHostname = electionUrl.split('/')[2];
 const electionSiteUrl = 'https://' + electionSiteHostname;
 const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(v => Number(v));
+const ignoredUserIds = (process.env.IGNORED_USERIDS || '').split(/\D+/).map(v => Number(v));
 const scrapeInterval = Number(process.env.SCRAPE_INTERVAL_MINS) || 5;
 const stackApikey = process.env.STACK_API_KEY;
 
@@ -228,6 +229,9 @@ const main = async () => {
 
         // Ignore stuff from self, Community or Feeds users
         if([me.id, -1, -2].includes(resolvedMsg.userId)) return;
+
+        // Ignore stuff from ignored users
+        if(ignoredUserIds.includes(resolvedMsg.userId)) return;
 
         // Ignore unnecessary events
         if(ignoredEventTypes.includes(resolvedMsg.eventType)) return;
