@@ -682,7 +682,7 @@ const main = async () => {
             }
 
             // How/where to vote
-            else if(['where', 'how', 'want', 'when'].some(x => content.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => content.includes(x)) && ['vote', 'elect'].some(x => content.includes(x))) {
+            else if(['where', 'how', 'want', 'when'].some(x => content.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => content.includes(x)) && ['voting', 'vote', 'elect'].some(x => content.includes(x))) {
 
                 const informedDecision = election.qnaUrl ? ` If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).` : '';
 
