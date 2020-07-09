@@ -336,10 +336,10 @@ const main = async () => {
             
             let responseText = null;
 
-            if(content.includes('alive')) {
+            if(content.equals('alive')) {
                 responseText = `I'm alive on ${scriptHostname}`;
             }
-            else if(content.includes('about') || content.equals('who are you?')) {
+            else if(content.equals('about') || content.equals('who are you?')) {
                 responseText = `I'm ${me.name} and ${me.about}`;
             }
             else if(content.includes('who') && ['made', 'created', 'owner', 'serve'].some(x => content.includes(x)) && content.includes('you')) {
@@ -376,7 +376,7 @@ const main = async () => {
                     `Why am I here? To serve the community`,
                 ].sortByRandom().pop();
             }
-            else if(['help', 'commands', 'faq', 'info'].some(x => content.includes(x))) {
+            else if(['help', 'commands', 'faq', 'info'].some(x => content.equals(x))) {
                 responseText = '\n' + ['Examples of election FAQs I can help with:', 
                     'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote', 
                     'how to decide who to vote for', 'why should I be a moderator',
