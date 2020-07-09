@@ -760,7 +760,11 @@ const main = async () => {
 
             // Good bot
             if(['the', 'this', 'i'].some(x => content.startsWith(x)) && content.includes('bot') && ['good', 'excellent', 'wonderful', 'well done', 'nice', 'great', 'like'].some(x => content.includes(x))) {
-                responseText = `I know, thanks anyway.`;
+                responseText = [
+                    `I know, thanks anyway.`,
+                    `I'm only as good as the one who made me.`,
+                    `Thanks! You're awesome!`,
+                ].sort(byRandom).pop();
             }
 
             
