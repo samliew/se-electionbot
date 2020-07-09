@@ -893,7 +893,12 @@ const main = async () => {
         const message = (req.body.message || '').trim();
 
         // Validation
-        if(!validPassword || message == '') {
+        if(!validPassword) {
+            console.error('Invalid password', req.body.password);
+            res.redirect(`/say?message=${encodeURIComponent(message)}&success=false`);
+        }
+        else if(message == '') {
+            console.error('Invalid message', message);
             res.redirect(`/say?message=${encodeURIComponent(message)}&success=false`);
         }
         else {

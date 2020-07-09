@@ -13,6 +13,11 @@ module.exports = {
         const staticPath = path.join(__dirname, '../static');
         app.use('/', express.static(staticPath));
         app.use(bodyParser.urlencoded({ extended: true }));
+        app.use(function(req, res, next) {
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            next();
+        });
                 
         app.listen(app.get('port'), () => {
             console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
