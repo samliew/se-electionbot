@@ -258,7 +258,6 @@ const main = async () => {
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
-            
             let responseText = null;
 
             if(content.indexOf('say ') === 0) {
@@ -324,20 +323,34 @@ const main = async () => {
             }
         }
         
+
         // If too close to previous message, ignore
         if(Date.now() < lastMessageTime + throttleSecs * 1000) {
             console.log('THROTTLE - too close to previous message');
             return;
         }
 
-        // Mentioned bot (8), not replied to existing message (18)
-        // Needs a lower throttle rate to work well
+
+        // Mentioned bot (8)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && throttleSecs <= 10) {
-            
             let responseText = null;
 
             if(content.equals('alive')) {
                 responseText = `I'm alive on ${scriptHostname}`;
+            }
+            if(content.startsWith('offtopic ')) {
+                const mid = Number(content.split('offtopic ')[1]);
+                if(!isNaN(mid)) {
+                    responseText = `:${mid} This room is for discussion about the [election](${electionUrl}).`;
+
+                    console.log('RESPONSE', responseText);
+                    await room.sendMessage(responseText);
+
+                    // Record last sent message time so we don't flood the room
+                    lastMessageTime = Date.now();
+
+                    return; // no further action
+                }
             }
             else if(content.equals('about') || content.equals('who are you?')) {
                 responseText = `I'm ${me.name} and ${me.about}`;
@@ -396,9 +409,9 @@ const main = async () => {
             }
         }
 
+        
         // Any new message that does not reply-to or mention any user (1)
         else if (resolvedMsg.eventType === 1 && !resolvedMsg.targetUserId) {
-            
             let responseText = null;
 
             // Current candidates
