@@ -80,15 +80,21 @@ let election = null;
 let room = null;
 
 
-// Helper functions
-const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
-const byRandom = () => .5 - Math.random();
-const randomPlop = () => [`I'm back.`, '*plop*', 'Hello there!', 'Hello World', 'testing... 1 2 3'].sort(byRandom).pop();
-const randomOops = () => ['very funny,', 'oops!', 'hmm...', 'hey,', 'sorry,'].sort(byRandom).pop() + ' ';
-
-
 // Prototype functions
 String.prototype.equals = function(n) { return this == n };
+
+Array.prototype.sortByRandom = function() {
+    // https://stackoverflow.com/a/46545530
+    return this.map((a) => ({sort: Math.random(), value: a}))
+        .sort((a, b) => a.sort - b.sort)
+        .map((a) => a.value);
+};
+
+
+// Helper functions
+const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
+const randomPlop = () => [`I'm back.`, '*plop*', 'Hello there!', 'Hello World', 'testing... 1 2 3'].sortByRandom().pop();
+const randomOops = () => ['very funny,', 'oops!', 'hmm...', 'hey,', 'sorry,'].sortByRandom().pop() + ' ';
 
 
 // Overrides console.log/error to insert newlines
@@ -347,28 +353,28 @@ const main = async () => {
                     `good, and you?`,
                     `I'm fine, thank you.`,
                     `I'm bored. Amuse me.`,
-                ].sort(byRandom).pop();
+                ].sortByRandom().pop();
             }
             else if(content.equals(`where are you?`)) {
                 responseText = [
                     `I'm on the interwebs`,
                     `I'm here, aren't I?`,
                     `I'm here and everywhere`,
-                ].sort(byRandom).pop();
+                ].sortByRandom().pop();
             }
             else if(content.includes(`your name?`) || content.equals(`what are you?`)) {
                 responseText = [
                     `I'm a robot. Bleep bloop.`,
                     `I'm a teacup, short and stout. Here is my handle, here is my spout.`,
                     `I'm a crystal ball; I already know the winners.`,
-                ].sort(byRandom).pop();
+                ].sortByRandom().pop();
             }
             else if(content.equals('why are you?')) {
                 responseText = [
                     `because.`,
                     `why what???`,
                     `Why am I here? To serve the community`,
-                ].sort(byRandom).pop();
+                ].sortByRandom().pop();
             }
             else if(['help', 'commands', 'faq', 'info'].some(x => content.includes(x))) {
                 responseText = '\n' + ['Examples of election FAQs I can help with:', 
@@ -764,7 +770,7 @@ const main = async () => {
                     `I know, thanks anyway.`,
                     `I'm only as good as the one who made me.`,
                     `Thanks! You're awesome!`,
-                ].sort(byRandom).pop();
+                ].sortByRandom().pop();
             }
 
             
