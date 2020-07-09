@@ -682,7 +682,7 @@ const main = async () => {
             }
 
             // How/where to vote
-            else if(['where', 'how', 'want'].some(x => content.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => content.includes(x)) && ['vote', 'elect'].some(x => content.includes(x))) {
+            else if(['where', 'how', 'want', 'when'].some(x => content.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => content.includes(x)) && ['vote', 'elect'].some(x => content.includes(x))) {
 
                 const informedDecision = election.qnaUrl ? ` If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).` : '';
 
@@ -698,7 +698,8 @@ const main = async () => {
                         break;
                     case 'nomination':
                         responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.electionUrl}?tab=nomination)`;
-                        if(election.qnaUrl) responseText += `, as well as read the candidates' [answers to your questions](${election.qnaUrl}) to find out more.`;
+                        if(election.qnaUrl) responseText += `, as well as read the candidates' [answers to your questions](${election.qnaUrl}) to find out more`;
+                        responseText += `. Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the actual election phase!`;
                         break;
                     case 'ended':
                         responseText = `The [election](${election.electionUrl}) has ended. You can no longer vote.`;
