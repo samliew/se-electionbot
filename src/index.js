@@ -356,7 +356,7 @@ const main = async () => {
                     `I'm here and everywhere`,
                 ].sort(byRandom).pop();
             }
-            else if(content.includes(`what's your name?`) || content.equals(`what are you?`)) {
+            else if(content.includes(`your name?`) || content.equals(`what are you?`)) {
                 responseText = [
                     `I'm a robot. Bleep bloop.`,
                     `I'm a teacup, short and stout. Here is my handle, here is my spout.`,
@@ -396,7 +396,7 @@ const main = async () => {
             let responseText = null;
 
             // Current candidates
-            if(['who are', 'who is', 'who has', 'how many'].some(x => content.includes(x)) && ['nominees', 'nominated', 'nominations', 'candidate'].some(x => content.includes(x))) {
+            if(['who are', 'who is', 'who has', 'how many'].some(x => content.startsWith(x)) && ['nominees', 'nominated', 'nominations', 'candidate'].some(x => content.includes(x))) {
                 
                 if(election.phase === null) {
                     responseText = notStartedYet();
@@ -557,7 +557,7 @@ const main = async () => {
             }
 
             // Candidate score formula
-            else if(['how', 'what'].some(x => content.includes(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
+            else if(['how', 'what'].some(x => content.startsWith(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
                 responseText = `The 40-point [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way: 1 point for each 1,000 reputation up to 20,000 reputation (for 20 points); and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges`;
             }
 
@@ -567,13 +567,13 @@ const main = async () => {
             }
 
             // How to choose/pick/decide who to vote for
-            else if((content.includes('how') && ['choose', 'pick', 'decide', 'deciding'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
+            else if((content.startsWith('how') && ['choose', 'pick', 'decide', 'deciding'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
                 if(election.qnaUrl) responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q & A](${election.qnaUrl})`;
                 if(election.phase == null) responseText = notStartedYet();
             }
 
             // Who is the best mod
-            else if(['who', 'which'].some(x => content.includes(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
+            else if(['who', 'which'].some(x => content.startsWith(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
                 responseText = `All the mods are great!!! I love all our mods equally!`;
             }
 
@@ -590,8 +590,8 @@ const main = async () => {
 
             // How to nominate self/others
             // - can't use keyword "vote" here
-            else if( (['how', 'where'].some(x => content.includes(x)) && ['nominate', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && [' i ', 'myself', 'name', 'user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)))
-                  || (['how to', 'how can'].some(x => content.includes(x)) && ['be', 'mod'].every(x => content.includes(x))) ) {
+            else if( (['how', 'where'].some(x => content.startsWith(x)) && ['nominate', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && [' i ', 'myself', 'name', 'user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)))
+                  || (['how to', 'how can'].some(x => content.startsWith(x)) && ['be', 'mod'].every(x => content.includes(x))) ) {
                 let reqs = [`at least ${election.repNominate} reputation`];
                 if(isStackOverflow) reqs.push(`have these badges (*${soRequiredBadgeNames.join(', ')}*)`);
                 if(electionSiteHostname.includes('askubuntu.com')) reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
@@ -604,18 +604,18 @@ const main = async () => {
             }
 
             // Why was nomination removed
-            else if(['why', 'what'].some(x => content.includes(x)) && ['nomination', 'nominees', 'candidate'].some(x => content.includes(x)) && ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(x => content.includes(x))) {
+            else if(['why', 'what'].some(x => content.startsWith(x)) && ['nomination', 'nominees', 'candidate'].some(x => content.includes(x)) && ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(x => content.includes(x))) {
                 responseText = `Candidates may withdraw their nomination any time before the election phase. Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
             }
 
             // Why be a moderator
-            else if(['why', 'what'].some(x => content.includes(x)) && ['benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && content.includes('mod')) {
+            else if(['why', 'what'].some(x => content.startsWith(x)) && ['benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && content.includes('mod')) {
                 responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
                   `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
             }
 
             // Are moderators paid
-            else if(['why', 'what', 'are', 'how'].some(x => content.includes(x)) && ['reward', 'paid', 'compensat', 'money'].some(x => content.includes(x)) && ['mods', 'moderators'].some(x => content.includes(x)) ) {
+            else if(['why', 'what', 'are', 'how'].some(x => content.startsWith(x)) && ['reward', 'paid', 'compensat', 'money'].some(x => content.includes(x)) && ['mods', 'moderators'].some(x => content.includes(x)) ) {
                 responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) is an entirely voluntary role, and they are not paid by Stack Exchange.`;
             }
 
@@ -677,12 +677,12 @@ const main = async () => {
             }
 
             // What is an election
-            else if(['how', 'what'].some(x => content.includes(x)) && ['is', 'an', 'does', 'about'].some(x => content.includes(x)) && ['election', 'it work'].some(x => content.includes(x))) {
+            else if(['how', 'what'].some(x => content.startsWith(x)) && ['is', 'an', 'does', 'about'].some(x => content.includes(x)) && ['election', 'it work'].some(x => content.includes(x))) {
                 responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
             }
 
             // How/where to vote
-            else if(['where', 'how', 'want', 'when'].some(x => content.includes(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => content.includes(x)) && ['voting', 'vote', 'elect'].some(x => content.includes(x))) {
+            else if(['where', 'how', 'want', 'when'].some(x => content.startsWith(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => content.includes(x)) && ['voting', 'vote', 'elect'].some(x => content.includes(x))) {
 
                 const informedDecision = election.qnaUrl ? ` If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).` : '';
 
@@ -713,7 +713,7 @@ const main = async () => {
             }
 
             // Who are the winners
-            else if(['who'].some(x => content.includes(x)) && ['winners', 'new mod', 'will win', 'future mod'].some(x => content.includes(x))) {
+            else if(['who'].some(x => content.startsWith(x)) && ['winners', 'new mod', 'will win', 'future mod'].some(x => content.includes(x))) {
                 
                 if(election.phase === null) {
                     responseText = notStartedYet();
@@ -730,7 +730,7 @@ const main = async () => {
             }
             
             // When is the election ending
-            else if(['when'].some(x => content.includes(x)) && (content.includes('election end') || content.includes('does it end') || content.includes('is it ending'))) {
+            else if(['when'].some(x => content.startsWith(x)) && (content.includes('election end') || content.includes('does it end') || content.includes('is it ending'))) {
                 
                 if(election.phase == 'ended') {
                     responseText = `The election is already over.`;
@@ -756,6 +756,11 @@ const main = async () => {
             // Edit diamond into username
             else if(['edit', 'insert', 'add'].some(x => content.includes(x)) && ['♦', 'diamond'].some(x => content.includes(x)) && content.includes('name')) {
                 responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
+            }
+
+            // Good bot
+            if(['the', 'this', 'i'].some(x => content.startsWith(x)) && content.includes('bot') && ['good', 'excellent', 'wonderful', 'well done', 'nice', 'great', 'like'].some(x => content.includes(x))) {
+                responseText = `I know, thanks anyway.`;
             }
 
             
