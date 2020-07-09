@@ -93,7 +93,7 @@ Array.prototype.sortByRandom = function() {
 
 // Helper functions
 const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralText : singularText;
-const randomPlop = () => [`I'm back.`, '*plop*', 'Hello there!', 'Hello World', 'testing... 1 2 3'].sortByRandom().pop();
+const randomPlop = () => [`I'm back.`, '*plop*', 'Hello there!', 'testing... 1 2 3'].sortByRandom().pop();
 const randomOops = () => ['very funny,', 'oops!', 'hmm...', 'hey,', 'sorry,'].sortByRandom().pop() + ' ';
 
 
