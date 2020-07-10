@@ -338,19 +338,22 @@ const main = async () => {
             if(content.equals('alive')) {
                 responseText = `I'm alive on ${scriptHostname}`;
             }
-            if(content.startsWith('offtopic ')) {
-                const mid = Number(content.split('offtopic ')[1]);
-                if(!isNaN(mid)) {
-                    responseText = `:${mid} This room is for discussion about the [election](${electionUrl}).`;
+            else if(content.startsWith('offtopic')) {
+                responseText = `This room is for discussion about the [election](${electionUrl}). Please try to keep this room on-topic. Thank you!`;
 
-                    console.log('RESPONSE', responseText);
-                    await room.sendMessage(responseText);
-
-                    // Record last sent message time so we don't flood the room
-                    lastMessageTime = Date.now();
-
-                    return; // no further action
+                // Reply to specific message if valid message id
+                const mid = Number(content.split('offtopic')[1]);
+                if(!isNaN(mid) && mid > 0) {
+                    responseText = `:${mid} ${offtopicMessage}`;
                 }
+
+                console.log('RESPONSE', responseText);
+                await room.sendMessage(responseText);
+
+                // Record last sent message time so we don't flood the room
+                lastMessageTime = Date.now();
+
+                return; // stop here since we are using a different default response method
             }
             else if(content.equals('about') || content.equals('who are you?')) {
                 responseText = `I'm ${me.name} and ${me.about}`;
@@ -571,7 +574,7 @@ const main = async () => {
                     // Record last sent message time so we don't flood the room
                     lastMessageTime = Date.now();
 
-                    return;
+                    return; // stop here since we are using a different default response method
                 }
             }
 
@@ -780,7 +783,7 @@ const main = async () => {
             // Good bot
             if(['the', 'this', 'i'].some(x => content.startsWith(x)) && content.includes('bot') && ['good', 'excellent', 'wonderful', 'well done', 'nice', 'great', 'like'].some(x => content.includes(x))) {
                 responseText = [
-                    `I know, thanks anyway.`,
+                    `I know, right?`,
                     `I'm only as good as the one who made me.`,
                     `Thanks! You're awesome!`,
                 ].sortByRandom().pop();
