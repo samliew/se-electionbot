@@ -341,10 +341,7 @@ const main = async () => {
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && throttleSecs <= 10) {
             let responseText = null;
 
-            if(content.equals('alive')) {
-                responseText = `I'm alive on ${scriptHostname}`;
-            }
-            else if(content.startsWith('offtopic')) {
+            if(content.startsWith('offtopic')) {
                 responseText = `This room is for discussion about the [election](${electionUrl}). Please try to keep this room on-topic. Thank you!`;
 
                 // Reply to specific message if valid message id
@@ -378,11 +375,13 @@ const main = async () => {
                     `I'm bored. Amuse me.`,
                 ].sortByRandom().pop();
             }
-            else if(content.equals(`where are you?`)) {
+            else if(content.equals('alive') || content.equals(`where are you?`)) {
                 responseText = [
+                    `I'm alive on ${scriptHostname}`,
                     `I'm on the interwebs`,
                     `I'm here, aren't I?`,
                     `I'm here and everywhere`,
+                    `No. I'm not here.`,
                 ].sortByRandom().pop();
             }
             else if(content.includes(`your name?`) || content.equals(`what are you?`)) {
