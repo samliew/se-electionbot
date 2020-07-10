@@ -358,7 +358,7 @@ const main = async () => {
 
                 // Record last sent message time so we don't flood the room
                 lastMessageTime = Date.now();
-                lastActivityTime = Date.now();
+                lastActivityTime = lastMessageTime;
 
                 return; // stop here since we are using a different default response method
             }
@@ -416,7 +416,7 @@ const main = async () => {
 
                 // Record last sent message time so we don't flood the room
                 lastMessageTime = Date.now();
-                lastActivityTime = Date.now();
+                lastActivityTime = lastMessageTime;
             }
         }
 
@@ -581,7 +581,7 @@ const main = async () => {
                     
                     // Record last sent message time so we don't flood the room
                     lastMessageTime = Date.now();
-                    lastActivityTime = Date.now();
+                    lastActivityTime = lastMessageTime;
 
                     return; // stop here since we are using a different default response method
                 }
@@ -806,7 +806,7 @@ const main = async () => {
 
                 // Record last sent message time so we don't flood the room
                 lastMessageTime = Date.now();
-                lastActivityTime = Date.now();
+                lastActivityTime = lastMessageTime;
             }
         }
     });
@@ -879,7 +879,8 @@ const main = async () => {
         }
         
         // Nothing new, check if room is inactive for more than 30 minutes, and remind users that bot is around to help
-        else if(lastActivityTime + 1800 * 1000 < Date.now()) {
+        // Last message should not be a message from the bot either
+        else if(lastMessageTime != lastActivityTime && lastActivityTime + 1800 * 1000 < Date.now()) {
             
             responseText = 'Welcome to the election chat room! ';
 
@@ -904,7 +905,7 @@ const main = async () => {
 
             // Record last sent message time so we don't flood the room
             lastMessageTime = Date.now();
-            lastActivityTime = Date.now();
+            lastActivityTime = lastMessageTime;
         }
 
     }, scrapeInterval * 60000);
