@@ -934,6 +934,7 @@ const main = async () => {
         }
 
         res.send(`
+            <link rel="icon" href="data:;base64,=" />
             <link rel="stylesheet" href="css/styles.css" />
             <h3>ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatRoomId}</a>:</h3>
             <form method="post">
