@@ -242,11 +242,11 @@ const main = async () => {
         // Ignore stuff from self, Community or Feeds users
         if([me.id, -1, -2].includes(resolvedMsg.userId)) return;
 
-        // Record time of last new message/reply in room
-        lastActivityTime = Date.now();
-
         // Ignore stuff from ignored users
         if(ignoredUserIds.includes(resolvedMsg.userId)) return;
+
+        // Record time of last new message/reply in room
+        lastActivityTime = Date.now();
         
         // Get details of user who triggered the message
         const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
