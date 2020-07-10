@@ -881,7 +881,7 @@ const main = async () => {
         // Last message should not be a message from the bot either
         else if(lastMessageTime != lastActivityTime && lastActivityTime + 1800 * 1000 < Date.now()) {
             
-            responseText = 'Welcome to the election chat room! ';
+            let responseText = 'Welcome to the election chat room! ';
 
             if(election.phase == null) {
                 responseText += `The [election](${election.electionUrl}?tab=${election.phase}) has not begun yet`;
