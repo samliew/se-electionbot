@@ -239,11 +239,11 @@ const main = async () => {
         // Ignore unnecessary events
         if(ignoredEventTypes.includes(resolvedMsg.eventType)) return;
 
-        // Record time of last new message/reply in room
-        lastActivityTime = Date.now();
-
         // Ignore stuff from self, Community or Feeds users
         if([me.id, -1, -2].includes(resolvedMsg.userId)) return;
+
+        // Record time of last new message/reply in room
+        lastActivityTime = Date.now();
 
         // Ignore stuff from ignored users
         if(ignoredUserIds.includes(resolvedMsg.userId)) return;
@@ -877,16 +877,17 @@ const main = async () => {
             });
         }
         
-        // Nothing new, check if room is inactive for more than 30 minutes, and remind users that bot is around to help
+        // Nothing new, check if last bot message more than 60 minutes, and remind users that bot is around to help
         // Last message should not be a message from the bot either
-        else if(lastMessageTime != lastActivityTime && lastActivityTime + 1800 * 1000 < Date.now()) {
+        else if(lastMessageTime !== lastActivityTime && lastActivityTime + 3600 * 1000 < Date.now() && lastMessageTime + 3600 * 1000 < Date.now()) {
+            console.log(lastMessageTime, lastActivityTime);
             
             let responseText = 'Welcome to the election chat room! ';
 
             if(election.phase == null) {
                 responseText += `The [election](${election.electionUrl}?tab=${election.phase}) has not begun yet`;
             }
-            if(election.phase === 'ended' || election.phase === 'cancelled') {
+            else if(election.phase === 'ended' || election.phase === 'cancelled') {
                 responseText += `The [election](${election.electionUrl}?tab=${election.phase}) has ended`;
             }
             // Nomination, primary, or election phase
@@ -894,11 +895,11 @@ const main = async () => {
                 responseText += `The [election](${election.electionUrl}?tab=${election.phase}) is in the ${election.phase} phase`;
                 
                 if(election.phase === 'nomination' || election.phase === 'primary') {
-                    responseText += `, and currently there are ${election.arrNominees.length} candidates`;
+                    responseText += ` and currently there are ${election.arrNominees.length} candidates`;
                 }
             }
             
-            responseText += '. I can answer frequently-asked questions about the election - type **`@ElectionBot help`** for more info.';
+            responseText += '. I can answer frequently-asked questions about the election - type *@ElectionBot help* for more info.';
 
             await room.sendMessage(responseText);
 
