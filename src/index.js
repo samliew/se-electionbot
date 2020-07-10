@@ -212,7 +212,7 @@ const main = async () => {
     let lastMessageTime = -1;
 
     // Variable to store time of last message activity in the room
-    let lastActivityTime = -1;
+    let lastActivityTime = Date.now();
 
     // Default election message
     const notStartedYet = () => {
