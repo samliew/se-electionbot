@@ -256,7 +256,7 @@ const main = async () => {
         if(ignoredEventTypes.includes(resolvedMsg.eventType)) return;
 
         // Ignore stuff from self, Community or Feeds users
-        if(me.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
+        if(me.id == resolvedMsg.userId || resolvedMsg.userId <= 0) return;
 
         // Ignore stuff from ignored users
         if(ignoredUserIds.includes(resolvedMsg.userId)) return;
@@ -266,8 +266,22 @@ const main = async () => {
         activityCount++;
         
         // Get details of user who triggered the message
-        const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
-        const isPrivileged = adminIds.includes(resolvedMsg.userId) || user.isModerator;
+        let user;
+        try {
+            if(resolvedMsg.userId == me.id) {
+                user = me;
+            }
+            else {
+                // This is so we can get extra info about the user
+                user = await client._browser.getProfile(resolvedMsg.userId);
+            }
+        }
+        catch(e) {
+            console.error(e);
+            user = null;
+        }
+
+        const isPrivileged = user.isModerator || adminIds.includes(resolvedMsg.userId);
 
         // If message is too short or long, and not by an admin or mod, ignore (most likely FP)
         if((content.length < 4 || content.length > 69) && !isPrivileged) {
