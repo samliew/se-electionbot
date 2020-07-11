@@ -14,7 +14,7 @@ if (process.env.NODE_ENV !== 'production') {
 const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
 const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
-// to stop bot from replying to too many messages in a short time
+// To stop bot from replying to too many messages in a short time
 let throttleSecs = Number(process.env.THROTTLE_SECS) || 10;
 
 const chatDomain = process.env.CHAT_DOMAIN;
@@ -26,7 +26,7 @@ const electionSiteHostname = electionUrl.split('/')[2];
 const electionSiteUrl = 'https://' + electionSiteHostname;
 const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(Number);
 const ignoredUserIds = (process.env.IGNORED_USERIDS || '').split(/\D+/).map(Number);
-const scrapeInterval = Number(process.env.SCRAPE_INTERVAL_MINS) || 5;
+const scrapeIntervalMins = Number(process.env.SCRAPE_INTERVAL_MINS) || 5;
 const stackApikey = process.env.STACK_API_KEY;
 
 
@@ -87,7 +87,7 @@ let lastActivityTime = Date.now();
 let activityCount = 0;
 
 const lowActivityCheckMins = 15;
-const activityCountMinThreshold = 20;
+const lowActivityCountThreshold = 20;
 
 // Prototype functions
 String.prototype.equals = function(n) { return this == n };
@@ -120,7 +120,20 @@ const randomOops = () => ['very funny,', 'oops!', 'hmm...', 'hey,', 'sorry,'].so
 
 
 // App setup
-if(debug) console.error('WARNING - Debug mode is on.');
+if(debug) {
+    console.error('WARNING - Debug mode is on.');
+    
+    console.log('chatDomain:', chatDomain);
+    console.log('chatRoomId:', chatRoomId);
+    console.log('electionUrl:', electionUrl);
+    console.log('electionSiteHostname:', electionSiteHostname);
+    console.log('electionSiteUrl:', electionSiteUrl);
+    console.log('adminIds:', adminIds.join(', '));
+    console.log('ignoredUserIds:', ignoredUserIds.join(', '));
+    console.log('scrapeIntervalMins:', scrapeIntervalMins);
+    console.log('lowActivityCheckMins:', lowActivityCheckMins);
+    console.log('lowActivityCountThreshold:', lowActivityCountThreshold);
+}
 
 
 // Election cancelled
@@ -883,8 +896,9 @@ const main = async () => {
         
         // Nothing new, there was at least some previous activity
         // Check if last bot message more than lowActivityCheckMins minutes, and remind users that bot is around to help
-        else if(activityCount >= activityCountMinThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) {
-            console.log(lastMessageTime, lastActivityTime);
+        else if(activityCount >= lowActivityCountThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) {
+            console.log(`Room is inactive for at least ${lowActivityCheckMins} mins, with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
+                        `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
             
             let responseText = 'Welcome to the election chat room! ';
 
@@ -915,7 +929,7 @@ const main = async () => {
             activityCount = 0;
         }
 
-    }, scrapeInterval * 60000);
+    }, scrapeIntervalMins * 60000);
 
     
     // Interval to keep-alive
