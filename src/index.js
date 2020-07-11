@@ -119,7 +119,7 @@ if (debug) console.error('WARNING - Debug mode is on.');
 =======
 if(debug) {
     console.error('WARNING - Debug mode is on.');
-    
+
     console.log('chatDomain:', chatDomain);
     console.log('chatRoomId:', chatRoomId);
     console.log('electionUrl:', electionUrl);
@@ -148,14 +148,14 @@ const makeURL = (label, uri) => `[${label}](${uri})`;
  */
 async function announceCancelled(election = null) {
 
-    if(election === null) {
+    if (election === null) {
         return false;
     }
 
     const { cancelledText, phase } = election;
 
     // Needs to be cancelled
-    if ( !cancelledText || phase == 'cancelled') {
+    if (!cancelledText || phase == 'cancelled') {
         return false;
     }
 
@@ -182,7 +182,7 @@ async function announceCancelled(election = null) {
 async function announceWinners(election = null) {
 
     //exit early if no election
-    if(election === null) {
+    if (election === null) {
         return false;
     }
 
@@ -297,7 +297,7 @@ const main = async () => {
 
     // Try announce winners on startup
     const announcedWinners = await announceWinners(election);
-    if(!announcedWinners && debug) {
+    if (!announcedWinners && debug) {
         // Announce arrival if in debug mode
         await room.sendMessage(getRandomPlop());
     }
@@ -352,7 +352,7 @@ const main = async () => {
         // Record time of last new message/reply in room, and increment activity count
         lastActivityTime = Date.now();
         activityCount++;
-        
+
         // Get details of user who triggered the message
         const user = userId == me.id ? me : await client._browser.getProfile(userId);
 
@@ -506,8 +506,8 @@ const main = async () => {
                 ).getRandom();
             }
             else if (['help', 'commands', 'faq', 'info'].some(x => decoded.equals(x))) {
-                responseText = '\n' + ['Examples of election FAQs I can help with:', 
-                    'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote', 
+                responseText = '\n' + ['Examples of election FAQs I can help with:',
+                    'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote',
                     'how to decide who to vote for', 'why should I be a moderator',
                     'are moderators paid', 'what is the election status',
                     'when is the election starting', 'when is the election ending',
@@ -702,13 +702,17 @@ const main = async () => {
 
             // Stats/How many voted/participated
             else if (['how', 'many'].every(x => decoded.includes(x)) && ['voted', 'participants'].some(x => decoded.includes(x))) {
-                responseText = election.phase == 'ended' ? election.statVoters : `We won't know for sure until the election ends.`;
+                responseText = election.phase === 'ended' ? election.statVoters : `We won't know for sure until the election ends.`;
             }
 
             // How to choose/pick/decide who to vote for
-            else if ((decoded.startsWith('how') && ['choose', 'pick', 'decide', 'deciding'].some(x => decoded.includes(x))) || (decoded.includes('who') && ['vote', 'for'].every(x => decoded.includes(x)))) {
-                if (election.qnaUrl) responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q & A](${election.qnaUrl})`;
-                if (election.phase == null) responseText = notStartedYet();
+            else if ((decoded.startsWith('how') && ['choose', 'pick', 'decide'].some(x => decoded.includes(x))) || (decoded.includes('who') && ['vote', 'for'].every(x => decoded.includes(x)))) {
+                if (election.qnaUrl) {
+                    responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}), and you also can look at examples of their participation on Meta and how they conduct themselves.`;
+                }
+                if (election.phase === null) {
+                    responseText = notStartedYet();
+                }
             }
 
             // Who is the best mod
@@ -990,13 +994,13 @@ const main = async () => {
                 console.log(`NOMINATION`, nominee);
             });
         }
-        
+
         // Nothing new, there was at least some previous activity
         // Check if last bot message more than lowActivityCheckMins minutes, and remind users that bot is around to help
-        else if(activityCount >= lowActivityCountThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) {
+        else if (activityCount >= lowActivityCountThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) {
             console.log(`Room is inactive for at least ${lowActivityCheckMins} mins, with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
-                        `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
-        
+                `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
+
             await sayHI(makeURL, room, election);
 
             // Record last sent message time so we don't flood the room
