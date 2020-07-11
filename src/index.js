@@ -269,8 +269,8 @@ const main = async () => {
         const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
         const isPrivileged = adminIds.includes(resolvedMsg.userId) || user.isModerator;
 
-        // If message is too short or long, and not a mention by admin or mod, ignore (most likely FP)
-        if((content.length < 4 || content.length > 69) && resolvedMsg.eventType === 1 && !isPrivileged) {
+        // If message is too short or long, and not by an admin or mod, ignore (most likely FP)
+        if((content.length < 4 || content.length > 69) && !isPrivileged) {
             console.log(`EVENT - Ignoring due to message length ${resolvedMsg.content.length}: `, resolvedMsg.content);
             return;
         }
