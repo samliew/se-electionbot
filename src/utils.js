@@ -4,15 +4,42 @@ const express = require('express');
 const request = require('request-promise');
 const bodyParser = require('body-parser');
 
-module.exports = {
+/**
+ * @summary validates and normalizes the Date
+ * @param {Date|number|string} input 
+ * @returns {Date}
+ */
+const validateDate = (input) => {
 
-    startServer: function(room) 
-    {
+    let output = input;
+
+    if (typeof input === 'string' || typeof input === 'number') {
+        output = new Date(input);
+    };
+
+    //instanceof as normal objects will pass `typeof !== "object"` validation
+    if (!(output instanceof Date)) {
+        output = new Date();
+    };
+
+    return output;
+};
+
+/**
+ * @summary base pluralization
+ * @param {number} amount 
+ * @returns {string}
+ */
+const pluralize = amount => amount !== 1 ? 's' : '';
+
+const exported = {
+
+    startServer: function (room) {
         const app = express().set('port', process.env.PORT || 5000);
         const staticPath = path.join(__dirname, '../static');
-        
+
         app.use(bodyParser.urlencoded({ extended: true }));
-        app.use(function(req, res, next) {
+        app.use(function (req, res, next) {
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             next();
@@ -25,28 +52,35 @@ module.exports = {
         });
 
         const shutdown = () => {
-            app.close(function() {
+            app.close(function () {
                 console.log('gracefully shutting down');
             });
-        }
+        };
         process.on('SIGINT', shutdown);
         process.on('SIGTERM', shutdown);
 
         return app;
     },
 
-    keepAlive: function(url, mins = 20) 
-    {
-        // Fetch endpoint to prevent server from idling
-        setInterval(function() {
-            https.get(url).on('error', function(err) {
-                console.error("ERROR - Keep-alive failed." + err.message);
-            });
+    /**
+     * @summary pings endpoint periodically to prevent idling
+     * @param {string} url
+     * @param {number} mins
+     * @returns {void}
+     */
+    keepAlive: (url, mins = 20) => {
+        setInterval(() => {
+            https.get(url).on('error', (err) => console.error(`ERROR - Keep-alive failed. ${err.message}`));
         }, mins * 60000);
     },
 
-    fetchUrl: async function(url, json = false)
-    {
+    /**
+     * @summary fetches the endpoint
+     * @param {string} url
+     * @param {boolean} [json]
+     * @returns {Promise}
+     */
+    fetchUrl: async (url, json = false) => {
         const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
 
         try {
@@ -63,53 +97,89 @@ module.exports = {
             console.log(`FETCH - ${url}`, debug ? (json ? JSON.stringify(content) : content) : '');
             return content;
         }
-        catch(e) {
+        catch (e) {
             console.error('FETCH - ERROR:', e);
             return null;
         }
     },
 
-    // Example URL: https://www.timeanddate.com/worldclock/fixedtime.html?iso=20201231T2359
-    toTadParamFormat: function(date)
-    {
-        if(typeof date === 'string' || typeof date === 'number') date = new Date(date); // from string or int
-        if(typeof date !== 'object') date = new Date(); // invalid, default to now
-
-        return date.toISOString().replace(/(-|:|\d\dZ)/gi, '').replace(/\..*$/, '').replace(/ /g, 'T');
+    /**
+     * @summary formats date input into ISO 8601 format
+     * 
+     * @example
+     *  https://www.timeanddate.com/worldclock/fixedtime.html?iso=20201231T2359
+     * 
+     * @param {Date|string|number} date 
+     * @returns {string}
+     */
+    toTadParamFormat: (date) => {
+        return validateDate(date).toISOString()
+            .replace(/(-|:|\d\dZ)/gi, '')
+            .replace(/\..*$/, '')
+            .replace(/ /g, 'T');
     },
 
-    dateToUtcTimestamp: function(date)
-    {
-        if(typeof date === 'string' || typeof date === 'number') date = new Date(date); // from string or int
-        if(typeof date !== 'object') date = new Date(); // invalid, default to now
-
-        return date.toISOString().replace('T', ' ').replace(/\.\d+/, '');
+    /**
+     * @summary formats date to UTC timestamp
+     * @param {Date|string|number} date 
+     * @returns {string}
+     */
+    dateToUtcTimestamp: (date) => {
+        return validateDate(date).toISOString()
+            .replace('T', ' ')
+            .replace(/\.\d+/, '');
     },
 
-    dateToRelativetime: function(date, soonText = 'soon')
-    {
-        if(typeof date === 'string' || typeof date === 'number') date = new Date(date); // from string or int
-        if(typeof date !== 'object') date = new Date(); // invalid, default to now
+    /**
+     * @summary formats date to relative time
+     * @param {Date|number|string} date 
+     * @param {string} [soonText] 
+     * @returns {string}
+     */
+    dateToRelativetime: (date, soonText = 'soon') => {
 
-        const pluralize = n => n !== 1 ? 's' : '';
+        date = validateDate(date);
 
         const diff = new Date(date) - Date.now();
-        const daysTo = Math.floor(diff / (24 * 60 * 60 * 1000));
-        const hoursTo = Math.floor(diff / (60 * 60 * 1000));
-        const textLink = daysTo > 1 ? 'in ' + daysTo + ' day' + pluralize(daysTo) :
-            hoursTo > 1 ? 'in ' + hoursTo + ' hour' + pluralize(hoursTo) :
-            soonText;
+        const daysTo = Math.floor(diff / (864e5));
+        const hoursTo = Math.floor(diff / (36e5));
 
-        return textLink;
+        if (daysTo < 1 && hoursTo < 1) {
+            return soonText;
+        }
+
+        if (daysTo >= 1) {
+            return `in ${daysTo} day${pluralize(daysTo)}`;
+        }
+
+        if (hoursTo >= 1) {
+            return `in ${hoursTo} hour${pluralize(hoursTo)}`;
+        }
+
+        return soonText;
     },
 
-    linkToRelativeTimestamp: function(date)
-    {
-        return `[${module.exports.dateToRelativetime(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${module.exports.toTadParamFormat(date)})`
+    link: `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`,
+
+    /**
+     * @summary formats date check link to relative time
+     * @param {Date|number|string} date
+     * @returns {string}
+     */
+    linkToRelativeTimestamp: (date) => {
+        return `[${exported.dateToRelativetime(date)}](${exported.link}${exported.toTadParamFormat(date)})`;
     },
 
-    linkToUtcTimestamp: function(date)
-    {
-        return `[${module.exports.dateToUtcTimestamp(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${module.exports.toTadParamFormat(date)})`
-    }
-}
+    /**
+     * @summary formats date check link to UTC time
+     * @param {Date|number|string} date
+     * @returns {string}
+     */
+    linkToUtcTimestamp: (date) => {
+        return `[${exported.dateToUtcTimestamp(date)}](${exported.link}${exported.toTadParamFormat(date)})`;
+    },
+
+    pluralize
+};
+
+module.exports = exported;
