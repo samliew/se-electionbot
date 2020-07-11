@@ -25,10 +25,7 @@ module.exports = {
         });
 
         process.on('SIGINT', function() {
-            app && app.close(() => console.log('gracefully shutting down'));
-        });
-        process.on('SIGTERM', function() {
-            app && app.close(() => console.log('gracefully shutting down'));
+            app.close(() => console.log('gracefully shutting down'));
         });
 
         return app;
