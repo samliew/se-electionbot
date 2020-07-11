@@ -614,8 +614,8 @@ const main = async () => {
             }
 
             // How to choose/pick/decide who to vote for
-            else if((content.startsWith('how') && ['choose', 'pick', 'decide', 'deciding'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
-                if(election.qnaUrl) responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q & A](${election.qnaUrl})`;
+            else if((content.startsWith('how') && ['choose', 'pick', 'decide'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
+                if(election.qnaUrl) responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}), and you also can look at examples of their participation on Meta and how they conduct themselves.`;
                 if(election.phase == null) responseText = notStartedYet();
             }
 
