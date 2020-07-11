@@ -114,9 +114,6 @@ const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralTe
 
 
 // App setup
-<<<<<<< HEAD
-if (debug) console.error('WARNING - Debug mode is on.');
-=======
 if(debug) {
     console.error('WARNING - Debug mode is on.');
 
@@ -131,7 +128,6 @@ if(debug) {
     console.log('lowActivityCheckMins:', lowActivityCheckMins);
     console.log('lowActivityCountThreshold:', lowActivityCountThreshold);
 }
->>>>>>> b2ace9a32cdf7fd8ce7808c38a7489618ae59265
 
 
 /**
@@ -819,6 +815,18 @@ const main = async () => {
                     responseText = election.statVoters;
                 }
             }
+            
+            // When is the election ending
+            else if (['when'].some(x => decoded.startsWith(x)) && (decoded.includes('election end') || decoded.includes('does it end') || decoded.includes('is it ending'))) {
+                
+                if(election.phase === 'ended') {
+                    responseText = `The election is already over.`;
+                }
+                else {
+                    const relativetime = utils.dateToRelativetime(election.dateEnded);
+                    responseText = `The election ends at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
+                }
+            }
 
             // What is an election
             else if (['how', 'what'].some(x => decoded.startsWith(x)) && ['is', 'an', 'does', 'about'].some(x => decoded.includes(x)) && ['election', 'it work'].some(x => decoded.includes(x))) {
@@ -874,19 +882,7 @@ const main = async () => {
                     responseText = `The election is not over yet. Stay tuned for the winners!`;
                 }
             }
-
-            // When is the election ending
-            else if (['when'].some(x => decoded.startsWith(x)) && (decoded.includes('election end') || decoded.includes('does it end') || decoded.includes('is it ending'))) {
-
-                if (election.phase == 'ended') {
-                    responseText = `The election is already over.`;
-                }
-                else {
-                    const relativetime = utils.dateToRelativetime(election.dateEnded);
-                    responseText = `The election ends at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
-                }
-            }
-
+            
             // Election schedule
             else if (decoded.includes('election schedule') || decoded.includes('when is the election')) {
                 const arrow = ' <-- current phase';
@@ -994,13 +990,13 @@ const main = async () => {
                 console.log(`NOMINATION`, nominee);
             });
         }
-
-        // Nothing new, there was at least some previous activity
-        // Check if last bot message more than lowActivityCheckMins minutes, and remind users that bot is around to help
-        else if (activityCount >= lowActivityCountThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) {
-            console.log(`Room is inactive for at least ${lowActivityCheckMins} mins, with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
-                `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
-
+        
+        // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes, 
+        // or no activity for 3 hours, remind users that bot is around to help
+        else if( (activityCount >= lowActivityCountThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || lastActivityTime + 3 * 60 * 60000 < Date.now() ) {
+            console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
+                        `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
+            
             await sayHI(makeURL, room, election);
 
             // Record last sent message time so we don't flood the room
