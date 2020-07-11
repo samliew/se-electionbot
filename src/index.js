@@ -267,9 +267,10 @@ const main = async () => {
         
         // Get details of user who triggered the message
         const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
+        const isPrivileged = adminIds.includes(resolvedMsg.userId) || user.isModerator;
 
-        // If message is too short or long, ignore (most likely FP)
-        if(content.length < 4 || content.length > 69) {
+        // If message is too short or long, and not a mention by admin or mod, ignore (most likely FP)
+        if((content.length < 4 || content.length > 69) && resolvedMsg.eventType === 1 && !isPrivileged) {
             console.log(`EVENT - Ignoring due to message length ${resolvedMsg.content.length}: `, resolvedMsg.content);
             return;
         }
@@ -280,7 +281,7 @@ const main = async () => {
         const relativeTimestampLinkToElection = utils.linkToRelativeTimestamp(election.dateElection);
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
-        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && (adminIds.indexOf(resolvedMsg.userId) >= 0 || user.isModerator)) {
+        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && isPrivileged) {
             let responseText = null;
 
             if(content.indexOf('say ') === 0) {
