@@ -256,7 +256,7 @@ const main = async () => {
         if(ignoredEventTypes.includes(resolvedMsg.eventType)) return;
 
         // Ignore stuff from self, Community or Feeds users
-        if([me.id, -1, -2].includes(resolvedMsg.userId)) return;
+        if(me.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
 
         // Ignore stuff from ignored users
         if(ignoredUserIds.includes(resolvedMsg.userId)) return;
