@@ -723,6 +723,18 @@ const main = async () => {
                     responseText = election.statVoters;
                 }
             }
+            
+            // When is the election ending
+            else if(['when'].some(x => content.startsWith(x)) && (content.includes('election end') || content.includes('does it end') || content.includes('is it ending'))) {
+                
+                if(election.phase == 'ended') {
+                    responseText = `The election is already over.`;
+                }
+                else {
+                    const relativetime = utils.dateToRelativetime(election.dateEnded);
+                    responseText = `The election ends at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
+                }
+            }
 
             // What is an election
             else if(['how', 'what'].some(x => content.startsWith(x)) && ['is', 'an', 'does', 'about'].some(x => content.includes(x)) && ['election', 'it work'].some(x => content.includes(x))) {
@@ -774,18 +786,6 @@ const main = async () => {
                 }
                 else {
                     responseText = `The election is not over yet. Stay tuned for the winners!`;
-                }
-            }
-            
-            // When is the election ending
-            else if(['when'].some(x => content.startsWith(x)) && (content.includes('election end') || content.includes('does it end') || content.includes('is it ending'))) {
-                
-                if(election.phase == 'ended') {
-                    responseText = `The election is already over.`;
-                }
-                else {
-                    const relativetime = utils.dateToRelativetime(election.dateEnded);
-                    responseText = `The election ends at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
                 }
             }
             
