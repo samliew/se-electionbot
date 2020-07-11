@@ -114,7 +114,7 @@ const pluralize = (n, pluralText = 's', singularText = '') => n !== 1 ? pluralTe
 
 
 // App setup
-if(debug) {
+if (debug) {
     console.error('WARNING - Debug mode is on.');
 
     console.log('chatDomain:', chatDomain);
@@ -336,7 +336,7 @@ const main = async () => {
         };
 
         // Ignore stuff from self, Community or Feeds users
-        if(me.id === userId || userId <= 0) {
+        if (me.id === userId || userId <= 0) {
             return;
         }
 
@@ -350,14 +350,23 @@ const main = async () => {
         activityCount++;
 
         // Get details of user who triggered the message
-        const user = userId === me.id ? me : await client._browser.getProfile(userId);
-        const isPrivileged = adminIds.includes(userId) || user.isModerator;
+        let user;
+        try {
+            // This is so we can get extra info about the user
+            user = userId === me.id ? await client._browser.getProfile(userId) : me;
+        }
+        catch (e) {
+            console.error(e);
+            user = null;
+        }
+
+        const isPrivileged = user.isModerator || adminIds.includes(userId);
 
         const { length } = content;
 
         // If message is too short or long, and not by an admin or mod, ignore (most likely FP)
-        if((length < 4 || length > 69) && !isPrivileged) {
-            console.log(`EVENT - Ignoring due to message length ${length}: `, content);
+        if ((length < 4 || length > 69) && !isPrivileged) {
+            console.log(`EVENT - Ignoring due to message length ${length}: `, decoded);
             return;
         }
 
@@ -816,11 +825,11 @@ const main = async () => {
                     responseText = election.statVoters;
                 }
             }
-            
+
             // When is the election ending
             else if (['when'].some(x => decoded.startsWith(x)) && (decoded.includes('election end') || decoded.includes('does it end') || decoded.includes('is it ending'))) {
-                
-                if(election.phase === 'ended') {
+
+                if (election.phase === 'ended') {
                     responseText = `The election is already over.`;
                 }
                 else {
@@ -883,7 +892,7 @@ const main = async () => {
                     responseText = `The election is not over yet. Stay tuned for the winners!`;
                 }
             }
-            
+
             // Election schedule
             else if (decoded.includes('election schedule') || decoded.includes('when is the election')) {
                 const arrow = ' <-- current phase';
@@ -991,13 +1000,13 @@ const main = async () => {
                 console.log(`NOMINATION`, nominee);
             });
         }
-        
+
         // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes, 
         // or no activity for 3 hours, remind users that bot is around to help
-        else if( (activityCount >= lowActivityCountThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || lastActivityTime + 3 * 60 * 60000 < Date.now() ) {
+        else if ((activityCount >= lowActivityCountThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || lastActivityTime + 3 * 60 * 60000 < Date.now()) {
             console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
-                        `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
-            
+                `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
+
             await sayHI(makeURL, room, election);
 
             // Record last sent message time so we don't flood the room
