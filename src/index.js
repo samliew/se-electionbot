@@ -706,7 +706,7 @@ const main = async () => {
             }
 
             // How to choose/pick/decide who to vote for
-            else if ((decoded.startsWith('how') && ['choose', 'pick', 'decide'].some(x => decoded.includes(x))) || (decoded.includes('who') && ['vote', 'for'].every(x => decoded.includes(x)))) {
+            else if ((decoded.startsWith('how') && ['choose', 'pick', 'decide', 'determine'].some(x => decoded.includes(x))) || (decoded.includes('who') && ['vote', 'for'].every(x => decoded.includes(x)))) {
                 if (election.qnaUrl) {
                     responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}), and you also can look at examples of their participation on Meta and how they conduct themselves.`;
                 }
