@@ -910,7 +910,9 @@ const main = async () => {
         
         // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes, 
         // or no activity for 3 hours, remind users that bot is around to help
-        else if( (activityCount >= lowActivityCountThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || lastActivityTime + 3 * 60 * 60000 < Date.now() ) {
+        else if( (activityCount >= lowActivityCountThreshold && lastActivityTime + 5 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || 
+                 (lastActivityTime != lowActivityCheckMins && lastActivityTime + 3 * 60 * 60000 < Date.now()) )
+        {
             console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                         `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
             
