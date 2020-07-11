@@ -79,6 +79,15 @@ let rescraperInt, rejoinInt;
 let election = null;
 let room = null;
 
+// Variable to store time of last bot sent message for throttling
+let lastMessageTime = -1;
+// Variable to store time of last message activity in the room
+let lastActivityTime = Date.now();
+// Variable to track activity in the room
+let activityCount = 0;
+
+const lowActivityCheckMins = 15;
+const activityCountMinThreshold = 20;
 
 // Prototype functions
 String.prototype.equals = function(n) { return this == n };
@@ -201,18 +210,12 @@ const main = async () => {
     // Join room
     room = await client.joinRoom(chatRoomId);
 
-    // Try announce winners on startup?
+    // Try announce winners on startup
     const announcedWinners = await announceWinners(election);
-    if(!announcedWinners) {
-        // Announce arrival
+    if(!announcedWinners && debug) {
+        // Announce arrival if in debug mode
         await room.sendMessage(randomPlop());
     }
-
-    // Variable to store time of last bot sent message for throttling
-    let lastMessageTime = -1;
-
-    // Variable to store time of last message activity in the room
-    let lastActivityTime = Date.now();
 
     // Default election message
     const notStartedYet = () => {
@@ -245,8 +248,9 @@ const main = async () => {
         // Ignore stuff from ignored users
         if(ignoredUserIds.includes(resolvedMsg.userId)) return;
 
-        // Record time of last new message/reply in room
+        // Record time of last new message/reply in room, and increment activity count
         lastActivityTime = Date.now();
+        activityCount++;
         
         // Get details of user who triggered the message
         const user = resolvedMsg.userId == me.id ? me : await client._browser.getProfile(resolvedMsg.userId);
@@ -877,9 +881,9 @@ const main = async () => {
             });
         }
         
-        // Nothing new, check if last bot message more than 60 minutes, and remind users that bot is around to help
-        // Last message should not be a message from the bot either
-        else if(lastMessageTime !== lastActivityTime && lastActivityTime + 3600 * 1000 < Date.now() && lastMessageTime + 3600 * 1000 < Date.now()) {
+        // Nothing new, there was at least some previous activity
+        // Check if last bot message more than lowActivityCheckMins minutes, and remind users that bot is around to help
+        else if(activityCount >= activityCountMinThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) {
             console.log(lastMessageTime, lastActivityTime);
             
             let responseText = 'Welcome to the election chat room! ';
@@ -906,6 +910,9 @@ const main = async () => {
             // Record last sent message time so we don't flood the room
             lastMessageTime = Date.now();
             lastActivityTime = lastMessageTime;
+
+            // Reset last activity count
+            activityCount = 0;
         }
 
     }, scrapeInterval * 60000);
