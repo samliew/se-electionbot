@@ -24,13 +24,12 @@ module.exports = {
             console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
         });
 
-        const shutdown = () => {
-            app.close(function() {
-                console.log('gracefully shutting down');
-            });
-        }
-        process.on('SIGINT', shutdown);
-        process.on('SIGTERM', shutdown);
+        process.on('SIGINT', function() {
+            app && app.close(() => console.log('gracefully shutting down'));
+        });
+        process.on('SIGTERM', function() {
+            app && app.close(() => console.log('gracefully shutting down'));
+        });
 
         return app;
     },
