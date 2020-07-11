@@ -702,8 +702,7 @@ const main = async () => {
                 }
                 // Nomination or primary phase
                 else {
-                    responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is in the ${election.phase} phase`;
-                    responseText += `, and currently there are  ${election.arrNominees.length} candidates.`;
+                    responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.arrNominees.length} candidates.`;
 
                     if(election.phase === 'primary') responseText += `. You may freely cast up/down votes on the candidates' nominations, and come back ${relativeTimestampLinkToElection} to vote in the actual election.`;
                 }
@@ -925,10 +924,10 @@ const main = async () => {
             }
             // Nomination, primary, or election phase
             else {
-                responseText += `The [election](${election.electionUrl}?tab=${election.phase}) is in the ${election.phase} phase`;
+                responseText += `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase`;
                 
                 if(election.phase === 'nomination' || election.phase === 'primary') {
-                    responseText += ` and currently there are ${election.arrNominees.length} candidates`;
+                    responseText += ` with ${election.arrNominees.length} candidates`;
                 }
             }
             
