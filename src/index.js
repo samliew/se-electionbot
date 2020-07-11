@@ -402,7 +402,7 @@ const main = async () => {
                     `Why am I here? To serve the community`,
                 ].sortByRandom().pop();
             }
-            else if(['help', 'commands', 'faq', 'info'].some(x => content.equals(x)) || ['who', 'how', 'where', 'what', 'why'].some(x => content.startsWith(x))) {
+            else if(['help', 'commands', 'faq', 'info'].some(x => content.equals(x))) {
                 responseText = '\n' + ['Examples of election FAQs I can help with:', 
                     'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote', 
                     'how to decide who to vote for', 'why should I be a moderator',
