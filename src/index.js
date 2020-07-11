@@ -355,8 +355,8 @@ const main = async () => {
 
         const { length } = content;
 
-        // If message is too short or long, and not a mention by admin or mod, ignore (most likely FP)
-        if((length < 4 || length > 69) && resolvedMsg.eventType === 1 && !isPrivileged) {
+        // If message is too short or long, and not by an admin or mod, ignore (most likely FP)
+        if((length < 4 || length > 69) && !isPrivileged) {
             console.log(`EVENT - Ignoring due to message length ${length}: `, content);
             return;
         }
