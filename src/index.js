@@ -300,7 +300,7 @@ const main = async () => {
         const [resolvedUname, resolvedUid, resolvedTargetUid] = Promise.all([
             msg.userName,
             msg.userId,
-            msg.targetUserId
+            [8, 18].includes(_eventType) ? msg.targetUserId : Promise.resolve()
         ]);
 
         // Resolve required fields
@@ -308,7 +308,7 @@ const main = async () => {
             eventType,
             userName: resolvedUname,
             userId: resolvedUid,
-            targetUserId: [8, 18].includes(_eventType) ? resolvedTargetUid : undefined,
+            targetUserId: resolvedTargetUid,
             content: decoded,
         };
 
