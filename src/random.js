@@ -26,7 +26,7 @@ class RandomizableArray extends Array {
 
 }
 
-const getRandomModal = () => new RandomizableArray(`should`, `have to`, `must`).getRandom();
+const getRandomModal = () => new RandomizableArray(`want to`, `have to`, `must`).getRandom();
 const getRandomPlop = () => new RandomizableArray(`I'm back.`, '*plop*', 'Hello there!', 'testing... 1 2 3').getRandom();
 const getRandomOops = () => new RandomizableArray('very funny,', 'oops!', 'hmm...', 'hey,', 'sorry,').getRandom() + ' ';
 
