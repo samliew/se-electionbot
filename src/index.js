@@ -176,7 +176,7 @@ async function announceWinners(election = null) {
     }
 
     // Build the message
-    let msg = `Congratulations to the winner${election.arrWinners.length == 1 ? '' : 's'} ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}!`;
+    let msg = `**Congratulations to the winner${election.arrWinners.length == 1 ? '' : 's'}** ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}!`;
 
     if(election.resultsUrl) {
         msg += ` You can [view the results online via OpaVote](${election.resultsUrl}).`;
@@ -356,6 +356,10 @@ const main = async () => {
             if(responseText != null && responseText.length <= 500) {
                 console.log('RESPONSE', responseText);
                 await room.sendMessage(responseText);
+
+                // Record last activity time only
+                // so this doesn't reset any mute, if active
+                lastActivityTime = Date.now();
 
                 return; // no further action
             }
@@ -998,6 +1002,11 @@ const main = async () => {
         }
         else {
             await room.sendMessage(message);
+        
+            // Record last activity time only
+            // so this doesn't reset any mute, if active
+            lastActivityTime = Date.now();
+            
             res.redirect(`/say?password=${req.body.password}&success=true`);
         }
         return;
