@@ -637,19 +637,19 @@ const main = async () => {
                         electionBadgeNames.forEach(electionBadge => {
                             if (!userBadges.includes(electionBadge)) missingBadges.push(electionBadge.replace('&amp;', '&'));
                         });
-                        const soMissingRequiredBadges = soRequiredBadgeNames.filter(requiredBadge => missingBadges.includes(requiredBadge));
-
-                        console.log(userId, userRep, repScore, badgeScore, candidateScore, missingBadges);
-
+                        const soMissingRequiredBadges = isStackOverflow ? soRequiredBadgeNames.filter(requiredBadge => missingBadges.includes(requiredBadge)) : [];
+                        
+                        console.log(resolvedMsg.userId, userRep, repScore, badgeScore, candidateScore);
+                        if(missingBadges.length > 0) console.log('Missing Badges: ', missingBadges.join(','));
+                        
                         // Does not meet minimum requirements
-                        if (userRep < election.repNominate ||
-                            (isStackOverflow && soMissingRequiredBadges.length > 0)) {
+                        if(userRep < election.repNominate || soMissingRequiredBadges.length > 0) {
                             responseText = `You are not eligible to nominate yourself in the election`;
 
                             if (userRep < election.repNominate) {
                                 responseText += ` as you do not have at least ${election.repNominate} reputation`;
                             }
-                            if (isStackOverflow && soMissingRequiredBadges.length > 0) {
+                            if(soMissingRequiredBadges.length > 0) {
                                 responseText += userRep < election.repNominate ? ' and' : ' as you are';
                                 responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` +
                                     soMissingRequiredBadges.join(', ');
@@ -1001,9 +1001,9 @@ const main = async () => {
         }
 
         // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes, 
-        // or no activity for 2 hours, remind users that bot is around to help
+        // or no activity for 3 hours, remind users that bot is around to help
         else if( (activityCount >= lowActivityCountThreshold && lastActivityTime + 3 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || 
-                 (lastActivityTime !== lowActivityCheckMins && lastActivityTime + 2 * 60 * 60000 < Date.now()) )
+                 (lastActivityTime !== lastMessageTime && lastActivityTime + 2 * 60 * 60000 < Date.now()) )
         {
             console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                 `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
