@@ -789,8 +789,7 @@ const main = async () => {
                 }
                 // Nomination or primary phase
                 else {
-                    responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is in the ${election.phase} phase`;
-                    responseText += `, and currently there are  ${election.arrNominees.length} candidates.`;
+                    responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.arrNominees.length} candidates.`;
 
                     if (election.phase === 'primary') responseText += `. You may freely cast up/down votes on the candidates' nominations, and come back ${relativeTimestampLinkToElection} to vote in the actual election.`;
                 }
@@ -1003,11 +1002,13 @@ const main = async () => {
 
         // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes, 
         // or no activity for 3 hours, remind users that bot is around to help
-        else if ((activityCount >= lowActivityCountThreshold && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || lastActivityTime + 3 * 60 * 60000 < Date.now()) {
+        else if( (activityCount >= lowActivityCountThreshold && lastActivityTime + 5 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || 
+                 (lastActivityTime !== lowActivityCheckMins && lastActivityTime + 3 * 60 * 60000 < Date.now()) )
+        {
             console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                 `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
 
-            await sayHI(makeURL, room, election);
+            await sayHI( makeURL, room, election );
 
             // Record last sent message time so we don't flood the room
             lastMessageTime = Date.now();
