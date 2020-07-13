@@ -385,12 +385,12 @@ const main = async () => {
             let responseText = null;
 
             if(content.startsWith('offtopic')) {
-                const offtopicMessage = `This room is for discussion about the [election](${electionUrl}). Please try to keep this room on-topic. Thank you!`;
+                responseText = `This room is for discussion about the [election](${electionUrl}). Please try to keep this room on-topic. Thank you!`;
 
                 // Reply to specific message if valid message id
                 const mid = Number(content.split('offtopic')[1]);
                 if(!isNaN(mid) && mid > 0) {
-                    responseText = `:${mid} ${offtopicMessage}`;
+                    responseText = `:${mid} ${responseText}`;
                 }
 
                 console.log('RESPONSE', responseText);
