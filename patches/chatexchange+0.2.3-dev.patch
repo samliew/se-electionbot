@@ -1,0 +1,25 @@
+diff --git a/node_modules/chatexchange/dist/Browser.js b/node_modules/chatexchange/dist/Browser.js
+index 4df4fec..7362c39 100644
+--- a/node_modules/chatexchange/dist/Browser.js
++++ b/node_modules/chatexchange/dist/Browser.js
+@@ -78,15 +78,15 @@ class Browser {
+      * @memberof Browser
+      */
+     async login(email, password) {
+-        const $ = await this._get$(`https://${this.host}/users/login`);
++        let loginHost = this.host;
++        if (this.host === "stackexchange.com") {
++            loginHost = "meta.stackexchange.com";
++        }
++        const $ = await this._get$(`https://${loginHost}/users/login`);
+         const fkey = $('input[name="fkey"]').val();
+         if (typeof fkey === "undefined") {
+             throw new InternalError_1.default("Unable to find fkey element on /users/login");
+         }
+-        let loginHost = this.host;
+-        if (this.host === "meta.stackexchange.com") {
+-            loginHost = "stackexchange.com";
+-        }
+         await this._post(`https://${loginHost}/users/login`, {
+             email,
+             fkey,

@@ -4,6 +4,7 @@
   "description": "Stack Exchange Election Bot",
   "main": "src/index.js",
   "scripts": {
+    "postinstall": "patch-package",
     "build": "npm run test && rimraf dist/ && babel src/ --out-dir dist/",
     "start": "node dist/index.js",
     "dev": "babel-node src/index.js",
@@ -29,6 +30,7 @@
     "express": "^4.16.4",
     "html-entities": "^1.2.1",
     "node-cron": "^2.0.3",
+    "patch-package": "^6.2.2",
     "request": "^2.88.0",
     "request-promise": "^4.2.4"
   },

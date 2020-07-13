@@ -4,7 +4,14 @@ const entities = new (require('html-entities').AllHtmlEntities);
 const announcement = new (require('./ScheduledAnnouncement').default);
 
 const utils = require('./utils');
+
 const { RandomizableArray, getRandomModal, getRandomPlop, getRandomOops } = require("./random.js");
+
+const { 
+    sayHI, 
+    isAskedIfModsArePaid, 
+    sayAreModsPaid 
+} = require("./messages");
 
 // If running locally, load env vars from .env file
 if (process.env.NODE_ENV !== 'production') {
@@ -207,7 +214,7 @@ async function announceWinners(election = null) {
     const winnerList = arrWinners.map(v => makeURL(v.userName, `${siteUrl}/users/${v.userId}`));
 
     // Build the message
-    let msg = `Congratulations to the winner${utils.pluralize(length)} ${winnerList.join(', ')}!`;
+    let msg = `**Congratulations to the winner${utils.pluralize(length)}** ${winnerList.join(', ')}!`;
 
     if (resultsUrl) {
         msg += ` You can ${makeURL("view the results online via OpaVote", resultsUrl)}.`;
@@ -218,42 +225,6 @@ async function announceWinners(election = null) {
 
     return true;
 }
-
-/**
- * @summary makes bot remind users that they are here
- * @param {function(string,string) : string} urlMaker 
- * @param {*} room 
- * @param {Election} election 
- * @returns {Promise<void>}
- */
-const sayHI = async (urlMaker, room, election) => {
-    let responseText = 'Welcome to the election chat room! ';
-
-    const { arrNominees, electionUrl, phase } = election;
-
-    const phaseTab = urlMaker("election", `${electionUrl}?tab=${phase}`);
-
-    if (phase == null) {
-        responseText += `The ${phaseTab} has not begun yet`;
-    }
-    else if (phase === 'ended' || phase === 'cancelled') {
-        responseText += `The ${phaseTab} has ended`;
-    }
-    // Nomination, primary, or election phase
-    else {
-        responseText += `The ${phaseTab} is in the ${phase} phase`;
-
-        if (phase === 'nomination' || phase === 'primary') {
-            responseText += ` and currently there are ${arrNominees.length} candidates`;
-        }
-    }
-
-    const helpCommand = `@ElectionBot help`;
-
-    responseText += `. I can answer frequently-asked questions about the election - type *${helpCommand}* for more info.`;
-
-    await room.sendMessage(responseText);
-};
 
 // Main fn
 const main = async () => {
@@ -280,7 +251,14 @@ const main = async () => {
 
     // Login to site
     const client = new Client(chatDomain);
-    await client.login(accountEmail, accountPassword);
+    try {
+        await client.login(accountEmail, accountPassword);
+    }
+    catch(e) {
+        console.error('FATAL - Unable to login to site!');
+        console.log(client);
+        return;
+    }
 
     // Get chat profile
     const _me = await client.getMe();
@@ -438,6 +416,10 @@ const main = async () => {
                 console.log('RESPONSE', responseText);
                 await room.sendMessage(responseText);
 
+                // Record last activity time only
+                // so this doesn't reset any mute, if active
+                lastActivityTime = Date.now();
+
                 return; // no further action
             }
         }
@@ -459,8 +441,8 @@ const main = async () => {
 
                 // Reply to specific message if valid message id
                 const mid = Number(decoded.split('offtopic')[1]);
-                if (!isNaN(mid) && mid > 0) {
-                    responseText = `:${mid} ${offtopicMessage}`;
+                if(!isNaN(mid) && mid > 0) {
+                    responseText = `:${mid} ${responseText}`;
                 }
 
                 console.log('RESPONSE', responseText);
@@ -513,10 +495,10 @@ const main = async () => {
             }
             else if(['help', 'command', 'info'].some(x => decoded.includes(x))) {
                 responseText = '\n' + ['Examples of election FAQs I can help with:', 
-                    'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote', 
-                    'how to decide who to vote for', 'why should I be a moderator',
-                    'are moderators paid', 'what is the election status',
-                    'when is the election starting', 'when is the election ending',
+                    'how does the election work', 'who are the candidates', 'how to nominate',
+                    'how to vote', 'how to decide who to vote for',
+                    'who are the current mods', 'are moderators paid', 
+                    'what is the election status', 'when is the election starting', 'when is the election ending',
                     'how is candidate score calculated', 'what is my candidate score',
                     'what are moderation badges', 'what are participation badges', 'what are editing badges',
                 ].join('\n- ');
@@ -584,8 +566,8 @@ const main = async () => {
                 // Hard-coded links to badges on Stack Overflow
                 if (isStackOverflow) {
                     responseText = `The 6 editing badges are: `;
-                    responseText += `[Organizer](https://stackoverflow.com/help/badges/5), [Copy Editor](https://stackoverflow.com/help/badges/223), [Explainer](https://stackoverflow.com/help/badges/4368), `;
-                    responseText += `[Refiner](https://stackoverflow.com/help/badges/4369), [Tag Editor](https://stackoverflow.com/help/badges/254), [Strunk & White](https://stackoverflow.com/help/badges/12).`;
+                    responseText += `${makeURL("Organizer", "https://stackoverflow.com/help/badges/5")}, ${makeURL("Copy Editor", "https://stackoverflow.com/help/badges/223")}, ${makeURL("Explainer","https://stackoverflow.com/help/badges/4368")}, `;
+                    responseText += `${makeURL("Refiner", "https://stackoverflow.com/help/badges/4369")}, ${makeURL("Tag Editor", "https://stackoverflow.com/help/badges/254")}, ${makeURL("Strunk & White", "https://stackoverflow.com/help/badges/12")}.`;
                 }
             }
 
@@ -597,9 +579,16 @@ const main = async () => {
                     `[Deputy](https://stackoverflow.com/help/badges/1002), [Convention](https://stackoverflow.com/help/badges/901). You'll also need ${election.repNominate} reputation.`;
             }
 
+            // What are the benefits of mods
+            // Why should I be a moderator
+            else if (['why', 'what'].some(x => decoded.startsWith(x)) && ['should i be', 'benefit', 'pros', 'entail', 'privil', 'power'].some(x => decoded.includes(x)) && decoded.includes('mod')) {
+                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
+                  `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
+            }
+
             // Calculate own candidate score
-            else if (decoded.includes('my candidate score') ||
-                (['should i ', 'can i '].some(x => decoded.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => decoded.includes(x)) && ['mod', 'election'].some(x => decoded.includes(x)))) {
+            else if (decoded.includes('my candidate score') || 
+                (['can i '].some(x => decoded.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => decoded.includes(x)) && ['mod', 'election'].some(x => decoded.includes(x))) ) {
 
                 if (isNaN(userId)) {
                     return;
@@ -658,7 +647,7 @@ const main = async () => {
                             responseText += `. If you really ${getRandomModal()} know, your candidate score is ${candidateScore} (out of 40).`;
                         }
                         // Exceeds expectations
-                        else if (candidateScore == 40) {
+                        else if (candidateScore === 40) {
                             responseText = `Wow! You have a maximum candidate score of 40!`;
 
                             // If nomination phase, ask user to nominate themselves
@@ -757,15 +746,9 @@ const main = async () => {
                 responseText = `Candidates may withdraw their nomination any time before the election phase. Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
             }
 
-            // Why be a moderator
-            else if (['why', 'what'].some(x => decoded.startsWith(x)) && ['benefit', 'pros', 'entail', 'privil', 'power'].some(x => decoded.includes(x)) && decoded.includes('mod')) {
-                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` +
-                    `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
-            }
-
             // Are moderators paid
-            else if (['why', 'what', 'are', 'how'].some(x => decoded.startsWith(x)) && ['reward', 'paid', 'compensat', 'money'].some(x => decoded.includes(x)) && ['mods', 'moderators'].some(x => decoded.includes(x))) {
-                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) is an entirely voluntary role, and they are not paid by Stack Exchange.`;
+            else if ( isAskedIfModsArePaid(decoded) ) {
+                responseText = sayAreModsPaid(makeURL, election);
             }
 
             // Status
@@ -1075,6 +1058,11 @@ const main = async () => {
         }
         else {
             await room.sendMessage(message);
+        
+            // Record last activity time only
+            // so this doesn't reset any mute, if active
+            lastActivityTime = Date.now();
+            
             res.redirect(`/say?password=${req.body.password}&success=true`);
         }
         return;
