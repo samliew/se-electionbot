@@ -585,16 +585,16 @@ const main = async () => {
                                 responseText += ` as you do not have at least ${election.repNominate} reputation`;
                             }
                             if(soMissingRequiredBadges.length > 0) {
-                                responseText += userRep < election.repNominate ? ' and' : ' as you are';
+                                responseText += userRep < election.repNominate ? '. You are also' : ' as you are';
                                 responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
                                     soMissingRequiredBadges.join(', ');
                             }
                             
-                            responseText += `. If you really must know, your candidate score is ${candidateScore} (out of 40).`;
+                            responseText += `. If you really must know, your candidate score is **${candidateScore}** (out of 40).`;
                         }
                         // Exceeds expectations
                         else if(candidateScore == 40) {
-                            responseText = `Wow! You have a maximum candidate score of 40!`;
+                            responseText = `Wow! You have a maximum candidate score of **40**!`;
                             
                             // If nomination phase, ask user to nominate themselves
                             if(election.status == null || election.status === 'nomination') {
@@ -603,7 +603,7 @@ const main = async () => {
                         }
                         // Still can nominate themselves
                         else {
-                            responseText = `Your candidate score is ${candidateScore} (out of 40).`;
+                            responseText = `Your candidate score is **${candidateScore}** (out of 40).`;
                             
                             if(missingBadges.length > 0) {
                                 responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
