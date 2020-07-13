@@ -212,7 +212,14 @@ const main = async () => {
 
     // Login to site
     const client = new Client(chatDomain);
-    await client.login(accountEmail, accountPassword);
+    try {
+        await client.login(accountEmail, accountPassword);
+    }
+    catch(e) {
+        console.error('FATAL - Unable to login to site!');
+        console.log(client);
+        return;
+    }
 
     // Get chat profile
     const _me = await client.getMe();
@@ -378,7 +385,7 @@ const main = async () => {
             let responseText = null;
 
             if(content.startsWith('offtopic')) {
-                responseText = `This room is for discussion about the [election](${electionUrl}). Please try to keep this room on-topic. Thank you!`;
+                const offtopicMessage = `This room is for discussion about the [election](${electionUrl}). Please try to keep this room on-topic. Thank you!`;
 
                 // Reply to specific message if valid message id
                 const mid = Number(content.split('offtopic')[1]);
@@ -436,10 +443,10 @@ const main = async () => {
             }
             else if(['help', 'command', 'info'].some(x => content.includes(x))) {
                 responseText = '\n' + ['Examples of election FAQs I can help with:', 
-                    'how does the election work', 'who are the candidates', 'how to nominate', 'how to vote', 
-                    'how to decide who to vote for', 'why should I be a moderator',
-                    'are moderators paid', 'what is the election status',
-                    'when is the election starting', 'when is the election ending',
+                    'how does the election work', 'who are the candidates', 'how to nominate',
+                    'how to vote', 'how to decide who to vote for',
+                    'who are the current mods', 'are moderators paid', 
+                    'what is the election status', 'when is the election starting', 'when is the election ending',
                     'how is candidate score calculated', 'what is my candidate score',
                     'what are moderation badges', 'what are participation badges', 'what are editing badges',
                 ].join('\n- ');
@@ -520,9 +527,16 @@ const main = async () => {
                     `[Deputy](https://stackoverflow.com/help/badges/1002), [Convention](https://stackoverflow.com/help/badges/901). You'll also need ${election.repNominate} reputation.`;
             }
 
+            // What are the benefits of mods
+            // Why should I be a moderator
+            else if(['why', 'what'].some(x => content.startsWith(x)) && ['should i be', 'benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && content.includes('mod')) {
+                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
+                  `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
+            }
+
             // Calculate own candidate score
             else if(content.includes('my candidate score') || 
-                (['should i ', 'can i '].some(x => content.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => content.includes(x)) && ['mod', 'election'].some(x => content.includes(x))) ) {
+                (['can i '].some(x => content.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => content.includes(x)) && ['mod', 'election'].some(x => content.includes(x))) ) {
 
                 if(isNaN(resolvedMsg.userId)) return;
 
@@ -672,12 +686,6 @@ const main = async () => {
             // Why was nomination removed
             else if(['why', 'what'].some(x => content.startsWith(x)) && ['nomination', 'nominees', 'candidate'].some(x => content.includes(x)) && ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(x => content.includes(x))) {
                 responseText = `Candidates may withdraw their nomination any time before the election phase. Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
-            }
-
-            // Why be a moderator
-            else if(['why', 'what'].some(x => content.startsWith(x)) && ['benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && content.includes('mod')) {
-                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
-                  `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
             }
 
             // Are moderators paid
