@@ -921,7 +921,7 @@ const main = async () => {
         }
         
         // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes, 
-        // or no activity for 3 hours, remind users that bot is around to help
+        // or no activity for 2 hours, remind users that bot is around to help, if last message was not posted by the bot
         else if( (activityCount >= lowActivityCountThreshold && lastActivityTime + 3 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || 
                  (lastActivityTime != lastMessageTime && lastActivityTime + 2 * 60 * 60000 < Date.now()) )
         {
