@@ -709,7 +709,7 @@ const main = async () => {
                     responseText = election.statVoters;
                 }
                 else if(election.phase === 'election') {
-                    responseText = `The [election](${election.electionUrl}?tab=election) is in the final election phase. `;
+                    responseText = `The [election](${election.electionUrl}?tab=election) is in the final voting phase. `;
                     responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
                 }
                 // Nomination or primary phase
@@ -740,7 +740,7 @@ const main = async () => {
                 }
                 else if(election.phase === 'election') {
                     const relativetime = utils.dateToRelativetime(election.dateEnded);
-                    responseText = `The [election](${election.electionUrl}?tab=election) is currently in the final election phase, ending at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
+                    responseText = `The [election](${election.electionUrl}?tab=election) is currently in the final voting phase, ending at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
                 }
                 else if(election.phase === 'ended') {
                     responseText = `The [election](${election.electionUrl}) is over.`;
@@ -780,12 +780,12 @@ const main = async () => {
                     case 'primary':
                         responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.electionUrl}?tab=primary).`;
                         responseText += informedDecision;
-                        responseText += ` Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the actual election phase!`;
+                        responseText += ` Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the election's voting phase!`;
                         break;
                     case 'nomination':
                         responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.electionUrl}?tab=nomination)`;
                         if(election.qnaUrl) responseText += `, as well as read the candidates' [answers to your questions](${election.qnaUrl}) to find out more`;
-                        responseText += `. Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the actual election phase!`;
+                        responseText += `. Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the election's voting phase!`;
                         break;
                     case 'ended':
                         responseText = `The [election](${election.electionUrl}) has ended. You can no longer vote.`;
@@ -891,7 +891,7 @@ const main = async () => {
         // Previously had no primary, but after re-scraping there is one
         if (!announcement.hasPrimary && election.datePrimary != null) {
             announcement.initPrimary(election.datePrimary);
-            await room.sendMessage(`There will be a primary phase before the election now, as there are at least ten candidates.`);
+            await room.sendMessage(`There will be a primary phase before the election now, as there are more than ten candidates.`);
         }
         
         // After re-scraping the election was cancelled

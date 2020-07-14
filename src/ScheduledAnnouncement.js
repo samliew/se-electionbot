@@ -70,7 +70,7 @@ export default class ScheduledAnnouncement {
                 cs,
                 async () => {
                     await this._election.scrapeElection();
-                    await this._room.sendMessage(`**The [election phase](${this._election.electionUrl}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
+                    await this._room.sendMessage(`**The [election's final voting phase](${this._election.electionUrl}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
                 },
                 { timezone: "Etc/UTC" }
             );
