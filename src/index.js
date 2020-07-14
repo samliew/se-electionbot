@@ -7,10 +7,12 @@ const utils = require('./utils');
 
 const { RandomizableArray, getRandomModal, getRandomPlop, getRandomOops } = require("./random.js");
 
-const { 
-    sayHI, 
-    isAskedIfModsArePaid, 
-    sayAreModsPaid 
+const {
+    sayHI,
+    isAskedWhyNominationRemoved,
+    sayWhyNominationRemoved,
+    isAskedIfModsArePaid,
+    sayAreModsPaid
 } = require("./messages");
 
 // If running locally, load env vars from .env file
@@ -254,7 +256,7 @@ const main = async () => {
     try {
         await client.login(accountEmail, accountPassword);
     }
-    catch(e) {
+    catch (e) {
         console.error('FATAL - Unable to login to site!');
         console.log(client);
         return;
@@ -441,7 +443,7 @@ const main = async () => {
 
                 // Reply to specific message if valid message id
                 const mid = Number(decoded.split('offtopic')[1]);
-                if(!isNaN(mid) && mid > 0) {
+                if (!isNaN(mid) && mid > 0) {
                     responseText = `:${mid} ${responseText}`;
                 }
 
@@ -493,11 +495,11 @@ const main = async () => {
                     `Why am I here? To serve the community`,
                 ).getRandom();
             }
-            else if(['help', 'command', 'info'].some(x => decoded.includes(x))) {
-                responseText = '\n' + ['Examples of election FAQs I can help with:', 
+            else if (['help', 'command', 'info'].some(x => decoded.includes(x))) {
+                responseText = '\n' + ['Examples of election FAQs I can help with:',
                     'how does the election work', 'who are the candidates', 'how to nominate',
                     'how to vote', 'how to decide who to vote for',
-                    'who are the current mods', 'are moderators paid', 
+                    'who are the current mods', 'are moderators paid',
                     'what is the election status', 'when is the election starting', 'when is the election ending',
                     'how is candidate score calculated', 'what is my candidate score',
                     'what are moderation badges', 'what are participation badges', 'what are editing badges',
@@ -566,7 +568,7 @@ const main = async () => {
                 // Hard-coded links to badges on Stack Overflow
                 if (isStackOverflow) {
                     responseText = `The 6 editing badges are: `;
-                    responseText += `${makeURL("Organizer", "https://stackoverflow.com/help/badges/5")}, ${makeURL("Copy Editor", "https://stackoverflow.com/help/badges/223")}, ${makeURL("Explainer","https://stackoverflow.com/help/badges/4368")}, `;
+                    responseText += `${makeURL("Organizer", "https://stackoverflow.com/help/badges/5")}, ${makeURL("Copy Editor", "https://stackoverflow.com/help/badges/223")}, ${makeURL("Explainer", "https://stackoverflow.com/help/badges/4368")}, `;
                     responseText += `${makeURL("Refiner", "https://stackoverflow.com/help/badges/4369")}, ${makeURL("Tag Editor", "https://stackoverflow.com/help/badges/254")}, ${makeURL("Strunk & White", "https://stackoverflow.com/help/badges/12")}.`;
                 }
             }
@@ -582,13 +584,13 @@ const main = async () => {
             // What are the benefits of mods
             // Why should I be a moderator
             else if (['why', 'what'].some(x => decoded.startsWith(x)) && ['should i be', 'benefit', 'pros', 'entail', 'privil', 'power'].some(x => decoded.includes(x)) && decoded.includes('mod')) {
-                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
-                  `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
+                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` +
+                    `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
             }
 
             // Calculate own candidate score
-            else if (decoded.includes('my candidate score') || 
-                (['can i '].some(x => decoded.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => decoded.includes(x)) && ['mod', 'election'].some(x => decoded.includes(x))) ) {
+            else if (decoded.includes('my candidate score') ||
+                (['can i '].some(x => decoded.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => decoded.includes(x)) && ['mod', 'election'].some(x => decoded.includes(x)))) {
 
                 if (isNaN(userId)) {
                     return;
@@ -627,18 +629,18 @@ const main = async () => {
                             if (!userBadges.includes(electionBadge)) missingBadges.push(electionBadge.replace('&amp;', '&'));
                         });
                         const soMissingRequiredBadges = isStackOverflow ? soRequiredBadgeNames.filter(requiredBadge => missingBadges.includes(requiredBadge)) : [];
-                        
+
                         console.log(resolvedMsg.userId, userRep, repScore, badgeScore, candidateScore);
-                        if(missingBadges.length > 0) console.log('Missing Badges: ', missingBadges.join(','));
-                        
+                        if (missingBadges.length > 0) console.log('Missing Badges: ', missingBadges.join(','));
+
                         // Does not meet minimum requirements
-                        if(userRep < election.repNominate || soMissingRequiredBadges.length > 0) {
+                        if (userRep < election.repNominate || soMissingRequiredBadges.length > 0) {
                             responseText = `You are not eligible to nominate yourself in the election`;
 
                             if (userRep < election.repNominate) {
                                 responseText += ` as you do not have at least ${election.repNominate} reputation`;
                             }
-                            if(soMissingRequiredBadges.length > 0) {
+                            if (soMissingRequiredBadges.length > 0) {
                                 responseText += userRep < election.repNominate ? ' and' : ' as you are';
                                 responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` +
                                     soMissingRequiredBadges.join(', ');
@@ -742,12 +744,12 @@ const main = async () => {
             }
 
             // Why was nomination removed
-            else if (['why', 'what'].some(x => decoded.startsWith(x)) && ['nomination', 'nominees', 'candidate'].some(x => decoded.includes(x)) && ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(x => decoded.includes(x))) {
-                responseText = `Candidates may withdraw their nomination any time before the election phase. Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
+            else if (isAskedWhyNominationRemoved(decoded)) {
+                responseText = sayWhyNominationRemoved();
             }
 
             // Are moderators paid
-            else if ( isAskedIfModsArePaid(decoded) ) {
+            else if (isAskedIfModsArePaid(decoded)) {
                 responseText = sayAreModsPaid(makeURL, election);
             }
 
@@ -985,13 +987,12 @@ const main = async () => {
 
         // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes, 
         // or no activity for 3 hours, remind users that bot is around to help
-        else if( (activityCount >= lowActivityCountThreshold && lastActivityTime + 3 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || 
-                 (lastActivityTime !== lastMessageTime && lastActivityTime + 2 * 60 * 60000 < Date.now()) )
-        {
+        else if ((activityCount >= lowActivityCountThreshold && lastActivityTime + 3 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) ||
+            (lastActivityTime !== lastMessageTime && lastActivityTime + 2 * 60 * 60000 < Date.now())) {
             console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                 `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
 
-            await sayHI( makeURL, room, election );
+            await sayHI(makeURL, room, election);
 
             // Record last sent message time so we don't flood the room
             lastMessageTime = Date.now();
@@ -1058,11 +1059,11 @@ const main = async () => {
         }
         else {
             await room.sendMessage(message);
-        
+
             // Record last activity time only
             // so this doesn't reset any mute, if active
             lastActivityTime = Date.now();
-            
+
             res.redirect(`/say?password=${req.body.password}&success=true`);
         }
         return;

@@ -37,17 +37,42 @@ const sayHI = async (urlMaker, room, election) => {
 };
 
 /**
+ * @summary checks if the message asked why a nomination was removed
+ * @param {string} text
+ * @returns {boolean}
+ */
+const isAskedWhyNominationRemoved = (text) => {
+    const textIncludes = text.includes.bind(text);
+    const textStarts = text.startsWith.bind(text);
+
+    return ['why', 'what'].some(textStarts) &&
+        ['nomination', 'nominees', 'candidate'].some(textIncludes) &&
+        ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(textIncludes);
+};
+
+/**
  * @summary checks if the message asked if mods are paid
  * @param {string} text 
  * @returns {boolean}
  */
-const isAskedIfModsArePaid = async (text) => {
+const isAskedIfModsArePaid = (text) => {
     const textIncludes = text.includes.bind(text);
     const textStarts = text.startsWith.bind(text);
 
-    return ['why', 'what', 'are', 'how'].some(textStarts) && 
-        ['reward', 'paid', 'compensat', 'money'].some(textIncludes) && 
+    return ['why', 'what', 'are', 'how'].some(textStarts) &&
+        ['reward', 'paid', 'compensat', 'money'].some(textIncludes) &&
         ['mods', 'moderators'].some(textIncludes);
+};
+
+/**
+ * @summary builds a response why nomination is removed
+ * @returns {string}
+ */
+const sayWhyNominationRemoved = () => {
+
+    const freeToRemove = `Candidates may withdraw their nomination any time before the election phase.`;
+
+    return `${freeToRemove} Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
 };
 
 /**
@@ -56,18 +81,18 @@ const isAskedIfModsArePaid = async (text) => {
  * @param {Election} election
  * @returns {string}
  */
-const sayAreModsPaid = async (urlMaker, election) => {
+const sayAreModsPaid = (urlMaker, election) => {
     const { siteUrl } = election;
 
     const modsURI = urlMaker("Elected ♦ moderators", `${siteUrl}/help/site-moderators`);
 
     return `${modsURI} is an entirely voluntary role, and they are not paid by Stack Exchange.`;
-}
-
 };
 
 module.exports = {
+    isAskedWhyNominationRemoved,
     isAskedIfModsArePaid,
     sayAreModsPaid,
+    sayWhyNominationRemoved,
     sayHI
 };
