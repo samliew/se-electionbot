@@ -242,6 +242,7 @@ const main = async () => {
         const relativetime = utils.dateToRelativetime(election.dateNomination);
         return `The [election](${election.electionUrl}) has not started yet. The **nomination** phase is starting at ${utils.linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
     };
+    const electionOverResponseText = `The [election](${election.electionUrl}) is over. See you next time!`;
     
     // Main event listener
     room.on('message', async msg => {
@@ -300,6 +301,7 @@ const main = async () => {
 
         // Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
         const relativeTimestampLinkToElection = utils.linkToRelativeTimestamp(election.dateElection);
+        const informedDecisionText = election.qnaUrl ? `If you want to make an informed decision on who to vote for, you can also read the candidates' answers in the [election Q&A](${election.qnaUrl}), and you also can look at examples of their participation on Meta and how they conduct themselves.` : '';
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && isPrivileged) {
@@ -408,7 +410,7 @@ const main = async () => {
             else if(content.includes('who') && ['made', 'created', 'owner', 'serve'].some(x => content.includes(x)) && content.includes('you')) {
                 responseText = `[Samuel](https://so-user.com/584192?tab=profile) created me. Isn't he awesome?`;
             }
-            else if(content.startsWith(`i love you`) || content.startsWith(`i like you`)) {
+            else if(content.startsWith(`i love you`)) {
                 responseText = `I love you 3000`;
             }
             else if(content.equals(`how are you?`)) {
@@ -420,11 +422,11 @@ const main = async () => {
             }
             else if(content.equals('alive') || content.equals(`where are you?`)) {
                 responseText = [
-                    `I'm alive on ${scriptHostname}`,
                     `I'm on the interwebs`,
                     `I'm here, aren't I?`,
                     `I'm here and everywhere`,
                     `No. I'm not here.`,
+                    `What do you think?`,
                 ].sortByRandom().pop();
             }
             else if(content.includes(`your name?`) || content.equals(`what are you?`)) {
@@ -439,6 +441,7 @@ const main = async () => {
                     `because.`,
                     `why what???`,
                     `Why am I here? To serve the community`,
+                    `What do you think?`,
                 ].sortByRandom().pop();
             }
             else if(['help', 'command', 'info'].some(x => content.includes(x))) {
@@ -479,7 +482,7 @@ const main = async () => {
                         election.arrNominees.map(v => v.userName).join(', ');
                 }
                 else {
-                    responseText = `No users have nominated themselves yet.`;
+                    responseText = `No users have nominated themselves yet. Why not be the first?`;
                 }
             }
 
@@ -554,7 +557,7 @@ const main = async () => {
                 }
                 // Previously a mod (on SO only)
                 else if(isStackOverflow && soPastAndPresentModIds.includes(resolvedMsg.userId)) {
-                    responseText = `are you really sure you want to be a moderator again???`;
+                    responseText = `are you *really* sure you want to be a moderator again???`;
                 }
                 // Default
                 else {
@@ -589,16 +592,18 @@ const main = async () => {
                         if(userRep < election.repNominate || soMissingRequiredBadges.length > 0) {
                             responseText = `You are not eligible to nominate yourself in the election`;
                             
+                            // Not enough rep
                             if(userRep < election.repNominate) {
                                 responseText += ` as you do not have at least ${election.repNominate} reputation`;
                             }
+                            
+                            // Don't have required badges (SO-only)
                             if(soMissingRequiredBadges.length > 0) {
                                 responseText += userRep < election.repNominate ? '. You are also' : ' as you are';
-                                responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ` + 
-                                    soMissingRequiredBadges.join(', ');
+                                responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ${soMissingRequiredBadges.join(', ')}`;
                             }
                             
-                            responseText += `. If you really must know, your candidate score is **${candidateScore}** (out of 40).`;
+                            responseText += `.`;
                         }
                         // Exceeds expectations
                         else if(candidateScore == 40) {
@@ -608,18 +613,28 @@ const main = async () => {
                             if(election.phase == null || election.phase === 'nomination') {
                                 responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
                             }
+                            // Did not nominate (primary, election, ended, cancelled)
+                            else if(!election.arrNominees.includes(resolvedMsg.userId)) {
+
+                                if(election.phase === 'ended' || election.phase === 'cancelled') {
+                                    responseText += ` Alas, the election is over.`;
+                                }
+                                else {
+                                    responseText += ` Alas, the nomination period is over.`;
+                                }
+                                responseText += ` Hope to see your candidature next election!`;
+                            }
                         }
                         // Still can nominate themselves
                         else {
                             responseText = `Your candidate score is **${candidateScore}** (out of 40).`;
                             
                             if(missingBadges.length > 0) {
-                                responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ` + 
-                                    missingBadges.join(', ') + '.';
+                                responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ${missingBadges.join(', ')}.`;
                             }
                              
                             // If nomination phase, ask user to nominate themselves
-                            if(election.phase == null || election.phase == 'nomination') {
+                            if(election.phase == null || election.phase === 'nomination') {
 
                                 if(candidateScore >= 30) {
                                     responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
@@ -651,12 +666,12 @@ const main = async () => {
 
             // Stats/How many voted/participated
             else if(['how', 'many'].every(x => content.includes(x)) && ['voted', 'participants'].some(x => content.includes(x))) {
-                responseText = election.phase == 'ended' ? election.statVoters : `We won't know for sure until the election ends.`;
+                responseText = election.phase == 'ended' ? election.statVoters : `We won't know until the election ends. Come back ${relativeTimestampLinkToElection}.`;
             }
 
             // How to choose/pick/decide who to vote for
             else if((content.startsWith('how') && ['choose', 'pick', 'decide', 'determine'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
-                if(election.qnaUrl) responseText = `If you want to make an informed decision on who to vote for, you can read the candidates' answers in the [election Q&A](${election.qnaUrl}), and you also can look at examples of their participation on Meta and how they conduct themselves.`;
+                if(election.qnaUrl) responseText = informedDecisionText;
                 if(election.phase == null) responseText = notStartedYet();
             }
 
@@ -711,7 +726,7 @@ const main = async () => {
                     responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
                 }
                 else if(election.phase === 'ended') {
-                    responseText = `The [election](${election.electionUrl}) has ended.`;
+                    responseText = electionOverResponseText;
                 }
                 else if(election.phase === 'cancelled') {
                     responseText = election.statVoters;
@@ -724,7 +739,7 @@ const main = async () => {
                 else {
                     responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.arrNominees.length} candidates.`;
 
-                    if(election.phase === 'primary') responseText += `. You may freely cast up/down votes on the candidates' nominations, and come back ${relativeTimestampLinkToElection} to vote in the actual election.`;
+                    if(election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${relativeTimestampLinkToElection} to vote in the final election voting phase.`;
                 }
             }
             
@@ -751,7 +766,7 @@ const main = async () => {
                     responseText = `The [election](${election.electionUrl}?tab=election) is currently in the final voting phase, ending at ${utils.linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
                 }
                 else if(election.phase === 'ended') {
-                    responseText = `The [election](${election.electionUrl}) is over.`;
+                    responseText = electionOverResponseText;
                 }
                 else if(election.phase === 'cancelled') {
                     responseText = election.statVoters;
@@ -762,7 +777,7 @@ const main = async () => {
             else if(['when'].some(x => content.startsWith(x)) && (content.includes('election end') || content.includes('does it end') || content.includes('is it ending'))) {
                 
                 if(election.phase == 'ended') {
-                    responseText = `The election is already over.`;
+                    responseText = electionOverResponseText;
                 }
                 else {
                     const relativetime = utils.dateToRelativetime(election.dateEnded);
@@ -778,22 +793,20 @@ const main = async () => {
             // How/where to vote
             else if(['where', 'how', 'want', 'when'].some(x => content.startsWith(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => content.includes(x)) && ['voting', 'vote', 'elect'].some(x => content.includes(x))) {
 
-                const informedDecision = election.qnaUrl ? ` If you want to make an informed decision, you can also read the candidates' answers in the [election Q & A](${election.qnaUrl}).` : '';
+                const comeBackFinalPhaseText = ` Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the election's final voting phase!`;
 
                 switch(election.phase) {
                     case 'election':
-                        responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.electionUrl}?tab=election).`;
-                        responseText += informedDecision;
+                        responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.electionUrl}?tab=election). ${informedDecisionText}`;
                         break;
                     case 'primary':
-                        responseText = `If you have at least ${election.repVote} reputation, you can freely up & down vote all the candidates in [the primary](${election.electionUrl}?tab=primary).`;
-                        responseText += informedDecision;
-                        responseText += ` Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the election's voting phase!`;
+                        responseText = `If you have at least ${election.repVote} reputation, you can freely [vote on the candidates](${election.electionUrl}?tab=primary). ${informedDecisionText}`;
+                        responseText += comeBackFinalPhaseText;
                         break;
                     case 'nomination':
                         responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.electionUrl}?tab=nomination)`;
                         if(election.qnaUrl) responseText += `, as well as read the candidates' [answers to your questions](${election.qnaUrl}) to find out more`;
-                        responseText += `. Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the election's voting phase!`;
+                        responseText += comeBackFinalPhaseText;
                         break;
                     case 'ended':
                         responseText = `The [election](${election.electionUrl}) has ended. You can no longer vote.`;
@@ -978,7 +991,7 @@ const main = async () => {
     }, 5 * 60000);
 
     
-    // Listen to requests
+    // Listen to requests from web form
     const app = utils.startServer();
     app.get('/say', function(req, res) {
         let postHtml = '';
@@ -1037,5 +1050,5 @@ main();
 if (scriptHostname.includes('herokuapp.com')) {
 
     // Heroku free dyno will shutdown when idle for 30 mins, so keep-alive is necessary
-    utils.keepAlive(scriptHostname, 25);
+    utils.keepAlive(scriptHostname);
 }

@@ -31,7 +31,7 @@ module.exports = {
         return app;
     },
 
-    keepAlive: function(url, mins = 20) 
+    keepAlive: function(url, mins = 30) 
     {
         // Fetch endpoint to prevent server from idling
         setInterval(function() {
