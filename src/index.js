@@ -527,6 +527,14 @@ const main = async () => {
                     `[Deputy](https://stackoverflow.com/help/badges/1002), [Convention](https://stackoverflow.com/help/badges/901). You'll also need ${election.repNominate} reputation.`;
             }
 
+            
+            // What is a moderator
+            // What do moderators do
+            else if(['what'].some(x => content.startsWith(x)) && ['is', 'do'].some(x => content.includes(x)) && content.includes('mod')) {
+                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
+                  ``;
+            }
+
             // What are the benefits of mods
             // Why should I be a moderator
             else if(['why', 'what'].some(x => content.startsWith(x)) && ['should i be', 'benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && content.includes('mod')) {
@@ -597,7 +605,7 @@ const main = async () => {
                             responseText = `Wow! You have a maximum candidate score of **40**!`;
                             
                             // If nomination phase, ask user to nominate themselves
-                            if(election.status == null || election.status === 'nomination') {
+                            if(election.phase == null || election.phase === 'nomination') {
                                 responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
                             }
                         }
@@ -611,7 +619,7 @@ const main = async () => {
                             }
                              
                             // If nomination phase, ask user to nominate themselves
-                            if(election.status == null || election.status === 'nomination') {
+                            if(election.phase == null || election.phase == 'nomination') {
 
                                 if(candidateScore >= 30) {
                                     responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
