@@ -677,7 +677,7 @@ const main = async () => {
 
             // Who is the best mod
             else if(['who', 'which'].some(x => content.startsWith(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
-                responseText = `All the mods are great!!! I love all our mods equally!`;
+                responseText = `All the mods are great!`;
             }
 
             // Current mods
@@ -687,7 +687,7 @@ const main = async () => {
                     responseText = `The [current ${currentSiteMods.length} moderator${pluralize(currentSiteMods.length)}](${electionSiteUrl}/users?tab=moderators) are: ` + entities.decode( currentSiteMods.map(v => v.display_name).join(', ') );
                 }
                 else {
-                    responseText = `The current moderators on ${election.sitename} can be found on this page: [${electionSiteUrl}/users?tab=moderators](${electionSiteUrl}/users?tab=moderators)`;
+                    responseText = `The current moderators can be found on this page: [/users?tab=moderators](${electionSiteUrl}/users?tab=moderators)`;
                 }
             }
 
