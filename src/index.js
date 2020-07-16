@@ -666,7 +666,7 @@ const main = async () => {
 
             // Stats/How many voted/participated
             else if(['how', 'many'].every(x => content.includes(x)) && ['voted', 'participants'].some(x => content.includes(x))) {
-                responseText = election.phase == 'ended' ? election.statVoters : `We won't know until the election ends. Come back ${relativeTimestampLinkToElection}.`;
+                responseText = election.phase == 'ended' ? election.statVoters : `We won't know until the election ends. Come back ${utils.linkToRelativeTimestamp(election.dateEnded)}.`;
             }
 
             // How to choose/pick/decide who to vote for
