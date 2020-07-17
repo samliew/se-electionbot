@@ -375,7 +375,7 @@ const main = async () => {
         }
         
 
-        // If too close to previous message, ignore
+        // If too close to previous message, ignore (apply throttle)
         if(Date.now() < lastMessageTime + throttleSecs * 1000) {
             console.log('THROTTLE - too close to previous message');
             return;
@@ -426,7 +426,6 @@ const main = async () => {
                     `I'm here, aren't I?`,
                     `I'm here and everywhere`,
                     `No. I'm not here.`,
-                    `What do you think?`,
                 ].sortByRandom().pop();
             }
             else if(content.includes(`your name?`) || content.equals(`what are you?`)) {
@@ -441,7 +440,6 @@ const main = async () => {
                     `because.`,
                     `why what???`,
                     `Why am I here? To serve the community`,
-                    `What do you think?`,
                 ].sortByRandom().pop();
             }
             else if(['help', 'command', 'info'].some(x => content.includes(x))) {
@@ -453,6 +451,27 @@ const main = async () => {
                     'how is candidate score calculated', 'what is my candidate score',
                     'what are moderation badges', 'what are participation badges', 'what are editing badges',
                 ].join('\n- ');
+            }
+            else {
+                // random response in room
+                responseText = [
+                    content,
+                    `Keep talking and nobody explodes`,
+                    `What do you think?`,
+                    `*deploying payload*`,
+                    `*disengaging safety*`,
+                    `*reticulating splines*`,
+                    `*calculating distortion error*`,
+                    `[Here are my thoughts](https://bit.ly/2CJKBkk)`,
+                ].sortByRandom().pop();
+            
+                console.log('RESPONSE', responseText);
+                await room.sendMessage(responseText);
+
+                // Record last sent message time so we don't flood the room
+                lastMessageTime = Date.now();
+                lastActivityTime = lastMessageTime;
+                return;
             }
             
             if(responseText != null && responseText.length <= 500) {
@@ -862,6 +881,11 @@ const main = async () => {
                 ].sortByRandom().pop();
             }
 
+            // Waffles
+            if(content.includes(waffles)) {
+                responseText = `Did someone say waffles? I love waffles.`;
+            }
+
             
             if(responseText != null && responseText.length <= 500) {
                 console.log('RESPONSE', responseText);
@@ -943,7 +967,7 @@ const main = async () => {
         
         // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes, 
         // or no activity for 2 hours, remind users that bot is around to help, if last message was not posted by the bot
-        else if( (activityCount >= lowActivityCountThreshold && lastActivityTime + 3 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || 
+        else if( (activityCount >= lowActivityCountThreshold && lastActivityTime + 4 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || 
                  (lastActivityTime != lastMessageTime && lastActivityTime + 2 * 60 * 60000 < Date.now()) )
         {
             console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
