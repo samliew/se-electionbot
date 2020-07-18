@@ -882,7 +882,7 @@ const main = async () => {
             }
 
             // Waffles
-            if(content.includes(waffles)) {
+            else if(content.includes('waffles')) {
                 responseText = `Did someone say waffles? I love waffles.`;
             }
 
