@@ -452,7 +452,7 @@ const main = async () => {
                     'what are moderation badges', 'what are participation badges', 'what are editing badges',
                 ].join('\n- ');
             }
-            else {
+            else if(0) { // disabled
                 // random response in room
                 responseText = [
                     content,
