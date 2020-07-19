@@ -881,11 +881,6 @@ const main = async () => {
                 ].sortByRandom().pop();
             }
 
-            // Waffles
-            else if(content.includes('waffles')) {
-                responseText = `Did someone say waffles? I love waffles.`;
-            }
-
             
             if(responseText != null && responseText.length <= 500) {
                 console.log('RESPONSE', responseText);
