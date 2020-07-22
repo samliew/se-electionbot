@@ -811,7 +811,7 @@ const main = async () => {
             }
 
             // What is an election
-            else if(['how', 'what'].some(x => content.startsWith(x)) && ['is', 'an', 'does', 'about'].some(x => content.includes(x)) && ['election', 'it work'].some(x => content.includes(x))) {
+            else if(content.length <= 56 && (/^what( i|')?s (an|the) election/.test(content) || /^how does (an|the) election work/.test(content))) {
                 responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
             }
 
