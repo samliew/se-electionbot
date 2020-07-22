@@ -554,7 +554,7 @@ const main = async () => {
 
             
             // What is a moderator/moderators do/does a mod
-            else if(['what'].some(x => content.startsWith(x)) && /(is|do(es)?)( a)? mod(erator)?s?/.test(content)) {
+            else if(['what'].some(x => content.startsWith(x)) && /(are|is|do(es)?)( a)? mod(erator)?s?/.test(content)) {
                 responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` + 
                   `They are volunteers who are equipped to handle situations that regular users can't like enforcing the Code of Conduct, investigating and destroying sockpuppet accounts, and performing post redactions.`;
             }
