@@ -230,10 +230,8 @@ const main = async () => {
     // Join room
     room = await client.joinRoom(chatRoomId);
 
-    // Try announce winners on startup
-    const announcedWinners = await announceWinners(election);
-    if(!announcedWinners && debug) {
-        // Announce arrival if in debug mode
+    // Announce join room if in debug mode
+    if(debug) {
         await room.sendMessage(randomPlop());
     }
 
@@ -268,6 +266,9 @@ const main = async () => {
 
         // Ignore stuff from ignored users
         if(ignoredUserIds.includes(resolvedMsg.userId)) return;
+
+        // Ignore messages with oneboxes & links!
+        if(content.includes('onebox') || content.includes('http')) return;
 
         // Record time of last new message/reply in room, and increment activity count
         lastActivityTime = Date.now();
@@ -742,7 +743,11 @@ const main = async () => {
                     responseText = notStartedYet();
                 }
                 else if(election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}. You can [view the results online via OpaVote](${election.resultsUrl}).`;
+                    responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}.`;
+                    
+                    if(election.resultsUrl) {
+                        responseText += ` You can [view the results online via OpaVote](${election.resultsUrl}).`;
+                    }
                 }
                 else if(election.phase === 'ended') {
                     responseText = electionOverResponseText;
