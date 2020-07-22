@@ -43,8 +43,6 @@ module.exports = {
 
     fetchUrl: async function(url, json = false)
     {
-        const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
-
         try {
             const content = await request({
                 gzip: true, // important: https://meta.stackexchange.com/a/446
@@ -56,7 +54,7 @@ module.exports = {
                 uri: url,
                 json: url.includes('api') || json,
             });
-            console.log(`FETCH - ${url}`, debug ? (json ? JSON.stringify(content) : content) : '');
+            console.log(`FETCH - ${url}`);
             return content;
         }
         catch(e) {
