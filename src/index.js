@@ -573,7 +573,7 @@ const main = async () => {
                 if(isNaN(resolvedMsg.userId)) return;
 
                 // Already a mod
-                if(user.isModerator) {
+                if(isStackOverflow && user.isModerator) {
                     responseText = randomOops() + `you already have a diamond!`;
                 }
                 // Previously a mod (on SO only)
