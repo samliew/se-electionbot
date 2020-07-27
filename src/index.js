@@ -587,7 +587,7 @@ const main = async () => {
                     // If not Stack Overflow, get election site user id
                     let siteUserId = resolvedMsg.userId;
                     if(!isStackOverflow) {
-                        siteUserId = await utils.getSiteUserIdFromChatStackExchangeId(siteUserId);
+                        siteUserId = await utils.getSiteUserIdFromChatStackExchangeId(siteUserId, chatDomain, electionSiteHostname);
                         
                         if(siteUserId === null) {
                             console.error(`Unable to get site user id for ${resolvedMsg.userId}.`);

@@ -64,7 +64,7 @@ module.exports = {
         }
     },
 
-    getSiteUserIdFromChatStackExchangeId: async function(chatUserId, siteUrl)
+    getSiteUserIdFromChatStackExchangeId: async function(chatUserId, chatdomain, siteUrl)
     {
         let userId = null;
 
