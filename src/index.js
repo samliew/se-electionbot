@@ -88,7 +88,7 @@ let lastActivityTime = Date.now();
 let activityCount = 0;
 
 const lowActivityCheckMins = 15;
-const lowActivityCountThreshold = 20;
+const lowActivityCountThreshold = 30;
 
 // Prototype functions
 String.prototype.equals = function(n) { return this == n };
@@ -979,8 +979,8 @@ const main = async () => {
         
         // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes, 
         // or no activity for 2 hours, remind users that bot is around to help, if last message was not posted by the bot
-        else if( (activityCount >= lowActivityCountThreshold && lastActivityTime + 4 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || 
-                 (lastActivityTime != lastMessageTime && lastActivityTime + 2 * 60 * 60000 < Date.now()) )
+        else if((activityCount >= lowActivityCountThreshold && lastActivityTime + 4 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) || 
+                (isStackOverflow && lastActivityTime != lastMessageTime && lastActivityTime + 2 * 60 * 60000 < Date.now()) )
         {
             console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                         `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
