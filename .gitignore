@@ -11,6 +11,7 @@ node_modules/
 
 # dotenv environment variables file
 .env
+.env*
 
 # caches and temp directories
 tmp

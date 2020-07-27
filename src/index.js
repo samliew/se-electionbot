@@ -583,10 +583,15 @@ const main = async () => {
                 }
                 // Default
                 else {
+
+                    // If not Stack Overflow, get election site user id
+                    let siteUserId = resolvedMsg.userId;
+                    if(!isStackOverflow) {
+                        siteUserId = await utils.getSiteUserIdFromChatStackExchangeId(siteUserId);
+                    }
                     
                     // Retrieve user badges and rep from API
-                    const badgeFilter = isStackOverflow ? '!SWJuQzAN)_Pb81O3B)' : '';
-                    const data = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${electionSiteApiSlug}&order=asc&sort=type&pagesize=100&filter=${badgeFilter}&key=${stackApikey}`, true);
+                    const data = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/${siteUserId}/badges?site=${electionSiteApiSlug}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`, true);
 
                     if(data == null || typeof data.items === 'undefined' || data.items.length == 0) {
                         console.error('No data from API.');
@@ -608,7 +613,7 @@ const main = async () => {
                         });
                         const soMissingRequiredBadges = isStackOverflow ? soRequiredBadgeNames.filter(requiredBadge => missingBadges.includes(requiredBadge)) : [];
                         
-                        console.log(resolvedMsg.userId, userRep, repScore, badgeScore, candidateScore);
+                        console.log(resolvedMsg.userId, siteUserId, userRep, repScore, badgeScore, candidateScore);
                         if(missingBadges.length > 0) console.log('Missing Badges: ', missingBadges.join(','));
                         
                         // Does not meet minimum requirements
@@ -626,7 +631,7 @@ const main = async () => {
                                 responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ${soMissingRequiredBadges.join(', ')}`;
                             }
                             
-                            responseText += `.`;
+                            responseText += `. Your candidate score is **${candidateScore}** (out of 40).`;
                         }
                         // Exceeds expectations
                         else if(candidateScore == 40) {

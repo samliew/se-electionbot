@@ -2,6 +2,7 @@ const path = require('path');
 const https = require('https');
 const express = require('express');
 const request = require('request-promise');
+const cheerio = require('cheerio');
 const bodyParser = require('body-parser');
 
 module.exports = {
@@ -61,6 +62,42 @@ module.exports = {
             console.error('FETCH - ERROR:', e);
             return null;
         }
+    },
+
+    getSiteUserIdFromChatStackExchangeId: async function(chatUserId, siteUrl)
+    {
+        let userId = null;
+
+        const chatUserPage = await module.exports.fetchUrl(`https://chat.${chatdomain}/users/${chatUserId}`);
+        let $ = cheerio.load(chatUserPage);
+        const linkedUserUrl = $('.user-stats a').first().attr('href');
+
+        // Linked site is the one we wanted, return site userid
+        if(linkedUserUrl.includes(siteUrl)) {
+            userId = Number(linkedUserUrl.match(/\d+/, ''));
+        }
+
+        // Linked site is not the one we wanted
+        else {
+                
+            try {
+
+                // Fetch linked site profile page to get network link
+                const linkedUserProfilePage = await module.exports.fetchUrl(`${linkedUserUrl}?tab=profile`);
+                $ = cheerio.load(linkedUserProfilePage);
+                const networkUserUrl = $('.js-user-header a').last().attr('href');
+
+                // Fetch network accounts to get the account of the site we want
+                const networkAccountsPage = await module.exports.fetchUrl(`${networkUserUrl}?tab=accounts`);
+                $ = cheerio.load(networkAccountsPage);
+                userId = $('.account-site a').filter((i, el) => el.href.includes(siteUrl)).first().attr('href');
+            }
+            catch(e) {
+                console.error(e);
+            }
+        }
+
+        return userId;
     },
 
     // Example URL: https://www.timeanddate.com/worldclock/fixedtime.html?iso=20201231T2359
