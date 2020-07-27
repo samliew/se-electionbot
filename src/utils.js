@@ -50,7 +50,7 @@ module.exports = {
                 simple: false,
                 resolveWithFullResponse: false,
                 headers: {
-                    'User-Agent': `Node.js/ElectionBot ver.${process.env.SOURCE_VERSION}; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
+                    'User-Agent': `Node.js/ElectionBot; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
                 },
                 uri: url,
                 json: url.includes('api') || json,
@@ -70,7 +70,7 @@ module.exports = {
 
         const chatUserPage = await module.exports.fetchUrl(`https://chat.${chatdomain}/users/${chatUserId}`);
         let $ = cheerio.load(chatUserPage);
-        const linkedUserUrl = $('.user-stats a').first().attr('href');
+        const linkedUserUrl = 'https:' + $('.user-stats a').first().attr('href');
         console.log(`Linked site user url: `, linkedUserUrl);
 
         // Linked site is the one we wanted, return site userid
