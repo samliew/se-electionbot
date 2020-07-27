@@ -33,6 +33,7 @@ const stackApikey = process.env.STACK_API_KEY;
 
 // App variables
 const isStackOverflow = electionSiteHostname.includes('stackoverflow.com');
+const isStackOverflowChat = chatDomain.includes('stackoverflow.com');
 const scriptInitDate = new Date();
 const ignoredEventTypes = [
 //  1,  // MessagePosted
@@ -80,15 +81,15 @@ let rescraperInt, rejoinInt;
 let election = null;
 let room = null;
 
+/* Low activity count variables */
+const lowActivityCheckMins = Number(process.env.LOW_ACTIVITY_CHECK_MINS) || 15;
+const lowActivityCountThreshold = Number(process.env.LOW_ACTIVITY_COUNT_THRESHOLD) || 30;
 // Variable to store time of last bot sent message for throttling
 let lastMessageTime = -1;
 // Variable to store time of last message activity in the room
 let lastActivityTime = Date.now();
 // Variable to track activity in the room
 let activityCount = 0;
-
-const lowActivityCheckMins = 15;
-const lowActivityCountThreshold = 30;
 
 // Prototype functions
 String.prototype.equals = function(n) { return this == n };
@@ -584,11 +585,12 @@ const main = async () => {
                 // Default
                 else {
 
-                    // If not Stack Overflow, get election site user id
+                    // If not Stack Overflow, get election site user id (chat has different ids)
                     let siteUserId = resolvedMsg.userId;
-                    if(!isStackOverflow) {
+                    if(!isStackOverflowChat) {
                         siteUserId = await utils.getSiteUserIdFromChatStackExchangeId(siteUserId, chatDomain, electionSiteHostname);
                         
+                        // Unable to get user id on election site
                         if(siteUserId === null) {
                             console.error(`Unable to get site user id for ${resolvedMsg.userId}.`);
                             return;
@@ -598,82 +600,90 @@ const main = async () => {
                     // Retrieve user badges and rep from API
                     const data = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/${siteUserId}/badges?site=${electionSiteApiSlug}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`, true);
 
+                    // Validation
                     if(data == null || typeof data.items === 'undefined' || data.items.length == 0) {
                         console.error('No data from API.');
+                        return;
                     }
+
+                    // Calculate candidate score
+                    const userBadges = data.items.map(v => v.name) || [];
+                    const userRep = data.items ? data.items[0].user.reputation : 0;
+                    
+                    const repScore = Math.min(Math.floor(userRep / 1000), 20);
+                    const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v)).length;
+                    const candidateScore = repScore + badgeScore;
+                    
+                    const missingBadges = [];
+                    electionBadgeNames.forEach(electionBadge => {
+                        if(!userBadges.includes(electionBadge)) missingBadges.push(electionBadge.replace('&amp;', '&'));
+                    });
+                    const soMissingRequiredBadges = isStackOverflow ? soRequiredBadgeNames.filter(requiredBadge => missingBadges.includes(requiredBadge)) : [];
+                    
+                    console.log(resolvedMsg.userId, siteUserId, userRep, repScore, badgeScore, candidateScore);
+                    if(missingBadges.length > 0) console.log('Missing Badges: ', missingBadges.join(','));
+                    
+                    // Does not meet minimum requirements
+                    if(userRep < election.repNominate || soMissingRequiredBadges.length > 0) {
+                        responseText = `You are not eligible to nominate yourself in the election`;
+                        
+                        // Not enough rep
+                        if(userRep < election.repNominate) {
+                            responseText += ` as you do not have at least ${election.repNominate} reputation`;
+                        }
+                        
+                        // Don't have required badges (SO-only)
+                        if(soMissingRequiredBadges.length > 0) {
+                            responseText += userRep < election.repNominate ? '. You are also' : ' as you are';
+                            responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ${soMissingRequiredBadges.join(', ')}`;
+                        }
+                        
+                        responseText += `. Your candidate score is **${candidateScore}** (out of 40).`;
+                    }
+                    // Exceeds expectations
+                    else if(candidateScore == 40) {
+                        responseText = `Wow! You have a maximum candidate score of **40**!`;
+                        
+                        // Already nominated, and not ended/cancelled
+                        if(election.arrNominees.includes(resolvedMsg.userId) && ['nomination', 'primary', 'election'].includes(election.phase)) {
+                            responseText += ` I can see you're already a candidate - good luck!`;
+                        }
+                        // If have not begun, or nomination phase, ask user to nominate themselves
+                        else if([null, 'nomination'].includes(election.phase)) {
+                            responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
+                        }
+                        // Did not nominate (primary, election, ended, cancelled)
+                        else if(!election.arrNominees.includes(resolvedMsg.userId)) {
+
+                            if(['ended', 'cancelled'].includes(election.phase)) {
+                                responseText += ` Alas, the election is over.`;
+                            }
+                            else {
+                                responseText += ` Alas, the nomination period is over.`;
+                            }
+                            responseText += ` Hope to see your candidature next election!`;
+                        }
+                    }
+                    // All others
                     else {
-
-                        // Calculate candidate score
-                        const userBadges = data.items.map(v => v.name) || [];
-                        const userRep = data.items ? data.items[0].user.reputation : 0;
+                        responseText = `Your candidate score is **${candidateScore}** (out of 40).`;
                         
-                        const repScore = Math.min(Math.floor(userRep / 1000), 20);
-                        const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v)).length;
-                        const candidateScore = repScore + badgeScore;
-                        
-                        const missingBadges = [];
-                        electionBadgeNames.forEach(electionBadge => {
-                            if(!userBadges.includes(electionBadge)) missingBadges.push(electionBadge.replace('&amp;', '&'));
-                        });
-                        const soMissingRequiredBadges = isStackOverflow ? soRequiredBadgeNames.filter(requiredBadge => missingBadges.includes(requiredBadge)) : [];
-                        
-                        console.log(resolvedMsg.userId, siteUserId, userRep, repScore, badgeScore, candidateScore);
-                        if(missingBadges.length > 0) console.log('Missing Badges: ', missingBadges.join(','));
-                        
-                        // Does not meet minimum requirements
-                        if(userRep < election.repNominate || soMissingRequiredBadges.length > 0) {
-                            responseText = `You are not eligible to nominate yourself in the election`;
-                            
-                            // Not enough rep
-                            if(userRep < election.repNominate) {
-                                responseText += ` as you do not have at least ${election.repNominate} reputation`;
-                            }
-                            
-                            // Don't have required badges (SO-only)
-                            if(soMissingRequiredBadges.length > 0) {
-                                responseText += userRep < election.repNominate ? '. You are also' : ' as you are';
-                                responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ${soMissingRequiredBadges.join(', ')}`;
-                            }
-                            
-                            responseText += `. Your candidate score is **${candidateScore}** (out of 40).`;
+                        if(missingBadges.length > 0) {
+                            responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ${missingBadges.join(', ')}.`;
                         }
-                        // Exceeds expectations
-                        else if(candidateScore == 40) {
-                            responseText = `Wow! You have a maximum candidate score of **40**!`;
-                            
-                            // If nomination phase, ask user to nominate themselves
-                            if(election.phase == null || election.phase === 'nomination') {
-                                responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
-                            }
-                            // Did not nominate (primary, election, ended, cancelled)
-                            else if(!election.arrNominees.includes(resolvedMsg.userId)) {
-
-                                if(election.phase === 'ended' || election.phase === 'cancelled') {
-                                    responseText += ` Alas, the election is over.`;
-                                }
-                                else {
-                                    responseText += ` Alas, the nomination period is over.`;
-                                }
-                                responseText += ` Hope to see your candidature next election!`;
-                            }
+                        
+                        // Already nominated, and not ended/cancelled
+                        if(election.arrNominees.includes(resolvedMsg.userId) && ['nomination', 'primary', 'election'].includes(election.phase)) {
+                            responseText += ` I can see you're already a candidate. Good luck!`;
                         }
-                        // Still can nominate themselves
-                        else {
-                            responseText = `Your candidate score is **${candidateScore}** (out of 40).`;
-                            
-                            if(missingBadges.length > 0) {
-                                responseText += ` You are missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ${missingBadges.join(', ')}.`;
-                            }
-                             
-                            // If nomination phase, ask user to nominate themselves
-                            if(election.phase == null || election.phase === 'nomination') {
+                        // If have not begun, or nomination phase, ask user to nominate themselves
+                        else if([null, 'nomination'].includes(election.phase)) {
 
-                                if(candidateScore >= 30) {
-                                    responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
-                                }
-                                else {
-                                    responseText += ` Having a high candidate score is not a requirement - you can still nominate yourself in the election!`;
-                                }
+                            if(candidateScore >= 30) {
+                                responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
+                            }
+                            else {
+                                responseText += ` Having a high candidate score is not a requirement - you can still nominate yourself in the election!`;
                             }
                         }
                     }
