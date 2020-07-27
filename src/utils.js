@@ -64,6 +64,7 @@ module.exports = {
         }
     },
 
+    // Expensive, up to three requests. Only one, if the linked account is the site we want.
     getSiteUserIdFromChatStackExchangeId: async function(chatUserId, chatdomain, siteUrl)
     {
         const stackApikey = process.env.STACK_API_KEY;
@@ -81,7 +82,6 @@ module.exports = {
 
         // Linked site is not the one we wanted
         else {
-                
             try {
 
                 // Fetch linked site profile page to get network link
@@ -94,16 +94,16 @@ module.exports = {
                 // Fetch network accounts via API to get the account of the site we want
                 const networkAccounts = await module.exports.fetchUrl(`https://api.stackexchange.com/2.2/users/${networkUserId}/associated?pagesize=100&types=main_site&filter=!myEHnzbmE0&key=${stackApikey}`);
                 let siteAccount = networkAccounts.items.filter(v => v.site_url.includes(siteUrl));
-                console.log(`Network accounts:`, networkAccounts.length, `Site account:`, siteAccount);
+                console.log(`Site account:`, siteAccount);
 
-                if(siteAccount.length === 1) userId = siteAccount.user_id;
+                if(siteAccount.length === 1) userId = siteAccount[0].user_id;
             }
             catch(e) {
                 console.error(e);
             }
         }
 
-        console.log(`Resolved site user id:`, userId);
+        console.log(`Resolved ${siteUrl} userId:`, userId);
         return userId;
     },
 
