@@ -24,6 +24,7 @@ const accountPassword = process.env.ACCOUNT_PASSWORD;
 const electionUrl = process.env.ELECTION_PAGE_URL;
 const electionSiteHostname = electionUrl.split('/')[2];
 const electionSiteUrl = 'https://' + electionSiteHostname;
+const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
 const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(Number);
 const ignoredUserIds = (process.env.IGNORED_USERIDS || '').split(/\D+/).map(Number);
 const scrapeIntervalMins = Number(process.env.SCRAPE_INTERVAL_MINS) || 5;
@@ -199,7 +200,7 @@ const main = async () => {
 
     // Get current site moderators
     // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
-    const currSiteModApiResponse = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/moderators?pagesize=100&order=desc&sort=reputation&site=${electionSiteHostname}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`, true);
+    const currSiteModApiResponse = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/moderators?pagesize=100&order=desc&sort=reputation&site=${electionSiteApiSlug}&filter=!LnNkvq0d-S*rS_0sMTDFRm&key=${stackApikey}`, true);
     currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(v => v.is_employee === false && v.account_id !== -1) : [];
     currentSiteModIds = currentSiteMods.map(v => v.user_id);
 
@@ -584,7 +585,7 @@ const main = async () => {
                 else {
                     
                     // Retrieve user badges and rep from API
-                    const data = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${electionSiteHostname}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`, true);
+                    const data = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${electionSiteApiSlug}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`, true);
 
                     if(data == null || typeof data.items === 'undefined' || data.items.length == 0) {
                         console.error('No data from API.');
