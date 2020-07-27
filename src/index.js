@@ -585,7 +585,8 @@ const main = async () => {
                 else {
                     
                     // Retrieve user badges and rep from API
-                    const data = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${electionSiteApiSlug}&order=asc&sort=type&pagesize=100&filter=!SWJuQzAN)_Pb81O3B)&key=${stackApikey}`, true);
+                    const badgeFilter = isStackOverflow ? '!SWJuQzAN)_Pb81O3B)' : '';
+                    const data = await utils.fetchUrl(`https://api.stackexchange.com/2.2/users/${resolvedMsg.userId}/badges?site=${electionSiteApiSlug}&order=asc&sort=type&pagesize=100&filter=${badgeFilter}&key=${stackApikey}`, true);
 
                     if(data == null || typeof data.items === 'undefined' || data.items.length == 0) {
                         console.error('No data from API.');
