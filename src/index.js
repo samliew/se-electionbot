@@ -588,6 +588,11 @@ const main = async () => {
                     let siteUserId = resolvedMsg.userId;
                     if(!isStackOverflow) {
                         siteUserId = await utils.getSiteUserIdFromChatStackExchangeId(siteUserId);
+                        
+                        if(siteUserId === null) {
+                            console.error(`Unable to get site user id for ${resolvedMsg.userId}.`);
+                            return;
+                        }
                     }
                     
                     // Retrieve user badges and rep from API
@@ -595,7 +600,6 @@ const main = async () => {
 
                     if(data == null || typeof data.items === 'undefined' || data.items.length == 0) {
                         console.error('No data from API.');
-                        responseText = 'sorry, I was unable to calculate your candidate score :(';
                     }
                     else {
 

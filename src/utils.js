@@ -71,6 +71,7 @@ module.exports = {
         const chatUserPage = await module.exports.fetchUrl(`https://chat.${chatdomain}/users/${chatUserId}`);
         let $ = cheerio.load(chatUserPage);
         const linkedUserUrl = $('.user-stats a').first().attr('href');
+        console.log(`Linked site user url: `, linkedUserUrl);
 
         // Linked site is the one we wanted, return site userid
         if(linkedUserUrl.includes(siteUrl)) {
@@ -86,17 +87,23 @@ module.exports = {
                 const linkedUserProfilePage = await module.exports.fetchUrl(`${linkedUserUrl}?tab=profile`);
                 $ = cheerio.load(linkedUserProfilePage);
                 const networkUserUrl = $('.js-user-header a').last().attr('href');
+                console.log(`Network user url: `, networkUserUrl);
 
                 // Fetch network accounts to get the account of the site we want
                 const networkAccountsPage = await module.exports.fetchUrl(`${networkUserUrl}?tab=accounts`);
                 $ = cheerio.load(networkAccountsPage);
-                userId = $('.account-site a').filter((i, el) => el.href.includes(siteUrl)).first().attr('href');
+                let siteUserUrl = $('.account-site a').filter((i, el) => el.href.includes(siteUrl)).first().attr('href');
+                console.log(`Site user url: `, siteUserUrl);
+
+                // Finally we get the target site's user id
+                if(siteUserUrl.length == 1) userId = Number(siteUserUrl.match(/\d+/, ''));
             }
             catch(e) {
                 console.error(e);
             }
         }
 
+        console.log(`Resolved site user id: `, userId);
         return userId;
     },
 
