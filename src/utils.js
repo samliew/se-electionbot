@@ -66,12 +66,13 @@ module.exports = {
 
     getSiteUserIdFromChatStackExchangeId: async function(chatUserId, chatdomain, siteUrl)
     {
+        const stackApikey = process.env.STACK_API_KEY;
         let userId = null;
 
         const chatUserPage = await module.exports.fetchUrl(`https://chat.${chatdomain}/users/${chatUserId}`);
         let $ = cheerio.load(chatUserPage);
         const linkedUserUrl = 'https:' + $('.user-stats a').first().attr('href');
-        console.log(`Linked site user url: `, linkedUserUrl);
+        console.log(`Linked site user url:`, linkedUserUrl);
 
         // Linked site is the one we wanted, return site userid
         if(linkedUserUrl.includes(siteUrl)) {
@@ -87,23 +88,22 @@ module.exports = {
                 const linkedUserProfilePage = await module.exports.fetchUrl(`${linkedUserUrl}?tab=profile`);
                 $ = cheerio.load(linkedUserProfilePage);
                 const networkUserUrl = $('.js-user-header a').last().attr('href');
-                console.log(`Network user url: `, networkUserUrl);
+                const networkUserId = Number(networkUserUrl.match(/\d+/, ''));
+                console.log(`Network user url:`, networkUserUrl, networkUserId);
 
-                // Fetch network accounts to get the account of the site we want
-                const networkAccountsPage = await module.exports.fetchUrl(`${networkUserUrl}?tab=accounts`);
-                $ = cheerio.load(networkAccountsPage);
-                let siteUserUrl = $('.account-site a').filter((i, el) => el.href.includes(siteUrl)).first().attr('href');
-                console.log(`Site user url: `, siteUserUrl);
+                // Fetch network accounts via API to get the account of the site we want
+                const networkAccounts = await module.exports.fetchUrl(`https://api.stackexchange.com/2.2/users/${networkUserId}/associated?pagesize=100&types=main_site&filter=!myEHnzbmE0&key=${stackApikey}`);
+                let siteAccount = networkAccounts.items.filter(v => v.site_url.includes(siteUrl));
+                console.log(`Network accounts:`, networkAccounts.length, `Site account:`, siteAccount);
 
-                // Finally we get the target site's user id
-                if(siteUserUrl.length == 1) userId = Number(siteUserUrl.match(/\d+/, ''));
+                if(siteAccount.length === 1) userId = siteAccount.user_id;
             }
             catch(e) {
                 console.error(e);
             }
         }
 
-        console.log(`Resolved site user id: `, userId);
+        console.log(`Resolved site user id:`, userId);
         return userId;
     },
 
