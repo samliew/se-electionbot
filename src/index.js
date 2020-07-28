@@ -294,8 +294,8 @@ const main = async () => {
 
         const isPrivileged = user.isModerator || adminIds.includes(resolvedMsg.userId);
 
-        // If message is too short or long, and not by an admin or mod, ignore (most likely FP)
-        if((content.length < 4 || content.length > 69) && !isPrivileged) {
+        // If message is too short or long, ignore (most likely FP)
+        if(content.length < 4 || content.length > 69) {
             console.log(`EVENT - Ignoring due to message length ${resolvedMsg.content.length}: `, resolvedMsg.content);
             return;
         }
