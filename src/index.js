@@ -615,6 +615,7 @@ const main = async () => {
                     }
 
                     // Calculate candidate score
+                    const hasNominated = election.arrNominees.some(v => v.userId === siteUserId);
                     const userBadges = data.items.map(v => v.name) || [];
                     const userRep = data.items ? data.items[0].user.reputation : 0;
                     
@@ -668,7 +669,7 @@ const main = async () => {
                         responseText = `Wow! You have a maximum candidate score of **40**!`;
                         
                         // Already nominated, and not ended/cancelled
-                        if(election.arrNominees.includes(siteUserId) && ['nomination', 'primary', 'election'].includes(election.phase)) {
+                        if(hasNominated && ['nomination', 'primary', 'election'].includes(election.phase)) {
                             responseText += ` I can see you're already a candidate - good luck!`;
                         }
                         // If have not begun, or nomination phase, ask user to nominate themselves
@@ -676,7 +677,7 @@ const main = async () => {
                             responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
                         }
                         // Did not nominate (primary, election, ended, cancelled)
-                        else if(!election.arrNominees.includes(siteUserId)) {
+                        else if(!hasNominated) {
 
                             if(['ended', 'cancelled'].includes(election.phase)) {
                                 responseText += ` Alas, the election is over.`;
@@ -696,7 +697,7 @@ const main = async () => {
                         }
                         
                         // Already nominated, and not ended/cancelled
-                        if(election.arrNominees.includes(siteUserId) && ['nomination', 'primary', 'election'].includes(election.phase)) {
+                        if(hasNominated && ['nomination', 'primary', 'election'].includes(election.phase)) {
                             responseText += ` I can see you're already a candidate. Good luck!`;
                         }
                         // If have not begun, or nomination phase, ask user to nominate themselves
