@@ -570,24 +570,32 @@ const main = async () => {
 
             // Calculate own candidate score
             else if(content.includes('my candidate score') || 
-                (['can i '].some(x => content.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => content.includes(x)) && ['mod', 'election'].some(x => content.includes(x))) ) {
+                (['can i '].some(x => content.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => content.includes(x)) && ['mod', 'election'].some(x => content.includes(x))) ||
+                (isPrivileged && /what is the candidate score for \d+$/.test(content)) ) {
 
                 if(isNaN(resolvedMsg.userId)) return;
 
+                const findingTargetCandidateScore = isPrivileged && /what is the candidate score for \d+$/.test(content);
+
                 // Already a mod
-                if(isStackOverflow && user.isModerator) {
+                if(!findingTargetCandidateScore && isStackOverflow && user.isModerator) {
                     responseText = randomOops() + `you already have a diamond!`;
                 }
                 // Previously a mod (on SO only)
-                else if(isStackOverflow && soPastAndPresentModIds.includes(resolvedMsg.userId)) {
+                else if(!findingTargetCandidateScore && isStackOverflow && soPastAndPresentModIds.includes(resolvedMsg.userId)) {
                     responseText = `are you *really* sure you want to be a moderator again???`;
                 }
                 // Default
                 else {
 
-                    // If not Stack Overflow, get election site user id (chat has different ids)
                     let siteUserId = resolvedMsg.userId;
-                    if(!isStackOverflowChat) {
+
+                    // If privileged user asking candidate score of another user, get user id from message
+                    if(findingTargetCandidateScore) {
+                        siteUserId = Number(content.match(/\d+$/)[0]);
+                    }
+                    // If not Chat.SO, resolve election site user id from chat id (chat has different ids)
+                    else if(!isStackOverflowChat) {
                         siteUserId = await utils.getSiteUserIdFromChatStackExchangeId(siteUserId, chatDomain, electionSiteHostname);
                         
                         // Unable to get user id on election site
@@ -622,9 +630,24 @@ const main = async () => {
                     
                     console.log(resolvedMsg.userId, siteUserId, userRep, repScore, badgeScore, candidateScore);
                     if(missingBadges.length > 0) console.log('Missing Badges: ', missingBadges.join(','));
-                    
+
+                    // Privileged user asking for candidate score of another user
+                    if(findingTargetCandidateScore) {
+
+                        responseText = `The candidate score for user [${siteUserId}](${electionSiteUrl}/users/${siteUserId}) is **${candidateScore}** (out of 40).`;
+                        
+                        // Don't have required badges (SO-only)
+                        if(soMissingRequiredBadges.length > 0) {
+                            responseText += ` The user is missing the required badge${pluralize(soMissingRequiredBadges.length)}: ${soMissingRequiredBadges.join(', ')}.`;
+                        }
+                        
+                        // Missing other badges
+                        else if(missingBadges.length > 0) {
+                            responseText += ` The user is missing ${pluralize(missingBadges.length, 'these', 'this')} badge${pluralize(missingBadges.length)}: ${missingBadges.join(', ')}.`;
+                        }
+                    }
                     // Does not meet minimum requirements
-                    if(userRep < election.repNominate || soMissingRequiredBadges.length > 0) {
+                    else if(userRep < election.repNominate || soMissingRequiredBadges.length > 0) {
                         responseText = `You are not eligible to nominate yourself in the election`;
                         
                         // Not enough rep
