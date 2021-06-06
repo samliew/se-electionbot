@@ -1120,52 +1120,51 @@ const main = async () => {
 
     // Listen to requests from web form
     const app = startServer();
-    app.get('/say', function (req, res) {
+    app.get('/say', ({ query }, res) => {
+        const { success, password = "", message = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
+
         let postHtml = '';
 
-        if (req.query.success == 'true') {
-            postHtml = `<div class="result success">Success!</div>`;
-        }
-        else if (req.query.success == 'false') {
-            postHtml = `<div class="result error">Error. Could not send message.</div>`;
-        }
+        const statusMap = {
+            true: `<div class="result success">Success!</div>`,
+            false: `<div class="result error">Error. Could not send message.</div>`
+        };
+
+        postHtml = statusMap[success];
 
         res.send(`
             <link rel="icon" href="data:;base64,=" />
             <link rel="stylesheet" href="css/styles.css" />
             <h3>ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatRoomId}</a>:</h3>
             <form method="post">
-                <input type="text" name="message" placeholder="message" maxlength="500" value="${req.query.message ? decodeURIComponent(req.query.message) : ''}" />
-                <input type="hidden" name="password" value="${req.query.password || ''}" />
+                <input type="text" name="message" placeholder="message" maxlength="500" value="${decodeURIComponent(message)}" />
+                <input type="hidden" name="password" value="${password}" />
                 <button>Send</button>
             </form>
             ${postHtml}
         `);
         return;
     });
-    app.post('/say', async function (req, res) {
-        const validPassword = req.body.password === process.env.PASSWORD;
-        const message = (req.body.message || '').trim();
+    app.post('/say', async ({ body }, res) => {
+        const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
+
+        const validPwd = password === process.env.PASSWORD;
+        const trimmed = message.trim();
 
         // Validation
-        if (!validPassword) {
-            console.error('Invalid password', req.body.password);
-            res.redirect(`/say?message=${encodeURIComponent(message)}&success=false`);
+        if (!validPwd || !trimmed) {
+            console.error(`'Invalid ${validPwd ? 'message' : 'password'}`, password);
+            res.redirect(`/say?message=${encodeURIComponent(trimmed)}&success=false`);
+            return;
         }
-        else if (message == '') {
-            console.error('Invalid message', message);
-            res.redirect(`/say?message=${encodeURIComponent(message)}&success=false`);
-        }
-        else {
-            await room.sendMessage(message);
 
-            // Record last activity time only
-            // so this doesn't reset any mute, if active
-            lastActivityTime = Date.now();
+        await room.sendMessage(trimmed);
 
-            res.redirect(`/say?password=${req.body.password}&success=true`);
-        }
-        return;
+        // Record last activity time only
+        // so this doesn't reset any mute, if active
+        lastActivityTime = Date.now();
+
+        res.redirect(`/say?password=${password}&success=true`);
     });
 
 
