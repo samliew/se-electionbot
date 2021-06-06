@@ -3,6 +3,8 @@
     "checkJs": true,
     "allowJs": true,
     "noEmit": true,
-    "declaration": false
+    "declaration": false,
+    "target": "ES6",
+    "moduleResolution": "node"
   }
 }
