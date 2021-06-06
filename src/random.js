@@ -1,12 +1,14 @@
 class RandomArray extends Array {
-
+    /**
+     * @param {...any} init
+     */
     constructor(...init) {
         super(...init);
     }
 
     /**
      * @summary gets a random element
-     * @returns {RandomArray}
+     * @returns {any}
      */
     getRandom() {
         const rnd = Math.floor(Math.random() * this.length);
