@@ -24,14 +24,13 @@
     "node": "10.x"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "chatexchange": "^0.2.3-dev",
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.4",
     "html-entities": "^1.2.1",
     "node-cron": "^2.0.3",
-    "patch-package": "^6.2.2",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.4"
+    "patch-package": "^6.2.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",
