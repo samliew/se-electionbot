@@ -235,5 +235,6 @@ module.exports = {
     linkToRelativeTimestamp,
     linkToUtcTimestamp,
     getSiteUserIdFromChatStackExchangeId,
+    pluralize,
     link
 };
