@@ -40,7 +40,7 @@ const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive pin
 // To stop bot from replying to too many messages in a short time
 let throttleSecs = Number(process.env.THROTTLE_SECS) || 10;
 
-const chatDomain = /** @type {"stackexchange.com"|"meta.stackexchange.com"|"stackoverflow.com"} */ (process.env.CHAT_DOMAIN);
+const chatDomain = (process.env.CHAT_DOMAIN);
 const chatRoomId = +process.env.CHAT_ROOM_ID;
 const accountEmail = process.env.ACCOUNT_EMAIL;
 const accountPassword = process.env.ACCOUNT_PASSWORD;
@@ -245,7 +245,7 @@ const main = async () => {
         key: stackApikey
     }).toString();
 
-    const currSiteModApiResponse = /** @type {APIListResponse} */(await fetchUrl(modURL.toString(), true));
+    const currSiteModApiResponse = /** @type {APIListResponse|null} */(await fetchUrl(modURL.toString(), true));
     currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1) : [];
     currentSiteModIds = currentSiteMods.map(({ user_id }) => user_id);
 
@@ -256,7 +256,7 @@ const main = async () => {
         console.error('FATAL - Invalid election data!');
     }
 
-    // Login to site
+    //@ts-expect-error
     const client = new Client(chatDomain);
     try {
         await client.login(accountEmail, accountPassword);
@@ -829,17 +829,12 @@ const main = async () => {
 
                 responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need ${reqs.join(', ')}. ${mentionsAnother}You cannot nominate another user.${mentionsAnother}`;
             }
-
-            // Why was nomination removed
-            else if (['why', 'what'].some(x => content.startsWith(x)) && ['nomination', 'nominees', 'candidate'].some(x => content.includes(x)) && ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(x => content.includes(x))) {
-                responseText = `Candidates may withdraw their nomination any time before the election phase. Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
+            else if (isAskedWhyNominationRemoved(content)) {
+                responseText = sayWhyNominationRemoved();
             }
-
-            // Are moderators paid
-            else if (['why', 'what', 'are', 'how'].some(x => content.startsWith(x)) && ['reward', 'paid', 'compensat', 'money'].some(x => content.includes(x)) && ['mods', 'moderators'].some(x => content.includes(x))) {
-                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) is an entirely voluntary role, and they are not paid by Stack Exchange.`;
+            else if (isAskedIfModsArePaid(content)) {
+                responseText = sayAreModsPaid(makeURL, election);
             }
-
             // Status
             else if (content.includes('election') && ['status', 'progress'].some(x => content.includes(x))) {
 
@@ -1076,26 +1071,7 @@ const main = async () => {
             console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                 `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
 
-            let responseText = 'Welcome to the election chat room! ';
-
-            if (election.phase == null) {
-                responseText += `The [election](${election.electionUrl}?tab=${election.phase}) has not begun yet`;
-            }
-            else if (election.phase === 'ended' || election.phase === 'cancelled') {
-                responseText += `The [election](${election.electionUrl}?tab=${election.phase}) has ended`;
-            }
-            // Nomination, primary, or election phase
-            else {
-                responseText += `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase`;
-
-                if (election.phase === 'nomination' || election.phase === 'primary') {
-                    responseText += ` with ${election.arrNominees.length} candidates`;
-                }
-            }
-
-            responseText += '. I can answer frequently-asked questions about the election - type *@ElectionBot help* for more info.';
-
-            await room.sendMessage(responseText);
+            await sayHI(makeURL, room, election);
 
             // Record last sent message time so we don't flood the room
             lastMessageTime = Date.now();
