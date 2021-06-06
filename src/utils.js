@@ -1,153 +1,239 @@
 const path = require('path');
 const https = require('https');
 const express = require('express');
-const request = require('request-promise');
 const cheerio = require('cheerio');
-const bodyParser = require('body-parser');
+const { default: axios } = require("axios");
+
+const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
+
+const apiBase = `https://api.stackexchange.com`;
+
+const startServer = () => {
+    const app = express().set('port', process.env.PORT || 5000);
+    const staticPath = path.join(__dirname, '../static');
+
+    //see https://stackoverflow.com/a/59892173/11407695
+    app.use(express.urlencoded({ extended: true }));
+
+    app.use((_req, res, next) => {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
+
+    app.use('/', express.static(staticPath));
+
+    const server = app.listen(app.get('port'), () => {
+        console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
+    });
+
+    //see https://stackoverflow.com/a/14516195/11407695
+    process.on('SIGINT', () => server.close(() => console.log('gracefully shutting down')));
+
+    return app;
+};
+
+/**
+ * @typedef {{
+ *  items: { site_url:string, user_id:string }[] //TODO: split into API entities
+ * }} APIListResponse
+ */
+
+
+/**
+ * @summary fetches the endpoint
+ * @param {string} url
+ * @param {boolean} [json]
+ * @returns {Promise<APIListResponse|string|null>}
+ */
+const fetchUrl = async (url, json = false) => {
+    const { SOURCE_VERSION, ACCOUNT_EMAIL, DEBUG } = process.env;
+
+    const debug = DEBUG.toLowerCase() !== 'false'; // default to true
+
+    try {
+        const { data } = await axios({
+            url,
+            responseType: url.includes('api') || json ? "json" : "text", //TODO: check if same as `url.includes('api') || json`
+            headers: {
+                'User-Agent': `Node.js/ElectionBot ver.${SOURCE_VERSION}; AccountEmail ${ACCOUNT_EMAIL}`,
+            },
+        });
+        console.log(`FETCH - ${url}`, debug ? (json ? JSON.stringify(data) : data) : '');
+        return data;
+    }
+    catch (e) {
+        console.error('FETCH - ERROR:', e);
+        return null;
+    }
+};
+
+/**
+ * @summary pings endpoint periodically to prevent idling
+ * @param {string} url
+ * @param {number} mins
+ * @returns {void}
+ */
+const keepAlive = (url, mins = 20) => {
+    setInterval(() => {
+        https.get(url).on('error', (err) => console.error(`ERROR - Keep-alive failed. ${err.message}`));
+    }, mins * 60000);
+};
+
+/**
+ * @summary base pluralization
+ * @param {number} amount
+ * @returns {string}
+ */
+const pluralize = amount => amount !== 1 ? 's' : '';
+
+/**
+ * @summary validates and normalizes the Date
+ * @param {Date|number|string} input
+ * @returns {Date}
+ */
+const validateDate = (input) => {
+    let output = input;
+
+    if (typeof input === 'string' || typeof input === 'number') {
+        output = new Date(input);
+    };
+
+    //instanceof as normal objects will pass `typeof !== "object"` validation
+    return output instanceof Date ? output : new Date();
+};
+
+/**
+ * @summary formats date input into ISO 8601 format
+ *
+ * @example
+ *  https://www.timeanddate.com/worldclock/fixedtime.html?iso=20201231T2359
+ *
+ * @param {Date|string|number} date
+ * @returns {string}
+ */
+const toTadParamFormat = (date) => validateDate(date).toISOString()
+    .replace(/(-|:|\d\dZ)/gi, '')
+    .replace(/\..*$/, '')
+    .replace(/ /g, 'T');
+
+
+/**
+ * @summary formats date to UTC timestamp
+ * @param {Date|string|number} date
+ * @returns {string}
+ */
+const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
+    .replace('T', ' ')
+    .replace(/\.\d+/, '');
+
+
+/**
+ * @summary formats date to relative time
+ * @param {Date|number|string} date
+ * @param {string} [soonText]
+ * @returns {string}
+ */
+const dateToRelativetime = (date, soonText = 'soon') => {
+
+    date = validateDate(date);
+
+    const diff = new Date(date).valueOf() - Date.now();
+    const daysTo = Math.floor(diff / (864e5));
+    const hoursTo = Math.floor(diff / (36e5));
+
+    if (daysTo < 1 && hoursTo < 1) return soonText;
+
+    if (daysTo >= 1) return `in ${daysTo} day${pluralize(daysTo)}`;
+
+    if (hoursTo >= 1) return `in ${hoursTo} hour${pluralize(hoursTo)}`;
+
+    return soonText;
+};
+
+/**
+ * @summary formats date check link to relative time
+ * @param {Date|number|string} date
+ * @returns {string}
+ */
+const linkToRelativeTimestamp = (date) =>
+    `[${dateToRelativetime(date)}](${link}${toTadParamFormat(date)})`;
+
+
+/**
+ * @summary formats date check link to UTC time
+ * @param {Date|number|string} date
+ * @returns {string}
+ */
+const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${link}${toTadParamFormat(date)})`;
+
+
+/**
+ * @description Expensive, up to three requests. Only one, if the linked account is the site we want.
+ * @param {string} chatUserId
+ * @param {string} chatdomain
+ * @param {string} siteUrl
+ * @returns {Promise<string|null>}
+ */
+const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, siteUrl) => {
+    const { STACK_API_KEY } = process.env;
+    let userId = null;
+
+    const chatUserPage = await fetchUrl(`https://chat.${chatdomain}/users/${chatUserId}`);
+
+    let $ = cheerio.load(/** @type {string} */(chatUserPage));
+
+    const linkedUserUrl = 'https:' + $('.user-stats a').first().attr('href');
+    console.log(`Linked site user url:`, linkedUserUrl);
+
+    // Linked site is the one we wanted, return site userid
+    if (linkedUserUrl.includes(siteUrl)) return (linkedUserUrl.match(/\d+/))[0];
+
+    // Linked site is not the one we wanted
+    try {
+        // Fetch linked site profile page to get network link
+        const linkedUserProfilePage = await fetchUrl(`${linkedUserUrl}?tab=profile`);
+
+        $ = cheerio.load(/** @type {string} */(linkedUserProfilePage));
+
+        const networkUserUrl = $('.js-user-header a').last().attr('href');
+        const networkUserId = +(networkUserUrl.match(/\d+/));
+        console.log(`Network user url:`, networkUserUrl, networkUserId);
+
+        const url = new URL(`${apiBase}/2.2/users/${networkUserId}/associated`);
+        url.search = new URLSearchParams({
+            pagesize: "100",
+            types: "main_site",
+            filter: "!myEHnzbmE0",
+            key: STACK_API_KEY
+        }).toString();
+
+        // Fetch network accounts via API to get the account of the site we want
+        const { items = [] } = /** @type {APIListResponse} */(await fetchUrl(url.toString()));
+
+        const siteAccount = items.filter(v => v.site_url.includes(siteUrl));
+
+        console.log(`Site account:`, siteAccount);
+
+        if (siteAccount.length === 1) userId = siteAccount[0].user_id;
+    }
+    catch (e) {
+        console.error(e);
+    }
+
+    console.log(`Resolved ${siteUrl} userId:`, userId);
+    return userId;
+};
 
 module.exports = {
-
-    startServer: function(room) 
-    {
-        const app = express().set('port', process.env.PORT || 5000);
-        const staticPath = path.join(__dirname, '../static');
-        
-        app.use(bodyParser.urlencoded({ extended: true }));
-        app.use(function(req, res, next) {
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            next();
-        });
-
-        app.use('/', express.static(staticPath));
-
-        app.listen(app.get('port'), () => {
-            console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
-        });
-
-        process.on('SIGINT', function() {
-            app.close(() => console.log('gracefully shutting down'));
-        });
-
-        return app;
-    },
-
-    keepAlive: function(url, mins = 30) 
-    {
-        // Fetch endpoint to prevent server from idling
-        setInterval(function() {
-            https.get(url).on('error', function(err) {
-                console.error("ERROR - Keep-alive failed." + err.message);
-            });
-        }, mins * 60000);
-    },
-
-    fetchUrl: async function(url, json = false)
-    {
-        try {
-            const content = await request({
-                gzip: true, // important: https://meta.stackexchange.com/a/446
-                simple: false,
-                resolveWithFullResponse: false,
-                headers: {
-                    'User-Agent': `Node.js/ElectionBot; AccountEmail ${process.env.ACCOUNT_EMAIL}`,
-                },
-                uri: url,
-                json: url.includes('api') || json,
-            });
-            console.log(`FETCH - ${url}`);
-            return content;
-        }
-        catch(e) {
-            console.error('FETCH - ERROR:', e);
-            return null;
-        }
-    },
-
-    // Expensive, up to three requests. Only one, if the linked account is the site we want.
-    getSiteUserIdFromChatStackExchangeId: async function(chatUserId, chatdomain, siteUrl)
-    {
-        const stackApikey = process.env.STACK_API_KEY;
-        let userId = null;
-
-        const chatUserPage = await module.exports.fetchUrl(`https://chat.${chatdomain}/users/${chatUserId}`);
-        let $ = cheerio.load(chatUserPage);
-        const linkedUserUrl = 'https:' + $('.user-stats a').first().attr('href');
-        console.log(`Linked site user url:`, linkedUserUrl);
-
-        // Linked site is the one we wanted, return site userid
-        if(linkedUserUrl.includes(siteUrl)) {
-            userId = Number(linkedUserUrl.match(/\d+/, ''));
-        }
-
-        // Linked site is not the one we wanted
-        else {
-            try {
-
-                // Fetch linked site profile page to get network link
-                const linkedUserProfilePage = await module.exports.fetchUrl(`${linkedUserUrl}?tab=profile`);
-                $ = cheerio.load(linkedUserProfilePage);
-                const networkUserUrl = $('.js-user-header a').last().attr('href');
-                const networkUserId = Number(networkUserUrl.match(/\d+/, ''));
-                console.log(`Network user url:`, networkUserUrl, networkUserId);
-
-                // Fetch network accounts via API to get the account of the site we want
-                const networkAccounts = await module.exports.fetchUrl(`https://api.stackexchange.com/2.2/users/${networkUserId}/associated?pagesize=100&types=main_site&filter=!myEHnzbmE0&key=${stackApikey}`);
-                let siteAccount = networkAccounts.items.filter(v => v.site_url.includes(siteUrl));
-                console.log(`Site account:`, siteAccount);
-
-                if(siteAccount.length === 1) userId = siteAccount[0].user_id;
-            }
-            catch(e) {
-                console.error(e);
-            }
-        }
-
-        console.log(`Resolved ${siteUrl} userId:`, userId);
-        return userId;
-    },
-
-    // Example URL: https://www.timeanddate.com/worldclock/fixedtime.html?iso=20201231T2359
-    toTadParamFormat: function(date)
-    {
-        if(typeof date === 'string' || typeof date === 'number') date = new Date(date); // from string or int
-        if(typeof date !== 'object') date = new Date(); // invalid, default to now
-
-        return date.toISOString().replace(/(-|:|\d\dZ)/gi, '').replace(/\..*$/, '').replace(/ /g, 'T');
-    },
-
-    dateToUtcTimestamp: function(date)
-    {
-        if(typeof date === 'string' || typeof date === 'number') date = new Date(date); // from string or int
-        if(typeof date !== 'object') date = new Date(); // invalid, default to now
-
-        return date.toISOString().replace('T', ' ').replace(/\.\d+/, '');
-    },
-
-    dateToRelativetime: function(date, soonText = 'soon')
-    {
-        if(typeof date === 'string' || typeof date === 'number') date = new Date(date); // from string or int
-        if(typeof date !== 'object') date = new Date(); // invalid, default to now
-
-        const pluralize = n => n !== 1 ? 's' : '';
-
-        const diff = new Date(date) - Date.now();
-        const daysTo = Math.floor(diff / (24 * 60 * 60 * 1000));
-        const hoursTo = Math.floor(diff / (60 * 60 * 1000));
-        const textLink = daysTo > 1 ? 'in ' + daysTo + ' day' + pluralize(daysTo) :
-            hoursTo > 1 ? 'in ' + hoursTo + ' hour' + pluralize(hoursTo) :
-            soonText;
-
-        return textLink;
-    },
-
-    linkToRelativeTimestamp: function(date)
-    {
-        return `[${module.exports.dateToRelativetime(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${module.exports.toTadParamFormat(date)})`
-    },
-
-    linkToUtcTimestamp: function(date)
-    {
-        return `[${module.exports.dateToUtcTimestamp(date)}](https://www.timeanddate.com/worldclock/fixedtime.html?iso=${module.exports.toTadParamFormat(date)})`
-    }
-}
+    startServer,
+    keepAlive,
+    fetchUrl,
+    toTadParamFormat,
+    dateToUtcTimestamp,
+    dateToRelativetime,
+    linkToRelativeTimestamp,
+    linkToUtcTimestamp,
+    getSiteUserIdFromChatStackExchangeId,
+    link
+};
