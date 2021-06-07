@@ -8,6 +8,8 @@ const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
 const apiBase = `https://api.stackexchange.com`;
 
+const apiVer = 2.2;
+
 const startServer = () => {
     const app = express().set('port', process.env.PORT || 5000);
     const staticPath = path.join(__dirname, '../static');
@@ -35,7 +37,18 @@ const startServer = () => {
 
 /**
  * @typedef {{
- *  items: { site_url:string, user_id:string }[] //TODO: split into API entities
+ *  site_url: string,
+ *  user_id: string,
+ *  user: {
+ *      reputation:number
+ *  },
+ *  name: string,
+ *  is_employee: boolean,
+ *  account_id: number
+ * }} ResItem
+ *
+ * @typedef {{
+ *  items: ResItem[] //TODO: split into API entities
  * }} APIListResponse
  */
 
@@ -85,7 +98,7 @@ const keepAlive = (url, mins = 20) => {
  * @param {number} amount
  * @returns {string}
  */
-const pluralize = amount => amount !== 1 ? 's' : '';
+const pluralize = (amount, pluralSuffix = "s", singularSuffix = "") => amount !== 1 ? pluralSuffix : singularSuffix;
 
 /**
  * @summary validates and normalizes the Date
@@ -235,5 +248,8 @@ module.exports = {
     linkToRelativeTimestamp,
     linkToUtcTimestamp,
     getSiteUserIdFromChatStackExchangeId,
-    link
+    pluralize,
+    link,
+    apiBase,
+    apiVer
 };
