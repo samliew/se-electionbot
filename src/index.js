@@ -29,6 +29,7 @@ const {
     sayAreModsPaid,
     sayNotStartedYet,
     sayElectionIsOver,
+    sayInformedDecision,
     sayWhyNominationRemoved
 } = require("./messages");
 
@@ -343,10 +344,6 @@ const main = async () => {
 
         console.log('EVENT', JSON.stringify(resolvedMsg));
 
-        // Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
-        const relativeTimestampLinkToElection = linkToRelativeTimestamp(election.dateElection);
-        const informedDecisionText = election.qnaUrl ? `If you want to make an informed decision on who to vote for, you can also read the candidates' answers in the [election Q&A](${election.qnaUrl}), and you also can look at examples of their participation on Meta and how they conduct themselves.` : '';
-
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id && isPrivileged) {
             let responseText = null;
@@ -392,7 +389,7 @@ const main = async () => {
             else if (content.includes('time')) {
                 responseText = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
                 if (['election', 'ended', 'cancelled'].includes(election.phase) == false) {
-                    responseText += ` (election phase starts ${relativeTimestampLinkToElection})`;
+                    responseText += ` (election phase starts ${linkToRelativeTimestamp(election.dateElection)})`;
                 }
             }
             else if (content.includes('chatroom')) {
@@ -788,7 +785,7 @@ const main = async () => {
 
             // How to choose/pick/decide who to vote for
             else if ((content.startsWith('how') && ['choose', 'pick', 'decide', 'determine'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
-                if (election.qnaUrl) responseText = informedDecisionText;
+                if (election.qnaUrl) responseText = sayInformedDecision(election);
                 if (election.phase == null) responseText = sayNotStartedYet(election);
             }
 
@@ -855,7 +852,7 @@ const main = async () => {
                 else {
                     responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.arrNominees.length} candidates.`;
 
-                    if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${relativeTimestampLinkToElection} to vote in the final election voting phase.`;
+                    if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${linkToRelativeTimestamp(election)} to vote in the final election voting phase.`;
                 }
             }
 
