@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    target-branch: "typescript"
+    labels:
+      - "chores"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "00:00"
+      timezone: "UTC"
+    allow:
+      - dependency-type: "direct"

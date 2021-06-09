@@ -238,6 +238,13 @@ const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, site
     return userId;
 };
 
+/**
+ * @summary makes a postable URL of form [label](uri)
+ * @param {string} label
+ * @param {string} uri
+ */
+const makeURL = (label, uri) => `[${label}](${uri})`;
+
 module.exports = {
     startServer,
     keepAlive,
@@ -248,6 +255,7 @@ module.exports = {
     linkToRelativeTimestamp,
     linkToUtcTimestamp,
     getSiteUserIdFromChatStackExchangeId,
+    makeURL,
     pluralize,
     link,
     apiBase,
