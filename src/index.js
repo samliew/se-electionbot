@@ -14,17 +14,22 @@ const {
     getSiteUserIdFromChatStackExchangeId,
     linkToRelativeTimestamp,
     linkToUtcTimestamp,
-    startServer
+    startServer,
+    makeURL,
 } = require('./utils');
 
 const { RandomArray, getRandomModal, getRandomPlop, getRandomOops } = require("./random.js");
 
 const {
     sayHI,
-    isAskedWhyNominationRemoved,
-    sayWhyNominationRemoved,
+    isAskedAboutVoting,
     isAskedIfModsArePaid,
-    sayAreModsPaid
+    isAskedWhyNominationRemoved,
+    sayAboutVoting,
+    sayAreModsPaid,
+    sayNotStartedYet,
+    sayElectionIsOver,
+    sayWhyNominationRemoved
 } = require("./messages");
 
 // If running locally, load env vars from .env file
@@ -140,13 +145,6 @@ if (debug) {
 }
 
 /**
- * @summary makes a postable URL of form [label](uri)
- * @param {string} label
- * @param {string} uri
- */
-const makeURL = (label, uri) => `[${label}](${uri})`;
-
-/**
  * @summary Election cancelled
  * @param {Election} [election]
  * @returns {Promise<boolean>}
@@ -225,7 +223,9 @@ async function announceWinners(election = null) {
  * @typedef {import("./utils").APIListResponse} APIListResponse
  */
 
-// Main fn
+/**
+ * @summary main bot function
+ */
 const main = async () => {
 
     // Inform if in debug mode
@@ -284,13 +284,6 @@ const main = async () => {
     if (debug) {
         await room.sendMessage(getRandomPlop());
     }
-
-    // Default election message
-    const notStartedYet = () => {
-        const relativetime = dateToRelativetime(election.dateNomination);
-        return `The [election](${election.electionUrl}) has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(election.dateNomination)} (${relativetime}).`;
-    };
-    const electionOverResponseText = `The [election](${election.electionUrl}) is over. See you next time!`;
 
     // Main event listener
     room.on('message', async msg => {
@@ -546,7 +539,7 @@ const main = async () => {
             if (['who are', 'who is', 'who has', 'how many'].some(x => content.startsWith(x)) && ['nominees', 'nominated', 'nominations', 'candidate'].some(x => content.includes(x))) {
 
                 if (election.phase === null) {
-                    responseText = notStartedYet();
+                    responseText = sayNotStartedYet(election);
                 }
                 else if (election.arrNominees.length > 0) {
                     // Can't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
@@ -796,7 +789,7 @@ const main = async () => {
             // How to choose/pick/decide who to vote for
             else if ((content.startsWith('how') && ['choose', 'pick', 'decide', 'determine'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
                 if (election.qnaUrl) responseText = informedDecisionText;
-                if (election.phase == null) responseText = notStartedYet();
+                if (election.phase == null) responseText = sayNotStartedYet(election);
             }
 
             // Who is the best mod
@@ -833,13 +826,13 @@ const main = async () => {
                 responseText = sayWhyNominationRemoved();
             }
             else if (isAskedIfModsArePaid(content)) {
-                responseText = sayAreModsPaid(makeURL, election);
+                responseText = sayAreModsPaid(election);
             }
             // Status
             else if (content.includes('election') && ['status', 'progress'].some(x => content.includes(x))) {
 
                 if (election.phase == null) {
-                    responseText = notStartedYet();
+                    responseText = sayNotStartedYet(election);
                 }
                 else if (election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
                     responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}.`;
@@ -849,7 +842,7 @@ const main = async () => {
                     }
                 }
                 else if (election.phase === 'ended') {
-                    responseText = electionOverResponseText;
+                    responseText = sayElectionIsOver(election);
                 }
                 else if (election.phase === 'cancelled') {
                     responseText = election.statVoters;
@@ -870,7 +863,7 @@ const main = async () => {
             else if (content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
 
                 if (election.phase == null) {
-                    responseText = notStartedYet();
+                    responseText = sayNotStartedYet(election);
                 }
                 else if (election.phase === 'nomination' && election.datePrimary != null) {
                     const relativetime = dateToRelativetime(election.datePrimary);
@@ -889,7 +882,7 @@ const main = async () => {
                     responseText = `The [election](${election.electionUrl}?tab=election) is currently in the final voting phase, ending at ${linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
                 }
                 else if (election.phase === 'ended') {
-                    responseText = electionOverResponseText;
+                    responseText = sayElectionIsOver(election);
                 }
                 else if (election.phase === 'cancelled') {
                     responseText = election.statVoters;
@@ -900,7 +893,7 @@ const main = async () => {
             else if (['when'].some(x => content.startsWith(x)) && (content.includes('election end') || content.includes('does it end') || content.includes('is it ending'))) {
 
                 if (election.phase == 'ended') {
-                    responseText = electionOverResponseText;
+                    responseText = sayElectionIsOver(election);
                 }
                 else {
                     const relativetime = dateToRelativetime(election.dateEnded);
@@ -914,39 +907,15 @@ const main = async () => {
             }
 
             // How/where to vote
-            else if (['where', 'how', 'want', 'when'].some(x => content.startsWith(x)) && ['do', 'can', 'to', 'give', 'cast', 'should'].some(x => content.includes(x)) && ['voting', 'vote', 'elect'].some(x => content.includes(x))) {
-
-                const comeBackFinalPhaseText = ` Don't forget to come back ${relativeTimestampLinkToElection} to also vote in the election's final voting phase!`;
-
-                switch (election.phase) {
-                    case 'election':
-                        responseText = `If you have at least ${election.repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${election.electionUrl}?tab=election). ${informedDecisionText}`;
-                        break;
-                    case 'primary':
-                        responseText = `If you have at least ${election.repVote} reputation, you can freely [vote on the candidates](${election.electionUrl}?tab=primary). ${informedDecisionText}`;
-                        responseText += comeBackFinalPhaseText;
-                        break;
-                    case 'nomination':
-                        responseText = `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${election.electionUrl}?tab=nomination)`;
-                        if (election.qnaUrl) responseText += `, as well as read the candidates' [answers to your questions](${election.qnaUrl}) to find out more`;
-                        responseText += comeBackFinalPhaseText;
-                        break;
-                    case 'ended':
-                        responseText = `The [election](${election.electionUrl}) has ended. You can no longer vote.`;
-                        break;
-                    case 'cancelled':
-                        responseText = election.statVoters;
-                        break;
-                    default:
-                        responseText = notStartedYet();
-                }
+            else if (isAskedAboutVoting(content)) {
+                responseText = sayAboutVoting(election);
             }
 
             // Who are the winners
             else if (['who'].some(x => content.startsWith(x)) && ['winners', 'new mod', 'will win', 'future mod'].some(x => content.includes(x))) {
 
                 if (election.phase === null) {
-                    responseText = notStartedYet();
+                    responseText = sayNotStartedYet(election);
                 }
                 else if (election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
                     responseText = `The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}.`;
@@ -1071,7 +1040,7 @@ const main = async () => {
             console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                 `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
 
-            await sayHI(makeURL, room, election);
+            await sayHI(room, election);
 
             // Record last sent message time so we don't flood the room
             lastMessageTime = Date.now();
