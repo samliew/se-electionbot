@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "chatexchange": "^0.2.3-dev",
+    "chatexchange": "^0.3.0-dev",
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.4",
     "html-entities": "^1.2.1",
