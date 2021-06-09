@@ -1,5 +1,7 @@
 # Stack Exchange Election Bot
 
+[![Build](https://github.com/samliew/se-electionbot/actions/workflows/nodejs.yml/badge.svg)](https://github.com/samliew/se-electionbot/actions/workflows/nodejs.yml)
+
 ElectionBot is a chatbot to handle queries for commonly-asked questions in an election chat room on a Stack Exchange site.
 
 Please direct any queries & feedback in the [development chatroom](https://chat.stackoverflow.com/rooms/190503/electionbot-development).
