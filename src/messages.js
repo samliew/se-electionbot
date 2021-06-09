@@ -1,18 +1,18 @@
 const { default: Election } = require("./Election.js");
+const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp } = require("./utils.js");
 
 /**
  * @summary makes bot remind users that they are here
- * @param {function(string,string) : string} urlMaker
  * @param {{ sendMessage(text:string): Promise<void> }} room //TODO: redefine
  * @param {Election} election
  * @returns {Promise<void>}
  */
-const sayHI = async (urlMaker, room, election) => {
+const sayHI = async (room, election) => {
     let responseText = 'Welcome to the election chat room! ';
 
     const { arrNominees, electionUrl, phase } = election;
 
-    const phaseTab = urlMaker("election", `${electionUrl}?tab=${phase}`);
+    const phaseTab = makeURL("election", `${electionUrl}?tab=${phase}`);
 
     const { length } = arrNominees;
 
@@ -48,17 +48,60 @@ const sayWhyNominationRemoved = () => {
 };
 
 /**
- * @summary builds a response if mods are paid
- * @param {function(string,string) : string} urlMaker
+ * @summary builds a response to if mods are paid
  * @param {Election} election
  * @returns {string}
  */
-const sayAreModsPaid = (urlMaker, election) => {
+const sayAreModsPaid = (election) => {
     const { siteUrl } = election;
 
-    const modsURI = urlMaker("Elected ♦ moderators", `${siteUrl}/help/site-moderators`);
+    const modsURI = makeURL("Elected ♦ moderators", `${siteUrl}/help/site-moderators`);
 
     return `${modsURI} is an entirely voluntary role, and they are not paid by Stack Exchange.`;
+};
+
+/**
+ * @summary Default election message
+ * @param {Election} election
+ * @returns {string}
+ */
+const sayNotStartedYet = ({ dateNomination, electionUrl }) => `The ${makeURL("election", electionUrl)} has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativetime(dateNomination)}).`;
+
+/**
+ * @summary gets election is over response text
+ * @param {Election} election
+ * @returns {string}
+ */
+const sayElectionIsOver = ({ electionUrl }) => `The ${makeURL("election", electionUrl)} is over. See you next time!`;
+
+/**
+ * @summary Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
+ * @param {Election} election
+ * @returns {string}
+ */
+const sayInformedDecision = ({ qnaUrl }) => qnaUrl ? `If you want to make an informed decision on who to vote for, you can also read the candidates' answers in the ${makeURL("election Q&A", qnaUrl)}, and you also can look at examples of their participation on Meta and how they conduct themselves.` : '';
+
+/**
+ * @summary builds a response to voting info query
+ * @param {Election} election
+ * @returns {string}
+ */
+const sayAboutVoting = (
+    election
+) => {
+    const { dateElection, electionUrl, phase, repVote, statVoters, qnaUrl } = election;
+
+    const comeBackFinalPhaseText = ` Don't forget to come back ${linkToRelativeTimestamp(dateElection)} to also vote in the election's final voting phase!`;
+
+    const phaseMap = {
+        cancelled: statVoters,
+        ended: `The ${makeURL("election", electionUrl)} has ended. You can no longer vote.`,
+        election: `If you have at least ${repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${electionUrl}?tab=election). ${sayInformedDecision(election)}`,
+        nomination: `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${electionUrl}?tab=nomination)${qnaUrl ? `, as well as read the candidates' [answers to your questions](${qnaUrl}) to find out more` : ""}${comeBackFinalPhaseText}`,
+        primary: `If you have at least ${repVote} reputation, you can freely [vote on the candidates](${electionUrl}?tab=primary). ${sayInformedDecision(election)}${comeBackFinalPhaseText}`
+    };
+
+    return phaseMap[phase] || sayNotStartedYet(election);
 };
 
 /**
@@ -89,10 +132,29 @@ const isAskedIfModsArePaid = (text) => {
         ['mods', 'moderators'].some(textIncludes);
 };
 
+/**
+ * @summary checks if the message asked how or where to vote
+ * @param {string} text
+ * @returns {boolean}
+ */
+const isAskedAboutVoting = (text) => {
+    const textIncludes = text.includes.bind(text);
+    const textStarts = text.startsWith.bind(text);
+
+    return ['where', 'how', 'want', 'when'].some(textStarts) &&
+        ['do', 'can', 'to', 'give', 'cast', 'should'].some(textIncludes) &&
+        ['voting', 'vote', 'elect'].some(textIncludes);
+};
+
 module.exports = {
     sayHI,
     sayWhyNominationRemoved,
     sayAreModsPaid,
+    sayAboutVoting,
+    sayElectionIsOver,
+    sayInformedDecision,
+    sayNotStartedYet,
     isAskedWhyNominationRemoved,
-    isAskedIfModsArePaid
+    isAskedIfModsArePaid,
+    isAskedAboutVoting
 };
