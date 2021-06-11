@@ -16,13 +16,16 @@ const {
     linkToUtcTimestamp,
     startServer,
     makeURL,
+    mapToRequired,
+    mapToName,
 } = require('./utils');
 
-const { RandomArray, getRandomModal, getRandomPlop, getRandomOops } = require("./random.js");
+const { RandomArray, getRandomPlop, getRandomOops } = require("./random.js");
 
 const {
     sayHI,
     isAskedAboutVoting,
+    isAskedForCandidateScore,
     isAskedIfModsArePaid,
     isAskedWhyNominationRemoved,
     sayAboutVoting,
@@ -32,6 +35,8 @@ const {
     sayInformedDecision,
     sayWhyNominationRemoved
 } = require("./messages");
+
+const { makeCandidateScoreCalc } = require("./score");
 
 // If running locally, load env vars from .env file
 if (process.env.NODE_ENV !== 'production') {
@@ -46,7 +51,7 @@ const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive pin
 // To stop bot from replying to too many messages in a short time
 let throttleSecs = Number(process.env.THROTTLE_SECS) || 10;
 
-const chatDomain = (process.env.CHAT_DOMAIN);
+const chatDomain = /** @type {import("chatexchange/dist/Client").Host} */ (process.env.CHAT_DOMAIN);
 const chatRoomId = +process.env.CHAT_ROOM_ID;
 const accountEmail = process.env.ACCOUNT_EMAIL;
 const accountPassword = process.env.ACCOUNT_PASSWORD;
@@ -91,14 +96,29 @@ const ignoredEventTypes = [
     34, // UserNameOrAvatarChanged
     7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
 ];
-const electionBadgeNames = [
-    'Civic Duty', 'Cleanup', 'Deputy', 'Electorate', 'Marshal', 'Sportsmanship', 'Reviewer', 'Steward',
-    'Constituent', 'Convention', 'Enthusiast', 'Investor', 'Quorum', 'Yearling',
-    'Organizer', 'Copy Editor', 'Explainer', 'Refiner', 'Tag Editor', 'Strunk &amp; White'
+const electionBadges = [
+    { name: 'Strunk & White', required: true },
+    { name: 'Convention', required: true },
+    { name: 'Deputy', required: true },
+    { name: 'Civic Duty', required: true },
+    { name: 'Cleanup', required: false },
+    { name: 'Electorate', required: false },
+    { name: 'Marshal', required: false },
+    { name: 'Sportsmanship', required: false },
+    { name: 'Reviewer', required: false },
+    { name: 'Steward', required: false },
+    { name: 'Constituent', required: false },
+    { name: 'Enthusiast', required: false },
+    { name: 'Investor', required: false },
+    { name: 'Quorum', required: false },
+    { name: 'Yearling', required: false },
+    { name: 'Organizer', required: false },
+    { name: 'Copy Editor', required: false },
+    { name: 'Explainer', required: false },
+    { name: 'Refiner', required: false },
+    { name: 'Tag Editor', required: false }
 ];
-const soRequiredBadgeNames = [
-    'Civic Duty', 'Strunk & White', 'Deputy', 'Convention'
-];
+
 const soPastAndPresentModIds = [
     34397, 50049, 102937, 267, 419, 106224, 396458, 50776, 105971, 2598,
     298479, 19679, 16587, 246246, 707111, 168175, 208809, 59303, 237838, 426671, 716216, 256196,
@@ -236,7 +256,7 @@ const main = async () => {
 
     // Get current site moderators
     // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
-    const modURL = new URL(`${apiBase}/2.2/${apiVer}/users/moderators`);
+    const modURL = new URL(`${apiBase}/${apiVer}/users/moderators`);
     modURL.search = new URLSearchParams({
         pagesize: "100",
         order: "desc",
@@ -257,7 +277,6 @@ const main = async () => {
         console.error('FATAL - Invalid election data!');
     }
 
-    //@ts-expect-error
     const client = new Client(chatDomain);
     try {
         await client.login(accountEmail, accountPassword);
@@ -287,7 +306,7 @@ const main = async () => {
     }
 
     // Main event listener
-    room.on('message', async msg => {
+    room.on('message', async (msg) => {
 
         // Decode HTML entities in messages, lowercase version for matching
         const origContent = entities.decode(msg._content);
@@ -299,7 +318,7 @@ const main = async () => {
             userName: await msg.userName,
             userId: await msg.userId,
             targetUserId: [8, 18].includes(msg._eventType) ? await msg.targetUserId : undefined,
-            content: content,
+            content,
         };
 
         // Ignore unnecessary events
@@ -607,159 +626,15 @@ const main = async () => {
             }
 
             // Calculate own candidate score
-            else if (content.includes('my candidate score') ||
-                (['can i '].some(x => content.includes(x)) && ['be', 'become', 'nominate', 'run'].some(x => content.includes(x)) && ['mod', 'election'].some(x => content.includes(x))) ||
-                (isPrivileged && /what is the candidate score for \d+$/.test(content))) {
+            else if (isAskedForCandidateScore(content)) {
 
-                if (isNaN(resolvedMsg.userId)) return;
+                //TODO: use config object pattern instead, 6 parameters is way too much
+                const calcCandidateScore = makeCandidateScoreCalc(
+                    scriptHostname, chatDomain, electionSiteApiSlug,
+                    stackApikey, electionBadges, soPastAndPresentModIds
+                );
 
-                const findingTargetCandidateScore = isPrivileged && /what is the candidate score for \d+$/.test(content);
-
-                // Already a mod
-                if (!findingTargetCandidateScore && isStackOverflow && user.isModerator) {
-                    responseText = getRandomOops() + `you already have a diamond!`;
-                }
-                // Previously a mod (on SO only)
-                else if (!findingTargetCandidateScore && isStackOverflow && soPastAndPresentModIds.includes(resolvedMsg.userId)) {
-                    responseText = `are you *really* sure you want to be a moderator again???`;
-                }
-                // Default
-                else {
-
-                    let siteUserId = resolvedMsg.userId;
-
-                    // If privileged user asking candidate score of another user, get user id from message
-                    if (findingTargetCandidateScore) {
-                        siteUserId = Number(content.match(/\d+$/)[0]);
-                    }
-                    // If not Chat.SO, resolve election site user id from chat id (chat has different ids)
-                    else if (!isStackOverflowChat) {
-                        siteUserId = await getSiteUserIdFromChatStackExchangeId(siteUserId, chatDomain, electionSiteHostname);
-
-                        // Unable to get user id on election site
-                        if (siteUserId === null) {
-                            console.error(`Unable to get site user id for ${resolvedMsg.userId}.`);
-                            return;
-                        }
-                    }
-
-                    // Retrieve user badges and rep from API
-                    const badgeURI = new URL(`${apiBase}/2.2/users/${siteUserId}/badges`);
-                    badgeURI.search = new URLSearchParams({
-                        site: electionSiteApiSlug,
-                        order: "asc",
-                        sort: "type",
-                        pagesize: "100",
-                        filter: "!SWJuQzAN)_Pb81O3B)",
-                        key: stackApikey
-                    }).toString();
-
-                    const data = /**@type {APIListResponse} */(await fetchUrl(badgeURI.toString(), true));
-
-                    // Validation
-                    if (data == null || typeof data.items === 'undefined' || data.items.length == 0) {
-                        console.error('No data from API.');
-                        return;
-                    }
-
-                    // Calculate candidate score
-                    const hasNominated = election.arrNominees.some(v => v.userId === siteUserId);
-                    const userBadges = data.items.map(v => v.name) || [];
-                    const userRep = data.items ? data.items[0].user.reputation : 0;
-
-                    const repScore = Math.min(Math.floor(userRep / 1000), 20);
-                    const badgeScore = userBadges.filter(v => electionBadgeNames.includes(v)).length;
-                    const candidateScore = repScore + badgeScore;
-
-                    const missingBadges = [];
-                    electionBadgeNames.forEach(electionBadge => {
-                        if (!userBadges.includes(electionBadge)) missingBadges.push(electionBadge.replace('&amp;', '&'));
-                    });
-                    const soMissingRequiredBadges = isStackOverflow ? soRequiredBadgeNames.filter(requiredBadge => missingBadges.includes(requiredBadge)) : [];
-
-                    console.log(resolvedMsg.userId, siteUserId, userRep, repScore, badgeScore, candidateScore);
-                    if (missingBadges.length > 0) console.log('Missing Badges: ', missingBadges.join(','));
-
-                    // Privileged user asking for candidate score of another user
-                    if (findingTargetCandidateScore) {
-
-                        responseText = `The candidate score for user [${siteUserId}](${electionSiteUrl}/users/${siteUserId}) is **${candidateScore}** (out of 40).`;
-
-                        // Don't have required badges (SO-only)
-                        if (soMissingRequiredBadges.length > 0) {
-                            responseText += ` The user is missing the required badge${pluralize(soMissingRequiredBadges.length)}: ${soMissingRequiredBadges.join(', ')}.`;
-                        }
-
-                        // Missing other badges
-                        else if (missingBadges.length > 0) {
-                            responseText += ` The user is missing th${pluralize(missingBadges.length, 'ese', 'is')} badge${pluralize(missingBadges.length)}: ${missingBadges.join(', ')}.`;
-                        }
-                    }
-                    // Does not meet minimum requirements
-                    else if (userRep < election.repNominate || soMissingRequiredBadges.length > 0) {
-                        responseText = `You are not eligible to nominate yourself in the election`;
-
-                        // Not enough rep
-                        if (userRep < election.repNominate) {
-                            responseText += ` as you do not have at least ${election.repNominate} reputation`;
-                        }
-
-                        // Don't have required badges (SO-only)
-                        if (soMissingRequiredBadges.length > 0) {
-                            responseText += userRep < election.repNominate ? '. You are also' : ' as you are';
-                            responseText += ` missing the required badge${pluralize(soMissingRequiredBadges.length)}: ${soMissingRequiredBadges.join(', ')}`;
-                        }
-
-                        responseText += `. Your candidate score is **${candidateScore}** (out of 40).`;
-                    }
-                    // Exceeds expectations
-                    else if (candidateScore == 40) {
-                        responseText = `Wow! You have a maximum candidate score of **40**!`;
-
-                        // Already nominated, and not ended/cancelled
-                        if (hasNominated && ['nomination', 'primary', 'election'].includes(election.phase)) {
-                            responseText += ` I can see you're already a candidate - good luck!`;
-                        }
-                        // If have not begun, or nomination phase, ask user to nominate themselves
-                        else if ([null, 'nomination'].includes(election.phase)) {
-                            responseText += ` Please consider nominating yourself in the [election](${election.electionUrl})!`;
-                        }
-                        // Did not nominate (primary, election, ended, cancelled)
-                        else if (!hasNominated) {
-
-                            if (['ended', 'cancelled'].includes(election.phase)) {
-                                responseText += ` Alas, the election is over.`;
-                            }
-                            else {
-                                responseText += ` Alas, the nomination period is over.`;
-                            }
-                            responseText += ` Hope to see your candidature next election!`;
-                        }
-                    }
-                    // All others
-                    else {
-                        responseText = `Your candidate score is **${candidateScore}** (out of 40).`;
-
-                        if (missingBadges.length > 0) {
-                            responseText += ` You are missing th${pluralize(missingBadges.length, 'ese', 'is')} badge${pluralize(missingBadges.length)}: ${missingBadges.join(', ')}.`;
-                        }
-
-                        // Already nominated, and not ended/cancelled
-                        if (hasNominated && ['nomination', 'primary', 'election'].includes(election.phase)) {
-                            responseText += ` I can see you're already a candidate. Good luck!`;
-                        }
-                        // If have not begun, or nomination phase, ask user to nominate themselves
-                        else if ([null, 'nomination'].includes(election.phase)) {
-
-                            if (candidateScore >= 30) {
-                                responseText += ` Perhaps consider nominating yourself in the [election](${election.electionUrl})?`;
-                            }
-                            else {
-                                responseText += ` Having a high candidate score is not a requirement - you can still nominate yourself in the election!`;
-                            }
-                        }
-                    }
-                };
+                await calcCandidateScore(election, user, msg, isStackOverflow);
 
                 if (responseText != null) {
                     console.log('RESPONSE', responseText);
@@ -809,8 +684,12 @@ const main = async () => {
             // - can't use keyword "vote" here
             else if ((['how', 'where'].some(x => content.startsWith(x)) && ['nominate', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && [' i ', 'myself', 'name', 'user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)))
                 || (['how to', 'how can'].some(x => content.startsWith(x)) && ['be', 'mod'].every(x => content.includes(x)))) {
+
+                const requiredBadges = electionBadges.filter(mapToRequired);
+                const requiredBadgeNames = requiredBadges.map(mapToName);
+
                 let reqs = [`at least ${election.repNominate} reputation`];
-                if (isStackOverflow) reqs.push(`have these badges (*${soRequiredBadgeNames.join(', ')}*)`);
+                if (isStackOverflow) reqs.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
                 if (electionSiteHostname.includes('askubuntu.com')) reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
                 reqs.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
 
