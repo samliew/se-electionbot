@@ -1,4 +1,3 @@
-const { default: User } = require("chatexchange/dist/User");
 const { apiBase, apiVer, fetchUrl } = require("./utils.js");
 
 /**
@@ -6,7 +5,7 @@ const { apiBase, apiVer, fetchUrl } = require("./utils.js");
  * @typedef {import("./utils.js").ResItem} ResItem
  *
  * @summary gets badges from the API
- * @param {User} user user to request badges for
+ * @param {import("chatexchange/dist/Browser").IProfileData} user user to request badges for
  * @param {string} site election site slug
  * @param {string} key api key
  * @returns {Promise<ResItem[]>}

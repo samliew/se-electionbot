@@ -1,4 +1,3 @@
-const { default: User } = require("chatexchange/dist/User");
 const { getBadges } = require("./api");
 const { default: Election } = require("./Election");
 const { sayMissingBadges } = require("./messages");
@@ -54,7 +53,7 @@ const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, badges, m
     /**
      * @summary calculates candidate score
      * @param {Election} election
-     * @param {User} user
+     * @param {import("chatexchange/dist/Browser").IProfileData} user
      * @param {resolvedMsg} message
      * @param {boolean} [isSO]
      */
