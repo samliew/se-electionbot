@@ -56,6 +56,7 @@ const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, badges, m
      * @param {import("chatexchange/dist/Browser").IProfileData} user
      * @param {resolvedMsg} message
      * @param {boolean} [isSO]
+     * @returns {Promise<string>}
      */
     async (election, user, message, isSO = false) => {
         //TODO: decide how to avoid mutation
@@ -101,7 +102,10 @@ const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, badges, m
             const items = await getBadges(user, apiSlug, apiKey);
 
             // Validation
-            if (!items.length) return console.error('No data from API.');
+            if (!items.length) {
+                console.error('No data from API.');
+                return "";
+            }
 
             const userBadgeNames = items.map(mapToName);
 
@@ -212,6 +216,8 @@ const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, badges, m
                 }
             }
         }
+
+        return responseText;
     };
 
 module.exports = {
