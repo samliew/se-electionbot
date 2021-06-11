@@ -34,7 +34,8 @@ const {
     sayNotStartedYet,
     sayElectionIsOver,
     sayInformedDecision,
-    sayWhyNominationRemoved
+    sayWhyNominationRemoved,
+    sayNextPhase
 } = require("./messages");
 
 const { makeCandidateScoreCalc } = require("./score");
@@ -128,7 +129,7 @@ const soPastAndPresentModIds = [
 ];
 let currentSiteModIds;
 let rescraperInt, rejoinInt;
-let election = null;
+let election = /** @type {Election|null} */(null);
 let room = null;
 
 /* Low activity count variables */
@@ -726,38 +727,13 @@ const main = async () => {
                 else {
                     responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.arrNominees.length} candidates.`;
 
-                    if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${linkToRelativeTimestamp(election)} to vote in the final election voting phase.`;
+                    if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${linkToRelativeTimestamp(election.dateElection)} to vote in the final election voting phase.`;
                 }
             }
 
             // Next phase
             else if (content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
-
-                if (election.phase == null) {
-                    responseText = sayNotStartedYet(election);
-                }
-                else if (election.phase === 'nomination' && election.datePrimary != null) {
-                    const relativetime = dateToRelativetime(election.datePrimary);
-                    responseText = `The next phase is the **primary** at ${linkToUtcTimestamp(election.datePrimary)} (${relativetime}).`;
-                }
-                else if (election.phase === 'nomination' && election.datePrimary == null) {
-                    const relativetime = dateToRelativetime(election.dateElection);
-                    responseText = `The next phase is the **election** at ${linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
-                }
-                else if (election.phase === 'primary') {
-                    const relativetime = dateToRelativetime(election.dateElection);
-                    responseText = `The next phase is the **election** at ${linkToUtcTimestamp(election.dateElection)} (${relativetime}).`;
-                }
-                else if (election.phase === 'election') {
-                    const relativetime = dateToRelativetime(election.dateEnded);
-                    responseText = `The [election](${election.electionUrl}?tab=election) is currently in the final voting phase, ending at ${linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
-                }
-                else if (election.phase === 'ended') {
-                    responseText = sayElectionIsOver(election);
-                }
-                else if (election.phase === 'cancelled') {
-                    responseText = election.statVoters;
-                }
+                responseText = sayNextPhase(election);
             }
 
             // When is the election ending

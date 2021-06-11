@@ -135,6 +135,28 @@ const sayCurrentMods = (election, currMods, entities) => {
 };
 
 /**
+ * @summary builds next phase response message
+ * @param {Election} election
+ * @returns {string}
+ */
+const sayNextPhase = (election) => {
+    const { phase, datePrimary, dateElection, dateEnded, electionUrl, statVoters } = election;
+
+    const phaseMap = {
+        "cancelled": statVoters,
+        "election": `The [election](${electionUrl}?tab=election) is currently in the final voting phase, ending at ${linkToUtcTimestamp(dateEnded)} (${dateToRelativetime(dateEnded)}).`,
+        "ended": sayElectionIsOver(election),
+        "null": sayNotStartedYet(election),
+        "nomination": `The next phase is the ${datePrimary ?
+            `**primary** at ${linkToUtcTimestamp(datePrimary)} (${dateToRelativetime(datePrimary)}).` :
+            `**election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativetime(dateElection)}).`}`,
+        "primary": `The next phase is the **election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativetime(dateElection)}).`
+    };
+
+    return phaseMap[phase];
+};
+
+/**
  * @summary checks if the message asked why a nomination was removed
  * @param {string} text
  * @returns {boolean}
@@ -206,6 +228,7 @@ module.exports = {
     sayWhyNominationRemoved,
     sayAreModsPaid,
     sayAboutVoting,
+    sayNextPhase,
     sayElectionIsOver,
     sayInformedDecision,
     sayMissingBadges,
