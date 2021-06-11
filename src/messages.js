@@ -1,5 +1,5 @@
 const { default: Election } = require("./Election.js");
-const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp } = require("./utils.js");
+const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize } = require("./utils.js");
 
 /**
  * @summary makes bot remind users that they are here
@@ -146,6 +146,27 @@ const isAskedAboutVoting = (text) => {
         ['voting', 'vote', 'elect'].some(textIncludes);
 };
 
+/**
+ * @summary checks if the message asked to tell candidate score
+ * @param {string} text
+ * @returns {boolean}
+ */
+const isAskedForCandidateScore = (text) => {
+    const textIncludes = text.includes.bind(text);
+
+    return text.includes('candidate score') ||
+        (['can i '].some(textIncludes) &&
+            ['be', 'become', 'nominate', 'run'].some(textIncludes) &&
+            ['mod', 'election'].some(textIncludes));
+};
+
+/**
+ * @param {string[]} badgeNames
+ * @param {number} count
+ * @param {boolean} [required]
+ */
+const sayMissingBadges = (badgeNames, count, required = false) => ` The user is missing th${pluralize(count, 'ese', 'is')} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
+
 module.exports = {
     sayHI,
     sayWhyNominationRemoved,
@@ -153,8 +174,10 @@ module.exports = {
     sayAboutVoting,
     sayElectionIsOver,
     sayInformedDecision,
+    sayMissingBadges,
     sayNotStartedYet,
     isAskedWhyNominationRemoved,
     isAskedIfModsArePaid,
-    isAskedAboutVoting
+    isAskedAboutVoting,
+    isAskedForCandidateScore
 };
