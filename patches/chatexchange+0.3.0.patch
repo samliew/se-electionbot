@@ -1,0 +1,13 @@
+diff --git a/node_modules/chatexchange/dist/Browser.d.ts b/node_modules/chatexchange/dist/Browser.d.ts
+index 98c1435..5566a1f 100644
+--- a/node_modules/chatexchange/dist/Browser.d.ts
++++ b/node_modules/chatexchange/dist/Browser.d.ts
+@@ -2,7 +2,7 @@
+ import * as WebSocket from "ws";
+ import Client from "./Client";
+ import Message from "./Message";
+-interface IProfileData {
++export interface IProfileData {
+     id: number;
+     name: string;
+     about: string;
