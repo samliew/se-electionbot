@@ -11,7 +11,6 @@ const {
     dateToRelativetime,
     dateToUtcTimestamp,
     keepAlive,
-    getSiteUserIdFromChatStackExchangeId,
     linkToRelativeTimestamp,
     linkToUtcTimestamp,
     startServer,
@@ -20,7 +19,7 @@ const {
     mapToName,
 } = require('./utils');
 
-const { RandomArray, getRandomPlop, getRandomOops } = require("./random.js");
+const { RandomArray, getRandomPlop } = require("./random.js");
 
 const {
     sayHI,
@@ -28,8 +27,10 @@ const {
     isAskedForCandidateScore,
     isAskedIfModsArePaid,
     isAskedWhyNominationRemoved,
+    isAskedForCurrentMods,
     sayAboutVoting,
     sayAreModsPaid,
+    sayCurrentMods,
     sayNotStartedYet,
     sayElectionIsOver,
     sayInformedDecision,
@@ -125,7 +126,7 @@ const soPastAndPresentModIds = [
     1114, 100297, 229044, 1252759, 444991, 871050, 2057919, 3093387, 1849664, 2193767, 4099593,
     541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
 ];
-let currentSiteMods, currentSiteModIds;
+let currentSiteModIds;
 let rescraperInt, rejoinInt;
 let election = null;
 let room = null;
@@ -267,7 +268,7 @@ const main = async () => {
     }).toString();
 
     const currSiteModApiResponse = /** @type {APIListResponse|null} */(await fetchUrl(modURL.toString(), true));
-    currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1) : [];
+    const currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1) : [];
     currentSiteModIds = currentSiteMods.map(({ user_id }) => user_id);
 
     // Wait for election page to be scraped
@@ -670,14 +671,8 @@ const main = async () => {
             }
 
             // Current mods
-            else if (['who', 'current', 'mod'].every(x => content.includes(x))) {
-
-                if (currentSiteMods && currentSiteMods.length > 0) {
-                    responseText = `The [current ${currentSiteMods.length} moderator${pluralize(currentSiteMods.length)}](${electionSiteUrl}/users?tab=moderators) are: ` + entities.decode(currentSiteMods.map(v => v.display_name).join(', '));
-                }
-                else {
-                    responseText = `The current moderators can be found on this page: [/users?tab=moderators](${electionSiteUrl}/users?tab=moderators)`;
-                }
+            else if (isAskedForCurrentMods(content)) {
+                responseText = sayCurrentMods(election, currentSiteMods, entities);
             }
 
             // How to nominate self/others

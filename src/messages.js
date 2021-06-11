@@ -105,11 +105,34 @@ const sayAboutVoting = (
 };
 
 /**
+ * @summary builds missing badges response message
  * @param {string[]} badgeNames
  * @param {number} count
  * @param {boolean} [required]
+ * @returns {string}
  */
 const sayMissingBadges = (badgeNames, count, required = false) => ` The user is missing th${pluralize(count, 'ese', 'is')} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
+
+/**
+ * @summary builds current mods list response message
+ * @param {Election} election
+ * @param {import("./utils.js").ResItem[]} currMods
+ * @param {import("html-entities").AllHtmlEntities} entities
+ * @returns {string}
+ */
+const sayCurrentMods = (election, currMods, entities) => {
+    const { length: numCurrMods } = currMods;
+
+    const { siteUrl } = election;
+
+    const currModNames = currMods.map(({ display_name }) => display_name);
+
+    const toBe = numCurrMods > 1 ? "are" : "is";
+
+    return "The current " + (numCurrMods > 0 ?
+        `${numCurrMods} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${siteUrl}/users?tab=moderators`)} ${toBe}: ${entities.decode(currModNames.join(', '))}`
+        : `moderators can be found on ${makeURL("this page", `${siteUrl}/users?tab=moderators`)}`);
+};
 
 /**
  * @summary checks if the message asked why a nomination was removed
@@ -179,6 +202,7 @@ const isAskedForCurrentMods = (text) => {
 
 module.exports = {
     sayHI,
+    sayCurrentMods,
     sayWhyNominationRemoved,
     sayAreModsPaid,
     sayAboutVoting,

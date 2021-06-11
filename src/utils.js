@@ -44,6 +44,7 @@ const startServer = () => {
  *  },
  *  name: string,
  *  is_employee: boolean,
+ *  display_name: string,
  *  account_id: number
  * }} ResItem
  *
