@@ -183,10 +183,10 @@ const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${link}${toT
 
 /**
  * @description Expensive, up to three requests. Only one, if the linked account is the site we want.
- * @param {string} chatUserId
+ * @param {number} chatUserId
  * @param {string} chatdomain
  * @param {string} siteUrl
- * @returns {Promise<string|null>}
+ * @returns {Promise<number|null>}
  */
 const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, siteUrl) => {
     const { STACK_API_KEY } = process.env;
@@ -200,7 +200,7 @@ const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, site
     console.log(`Linked site user url:`, linkedUserUrl);
 
     // Linked site is the one we wanted, return site userid
-    if (linkedUserUrl.includes(siteUrl)) return (linkedUserUrl.match(/\d+/))[0];
+    if (linkedUserUrl.includes(siteUrl)) return +((linkedUserUrl.match(/\d+/))[0]);
 
     // Linked site is not the one we wanted
     try {
@@ -213,7 +213,7 @@ const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, site
         const networkUserId = +(networkUserUrl.match(/\d+/));
         console.log(`Network user url:`, networkUserUrl, networkUserId);
 
-        const url = new URL(`${apiBase}/2.2/users/${networkUserId}/associated`);
+        const url = new URL(`${apiBase}/${apiVer}/users/${networkUserId}/associated`);
         url.search = new URLSearchParams({
             pagesize: "100",
             types: "main_site",
@@ -235,7 +235,7 @@ const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, site
     }
 
     console.log(`Resolved ${siteUrl} userId:`, userId);
-    return userId;
+    return +userId;
 };
 
 /**
@@ -245,7 +245,27 @@ const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, site
  */
 const makeURL = (label, uri) => `[${label}](${uri})`;
 
+/**
+ * @typedef {{ name: string, required?: boolean }} Badge
+ */
+
+/**
+ * @summary callback for mapping badge to name
+ * @param {Badge} badge
+ * @returns {string}
+ */
+const mapToName = ({ name }) => name;
+
+/**
+ * @summary callback for mapping badge to required
+ * @param {Badge} badge
+ * @returns {boolean}
+ */
+const mapToRequired = ({ required }) => required;
+
 module.exports = {
+    mapToName,
+    mapToRequired,
     startServer,
     keepAlive,
     fetchUrl,
