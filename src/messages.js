@@ -1,5 +1,5 @@
 const { default: Election } = require("./Election.js");
-const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp } = require("./utils.js");
+const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize } = require("./utils.js");
 
 /**
  * @summary makes bot remind users that they are here
@@ -105,6 +105,58 @@ const sayAboutVoting = (
 };
 
 /**
+ * @summary builds missing badges response message
+ * @param {string[]} badgeNames
+ * @param {number} count
+ * @param {boolean} [required]
+ * @returns {string}
+ */
+const sayMissingBadges = (badgeNames, count, required = false) => ` The user is missing th${pluralize(count, 'ese', 'is')} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
+
+/**
+ * @summary builds current mods list response message
+ * @param {Election} election
+ * @param {import("./utils.js").ResItem[]} currMods
+ * @param {import("html-entities").AllHtmlEntities} entities
+ * @returns {string}
+ */
+const sayCurrentMods = (election, currMods, entities) => {
+    const { length: numCurrMods } = currMods;
+
+    const { siteUrl } = election;
+
+    const currModNames = currMods.map(({ display_name }) => display_name);
+
+    const toBe = numCurrMods > 1 ? "are" : "is";
+
+    return "The current " + (numCurrMods > 0 ?
+        `${numCurrMods} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${siteUrl}/users?tab=moderators`)} ${toBe}: ${entities.decode(currModNames.join(', '))}`
+        : `moderators can be found on ${makeURL("this page", `${siteUrl}/users?tab=moderators`)}`);
+};
+
+/**
+ * @summary builds next phase response message
+ * @param {Election} election
+ * @returns {string}
+ */
+const sayNextPhase = (election) => {
+    const { phase, datePrimary, dateElection, dateEnded, electionUrl, statVoters } = election;
+
+    const phaseMap = {
+        "cancelled": statVoters,
+        "election": `The [election](${electionUrl}?tab=election) is currently in the final voting phase, ending at ${linkToUtcTimestamp(dateEnded)} (${dateToRelativetime(dateEnded)}).`,
+        "ended": sayElectionIsOver(election),
+        "null": sayNotStartedYet(election),
+        "nomination": `The next phase is the ${datePrimary ?
+            `**primary** at ${linkToUtcTimestamp(datePrimary)} (${dateToRelativetime(datePrimary)}).` :
+            `**election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativetime(dateElection)}).`}`,
+        "primary": `The next phase is the **election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativetime(dateElection)}).`
+    };
+
+    return phaseMap[phase];
+};
+
+/**
  * @summary checks if the message asked why a nomination was removed
  * @param {string} text
  * @returns {boolean}
@@ -146,15 +198,44 @@ const isAskedAboutVoting = (text) => {
         ['voting', 'vote', 'elect'].some(textIncludes);
 };
 
+/**
+ * @summary checks if the message asked to tell candidate score
+ * @param {string} text
+ * @returns {boolean}
+ */
+const isAskedForCandidateScore = (text) => {
+    const textIncludes = text.includes.bind(text);
+
+    return text.includes('candidate score') ||
+        (['can i '].some(textIncludes) &&
+            ['be', 'become', 'nominate', 'run'].some(textIncludes) &&
+            ['mod', 'election'].some(textIncludes));
+};
+
+/**
+ * @summary checks if the message asked to tell who the current mods are
+ * @param {string} text
+ * @returns {boolean}
+ */
+const isAskedForCurrentMods = (text) => {
+    const textIncludes = text.includes.bind(text);
+    return ['who', 'current', 'mod'].every(textIncludes);
+};
+
 module.exports = {
     sayHI,
+    sayCurrentMods,
     sayWhyNominationRemoved,
     sayAreModsPaid,
     sayAboutVoting,
+    sayNextPhase,
     sayElectionIsOver,
     sayInformedDecision,
+    sayMissingBadges,
     sayNotStartedYet,
     isAskedWhyNominationRemoved,
     isAskedIfModsArePaid,
-    isAskedAboutVoting
+    isAskedAboutVoting,
+    isAskedForCandidateScore,
+    isAskedForCurrentMods
 };
