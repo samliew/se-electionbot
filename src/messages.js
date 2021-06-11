@@ -105,6 +105,13 @@ const sayAboutVoting = (
 };
 
 /**
+ * @param {string[]} badgeNames
+ * @param {number} count
+ * @param {boolean} [required]
+ */
+const sayMissingBadges = (badgeNames, count, required = false) => ` The user is missing th${pluralize(count, 'ese', 'is')} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
+
+/**
  * @summary checks if the message asked why a nomination was removed
  * @param {string} text
  * @returns {boolean}
@@ -161,11 +168,14 @@ const isAskedForCandidateScore = (text) => {
 };
 
 /**
- * @param {string[]} badgeNames
- * @param {number} count
- * @param {boolean} [required]
+ * @summary checks if the message asked to tell who the current mods are
+ * @param {string} text
+ * @returns {boolean}
  */
-const sayMissingBadges = (badgeNames, count, required = false) => ` The user is missing th${pluralize(count, 'ese', 'is')} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
+const isAskedForCurrentMods = (text) => {
+    const textIncludes = text.includes.bind(text);
+    return ['who', 'current', 'mod'].every(textIncludes);
+};
 
 module.exports = {
     sayHI,
@@ -179,5 +189,6 @@ module.exports = {
     isAskedWhyNominationRemoved,
     isAskedIfModsArePaid,
     isAskedAboutVoting,
-    isAskedForCandidateScore
+    isAskedForCandidateScore,
+    isAskedForCurrentMods
 };
