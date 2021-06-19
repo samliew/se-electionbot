@@ -23,14 +23,17 @@ const { RandomArray, getRandomPlop } = require("./random.js");
 
 const {
     sayHI,
+
     isAskedAboutVoting,
     isAskedForCandidateScore,
     isAskedIfModsArePaid,
     isAskedWhyNominationRemoved,
     isAskedForCurrentMods,
+    isAskedForCurrentWinners,
     sayAboutVoting,
     sayAreModsPaid,
     sayCurrentMods,
+    sayCurrentWinners,
     sayNotStartedYet,
     sayElectionIsOver,
     sayInformedDecision,
@@ -759,20 +762,8 @@ const main = async () => {
             }
 
             // Who are the winners
-            else if (['who'].some(x => content.startsWith(x)) && ['winners', 'new mod', 'will win', 'future mod'].some(x => content.includes(x))) {
-
-                if (election.phase === null) {
-                    responseText = sayNotStartedYet(election);
-                }
-                else if (election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}.`;
-                }
-                else if (election.phase === 'ended') {
-                    responseText = `The winners can be found on the [election page](${election.electionUrl}).`;
-                }
-                else {
-                    responseText = `The election is not over yet. Stay tuned for the winners!`;
-                }
+            else if (isAskedForCurrentWinners(content)) {
+                responseText = sayCurrentWinners(election);
             }
 
             // Election schedule
