@@ -157,6 +157,30 @@ const sayNextPhase = (election) => {
 };
 
 /**
+ * @summary builds current winners message
+ * @param {Election} election
+ * @returns {string}
+ */
+const sayCurrentWinners = (election) => {
+    const { phase, arrWinners = [], siteUrl, electionUrl } = election;
+
+    const phaseMap = {
+        "default": `The election is not over yet. Stay tuned for the winners!`,
+        "null": sayNotStartedYet(election),
+        "ended": `The winners can be found on the ${makeURL("election page", electionUrl)}.`
+    };
+
+    const { length } = arrWinners;
+
+    if (phase === 'ended' && length > 0) {
+        const winnerNames = arrWinners.map(({ userName, userId }) => makeURL(userName, `/${siteUrl}/users/${userId}`));
+        return `The winner${pluralize(length)} ${length > 1 ? 'are' : 'is'}: ${winnerNames.join(', ')}.`;
+    }
+
+    return phaseMap[phase] || phaseMap.default;
+};
+
+/**
  * @summary checks if the message asked why a nomination was removed
  * @param {string} text
  * @returns {boolean}
@@ -222,12 +246,25 @@ const isAskedForCurrentMods = (text) => {
     return ['who', 'current', 'mod'].every(textIncludes);
 };
 
+/**
+ * @summary checks if the message asked to tell who winners are
+ * @param {string} text
+ * @returns {boolean}
+ */
+const isAskedForCurrentWinners = (text) => {
+    const textIncludes = text.includes.bind(text);
+    const textStarts = text.startsWith.bind(text);
+
+    return ['who'].some(textStarts) && ['winners', 'new mod', 'will win', 'future mod'].some(textIncludes);
+};
+
 module.exports = {
     sayHI,
     sayCurrentMods,
     sayWhyNominationRemoved,
     sayAreModsPaid,
     sayAboutVoting,
+    sayCurrentWinners,
     sayNextPhase,
     sayElectionIsOver,
     sayInformedDecision,
@@ -237,5 +274,6 @@ module.exports = {
     isAskedIfModsArePaid,
     isAskedAboutVoting,
     isAskedForCandidateScore,
-    isAskedForCurrentMods
+    isAskedForCurrentMods,
+    isAskedForCurrentWinners
 };
