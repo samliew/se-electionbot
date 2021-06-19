@@ -4,7 +4,7 @@ updates:
     directory: "/"
     open-pull-requests-limit: 10
     rebase-strategy: "auto"
-    target-branch: "typescript"
+    target-branch: "master"
     labels:
       - "chores"
     schedule:
