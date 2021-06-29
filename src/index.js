@@ -23,7 +23,6 @@ const { RandomArray, getRandomPlop } = require("./random.js");
 
 const {
     sayHI,
-
     isAskedAboutVoting,
     isAskedForCandidateScore,
     isAskedIfModsArePaid,
@@ -38,7 +37,8 @@ const {
     sayElectionIsOver,
     sayInformedDecision,
     sayWhyNominationRemoved,
-    sayNextPhase
+    sayNextPhase,
+    sayElectionSchedule
 } = require("./messages");
 
 const { makeCandidateScoreCalc } = require("./score");
@@ -768,14 +768,7 @@ const main = async () => {
 
             // Election schedule
             else if (content.includes('election schedule') || content.includes('when is the election')) {
-                const arrow = ' <-- current phase';
-                responseText = [
-                    `    ${election.sitename} Election ${election.electionNum} Schedule`,
-                    `    Nomination: ${election.dateNomination}` + (election.phase == 'nomination' ? arrow : ''),
-                    `    Primary:    ${election.datePrimary || '(none)'}` + (election.phase == 'primary' ? arrow : ''),
-                    `    Election:   ${election.dateElection}` + (election.phase == 'election' ? arrow : ''),
-                    `    End:        ${election.dateEnded}` + (election.phase == 'ended' ? arrow : '')
-                ].join('\n');
+                responseText = sayElectionSchedule(election);
             }
 
             // Edit diamond into username

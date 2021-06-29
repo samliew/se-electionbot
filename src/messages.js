@@ -1,5 +1,5 @@
 const { default: Election } = require("./Election.js");
-const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize } = require("./utils.js");
+const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize, capitalize } = require("./utils.js");
 
 /**
  * @summary makes bot remind users that they are here
@@ -181,6 +181,34 @@ const sayCurrentWinners = (election) => {
 };
 
 /**
+  * @summary builds the election schedule message
+  * @param {Election} election
+  * @returns {string}
+  */
+const sayElectionSchedule = (election) => {
+    const { dateElection, dateNomination, datePrimary, dateEnded, phase, sitename, electionNum } = election;
+
+    const arrow = ' <-- current phase';
+
+    const prefix = `    ${sitename} Election ${electionNum} Schedule`;
+
+    const dateMap = [
+        ["nomination", dateNomination],
+        ["primary", datePrimary],
+        ["election", dateElection],
+        ["ended", dateEnded]
+    ];
+
+    const maxPhaseLen = Math.max(...dateMap.map(([{ length }]) => length));
+
+    const phases = dateMap.map(
+        ([ph, date]) => `    ${capitalize(ph)}: ${" ".repeat(maxPhaseLen - ph.length)}${date}${ph === phase ? arrow : ""}`
+    );
+
+    return [prefix, ...phases].join("\n");
+};
+
+/**
  * @summary checks if the message asked why a nomination was removed
  * @param {string} text
  * @returns {boolean}
@@ -266,6 +294,7 @@ module.exports = {
     sayAboutVoting,
     sayCurrentWinners,
     sayNextPhase,
+    sayElectionSchedule,
     sayElectionIsOver,
     sayInformedDecision,
     sayMissingBadges,
