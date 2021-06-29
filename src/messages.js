@@ -209,6 +209,25 @@ const sayElectionSchedule = (election) => {
 };
 
 /**
+ * @summary builds an off-topic warning message
+ * @param {Election} election
+ * @param {string} asked
+ * @returns {string}
+ */
+const sayOffTopicMessage = (election, asked) => {
+    const { electionUrl } = election;
+
+    const plead = "Please try to keep the room on-topic.";
+
+    const text = `This room is for discussion about the ${makeURL("election", electionUrl)}. ${plead} Thank you!`;
+
+    const [, messageId] = asked.split('offtopic');
+
+    // Reply to specific message if valid message id
+    return +messageId ? `:${messageId} ${text}` : text;
+};
+
+/**
  * @summary checks if the message asked why a nomination was removed
  * @param {string} text
  * @returns {boolean}
@@ -295,6 +314,7 @@ module.exports = {
     sayCurrentWinners,
     sayNextPhase,
     sayElectionSchedule,
+    sayOffTopicMessage,
     sayElectionIsOver,
     sayInformedDecision,
     sayMissingBadges,
