@@ -95,6 +95,13 @@ const keepAlive = (url, mins = 20) => {
 };
 
 /**
+ * @summary capitalizes the word
+ * @param {string} word
+ * @returns {string}
+ */
+const capitalize = (word) => word[0].toUpperCase() + word.slice(1).toLowerCase();
+
+/**
  * @summary base pluralization
  * @param {number} amount
  * @returns {string}
@@ -277,6 +284,7 @@ module.exports = {
     linkToUtcTimestamp,
     getSiteUserIdFromChatStackExchangeId,
     makeURL,
+    capitalize,
     pluralize,
     link,
     apiBase,
