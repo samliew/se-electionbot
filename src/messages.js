@@ -105,6 +105,27 @@ const sayAboutVoting = (
 };
 
 /**
+ * @summary builds a response to badges of a certain type query
+ * @param {{ type: "moderation"|"participation"|"editing"|string, name:string, id:string }[]} badges
+ * @param {"moderation"|"participation"|"editing"} type
+ * @param {boolean} [isSO]
+ * @returns {string}
+ */
+const sayBadgesByType = (badges, type, isSO = true) => {
+    const filtered = badges.filter(({ type: btype }) => btype === type);
+
+    const { length } = filtered;
+
+    const numBadgesPrefix = `The ${length} ${type} badge${pluralize(length)} ${pluralize(length, "are", "is")}: `;
+
+    return numBadgesPrefix + (
+        isSO ?
+            filtered.map(({ id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${id}`)) :
+            filtered.map(({ name }) => name)
+    ).join(", ");
+};
+
+/**
  * @summary builds missing badges response message
  * @param {string[]} badgeNames
  * @param {number} count
@@ -311,6 +332,7 @@ module.exports = {
     sayWhyNominationRemoved,
     sayAreModsPaid,
     sayAboutVoting,
+    sayBadgesByType,
     sayCurrentWinners,
     sayNextPhase,
     sayElectionSchedule,
