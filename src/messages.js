@@ -126,6 +126,28 @@ const sayBadgesByType = (badges, type, isSO = true) => {
 };
 
 /**
+ * @summary builds a response to the required badges query
+ * @param {Election} election
+ * @param {{ required: boolean, id: string, name: string }[]} badges
+ * @returns {string}
+ */
+const sayRequiredBadges = (election, badges) => {
+    const { repNominate } = election;
+
+    const required = badges.filter(({ required }) => required);
+
+    const { length } = required;
+
+    const numBadgesPrefix = `The ${length} required badge${pluralize(length)} to nominate yourself ${pluralize(length, "are", "is")}: `;
+
+    const badgeList = required.map(({ id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${id}`)).join(", ");
+
+    const repPostfix = ` You'll also need ${repNominate} reputation.`;
+
+    return numBadgesPrefix + badgeList + repPostfix;
+};
+
+/**
  * @summary builds missing badges response message
  * @param {string[]} badgeNames
  * @param {number} count
@@ -341,6 +363,7 @@ module.exports = {
     sayInformedDecision,
     sayMissingBadges,
     sayNotStartedYet,
+    sayRequiredBadges,
     isAskedWhyNominationRemoved,
     isAskedIfModsArePaid,
     isAskedAboutVoting,

@@ -40,7 +40,8 @@ const {
     sayNextPhase,
     sayElectionSchedule,
     sayOffTopicMessage,
-    sayBadgesByType
+    sayBadgesByType,
+    sayRequiredBadges
 } = require("./messages");
 
 const { makeCandidateScoreCalc } = require("./score");
@@ -584,10 +585,7 @@ const main = async () => {
 
             // SO required badges
             else if (isStackOverflow && ['what', 'required', 'badges'].every(x => content.includes(x))) {
-
-                // Hard-coded links to badges on Stack Overflow
-                responseText = `The 4 required badges to nominate yourself are: [Civic Duty](https://stackoverflow.com/help/badges/32), [Strunk & White](https://stackoverflow.com/help/badges/12), ` +
-                    `[Deputy](https://stackoverflow.com/help/badges/1002), [Convention](https://stackoverflow.com/help/badges/901). You'll also need ${election.repNominate} reputation.`;
+                responseText = sayRequiredBadges(election, electionBadges);
             }
 
 
