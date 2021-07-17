@@ -28,14 +28,20 @@ const {
     isAskedIfModsArePaid,
     isAskedWhyNominationRemoved,
     isAskedForCurrentMods,
+    isAskedForCurrentWinners,
     sayAboutVoting,
     sayAreModsPaid,
     sayCurrentMods,
+    sayCurrentWinners,
     sayNotStartedYet,
     sayElectionIsOver,
     sayInformedDecision,
     sayWhyNominationRemoved,
-    sayNextPhase
+    sayNextPhase,
+    sayElectionSchedule,
+    sayOffTopicMessage,
+    sayBadgesByType,
+    sayRequiredBadges
 } = require("./messages");
 
 const { makeCandidateScoreCalc } = require("./score");
@@ -99,26 +105,26 @@ const ignoredEventTypes = [
     7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
 ];
 const electionBadges = [
-    { name: 'Strunk & White', required: true },
-    { name: 'Convention', required: true },
-    { name: 'Deputy', required: true },
-    { name: 'Civic Duty', required: true },
-    { name: 'Cleanup', required: false },
-    { name: 'Electorate', required: false },
-    { name: 'Marshal', required: false },
-    { name: 'Sportsmanship', required: false },
-    { name: 'Reviewer', required: false },
-    { name: 'Steward', required: false },
-    { name: 'Constituent', required: false },
-    { name: 'Enthusiast', required: false },
-    { name: 'Investor', required: false },
-    { name: 'Quorum', required: false },
-    { name: 'Yearling', required: false },
-    { name: 'Organizer', required: false },
-    { name: 'Copy Editor', required: false },
-    { name: 'Explainer', required: false },
-    { name: 'Refiner', required: false },
-    { name: 'Tag Editor', required: false }
+    { name: 'Deputy', required: true, type: "moderation", id: "1002" },
+    { name: 'Civic Duty', required: true, type: "moderation", id: "32" },
+    { name: 'Cleanup', required: false, type: "moderation", id: "4" },
+    { name: 'Electorate', required: false, type: "moderation", id: "155" },
+    { name: 'Marshal', required: false, type: "moderation", id: "1298" },
+    { name: 'Sportsmanship', required: false, type: "moderation", id: "805" },
+    { name: 'Reviewer', required: false, type: "moderation", id: "1478" },
+    { name: 'Steward', required: false, type: "moderation", id: "2279" },
+    { name: 'Constituent', required: false, type: "participation", id: "1974" },
+    { name: 'Convention', required: true, type: "participation", id: "901" },
+    { name: 'Enthusiast', required: false, type: "participation", id: "71" },
+    { name: 'Investor', required: false, type: "participation", id: "219" },
+    { name: 'Quorum', required: false, type: "participation", id: "900" },
+    { name: 'Yearling', required: false, type: "participation", id: "13" },
+    { name: 'Organizer', required: false, type: "editing", id: "5" },
+    { name: 'Copy Editor', required: false, type: "editing", id: "233" },
+    { name: 'Explainer', required: false, type: "editing", id: "4368" },
+    { name: 'Refiner', required: false, type: "editing", id: "4369" },
+    { name: 'Tag Editor', required: false, type: "editing", id: "254" },
+    { name: 'Strunk & White', required: true, type: "editing", id: "12" },
 ];
 
 const soPastAndPresentModIds = [
@@ -449,14 +455,7 @@ const main = async () => {
             let responseText = null;
 
             if (content.startsWith('offtopic')) {
-                responseText = `This room is for discussion about the [election](${electionUrl}). Please try to keep this room on-topic. Thank you!`;
-
-                // Reply to specific message if valid message id
-                const mid = Number(content.split('offtopic')[1]);
-                if (!isNaN(mid) && mid > 0) {
-                    responseText = `:${mid} ${responseText}`;
-                }
-
+                responseText = sayOffTopicMessage(election, content);
                 console.log('RESPONSE', responseText);
                 await room.sendMessage(responseText);
 
@@ -571,46 +570,22 @@ const main = async () => {
 
             // Moderation badges
             else if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
-                responseText = `The 8 moderation badges are: Civic Duty, Cleanup, Deputy, Electorate, Marshal, Sportsmanship, Reviewer, Steward.`;
-
-                // Hard-coded links to badges on Stack Overflow
-                if (isStackOverflow) {
-                    responseText = `The 8 moderation badges are: `;
-                    responseText += `[Civic Duty](https://stackoverflow.com/help/badges/32), [Cleanup](https://stackoverflow.com/help/badges/4), [Deputy](https://stackoverflow.com/help/badges/1002), [Electorate](https://stackoverflow.com/help/badges/155), `;
-                    responseText += `[Marshal](https://stackoverflow.com/help/badges/1298), [Sportsmanship](https://stackoverflow.com/help/badges/805), [Reviewer](https://stackoverflow.com/help/badges/1478), [Steward](https://stackoverflow.com/help/badges/2279).`;
-                }
+                responseText = sayBadgesByType(electionBadges, "moderation", isStackOverflow);
             }
 
             // Participation badges
             else if (['what', 'participation', 'badges'].every(x => content.includes(x))) {
-                responseText = `The 6 participation badges are: Constituent, Convention, Enthusiast, Investor, Quorum, Yearling.`;
-
-                // Hard-coded links to badges on Stack Overflow
-                if (isStackOverflow) {
-                    responseText = `The 6 participation badges are: `;
-                    responseText += `[Constituent](https://stackoverflow.com/help/badges/1974), [Convention](https://stackoverflow.com/help/badges/901), [Enthusiast](https://stackoverflow.com/help/badges/71), `;
-                    responseText += `[Investor](https://stackoverflow.com/help/badges/219), [Quorum](https://stackoverflow.com/help/badges/900), [Yearling](https://stackoverflow.com/help/badges/13).`;
-                }
+                responseText = sayBadgesByType(electionBadges, "participation", isStackOverflow);
             }
 
             // Editing badges
             else if (['what', 'editing', 'badges'].every(x => content.includes(x))) {
-                responseText = `The 6 editing badges are: Organizer, Copy Editor, Explainer, Refiner, Tag Editor, Strunk & White.`;
-
-                // Hard-coded links to badges on Stack Overflow
-                if (isStackOverflow) {
-                    responseText = `The 6 editing badges are: `;
-                    responseText += `[Organizer](https://stackoverflow.com/help/badges/5), [Copy Editor](https://stackoverflow.com/help/badges/223), [Explainer](https://stackoverflow.com/help/badges/4368), `;
-                    responseText += `[Refiner](https://stackoverflow.com/help/badges/4369), [Tag Editor](https://stackoverflow.com/help/badges/254), [Strunk & White](https://stackoverflow.com/help/badges/12).`;
-                }
+                responseText = sayBadgesByType(electionBadges, "editing", isStackOverflow);
             }
 
             // SO required badges
             else if (isStackOverflow && ['what', 'required', 'badges'].every(x => content.includes(x))) {
-
-                // Hard-coded links to badges on Stack Overflow
-                responseText = `The 4 required badges to nominate yourself are: [Civic Duty](https://stackoverflow.com/help/badges/32), [Strunk & White](https://stackoverflow.com/help/badges/12), ` +
-                    `[Deputy](https://stackoverflow.com/help/badges/1002), [Convention](https://stackoverflow.com/help/badges/901). You'll also need ${election.repNominate} reputation.`;
+                responseText = sayRequiredBadges(election, electionBadges);
             }
 
 
@@ -759,32 +734,13 @@ const main = async () => {
             }
 
             // Who are the winners
-            else if (['who'].some(x => content.startsWith(x)) && ['winners', 'new mod', 'will win', 'future mod'].some(x => content.includes(x))) {
-
-                if (election.phase === null) {
-                    responseText = sayNotStartedYet(election);
-                }
-                else if (election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}.`;
-                }
-                else if (election.phase === 'ended') {
-                    responseText = `The winners can be found on the [election page](${election.electionUrl}).`;
-                }
-                else {
-                    responseText = `The election is not over yet. Stay tuned for the winners!`;
-                }
+            else if (isAskedForCurrentWinners(content)) {
+                responseText = sayCurrentWinners(election);
             }
 
             // Election schedule
             else if (content.includes('election schedule') || content.includes('when is the election')) {
-                const arrow = ' <-- current phase';
-                responseText = [
-                    `    ${election.sitename} Election ${election.electionNum} Schedule`,
-                    `    Nomination: ${election.dateNomination}` + (election.phase == 'nomination' ? arrow : ''),
-                    `    Primary:    ${election.datePrimary || '(none)'}` + (election.phase == 'primary' ? arrow : ''),
-                    `    Election:   ${election.dateElection}` + (election.phase == 'election' ? arrow : ''),
-                    `    End:        ${election.dateEnded}` + (election.phase == 'ended' ? arrow : '')
-                ].join('\n');
+                responseText = sayElectionSchedule(election);
             }
 
             // Edit diamond into username

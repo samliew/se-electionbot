@@ -1,5 +1,5 @@
 const { default: Election } = require("./Election.js");
-const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize } = require("./utils.js");
+const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize, capitalize } = require("./utils.js");
 
 /**
  * @summary makes bot remind users that they are here
@@ -105,6 +105,49 @@ const sayAboutVoting = (
 };
 
 /**
+ * @summary builds a response to badges of a certain type query
+ * @param {{ type: "moderation"|"participation"|"editing"|string, name:string, id:string }[]} badges
+ * @param {"moderation"|"participation"|"editing"} type
+ * @param {boolean} [isSO]
+ * @returns {string}
+ */
+const sayBadgesByType = (badges, type, isSO = true) => {
+    const filtered = badges.filter(({ type: btype }) => btype === type);
+
+    const { length } = filtered;
+
+    const numBadgesPrefix = `The ${length} ${type} badge${pluralize(length)} ${pluralize(length, "are", "is")}: `;
+
+    return numBadgesPrefix + (
+        isSO ?
+            filtered.map(({ id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${id}`)) :
+            filtered.map(({ name }) => name)
+    ).join(", ");
+};
+
+/**
+ * @summary builds a response to the required badges query
+ * @param {Election} election
+ * @param {{ required: boolean, id: string, name: string }[]} badges
+ * @returns {string}
+ */
+const sayRequiredBadges = (election, badges) => {
+    const { repNominate } = election;
+
+    const required = badges.filter(({ required }) => required);
+
+    const { length } = required;
+
+    const numBadgesPrefix = `The ${length} required badge${pluralize(length)} to nominate yourself ${pluralize(length, "are", "is")}: `;
+
+    const badgeList = required.map(({ id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${id}`)).join(", ");
+
+    const repPostfix = ` You'll also need ${repNominate} reputation.`;
+
+    return numBadgesPrefix + badgeList + repPostfix;
+};
+
+/**
  * @summary builds missing badges response message
  * @param {string[]} badgeNames
  * @param {number} count
@@ -154,6 +197,77 @@ const sayNextPhase = (election) => {
     };
 
     return phaseMap[phase];
+};
+
+/**
+ * @summary builds current winners message
+ * @param {Election} election
+ * @returns {string}
+ */
+const sayCurrentWinners = (election) => {
+    const { phase, arrWinners = [], siteUrl, electionUrl } = election;
+
+    const phaseMap = {
+        "default": `The election is not over yet. Stay tuned for the winners!`,
+        "null": sayNotStartedYet(election),
+        "ended": `The winners can be found on the ${makeURL("election page", electionUrl)}.`
+    };
+
+    const { length } = arrWinners;
+
+    if (phase === 'ended' && length > 0) {
+        const winnerNames = arrWinners.map(({ userName, userId }) => makeURL(userName, `/${siteUrl}/users/${userId}`));
+        return `The winner${pluralize(length)} ${length > 1 ? 'are' : 'is'}: ${winnerNames.join(', ')}.`;
+    }
+
+    return phaseMap[phase] || phaseMap.default;
+};
+
+/**
+  * @summary builds the election schedule message
+  * @param {Election} election
+  * @returns {string}
+  */
+const sayElectionSchedule = (election) => {
+    const { dateElection, dateNomination, datePrimary, dateEnded, phase, sitename, electionNum } = election;
+
+    const arrow = ' <-- current phase';
+
+    const prefix = `    ${sitename} Election ${electionNum} Schedule`;
+
+    const dateMap = [
+        ["nomination", dateNomination],
+        ["primary", datePrimary],
+        ["election", dateElection],
+        ["ended", dateEnded]
+    ];
+
+    const maxPhaseLen = Math.max(...dateMap.map(([{ length }]) => length));
+
+    const phases = dateMap.map(
+        ([ph, date]) => `    ${capitalize(ph)}: ${" ".repeat(maxPhaseLen - ph.length)}${date}${ph === phase ? arrow : ""}`
+    );
+
+    return [prefix, ...phases].join("\n");
+};
+
+/**
+ * @summary builds an off-topic warning message
+ * @param {Election} election
+ * @param {string} asked
+ * @returns {string}
+ */
+const sayOffTopicMessage = (election, asked) => {
+    const { electionUrl } = election;
+
+    const plead = "Please try to keep the room on-topic.";
+
+    const text = `This room is for discussion about the ${makeURL("election", electionUrl)}. ${plead} Thank you!`;
+
+    const [, messageId] = asked.split('offtopic');
+
+    // Reply to specific message if valid message id
+    return +messageId ? `:${messageId} ${text}` : text;
 };
 
 /**
@@ -222,20 +336,38 @@ const isAskedForCurrentMods = (text) => {
     return ['who', 'current', 'mod'].every(textIncludes);
 };
 
+/**
+ * @summary checks if the message asked to tell who winners are
+ * @param {string} text
+ * @returns {boolean}
+ */
+const isAskedForCurrentWinners = (text) => {
+    const textIncludes = text.includes.bind(text);
+    const textStarts = text.startsWith.bind(text);
+
+    return ['who'].some(textStarts) && ['winners', 'new mod', 'will win', 'future mod'].some(textIncludes);
+};
+
 module.exports = {
     sayHI,
     sayCurrentMods,
     sayWhyNominationRemoved,
     sayAreModsPaid,
     sayAboutVoting,
+    sayBadgesByType,
+    sayCurrentWinners,
     sayNextPhase,
+    sayElectionSchedule,
+    sayOffTopicMessage,
     sayElectionIsOver,
     sayInformedDecision,
     sayMissingBadges,
     sayNotStartedYet,
+    sayRequiredBadges,
     isAskedWhyNominationRemoved,
     isAskedIfModsArePaid,
     isAskedAboutVoting,
     isAskedForCandidateScore,
-    isAskedForCurrentMods
+    isAskedForCurrentMods,
+    isAskedForCurrentWinners
 };
