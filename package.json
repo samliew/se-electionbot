@@ -44,7 +44,7 @@
     "@types/chai": "^4.2.21",
     "@types/chai-as-promised": "^7.1.4",
     "@types/cheerio": "^0.22.30",
-    "@types/express": "^4.17.12",
+    "@types/express": "^4.17.13",
     "@types/mocha": "^8.2.2",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
