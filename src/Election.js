@@ -3,6 +3,12 @@ const utils = require('./utils');
 
 export default class Election {
 
+    /** @type {Nominee[]} */
+    arrNominees = [];
+
+    /** @type {Nominee[]} */
+    arrWinners = [];
+
     /**
      * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
      * @param {string|number} [electionNum] number of election, can be a numeric string
@@ -63,6 +69,44 @@ export default class Election {
         return phase;
     }
 
+    /**
+     * @summary gets Nominee objects for winners
+     * @param {number[]} winnerIds
+     * @returns {Nominee[]}
+     */
+    getWinners(winnerIds) {
+        return this.arrNominees.filter(({ userId }) => winnerIds.includes(userId));
+    }
+
+    /**
+     * @typedef {{
+     *  userId: number,
+     *  userName: string,
+     *  userYears: string,
+     *  userScore: string,
+     *  permalink: string
+     * }} Nominee
+     *
+     * @summary scrapes nominee element
+     * @param {cheerio.Root} $ Cheerio root element
+     * @param {cheerio.Element} el nominee element
+     * @param {string} electionPageUrl election URL
+     * @returns {Nominee}
+     */
+    scrapeNominee($, el, electionPageUrl) {
+        const userLink = $(el).find('.user-details a');
+
+        return {
+            userId: +(userLink.attr('href').split('/')[2]),
+            userName: userLink.text(),
+            userYears: $(el).find('.user-details').contents().map((_i, { data, type }) =>
+                type === 'text' ? data.trim() : ""
+            ).get().join(' ').trim(),
+            userScore: $(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)[0],
+            permalink: `${electionPageUrl}#${$(el).attr('id')}`,
+        };
+    }
+
     async scrapeElection() {
 
         // Save prev values so we can compare changes after
@@ -99,6 +143,8 @@ export default class Election {
 
             const candidateElems = $('#mainbar .candidate-row');
 
+            const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get();
+
             this.updated = Date.now();
             this.sitename = $('meta[property="og:site_name"]').attr('content').replace('Stack Exchange', '').trim();
             this.siteHostname = this.electionUrl.split('/')[2]; // hostname only, exclude trailing slash
@@ -112,20 +158,8 @@ export default class Election {
             this.numPositions = +numPositions;
             this.repVote = 150;
             this.repNominate = repToNominate;
-            this.arrWinners = [];
-            this.arrNominees = candidateElems.map((_i, el) => {
-                const userLink = $(el).find('.user-details a');
 
-                return {
-                    userId: +(userLink.attr('href').split('/')[2]),
-                    userName: userLink.text(),
-                    userYears: $(el).find('.user-details').contents().map((_i, { data, type }) =>
-                        type === 'text' ? data.trim() : ""
-                    ).get().join(' ').trim(),
-                    userScore: $(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)[0],
-                    permalink: `${electionPageUrl}#${$(el).attr('id')}`,
-                };
-            }).get();
+            this.arrNominees.push(...nominees);
 
             this.qnaUrl = process.env.ELECTION_QA_URL || electionPost.find('a[href*="/questions/tagged/election"]').attr('href');
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || electionPost.find('a[href*="/rooms/"]').attr('href');
@@ -162,8 +196,8 @@ export default class Election {
                     ).get().join(' ').trim();
 
                     // Get winners
-                    let winners = $(statsElem).find('a').map((_i, el) => +($(el).attr('href').split('/')[2])).get();
-                    this.arrWinners = this.arrNominees.filter(v => winners.includes(v.userId));
+                    const winnerIds = $(statsElem).find('a').map((_i, el) => +($(el).attr('href').split('/')[2])).get();
+                    this.arrWinners = this.getWinners(winnerIds);
                 }
             }
 
