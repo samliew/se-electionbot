@@ -47,21 +47,18 @@ export default class Election {
      *
      * @static
      * @summary gets current phase given election dates
-     * @param {string} nominationDate
-     * @param {string} startDate
-     * @param {string} primaryDate
-     * @param {string} endDate
+     * @param {Election} election
      * @returns {ElectionPhase}
      */
-    static getPhase(nominationDate, startDate, primaryDate, endDate, today = new Date()) {
+    static getPhase({ dateNomination, dateElection, datePrimary, dateEnded }, today = new Date()) {
         const now = today.valueOf();
 
         /** @type {[string, ElectionPhase][]} */
         const phaseMap = [
-            [endDate, "ended"],
-            [startDate, "election"],
-            [primaryDate, "primary"],
-            [nominationDate, "nomination"]
+            [dateEnded, "ended"],
+            [dateElection, "election"],
+            [datePrimary, "primary"],
+            [dateNomination, "nomination"]
         ];
 
         const [, phase = null] = phaseMap.find(([d]) => !!d && new Date(d).valueOf() <= now) || [];
@@ -166,7 +163,7 @@ export default class Election {
             this.qnaUrl = process.env.ELECTION_QA_URL || electionPost.find('a[href*="/questions/tagged/election"]').attr('href');
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || electionPost.find('a[href*="/rooms/"]').attr('href');
 
-            this.phase = Election.getPhase(nominationDate, startDate, primaryDate, endDate);
+            this.phase = Election.getPhase(this);
 
             // If election has ended (or cancelled)
             if (this.phase === 'ended') {
