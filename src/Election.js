@@ -69,6 +69,8 @@ export default class Election {
 
             const repToNominate = +minRep.replace(/\D/g, "");
 
+            const candidateElems = $('#mainbar .candidate-row');
+
             this.updated = Date.now();
             this.sitename = $('meta[property="og:site_name"]').attr('content').replace('Stack Exchange', '').trim();
             this.siteHostname = this.electionUrl.split('/')[2]; // hostname only, exclude trailing slash
@@ -83,15 +85,17 @@ export default class Election {
             this.repVote = 150;
             this.repNominate = repToNominate;
             this.arrWinners = [];
-            this.arrNominees = $('#mainbar .candidate-row').map((i, el) => {
+            this.arrNominees = candidateElems.map((_i, el) => {
+                const userLink = $(el).find('.user-details a');
+
                 return {
-                    userId: Number($(el).find('.user-details a').attr('href').split('/')[2]),
-                    userName: $(el).find('.user-details a').text(),
-                    userYears: $(el).find('.user-details').contents().map(function () {
-                        if (this.type === 'text') return this.data.trim();
-                    }).get().join(' ').trim(),
+                    userId: +(userLink.attr('href').split('/')[2]),
+                    userName: userLink.text(),
+                    userYears: $(el).find('.user-details').contents().map((_i, { data, type }) =>
+                        type === 'text' ? data.trim() : ""
+                    ).get().join(' ').trim(),
                     userScore: $(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)[0],
-                    permalink: electionPageUrl + '#' + $(el).attr('id'),
+                    permalink: `${electionPageUrl}#${$(el).attr('id')}`,
                 };
             }).get();
 
@@ -131,9 +135,9 @@ export default class Election {
                 // Election ended
                 else {
                     // Get election stats
-                    this.statVoters = $(statsElem).contents().map((_i, { data, type }) => {
-                        if (type === 'text') return data.trim();
-                    }).get().join(' ').trim();
+                    this.statVoters = $(statsElem).contents().map((_i, { data, type }) =>
+                        type === 'text' ? data.trim() : ""
+                    ).get().join(' ').trim();
 
                     // Get winners
                     let winners = $(statsElem).find('a').map((_i, el) => +($(el).attr('href').split('/')[2])).get();
