@@ -49,25 +49,26 @@ export default class Election {
             // Parse election page
             const $ = cheerio.load(/** @type {string} */(pageHtml));
 
-            let electionPost = $('#mainbar .post-text .wiki-ph-content');
-            let sidebarValues = $('#sidebar').find('.label-value').map((i, el) => $(el).attr('title') || $(el).text()).get();
+            const content = $("#content");
 
-            // Insert null value in second position for elections with no primary phase
-            if (sidebarValues.length == 5) {
-                sidebarValues.splice(1, 0, null);
-            }
+            const metaElems = content.find(".flex--item.mt4 .d-flex.gs4 .flex--item:nth-child(2)");
+            const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
+
+            const [nominationDate, startDate, endDate, numCandidates, numPositions] = metaVals;
+
+            const electionPost = $('#mainbar .js-post-body .wiki-ph');
 
             this.updated = Date.now();
             this.sitename = $('meta[property="og:site_name"]').attr('content').replace('Stack Exchange', '').trim();
             this.siteHostname = this.electionUrl.split('/')[2]; // hostname only, exclude trailing slash
             this.siteUrl = 'https://' + this.siteHostname;
             this.title = $('#content h1').first().text().trim();
-            this.dateNomination = sidebarValues[0];
-            this.datePrimary = sidebarValues[1];
-            this.dateElection = sidebarValues[2];
-            this.dateEnded = sidebarValues[3];
-            this.numCandidates = Number(sidebarValues[4]);
-            this.numPositions = Number(sidebarValues[5]);
+            this.dateNomination = nominationDate;
+            this.datePrimary = null; //sidebarValues[1]; //TODO where's primary in the new UI?
+            this.dateElection = startDate;
+            this.dateEnded = endDate;
+            this.numCandidates = +numCandidates;
+            this.numPositions = +numPositions;
             this.repVote = 150;
             this.repNominate = Number($('#sidebar .s-sidebarwidget--content b').eq(1).text().replace(/\D+/g, ''));
             this.arrWinners = [];
@@ -83,7 +84,7 @@ export default class Election {
                 };
             }).get();
 
-            this.qnaUrl = process.env.ELECTION_QA_URL || electionPost.find('a').not('[href*="/tagged/"]').not('[href*="/chat"]').not('[href*="stackoverflow.blog"]').last().attr('href');
+            this.qnaUrl = process.env.ELECTION_QA_URL || electionPost.find('a[href*="/questions/tagged/election"]').attr('href');
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || electionPost.find('a[href*="/rooms/"]').attr('href');
 
             // Calculate phase of election
@@ -97,30 +98,34 @@ export default class Election {
             // If election has ended (or cancelled)
             if (this.phase === 'ended') {
 
-                // Get results URL
-                this.resultsUrl = $('#mainbar').find('.question-status h2').first().find('a').first().attr('href');
-                if (!this.resultsUrl.includes('opavote.com')) this.resultsUrl = ''; // incorrect/not available immediately
+                const resultsWrapper = $($('#mainbar').find('aside[role=status]').get(1));
 
-                let winnerElem = $('#mainbar').find('.question-status h2').eq(1);
+                const [statusElem, resultsElem, statsElem] = resultsWrapper.find(".flex--item").get();
+
+                const resultsURL = $(resultsElem).find('a').first().attr('href');
+
+                // Get results URL
+                this.resultsUrl = resultsURL;
+                if (!resultsURL.includes('opavote.com')) this.resultsUrl = ''; // incorrect/not available immediately
 
                 // Check if election was cancelled?
-                if (winnerElem.text().includes('cancelled')) {
+                if ($(statusElem).text().includes('cancelled')) {
                     this.phase = 'cancelled';
 
                     // Convert link to chat-friendly markup
-                    this.cancelledText = winnerElem.html()
+                    this.cancelledText = statusElem.html()
                         .replace(/<a href="/g, 'See [meta](')
                         .replace(/">.+/g, ') for details.').trim();
                 }
                 // Election ended
                 else {
                     // Get election stats
-                    this.statVoters = winnerElem.contents().map(function () {
-                        if (this.type === 'text') return this.data.trim();
+                    this.statVoters = $(statsElem).contents().map((_i, { data, type }) => {
+                        if (type === 'text') return data.trim();
                     }).get().join(' ').trim();
 
                     // Get winners
-                    let winners = winnerElem.find('a').map((i, el) => Number($(el).attr('href').split('/')[2])).get();
+                    let winners = $(statsElem).find('a').map((_i, el) => +($(el).attr('href').split('/')[2])).get();
                     this.arrWinners = this.arrNominees.filter(v => winners.includes(v.userId));
                 }
             }
