@@ -109,6 +109,13 @@ const capitalize = (word) => word[0].toUpperCase() + word.slice(1).toLowerCase()
 const pluralize = (amount, pluralSuffix = "s", singularSuffix = "") => amount !== 1 ? pluralSuffix : singularSuffix;
 
 /**
+ * @summary turns list of items into a enumeration
+ * @param {...string} items
+ * @returns {string}
+ */
+const listify = (...items) => items.length > 2 ? `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}` : items.join(", ");
+
+/**
  * @summary validates and normalizes the Date
  * @param {Date|number|string} input
  * @returns {Date}
@@ -286,6 +293,7 @@ module.exports = {
     makeURL,
     capitalize,
     pluralize,
+    listify,
     link,
     apiBase,
     apiVer

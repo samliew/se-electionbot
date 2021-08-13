@@ -23,12 +23,6 @@ const { RandomArray, getRandomPlop } = require("./random.js");
 
 const {
     sayHI,
-    isAskedAboutVoting,
-    isAskedForCandidateScore,
-    isAskedIfModsArePaid,
-    isAskedWhyNominationRemoved,
-    isAskedForCurrentMods,
-    isAskedForCurrentWinners,
     sayAboutVoting,
     sayAreModsPaid,
     sayCurrentMods,
@@ -41,8 +35,19 @@ const {
     sayElectionSchedule,
     sayOffTopicMessage,
     sayBadgesByType,
-    sayRequiredBadges
+    sayRequiredBadges,
+    sayWhatModsDo,
+    sayCandidateScoreFormula
 } = require("./messages");
+
+const {
+    isAskedAboutVoting,
+    isAskedForCandidateScore,
+    isAskedIfModsArePaid,
+    isAskedWhyNominationRemoved,
+    isAskedForCurrentMods,
+    isAskedForCurrentWinners,
+} = require("./guards");
 
 const { makeCandidateScoreCalc } = require("./score");
 
@@ -104,6 +109,16 @@ const ignoredEventTypes = [
     34, // UserNameOrAvatarChanged
     7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
 ];
+
+/**
+ * @typedef {{
+ *  type: "moderation"|"participation"|"editing",
+ *  name:string,
+ *  id:string,
+ *  required?: boolean
+ * }} Badge
+ * @type {Badge[]}
+ */
 const electionBadges = [
     { name: 'Deputy', required: true, type: "moderation", id: "1002" },
     { name: 'Civic Duty', required: true, type: "moderation", id: "32" },
@@ -591,8 +606,7 @@ const main = async () => {
 
             // What is a moderator/moderators do/does a mod
             else if (['what'].some(x => content.startsWith(x)) && /(are|is|do(es)?)( a)? mod(erator)?s?/.test(content)) {
-                responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` +
-                    `They are volunteers who are equipped to handle situations that regular users can't like enforcing the Code of Conduct, investigating and destroying sockpuppet accounts, and performing post redactions.`;
+                responseText = sayWhatModsDo(election);
             }
 
             // What are the benefits of mods
@@ -627,7 +641,7 @@ const main = async () => {
 
             // Candidate score formula
             else if (['how', 'what'].some(x => content.startsWith(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
-                responseText = `The 40-point [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way: 1 point for each 1,000 reputation up to 20,000 reputation (for 20 points); and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges`;
+                responseText = sayCandidateScoreFormula(electionBadges);
             }
 
             // Stats/How many voted/participated

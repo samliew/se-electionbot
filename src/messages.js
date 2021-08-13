@@ -1,5 +1,9 @@
 const { default: Election } = require("./Election.js");
-const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize, capitalize } = require("./utils.js");
+const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize, capitalize, listify } = require("./utils.js");
+
+/**
+ * @typedef {import("./index").Badge} Badge
+ */
 
 /**
  * @summary makes bot remind users that they are here
@@ -106,8 +110,8 @@ const sayAboutVoting = (
 
 /**
  * @summary builds a response to badges of a certain type query
- * @param {{ type: "moderation"|"participation"|"editing"|string, name:string, id:string }[]} badges
- * @param {"moderation"|"participation"|"editing"} type
+ * @param {Badge[]} badges
+ * @param {Badge["type"]} type
  * @param {boolean} [isSO]
  * @returns {string}
  */
@@ -128,7 +132,7 @@ const sayBadgesByType = (badges, type, isSO = true) => {
 /**
  * @summary builds a response to the required badges query
  * @param {Election} election
- * @param {{ required: boolean, id: string, name: string }[]} badges
+ * @param {Badge[]} badges
  * @returns {string}
  */
 const sayRequiredBadges = (election, badges) => {
@@ -271,81 +275,55 @@ const sayOffTopicMessage = (election, asked) => {
 };
 
 /**
- * @summary checks if the message asked why a nomination was removed
- * @param {string} text
- * @returns {boolean}
+ * @summary builds an off-topic warning message
+ * @param {Election} election
+ * @returns {string}
  */
-const isAskedWhyNominationRemoved = (text) => {
-    const textIncludes = text.includes.bind(text);
-    const textStarts = text.startsWith.bind(text);
+const sayWhatModsDo = (election) => {
+    const { siteUrl } = election;
 
-    return ['why', 'what'].some(textStarts) &&
-        ['nomination', 'nominees', 'candidate'].some(textIncludes) &&
-        ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(textIncludes);
+    const modActivities = [
+        `enforcing the ${makeURL("Code of Conduct", `${siteUrl}/conduct`)}`,
+        `investigating and destroying sockpuppet accounts`,
+        `and performing post redactions`
+    ];
+
+    const modsAre = `essential to keeping the site clean, fair, and friendly`;
+
+    const modsDo = `They are volunteers who are equipped to handle situations regular users can't, like ${modActivities.join(", ")}`;
+
+    return `${makeURL("Elected ♦ moderators", `${siteUrl}/help/site-moderators`)} are ${modsAre}. ${modsDo}.`;
 };
 
 /**
- * @summary checks if the message asked if mods are paid
- * @param {string} text
- * @returns {boolean}
+ * @summary builds a candidate score formula message
+ * @param {Badge[]} badges
+ * @returns {string}
  */
-const isAskedIfModsArePaid = (text) => {
-    const textIncludes = text.includes.bind(text);
-    const textStarts = text.startsWith.bind(text);
+const sayCandidateScoreFormula = (badges) => {
 
-    return ['why', 'what', 'are', 'how'].some(textStarts) &&
-        ['reward', 'paid', 'compensat', 'money'].some(textIncludes) &&
-        ['mods', 'moderators'].some(textIncludes);
-};
+    const badgeCounts = { moderation: 0, editing: 0, participation: 0 };
 
-/**
- * @summary checks if the message asked how or where to vote
- * @param {string} text
- * @returns {boolean}
- */
-const isAskedAboutVoting = (text) => {
-    const textIncludes = text.includes.bind(text);
-    const textStarts = text.startsWith.bind(text);
+    const numModBadges = badges.reduce((a, { type }) => {
+        a[type] += 1;
+        return a;
+    }, badgeCounts);
 
-    return ['where', 'how', 'want', 'when'].some(textStarts) &&
-        ['do', 'can', 'to', 'give', 'cast', 'should'].some(textIncludes) &&
-        ['voting', 'vote', 'elect'].some(textIncludes);
-};
+    const counts = Object.entries(numModBadges).map(([type, count]) => `${count} ${type}`);
 
-/**
- * @summary checks if the message asked to tell candidate score
- * @param {string} text
- * @returns {boolean}
- */
-const isAskedForCandidateScore = (text) => {
-    const textIncludes = text.includes.bind(text);
+    const badgeSum = Object.values(numModBadges).reduce((a, c) => a + c);
 
-    return text.includes('candidate score') ||
-        (['can i '].some(textIncludes) &&
-            ['be', 'become', 'nominate', 'run'].some(textIncludes) &&
-            ['mod', 'election'].some(textIncludes));
-};
+    const maxRepPts = 20;
 
-/**
- * @summary checks if the message asked to tell who the current mods are
- * @param {string} text
- * @returns {boolean}
- */
-const isAskedForCurrentMods = (text) => {
-    const textIncludes = text.includes.bind(text);
-    return ['who', 'current', 'mod'].every(textIncludes);
-};
+    const allPts = badgeSum + maxRepPts;
 
-/**
- * @summary checks if the message asked to tell who winners are
- * @param {string} text
- * @returns {boolean}
- */
-const isAskedForCurrentWinners = (text) => {
-    const textIncludes = text.includes.bind(text);
-    const textStarts = text.startsWith.bind(text);
+    const repPts = `1 point for each 1,000 reputation up to 20,000 reputation (${maxRepPts} point${pluralize(badgeSum)})`;
 
-    return ['who'].some(textStarts) && ['winners', 'new mod', 'will win', 'future mod'].some(textIncludes);
+    const badgePts = `and 1 point for each of the ${listify(...counts)} badges (${badgeSum} point${pluralize(badgeSum)})`;
+
+    const formula = `${repPts}; ${badgePts}`;
+
+    return `The ${allPts}-point ${makeURL("candidate score", "https://meta.stackexchange.com/a/252643")} is calculated this way: ${formula}`;
 };
 
 module.exports = {
@@ -364,10 +342,6 @@ module.exports = {
     sayMissingBadges,
     sayNotStartedYet,
     sayRequiredBadges,
-    isAskedWhyNominationRemoved,
-    isAskedIfModsArePaid,
-    isAskedAboutVoting,
-    isAskedForCandidateScore,
-    isAskedForCurrentMods,
-    isAskedForCurrentWinners
+    sayWhatModsDo,
+    sayCandidateScoreFormula
 };
