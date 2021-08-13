@@ -35,6 +35,33 @@ export default class Election {
         );
     }
 
+    /**
+     * @typedef {null|"ended"|"election"|"primary"|"nomination"} ElectionPhase
+     *
+     * @static
+     * @summary gets current phase given election dates
+     * @param {string} nominationDate
+     * @param {string} startDate
+     * @param {string} primaryDate
+     * @param {string} endDate
+     * @returns {ElectionPhase}
+     */
+    static getPhase(nominationDate, startDate, primaryDate, endDate) {
+        const now = Date.now();
+
+        /** @type {[string, ElectionPhase][]} */
+        const phaseMap = [
+            [endDate, "ended"],
+            [startDate, "election"],
+            [primaryDate, "primary"],
+            [nominationDate, "nomination"]
+        ];
+
+        const [, phase = null] = phaseMap.find(([datestr]) => new Date(datestr).valueOf() <= now) || [];
+
+        return phase;
+    }
+
     async scrapeElection() {
 
         // Save prev values so we can compare changes after
@@ -102,13 +129,7 @@ export default class Election {
             this.qnaUrl = process.env.ELECTION_QA_URL || electionPost.find('a[href*="/questions/tagged/election"]').attr('href');
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || electionPost.find('a[href*="/rooms/"]').attr('href');
 
-            // Calculate phase of election
-            const now = Date.now();
-            this.phase = new Date(this.dateEnded).valueOf() <= now ? 'ended' :
-                new Date(this.dateElection).valueOf() <= now ? 'election' :
-                    this.datePrimary && new Date(this.datePrimary).valueOf() <= now ? 'primary' :
-                        new Date(this.dateNomination).valueOf() <= now ? 'nomination' :
-                            null; // default
+            this.phase = Election.getPhase(nominationDate, startDate, primaryDate, endDate);
 
             // If election has ended (or cancelled)
             if (this.phase === 'ended') {
