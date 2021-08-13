@@ -411,7 +411,7 @@ const main = async () => {
                 return `*setting up test cron job*`;
             });
 
-            commander.add("get cron", "lists schedulued announcements", ({ schedules }) => {
+            commander.add("get cron", "lists scheduled announcements", ({ schedules }) => {
                 return 'Currently scheduled announcements: `' + JSON.stringify(schedules) + '`';
             });
 
