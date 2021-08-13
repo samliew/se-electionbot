@@ -271,6 +271,27 @@ const sayOffTopicMessage = (election, asked) => {
 };
 
 /**
+ * @summary builds an off-topic warning message
+ * @param {Election} election
+ */
+const sayWhatModsDo = (election) => {
+    const { siteUrl } = election;
+
+    const modActivities = [
+        `enforcing the ${makeURL("Code of Conduct", `${siteUrl}/conduct`)}`,
+        `investigating and destroying sockpuppet accounts`,
+        `and performing post redactions`
+    ];
+
+    const modsAre = `essential to keeping the site clean, fair, and friendly`;
+
+    const modsDo = `They are volunteers who are equipped to handle situations regular users can't, like ${modActivities.join(", ")}`;
+
+    return `${makeURL("Elected ♦ moderators", `${siteUrl}/help/site-moderators`)} are ${modsAre}. ${modsDo}.`;
+
+};
+
+/**
  * @summary checks if the message asked why a nomination was removed
  * @param {string} text
  * @returns {boolean}
@@ -364,6 +385,7 @@ module.exports = {
     sayMissingBadges,
     sayNotStartedYet,
     sayRequiredBadges,
+    sayWhatModsDo,
     isAskedWhyNominationRemoved,
     isAskedIfModsArePaid,
     isAskedAboutVoting,
