@@ -12,11 +12,25 @@ describe('Election', () => {
             const tomorrow = dateToUtcTimestamp(new Date(now + 864e5));
             const yesterday = dateToUtcTimestamp(new Date(now - 864e5));
 
-            const noPhase = Election.getPhase(tomorrow, tomorrow, tomorrow, tomorrow);
-            const nomination = Election.getPhase(yesterday, tomorrow, tomorrow, tomorrow);
-            const primary = Election.getPhase(tomorrow, tomorrow, yesterday, tomorrow);
-            const start = Election.getPhase(tomorrow, yesterday, tomorrow, tomorrow);
-            const ended = Election.getPhase(yesterday, yesterday, yesterday, yesterday);
+            const election = new Election("https://stackoverflow.com/election/12", 12);
+            election.dateElection = tomorrow;
+            election.dateEnded = tomorrow;
+            election.datePrimary = tomorrow;
+            election.dateNomination = tomorrow;
+
+            const noPhase = Election.getPhase(election);
+
+            election.dateNomination = yesterday;
+            const nomination = Election.getPhase(election);
+
+            election.datePrimary = yesterday;
+            const primary = Election.getPhase(election);
+
+            election.dateElection = yesterday;
+            const start = Election.getPhase(election);
+
+            election.dateEnded = yesterday;
+            const ended = Election.getPhase(election);
 
             expect(noPhase).to.equal(null);
             expect(nomination).to.equal("nomination");
