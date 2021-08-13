@@ -160,10 +160,10 @@ const sayMissingBadges = (badgeNames, count, required = false) => ` The user is 
  * @summary builds current mods list response message
  * @param {Election} election
  * @param {import("./utils.js").ResItem[]} currMods
- * @param {import("html-entities").AllHtmlEntities} entities
+ * @param {import("html-entities").decode} decodeEntities
  * @returns {string}
  */
-const sayCurrentMods = (election, currMods, entities) => {
+const sayCurrentMods = (election, currMods, decodeEntities) => {
     const { length: numCurrMods } = currMods;
 
     const { siteUrl } = election;
@@ -173,7 +173,7 @@ const sayCurrentMods = (election, currMods, entities) => {
     const toBe = numCurrMods > 1 ? "are" : "is";
 
     return "The current " + (numCurrMods > 0 ?
-        `${numCurrMods} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${siteUrl}/users?tab=moderators`)} ${toBe}: ${entities.decode(currModNames.join(', '))}`
+        `${numCurrMods} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${siteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(currModNames.join(', '))}`
         : `moderators can be found on ${makeURL("this page", `${siteUrl}/users?tab=moderators`)}`);
 };
 

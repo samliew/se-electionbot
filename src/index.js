@@ -1,6 +1,6 @@
 import Client from 'chatexchange';
+import { decode } from 'html-entities';
 const Election = require('./Election').default;
-const entities = new (require('html-entities').AllHtmlEntities);
 const announcement = new (require('./ScheduledAnnouncement').default);
 
 const {
@@ -49,7 +49,7 @@ const { makeCandidateScoreCalc } = require("./score");
 // If running locally, load env vars from .env file
 if (process.env.NODE_ENV !== 'production') {
     const dotenv = require('dotenv');
-    dotenv.load({ debug: process.env.DEBUG });
+    dotenv.load({ debug: process.env.DEBUG === 'true' });
 }
 
 // Environment variables
@@ -317,7 +317,7 @@ const main = async () => {
     room.on('message', async (msg) => {
 
         // Decode HTML entities in messages, lowercase version for matching
-        const origContent = entities.decode(msg._content);
+        const origContent = decode(msg._content);
         const content = origContent.toLowerCase().replace(/^@\S+\s+/, '');
 
         // Resolve required fields
@@ -648,7 +648,7 @@ const main = async () => {
 
             // Current mods
             else if (isAskedForCurrentMods(content)) {
-                responseText = sayCurrentMods(election, currentSiteMods, entities);
+                responseText = sayCurrentMods(election, currentSiteMods, decode);
             }
 
             // How to nominate self/others
