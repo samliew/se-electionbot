@@ -63,6 +63,12 @@ export default class Election {
 
             const electionPost = $('#mainbar .js-post-body .wiki-ph');
 
+            const conditionsNotice = $($('#mainbar').find('aside[role=status]').get(0));
+
+            const [, minRep = "0"] = /with (?:more than )?(\d+,?\d+) reputation/m.exec(conditionsNotice.text()) || [];
+
+            const repToNominate = +minRep.replace(/\D/g, "");
+
             this.updated = Date.now();
             this.sitename = $('meta[property="og:site_name"]').attr('content').replace('Stack Exchange', '').trim();
             this.siteHostname = this.electionUrl.split('/')[2]; // hostname only, exclude trailing slash
@@ -75,7 +81,7 @@ export default class Election {
             this.numCandidates = +numCandidates;
             this.numPositions = +numPositions;
             this.repVote = 150;
-            this.repNominate = Number($('#sidebar .s-sidebarwidget--content b').eq(1).text().replace(/\D+/g, ''));
+            this.repNominate = repToNominate;
             this.arrWinners = [];
             this.arrNominees = $('#mainbar .candidate-row').map((i, el) => {
                 return {
