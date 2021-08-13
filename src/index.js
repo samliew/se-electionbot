@@ -1,5 +1,5 @@
 import Client from 'chatexchange';
-import { decode } from 'html-entities';
+import { AllHtmlEntities } from 'html-entities';
 const Election = require('./Election').default;
 const announcement = new (require('./ScheduledAnnouncement').default);
 
@@ -54,7 +54,7 @@ const { makeCandidateScoreCalc } = require("./score");
 // If running locally, load env vars from .env file
 if (process.env.NODE_ENV !== 'production') {
     const dotenv = require('dotenv');
-    dotenv.load({ debug: process.env.DEBUG === 'true' });
+    dotenv.config({ debug: process.env.DEBUG === 'true' });
 }
 
 // Environment variables
@@ -135,7 +135,7 @@ const electionBadges = [
     { name: 'Quorum', required: false, type: "participation", id: "900" },
     { name: 'Yearling', required: false, type: "participation", id: "13" },
     { name: 'Organizer', required: false, type: "editing", id: "5" },
-    { name: 'Copy Editor', required: false, type: "editing", id: "233" },
+    { name: 'Copy Editor', required: false, type: "editing", id: "223" },
     { name: 'Explainer', required: false, type: "editing", id: "4368" },
     { name: 'Refiner', required: false, type: "editing", id: "4369" },
     { name: 'Tag Editor', required: false, type: "editing", id: "254" },
@@ -330,9 +330,11 @@ const main = async () => {
 
     // Main event listener
     room.on('message', async (msg) => {
+        const encoded = await msg.content;
 
         // Decode HTML entities in messages, lowercase version for matching
-        const origContent = decode(msg._content);
+        const origContent = AllHtmlEntities.decode(encoded);
+
         const content = origContent.toLowerCase().replace(/^@\S+\s+/, '');
 
         // Resolve required fields
@@ -394,7 +396,7 @@ const main = async () => {
                 responseText = origContent.replace(/^@\S+\s+say /i, '');
             }
             else if (content.includes('alive')) {
-                responseText = `I'm alive on ${scriptHostname}, started on ${dateToUtcTimestamp(scriptInitDate)} with an uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1000)} seconds.` +
+                responseText = `I'm alive on ${scriptHostname || "planet Earth"}, started on ${dateToUtcTimestamp(scriptInitDate)} with an uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1000)} seconds.` +
                     (debug ? ' I am in debug mode.' : '');
             }
             else if (content.includes('test cron')) {
@@ -415,18 +417,18 @@ const main = async () => {
                     responseText = `*invalid throttle value*`;
                 }
             }
-            else if (content.includes('throttle')) {
+            else if (content.includes('get throttle')) {
                 responseText = `Reply throttle is currently ${throttleSecs} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
             }
             else if (content.includes('clear timeout') || content.includes('unmute')) {
                 responseText = `*timeout cleared*`;
                 lastMessageTime = -1;
             }
-            else if (content.includes('timeout') || content.includes('mute')) {
-                let num = +content.match(/\d+$/);
-                num = num ? +(num[0]) : 5; // defaulting to 5
-                responseText = `*silenced for ${num} minutes*`;
-                lastMessageTime = Date.now() + (num * 60000) - (throttleSecs * 1000);
+            else if (["mute", "timeout", "sleep"].some((c) => content.includes(c))) {
+                const [, num = 5] = /\s+(\d+)$/.exec(content) || [];
+                const parsed = +num;
+                responseText = `*silenced for ${parsed} minutes*`;
+                lastMessageTime = Date.now() + (parsed * 60000) - (throttleSecs * 1000);
             }
             else if (content.includes('time')) {
                 responseText = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
@@ -435,13 +437,19 @@ const main = async () => {
                 }
             }
             else if (content.includes('chatroom')) {
-                responseText = `The election chat room is at ${election.chatUrl}`;
+                responseText = `The election chat room is at ${election.chatUrl || "the platform 9 3/4"}`;
+            }
+            else if (["brew", "coffee"].every((c) => content.includes(c))) {
+                //TODO: add for whom the coffee
+                const coffee = new RandomArray("cappuccino", "espresso", "latte", "ristretto", "macchiato");
+                responseText = `Brewing some ${coffee.getRandom()} for ${user.name || "somebody"}`;
             }
             else if (content.includes('commands')) {
                 responseText = 'moderator commands (requires mention): *' + [
                     'say', 'alive', 'cron', 'test cron', 'chatroom',
-                    'throttle', 'set throttle X (in seconds)',
-                    'mute', 'mute X (in minutes)', 'unmute', 'time'
+                    'get throttle', 'set throttle X (in seconds)',
+                    'mute', 'mute X (in minutes)', 'sleep X (in minutes)',
+                    'unmute', 'time', 'brew coffee'
                 ].join(', ') + '*';
             }
 
@@ -625,7 +633,7 @@ const main = async () => {
                     stackApikey, electionBadges, soPastAndPresentModIds
                 );
 
-                await calcCandidateScore(election, user, msg, isStackOverflow);
+                responseText = await calcCandidateScore(election, user, resolvedMsg, isStackOverflow);
 
                 if (responseText != null) {
                     console.log('RESPONSE', responseText);
@@ -662,7 +670,7 @@ const main = async () => {
 
             // Current mods
             else if (isAskedForCurrentMods(content)) {
-                responseText = sayCurrentMods(election, currentSiteMods, decode);
+                responseText = sayCurrentMods(election, currentSiteMods, AllHtmlEntities.decode);
             }
 
             // How to nominate self/others

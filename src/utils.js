@@ -37,6 +37,7 @@ const startServer = () => {
 
 /**
  * @typedef {{
+ *  id: string,
  *  site_url: string,
  *  user_id: string,
  *  user: {
@@ -49,7 +50,16 @@ const startServer = () => {
  * }} ResItem
  *
  * @typedef {{
+ *   user: { reputation: number },
+ *   badge_id: number,
+ *   link: string,
+ *   name: string,
+ *   rank: "bronze" | "silver" | "gold"
+ * }} BadgeItem
+ *
+ * @typedef {{
  *  items: ResItem[] //TODO: split into API entities
+ *  has_more: boolean
  * }} APIListResponse
  */
 
@@ -58,7 +68,7 @@ const startServer = () => {
  * @summary fetches the endpoint
  * @param {string} url
  * @param {boolean} [json]
- * @returns {Promise<APIListResponse|string|null>}
+ * @returns {Promise<any>}
  */
 const fetchUrl = async (url, json = false) => {
     const { SOURCE_VERSION, ACCOUNT_EMAIL, DEBUG } = process.env;
@@ -261,8 +271,15 @@ const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, site
 const makeURL = (label, uri) => `[${label}](${uri})`;
 
 /**
- * @typedef {{ name: string, required?: boolean }} Badge
+ * @typedef {{ id:string, name: string, required?: boolean }} Badge
  */
+
+/**
+ * @summary callback for mapping badge to name
+ * @param {BadgeItem} badge
+ * @returns {string}
+ */
+const mapToId = ({ badge_id }) => badge_id.toString();
 
 /**
  * @summary callback for mapping badge to name
@@ -279,6 +296,7 @@ const mapToName = ({ name }) => name;
 const mapToRequired = ({ required }) => required;
 
 module.exports = {
+    mapToId,
     mapToName,
     mapToRequired,
     startServer,
