@@ -62,9 +62,6 @@ if (process.env.NODE_ENV !== 'production') {
 const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
 const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
-// To stop bot from replying to too many messages in a short time
-let throttleSecs = +(process.env.THROTTLE_SECS) || 10;
-
 const chatDomain = /** @type {import("chatexchange/dist/Client").Host} */ (process.env.CHAT_DOMAIN);
 const chatRoomId = +process.env.CHAT_ROOM_ID;
 const accountEmail = process.env.ACCOUNT_EMAIL;
@@ -508,14 +505,14 @@ const main = async () => {
                 ["alive", /alive/, scriptHostname, scriptInitDate],
                 ["test cron", /test cron/, announcement],
                 ["get cron", /get cron/, announcement],
-                ["get throttle", /get throttle/, throttleSecs],
+                ["get throttle", /get throttle/, BotConfig.throttleSecs],
                 ["set throttle", /set throttle/, content, BotConfig],
                 ["get time", /get time/, election],
                 ["chatroom", /chatroom/, election],
                 ["coffee", /(?:brew|make).+coffee/, user],
                 ["timetravel", /88 miles|delorean/, election, content],
                 ["unmute", /unmute|clear timeout/, BotConfig],
-                ["mute", /mute|timeout|sleep/, BotConfig, content, throttleSecs]
+                ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs]
             ];
 
             responseText = outputs.reduce(
@@ -549,7 +546,7 @@ const main = async () => {
                 for (const message of messages) {
                     await room.sendMessage(message);
                     //avoid getting throttled ourselves
-                    await new Promise((resolve) => setTimeout(resolve, throttleSecs * 1e3));
+                    await new Promise((resolve) => setTimeout(resolve, BotConfig.throttleSecs * 1e3));
                 }
 
                 // Record last activity time only
@@ -562,14 +559,14 @@ const main = async () => {
 
 
         // If too close to previous message, ignore (apply throttle)
-        if (Date.now() < BotConfig.lastMessageTime + throttleSecs * 1000) {
+        if (Date.now() < BotConfig.lastMessageTime + BotConfig.throttleSecs * 1000) {
             console.log('THROTTLE - too close to previous message');
             return;
         }
 
 
         // Mentioned bot (8)
-        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id && throttleSecs <= 10) {
+        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id && BotConfig.throttleSecs <= 10) {
             let responseText = null;
 
             if (content.startsWith('offtopic')) {
