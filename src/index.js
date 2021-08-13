@@ -23,12 +23,6 @@ const { RandomArray, getRandomPlop } = require("./random.js");
 
 const {
     sayHI,
-    isAskedAboutVoting,
-    isAskedForCandidateScore,
-    isAskedIfModsArePaid,
-    isAskedWhyNominationRemoved,
-    isAskedForCurrentMods,
-    isAskedForCurrentWinners,
     sayAboutVoting,
     sayAreModsPaid,
     sayCurrentMods,
@@ -43,6 +37,15 @@ const {
     sayBadgesByType,
     sayRequiredBadges
 } = require("./messages");
+
+const {
+    isAskedAboutVoting,
+    isAskedForCandidateScore,
+    isAskedIfModsArePaid,
+    isAskedWhyNominationRemoved,
+    isAskedForCurrentMods,
+    isAskedForCurrentWinners,
+} = require("./guards");
 
 const { makeCandidateScoreCalc } = require("./score");
 
