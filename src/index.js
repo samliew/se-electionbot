@@ -36,7 +36,8 @@ const {
     sayOffTopicMessage,
     sayBadgesByType,
     sayRequiredBadges,
-    sayWhatModsDo
+    sayWhatModsDo,
+    sayCandidateScoreFormula
 } = require("./messages");
 
 const {
@@ -640,7 +641,7 @@ const main = async () => {
 
             // Candidate score formula
             else if (['how', 'what'].some(x => content.startsWith(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
-                responseText = `The 40-point [candidate score](https://meta.stackexchange.com/a/252643) is calculated this way: 1 point for each 1,000 reputation up to 20,000 reputation (for 20 points); and 1 point for each of the 8 moderation, 6 participation, and 6 editing badges`;
+                responseText = sayCandidateScoreFormula(electionBadges);
             }
 
             // Stats/How many voted/participated

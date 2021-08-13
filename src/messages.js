@@ -1,5 +1,5 @@
 const { default: Election } = require("./Election.js");
-const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize, capitalize } = require("./utils.js");
+const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize, capitalize, listify } = require("./utils.js");
 
 /**
  * @typedef {import("./index").Badge} Badge
@@ -309,11 +309,21 @@ const sayCandidateScoreFormula = (badges) => {
         return a;
     }, badgeCounts);
 
-    const counts = Object.entries(numModBadges).map(([type, count]) => `${count} ${type}`).join(", ");
+    const counts = Object.entries(numModBadges).map(([type, count]) => `${count} ${type}`);
 
-    const formula = `1 point for each 1,000 reputation up to 20,000 reputation (for 20 points); and 1 point for each of the ${counts} 8 moderation, 6 participation, and 6 editing badges`;
+    const badgeSum = Object.values(numModBadges).reduce((a, c) => a + c);
 
-    return `The 40-point ${makeURL("candidate score", "https://meta.stackexchange.com/a/252643")} is calculated this way: ${formula}`;
+    const maxRepPts = 20;
+
+    const allPts = badgeSum + maxRepPts;
+
+    const repPts = `1 point for each 1,000 reputation up to 20,000 reputation (${maxRepPts} point${pluralize(badgeSum)})`;
+
+    const badgePts = `and 1 point for each of the ${listify(...counts)} badges (${badgeSum} point${pluralize(badgeSum)})`;
+
+    const formula = `${repPts}; ${badgePts}`;
+
+    return `The ${allPts}-point ${makeURL("candidate score", "https://meta.stackexchange.com/a/252643")} is calculated this way: ${formula}`;
 };
 
 module.exports = {
@@ -333,4 +343,5 @@ module.exports = {
     sayNotStartedYet,
     sayRequiredBadges,
     sayWhatModsDo,
+    sayCandidateScoreFormula
 };
