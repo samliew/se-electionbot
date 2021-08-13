@@ -524,6 +524,13 @@ const main = async () => {
                     `Why am I here? To serve the community`,
                 ).getRandom();
             }
+            else if (/thanks?(?: you)?/.test(content)) {
+                responseText = new RandomArray(
+                    "You are welcome",
+                    "My pleasure",
+                    "Not at all"
+                ).getRandom();
+            }
             else if (['help', 'command', 'info'].some(x => content.includes(x))) {
                 responseText = '\n' + ['Examples of election FAQs I can help with:',
                     'how does the election work', 'who are the candidates', 'how to nominate',
