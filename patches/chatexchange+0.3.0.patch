@@ -11,3 +11,104 @@ index 98c1435..5566a1f 100644
      id: number;
      name: string;
      about: string;
+diff --git a/node_modules/chatexchange/dist/Browser.js b/node_modules/chatexchange/dist/Browser.js
+index d4fad6c..35c2dcb 100644
+--- a/node_modules/chatexchange/dist/Browser.js
++++ b/node_modules/chatexchange/dist/Browser.js
+@@ -170,13 +170,13 @@ class Browser {
+         // Filter out only text (Ignore HTML entirely)
+         const statsElements = $(".user-keycell,.user-valuecell")
+             .map((_i, el) => $(el)
+-            .text()
+-            .trim()
+-            .replace(/\s{2,}[\w\s()]*/u, ""))
++                .text()
++                .trim()
++                .replace(/\s{2,}[\w\s()]*/u, ""))
+             .toArray();
+         const { about, "last message": lmsg, "last seen": lseen,
+-        //@ts-expect-error
+-         } = utils_1.arrayToKvp(statsElements);
++            //@ts-expect-error
++        } = utils_1.arrayToKvp(statsElements);
+         if (typeof lmsg !== "undefined") {
+             lastMessage = utils_1.parseAgoString(lmsg);
+         }
+@@ -215,6 +215,14 @@ class Browser {
+         if (replyInfo.length > 0) {
+             parentMessageId = parseInt(replyInfo.attr("href").split("#")[1], 10);
+         }
++
++        const $userDiv = $msg.parent().prev(".signature").find(".username a");
++
++        const userId = parseInt($userDiv.attr("href").split("/")[2], 10);
++        const userName = $userDiv.text();
++
++        const user = this._client.getUser(userId, { name: userName });
++
+         return {
+             content,
+             edited,
+@@ -222,6 +230,9 @@ class Browser {
+             parentMessageId,
+             roomId,
+             roomName,
++            user,
++            userId,
++            userName
+         };
+     }
+     /**
+diff --git a/node_modules/chatexchange/dist/Message.js b/node_modules/chatexchange/dist/Message.js
+index f112fc8..eca19c6 100644
+--- a/node_modules/chatexchange/dist/Message.js
++++ b/node_modules/chatexchange/dist/Message.js
+@@ -33,29 +33,30 @@ class Message {
+         return utils_1.lazy(() => this._room, () => this._setRoom());
+     }
+     get roomId() {
+-        return utils_1.lazy(() => this._roomId, () => this._scrapeTranscript());
++        return utils_1.lazy(() => this._roomId, () => this._scrapeTranscript("roomId"));
+     }
+     get content() {
+-        return utils_1.lazy(() => this._content, () => this._scrapeTranscript());
++        return utils_1.lazy(() => this._content, () => this._scrapeTranscript("content"));
+     }
+     get userId() {
+-        return utils_1.lazy(() => this._userId, () => this._scrapeTranscript());
++        return utils_1.lazy(() => this._userId, () => this._scrapeTranscript("userId"));
+     }
+     get targetUserId() {
+-        return utils_1.lazy(() => this._targetUserId, () => this._scrapeTranscript());
++        return utils_1.lazy(() => this._targetUserId, () => this._scrapeTranscript("targetUserId"));
+     }
+     get parentId() {
+-        return utils_1.lazy(() => this._parentId, () => this._scrapeTranscript());
++        return utils_1.lazy(() => this._parentId, () => this._scrapeTranscript("parentMessageId"));
+     }
+     async _setRoom() {
+         const roomId = await this.roomId;
+         this._room = this._client.getRoom(roomId);
+     }
+-    async _scrapeTranscript() {
++    async _scrapeTranscript(prop) {
+         const data = await this._client._browser.getTranscript(this.id);
+         for (const [key, value] of Object.entries(data)) {
+             this[`_${key}`] = value;
+         }
++        return data[prop];
+     }
+     /**
+      * Send a reply to this message, replying to the user
+diff --git a/node_modules/chatexchange/dist/Room.js b/node_modules/chatexchange/dist/Room.js
+index 9ced9be..814b99b 100644
+--- a/node_modules/chatexchange/dist/Room.js
++++ b/node_modules/chatexchange/dist/Room.js
+@@ -61,6 +61,7 @@ class Room extends events_1.EventEmitter {
+                 const msg = new Message_1.default(this._client, event.message_id, {
+                     room: this,
+                     roomId: this.id,
++                    ...event
+                 });
+                 this.emit("message", msg);
+             }
