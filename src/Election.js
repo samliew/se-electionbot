@@ -3,15 +3,16 @@ const utils = require('./utils');
 
 export default class Election {
 
+    /**
+     * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
+     * @param {string|number} [electionNum] number of election, can be a numeric string
+     */
     constructor(electionUrl, electionNum = null) {
         this.electionUrl = electionUrl;
 
-        if (electionNum) {
-            this.electionNum = Number(electionNum);
-        }
-        else {
-            this.electionNum = Number(electionUrl.split('/').pop()) || null;
-        }
+        this.electionNum = electionNum ?
+            +electionNum :
+            +electionUrl.split('/').pop() || null;
 
         // private
         this._prevObj = null;
