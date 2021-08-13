@@ -1,5 +1,6 @@
 import Client from 'chatexchange';
 import { AllHtmlEntities } from 'html-entities';
+import { CommandManager } from './commands';
 const Election = require('./Election').default;
 const announcement = new (require('./ScheduledAnnouncement').default);
 
@@ -389,80 +390,171 @@ const main = async () => {
             return;
         }
 
-        console.log('EVENT', JSON.stringify(resolvedMsg));
+        console.log('EVENT', JSON.stringify({ ...resolvedMsg, isPrivileged }));
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id && isPrivileged) {
-            let responseText = null;
+            let responseText = "";
 
-            if (content.indexOf('say ') === 0) {
-                responseText = origContent.replace(/^@\S+\s+say /i, '');
-            }
-            else if (content.includes('alive')) {
-                responseText = `I'm alive on ${scriptHostname || "planet Earth"}, started on ${dateToUtcTimestamp(scriptInitDate)} with an uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1000)} seconds.` +
-                    (debug ? ' I am in debug mode.' : '');
-            }
-            else if (content.includes('test cron')) {
-                responseText = `*setting up test cron job*`;
+            const commander = new CommandManager();
+
+            commander.add("say", "bot echoes something", (content) => content.replace(/^@\S+\s+say /i, ''));
+
+            commander.add("alive", "bot reports on its status", (host, start) => {
+
+                const hosted = `I'm alive on ${host || "planet Earth"}`;
+                const started = `started on ${dateToUtcTimestamp(start)}`;
+                const uptime = `uptime of ${Math.floor((Date.now() - start.getTime()) / 1e3)} seconds`;
+
+                return `${hosted}, ${started} with an ${uptime}.${debug ? ' I am in debug mode.' : ''}`;
+            });
+
+            commander.add("test cron", "sets up a test cron job", (announcement) => {
                 announcement.initTest();
-            }
-            else if (content.includes('cron')) {
-                responseText = 'Currently scheduled announcements: `' + JSON.stringify(announcement.schedules) + '`';
-            }
-            else if (content.includes('set throttle')) {
-                let match = content.match(/(\d+\.)?\d+$/);
-                let num = match ? Number(match[0]) : null;
-                if (num != null && !isNaN(num) && num >= 0) {
-                    throttleSecs = num;
-                    responseText = `*throttle set to ${throttleSecs} seconds*`;
+                return `*setting up test cron job*`;
+            });
+
+            commander.add("get cron", "lists schedulued announcements", ({ schedules }) => {
+                return 'Currently scheduled announcements: `' + JSON.stringify(schedules) + '`';
+            });
+
+            commander.add("get throttle", "gets current throttle (in seconds)", (throttle) => {
+                return `Reply throttle is currently ${throttle} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
+            });
+
+            commander.add("set throttle", "sets throttle to N (in seconds)", (content, config) => {
+                const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
+                const newThrottle = +match;
+
+                const isValidThrottle = !isNaN(newThrottle) && newThrottle >= 0;
+
+                if (isValidThrottle) {
+                    config.throttleSecs = newThrottle;
+                    return `*throttle set to ${newThrottle} seconds*`;
                 }
-                else {
-                    responseText = `*invalid throttle value*`;
+
+                return `*invalid throttle value*`;
+            });
+
+            commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
+                return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
+            });
+
+            commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
+                const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
+                config.lastMessageTime = Date.now() + (+num * 6e4) - (throttle * 1e3);
+                return `*silenced for ${num} minutes*`;
+            });
+
+            commander.alias("mute", ["timeout", "sleep"]);
+
+            commander.add("unmute", "allows the bot to speak immediately", (config) => {
+                config.lastMessageTime = -1;
+                return `*timeout cleared*`;
+            });
+
+            commander.add("get time", "gets current UTC time and the election phase time", ({ phase, dateElection }) => {
+                const current = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
+
+                if (!['election', 'ended', 'cancelled'].includes(phase)) {
+                    return `${current} (election phase starts ${linkToRelativeTimestamp(dateElection)})`;
                 }
-            }
-            else if (content.includes('get throttle')) {
-                responseText = `Reply throttle is currently ${throttleSecs} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
-            }
-            else if (content.includes('clear timeout') || content.includes('unmute')) {
-                responseText = `*timeout cleared*`;
-                lastMessageTime = -1;
-            }
-            else if (["mute", "timeout", "sleep"].some((c) => content.includes(c))) {
-                const [, num = 5] = /\s+(\d+)$/.exec(content) || [];
-                const parsed = +num;
-                responseText = `*silenced for ${parsed} minutes*`;
-                lastMessageTime = Date.now() + (parsed * 60000) - (throttleSecs * 1000);
-            }
-            else if (content.includes('time')) {
-                responseText = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
-                if (['election', 'ended', 'cancelled'].includes(election.phase) == false) {
-                    responseText += ` (election phase starts ${linkToRelativeTimestamp(election.dateElection)})`;
-                }
-            }
-            else if (content.includes('chatroom')) {
-                responseText = `The election chat room is at ${election.chatUrl || "the platform 9 3/4"}`;
-            }
-            else if (["brew", "coffee"].every((c) => content.includes(c))) {
+
+                return current;
+            });
+
+            commander.add("coffee", "brews some coffee for the requestor", ({ name }) => {
                 //TODO: add for whom the coffee
                 const coffee = new RandomArray("cappuccino", "espresso", "latte", "ristretto", "macchiato");
-                responseText = `Brewing some ${coffee.getRandom()} for ${user.name || "somebody"}`;
-            }
-            else if (content.includes('commands')) {
-                responseText = 'moderator commands (requires mention): *' + [
-                    'say', 'alive', 'cron', 'test cron', 'chatroom',
-                    'get throttle', 'set throttle X (in seconds)',
-                    'mute', 'mute X (in minutes)', 'sleep X (in minutes)',
-                    'unmute', 'time', 'brew coffee'
-                ].join(', ') + '*';
+                return `Brewing some ${coffee.getRandom()} for ${name || "somebody"}`;
+            });
+
+            commander.add("timetravel", "sends bot back in time to another phase", (election, content) => {
+                const [, yyyy, MM, dd] = /(\d{4})-(\d{2})-(\d{2})/.exec(content) || [];
+
+                if (!yyyy || !MM || !dd) return "Sorry, Doc! Invalid coordinates";
+
+                const destination = new Date(+yyyy, +MM - 1, +dd);
+
+                const phase = Election.getPhase(election, destination);
+
+                election.phase = phase;
+
+                const intl = new Intl.DateTimeFormat("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "2-digit",
+                    hour12: true,
+                    hour: "2-digit",
+                    minute: "2-digit"
+                });
+
+                const arrived = intl
+                    .format(destination)
+                    .replace(/, /g, " ")
+                    .replace(/ (?:AM|PM)$/, "");
+
+                return `Arrived at ${arrived}, today's phase: ${phase}`;
+            });
+
+            commander.alias("timetravel", ["delorean"]);
+
+            commander.add("help", "Prints usage info", () => commander.help("*moderator commands (requires mention):*"));
+            commander.alias("help", ["usage", "commands"]);
+
+            const outputs = [
+                ["help", /help|usage|commands/],
+                ["say", /say/, origContent],
+                ["alive", /alive/, scriptHostname, scriptInitDate],
+                ["test cron", /test cron/, announcement],
+                ["get cron", /get cron/, announcement],
+                ["get throttle", /get throttle/, throttleSecs],
+                ["set throttle", /set throttle/, content, BotConfig],
+                ["get time", /get time/, election],
+                ["chatroom", /chatroom/, election],
+                ["coffee", /(?:brew|make).+coffee/, user],
+                ["timetravel", /88 miles|delorean/, election, content],
+                ["unmute", /unmute|clear timeout/, BotConfig],
+                ["mute", /mute|timeout|sleep/, BotConfig, content, throttleSecs]
+            ];
+
+            responseText = outputs.reduce(
+                (a, args) => a || commander.runIfMatches.call(commander, content, ...args)
+                , "");
+
+            if (debug) {
+                console.log(`response info:
+                response chars: ${responseText.length}
+                content: ${content}
+                original: ${origContent}
+                last message: ${BotConfig.lastMessageTime}
+                last activty: ${BotConfig.lastActivityTime}
+                `);
             }
 
-            if (responseText != null && responseText.length <= 500) {
-                console.log('RESPONSE', responseText);
-                await room.sendMessage(responseText);
+            const maxPerMessage = 500;
+
+            if (responseText) {
+                const messages = responseText.split(
+                    new RegExp(`(^(?:.|\\n|\\r){1,${maxPerMessage}})(?:\\n|$)`, "gm")
+                ).filter(Boolean);
+
+                console.log(`RESPONSE (${messages.length})`, responseText);
+
+                if (messages.length > 3) {
+                    await room.sendMessage(`I wrote a poem of ${messages.length} messages for you!`);
+                    return;
+                }
+
+                for (const message of messages) {
+                    await room.sendMessage(message);
+                    //avoid getting throttled ourselves
+                    await new Promise((resolve) => setTimeout(resolve, throttleSecs * 1e3));
+                }
 
                 // Record last activity time only
                 // so this doesn't reset any mute, if active
-                lastActivityTime = Date.now();
+                BotConfig.lastActivityTime = Date.now();
 
                 return; // no further action
             }
