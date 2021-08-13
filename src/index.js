@@ -62,7 +62,7 @@ const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
 const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
 // To stop bot from replying to too many messages in a short time
-let throttleSecs = Number(process.env.THROTTLE_SECS) || 10;
+let throttleSecs = +(process.env.THROTTLE_SECS) || 10;
 
 const chatDomain = /** @type {import("chatexchange/dist/Client").Host} */ (process.env.CHAT_DOMAIN);
 const chatRoomId = +process.env.CHAT_ROOM_ID;
@@ -156,12 +156,17 @@ let room = null;
 /* Low activity count variables */
 const lowActivityCheckMins = Number(process.env.LOW_ACTIVITY_CHECK_MINS) || 15;
 const lowActivityCountThreshold = Number(process.env.LOW_ACTIVITY_COUNT_THRESHOLD) || 30;
-// Variable to store time of last bot sent message for throttling
-let lastMessageTime = -1;
-// Variable to store time of last message activity in the room
-let lastActivityTime = Date.now();
-// Variable to track activity in the room
-let activityCount = 0;
+
+const BotConfig = {
+    // To stop bot from replying to too many messages in a short time
+    throttleSecs: +(process.env.THROTTLE_SECS) || 10,
+    // Variable to store time of last message activity in the room
+    lastActivityTime: Date.now(),
+    // Variable to store time of last bot sent message for throttling
+    lastMessageTime: -1,
+    // Variable to track activity in the room
+    activityCount: 0
+};
 
 // Overrides console.log/error to insert newlines
 (function () {
@@ -357,8 +362,8 @@ const main = async () => {
         if (content.includes('onebox') || content.includes('http')) return;
 
         // Record time of last new message/reply in room, and increment activity count
-        lastActivityTime = Date.now();
-        activityCount++;
+        BotConfig.lastActivityTime = Date.now();
+        BotConfig.activityCount++;
 
         // Get details of user who triggered the message
         let user;
@@ -465,7 +470,7 @@ const main = async () => {
 
 
         // If too close to previous message, ignore (apply throttle)
-        if (Date.now() < lastMessageTime + throttleSecs * 1000) {
+        if (Date.now() < BotConfig.lastMessageTime + throttleSecs * 1000) {
             console.log('THROTTLE - too close to previous message');
             return;
         }
@@ -481,8 +486,8 @@ const main = async () => {
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room
-                lastMessageTime = Date.now();
-                lastActivityTime = lastMessageTime;
+                BotConfig.lastMessageTime = Date.now();
+                BotConfig.lastActivityTime = BotConfig.lastMessageTime;
 
                 return; // stop here since we are using a different default response method
             }
@@ -560,8 +565,8 @@ const main = async () => {
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room
-                lastMessageTime = Date.now();
-                lastActivityTime = lastMessageTime;
+                BotConfig.lastMessageTime = Date.now();
+                BotConfig.lastActivityTime = BotConfig.lastMessageTime;
                 return;
             }
 
@@ -570,8 +575,8 @@ const main = async () => {
                 await msg.reply(responseText);
 
                 // Record last sent message time so we don't flood the room
-                lastMessageTime = Date.now();
-                lastActivityTime = lastMessageTime;
+                BotConfig.lastMessageTime = Date.now();
+                BotConfig.lastActivityTime = BotConfig.lastMessageTime;
             }
         }
 
@@ -645,8 +650,8 @@ const main = async () => {
                     await msg.reply(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    lastMessageTime = Date.now();
-                    lastActivityTime = lastMessageTime;
+                    BotConfig.lastMessageTime = Date.now();
+                    BotConfig.lastActivityTime = BotConfig.lastMessageTime;
 
                     return; // stop here since we are using a different default response method
                 }
@@ -790,8 +795,8 @@ const main = async () => {
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room
-                lastMessageTime = Date.now();
-                lastActivityTime = lastMessageTime;
+                BotConfig.lastMessageTime = Date.now();
+                BotConfig.lastActivityTime = BotConfig.lastMessageTime;
             }
         }
     });
@@ -865,19 +870,19 @@ const main = async () => {
 
         // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes,
         // or no activity for 2 hours, remind users that bot is around to help, if last message was not posted by the bot
-        else if ((activityCount >= lowActivityCountThreshold && lastActivityTime + 4 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) ||
-            (isStackOverflow && lastActivityTime != lastMessageTime && lastActivityTime + 2 * 60 * 60000 < Date.now())) {
-            console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
-                `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
+        else if ((BotConfig.activityCount >= lowActivityCountThreshold && BotConfig.lastActivityTime + 4 * 60000 < Date.now() && BotConfig.lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) ||
+            (isStackOverflow && BotConfig.lastActivityTime != BotConfig.lastMessageTime && BotConfig.lastActivityTime + 2 * 60 * 60000 < Date.now())) {
+            console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
+                `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
             await sayHI(room, election);
 
             // Record last sent message time so we don't flood the room
-            lastMessageTime = Date.now();
-            lastActivityTime = lastMessageTime;
+            BotConfig.lastMessageTime = Date.now();
+            BotConfig.lastActivityTime = BotConfig.lastMessageTime;
 
             // Reset last activity count
-            activityCount = 0;
+            BotConfig.activityCount = 0;
         }
 
     }, scrapeIntervalMins * 60000);
@@ -937,7 +942,7 @@ const main = async () => {
 
         // Record last activity time only
         // so this doesn't reset any mute, if active
-        lastActivityTime = Date.now();
+        BotConfig.lastActivityTime = Date.now();
 
         res.redirect(`/say?password=${password}&success=true`);
     });
