@@ -54,7 +54,12 @@ export default class Election {
             const metaElems = content.find(".flex--item.mt4 .d-flex.gs4 .flex--item:nth-child(2)");
             const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
 
-            const [nominationDate, startDate, endDate, numCandidates, numPositions] = metaVals;
+            const [numCandidates, numPositions] = metaVals.slice(-2, metaVals.length);
+
+            // Insert null value in second position for elections with no primary phase
+            if (metaVals.length === 5) metaVals.splice(1, 0, null);
+
+            const [nominationDate, primaryDate, startDate, endDate] = metaVals;
 
             const electionPost = $('#mainbar .js-post-body .wiki-ph');
 
@@ -64,7 +69,7 @@ export default class Election {
             this.siteUrl = 'https://' + this.siteHostname;
             this.title = $('#content h1').first().text().trim();
             this.dateNomination = nominationDate;
-            this.datePrimary = null; //sidebarValues[1]; //TODO where's primary in the new UI?
+            this.datePrimary = primaryDate;
             this.dateElection = startDate;
             this.dateEnded = endDate;
             this.numCandidates = +numCandidates;
