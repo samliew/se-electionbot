@@ -491,12 +491,12 @@ const main = async () => {
                     .replace(/, /g, " ")
                     .replace(/ (?:AM|PM)$/, "");
 
-                return `Arrived at ${arrived}, today's phase: ${phase}`;
+                return `Arrived at ${arrived}, today's phase: ${phase || "no phase"}`;
             });
 
-            commander.alias("timetravel", ["delorean"]);
+            commander.alias("timetravel", ["delorean", "88 miles"]);
 
-            commander.add("help", "Prints usage info", () => commander.help("*moderator commands (requires mention):*"));
+            commander.add("help", "Prints usage info", () => commander.help("moderator commands (requires mention):"));
             commander.alias("help", ["usage", "commands"]);
 
             const outputs = [
@@ -510,7 +510,7 @@ const main = async () => {
                 ["get time", /get time/, election],
                 ["chatroom", /chatroom/, election],
                 ["coffee", /(?:brew|make).+coffee/, user],
-                ["timetravel", /88 miles|delorean/, election, content],
+                ["timetravel", /88 miles|delorean|timetravel/, election, content],
                 ["unmute", /unmute|clear timeout/, BotConfig],
                 ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs]
             ];
