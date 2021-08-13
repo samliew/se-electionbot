@@ -2,6 +2,10 @@ const { default: Election } = require("./Election.js");
 const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize, capitalize } = require("./utils.js");
 
 /**
+ * @typedef {import("./index").Badge} Badge
+ */
+
+/**
  * @summary makes bot remind users that they are here
  * @param {{ sendMessage(text:string): Promise<void> }} room //TODO: redefine
  * @param {Election} election
@@ -106,8 +110,8 @@ const sayAboutVoting = (
 
 /**
  * @summary builds a response to badges of a certain type query
- * @param {{ type: "moderation"|"participation"|"editing"|string, name:string, id:string }[]} badges
- * @param {"moderation"|"participation"|"editing"} type
+ * @param {Badge[]} badges
+ * @param {Badge["type"]} type
  * @param {boolean} [isSO]
  * @returns {string}
  */
@@ -128,7 +132,7 @@ const sayBadgesByType = (badges, type, isSO = true) => {
 /**
  * @summary builds a response to the required badges query
  * @param {Election} election
- * @param {{ required: boolean, id: string, name: string }[]} badges
+ * @param {Badge[]} badges
  * @returns {string}
  */
 const sayRequiredBadges = (election, badges) => {
@@ -273,6 +277,7 @@ const sayOffTopicMessage = (election, asked) => {
 /**
  * @summary builds an off-topic warning message
  * @param {Election} election
+ * @returns {string}
  */
 const sayWhatModsDo = (election) => {
     const { siteUrl } = election;
@@ -288,7 +293,27 @@ const sayWhatModsDo = (election) => {
     const modsDo = `They are volunteers who are equipped to handle situations regular users can't, like ${modActivities.join(", ")}`;
 
     return `${makeURL("Elected ♦ moderators", `${siteUrl}/help/site-moderators`)} are ${modsAre}. ${modsDo}.`;
+};
 
+/**
+ * @summary builds a candidate score formula message
+ * @param {Badge[]} badges
+ * @returns {string}
+ */
+const sayCandidateScoreFormula = (badges) => {
+
+    const badgeCounts = { moderation: 0, editing: 0, participation: 0 };
+
+    const numModBadges = badges.reduce((a, { type }) => {
+        a[type] += 1;
+        return a;
+    }, badgeCounts);
+
+    const counts = Object.entries(numModBadges).map(([type, count]) => `${count} ${type}`).join(", ");
+
+    const formula = `1 point for each 1,000 reputation up to 20,000 reputation (for 20 points); and 1 point for each of the ${counts} 8 moderation, 6 participation, and 6 editing badges`;
+
+    return `The 40-point ${makeURL("candidate score", "https://meta.stackexchange.com/a/252643")} is calculated this way: ${formula}`;
 };
 
 module.exports = {
