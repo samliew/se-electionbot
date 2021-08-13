@@ -53,8 +53,8 @@ export default class Election {
      * @param {string} endDate
      * @returns {ElectionPhase}
      */
-    static getPhase(nominationDate, startDate, primaryDate, endDate) {
-        const now = Date.now();
+    static getPhase(nominationDate, startDate, primaryDate, endDate, today = new Date()) {
+        const now = today.valueOf();
 
         /** @type {[string, ElectionPhase][]} */
         const phaseMap = [
@@ -64,7 +64,7 @@ export default class Election {
             [nominationDate, "nomination"]
         ];
 
-        const [, phase = null] = phaseMap.find(([datestr]) => new Date(datestr).valueOf() <= now) || [];
+        const [, phase = null] = phaseMap.find(([d]) => !!d && new Date(d).valueOf() <= now) || [];
 
         return phase;
     }
