@@ -16,7 +16,7 @@ describe('Commander', () => {
 
         it('should correctly list aliases', () => {
             const help = commander.help();
-            expect(help).to.equal(`- [bark] (say) barks, what else?`);
+            expect(help).to.equal(`Commands\n- [bark] (say) barks, what else?`);
         });
 
     });
