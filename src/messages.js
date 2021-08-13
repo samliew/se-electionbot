@@ -221,7 +221,7 @@ const sayCurrentWinners = (election) => {
     const { length } = arrWinners;
 
     if (phase === 'ended' && length > 0) {
-        const winnerNames = arrWinners.map(({ userName, userId }) => makeURL(userName, `/${siteUrl}/users/${userId}`));
+        const winnerNames = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
         return `The winner${pluralize(length)} ${length > 1 ? 'are' : 'is'}: ${winnerNames.join(', ')}.`;
     }
 
