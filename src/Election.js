@@ -159,6 +159,8 @@ export default class Election {
             this.repVote = 150;
             this.repNominate = repToNominate;
 
+            //clear an array before rescraping
+            this.arrNominees.length = 0;
             this.arrNominees.push(...nominees);
 
             this.qnaUrl = process.env.ELECTION_QA_URL || electionPost.find('a[href*="/questions/tagged/election"]').attr('href');

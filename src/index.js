@@ -231,9 +231,7 @@ async function announceWinners(election = null) {
 
     const { length } = arrWinners;
 
-    if (debug) {
-        console.log('announceWinners() called: ', arrWinners);
-    }
+    if (debug) console.log('announceWinners() called: ', arrWinners);
 
     // Needs to have ended and have winners
     if (phase != 'ended' || length === 0) return false;
