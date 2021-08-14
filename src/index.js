@@ -1,5 +1,5 @@
 import Client from 'chatexchange';
-import { AllHtmlEntities } from 'html-entities';
+import { decode } from 'html-entities';
 import { CommandManager } from './commands';
 const Election = require('./Election').default;
 const announcement = new (require('./ScheduledAnnouncement').default);
@@ -18,7 +18,7 @@ const {
     makeURL,
     mapToRequired,
     mapToName,
-} = require('./utils');
+} = require('./utils').default;
 
 const { RandomArray, getRandomPlop } = require("./random.js");
 
@@ -334,7 +334,7 @@ const main = async () => {
         const encoded = await msg.content;
 
         // Decode HTML entities in messages, lowercase version for matching
-        const origContent = AllHtmlEntities.decode(encoded);
+        const origContent = decode(encoded);
 
         const content = origContent.toLowerCase().replace(/^@\S+\s+/, '');
 
@@ -769,7 +769,7 @@ const main = async () => {
 
             // Current mods
             else if (isAskedForCurrentMods(content)) {
-                responseText = sayCurrentMods(election, currentSiteMods, AllHtmlEntities.decode);
+                responseText = sayCurrentMods(election, currentSiteMods, decode);
             }
 
             // How to nominate self/others
