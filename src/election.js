@@ -104,7 +104,10 @@ export default class Election {
         };
     }
 
-    async scrapeElection() {
+    /**
+     * @param {import("./index.js").BotConfig} config
+     */
+    async scrapeElection(config) {
 
         // Save prev values so we can compare changes after
         this._prevObj = Object.assign({}, this); // fast way of cloning an object
@@ -113,7 +116,7 @@ export default class Election {
         const electionPageUrl = `${this.electionUrl}?tab=nomination`;
 
         try {
-            const pageHtml = await fetchUrl(electionPageUrl);
+            const pageHtml = await fetchUrl(config, electionPageUrl);
 
             // Parse election page
             const $ = cheerio.load(/** @type {string} */(pageHtml));

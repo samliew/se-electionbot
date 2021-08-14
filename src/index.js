@@ -39,10 +39,11 @@ const announcement = new Announcement();
  *
  * @typedef {{
  *  throttleSecs: number,
- *  lastActivityTime
- *  lastMessageTime
- *  activityCount
- *  debug
+ *  lastActivityTime: number,
+ *  lastMessageTime: number,
+ *  activityCount: number,
+ *  debug: boolean,
+ *  verbose: boolean
  * }} BotConfig
  */
 
@@ -153,7 +154,9 @@ const announcement = new Announcement();
         // Variable to track activity in the room
         activityCount: 0,
         // Debug mode
-        debug: process.env.DEBUG.toLowerCase() !== 'false'
+        debug: JSON.parse(process.env.DEBUG?.toLowerCase() || "false"),
+        // Verbose logging
+        verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false")
     };
 
     // Overrides console.log/error to insert newlines
@@ -280,13 +283,13 @@ const announcement = new Announcement();
             key: stackApikey
         }).toString();
 
-        const currSiteModApiResponse = /** @type {APIListResponse|null} */(await fetchUrl(modURL.toString(), true));
+        const currSiteModApiResponse = /** @type {APIListResponse|null} */(await fetchUrl(BotConfig, modURL.toString(), true));
         const currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1) : [];
         currentSiteModIds = currentSiteMods.map(({ user_id }) => user_id);
 
         // Wait for election page to be scraped
         election = new Election(electionUrl);
-        await election.scrapeElection();
+        await election.scrapeElection(BotConfig);
         if (election.validate() === false) {
             console.error('FATAL - Invalid election data!');
         }
@@ -725,7 +728,7 @@ const announcement = new Announcement();
                 else if (isAskedForCandidateScore(content)) {
 
                     //TODO: use config object pattern instead, 6 parameters is way too much
-                    const calcCandidateScore = makeCandidateScoreCalc(
+                    const calcCandidateScore = makeCandidateScoreCalc(BotConfig,
                         scriptHostname, chatDomain, electionSiteApiSlug,
                         stackApikey, electionBadges, soPastAndPresentModIds
                     );

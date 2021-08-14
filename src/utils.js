@@ -99,14 +99,13 @@ export const startServer = async (room, config) => {
 
 /**
  * @summary fetches the endpoint
+ * @param {import("./index").BotConfig} config
  * @param {string} url
  * @param {boolean} [json]
  * @returns {Promise<any>}
  */
-export const fetchUrl = async (url, json = false) => {
-    const { SOURCE_VERSION, ACCOUNT_EMAIL, DEBUG } = process.env;
-
-    const debug = DEBUG.toLowerCase() !== 'false'; // default to true
+export const fetchUrl = async (config, url, json = false) => {
+    const { SOURCE_VERSION, ACCOUNT_EMAIL } = process.env;
 
     try {
         const { data } = await axios({
@@ -116,7 +115,11 @@ export const fetchUrl = async (url, json = false) => {
                 'User-Agent': `Node.js/ElectionBot ver.${SOURCE_VERSION}; AccountEmail ${ACCOUNT_EMAIL}`,
             },
         });
-        console.log(`FETCH - ${url}`, debug ? (json ? JSON.stringify(data) : data) : '');
+
+        if (config.debug) {
+            console.log(`FETCH - ${url}`, config.verbose ? (json ? JSON.stringify(data) : data) : '');
+        }
+
         return data;
     }
     catch (e) {
@@ -241,16 +244,17 @@ export const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${lin
 
 /**
  * @description Expensive, up to three requests. Only one, if the linked account is the site we want.
+ * @param {import("./index").BotConfig} config
  * @param {number} chatUserId
  * @param {string} chatdomain
  * @param {string} siteUrl
  * @returns {Promise<number|null>}
  */
-export const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, siteUrl) => {
+export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, chatdomain, siteUrl) => {
     const { STACK_API_KEY } = process.env;
     let userId = null;
 
-    const chatUserPage = await fetchUrl(`https://chat.${chatdomain}/users/${chatUserId}`);
+    const chatUserPage = await fetchUrl(config, `https://chat.${chatdomain}/users/${chatUserId}`);
 
     let $ = cheerio.load(/** @type {string} */(chatUserPage));
 
@@ -263,7 +267,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomai
     // Linked site is not the one we wanted
     try {
         // Fetch linked site profile page to get network link
-        const linkedUserProfilePage = await fetchUrl(`${linkedUserUrl}?tab=profile`);
+        const linkedUserProfilePage = await fetchUrl(config, `${linkedUserUrl}?tab=profile`);
 
         $ = cheerio.load(/** @type {string} */(linkedUserProfilePage));
 
@@ -280,7 +284,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomai
         }).toString();
 
         // Fetch network accounts via API to get the account of the site we want
-        const { items = [] } = /** @type {APIListResponse} */(await fetchUrl(url.toString()));
+        const { items = [] } = /** @type {APIListResponse} */(await fetchUrl(config, url.toString()));
 
         const siteAccount = items.filter(v => v.site_url.includes(siteUrl));
 

@@ -42,6 +42,7 @@ export const makeIsEligible = (requiredRep) =>
 
 /**
  * @summary HOF with common parameters
+ * @param {import("./index.js").BotConfig} config
  * @param {string} hostname
  * @param {string} chatDomain
  * @param {string} apiSlug
@@ -49,7 +50,7 @@ export const makeIsEligible = (requiredRep) =>
  * @param {import("./utils").Badge[]} badges
  * @param {number[]} modIds
  */
-export const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
+export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
     /**
      * @summary calculates candidate score
      * @param {Election} election
@@ -91,7 +92,7 @@ export const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, ba
         }
         // If not Chat.SO, resolve election site user id from chat id (chat has different ids)
         else if (!chatDomain.includes('stackoverflow.com')) {
-            userId = await getSiteUserIdFromChatStackExchangeId(userId, chatDomain, hostname);
+            userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname);
 
             // Unable to get user id on election site
             if (userId === null) {
@@ -100,7 +101,7 @@ export const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, ba
             }
         }
 
-        const items = await getBadges(user, apiSlug, apiKey);
+        const items = await getBadges(config, user, apiSlug, apiKey);
 
         // Validation
         if (!items.length) {
