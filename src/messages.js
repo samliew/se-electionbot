@@ -165,7 +165,7 @@ const sayMissingBadges = (badgeNames, count, required = false) => ` The user is 
  * @summary builds current mods list response message
  * @param {Election} election
  * @param {import("./utils.js").ResItem[]} currMods
- * @param {import("html-entities").AllHtmlEntities["decode"]} decodeEntities
+ * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
 const sayCurrentMods = (election, currMods, decodeEntities) => {
