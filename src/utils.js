@@ -10,7 +10,12 @@ export const apiBase = `https://api.stackexchange.com`;
 
 export const apiVer = 2.2;
 
-export const startServer = () => {
+/**
+ * @summary starts the bot server
+ * @param {{ sendMessage(msg:string): Promise<any> }} room
+ * @returns {Promise<import("express").Application>}
+ */
+export const startServer = async (room) => {
     const app = express().set('port', process.env.PORT || 5000);
     const staticPath = join(__dirname, '../static');
 
@@ -29,9 +34,31 @@ export const startServer = () => {
         console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
     });
 
-    //see https://stackoverflow.com/a/14516195/11407695
-    process.on('SIGINT', () => server.close(() => console.log('gracefully shutting down')));
+    const farewell = async () => {
+        await room.sendMessage("have to go now, will be back soon");
+        terminate(server);
+    };
 
+    /** @param {import("http").Server} server */
+    const terminate = (server) => server.close(() => {
+        console.log('gracefully shutting down');
+        process.exit(0);
+    });
+
+    /** @see https://stackoverflow.com/a/67567395/11407695 */
+    if (process.platform === "win32") {
+        const rl = await import("readline");
+        const rli = rl.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        rli.on("SIGINT", farewell);
+        return app;
+    }
+
+    //see https://stackoverflow.com/a/14516195/11407695
+    process.on('SIGINT', farewell);
     return app;
 };
 

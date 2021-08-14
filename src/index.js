@@ -967,7 +967,7 @@ const main = async () => {
 
 
     // Listen to requests from web form
-    const app = startServer();
+    const app = await startServer(room);
     app.get('/say', ({ query }, res) => {
         const { success, password = "", message = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
