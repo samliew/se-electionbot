@@ -5,6 +5,7 @@
     "noEmit": true,
     "declaration": false,
     "target": "ES6",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "skipLibCheck": true
   }
 }

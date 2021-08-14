@@ -2,7 +2,7 @@ const { getBadges } = require("./api");
 const { default: Election } = require("./Election");
 const { sayMissingBadges } = require("./messages");
 const { getRandomOops } = require("./random");
-const { getSiteUserIdFromChatStackExchangeId, mapToName, mapToRequired, makeURL, pluralize } = require("./utils");
+const { getSiteUserIdFromChatStackExchangeId, mapToName, mapToRequired, makeURL, pluralize, mapToId } = require("./utils");
 
 /**
  * @typedef {{
@@ -62,158 +62,163 @@ const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, badges, m
         //TODO: decide how to avoid mutation
         let { userId, content } = message;
 
-        if (isNaN(userId)) return;
+        if (isNaN(userId)) {
+            console.error(`invalid user id: ${userId}`);
+            return "";
+        }
 
         const { arrNominees, electionUrl, phase, repNominate, siteUrl } = election;
 
         const { isModerator } = user;
 
-        let responseText;
+        let responseText = "";
 
         const findingTargetCandidateScore = isModerator && /what is the candidate score for \d+$/.test(content);
 
-        if (!findingTargetCandidateScore && isSO) {
+        const wasModerator = modIds.includes(userId);
 
+        if (!findingTargetCandidateScore && isSO && (isModerator || wasModerator)) {
             if (isModerator) {
-                responseText = getRandomOops() + ` you already have a diamond!`;
-            } else if (modIds.includes(userId)) {
-                responseText = `are you *really* sure you want to be a moderator again???`;
+                return `${getRandomOops()} you already have a diamond!`;
+            } else if (wasModerator) {
+                return `are you *really* sure you want to be a moderator again???`;
             }
-
         }
-        // Default
-        else {
 
-            // If privileged user asking candidate score of another user, get user id from message
-            if (findingTargetCandidateScore) {
-                userId = Number(content.match(/\d+$/)[0]);
-            }
-            // If not Chat.SO, resolve election site user id from chat id (chat has different ids)
-            else if (!chatDomain.includes('stackoverflow.com')) {
-                userId = await getSiteUserIdFromChatStackExchangeId(userId, chatDomain, hostname);
+        // If privileged user asking candidate score of another user, get user id from message
+        if (findingTargetCandidateScore) {
+            userId = Number(content.match(/\d+$/)[0]);
+        }
+        // If not Chat.SO, resolve election site user id from chat id (chat has different ids)
+        else if (!chatDomain.includes('stackoverflow.com')) {
+            userId = await getSiteUserIdFromChatStackExchangeId(userId, chatDomain, hostname);
 
-                // Unable to get user id on election site
-                if (userId === null) {
-                    console.error(`Unable to get site user id for ${userId}.`);
-                    return;
-                }
-            }
-
-            const items = await getBadges(user, apiSlug, apiKey);
-
-            // Validation
-            if (!items.length) {
-                console.error('No data from API.');
+            // Unable to get user id on election site
+            if (userId === null) {
+                console.error(`Unable to get site user id for ${userId}.`);
                 return "";
             }
+        }
 
-            const userBadgeNames = items.map(mapToName);
+        const items = await getBadges(user, apiSlug, apiKey);
 
-            const [badge] = items;
+        // Validation
+        if (!items.length) {
+            console.error('No data from API.');
+            return "";
+        }
 
-            //TODO: why use badges for that if we pass an instance of User?
-            const userRep = badge.user.reputation;
+        const userBadgeIds = items.map(mapToId);
 
-            const hasNominated = arrNominees.some(v => v.userId === userId);
+        const [badge] = items;
 
-            const repScore = Math.min(Math.floor(userRep / 1000), 20);
-            const badgeScore = userBadgeNames.filter(v => badges.some(({ name }) => name === v)).length;
-            const candidateScore = repScore + badgeScore;
+        //TODO: why use badges for that if we pass an instance of User?
+        const userRep = badge.user.reputation;
 
-            //TODO: userBadges contains '&' char escaped '&amp' - request insecure maybe?
-            const missingBadges = badges.filter(({ name }) => !userBadgeNames.includes(name));
+        const hasNominated = arrNominees.some(v => v.userId === userId);
 
-            const requiredBadgeNames = badges.filter(mapToRequired);
+        const repScore = Math.min(Math.floor(userRep / 1000), 20);
+        const badgeScore = userBadgeIds.filter(v => badges.some(({ id }) => id === v)).length;
+        const candidateScore = repScore + badgeScore;
 
-            const missingRequiredBadges = isSO ? requiredBadgeNames.filter(badge => missingBadges.includes(badge)) : [];
+        const missingBadges = badges.filter(({ id }) => !userBadgeIds.includes(id));
 
-            const { length: numMissingBadges } = missingBadges;
+        const requiredBadges = badges.filter(mapToRequired);
 
-            const { length: numMissingRequiredBadges } = missingRequiredBadges;
+        const missingBadgeIds = missingBadges.map(({ id }) => id);
 
-            const missingRequiredBadgeNames = missingRequiredBadges.map(mapToName);
-            const missingBadgeNames = missingBadges.map(mapToName);
+        const missingRequiredBadges = isSO ? requiredBadges.filter(({ id }) => missingBadgeIds.includes(id)) : [];
 
-            if (numMissingBadges > 0) console.log('Missing Badges: ', missingBadgeNames.join(','));
+        const { length: numMissingBadges } = missingBadges;
 
-            const currMaxScore = 40;
+        const { length: numMissingRequiredBadges } = missingRequiredBadges;
 
-            const isEligible = makeIsEligible(repNominate);
+        const missingRequiredBadgeNames = missingRequiredBadges.map(mapToName);
+        const missingBadgeNames = missingBadges.map(mapToName);
 
-            // Privileged user asking for candidate score of another user
-            if (findingTargetCandidateScore) {
+        if (numMissingBadges > 0) console.log('Missing Badges: ', missingBadgeNames.join(','));
 
-                responseText = `The candidate score for user ${makeURL(userId.toString(), `${siteUrl}/users/${userId}`)} is ${getScoreText(candidateScore, currMaxScore)}.`;
+        const currMaxScore = 40;
 
-                if (numMissingRequiredBadges > 0) {
-                    responseText += sayMissingBadges(missingRequiredBadgeNames, numMissingRequiredBadges, true);
-                } else if (numMissingBadges > 0) {
-                    responseText += sayMissingBadges(missingBadgeNames, numMissingBadges);
-                }
+        const isEligible = makeIsEligible(repNominate);
+
+        // Privileged user asking for candidate score of another user
+        if (findingTargetCandidateScore) {
+
+            responseText = `The candidate score for user ${makeURL(userId.toString(), `${siteUrl}/users/${userId}`)} is ${getScoreText(candidateScore, currMaxScore)}.`;
+
+            if (numMissingRequiredBadges > 0) {
+                responseText += sayMissingBadges(missingRequiredBadgeNames, numMissingRequiredBadges, true);
+            } else if (numMissingBadges > 0) {
+                responseText += sayMissingBadges(missingBadgeNames, numMissingBadges);
             }
-            // Does not meet minimum requirements
-            else if (isEligible(userRep, numMissingRequiredBadges)) {
-                responseText = `You are not eligible to nominate yourself in the election`;
+        }
+        // Does not meet minimum requirements
+        else if (!isEligible(userRep, numMissingRequiredBadges)) {
+            responseText = `You are not eligible to nominate yourself in the election`;
 
-                const isUnderRep = userRep < repNominate;
+            const isUnderRep = userRep < repNominate;
 
-                // Not enough rep
-                if (isUnderRep) {
-                    responseText += ` as you do not have at least ${repNominate} reputation`;
-                }
-
-                // Don't have required badges (SO-only)
-                if (numMissingRequiredBadges > 0) {
-                    responseText += isUnderRep ? '. You are also' : ' as you are';
-                    responseText += ` missing the required badge${pluralize(numMissingRequiredBadges)}: ${missingRequiredBadgeNames.join(', ')}`;
-                }
-
-                responseText += `. Your candidate score is ${getScoreText(candidateScore, currMaxScore)}.`;
-            } else if (candidateScore >= currMaxScore) {
-                responseText = `Wow! You have a maximum candidate score of **${currMaxScore}**!`;
-
-                // Already nominated, and not ended/cancelled
-                if (hasNominated && ['nomination', 'primary', 'election'].includes(phase)) {
-                    responseText += ` I can see you're already a candidate - good luck!`;
-                }
-                // If have not begun, or nomination phase, ask user to nominate themselves
-                else if (['null', 'nomination'].includes(phase)) {
-                    responseText += ` Please consider nominating yourself in the ${makeURL("election", electionUrl)}!`;
-                }
-                // Did not nominate (primary, election, ended, cancelled)
-                else if (!hasNominated) {
-
-                    const phaseMap = {
-                        "ended": `the election has ended.`,
-                        "cancelled": `the election is cancelled.`,
-                        "election": `the nomination period is over`,
-                        "primary": `the nomination period is over`
-                    };
-
-                    responseText += `Alas, ${phaseMap[phase]} Hope to see your candidature next election!`;
-                }
+            // Not enough rep
+            if (isUnderRep) {
+                responseText += ` as you do not have at least ${repNominate} reputation`;
             }
-            // All others
-            else {
-                responseText = `Your candidate score is **${candidateScore}** (out of ${currMaxScore}).`;
 
-                if (numMissingBadges > 0) {
-                    responseText += sayMissingBadges(missingBadgeNames, numMissingBadges);
-                }
+            // Don't have required badges (SO-only)
+            if (numMissingRequiredBadges > 0) {
+                responseText += isUnderRep ? '. You are also' : ' as you are';
+                responseText += ` missing the required badge${pluralize(numMissingRequiredBadges)}: ${missingRequiredBadgeNames.join(', ')}`;
+            }
 
-                // Already nominated, and not ended/cancelled
-                if (hasNominated && ['nomination', 'primary', 'election'].includes(phase)) {
-                    responseText += ` I can see you're already a candidate. Good luck!`;
-                }
-                // If have not begun, or nomination phase, ask user to nominate themselves
-                else if (['null', 'nomination'].includes(phase)) {
+            responseText += `. Your candidate score is ${getScoreText(candidateScore, currMaxScore)}.`;
+        } else if (candidateScore >= currMaxScore) {
+            responseText = `Wow! You have a maximum candidate score of **${currMaxScore}**!`;
 
-                    const perhapsNominateThreshold = 30;
+            // Already nominated, and not ended/cancelled
+            if (hasNominated && ['nomination', 'primary', 'election'].includes(phase)) {
+                responseText += ` I can see you're already a candidate - good luck!`;
+            }
+            // If have not begun, or nomination phase, ask user to nominate themselves
+            else if (['null', 'nomination'].includes(phase)) {
+                responseText += ` Please consider nominating yourself in the ${makeURL("election", electionUrl)}!`;
+            }
+            // Did not nominate (primary, election, ended, cancelled)
+            else if (!hasNominated) {
 
-                    responseText += candidateScore >= perhapsNominateThreshold ?
-                        ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
-                        ` Having a high score is not a requirement - you can still nominate yourself!`;
-                }
+                const phaseMap = {
+                    "ended": `the election has ended.`,
+                    "cancelled": `the election is cancelled.`,
+                    "election": `the nomination period is over`,
+                    "primary": `the nomination period is over`
+                };
+
+                responseText += `Alas, ${phaseMap[phase]} Hope to see your candidature next election!`;
+            } else {
+                console.error("this case??", {
+                    candidateScore, currMaxScore, hasNominated, phase
+                });
+            }
+        }
+        // All others
+        else {
+            responseText = `Your candidate score is **${candidateScore}** (out of ${currMaxScore}).`;
+
+            if (numMissingBadges > 0) {
+                responseText += sayMissingBadges(missingBadgeNames, numMissingBadges);
+            }
+
+            // Already nominated, and not ended/cancelled
+            if (hasNominated && ['nomination', 'primary', 'election'].includes(phase)) {
+                responseText += ` I can see you're already a candidate. Good luck!`;
+            }
+            // If have not begun, or nomination phase, ask user to nominate themselves
+            else if (['null', 'nomination'].includes(phase)) {
+
+                const perhapsNominateThreshold = 30;
+
+                responseText += candidateScore >= perhapsNominateThreshold ?
+                    ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
+                    ` Having a high score is not a requirement - you can still nominate yourself!`;
             }
         }
 

@@ -65,6 +65,7 @@ const sayAreModsPaid = (election) => {
 };
 
 /**
+ * TODO: do not add nomination phase if not started
  * @summary Default election message
  * @param {Election} election
  * @returns {string}
@@ -164,7 +165,7 @@ const sayMissingBadges = (badgeNames, count, required = false) => ` The user is 
  * @summary builds current mods list response message
  * @param {Election} election
  * @param {import("./utils.js").ResItem[]} currMods
- * @param {import("html-entities").decode} decodeEntities
+ * @param {import("html-entities").AllHtmlEntities["decode"]} decodeEntities
  * @returns {string}
  */
 const sayCurrentMods = (election, currMods, decodeEntities) => {
@@ -220,7 +221,7 @@ const sayCurrentWinners = (election) => {
     const { length } = arrWinners;
 
     if (phase === 'ended' && length > 0) {
-        const winnerNames = arrWinners.map(({ userName, userId }) => makeURL(userName, `/${siteUrl}/users/${userId}`));
+        const winnerNames = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
         return `The winner${pluralize(length)} ${length > 1 ? 'are' : 'is'}: ${winnerNames.join(', ')}.`;
     }
 
@@ -249,7 +250,7 @@ const sayElectionSchedule = (election) => {
     const maxPhaseLen = Math.max(...dateMap.map(([{ length }]) => length));
 
     const phases = dateMap.map(
-        ([ph, date]) => `    ${capitalize(ph)}: ${" ".repeat(maxPhaseLen - ph.length)}${date}${ph === phase ? arrow : ""}`
+        ([ph, date]) => `    ${capitalize(ph)}: ${" ".repeat(maxPhaseLen - ph.length)}${date || "never"}${ph === phase ? arrow : ""}`
     );
 
     return [prefix, ...phases].join("\n");

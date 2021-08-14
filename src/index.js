@@ -1,5 +1,6 @@
 import Client from 'chatexchange';
-import { decode } from 'html-entities';
+import { AllHtmlEntities } from 'html-entities';
+import { CommandManager } from './commands';
 const Election = require('./Election').default;
 const announcement = new (require('./ScheduledAnnouncement').default);
 
@@ -54,15 +55,12 @@ const { makeCandidateScoreCalc } = require("./score");
 // If running locally, load env vars from .env file
 if (process.env.NODE_ENV !== 'production') {
     const dotenv = require('dotenv');
-    dotenv.load({ debug: process.env.DEBUG === 'true' });
+    dotenv.config({ debug: process.env.DEBUG === 'true' });
 }
 
 // Environment variables
 const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
 const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
-
-// To stop bot from replying to too many messages in a short time
-let throttleSecs = Number(process.env.THROTTLE_SECS) || 10;
 
 const chatDomain = /** @type {import("chatexchange/dist/Client").Host} */ (process.env.CHAT_DOMAIN);
 const chatRoomId = +process.env.CHAT_ROOM_ID;
@@ -135,7 +133,7 @@ const electionBadges = [
     { name: 'Quorum', required: false, type: "participation", id: "900" },
     { name: 'Yearling', required: false, type: "participation", id: "13" },
     { name: 'Organizer', required: false, type: "editing", id: "5" },
-    { name: 'Copy Editor', required: false, type: "editing", id: "233" },
+    { name: 'Copy Editor', required: false, type: "editing", id: "223" },
     { name: 'Explainer', required: false, type: "editing", id: "4368" },
     { name: 'Refiner', required: false, type: "editing", id: "4369" },
     { name: 'Tag Editor', required: false, type: "editing", id: "254" },
@@ -156,12 +154,17 @@ let room = null;
 /* Low activity count variables */
 const lowActivityCheckMins = Number(process.env.LOW_ACTIVITY_CHECK_MINS) || 15;
 const lowActivityCountThreshold = Number(process.env.LOW_ACTIVITY_COUNT_THRESHOLD) || 30;
-// Variable to store time of last bot sent message for throttling
-let lastMessageTime = -1;
-// Variable to store time of last message activity in the room
-let lastActivityTime = Date.now();
-// Variable to track activity in the room
-let activityCount = 0;
+
+const BotConfig = {
+    // To stop bot from replying to too many messages in a short time
+    throttleSecs: +(process.env.THROTTLE_SECS) || 10,
+    // Variable to store time of last message activity in the room
+    lastActivityTime: Date.now(),
+    // Variable to store time of last bot sent message for throttling
+    lastMessageTime: -1,
+    // Variable to track activity in the room
+    activityCount: 0
+};
 
 // Overrides console.log/error to insert newlines
 (function () {
@@ -231,9 +234,7 @@ async function announceWinners(election = null) {
 
     const { length } = arrWinners;
 
-    if (debug) {
-        console.log('announceWinners() called: ', arrWinners);
-    }
+    if (debug) console.log('announceWinners() called: ', arrWinners);
 
     // Needs to have ended and have winners
     if (phase != 'ended' || length === 0) return false;
@@ -330,9 +331,11 @@ const main = async () => {
 
     // Main event listener
     room.on('message', async (msg) => {
+        const encoded = await msg.content;
 
         // Decode HTML entities in messages, lowercase version for matching
-        const origContent = decode(msg._content);
+        const origContent = AllHtmlEntities.decode(encoded);
+
         const content = origContent.toLowerCase().replace(/^@\S+\s+/, '');
 
         // Resolve required fields
@@ -357,8 +360,8 @@ const main = async () => {
         if (content.includes('onebox') || content.includes('http')) return;
 
         // Record time of last new message/reply in room, and increment activity count
-        lastActivityTime = Date.now();
-        activityCount++;
+        BotConfig.lastActivityTime = Date.now();
+        BotConfig.activityCount++;
 
         // Get details of user who triggered the message
         let user;
@@ -384,74 +387,171 @@ const main = async () => {
             return;
         }
 
-        console.log('EVENT', JSON.stringify(resolvedMsg));
+        console.log('EVENT', JSON.stringify({ ...resolvedMsg, isPrivileged }));
 
         // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
         if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id && isPrivileged) {
-            let responseText = null;
+            let responseText = "";
 
-            if (content.indexOf('say ') === 0) {
-                responseText = origContent.replace(/^@\S+\s+say /i, '');
-            }
-            else if (content.includes('alive')) {
-                responseText = `I'm alive on ${scriptHostname}, started on ${dateToUtcTimestamp(scriptInitDate)} with an uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1000)} seconds.` +
-                    (debug ? ' I am in debug mode.' : '');
-            }
-            else if (content.includes('test cron')) {
-                responseText = `*setting up test cron job*`;
+            const commander = new CommandManager();
+
+            commander.add("say", "bot echoes something", (content) => content.replace(/^@\S+\s+say /i, ''));
+
+            commander.add("alive", "bot reports on its status", (host, start) => {
+
+                const hosted = `I'm alive on ${host || "planet Earth"}`;
+                const started = `started on ${dateToUtcTimestamp(start)}`;
+                const uptime = `uptime of ${Math.floor((Date.now() - start.getTime()) / 1e3)} seconds`;
+
+                return `${hosted}, ${started} with an ${uptime}.${debug ? ' I am in debug mode.' : ''}`;
+            });
+
+            commander.add("test cron", "sets up a test cron job", (announcement) => {
                 announcement.initTest();
-            }
-            else if (content.includes('cron')) {
-                responseText = 'Currently scheduled announcements: `' + JSON.stringify(announcement.schedules) + '`';
-            }
-            else if (content.includes('set throttle')) {
-                let match = content.match(/(\d+\.)?\d+$/);
-                let num = match ? Number(match[0]) : null;
-                if (num != null && !isNaN(num) && num >= 0) {
-                    throttleSecs = num;
-                    responseText = `*throttle set to ${throttleSecs} seconds*`;
+                return `*setting up test cron job*`;
+            });
+
+            commander.add("get cron", "lists scheduled announcements", ({ schedules }) => {
+                return 'Currently scheduled announcements: `' + JSON.stringify(schedules) + '`';
+            });
+
+            commander.add("get throttle", "gets current throttle (in seconds)", (throttle) => {
+                return `Reply throttle is currently ${throttle} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
+            });
+
+            commander.add("set throttle", "sets throttle to N (in seconds)", (content, config) => {
+                const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
+                const newThrottle = +match;
+
+                const isValidThrottle = !isNaN(newThrottle) && newThrottle >= 0;
+
+                if (isValidThrottle) {
+                    config.throttleSecs = newThrottle;
+                    return `*throttle set to ${newThrottle} seconds*`;
                 }
-                else {
-                    responseText = `*invalid throttle value*`;
+
+                return `*invalid throttle value*`;
+            });
+
+            commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
+                return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
+            });
+
+            commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
+                const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
+                config.lastMessageTime = Date.now() + (+num * 6e4) - (throttle * 1e3);
+                return `*silenced for ${num} minutes*`;
+            });
+
+            commander.alias("mute", ["timeout", "sleep"]);
+
+            commander.add("unmute", "allows the bot to speak immediately", (config) => {
+                config.lastMessageTime = -1;
+                return `*timeout cleared*`;
+            });
+
+            commander.add("get time", "gets current UTC time and the election phase time", ({ phase, dateElection }) => {
+                const current = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
+
+                if (!['election', 'ended', 'cancelled'].includes(phase)) {
+                    return `${current} (election phase starts ${linkToRelativeTimestamp(dateElection)})`;
                 }
-            }
-            else if (content.includes('throttle')) {
-                responseText = `Reply throttle is currently ${throttleSecs} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
-            }
-            else if (content.includes('clear timeout') || content.includes('unmute')) {
-                responseText = `*timeout cleared*`;
-                lastMessageTime = -1;
-            }
-            else if (content.includes('timeout') || content.includes('mute')) {
-                let num = +content.match(/\d+$/);
-                num = num ? +(num[0]) : 5; // defaulting to 5
-                responseText = `*silenced for ${num} minutes*`;
-                lastMessageTime = Date.now() + (num * 60000) - (throttleSecs * 1000);
-            }
-            else if (content.includes('time')) {
-                responseText = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
-                if (['election', 'ended', 'cancelled'].includes(election.phase) == false) {
-                    responseText += ` (election phase starts ${linkToRelativeTimestamp(election.dateElection)})`;
-                }
-            }
-            else if (content.includes('chatroom')) {
-                responseText = `The election chat room is at ${election.chatUrl}`;
-            }
-            else if (content.includes('commands')) {
-                responseText = 'moderator commands (requires mention): *' + [
-                    'say', 'alive', 'cron', 'test cron', 'chatroom',
-                    'throttle', 'set throttle X (in seconds)',
-                    'mute', 'mute X (in minutes)', 'unmute', 'time'
-                ].join(', ') + '*';
+
+                return current;
+            });
+
+            commander.add("coffee", "brews some coffee for the requestor", ({ name }) => {
+                //TODO: add for whom the coffee
+                const coffee = new RandomArray("cappuccino", "espresso", "latte", "ristretto", "macchiato");
+                return `Brewing some ${coffee.getRandom()} for ${name || "somebody"}`;
+            });
+
+            commander.add("timetravel", "sends bot back in time to another phase", (election, content) => {
+                const [, yyyy, MM, dd] = /(\d{4})-(\d{2})-(\d{2})/.exec(content) || [];
+
+                if (!yyyy || !MM || !dd) return "Sorry, Doc! Invalid coordinates";
+
+                const destination = new Date(+yyyy, +MM - 1, +dd);
+
+                const phase = Election.getPhase(election, destination);
+
+                election.phase = phase;
+
+                const intl = new Intl.DateTimeFormat("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "2-digit",
+                    hour12: true,
+                    hour: "2-digit",
+                    minute: "2-digit"
+                });
+
+                const arrived = intl
+                    .format(destination)
+                    .replace(/, /g, " ")
+                    .replace(/ (?:AM|PM)$/, "");
+
+                return `Arrived at ${arrived}, today's phase: ${phase}`;
+            });
+
+            commander.alias("timetravel", ["delorean"]);
+
+            commander.add("help", "Prints usage info", () => commander.help("*moderator commands (requires mention):*"));
+            commander.alias("help", ["usage", "commands"]);
+
+            const outputs = [
+                ["help", /help|usage|commands/],
+                ["say", /say/, origContent],
+                ["alive", /alive/, scriptHostname, scriptInitDate],
+                ["test cron", /test cron/, announcement],
+                ["get cron", /get cron/, announcement],
+                ["get throttle", /get throttle/, BotConfig.throttleSecs],
+                ["set throttle", /set throttle/, content, BotConfig],
+                ["get time", /get time/, election],
+                ["chatroom", /chatroom/, election],
+                ["coffee", /(?:brew|make).+coffee/, user],
+                ["timetravel", /88 miles|delorean/, election, content],
+                ["unmute", /unmute|clear timeout/, BotConfig],
+                ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs]
+            ];
+
+            responseText = outputs.reduce(
+                (a, args) => a || commander.runIfMatches.call(commander, content, ...args)
+                , "");
+
+            if (debug) {
+                console.log(`response info:
+                response chars: ${responseText.length}
+                content: ${content}
+                original: ${origContent}
+                last message: ${BotConfig.lastMessageTime}
+                last activty: ${BotConfig.lastActivityTime}
+                `);
             }
 
-            if (responseText != null && responseText.length <= 500) {
-                console.log('RESPONSE', responseText);
-                await room.sendMessage(responseText);
+            const maxPerMessage = 500;
+
+            if (responseText) {
+                const messages = responseText.split(
+                    new RegExp(`(^(?:.|\\n|\\r){1,${maxPerMessage}})(?:\\n|$)`, "gm")
+                ).filter(Boolean);
+
+                console.log(`RESPONSE (${messages.length})`, responseText);
+
+                if (messages.length > 3) {
+                    await room.sendMessage(`I wrote a poem of ${messages.length} messages for you!`);
+                    return;
+                }
+
+                for (const message of messages) {
+                    await room.sendMessage(message);
+                    //avoid getting throttled ourselves
+                    await new Promise((resolve) => setTimeout(resolve, BotConfig.throttleSecs * 1e3));
+                }
 
                 // Record last activity time only
                 // so this doesn't reset any mute, if active
-                lastActivityTime = Date.now();
+                BotConfig.lastActivityTime = Date.now();
 
                 return; // no further action
             }
@@ -459,14 +559,14 @@ const main = async () => {
 
 
         // If too close to previous message, ignore (apply throttle)
-        if (Date.now() < lastMessageTime + throttleSecs * 1000) {
+        if (Date.now() < BotConfig.lastMessageTime + BotConfig.throttleSecs * 1000) {
             console.log('THROTTLE - too close to previous message');
             return;
         }
 
 
         // Mentioned bot (8)
-        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id && throttleSecs <= 10) {
+        if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id && BotConfig.throttleSecs <= 10) {
             let responseText = null;
 
             if (content.startsWith('offtopic')) {
@@ -475,8 +575,8 @@ const main = async () => {
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room
-                lastMessageTime = Date.now();
-                lastActivityTime = lastMessageTime;
+                BotConfig.lastMessageTime = Date.now();
+                BotConfig.lastActivityTime = BotConfig.lastMessageTime;
 
                 return; // stop here since we are using a different default response method
             }
@@ -518,6 +618,13 @@ const main = async () => {
                     `Why am I here? To serve the community`,
                 ).getRandom();
             }
+            else if (/thanks?(?: you)?/.test(content)) {
+                responseText = new RandomArray(
+                    "You are welcome",
+                    "My pleasure",
+                    "Not at all"
+                ).getRandom();
+            }
             else if (['help', 'command', 'info'].some(x => content.includes(x))) {
                 responseText = '\n' + ['Examples of election FAQs I can help with:',
                     'how does the election work', 'who are the candidates', 'how to nominate',
@@ -547,8 +654,8 @@ const main = async () => {
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room
-                lastMessageTime = Date.now();
-                lastActivityTime = lastMessageTime;
+                BotConfig.lastMessageTime = Date.now();
+                BotConfig.lastActivityTime = BotConfig.lastMessageTime;
                 return;
             }
 
@@ -557,8 +664,8 @@ const main = async () => {
                 await msg.reply(responseText);
 
                 // Record last sent message time so we don't flood the room
-                lastMessageTime = Date.now();
-                lastActivityTime = lastMessageTime;
+                BotConfig.lastMessageTime = Date.now();
+                BotConfig.lastActivityTime = BotConfig.lastMessageTime;
             }
         }
 
@@ -625,15 +732,15 @@ const main = async () => {
                     stackApikey, electionBadges, soPastAndPresentModIds
                 );
 
-                await calcCandidateScore(election, user, msg, isStackOverflow);
+                responseText = await calcCandidateScore(election, user, resolvedMsg, isStackOverflow);
 
                 if (responseText != null) {
                     console.log('RESPONSE', responseText);
                     await msg.reply(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    lastMessageTime = Date.now();
-                    lastActivityTime = lastMessageTime;
+                    BotConfig.lastMessageTime = Date.now();
+                    BotConfig.lastActivityTime = BotConfig.lastMessageTime;
 
                     return; // stop here since we are using a different default response method
                 }
@@ -662,7 +769,7 @@ const main = async () => {
 
             // Current mods
             else if (isAskedForCurrentMods(content)) {
-                responseText = sayCurrentMods(election, currentSiteMods, decode);
+                responseText = sayCurrentMods(election, currentSiteMods, AllHtmlEntities.decode);
             }
 
             // How to nominate self/others
@@ -777,8 +884,8 @@ const main = async () => {
                 await room.sendMessage(responseText);
 
                 // Record last sent message time so we don't flood the room
-                lastMessageTime = Date.now();
-                lastActivityTime = lastMessageTime;
+                BotConfig.lastMessageTime = Date.now();
+                BotConfig.lastActivityTime = BotConfig.lastMessageTime;
             }
         }
     });
@@ -852,19 +959,19 @@ const main = async () => {
 
         // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes,
         // or no activity for 2 hours, remind users that bot is around to help, if last message was not posted by the bot
-        else if ((activityCount >= lowActivityCountThreshold && lastActivityTime + 4 * 60000 < Date.now() && lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) ||
-            (isStackOverflow && lastActivityTime != lastMessageTime && lastActivityTime + 2 * 60 * 60000 < Date.now())) {
-            console.log(`Room is inactive with ${activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
-                `Last activity ${lastActivityTime}; Last bot message ${lastMessageTime}`);
+        else if ((BotConfig.activityCount >= lowActivityCountThreshold && BotConfig.lastActivityTime + 4 * 60000 < Date.now() && BotConfig.lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) ||
+            (isStackOverflow && BotConfig.lastActivityTime != BotConfig.lastMessageTime && BotConfig.lastActivityTime + 2 * 60 * 60000 < Date.now())) {
+            console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
+                `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
             await sayHI(room, election);
 
             // Record last sent message time so we don't flood the room
-            lastMessageTime = Date.now();
-            lastActivityTime = lastMessageTime;
+            BotConfig.lastMessageTime = Date.now();
+            BotConfig.lastActivityTime = BotConfig.lastMessageTime;
 
             // Reset last activity count
-            activityCount = 0;
+            BotConfig.activityCount = 0;
         }
 
     }, scrapeIntervalMins * 60000);
@@ -924,7 +1031,7 @@ const main = async () => {
 
         // Record last activity time only
         // so this doesn't reset any mute, if active
-        lastActivityTime = Date.now();
+        BotConfig.lastActivityTime = Date.now();
 
         res.redirect(`/say?password=${password}&success=true`);
     });

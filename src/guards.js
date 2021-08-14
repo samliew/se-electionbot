@@ -4,12 +4,9 @@
  * @returns {boolean}
  */
 const isAskedWhyNominationRemoved = (text) => {
-    const textIncludes = text.includes.bind(text);
-    const textStarts = text.startsWith.bind(text);
-
-    return ['why', 'what'].some(textStarts) &&
-        ['nomination', 'nominees', 'candidate'].some(textIncludes) &&
-        ['removed', 'withdraw', 'fewer', 'lesser', 'resign'].some(textIncludes);
+    return /^(?:why|what)\b/.test(text) &&
+        /\b(?:nomination|nominees|candidate)\b/.test(text) &&
+        /\b(?:removed|withdraw|fewer|lesser|resign)\b/.test(text);
 };
 
 /**
@@ -18,12 +15,9 @@ const isAskedWhyNominationRemoved = (text) => {
  * @returns {boolean}
  */
 const isAskedIfModsArePaid = (text) => {
-    const textIncludes = text.includes.bind(text);
-    const textStarts = text.startsWith.bind(text);
-
-    return ['why', 'what', 'are', 'how'].some(textStarts) &&
-        ['reward', 'paid', 'compensat', 'money'].some(textIncludes) &&
-        ['mods', 'moderators'].some(textIncludes);
+    return /^(?:why|what|are|how)\b/.test(text) &&
+        /\b(?:reward|paid|compensated|money)\b/.test(text) &&
+        /\b(?:mods|moderators)\b/.test(text);
 };
 
 /**
@@ -32,12 +26,9 @@ const isAskedIfModsArePaid = (text) => {
  * @returns {boolean}
  */
 const isAskedAboutVoting = (text) => {
-    const textIncludes = text.includes.bind(text);
-    const textStarts = text.startsWith.bind(text);
-
-    return ['where', 'how', 'want', 'when'].some(textStarts) &&
-        ['do', 'can', 'to', 'give', 'cast', 'should'].some(textIncludes) &&
-        ['voting', 'vote', 'elect'].some(textIncludes);
+    return /^(?:where|how|want|when)\b/.test(text) &&
+        /\b(?:do|can|to|give|cast|should)\b/.test(text) &&
+        /\b(?:voting|vote|elect)\b/.test(text);
 };
 
 /**
@@ -46,13 +37,12 @@ const isAskedAboutVoting = (text) => {
  * @returns {boolean}
  */
 const isAskedForCandidateScore = (text) => {
-    const textIncludes = text.includes.bind(text);
-
-    return text.includes('candidate score') ||
-        (['can i '].some(textIncludes) &&
-            ['be', 'become', 'nominate', 'run'].some(textIncludes) &&
-            ['mod', 'election'].some(textIncludes));
+    return /candidate score/.test(text) ||
+        /can i /.test(text) &&
+        /be|become|nominate|run/.test(text) &&
+        /mod|election/.test(text);
 };
+
 
 /**
  * @summary checks if the message asked to tell who the current mods are
@@ -60,8 +50,7 @@ const isAskedForCandidateScore = (text) => {
  * @returns {boolean}
  */
 const isAskedForCurrentMods = (text) => {
-    const textIncludes = text.includes.bind(text);
-    return ['who', 'current', 'mod'].every(textIncludes);
+    return ['who', 'current', 'mod'].every((t) => text.includes(t));
 };
 
 /**
@@ -70,10 +59,7 @@ const isAskedForCurrentMods = (text) => {
  * @returns {boolean}
  */
 const isAskedForCurrentWinners = (text) => {
-    const textIncludes = text.includes.bind(text);
-    const textStarts = text.startsWith.bind(text);
-
-    return ['who'].some(textStarts) && ['winners', 'new mod', 'will win', 'future mod'].some(textIncludes);
+    return /^who/.test(text) && /winners|new mod|will win|future mod/.test(text);
 };
 
 module.exports = {
