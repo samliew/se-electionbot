@@ -1,5 +1,5 @@
 const cheerio = require('cheerio');
-const utils = require('./utils');
+const utils = require('./utils').default;
 
 export default class Election {
 
@@ -183,7 +183,7 @@ export default class Election {
                     this.phase = 'cancelled';
 
                     // Convert link to chat-friendly markup
-                    this.cancelledText = statusElem.html()
+                    this.cancelledText = $(statusElem).html()
                         .replace(/<a href="/g, 'See [meta](')
                         .replace(/">.+/g, ') for details.').trim();
                 }
