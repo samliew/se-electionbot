@@ -1,8 +1,8 @@
-const { getBadges } = require("./api");
-const { default: Election } = require("./Election");
-const { sayMissingBadges } = require("./messages");
-const { getRandomOops } = require("./random");
-const { getSiteUserIdFromChatStackExchangeId, mapToName, mapToRequired, makeURL, pluralize, mapToId } = require("./utils");
+import { getBadges } from "./api";
+import Election from './election';
+import { sayMissingBadges } from "./messages";
+import { getRandomOops } from "./random";
+import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, pluralize } from "./utils";
 
 /**
  * @typedef {{
@@ -20,13 +20,13 @@ const { getSiteUserIdFromChatStackExchangeId, mapToName, mapToRequired, makeURL,
  * @param {number} max
  * @returns {string}
  */
-const getScoreText = (score, max) => `**${score}** (out of ${max})`;
+export const getScoreText = (score, max) => `**${score}** (out of ${max})`;
 
 /**
  * @summary checks if the user is eligible for nomination
  * @param {number} requiredRep reputation required to nominate
  */
-const makeIsEligible = (requiredRep) =>
+export const makeIsEligible = (requiredRep) =>
     /**
      * @param {number} missingRequiredBadges
      * @param {number} reputation
@@ -49,7 +49,7 @@ const makeIsEligible = (requiredRep) =>
  * @param {import("./utils").Badge[]} badges
  * @param {number[]} modIds
  */
-const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
+export const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
     /**
      * @summary calculates candidate score
      * @param {Election} election
@@ -224,7 +224,3 @@ const makeCandidateScoreCalc = (hostname, chatDomain, apiSlug, apiKey, badges, m
 
         return responseText;
     };
-
-module.exports = {
-    makeCandidateScoreCalc
-};

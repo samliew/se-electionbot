@@ -1,4 +1,4 @@
-class RandomArray extends Array {
+export class RandomArray extends Array {
     /**
      * @param {...any} init
      */
@@ -29,13 +29,6 @@ class RandomArray extends Array {
 
 }
 
-const getRandomModal = () => new RandomArray(`want to`, `have to`, `must`).getRandom();
-const getRandomPlop = () => new RandomArray(`I'm back.`, '*plop*', 'Hello there!', 'testing... 1 2 3').getRandom();
-const getRandomOops = () => new RandomArray('very funny,', 'oops!', 'hmm...', 'hey,', 'sorry,').getRandom() + ' ';
-
-module.exports = {
-    RandomArray,
-    getRandomModal,
-    getRandomPlop,
-    getRandomOops
-};
+export const getRandomModal = () => new RandomArray(`want to`, `have to`, `must`).getRandom();
+export const getRandomPlop = () => new RandomArray(`I'm back.`, '*plop*', 'Hello there!', 'testing... 1 2 3').getRandom();
+export const getRandomOops = () => new RandomArray('very funny,', 'oops!', 'hmm...', 'hey,', 'sorry,').getRandom() + ' ';

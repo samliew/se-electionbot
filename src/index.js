@@ -1,56 +1,35 @@
 import Client from 'chatexchange';
 import { decode } from 'html-entities';
 import { CommandManager } from './commands';
-const Election = require('./Election').default;
-const announcement = new (require('./ScheduledAnnouncement').default);
-
-const {
-    apiBase,
-    apiVer,
-    fetchUrl,
-    pluralize,
-    dateToRelativetime,
-    dateToUtcTimestamp,
-    keepAlive,
-    linkToRelativeTimestamp,
-    linkToUtcTimestamp,
-    startServer,
-    makeURL,
-    mapToRequired,
-    mapToName,
-} = require('./utils').default;
-
-const { RandomArray, getRandomPlop } = require("./random.js");
-
-const {
-    sayHI,
-    sayAboutVoting,
-    sayAreModsPaid,
-    sayCurrentMods,
-    sayCurrentWinners,
-    sayNotStartedYet,
-    sayElectionIsOver,
-    sayInformedDecision,
-    sayWhyNominationRemoved,
-    sayNextPhase,
-    sayElectionSchedule,
-    sayOffTopicMessage,
-    sayBadgesByType,
-    sayRequiredBadges,
-    sayWhatModsDo,
-    sayCandidateScoreFormula
-} = require("./messages");
-
-const {
+import Election from './election';
+import {
     isAskedAboutVoting,
-    isAskedForCandidateScore,
-    isAskedIfModsArePaid,
-    isAskedWhyNominationRemoved,
-    isAskedForCurrentMods,
-    isAskedForCurrentWinners,
-} = require("./guards");
+    isAskedForCandidateScore, isAskedForCurrentMods,
+    isAskedForCurrentWinners, isAskedIfModsArePaid,
+    isAskedWhyNominationRemoved
+} from "./guards";
+import {
+    sayAboutVoting,
+    sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
+    sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges,
+    sayWhatModsDo, sayWhyNominationRemoved
+} from "./messages";
+import { getRandomPlop, RandomArray } from "./random.js";
+import Announcement from './ScheduledAnnouncement';
+import { makeCandidateScoreCalc } from "./score";
+import {
+    apiBase,
+    apiVer, dateToRelativetime,
+    dateToUtcTimestamp, fetchUrl, keepAlive,
+    linkToRelativeTimestamp,
+    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, pluralize, startServer
+} from './utils';
 
-const { makeCandidateScoreCalc } = require("./score");
+
+
+
+// preserves compatibility with older import style
+const announcement = new Announcement();
 
 // If running locally, load env vars from .env file
 if (process.env.NODE_ENV !== 'production') {

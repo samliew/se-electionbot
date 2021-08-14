@@ -1,4 +1,4 @@
-const { apiBase, apiVer, fetchUrl } = require("./utils.js");
+import { apiBase, apiVer, fetchUrl } from "./utils.js";
 
 /**
  * @typedef {import("./utils.js").BadgeItem} BadgeItem
@@ -10,7 +10,7 @@ const { apiBase, apiVer, fetchUrl } = require("./utils.js");
  * @param {number} [page]
  * @returns {Promise<BadgeItem[]>}
  */
-const getBadges = async (user, site, key, page = 1) => {
+export const getBadges = async (user, site, key, page = 1) => {
     const { id } = user;
 
     const badgeURI = new URL(`${apiBase}/${apiVer}/users/${id}/badges`);
@@ -31,8 +31,4 @@ const getBadges = async (user, site, key, page = 1) => {
     }
 
     return items;
-};
-
-module.exports = {
-    getBadges
 };

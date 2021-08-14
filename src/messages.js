@@ -1,5 +1,8 @@
-const { default: Election } = require("./Election.js");
-const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp, pluralize, capitalize, listify } = require("./utils.js");
+import Election from "./election.js";
+import {
+    capitalize, dateToRelativetime, linkToRelativeTimestamp,
+    linkToUtcTimestamp, listify, makeURL, pluralize
+} from "./utils.js";
 
 /**
  * @typedef {import("./index").Badge} Badge
@@ -11,7 +14,7 @@ const { makeURL, dateToRelativetime, linkToUtcTimestamp, linkToRelativeTimestamp
  * @param {Election} election
  * @returns {Promise<void>}
  */
-const sayHI = async (room, election) => {
+export const sayHI = async (room, election) => {
     let responseText = 'Welcome to the election chat room! ';
 
     const { arrNominees, electionUrl, phase } = election;
@@ -46,7 +49,7 @@ const sayHI = async (room, election) => {
  * @summary builds a response why nomination is removed
  * @returns {string}
  */
-const sayWhyNominationRemoved = () => {
+export const sayWhyNominationRemoved = () => {
     const freeToRemove = `Candidates may withdraw their nomination any time before the election phase.`;
     return `${freeToRemove} Nominations made in bad faith, or candidates who do not meet the requirements may also be removed by community managers.`;
 };
@@ -56,7 +59,7 @@ const sayWhyNominationRemoved = () => {
  * @param {Election} election
  * @returns {string}
  */
-const sayAreModsPaid = (election) => {
+export const sayAreModsPaid = (election) => {
     const { siteUrl } = election;
 
     const modsURI = makeURL("Elected ♦ moderators", `${siteUrl}/help/site-moderators`);
@@ -70,28 +73,28 @@ const sayAreModsPaid = (election) => {
  * @param {Election} election
  * @returns {string}
  */
-const sayNotStartedYet = ({ dateNomination, electionUrl }) => `The ${makeURL("election", electionUrl)} has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativetime(dateNomination)}).`;
+export const sayNotStartedYet = ({ dateNomination, electionUrl }) => `The ${makeURL("election", electionUrl)} has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativetime(dateNomination)}).`;
 
 /**
  * @summary gets election is over response text
  * @param {Election} election
  * @returns {string}
  */
-const sayElectionIsOver = ({ electionUrl }) => `The ${makeURL("election", electionUrl)} is over. See you next time!`;
+export const sayElectionIsOver = ({ electionUrl }) => `The ${makeURL("election", electionUrl)} is over. See you next time!`;
 
 /**
  * @summary Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
  * @param {Election} election
  * @returns {string}
  */
-const sayInformedDecision = ({ qnaUrl }) => qnaUrl ? `If you want to make an informed decision on who to vote for, you can also read the candidates' answers in the ${makeURL("election Q&A", qnaUrl)}, and you also can look at examples of their participation on Meta and how they conduct themselves.` : '';
+export const sayInformedDecision = ({ qnaUrl }) => qnaUrl ? `If you want to make an informed decision on who to vote for, you can also read the candidates' answers in the ${makeURL("election Q&A", qnaUrl)}, and you also can look at examples of their participation on Meta and how they conduct themselves.` : '';
 
 /**
  * @summary builds a response to voting info query
  * @param {Election} election
  * @returns {string}
  */
-const sayAboutVoting = (
+export const sayAboutVoting = (
     election
 ) => {
     const { dateElection, electionUrl, phase, repVote, statVoters, qnaUrl } = election;
@@ -116,7 +119,7 @@ const sayAboutVoting = (
  * @param {boolean} [isSO]
  * @returns {string}
  */
-const sayBadgesByType = (badges, type, isSO = true) => {
+export const sayBadgesByType = (badges, type, isSO = true) => {
     const filtered = badges.filter(({ type: btype }) => btype === type);
 
     const { length } = filtered;
@@ -136,7 +139,7 @@ const sayBadgesByType = (badges, type, isSO = true) => {
  * @param {Badge[]} badges
  * @returns {string}
  */
-const sayRequiredBadges = (election, badges) => {
+export const sayRequiredBadges = (election, badges) => {
     const { repNominate } = election;
 
     const required = badges.filter(({ required }) => required);
@@ -159,7 +162,7 @@ const sayRequiredBadges = (election, badges) => {
  * @param {boolean} [required]
  * @returns {string}
  */
-const sayMissingBadges = (badgeNames, count, required = false) => ` The user is missing th${pluralize(count, 'ese', 'is')} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
+export const sayMissingBadges = (badgeNames, count, required = false) => ` The user is missing th${pluralize(count, 'ese', 'is')} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
 
 /**
  * @summary builds current mods list response message
@@ -168,7 +171,7 @@ const sayMissingBadges = (badgeNames, count, required = false) => ` The user is 
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
-const sayCurrentMods = (election, currMods, decodeEntities) => {
+export const sayCurrentMods = (election, currMods, decodeEntities) => {
     const { length: numCurrMods } = currMods;
 
     const { siteUrl } = election;
@@ -187,7 +190,7 @@ const sayCurrentMods = (election, currMods, decodeEntities) => {
  * @param {Election} election
  * @returns {string}
  */
-const sayNextPhase = (election) => {
+export const sayNextPhase = (election) => {
     const { phase, datePrimary, dateElection, dateEnded, electionUrl, statVoters } = election;
 
     const phaseMap = {
@@ -209,7 +212,7 @@ const sayNextPhase = (election) => {
  * @param {Election} election
  * @returns {string}
  */
-const sayCurrentWinners = (election) => {
+export const sayCurrentWinners = (election) => {
     const { phase, arrWinners = [], siteUrl, electionUrl } = election;
 
     const phaseMap = {
@@ -233,7 +236,7 @@ const sayCurrentWinners = (election) => {
   * @param {Election} election
   * @returns {string}
   */
-const sayElectionSchedule = (election) => {
+export const sayElectionSchedule = (election) => {
     const { dateElection, dateNomination, datePrimary, dateEnded, phase, sitename, electionNum } = election;
 
     const arrow = ' <-- current phase';
@@ -262,7 +265,7 @@ const sayElectionSchedule = (election) => {
  * @param {string} asked
  * @returns {string}
  */
-const sayOffTopicMessage = (election, asked) => {
+export const sayOffTopicMessage = (election, asked) => {
     const { electionUrl } = election;
 
     const plead = "Please try to keep the room on-topic.";
@@ -280,7 +283,7 @@ const sayOffTopicMessage = (election, asked) => {
  * @param {Election} election
  * @returns {string}
  */
-const sayWhatModsDo = (election) => {
+export const sayWhatModsDo = (election) => {
     const { siteUrl } = election;
 
     const modActivities = [
@@ -301,7 +304,7 @@ const sayWhatModsDo = (election) => {
  * @param {Badge[]} badges
  * @returns {string}
  */
-const sayCandidateScoreFormula = (badges) => {
+export const sayCandidateScoreFormula = (badges) => {
 
     const badgeCounts = { moderation: 0, editing: 0, participation: 0 };
 
@@ -325,24 +328,4 @@ const sayCandidateScoreFormula = (badges) => {
     const formula = `${repPts}; ${badgePts}`;
 
     return `The ${allPts}-point ${makeURL("candidate score", "https://meta.stackexchange.com/a/252643")} is calculated this way: ${formula}`;
-};
-
-module.exports = {
-    sayHI,
-    sayCurrentMods,
-    sayWhyNominationRemoved,
-    sayAreModsPaid,
-    sayAboutVoting,
-    sayBadgesByType,
-    sayCurrentWinners,
-    sayNextPhase,
-    sayElectionSchedule,
-    sayOffTopicMessage,
-    sayElectionIsOver,
-    sayInformedDecision,
-    sayMissingBadges,
-    sayNotStartedYet,
-    sayRequiredBadges,
-    sayWhatModsDo,
-    sayCandidateScoreFormula
 };

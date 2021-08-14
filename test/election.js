@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import Election from "../src/Election";
+import Election from "../src/election";
 import { dateToUtcTimestamp } from "../src/utils";
 
 describe('Election', () => {

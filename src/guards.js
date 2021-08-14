@@ -3,7 +3,7 @@
  * @param {string} text
  * @returns {boolean}
  */
-const isAskedWhyNominationRemoved = (text) => {
+export const isAskedWhyNominationRemoved = (text) => {
     return /^(?:why|what)\b/.test(text) &&
         /\b(?:nomination|nominees|candidate)\b/.test(text) &&
         /\b(?:removed|withdraw|fewer|lesser|resign)\b/.test(text);
@@ -14,7 +14,7 @@ const isAskedWhyNominationRemoved = (text) => {
  * @param {string} text
  * @returns {boolean}
  */
-const isAskedIfModsArePaid = (text) => {
+export const isAskedIfModsArePaid = (text) => {
     return /^(?:why|what|are|how)\b/.test(text) &&
         /\b(?:reward|paid|compensated|money)\b/.test(text) &&
         /\b(?:mods|moderators)\b/.test(text);
@@ -25,7 +25,7 @@ const isAskedIfModsArePaid = (text) => {
  * @param {string} text
  * @returns {boolean}
  */
-const isAskedAboutVoting = (text) => {
+export const isAskedAboutVoting = (text) => {
     return /^(?:where|how|want|when)\b/.test(text) &&
         /\b(?:do|can|to|give|cast|should)\b/.test(text) &&
         /\b(?:voting|vote|elect)\b/.test(text);
@@ -36,7 +36,7 @@ const isAskedAboutVoting = (text) => {
  * @param {string} text
  * @returns {boolean}
  */
-const isAskedForCandidateScore = (text) => {
+export const isAskedForCandidateScore = (text) => {
     return /candidate score/.test(text) ||
         /can i /.test(text) &&
         /be|become|nominate|run/.test(text) &&
@@ -49,7 +49,7 @@ const isAskedForCandidateScore = (text) => {
  * @param {string} text
  * @returns {boolean}
  */
-const isAskedForCurrentMods = (text) => {
+export const isAskedForCurrentMods = (text) => {
     return ['who', 'current', 'mod'].every((t) => text.includes(t));
 };
 
@@ -58,15 +58,6 @@ const isAskedForCurrentMods = (text) => {
  * @param {string} text
  * @returns {boolean}
  */
-const isAskedForCurrentWinners = (text) => {
+export const isAskedForCurrentWinners = (text) => {
     return /^who/.test(text) && /winners|new mod|will win|future mod/.test(text);
-};
-
-module.exports = {
-    isAskedWhyNominationRemoved,
-    isAskedIfModsArePaid,
-    isAskedAboutVoting,
-    isAskedForCandidateScore,
-    isAskedForCurrentMods,
-    isAskedForCurrentWinners
 };

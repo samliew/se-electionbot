@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { default: Election } = require("../src/Election");
+const { default: Election } = require("../src/election");
 const { sayInformedDecision, sayElectionSchedule, sayBadgesByType } = require("../src/messages");
 const { capitalize } = require("../src/utils");
 
