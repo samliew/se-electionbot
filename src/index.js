@@ -25,17 +25,22 @@ import {
     linkToUtcTimestamp, makeURL, mapToName, mapToRequired, pluralize, startServer
 } from './utils.js';
 
-
-
-
 // preserves compatibility with older import style
 const announcement = new Announcement();
+
+/**
+ * @typedef {{
+ *  type: "moderation"|"participation"|"editing",
+ *  name:string,
+ *  id:string,
+ *  required?: boolean
+ * }} Badge
+ */
 
 (async () => {
 
     // If running locally, load env vars from .env file
     if (process.env.NODE_ENV !== 'production') {
-        const dotenv = await import('dotenv');
         dotenv.config({ debug: process.env.DEBUG === 'true' });
     }
 
@@ -90,12 +95,6 @@ const announcement = new Announcement();
     ];
 
     /**
-     * @typedef {{
-     *  type: "moderation"|"participation"|"editing",
-     *  name:string,
-     *  id:string,
-     *  required?: boolean
-     * }} Badge
      * @type {Badge[]}
      */
     const electionBadges = [

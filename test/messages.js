@@ -33,7 +33,7 @@ describe("Messages module", () => {
 
     describe('sayBadgesByType', () => {
 
-        /** @type {import("../src").Badge[]} */
+        /** @type {import("../src/index").Badge[]} */
         const badges = [{
             id: "1", name: "Badge1", type: "moderation"
         },
