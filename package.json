@@ -24,7 +24,8 @@
   },
   "homepage": "https://github.com/samliew/se-electionbot#readme",
   "engines": {
-    "node": "10.x"
+    "npm": "7.x",
+    "node": "14.x"
   },
   "dependencies": {
     "axios": "^0.21.1",
