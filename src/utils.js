@@ -3,11 +3,15 @@ import cheerio from 'cheerio';
 import express from 'express';
 import { get } from 'https';
 import { join } from 'path';
+import { URL } from "url";
+
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
 export const apiBase = `https://api.stackexchange.com`;
 
 export const apiVer = 2.2;
+
+const __dirname = new URL(".", import.meta.url).pathname;
 
 /**
  * @summary starts the bot server
