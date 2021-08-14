@@ -1,7 +1,7 @@
-const { expect } = require("chai");
-const { default: Election } = require("../src/election");
-const { sayInformedDecision, sayElectionSchedule, sayBadgesByType } = require("../src/messages");
-const { capitalize } = require("../src/utils");
+import { expect } from "chai";
+import Election from "../src/election";
+import { sayBadgesByType, sayElectionSchedule, sayInformedDecision } from "../src/messages";
+import { capitalize } from "../src/utils";
 
 describe("Messages module", () => {
 
