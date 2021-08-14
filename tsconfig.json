@@ -8,6 +8,6 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
-    "module": "CommonJS"
+    "module": "es2020"
   }
 }
