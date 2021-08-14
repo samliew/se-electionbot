@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { listify, pluralize } from "../src/utils";
+import { listify, pluralize } from "../src/utils.js";
 
 describe('String-related utils', () => {
 

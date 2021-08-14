@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import Election from "../src/election";
-import { sayBadgesByType, sayElectionSchedule, sayInformedDecision } from "../src/messages";
-import { capitalize } from "../src/utils";
+import Election from "../src/election.js";
+import { sayBadgesByType, sayElectionSchedule, sayInformedDecision } from "../src/messages.js";
+import { capitalize } from "../src/utils.js";
 
 describe("Messages module", () => {
 

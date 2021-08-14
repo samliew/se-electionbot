@@ -1,29 +1,29 @@
 import Client from 'chatexchange';
-import { decode } from 'html-entities';
-import { CommandManager } from './commands';
-import Election from './election';
+import entities from 'html-entities';
+import { CommandManager } from './commands.js';
+import Election from './election.js';
 import {
     isAskedAboutVoting,
     isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentWinners, isAskedIfModsArePaid,
     isAskedWhyNominationRemoved
-} from "./guards";
+} from "./guards.js";
 import {
     sayAboutVoting,
     sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
     sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges,
     sayWhatModsDo, sayWhyNominationRemoved
-} from "./messages";
+} from "./messages.js";
 import { getRandomPlop, RandomArray } from "./random.js";
-import Announcement from './ScheduledAnnouncement';
-import { makeCandidateScoreCalc } from "./score";
+import Announcement from './ScheduledAnnouncement.js';
+import { makeCandidateScoreCalc } from "./score.js";
 import {
     apiBase,
     apiVer, dateToRelativetime,
     dateToUtcTimestamp, fetchUrl, keepAlive,
     linkToRelativeTimestamp,
     linkToUtcTimestamp, makeURL, mapToName, mapToRequired, pluralize, startServer
-} from './utils';
+} from './utils.js';
 
 
 
@@ -313,7 +313,7 @@ const main = async () => {
         const encoded = await msg.content;
 
         // Decode HTML entities in messages, lowercase version for matching
-        const origContent = decode(encoded);
+        const origContent = entities.decode(encoded);
 
         const content = origContent.toLowerCase().replace(/^@\S+\s+/, '');
 
@@ -748,7 +748,7 @@ const main = async () => {
 
             // Current mods
             else if (isAskedForCurrentMods(content)) {
-                responseText = sayCurrentMods(election, currentSiteMods, decode);
+                responseText = sayCurrentMods(election, currentSiteMods, entities.decode);
             }
 
             // How to nominate self/others

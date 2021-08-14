@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { dateToUtcTimestamp } from "./utils";
+import { dateToUtcTimestamp } from "./utils.js";
 
 export default class ScheduledAnnouncement {
 

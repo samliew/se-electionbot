@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { dateToUtcTimestamp, fetchUrl } from './utils';
+import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 
 export default class Election {
 

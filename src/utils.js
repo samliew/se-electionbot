@@ -1,9 +1,8 @@
 import axios from "axios";
-import { load } from 'cheerio';
+import cheerio from 'cheerio';
 import express from 'express';
 import { get } from 'https';
 import { join } from 'path';
-
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
 export const apiBase = `https://api.stackexchange.com`;
@@ -246,7 +245,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomai
 
     const chatUserPage = await fetchUrl(`https://chat.${chatdomain}/users/${chatUserId}`);
 
-    let $ = load(/** @type {string} */(chatUserPage));
+    let $ = cheerio.load(/** @type {string} */(chatUserPage));
 
     const linkedUserUrl = 'https:' + $('.user-stats a').first().attr('href');
     console.log(`Linked site user url:`, linkedUserUrl);
@@ -259,7 +258,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomai
         // Fetch linked site profile page to get network link
         const linkedUserProfilePage = await fetchUrl(`${linkedUserUrl}?tab=profile`);
 
-        $ = load(/** @type {string} */(linkedUserProfilePage));
+        $ = cheerio.load(/** @type {string} */(linkedUserProfilePage));
 
         const networkUserUrl = $('.js-user-header a').last().attr('href');
         const networkUserId = +(networkUserUrl.match(/\d+/));

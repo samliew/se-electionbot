@@ -1,8 +1,8 @@
-import { getBadges } from "./api";
-import Election from './election';
-import { sayMissingBadges } from "./messages";
-import { getRandomOops } from "./random";
-import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, pluralize } from "./utils";
+import { getBadges } from "./api.js";
+import Election from './election.js';
+import { sayMissingBadges } from "./messages.js";
+import { getRandomOops } from "./random.js";
+import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, pluralize } from "./utils.js";
 
 /**
  * @typedef {{
