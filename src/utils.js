@@ -16,9 +16,10 @@ const __dirname = new URL(".", import.meta.url).pathname;
 /**
  * @summary starts the bot server
  * @param {{ sendMessage(msg:string): Promise<any> }} room
+ * @param {import("./index").BotConfig} config
  * @returns {Promise<import("express").Application>}
  */
-export const startServer = async (room) => {
+export const startServer = async (room, config) => {
     const app = express().set('port', process.env.PORT || 5000);
     const staticPath = join(__dirname, '../static');
 
@@ -38,7 +39,9 @@ export const startServer = async (room) => {
     });
 
     const farewell = async () => {
-        await room.sendMessage("have to go now, will be back soon");
+        if (config.debug) {
+            await room.sendMessage("have to go now, will be back soon");
+        }
         terminate(server);
     };
 
@@ -60,7 +63,7 @@ export const startServer = async (room) => {
         return app;
     }
 
-    //see https://stackoverflow.com/a/14516195/11407695
+    /** @see https://stackoverflow.com/a/14516195/11407695 */
     process.on('SIGINT', farewell);
     return app;
 };

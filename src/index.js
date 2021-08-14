@@ -36,6 +36,14 @@ const announcement = new Announcement();
  *  id:string,
  *  required?: boolean
  * }} Badge
+ *
+ * @typedef {{
+ *  throttleSecs: number,
+ *  lastActivityTime
+ *  lastMessageTime
+ *  activityCount
+ *  debug
+ * }} BotConfig
  */
 
 (async () => {
@@ -46,7 +54,6 @@ const announcement = new Announcement();
     }
 
     // Environment variables
-    const debug = process.env.DEBUG.toLowerCase() !== 'false'; // default to true
     const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
     const chatDomain = /** @type {import("chatexchange/dist/Client").Host} */ (process.env.CHAT_DOMAIN);
@@ -144,7 +151,9 @@ const announcement = new Announcement();
         // Variable to store time of last bot sent message for throttling
         lastMessageTime: -1,
         // Variable to track activity in the room
-        activityCount: 0
+        activityCount: 0,
+        // Debug mode
+        debug: process.env.DEBUG.toLowerCase() !== 'false'
     };
 
     // Overrides console.log/error to insert newlines
@@ -157,7 +166,7 @@ const announcement = new Announcement();
 
 
     // App setup
-    if (debug) {
+    if (BotConfig.debug) {
         console.error('WARNING - Debug mode is on.');
 
         console.log('chatDomain:', chatDomain);
@@ -215,7 +224,7 @@ const announcement = new Announcement();
 
         const { length } = arrWinners;
 
-        if (debug) console.log('announceWinners() called: ', arrWinners);
+        if (BotConfig.debug) console.log('announceWinners() called: ', arrWinners);
 
         // Needs to have ended and have winners
         if (phase != 'ended' || length === 0) return false;
@@ -255,7 +264,7 @@ const announcement = new Announcement();
     const main = async () => {
 
         // Inform if in debug mode
-        if (debug) {
+        if (BotConfig.debug) {
             console.log('DEBUG MODE ON!');
         }
 
@@ -307,7 +316,7 @@ const announcement = new Announcement();
         room = await client.joinRoom(chatRoomId);
 
         // Announce join room if in debug mode
-        if (debug) {
+        if (BotConfig.debug) {
             await room.sendMessage(getRandomPlop());
         }
 
@@ -385,7 +394,13 @@ const announcement = new Announcement();
                     const started = `started on ${dateToUtcTimestamp(start)}`;
                     const uptime = `uptime of ${Math.floor((Date.now() - start.getTime()) / 1e3)} seconds`;
 
-                    return `${hosted}, ${started} with an ${uptime}.${debug ? ' I am in debug mode.' : ''}`;
+                    return `${hosted}, ${started} with an ${uptime}.${BotConfig.debug ? ' I am in debug mode.' : ''}`;
+                });
+
+                commander.add("debug", "switches debugging on/off", (config, content) => {
+                    const [, state = "on"] = /(on|off)/.exec(content) || [];
+                    config.debug = state === "on";
+                    return `Debug mode ${state}`;
                 });
 
                 commander.add("test cron", "sets up a test cron job", (announcement) => {
@@ -494,14 +509,15 @@ const announcement = new Announcement();
                     ["coffee", /(?:brew|make).+coffee/, user],
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
                     ["unmute", /unmute|clear timeout/, BotConfig],
-                    ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs]
+                    ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
+                    ["debug", /debug(?:ing)?/, BotConfig, content]
                 ];
 
                 responseText = outputs.reduce(
                     (a, args) => a || commander.runIfMatches.call(commander, content, ...args)
                     , "");
 
-                if (debug) {
+                if (BotConfig.debug) {
                     console.log(`response info:
                 response chars: ${responseText.length}
                 content: ${content}
@@ -618,7 +634,7 @@ const announcement = new Announcement();
                     ].join('\n- ');
                 }
                 // fun mode only for testing purposes
-                else if (debug) {
+                else if (BotConfig.debug) {
 
                     // random response in room
                     responseText = new RandomArray(
@@ -890,7 +906,7 @@ const announcement = new Announcement();
             await election.scrapeElection();
             announcement.setElection(election);
 
-            if (debug) {
+            if (BotConfig.debug) {
                 // Log scraped election info
                 console.log('SCRAPE', election.updated, election);
 
@@ -964,13 +980,13 @@ const announcement = new Announcement();
 
             // Try to stay-alive by rejoining room
             room = await client.joinRoom(chatRoomId);
-            if (debug) console.log('Stay alive rejoin room', room);
+            if (BotConfig.debug) console.log('Stay alive rejoin room', room);
 
         }, 5 * 60000);
 
 
         // Listen to requests from web form
-        const app = await startServer(room);
+        const app = await startServer(room, BotConfig);
         app.get('/say', ({ query }, res) => {
             const { success, password = "", message = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
