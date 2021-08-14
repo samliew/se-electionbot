@@ -1,4 +1,5 @@
-import Client from 'chatexchange';
+import Client from "chatexchange";
+import dotenv from "dotenv";
 import entities from 'html-entities';
 import { CommandManager } from './commands.js';
 import Election from './election.js';
@@ -281,7 +282,8 @@ const announcement = new Announcement();
             console.error('FATAL - Invalid election data!');
         }
 
-        const client = new Client(chatDomain);
+        // default is a temp fix for ChatExchange being served as CJS module
+        const client = new Client["default"](chatDomain);
         try {
             await client.login(accountEmail, accountPassword);
         }
