@@ -375,9 +375,11 @@ const announcement = new Announcement();
 
             const isPrivileged = user.isModerator || adminIds.includes(resolvedMsg.userId);
 
-            // If message is too short or long, ignore (most likely FP)
-            if (content.length < 4 || content.length > 69) {
-                console.log(`EVENT - Ignoring due to message length ${resolvedMsg.content.length}: `, resolvedMsg.content);
+            // If message is too short or long, ignore (most likely FP, except if an admin issues the message)
+            const { length } = content;
+            if ((length < 4 || length > 69) && !isPrivileged) {
+                const { content } = resolvedMsg;
+                console.log(`EVENT - Ignoring due to message length ${content.length}: ${content}`);
                 return;
             }
 
