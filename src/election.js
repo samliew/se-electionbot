@@ -104,7 +104,10 @@ export default class Election {
         };
     }
 
-    async scrapeElection() {
+    /**
+     * @param {import("./index.js").BotConfig} config
+     */
+    async scrapeElection(config) {
 
         // Save prev values so we can compare changes after
         this._prevObj = Object.assign({}, this); // fast way of cloning an object
@@ -113,7 +116,7 @@ export default class Election {
         const electionPageUrl = `${this.electionUrl}?tab=nomination`;
 
         try {
-            const pageHtml = await fetchUrl(electionPageUrl);
+            const pageHtml = await fetchUrl(config, electionPageUrl);
 
             // Parse election page
             const $ = cheerio.load(/** @type {string} */(pageHtml));
@@ -172,11 +175,12 @@ export default class Election {
 
                 const [statusElem, resultsElem, statsElem] = resultsWrapper.find(".flex--item").get();
 
-                const resultsURL = $(resultsElem).find('a').first().attr('href');
+                const resultsURL = $(resultsElem).find('a').first().attr('href') || "";
 
-                // Get results URL
                 this.resultsUrl = resultsURL;
-                if (!resultsURL.includes('opavote.com')) this.resultsUrl = ''; // incorrect/not available immediately
+
+                // incorrect/not available immediately
+                if (!resultsURL.includes('opavote.com')) this.resultsUrl = '';
 
                 // Check if election was cancelled?
                 if ($(statusElem).text().includes('cancelled')) {

@@ -6,6 +6,7 @@ import Election from './election.js';
 import {
     isAskedAboutVoting,
     isAskedForCandidateScore, isAskedForCurrentMods,
+    isAskedForCurrentNominees,
     isAskedForCurrentWinners, isAskedIfModsArePaid,
     isAskedWhyNominationRemoved
 } from "./guards.js";
@@ -39,10 +40,11 @@ const announcement = new Announcement();
  *
  * @typedef {{
  *  throttleSecs: number,
- *  lastActivityTime
- *  lastMessageTime
- *  activityCount
- *  debug
+ *  lastActivityTime: number,
+ *  lastMessageTime: number,
+ *  activityCount: number,
+ *  debug: boolean,
+ *  verbose: boolean
  * }} BotConfig
  */
 
@@ -153,7 +155,9 @@ const announcement = new Announcement();
         // Variable to track activity in the room
         activityCount: 0,
         // Debug mode
-        debug: process.env.DEBUG.toLowerCase() !== 'false'
+        debug: JSON.parse(process.env.DEBUG?.toLowerCase() || "false"),
+        // Verbose logging
+        verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false")
     };
 
     // Overrides console.log/error to insert newlines
@@ -280,13 +284,13 @@ const announcement = new Announcement();
             key: stackApikey
         }).toString();
 
-        const currSiteModApiResponse = /** @type {APIListResponse|null} */(await fetchUrl(modURL.toString(), true));
+        const currSiteModApiResponse = /** @type {APIListResponse|null} */(await fetchUrl(BotConfig, modURL.toString(), true));
         const currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1) : [];
         currentSiteModIds = currentSiteMods.map(({ user_id }) => user_id);
 
         // Wait for election page to be scraped
         election = new Election(electionUrl);
-        await election.scrapeElection();
+        await election.scrapeElection(BotConfig);
         if (election.validate() === false) {
             console.error('FATAL - Invalid election data!');
         }
@@ -372,9 +376,11 @@ const announcement = new Announcement();
 
             const isPrivileged = user.isModerator || adminIds.includes(resolvedMsg.userId);
 
-            // If message is too short or long, ignore (most likely FP)
-            if (content.length < 4 || content.length > 69) {
-                console.log(`EVENT - Ignoring due to message length ${resolvedMsg.content.length}: `, resolvedMsg.content);
+            // If message is too short or long, ignore (most likely FP, except if an admin issues the message)
+            const { length } = content;
+            if ((length < 4 || length > 69) && !isPrivileged) {
+                const { content } = resolvedMsg;
+                console.log(`EVENT - Ignoring due to message length ${content.length}: ${content}`);
                 return;
             }
 
@@ -464,11 +470,11 @@ const announcement = new Announcement();
                 });
 
                 commander.add("timetravel", "sends bot back in time to another phase", (election, content) => {
-                    const [, yyyy, MM, dd] = /(\d{4})-(\d{2})-(\d{2})/.exec(content) || [];
+                    const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
 
-                    if (!yyyy || !MM || !dd) return "Sorry, Doc! Invalid coordinates";
+                    if (!today && (!yyyy || !MM || !dd)) return "Sorry, Doc! Invalid coordinates";
 
-                    const destination = new Date(+yyyy, +MM - 1, +dd);
+                    const destination = today ? new Date() : new Date(+yyyy, +MM - 1, +dd);
 
                     const phase = Election.getPhase(election, destination);
 
@@ -496,6 +502,13 @@ const announcement = new Announcement();
                 commander.add("help", "Prints usage info", () => commander.help("moderator commands (requires mention):"));
                 commander.alias("help", ["usage", "commands"]);
 
+                commander.add("die", "shuts down the bot in case of emergency", () => {
+                    setTimeout(() => process.exit(0), 3e3);
+                    return "initiating shutdown sequence";
+                });
+
+                commander.alias("die", ["shutdown"]);
+
                 const outputs = [
                     ["help", /help|usage|commands/],
                     ["say", /say/, origContent],
@@ -510,7 +523,8 @@ const announcement = new Announcement();
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
                     ["unmute", /unmute|clear timeout/, BotConfig],
                     ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
-                    ["debug", /debug(?:ing)?/, BotConfig, content]
+                    ["debug", /debug(?:ing)?/, BotConfig, content],
+                    ["die", /die|shutdown|turn off/]
                 ];
 
                 responseText = outputs.reduce(
@@ -673,8 +687,7 @@ const announcement = new Announcement();
                 let responseText = null;
 
                 // Current candidates
-                if (['who are', 'who is', 'who has', 'how many'].some(x => content.startsWith(x)) && ['nominees', 'nominated', 'nominations', 'candidate'].some(x => content.includes(x))) {
-
+                if (isAskedForCurrentNominees(content)) {
                     if (election.phase === null) {
                         responseText = sayNotStartedYet(election);
                     }
@@ -725,7 +738,7 @@ const announcement = new Announcement();
                 else if (isAskedForCandidateScore(content)) {
 
                     //TODO: use config object pattern instead, 6 parameters is way too much
-                    const calcCandidateScore = makeCandidateScoreCalc(
+                    const calcCandidateScore = makeCandidateScoreCalc(BotConfig,
                         scriptHostname, chatDomain, electionSiteApiSlug,
                         stackApikey, electionBadges, soPastAndPresentModIds
                     );
@@ -903,21 +916,21 @@ const announcement = new Announcement();
         // Interval to re-scrape election data
         rescraperInt = setInterval(async function () {
 
-            await election.scrapeElection();
+            await election.scrapeElection(BotConfig);
             announcement.setElection(election);
 
-            if (BotConfig.debug) {
-                // Log scraped election info
+            if (BotConfig.verbose) {
                 console.log('SCRAPE', election.updated, election);
+            }
 
-                // Log election winners
-                if (election.phase === 'ended') {
-                    console.log('Election winners', election.arrWinners);
+            if (BotConfig.debug) {
+                const { arrNominees, arrWinners, phase } = election;
+
+                if (phase === 'ended') {
+                    console.log(`Election winners: ${arrWinners}`);
                 }
-                // Log election candidates
-                else {
-                    console.log('Election candidates', election.arrNominees);
-                }
+
+                console.log(`Election candidates: ${arrNominees}`);
             }
 
             // No previous scrape results yet, do not proceed

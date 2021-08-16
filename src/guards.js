@@ -61,3 +61,12 @@ export const isAskedForCurrentMods = (text) => {
 export const isAskedForCurrentWinners = (text) => {
     return /^who/.test(text) && /winners|new mod|will win|future mod/.test(text);
 };
+
+/**
+ * @summary checks if the message asked to tell who nominees are
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedForCurrentNominees = (text) => {
+    return /(?:who|what) (?:are|were|was|is)/.test(text) && /(?:nomin(?:ee|ation)|participant|candidate)s?/.test(text);
+};

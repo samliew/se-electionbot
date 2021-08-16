@@ -11,6 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: dependencies
       - name: Using Node 14
         uses: actions/setup-node@v1
         with:
