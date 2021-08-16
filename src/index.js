@@ -502,6 +502,13 @@ const announcement = new Announcement();
                 commander.add("help", "Prints usage info", () => commander.help("moderator commands (requires mention):"));
                 commander.alias("help", ["usage", "commands"]);
 
+                commander.add("die", "shuts down the bot in case of emergency", () => {
+                    setTimeout(() => process.exit(0), 3e3);
+                    return "initiating shutdown sequence";
+                });
+
+                commander.alias("die", ["shutdown"]);
+
                 const outputs = [
                     ["help", /help|usage|commands/],
                     ["say", /say/, origContent],
@@ -516,7 +523,8 @@ const announcement = new Announcement();
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
                     ["unmute", /unmute|clear timeout/, BotConfig],
                     ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
-                    ["debug", /debug(?:ing)?/, BotConfig, content]
+                    ["debug", /debug(?:ing)?/, BotConfig, content],
+                    ["die", /die|shutdown|turn off/]
                 ];
 
                 responseText = outputs.reduce(
