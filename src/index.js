@@ -916,21 +916,21 @@ const announcement = new Announcement();
         // Interval to re-scrape election data
         rescraperInt = setInterval(async function () {
 
-            await election.scrapeElection();
+            await election.scrapeElection(BotConfig);
             announcement.setElection(election);
 
-            if (BotConfig.debug) {
-                // Log scraped election info
+            if (BotConfig.verbose) {
                 console.log('SCRAPE', election.updated, election);
+            }
 
-                // Log election winners
-                if (election.phase === 'ended') {
-                    console.log('Election winners', election.arrWinners);
+            if (BotConfig.debug) {
+                const { arrNominees, arrWinners, phase } = election;
+
+                if (phase === 'ended') {
+                    console.log(`Election winners: ${arrWinners}`);
                 }
-                // Log election candidates
-                else {
-                    console.log('Election candidates', election.arrNominees);
-                }
+
+                console.log(`Election candidates: ${arrNominees}`);
             }
 
             // No previous scrape results yet, do not proceed
