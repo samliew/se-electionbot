@@ -19,28 +19,25 @@ export const sayHI = async (room, election) => {
 
     const { arrNominees, electionUrl, phase } = election;
 
-    const phaseTab = makeURL("election", `${electionUrl}?tab=${phase}`);
-
     const { length } = arrNominees;
+
+    const electionLink = makeURL("election", `${electionUrl}?tab=${phase}`);
+    const phasePrefix = `The ${electionLink} is in the ${phase} phase`;
 
     //TODO: change 'null' to empty string (no type hopping)
     const phaseMap = {
-        "null": `The ${phaseTab} has not begun yet`,
-        "ended": `The ${phaseTab} has ended`,
-        "cancelled": `The ${phaseTab} has been cancelled`,
-        "nomination": ` and currently there are ${length} candidates`,
-        "primary": ` and currently there are ${length} candidates`,
+        "null": `The ${electionLink} has not begun yet.`,
+        "ended": `The ${electionLink} has ended.`,
+        "cancelled": `The ${electionLink} has been cancelled.`,
+        "nomination": `The ${electionLink} is in the ${phase} phase, and currently there are ${length} candidates.`,
+        "primary": `The ${electionLink} is in the ${phase} phase, and currently there are ${length} candidates.`,
     };
-
-    if (!phase || ["ended", "cancelled"].includes(phase)) {
-        responseText += `The ${phaseTab} is in the ${phase} phase`;
-    }
 
     responseText += phaseMap[JSON.stringify(phase)];
 
     const helpCommand = `@ElectionBot help`;
 
-    responseText += `. I can answer frequently-asked questions about the election - type *${helpCommand}* for more info.`;
+    responseText += ` I can answer frequently-asked questions about the election - type *${helpCommand}* for more info.`;
 
     await room.sendMessage(responseText);
 };
