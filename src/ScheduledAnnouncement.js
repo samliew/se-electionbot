@@ -1,5 +1,5 @@
 import cron from "node-cron";
-const utils = require('./utils');
+import { dateToUtcTimestamp } from "./utils.js";
 
 export default class ScheduledAnnouncement {
 
@@ -126,7 +126,7 @@ export default class ScheduledAnnouncement {
             async () => {
                 console.log('TEST CRON STARTED');
                 await this._election.scrapeElection();
-                await this._room.sendMessage(`Test cron job succesfully completed at ${utils.dateToUtcTimestamp(this._election.updated)}.`);
+                await this._room.sendMessage(`Test cron job succesfully completed at ${dateToUtcTimestamp(this._election.updated)}.`);
                 console.log('TEST CRON ENDED', this._election, '\n', this._room);
             },
             { timezone: "Etc/UTC" }

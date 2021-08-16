@@ -1,5 +1,5 @@
-const cheerio = require('cheerio');
-const utils = require('./utils');
+import cheerio from 'cheerio';
+import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 
 export default class Election {
 
@@ -113,7 +113,7 @@ export default class Election {
         const electionPageUrl = `${this.electionUrl}?tab=nomination`;
 
         try {
-            const pageHtml = await utils.fetchUrl(electionPageUrl);
+            const pageHtml = await fetchUrl(electionPageUrl);
 
             // Parse election page
             const $ = cheerio.load(/** @type {string} */(pageHtml));
@@ -183,7 +183,7 @@ export default class Election {
                     this.phase = 'cancelled';
 
                     // Convert link to chat-friendly markup
-                    this.cancelledText = statusElem.html()
+                    this.cancelledText = $(statusElem).html()
                         .replace(/<a href="/g, 'See [meta](')
                         .replace(/">.+/g, ') for details.').trim();
                 }
@@ -201,7 +201,7 @@ export default class Election {
             }
 
             console.log(
-                `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${utils.dateToUtcTimestamp(this.updated)}.\n` +
+                `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.\n` +
                 `-------- PHASE ${this.phase};  CANDIDATES ${this.arrNominees.length};  WINNERS ${this.arrWinners.length}\n` +
                 `-------- QNA ${this.qnaUrl};  CHAT ${this.chatUrl}`
             );

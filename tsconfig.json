@@ -6,6 +6,8 @@
     "declaration": false,
     "target": "ES6",
     "moduleResolution": "node",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "es2020"
   }
 }

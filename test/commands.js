@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { CommandManager } from "../src/commands";
+import { CommandManager } from "../src/commands.js";
 
 describe('Commander', () => {
 

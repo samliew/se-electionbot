@@ -1,18 +1,27 @@
-const path = require('path');
-const https = require('https');
-const express = require('express');
-const cheerio = require('cheerio');
-const { default: axios } = require("axios");
+import axios from "axios";
+import cheerio from 'cheerio';
+import express from 'express';
+import { get } from 'https';
+import { join } from 'path';
+import { URL } from "url";
 
-const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
+export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
-const apiBase = `https://api.stackexchange.com`;
+export const apiBase = `https://api.stackexchange.com`;
 
-const apiVer = 2.2;
+export const apiVer = 2.2;
 
-const startServer = () => {
+const __dirname = new URL(".", import.meta.url).pathname;
+
+/**
+ * @summary starts the bot server
+ * @param {{ sendMessage(msg:string): Promise<any> }} room
+ * @param {import("./index").BotConfig} config
+ * @returns {Promise<import("express").Application>}
+ */
+export const startServer = async (room, config) => {
     const app = express().set('port', process.env.PORT || 5000);
-    const staticPath = path.join(__dirname, '../static');
+    const staticPath = join(__dirname, '../static');
 
     //see https://stackoverflow.com/a/59892173/11407695
     app.use(express.urlencoded({ extended: true }));
@@ -29,9 +38,33 @@ const startServer = () => {
         console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
     });
 
-    //see https://stackoverflow.com/a/14516195/11407695
-    process.on('SIGINT', () => server.close(() => console.log('gracefully shutting down')));
+    const farewell = async () => {
+        if (config.debug) {
+            await room.sendMessage("have to go now, will be back soon");
+        }
+        terminate(server);
+    };
 
+    /** @param {import("http").Server} server */
+    const terminate = (server) => server.close(() => {
+        console.log('gracefully shutting down');
+        process.exit(0);
+    });
+
+    /** @see https://stackoverflow.com/a/67567395/11407695 */
+    if (process.platform === "win32") {
+        const rl = await import("readline");
+        const rli = rl.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        rli.on("SIGINT", farewell);
+        return app;
+    }
+
+    /** @see https://stackoverflow.com/a/14516195/11407695 */
+    process.on('SIGINT', farewell);
     return app;
 };
 
@@ -70,7 +103,7 @@ const startServer = () => {
  * @param {boolean} [json]
  * @returns {Promise<any>}
  */
-const fetchUrl = async (url, json = false) => {
+export const fetchUrl = async (url, json = false) => {
     const { SOURCE_VERSION, ACCOUNT_EMAIL, DEBUG } = process.env;
 
     const debug = DEBUG.toLowerCase() !== 'false'; // default to true
@@ -98,9 +131,9 @@ const fetchUrl = async (url, json = false) => {
  * @param {number} mins
  * @returns {void}
  */
-const keepAlive = (url, mins = 20) => {
+export const keepAlive = (url, mins = 20) => {
     setInterval(() => {
-        https.get(url).on('error', (err) => console.error(`ERROR - Keep-alive failed. ${err.message}`));
+        get(url).on('error', (err) => console.error(`ERROR - Keep-alive failed. ${err.message}`));
     }, mins * 60000);
 };
 
@@ -109,28 +142,28 @@ const keepAlive = (url, mins = 20) => {
  * @param {string} word
  * @returns {string}
  */
-const capitalize = (word) => word[0].toUpperCase() + word.slice(1).toLowerCase();
+export const capitalize = (word) => word[0].toUpperCase() + word.slice(1).toLowerCase();
 
 /**
  * @summary base pluralization
  * @param {number} amount
  * @returns {string}
  */
-const pluralize = (amount, pluralSuffix = "s", singularSuffix = "") => amount !== 1 ? pluralSuffix : singularSuffix;
+export const pluralize = (amount, pluralSuffix = "s", singularSuffix = "") => amount !== 1 ? pluralSuffix : singularSuffix;
 
 /**
  * @summary turns list of items into a enumeration
  * @param {...string} items
  * @returns {string}
  */
-const listify = (...items) => items.length > 2 ? `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}` : items.join(", ");
+export const listify = (...items) => items.length > 2 ? `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}` : items.join(", ");
 
 /**
  * @summary validates and normalizes the Date
  * @param {Date|number|string} input
  * @returns {Date}
  */
-const validateDate = (input) => {
+export const validateDate = (input) => {
     let output = input;
 
     if (typeof input === 'string' || typeof input === 'number') {
@@ -150,7 +183,7 @@ const validateDate = (input) => {
  * @param {Date|string|number} date
  * @returns {string}
  */
-const toTadParamFormat = (date) => validateDate(date).toISOString()
+export const toTadParamFormat = (date) => validateDate(date).toISOString()
     .replace(/(-|:|\d\dZ)/gi, '')
     .replace(/\..*$/, '')
     .replace(/ /g, 'T');
@@ -161,7 +194,7 @@ const toTadParamFormat = (date) => validateDate(date).toISOString()
  * @param {Date|string|number} date
  * @returns {string}
  */
-const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
+export const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
     .replace('T', ' ')
     .replace(/\.\d+/, '');
 
@@ -172,7 +205,7 @@ const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
  * @param {string} [soonText]
  * @returns {string}
  */
-const dateToRelativetime = (date, soonText = 'soon') => {
+export const dateToRelativetime = (date, soonText = 'soon') => {
 
     date = validateDate(date);
 
@@ -194,7 +227,7 @@ const dateToRelativetime = (date, soonText = 'soon') => {
  * @param {Date|number|string} date
  * @returns {string}
  */
-const linkToRelativeTimestamp = (date) =>
+export const linkToRelativeTimestamp = (date) =>
     `[${dateToRelativetime(date)}](${link}${toTadParamFormat(date)})`;
 
 
@@ -203,7 +236,7 @@ const linkToRelativeTimestamp = (date) =>
  * @param {Date|number|string} date
  * @returns {string}
  */
-const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${link}${toTadParamFormat(date)})`;
+export const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${link}${toTadParamFormat(date)})`;
 
 
 /**
@@ -213,7 +246,7 @@ const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${link}${toT
  * @param {string} siteUrl
  * @returns {Promise<number|null>}
  */
-const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, siteUrl) => {
+export const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, siteUrl) => {
     const { STACK_API_KEY } = process.env;
     let userId = null;
 
@@ -268,7 +301,7 @@ const getSiteUserIdFromChatStackExchangeId = async (chatUserId, chatdomain, site
  * @param {string} label
  * @param {string} uri
  */
-const makeURL = (label, uri) => `[${label}](${uri})`;
+export const makeURL = (label, uri) => `[${label}](${uri})`;
 
 /**
  * @typedef {{ id:string, name: string, required?: boolean }} Badge
@@ -279,40 +312,18 @@ const makeURL = (label, uri) => `[${label}](${uri})`;
  * @param {BadgeItem} badge
  * @returns {string}
  */
-const mapToId = ({ badge_id }) => badge_id.toString();
+export const mapToId = ({ badge_id }) => badge_id.toString();
 
 /**
  * @summary callback for mapping badge to name
  * @param {Badge} badge
  * @returns {string}
  */
-const mapToName = ({ name }) => name;
+export const mapToName = ({ name }) => name;
 
 /**
  * @summary callback for mapping badge to required
  * @param {Badge} badge
  * @returns {boolean}
  */
-const mapToRequired = ({ required }) => required;
-
-module.exports = {
-    mapToId,
-    mapToName,
-    mapToRequired,
-    startServer,
-    keepAlive,
-    fetchUrl,
-    toTadParamFormat,
-    dateToUtcTimestamp,
-    dateToRelativetime,
-    linkToRelativeTimestamp,
-    linkToUtcTimestamp,
-    getSiteUserIdFromChatStackExchangeId,
-    makeURL,
-    capitalize,
-    pluralize,
-    listify,
-    link,
-    apiBase,
-    apiVer
-};
+export const mapToRequired = ({ required }) => required;
