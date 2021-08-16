@@ -6,6 +6,7 @@ import Election from './election.js';
 import {
     isAskedAboutVoting,
     isAskedForCandidateScore, isAskedForCurrentMods,
+    isAskedForCurrentNominees,
     isAskedForCurrentWinners, isAskedIfModsArePaid,
     isAskedWhyNominationRemoved
 } from "./guards.js";
@@ -678,8 +679,7 @@ const announcement = new Announcement();
                 let responseText = null;
 
                 // Current candidates
-                if (['who are', 'who is', 'who has', 'how many'].some(x => content.startsWith(x)) && ['nominees', 'nominated', 'nominations', 'candidate'].some(x => content.includes(x))) {
-
+                if (isAskedForCurrentNominees(content)) {
                     if (election.phase === null) {
                         responseText = sayNotStartedYet(election);
                     }
