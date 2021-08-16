@@ -470,11 +470,11 @@ const announcement = new Announcement();
                 });
 
                 commander.add("timetravel", "sends bot back in time to another phase", (election, content) => {
-                    const [, yyyy, MM, dd] = /(\d{4})-(\d{2})-(\d{2})/.exec(content) || [];
+                    const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
 
-                    if (!yyyy || !MM || !dd) return "Sorry, Doc! Invalid coordinates";
+                    if (!today && (!yyyy || !MM || !dd)) return "Sorry, Doc! Invalid coordinates";
 
-                    const destination = new Date(+yyyy, +MM - 1, +dd);
+                    const destination = today ? new Date() : new Date(+yyyy, +MM - 1, +dd);
 
                     const phase = Election.getPhase(election, destination);
 
