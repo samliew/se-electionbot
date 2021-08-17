@@ -1,3 +1,21 @@
+/**
+ * @typedef {import("./index").User} User
+ */
+
+export const AccessLevel = {
+    user: 1,
+    admin: 2,
+    dev: 4,
+    get privileged() {
+        const { admin, dev } = this;
+        return admin | dev;
+    },
+    get all() {
+        const { user, privileged } = this;
+        return user | privileged;
+    }
+};
+
 export class Command {
 
     /** @type {Command} */
@@ -6,15 +24,19 @@ export class Command {
     /** @type {Command[]} */
     aliases = [];
 
+    access = AccessLevel.user;
+
     /**
-     * @param {string} name
-     * @param {string} description
-     * @param {(...args:any[]) => unknown} handler
+     * @param {string} name command primary name
+     * @param {string} description command description
+     * @param {(...args:any[]) => unknown} handler command handler to invoke
+     * @param {number} [access] required privilege level
      */
-    constructor(name, description, handler) {
+    constructor(name, description, handler, access = AccessLevel.user) {
         this.name = name;
         this.description = description;
         this.handler = handler;
+        this.access = access;
     }
 
     /**
@@ -31,8 +53,8 @@ export class Command {
      * @param {string} [newName]
      */
     static fromCommand(command, newName) {
-        const { name, description, handler } = command;
-        return new Command(newName || name, description, handler);
+        const { name, description, handler, access } = command;
+        return new Command(newName || name, description, handler, access);
     }
 }
 
@@ -41,14 +63,35 @@ export class CommandManager {
     /**@type {{ [name:string]: Command }} */
     commands = {};
 
+    /** @type {User} */
+    user;
+
+    /**
+     * @param {User} user user for whom to manage commands
+     */
+    constructor(user) {
+        this.user = user;
+    }
+
+    /**
+     * @summary checks if a user can run the command
+     * @param {Command} [command] command to check
+     */
+    canRun(command) {
+        const { user } = this;
+        return command && !!(user.access & command.access);
+
+    }
+
     /**
      * @summary adds a command to manager
      * @param {string} name
      * @param {string} description
      * @param {(...args:any[]) => unknown} handler
+     * @param {number} [access]
      */
-    add(name, description, handler) {
-        this.commands[name] = new Command(name, description, handler);
+    add(name, description, handler, access = AccessLevel.user) {
+        this.commands[name] = new Command(name, description, handler, access);
     }
 
     /**
@@ -75,7 +118,7 @@ export class CommandManager {
      */
     run(name, ...args) {
         const command = this.commands[name];
-        return command?.run(...args);
+        return this.canRun(command) ? command.run(...args) : void 0;
     }
 
     /**
@@ -84,9 +127,8 @@ export class CommandManager {
      * @returns {Command}
      */
     getMatching(regex) {
-        const { commands } = this;
-        const [, command] = Object.entries(commands).find(([name]) => regex.test(name)) || [];
-        return command;
+        const [, command] = Object.entries(this.commands).find(([name]) => regex.test(name)) || [];
+        return this.canRun(command) ? command : null;
     }
 
     /**
@@ -99,16 +141,18 @@ export class CommandManager {
     }
 
     /**
-     * @param {string} text
-     * @param {string} name
-     * @param {RegExp} regex
+     * @summary runs a command only if text matches regex
+     * @param {string} text text to match against
+     * @param {string} name name of the command to run
+     * @param {RegExp} regex regular expression to match
      */
     runIfMatches(text, name, regex, ...args) {
-        return regex.test(text) && this.commands[name]?.run(...args);
+        return regex.test(text) && this.run(name, ...args);
     }
 
     /**
      * @summary lists commands and usage
+     * @param {string} [prefix] text to prefix the list with
      */
     help(prefix = "Commands") {
         const { commands } = this;
