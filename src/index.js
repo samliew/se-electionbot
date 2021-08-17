@@ -24,7 +24,7 @@ import {
     apiVer, dateToRelativetime,
     dateToUtcTimestamp, fetchUrl, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, pluralize, startServer
+    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer
 } from './utils.js';
 
 // preserves compatibility with older import style
@@ -66,8 +66,6 @@ const announcement = new Announcement();
     const electionSiteHostname = electionUrl.split('/')[2];
     const electionSiteUrl = 'https://' + electionSiteHostname;
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
-    const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(Number);
-    const ignoredUserIds = (process.env.IGNORED_USERIDS || '').split(/\D+/).map(Number);
     const scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS) || 5;
     const stackApikey = process.env.STACK_API_KEY;
 
@@ -157,7 +155,11 @@ const announcement = new Announcement();
         // Debug mode
         debug: JSON.parse(process.env.DEBUG?.toLowerCase() || "false"),
         // Verbose logging
-        verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false")
+        verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false"),
+        //user ids by level
+        adminIds: parseIds(process.env.ADMIN_IDS || ''),
+        ignoredUserIds: parseIds(process.env.IGNORED_USERIDS || ''),
+        devIds: parseIds(process.env.DEV_IDS || ""),
     };
 
     // Overrides console.log/error to insert newlines
@@ -178,8 +180,9 @@ const announcement = new Announcement();
         console.log('electionUrl:', electionUrl);
         console.log('electionSiteHostname:', electionSiteHostname);
         console.log('electionSiteUrl:', electionSiteUrl);
-        console.log('adminIds:', adminIds.join(', '));
-        console.log('ignoredUserIds:', ignoredUserIds.join(', '));
+
+        Object.entries(BotConfig).forEach(([key, val]) => console.log(key, val));
+
         console.log('scrapeIntervalMins:', scrapeIntervalMins);
         console.log('lowActivityCheckMins:', lowActivityCheckMins);
         console.log('lowActivityCountThreshold:', lowActivityCountThreshold);
