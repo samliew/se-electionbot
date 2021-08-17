@@ -374,10 +374,10 @@ const announcement = new Announcement();
             if (ignoredEventTypes.includes(resolvedMsg.eventType)) return;
 
             // Ignore stuff from self, Community or Feeds users
-            if (meWithId.id == resolvedMsg.userId || resolvedMsg.userId <= 0) return;
+            if (meWithId.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
 
             // Ignore stuff from ignored users
-            if (ignoredUserIds.includes(resolvedMsg.userId)) return;
+            if (BotConfig.ignoredUserIds.includes(resolvedMsg.userId)) return;
 
             // Ignore messages with oneboxes & links!
             if (content.includes('onebox') || content.includes('http')) return;
