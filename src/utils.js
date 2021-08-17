@@ -331,3 +331,10 @@ export const mapToName = ({ name }) => name;
  * @returns {boolean}
  */
 export const mapToRequired = ({ required }) => required;
+
+/**
+ * @summary parses user ids from ENV
+ * @param {string} ids
+ * @returns {number[]}
+ */
+export const parseIds = (ids) => ids.split(/\D+/).map(Number);
