@@ -10,13 +10,11 @@ import {
 
 /**
  * @summary makes bot remind users that they are here
- * @param {{ sendMessage(text:string): Promise<void> }} room //TODO: redefine
+ * @param {{ sendMessage(text:string): Promise<void> }} room
  * @param {Election} election
  * @returns {Promise<void>}
  */
 export const sayHI = async (room, election) => {
-    let responseText = 'Welcome to the election chat room! ';
-
     const { arrNominees, electionUrl, phase } = election;
 
     const { length } = arrNominees;
@@ -24,22 +22,21 @@ export const sayHI = async (room, election) => {
     const electionLink = makeURL("election", `${electionUrl}?tab=${phase}`);
     const phasePrefix = `The ${electionLink} is in the ${phase} phase`;
 
-    //TODO: change 'null' to empty string (no type hopping)
     const phaseMap = {
         "null": `The ${electionLink} has not begun yet.`,
         "ended": `The ${electionLink} has ended.`,
         "cancelled": `The ${electionLink} has been cancelled.`,
-        "nomination": `The ${electionLink} is in the ${phase} phase, and currently there are ${length} candidates.`,
-        "primary": `The ${electionLink} is in the ${phase} phase, and currently there are ${length} candidates.`,
+        "nomination": `${phasePrefix}, and currently there are ${length} candidates.`,
+        "primary": `${phasePrefix}, and currently there are ${length} candidates.`,
     };
 
-    responseText += phaseMap[JSON.stringify(phase)];
-
+    const greeting = 'Welcome to the election chat room! ';
+    const phaseText = phaseMap[phase] || "";
     const helpCommand = `@ElectionBot help`;
 
-    responseText += ` I can answer frequently-asked questions about the election - type *${helpCommand}* for more info.`;
+    const text = `${greeting}${phaseText} I can answer frequently-asked questions about elections (type *${helpCommand}* for more info).`;
 
-    await room.sendMessage(responseText);
+    await room.sendMessage(text);
 };
 
 /**

@@ -509,6 +509,9 @@ const announcement = new Announcement();
 
                 commander.alias("die", ["shutdown"]);
 
+                commander.add("greet", "makes the bot welcome everyone", sayHI);
+                commander.alias("greet", ["welcome"]);
+
                 const outputs = [
                     ["help", /help|usage|commands/],
                     ["say", /say/, origContent],
@@ -524,7 +527,8 @@ const announcement = new Announcement();
                     ["unmute", /unmute|clear timeout/, BotConfig],
                     ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
                     ["debug", /debug(?:ing)?/, BotConfig, content],
-                    ["die", /die|shutdown|turn off/]
+                    ["die", /die|shutdown|turn off/],
+                    ["greet", /^(greet|welcome)/, room, election]
                 ];
 
                 responseText = outputs.reduce(
