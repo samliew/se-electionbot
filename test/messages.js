@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import Election from "../src/election.js";
-import { sayBadgesByType, sayElectionSchedule, sayInformedDecision } from "../src/messages.js";
+import { sayBadgesByType, sayElectionSchedule, sayHI, sayInformedDecision } from "../src/messages.js";
 import { capitalize } from "../src/utils.js";
 
 describe("Messages module", () => {
@@ -79,6 +79,39 @@ describe("Messages module", () => {
         it("should return empty message if 'qnaUrl' is present", () => {
             const nonEmpty = sayInformedDecision(/** @type {Election} */({ qnaUrl: "stackoverflow.com" }));
             expect(nonEmpty).to.be.not.empty;
+        });
+
+    });
+
+    describe('sayHI', () => {
+
+        it('should not add phase info on no phase', async () => {
+            const election = new Election("https://ja.stackoverflow.com/election");
+
+            const mockRoom = {
+                async sendMessage(txt) {
+                    expect(txt).to.not.match(/is in the.*? phase/);
+                }
+            };
+
+            await sayHI(mockRoom, election);
+        });
+
+        it('should correctly add phase info', async () => {
+            const electionLink = "https://stackoverflow.com/election/12";
+
+            const phase = "cancelled";
+
+            const election = new Election(electionLink, 12);
+            election.phase = phase;
+
+            const mockRoom = {
+                async sendMessage(txt) {
+                    expect(txt).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
+                }
+            };
+
+            await sayHI(mockRoom, election);
         });
 
     });
