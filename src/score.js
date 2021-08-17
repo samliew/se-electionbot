@@ -5,13 +5,10 @@ import { getRandomOops } from "./random.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, pluralize } from "./utils.js";
 
 /**
- * @typedef {{
- *  eventType: string,
- *  userName: string,
- *  userId: number,
- *  targetUserId?: number,
- *  content: string,
- * }} resolvedMsg
+ * @typedef {import("chatexchange/dist/Browser").IProfileData} User
+ * @typedef {import("./index.js").BotConfig} BotConfig
+ * @typedef {import("./utils").Badge} Badge
+ * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
  */
 
 /**
@@ -42,20 +39,20 @@ export const makeIsEligible = (requiredRep) =>
 
 /**
  * @summary HOF with common parameters
- * @param {import("./index.js").BotConfig} config
+ * @param {BotConfig} config
  * @param {string} hostname
  * @param {string} chatDomain
  * @param {string} apiSlug
  * @param {string} apiKey
- * @param {import("./utils").Badge[]} badges
+ * @param {Badge[]} badges
  * @param {number[]} modIds
  */
 export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
     /**
      * @summary calculates candidate score
      * @param {Election} election
-     * @param {import("chatexchange/dist/Browser").IProfileData} user
-     * @param {resolvedMsg} message
+     * @param {User} user
+     * @param {ResolvedMessage} message
      * @param {boolean} [isSO]
      * @returns {Promise<string>}
      */
