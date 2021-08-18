@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { listify, pluralize } from "../src/utils.js";
+import { listify, parseIds, pluralize } from "../src/utils.js";
 
 describe('String-related utils', () => {
 
@@ -27,6 +27,15 @@ describe('String-related utils', () => {
         it('should pluralize otherwise', () => {
             const plural = pluralize(10, "es");
             expect(plural).to.equal("es");
+        });
+
+    });
+
+    describe('parseIds', () => {
+
+        it('should parse id strings correctly', () => {
+            const parsed = parseIds("1234|56789|101010");
+            expect(parsed).to.deep.equal([1234, 56789, 101010]);
         });
 
     });

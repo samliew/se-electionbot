@@ -1,11 +1,26 @@
 import { expect } from "chai";
-import { CommandManager } from "../src/commands.js";
+import { AccessLevel, CommandManager } from "../src/commands.js";
 
 describe('Commander', () => {
 
-    describe('aliases', () => {
+    const getMockUser = (overrides = {}) => {
+        const defaults = {
+            access: AccessLevel.dev,
+            id: 42,
+            name: "Answer",
+            isModerator: false,
+            about: "",
+            roomCount: 1,
+            messageCount: 0,
+            reputation: 42,
+            lastSeen: Date.now(),
+            lastMessage: Date.now()
+        };
+        return Object.assign(defaults, overrides);
+    };
 
-        const commander = new CommandManager();
+    describe('aliases', () => {
+        const commander = new CommandManager(getMockUser());
         commander.add("bark", "barks, what else?", () => "bark!");
         commander.alias("bark", ["say"]);
 
@@ -17,6 +32,34 @@ describe('Commander', () => {
         it('should correctly list aliases', () => {
             const help = commander.help();
             expect(help).to.equal(`Commands\n- [bark] (say) barks, what else?`);
+        });
+
+    });
+
+    describe('AccessLevel', () => {
+        const commander = new CommandManager(getMockUser());
+        commander.add("destroy", "Destroys the universe", () => "💥", AccessLevel.dev);
+        commander.add("restart", "Restarts the bot", () => true, AccessLevel.privileged);
+        commander.add("pet", "Pets the bot", () => "good bot! Who's a good bot?", AccessLevel.all);
+
+        it('should allow privileged commands for privileged users', () => {
+            const boom = commander.run("destroy");
+            expect(boom).to.not.be.undefined;
+
+            const pet = commander.run("pet");
+            expect(pet).to.not.be.undefined;
+
+            const restart = commander.run("restart");
+            expect(restart).to.not.be.undefined;
+        });
+
+        it('should disallow privileged commands for underprivileged users', () => {
+            commander.user = getMockUser({ access: AccessLevel.user });
+            const poof = commander.run("destroy");
+            expect(poof).to.be.undefined;
+
+            const restart = commander.run("restart");
+            expect(restart).to.be.undefined;
         });
 
     });

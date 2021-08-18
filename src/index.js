@@ -1,19 +1,21 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { CommandManager } from './commands.js';
+import { AccessLevel, CommandManager } from './commands.js';
 import Election from './election.js';
 import {
+    isAskedAboutUsernameDiamond,
     isAskedAboutVoting,
     isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentNominees,
-    isAskedForCurrentWinners, isAskedIfModsArePaid,
+    isAskedForCurrentWinners, isAskedForElectionSchedule, isAskedIfModsArePaid,
     isAskedWhyNominationRemoved
 } from "./guards.js";
 import {
     sayAboutVoting,
     sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
     sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges,
+    sayWhatIsAnElection,
     sayWhatModsDo, sayWhyNominationRemoved
 } from "./messages.js";
 import { getRandomPlop, RandomArray } from "./random.js";
@@ -24,7 +26,7 @@ import {
     apiVer, dateToRelativetime,
     dateToUtcTimestamp, fetchUrl, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, pluralize, startServer
+    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer
 } from './utils.js';
 
 // preserves compatibility with older import style
@@ -46,6 +48,18 @@ const announcement = new Announcement();
  *  debug: boolean,
  *  verbose: boolean
  * }} BotConfig
+ *
+ * @typedef {import("./utils").APIListResponse} APIListResponse
+ *
+ * @typedef {{
+ *  eventType: number,
+ *  userName: string,
+ *  userId: number,
+ *  targetUserId?: number,
+ *  content: string,
+ * }} ResolvedMessage
+ *
+ * @typedef {import("chatexchange/dist/Browser").IProfileData & { access: number }} User
  */
 
 (async () => {
@@ -66,8 +80,6 @@ const announcement = new Announcement();
     const electionSiteHostname = electionUrl.split('/')[2];
     const electionSiteUrl = 'https://' + electionSiteHostname;
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
-    const adminIds = (process.env.ADMIN_IDS || '').split(/\D+/).map(Number);
-    const ignoredUserIds = (process.env.IGNORED_USERIDS || '').split(/\D+/).map(Number);
     const scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS) || 5;
     const stackApikey = process.env.STACK_API_KEY;
 
@@ -157,7 +169,11 @@ const announcement = new Announcement();
         // Debug mode
         debug: JSON.parse(process.env.DEBUG?.toLowerCase() || "false"),
         // Verbose logging
-        verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false")
+        verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false"),
+        //user ids by level
+        adminIds: parseIds(process.env.ADMIN_IDS || ''),
+        ignoredUserIds: parseIds(process.env.IGNORED_USERIDS || ''),
+        devIds: parseIds(process.env.DEV_IDS || ""),
     };
 
     // Overrides console.log/error to insert newlines
@@ -178,8 +194,9 @@ const announcement = new Announcement();
         console.log('electionUrl:', electionUrl);
         console.log('electionSiteHostname:', electionSiteHostname);
         console.log('electionSiteUrl:', electionSiteUrl);
-        console.log('adminIds:', adminIds.join(', '));
-        console.log('ignoredUserIds:', ignoredUserIds.join(', '));
+
+        Object.entries(BotConfig).forEach(([key, val]) => console.log(key, val));
+
         console.log('scrapeIntervalMins:', scrapeIntervalMins);
         console.log('lowActivityCheckMins:', lowActivityCheckMins);
         console.log('lowActivityCountThreshold:', lowActivityCountThreshold);
@@ -257,10 +274,23 @@ const announcement = new Announcement();
         return true;
     }
 
-
     /**
-     * @typedef {import("./utils").APIListResponse} APIListResponse
+     * @summary gets a User given a resolved message from them
+     * @param {import("chatexchange").default} client
+     * @param {ResolvedMessage} message
+     * @returns {Promise<User|null>}
      */
+    const getUser = async (client, { userId }) => {
+        try {
+            // This is so we can get extra info about the user
+            // @ts-expect-error
+            return client._browser.getProfile(userId);
+        }
+        catch (e) {
+            console.error(e);
+            return null;
+        }
+    };
 
     /**
      * @summary main bot function
@@ -333,7 +363,7 @@ const announcement = new Announcement();
 
             const content = origContent.toLowerCase().replace(/^@\S+\s+/, '');
 
-            // Resolve required fields
+            /** @type {ResolvedMessage} */
             const resolvedMsg = {
                 eventType: msg._eventType,
                 userName: await msg.userName,
@@ -346,10 +376,10 @@ const announcement = new Announcement();
             if (ignoredEventTypes.includes(resolvedMsg.eventType)) return;
 
             // Ignore stuff from self, Community or Feeds users
-            if (meWithId.id == resolvedMsg.userId || resolvedMsg.userId <= 0) return;
+            if (meWithId.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
 
             // Ignore stuff from ignored users
-            if (ignoredUserIds.includes(resolvedMsg.userId)) return;
+            if (BotConfig.ignoredUserIds.includes(resolvedMsg.userId)) return;
 
             // Ignore messages with oneboxes & links!
             if (content.includes('onebox') || content.includes('http')) return;
@@ -359,22 +389,23 @@ const announcement = new Announcement();
             BotConfig.activityCount++;
 
             // Get details of user who triggered the message
-            let user;
-            try {
-                if (resolvedMsg.userId == meWithId.id) {
-                    user = me;
-                }
-                else {
-                    // This is so we can get extra info about the user
-                    user = await client._browser.getProfile(resolvedMsg.userId);
-                }
-            }
-            catch (e) {
-                console.error(e);
-                user = null;
-            }
+            const user = await getUser(client, resolvedMsg);
 
-            const isPrivileged = user.isModerator || adminIds.includes(resolvedMsg.userId);
+            //if user is null, we have a problem
+            if (!user) return console.log("missing user", resolvedMsg);
+
+            // TODO: make a part of User
+            /** @type {[number[], number][]} */
+            const userLevels = [
+                [BotConfig.adminIds, AccessLevel.admin],
+                [BotConfig.devIds, AccessLevel.dev]
+            ];
+
+            const [, access] = userLevels.find(([ids]) => ids.includes(user.id)) || [, AccessLevel.user];
+
+            user.access = access;
+
+            const isPrivileged = user.isModerator || ((AccessLevel.privileged) & access);
 
             // If message is too short or long, ignore (most likely FP, except if an admin issues the message)
             const { length } = content;
@@ -384,15 +415,15 @@ const announcement = new Announcement();
                 return;
             }
 
-            console.log('EVENT', JSON.stringify({ ...resolvedMsg, isPrivileged }));
+            console.log('EVENT', JSON.stringify({ resolvedMsg, user }));
 
             // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
-            if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id && isPrivileged) {
+            if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id) {
                 let responseText = "";
 
-                const commander = new CommandManager();
+                const commander = new CommandManager(user);
 
-                commander.add("say", "bot echoes something", (content) => content.replace(/^@\S+\s+say /i, ''));
+                commander.add("say", "bot echoes something", (content) => content.replace(/^@\S+\s+say /i, ''), AccessLevel.privileged);
 
                 commander.add("alive", "bot reports on its status", (host, start) => {
 
@@ -401,26 +432,26 @@ const announcement = new Announcement();
                     const uptime = `uptime of ${Math.floor((Date.now() - start.getTime()) / 1e3)} seconds`;
 
                     return `${hosted}, ${started} with an ${uptime}.${BotConfig.debug ? ' I am in debug mode.' : ''}`;
-                });
+                }, AccessLevel.privileged);
 
                 commander.add("debug", "switches debugging on/off", (config, content) => {
                     const [, state = "on"] = /(on|off)/.exec(content) || [];
                     config.debug = state === "on";
                     return `Debug mode ${state}`;
-                });
+                }, AccessLevel.dev);
 
                 commander.add("test cron", "sets up a test cron job", (announcement) => {
                     announcement.initTest();
                     return `*setting up test cron job*`;
-                });
+                }, AccessLevel.dev);
 
                 commander.add("get cron", "lists scheduled announcements", ({ schedules }) => {
                     return 'Currently scheduled announcements: `' + JSON.stringify(schedules) + '`';
-                });
+                }, AccessLevel.dev);
 
                 commander.add("get throttle", "gets current throttle (in seconds)", (throttle) => {
                     return `Reply throttle is currently ${throttle} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
-                });
+                }, AccessLevel.privileged);
 
                 commander.add("set throttle", "sets throttle to N (in seconds)", (content, config) => {
                     const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
@@ -434,24 +465,22 @@ const announcement = new Announcement();
                     }
 
                     return `*invalid throttle value*`;
-                });
+                }, AccessLevel.privileged);
 
                 commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
-                });
+                }, AccessLevel.privileged);
 
                 commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
                     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
                     config.lastMessageTime = Date.now() + (+num * 6e4) - (throttle * 1e3);
                     return `*silenced for ${num} minutes*`;
-                });
-
-                commander.alias("mute", ["timeout", "sleep"]);
+                }, AccessLevel.privileged);
 
                 commander.add("unmute", "allows the bot to speak immediately", (config) => {
                     config.lastMessageTime = -1;
                     return `*timeout cleared*`;
-                });
+                }, AccessLevel.privileged);
 
                 commander.add("get time", "gets current UTC time and the election phase time", ({ phase, dateElection }) => {
                     const current = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
@@ -461,13 +490,13 @@ const announcement = new Announcement();
                     }
 
                     return current;
-                });
+                }, AccessLevel.privileged);
 
                 commander.add("coffee", "brews some coffee for the requestor", ({ name }) => {
                     //TODO: add for whom the coffee
                     const coffee = new RandomArray("cappuccino", "espresso", "latte", "ristretto", "macchiato");
                     return `Brewing some ${coffee.getRandom()} for ${name || "somebody"}`;
-                });
+                }, AccessLevel.privileged);
 
                 commander.add("timetravel", "sends bot back in time to another phase", (election, content) => {
                     const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
@@ -495,21 +524,21 @@ const announcement = new Announcement();
                         .replace(/ (?:AM|PM)$/, "");
 
                     return `Arrived at ${arrived}, today's phase: ${phase || "no phase"}`;
-                });
+                }, AccessLevel.dev);
 
-                commander.alias("timetravel", ["delorean", "88 miles"]);
-
-                commander.add("help", "Prints usage info", () => commander.help("moderator commands (requires mention):"));
-                commander.alias("help", ["usage", "commands"]);
+                commander.add("help", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
 
                 commander.add("die", "shuts down the bot in case of emergency", () => {
                     setTimeout(() => process.exit(0), 3e3);
                     return "initiating shutdown sequence";
-                });
+                }, AccessLevel.dev);
 
+                commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
+
+                commander.alias("timetravel", ["delorean", "88 miles"]);
+                commander.alias("mute", ["timeout", "sleep"]);
+                commander.alias("help", ["usage", "commands"]);
                 commander.alias("die", ["shutdown"]);
-
-                commander.add("greet", "makes the bot welcome everyone", sayHI);
                 commander.alias("greet", ["welcome"]);
 
                 const outputs = [
@@ -861,26 +890,18 @@ const announcement = new Announcement();
 
                 // What is an election
                 else if (content.length <= 56 && (/^what( i|')?s (an|the) election/.test(content) || /^how does (an|the) election work/.test(content))) {
-                    responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
+                    responseText = sayWhatIsAnElection(election);
                 }
-
-                // How/where to vote
                 else if (isAskedAboutVoting(content)) {
                     responseText = sayAboutVoting(election);
                 }
-
-                // Who are the winners
                 else if (isAskedForCurrentWinners(content)) {
                     responseText = sayCurrentWinners(election);
                 }
-
-                // Election schedule
-                else if (content.includes('election schedule') || content.includes('when is the election')) {
+                else if (isAskedForElectionSchedule(content)) {
                     responseText = sayElectionSchedule(election);
                 }
-
-                // Edit diamond into username
-                else if (['edit', 'insert', 'add'].some(x => content.includes(x)) && ['♦', 'diamond'].some(x => content.includes(x)) && content.includes('name')) {
+                else if (isAskedAboutUsernameDiamond(content)) {
                     responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
                 }
 
