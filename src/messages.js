@@ -323,3 +323,18 @@ export const sayCandidateScoreFormula = (badges) => {
 
     return `The ${allPts}-point ${makeURL("candidate score", "https://meta.stackexchange.com/a/252643")} is calculated this way: ${formula}`;
 };
+
+/**
+ * @summary builds an election definition message
+ * @param {Election} election
+ * @returns {string}
+ */
+export const sayWhatIsAnElection = (election) => {
+    const { repVote } = election;
+
+    const diamondURL = makeURL("diamond ♦ moderator", "https://meta.stackexchange.com/q/75189");
+    const electionURL = makeURL("election", "https://meta.stackexchange.com/q/135360");
+    const eligibility = `users with at least ${repVote} reputation can vote for them`;
+
+    return `An ${electionURL} is where users nominate themselves as candidates for the role of ${diamondURL}, and ${eligibility}.`;
+};

@@ -4,16 +4,18 @@ import entities from 'html-entities';
 import { AccessLevel, CommandManager } from './commands.js';
 import Election from './election.js';
 import {
+    isAskedAboutUsernameDiamond,
     isAskedAboutVoting,
     isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentNominees,
-    isAskedForCurrentWinners, isAskedIfModsArePaid,
+    isAskedForCurrentWinners, isAskedForElectionSchedule, isAskedIfModsArePaid,
     isAskedWhyNominationRemoved
 } from "./guards.js";
 import {
     sayAboutVoting,
     sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
     sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges,
+    sayWhatIsAnElection,
     sayWhatModsDo, sayWhyNominationRemoved
 } from "./messages.js";
 import { getRandomPlop, RandomArray } from "./random.js";
@@ -888,26 +890,18 @@ const announcement = new Announcement();
 
                 // What is an election
                 else if (content.length <= 56 && (/^what( i|')?s (an|the) election/.test(content) || /^how does (an|the) election work/.test(content))) {
-                    responseText = `An [election](https://meta.stackexchange.com/q/135360) is where users nominate themselves as candidates for the role of [diamond ♦ moderator](https://meta.stackexchange.com/q/75189), and users with at least ${election.repVote} reputation can vote for them.`;
+                    responseText = sayWhatIsAnElection(election);
                 }
-
-                // How/where to vote
                 else if (isAskedAboutVoting(content)) {
                     responseText = sayAboutVoting(election);
                 }
-
-                // Who are the winners
                 else if (isAskedForCurrentWinners(content)) {
                     responseText = sayCurrentWinners(election);
                 }
-
-                // Election schedule
-                else if (content.includes('election schedule') || content.includes('when is the election')) {
+                else if (isAskedForElectionSchedule(content)) {
                     responseText = sayElectionSchedule(election);
                 }
-
-                // Edit diamond into username
-                else if (['edit', 'insert', 'add'].some(x => content.includes(x)) && ['♦', 'diamond'].some(x => content.includes(x)) && content.includes('name')) {
+                else if (isAskedAboutUsernameDiamond(content)) {
                     responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
                 }
 

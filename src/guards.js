@@ -70,3 +70,21 @@ export const isAskedForCurrentWinners = (text) => {
 export const isAskedForCurrentNominees = (text) => {
     return /(?:who|what) (?:are|were|was|is)/.test(text) && /(?:nomin(?:ee|ation)|participant|candidate)s?/.test(text);
 };
+
+/**
+ * @summary checks if the message asked for current election schedule
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedForElectionSchedule = (text) => {
+    return /(?:when|how) is the election(?: scheduled)?|election schedule/.test(text);
+};
+
+/**
+ * @summary checks if the message asked if anyone can edit in a ♦ in their username
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedAboutUsernameDiamond = (text) => {
+    return /(?:edit|insert|add).+?(?:\u2666|diamond).+?(?:user)?name/.test(text);
+};
