@@ -25,7 +25,7 @@ export const isAskedIfModsArePaid = (text) => {
  * @param {string} text
  * @returns {boolean}
  */
-export const isAskedAboutModPowers = (text) => {
+export const isAskedAboutModsOrModPowers = (text) => {
     return /^(?:why|what|should|does)\b/.test(text) && 
         /\b(?:should i be|is a|do(?:es) (?:mod|moderator)s?|benefit|privileges?|powers?|responsibilit(?:y|ies))\b/.test(text) && 
         /\b(?:mod|moderator)s?\b/.test(text);

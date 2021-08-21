@@ -8,7 +8,7 @@ import {
     isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
     isAskedForElectionSchedule, 
-    isAskedAboutModPowers, isAskedIfModsArePaid,
+    isAskedAboutModsOrModPowers, isAskedIfModsArePaid,
     isAskedWhyNominationRemoved, 
     isAskedAboutUsernameDiamond,
 } from "./guards.js";
@@ -751,7 +751,7 @@ const announcement = new Announcement();
 
                 // What are the benefits of mods
                 // Why should I be a moderator
-                else if (isAskedAboutModPowers(content)) {
+                else if (isAskedAboutModsOrModPowers(content)) {
                     responseText = sayWhatModsDo(election);
                 }
 

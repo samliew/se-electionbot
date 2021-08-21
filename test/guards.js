@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import {
     isAskedForElectionSchedule,
-    isAskedAboutModPowers,
+    isAskedAboutModsOrModPowers,
     isAskedAboutUsernameDiamond
 } from "../src/guards.js";
 
@@ -26,7 +26,7 @@ describe('Message Guards', () => {
 
     });
 
-    describe('isAskedAboutModPowers', () => {
+    describe('isAskedAboutModsOrModPowers', () => {
 
         it('should correctly match content', () => {
 
@@ -44,7 +44,7 @@ describe('Message Guards', () => {
             ];
 
             matches.forEach((txt) => {
-                const matched = isAskedAboutModPowers(txt);
+                const matched = isAskedAboutModsOrModPowers(txt);
                 expect(matched, `<${txt}> not matched`).to.be.true;
             });
 
