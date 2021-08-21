@@ -4,9 +4,9 @@
 
 ElectionBot is a chatbot to handle queries for commonly-asked questions in an election chat room for a site on the Stack Exchange network.
 
-Please direct any queries & feedback to [the developers](https://github.com/samliew/se-electionbot/graphs/contributors), in the [development chatroom](https://chat.stackoverflow.com/rooms/190503/electionbot-development), or [create an issue on Github](https://github.com/samliew/se-electionbot/issues/new/choose).
+Please direct any queries & feedback to [the developers](https://github.com/samliew/se-electionbot/graphs/contributors) in the [development chatroom](https://chat.stackoverflow.com/rooms/190503/electionbot-development) or [create an issue on Github](https://github.com/samliew/se-electionbot/issues/new/choose).
 
-## Examples of topics the bot can help with:
+## Examples of topics the bot can help with
 
 General election help:
 - what is an election/ how does it work
@@ -49,6 +49,7 @@ The bot also sends a greeting with the election status after certain levels of i
 ## Mod-only commands
 
 Moderators can also make use of these commands *(reqires mention)* to help moderate the chat room:
+- commands
 - say *message*
 - alive
 - get time

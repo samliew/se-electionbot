@@ -535,7 +535,7 @@ const announcement = new Announcement();
                 }, AccessLevel.dev);
 
                 // to reserve the keyword 'help' for normal users
-                commander.add("commands", "Prints usage info", () => commander.help("moderator commands *(requires mention)*:"), AccessLevel.privileged);
+                commander.add("commands", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
 
                 commander.add("die", "shuts down the bot in case of emergency", () => {
                     setTimeout(() => process.exit(0), 3e3);
