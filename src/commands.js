@@ -112,6 +112,14 @@ export class CommandManager {
     }
 
     /**
+     * @summary aliases multiple commands
+     * @param {{ [command: string]: string[] }} dict
+     */
+    aliases(dict) {
+        Object.entries(dict).forEach(([name, aliases]) => this.alias(name, aliases));
+    }
+
+    /**
      * @summary runs a command by name
      * @param {string} name
      * @param {...any} args

@@ -29,6 +29,26 @@ describe('Commander', () => {
             expect(commander.commands.say.aliasFor).to.not.be.null;
         });
 
+        it('"aliases" method should correct set aliases', () => {
+
+            const commander = new CommandManager(getMockUser());
+            commander.add("♦", "gets a diamond", () => "♦");
+            commander.add("gold", "gets some gold", () => "#FFD700");
+
+            const goldAliases = ["aurum"];
+            const diamondAliases = ["diamond", "mod"];
+
+            commander.aliases({
+                "♦": diamondAliases,
+                "gold": goldAliases
+            });
+
+            const { commands } = commander;
+
+            expect(commands.gold.aliases.map((a) => a.name)).to.deep.equal(goldAliases);
+            expect(commands["♦"].aliases.map((a) => a.name)).to.deep.equal(diamondAliases);
+        });
+
         it('should correctly list aliases', () => {
             const help = commander.help();
             expect(help).to.equal(`Commands\n- [bark] (say) barks, what else?`);

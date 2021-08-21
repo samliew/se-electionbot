@@ -544,11 +544,13 @@ const announcement = new Announcement();
 
                 commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
 
-                commander.alias("timetravel", ["delorean", "88 miles"]);
-                commander.alias("mute", ["timeout", "sleep"]);
-                commander.alias("commands", ["usage"]);
-                commander.alias("die", ["shutdown"]);
-                commander.alias("greet", ["welcome"]);
+                commander.aliases({
+                    timetravel: ["delorean", "88 miles"],
+                    mute: ["timeout", "sleep"],
+                    commands: ["usage"],
+                    die: ["shutdown"],
+                    greet: ["welcome"],
+                });
 
                 // TODO: Do not show dev-only commands to mods, split to separate dev menu?
                 const outputs = [
