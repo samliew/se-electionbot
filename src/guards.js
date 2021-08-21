@@ -27,7 +27,7 @@ export const isAskedIfModsArePaid = (text) => {
  */
 export const isAskedAboutModPowers = (text) => {
     return /^(?:why|what)\b/.test(text) && 
-        /\b(?:mod|moderator)s?)\b/.test(text) && 
+        /\b(?:mod|moderator)s?\b/.test(text) && 
         /\b(?:should i be|does mod|mods do|benefit|pros|privileges?|powers?|responsibilit(?:y|ies))\b/.test(text);
 };
 
