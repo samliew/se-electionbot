@@ -60,9 +60,11 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         //TODO: decide how to avoid mutation
         let { userId, content } = message;
 
+        const errorResponse = (otherUser = false) => `Sorry, an error occured when calculating ${otherUser ? `the user's` : `your`} candidate score.`;
+
         if (isNaN(userId) || userId <= 0) {
             console.error(`Invalid user id: ${userId}`);
-            return "";
+            return errorResponse(false);
         }
 
         const isStackOverflowChat = chatDomain === 'stackoverflow.com';
@@ -97,7 +99,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             // Unable to get user id on election site
             if (userId === null) {
                 console.error(`Unable to get site user id for ${userId}.`);
-                return "";
+                return errorResponse(findingTargetCandidateScore);
             }
         }
 
@@ -106,7 +108,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         // Validation
         if (!items.length) {
             console.error('No data from API.');
-            return "";
+            return errorResponse(findingTargetCandidateScore);
         }
 
         const userBadgeIds = items.map(mapToId);
