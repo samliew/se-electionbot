@@ -262,9 +262,7 @@ export const sayElectionSchedule = (election) => {
 export const sayOffTopicMessage = (election, asked) => {
     const { electionUrl } = election;
 
-    const plead = "Please try to keep the room on-topic.";
-
-    const text = `This room is for discussion about the ${makeURL("election", electionUrl)}. ${plead} Thank you!`;
+    const text = `This room is for discussion about the ${makeURL("election", electionUrl)}. Please try to keep the room on-topic. Thank you!`;
 
     const [, messageId] = asked.split('offtopic');
 
@@ -281,14 +279,16 @@ export const sayWhatModsDo = (election) => {
     const { siteUrl } = election;
 
     const modActivities = [
-        `enforcing the ${makeURL("Code of Conduct", `${siteUrl}/conduct`)}`,
         `investigating and destroying sockpuppet accounts`,
+        `suspend and privately messaging users`,
+        `viewing deleted content`,
+        `migrating questions to any network site`,
         `and performing post redactions`
     ];
 
-    const modsAre = `essential to keeping the site clean, fair, and friendly`;
+    const modsAre = `essential to keeping the site clean, fair, and friendly by enforcing the ${makeURL("Code of Conduct", `${siteUrl}/conduct`)}`;
 
-    const modsDo = `They are volunteers who are equipped to handle situations regular users can't, like ${modActivities.join(", ")}`;
+    const modsDo = `They are volunteers who are granted [additional privileges](https://meta.stackexchange.com/q/75189) to handle situations regular users can't, like ${modActivities.join(", ")}`;
 
     return `${makeURL("Elected ♦ moderators", `${siteUrl}/help/site-moderators`)} are ${modsAre}. ${modsDo}.`;
 };

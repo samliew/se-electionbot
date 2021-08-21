@@ -4,21 +4,29 @@ import entities from 'html-entities';
 import { AccessLevel, CommandManager } from './commands.js';
 import Election from './election.js';
 import {
-    isAskedAboutUsernameDiamond,
     isAskedAboutVoting,
     isAskedForCandidateScore, isAskedForCurrentMods,
-    isAskedForCurrentNominees,
-    isAskedForCurrentWinners, isAskedForElectionSchedule, isAskedIfModsArePaid,
-    isAskedWhyNominationRemoved
+    isAskedForCurrentNominees, isAskedForCurrentWinners,
+    isAskedForElectionSchedule, 
+    isAskedAboutModPowers, isAskedIfModsArePaid,
+    isAskedWhyNominationRemoved, 
+    isAskedAboutUsernameDiamond,
 } from "./guards.js";
 import {
     sayAboutVoting,
-    sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
-    sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges,
-    sayWhatIsAnElection,
-    sayWhatModsDo, sayWhyNominationRemoved
+    sayCandidateScoreFormula, sayCurrentMods,
+    sayCurrentWinners, 
+    sayElectionSchedule, 
+    sayWhatModsDo, sayAreModsPaid, 
+    sayHI, sayWhatIsAnElection,
+    sayInformedDecision, 
+    sayNotStartedYet, 
+    sayNextPhase, sayElectionIsOver, 
+    sayRequiredBadges, sayBadgesByType, 
+    sayWhyNominationRemoved,
+    sayOffTopicMessage
 } from "./messages.js";
-import { getRandomPlop, RandomArray } from "./random.js";
+import { getRandomPlop, getRandomGoodThanks, RandomArray } from "./random.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import {
@@ -526,7 +534,8 @@ const announcement = new Announcement();
                     return `Arrived at ${arrived}, today's phase: ${phase || "no phase"}`;
                 }, AccessLevel.dev);
 
-                commander.add("help", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
+                // to reserve the keyword 'help' for normal users
+                commander.add("commands", "Prints usage info", () => commander.help("moderator commands *(requires mention)*:"), AccessLevel.privileged);
 
                 commander.add("die", "shuts down the bot in case of emergency", () => {
                     setTimeout(() => process.exit(0), 3e3);
@@ -537,12 +546,13 @@ const announcement = new Announcement();
 
                 commander.alias("timetravel", ["delorean", "88 miles"]);
                 commander.alias("mute", ["timeout", "sleep"]);
-                commander.alias("help", ["usage", "commands"]);
+                commander.alias("commands", ["usage"]);
                 commander.alias("die", ["shutdown"]);
                 commander.alias("greet", ["welcome"]);
 
+                // TODO: Do not show dev-only commands to mods, split to separate dev menu?
                 const outputs = [
-                    ["help", /help|usage|commands/],
+                    ["commands", /commands|usage/],
                     ["say", /say/, origContent],
                     ["alive", /alive/, scriptHostname, scriptInitDate],
                     ["test cron", /test cron/, announcement],
@@ -628,8 +638,8 @@ const announcement = new Announcement();
                 else if (["about", "who are you?"].includes(content)) {
                     responseText = `I'm ${me.name} and ${me.about}`;
                 }
-                else if (content.includes('who') && ['made', 'created', 'owner', 'serve'].some(x => content.includes(x)) && content.includes('you')) {
-                    responseText = `[Samuel](https://so-user.com/584192?tab=profile) created me. Isn't he awesome?`;
+                else if (content.includes('who') && ['made', 'created', 'owner', 'devs', 'developer'].some(x => content.includes(x)) && content.includes('you')) {
+                    responseText = `[Samuel](https://so-user.com/584192?tab=profile) created me. I am also maintained by [these developers](https://github.com/samliew/se-electionbot/graphs/contributors).`;
                 }
                 else if (content.startsWith(`i love you`)) {
                     responseText = `I love you 3000`;
@@ -719,23 +729,8 @@ const announcement = new Announcement();
             else if (resolvedMsg.eventType === 1 && !resolvedMsg.targetUserId) {
                 let responseText = null;
 
-                // Current candidates
-                if (isAskedForCurrentNominees(content)) {
-                    if (election.phase === null) {
-                        responseText = sayNotStartedYet(election);
-                    }
-                    else if (election.arrNominees.length > 0) {
-                        // Can't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
-                        responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.electionUrl}): ` +
-                            election.arrNominees.map(v => v.userName).join(', ');
-                    }
-                    else {
-                        responseText = `No users have nominated themselves yet. Why not be the first?`;
-                    }
-                }
-
                 // Moderation badges
-                else if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
+                if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
                     responseText = sayBadgesByType(electionBadges, "moderation", isStackOverflow);
                 }
 
@@ -754,17 +749,10 @@ const announcement = new Announcement();
                     responseText = sayRequiredBadges(election, electionBadges);
                 }
 
-
-                // What is a moderator/moderators do/does a mod
-                else if (['what'].some(x => content.startsWith(x)) && /(are|is|do(es)?)( a)? mod(erator)?s?/.test(content)) {
-                    responseText = sayWhatModsDo(election);
-                }
-
                 // What are the benefits of mods
                 // Why should I be a moderator
-                else if (['why', 'what'].some(x => content.startsWith(x)) && ['should i be', 'benefit', 'pros', 'entail', 'privil', 'power'].some(x => content.includes(x)) && content.includes('mod')) {
-                    responseText = `[Elected ♦ moderators](${election.siteUrl}/help/site-moderators) are essential to keeping the site clean, fair, and friendly. ` +
-                        `Not only that, moderators get [additional privileges](https://meta.stackexchange.com/q/75189) like viewing deleted posts/comments/chat messages, searching for a user's deleted posts, suspend/privately message users, migrate questions to any network site, unlimited binding close/delete/flags on everything, just to name a few.`;
+                else if (isAskedAboutModPowers(content)) {
+                    responseText = sayWhatModsDo(election);
                 }
 
                 // Calculate own candidate score
@@ -795,12 +783,27 @@ const announcement = new Announcement();
                     responseText = sayCandidateScoreFormula(electionBadges);
                 }
 
-                // Stats/How many voted/participated
-                else if (['how', 'many'].every(x => content.includes(x)) && ['voted', 'participants'].some(x => content.includes(x))) {
+                // Current candidates
+                else if (isAskedForCurrentNominees(content)) {
+                    if (election.phase === null) {
+                        responseText = sayNotStartedYet(election);
+                    }
+                    else if (election.arrNominees.length > 0) {
+                        // Don't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
+                        responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.electionUrl}): ` +
+                            election.arrNominees.map(v => v.userName).join(', ');
+                    }
+                    else {
+                        responseText = `No users have nominated themselves yet. Why not be the first?`;
+                    }
+                }
+
+                // Election stats - How many voted/participants/participated
+                else if (['how', 'many'].every(x => content.includes(x)) && ['voted', 'participa'].some(x => content.includes(x))) {
                     responseText = election.phase == 'ended' ? election.statVoters : `We won't know until the election ends. Come back ${linkToRelativeTimestamp(election.dateEnded)}.`;
                 }
 
-                // How to choose/pick/decide who to vote for
+                // How to choose/pick/decide/determine who to vote for
                 else if ((content.startsWith('how') && ['choose', 'pick', 'decide', 'determine'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
                     if (election.qnaUrl) responseText = sayInformedDecision(election);
                     if (election.phase == null) responseText = sayNotStartedYet(election);
@@ -907,11 +910,7 @@ const announcement = new Announcement();
 
                 // Good bot
                 if (['the', 'this', 'i'].some(x => content.startsWith(x)) && content.includes('bot') && ['good', 'excellent', 'wonderful', 'well done', 'nice', 'great', 'like'].some(x => content.includes(x))) {
-                    responseText = new RandomArray(
-                        `I know, right?`,
-                        `I'm only as good as the one who made me.`,
-                        `Thanks! You're awesome!`,
-                    ).getRandom();
+                    responseText = getRandomGoodThanks();
                 }
 
 

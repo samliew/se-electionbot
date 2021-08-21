@@ -21,6 +21,17 @@ export const isAskedIfModsArePaid = (text) => {
 };
 
 /**
+ * @summary checks if the message asked what do moderators do or what privileges they have
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedAboutModPowers = (text) => {
+    return ['why', 'what'].some(x => text.startsWith(x)) && 
+        / mod(erator)?s?/.test(text) && 
+        ['should i be', 'does mod', 'benefit', 'pros', 'privileg', 'power', 'responsibilit'].some(x => text.includes(x));
+};
+
+/**
  * @summary checks if the message asked how or where to vote
  * @param {string} text
  * @returns {boolean}
@@ -32,12 +43,12 @@ export const isAskedAboutVoting = (text) => {
 };
 
 /**
- * @summary checks if the message asked to tell candidate score
+ * @summary checks if the message asked to tell one's candidate score
  * @param {string} text
  * @returns {boolean}
  */
 export const isAskedForCandidateScore = (text) => {
-    return /candidate score/.test(text) ||
+    return /my candidate score/.test(text) ||
         /can i /.test(text) &&
         /be|become|nominate|run/.test(text) &&
         /mod|election/.test(text);
