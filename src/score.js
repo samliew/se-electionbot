@@ -60,10 +60,12 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         //TODO: decide how to avoid mutation
         let { userId, content } = message;
 
-        if (isNaN(userId)) {
-            console.error(`invalid user id: ${userId}`);
+        if (isNaN(userId) || userId <= 0) {
+            console.error(`Invalid user id: ${userId}`);
             return "";
         }
+
+        const isStackOverflowChat = chatDomain === 'stackoverflow.com';
 
         const { arrNominees, electionUrl, phase, repNominate, siteUrl } = election;
 
@@ -87,8 +89,9 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         if (findingTargetCandidateScore) {
             userId = Number(content.match(/\d+$/)[0]);
         }
+
         // If not Chat.SO, resolve election site user id from chat id (chat has different ids)
-        else if (!chatDomain.includes('stackoverflow.com')) {
+        if (!isStackOverflowChat) {
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname);
 
             // Unable to get user id on election site

@@ -94,7 +94,7 @@ const announcement = new Announcement();
 
     // App variables
     const isStackOverflow = electionSiteHostname.includes('stackoverflow.com');
-    const isStackOverflowChat = chatDomain.includes('stackoverflow.com');
+    const isStackOverflowChat = chatDomain === 'stackoverflow.com';
     const scriptInitDate = new Date();
     const ignoredEventTypes = [
         //  1,  // MessagePosted

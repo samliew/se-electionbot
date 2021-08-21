@@ -48,7 +48,8 @@ export const isAskedAboutVoting = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCandidateScore = (text) => {
-    return /my candidate score/.test(text) ||
+    return /what is the candidate score for \d+$/.test(text) ||
+        /my candidate score/.test(text) ||
         /can i /.test(text) &&
         /be|become|nominate|run/.test(text) &&
         /mod|election/.test(text);
