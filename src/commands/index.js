@@ -1,5 +1,5 @@
 /**
- * @typedef {import("./index").User} User
+ * @typedef {import("../index").User} User
  */
 
 export const AccessLevel = {
@@ -165,7 +165,7 @@ export class CommandManager {
     help(prefix = "Commands") {
         const { commands } = this;
         const list = Object.values(commands)
-            .filter(({ aliasFor }) => !aliasFor)
+            .filter((cmd) => !cmd.aliasFor && this.canRun(cmd))
             .map(({ name, description, aliases }) => {
                 const aliasNames = aliases.map(({ name }) => name).join(", ");
                 const alias = aliasNames ? ` (${aliasNames})` : "";
