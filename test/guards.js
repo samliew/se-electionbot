@@ -1,5 +1,9 @@
 import { expect } from "chai";
-import { isAskedAboutUsernameDiamond, isAskedForElectionSchedule } from "../src/guards.js";
+import {
+    isAskedForElectionSchedule,
+    isAskedAboutModPowers,
+    isAskedAboutUsernameDiamond
+} from "../src/guards.js";
 
 describe('Message Guards', () => {
 
@@ -18,6 +22,32 @@ describe('Message Guards', () => {
                 const matched = isAskedForElectionSchedule(txt);
                 expect(matched, `<${txt}> not matched`).to.be.true;
             });
+        });
+
+    });
+
+    describe('isAskedAboutModPowers', () => {
+
+        it('should correctly match content', () => {
+
+            const matches = [
+                "what is a moderator",
+                "what do moderators do?",
+                "what do mods do",
+                "what does mods do",
+                "what powers do mods have",
+                "what are the responsibilities of a mod",
+                "what are the responsibilities of moderators",
+                "what are the benefits of being a moderator",
+                "should i be a mod",
+                "does moderators have extra privileges"
+            ];
+
+            matches.forEach((txt) => {
+                const matched = isAskedAboutModPowers(txt);
+                expect(matched, `<${txt}> not matched`).to.be.true;
+            });
+
         });
 
     });
