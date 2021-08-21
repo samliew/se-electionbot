@@ -16,7 +16,7 @@ General election help:
 - how to vote
 - how to decide who to vote for
 - how is the candidate score calculated
-- **what is my candidate score** *(calculates if one is eligible for nomination)*
+- **what is my candidate score** *(calculates if ownself is eligible for nomination)*
 - what are the moderation badges
 - what are the participation badges
 - what are the editing badges
@@ -58,3 +58,4 @@ Moderators can also make use of these commands *(reqires mention)* to help moder
 - mute *X*
 - unmute
 - greet
+- **what is the candidate score for *X*** *(calculates candidate score of userId "X")*
