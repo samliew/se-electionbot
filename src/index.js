@@ -582,7 +582,7 @@ const announcement = new Announcement();
                 ];
 
                 responseText = outputs.reduce(
-                    (a, args) => a || commander.runIfMatches.call(commander, content, ...args)
+                    (a, args) => a || commander.runIfMatches.call(commander, content, ...args) || ""
                     , "");
 
                 if (BotConfig.debug) {
