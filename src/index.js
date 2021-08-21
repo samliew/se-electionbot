@@ -567,7 +567,7 @@ const announcement = new Announcement();
                     ["debug", /debug(?:ing)?/, BotConfig, content],
                     ["die", /die|shutdown|turn off/],
                     ["greet", /^(greet|welcome)/, room, election],
-                    ["access", /set (?:access|level)/, BotConfig, user, content]
+                    ["set access", /set (?:access|level)/, BotConfig, user, content]
                 ];
 
                 responseText = outputs.reduce(
