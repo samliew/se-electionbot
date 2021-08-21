@@ -54,7 +54,10 @@ const announcement = new Announcement();
  *  lastMessageTime: number,
  *  activityCount: number,
  *  debug: boolean,
- *  verbose: boolean
+ *  verbose: boolean,
+ *  adminIds: Set<number>,
+ *  devIds: Set<number>,
+ *  ignoredUserIds: Set<number>
  * }} BotConfig
  *
  * @typedef {import("./utils").APIListResponse} APIListResponse
@@ -165,6 +168,9 @@ const announcement = new Announcement();
     const lowActivityCheckMins = Number(process.env.LOW_ACTIVITY_CHECK_MINS) || 15;
     const lowActivityCountThreshold = Number(process.env.LOW_ACTIVITY_COUNT_THRESHOLD) || 30;
 
+    /**
+     * @type {BotConfig}
+     */
     const BotConfig = {
         // To stop bot from replying to too many messages in a short time
         throttleSecs: +(process.env.THROTTLE_SECS) || 10,
@@ -179,9 +185,9 @@ const announcement = new Announcement();
         // Verbose logging
         verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false"),
         //user ids by level
-        adminIds: parseIds(process.env.ADMIN_IDS || ''),
-        ignoredUserIds: parseIds(process.env.IGNORED_USERIDS || ''),
-        devIds: parseIds(process.env.DEV_IDS || ""),
+        adminIds: new Set(parseIds(process.env.ADMIN_IDS || '')),
+        ignoredUserIds: new Set(parseIds(process.env.IGNORED_USERIDS || '')),
+        devIds: new Set(parseIds(process.env.DEV_IDS || "")),
     };
 
     // Overrides console.log/error to insert newlines
@@ -387,7 +393,7 @@ const announcement = new Announcement();
             if (meWithId.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
 
             // Ignore stuff from ignored users
-            if (BotConfig.ignoredUserIds.includes(resolvedMsg.userId)) return;
+            if (BotConfig.ignoredUserIds.has(resolvedMsg.userId)) return;
 
             // Ignore messages with oneboxes & links!
             if (content.includes('onebox') || content.includes('http')) return;
@@ -403,13 +409,13 @@ const announcement = new Announcement();
             if (!user) return console.log("missing user", resolvedMsg);
 
             // TODO: make a part of User
-            /** @type {[number[], number][]} */
+            /** @type {[Set<number>, number][]} */
             const userLevels = [
                 [BotConfig.adminIds, AccessLevel.admin],
                 [BotConfig.devIds, AccessLevel.dev]
             ];
 
-            const [, access] = userLevels.find(([ids]) => ids.includes(user.id)) || [, AccessLevel.user];
+            const [, access] = userLevels.find(([ids]) => ids.has(user.id)) || [, AccessLevel.user];
 
             user.access = access;
 
