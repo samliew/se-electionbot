@@ -950,11 +950,11 @@ const announcement = new Announcement();
             if (BotConfig.debug) {
                 const { arrNominees, arrWinners, phase } = election;
 
-                if (phase === 'ended') {
-                    console.log(`Election winners: ${arrWinners}`);
-                }
+                console.log(`Election candidates: ${arrNominees.map(x => x.userName).join(', ')}`);
 
-                console.log(`Election candidates: ${arrNominees}`);
+                if (phase === 'ended') {
+                    console.log(`Election winners: ${arrWinners.map(x => x.userName).join(', ')}`);
+                }
             }
 
             // No previous scrape results yet, do not proceed
