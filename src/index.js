@@ -512,6 +512,8 @@ const announcement = new Announcement();
                     return `Brewing some ${coffee.getRandom()} for ${name || "somebody"}`;
                 }, AccessLevel.privileged);
 
+                commander.add("access", "sets user's access level", setAccessCommand, AccessLevel.dev);
+
                 commander.add("timetravel", "sends bot back in time to another phase", (election, content) => {
                     const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
 
@@ -575,7 +577,8 @@ const announcement = new Announcement();
                     ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
                     ["debug", /debug(?:ing)?/, BotConfig, content],
                     ["die", /die|shutdown|turn off/],
-                    ["greet", /^(greet|welcome)/, room, election]
+                    ["greet", /^(greet|welcome)/, room, election],
+                    ["access", /set (?:access|level)/, BotConfig, user, content]
                 ];
 
                 responseText = outputs.reduce(
