@@ -26,9 +26,9 @@ export const isAskedIfModsArePaid = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutModPowers = (text) => {
-    return ['why', 'what'].some(x => text.startsWith(x)) && 
-        / mod(erator)?s?/.test(text) && 
-        ['should i be', 'does mod', 'benefit', 'pros', 'privileg', 'power', 'responsibilit'].some(x => text.includes(x));
+    return /^(?:why|what)\b/.test(text) && 
+        /\b(?:mod|moderator)s?)\b/.test(text) && 
+        /\b(?:should i be|does mod|mods do|benefit|pros|privileges?|powers?|responsibilit(?:y|ies))\b/.test(text);
 };
 
 /**

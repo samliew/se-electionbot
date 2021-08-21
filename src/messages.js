@@ -271,7 +271,7 @@ export const sayOffTopicMessage = (election, asked) => {
 };
 
 /**
- * @summary builds an off-topic warning message
+ * @summary builds a message about mod responsibilities
  * @param {Election} election
  * @returns {string}
  */
@@ -279,9 +279,8 @@ export const sayWhatModsDo = (election) => {
     const { siteUrl } = election;
 
     const modActivities = [
-        `investigating and destroying sockpuppet accounts`,
-        `suspend and privately messaging users`,
-        `viewing deleted content`,
+        `investigating sockpuppet accounts`,
+        `suspending users`,
         `migrating questions to any network site`,
         `and performing post redactions`
     ];
