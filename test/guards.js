@@ -1,7 +1,11 @@
 import { expect } from "chai";
 import {
     isAskedForElectionSchedule,
+<<<<<<< HEAD
     isAskedAboutModsOrModPowers,
+=======
+    isAskedAboutModPowers,
+>>>>>>> bd3b3a81ef2c5caa85dd93e9d75a49a586f125f8
     isAskedAboutUsernameDiamond
 } from "../src/guards.js";
 
@@ -44,7 +48,11 @@ describe('Message Guards', () => {
             ];
 
             matches.forEach((txt) => {
+<<<<<<< HEAD
                 const matched = isAskedAboutModsOrModPowers(txt);
+=======
+                const matched = isAskedAboutModPowers(txt);
+>>>>>>> bd3b3a81ef2c5caa85dd93e9d75a49a586f125f8
                 expect(matched, `<${txt}> not matched`).to.be.true;
             });
 
