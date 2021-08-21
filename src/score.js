@@ -101,7 +101,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             }
         }
 
-        const items = await getBadges(config, user, apiSlug, apiKey);
+        const items = await getBadges(config, userId, apiSlug, apiKey);
 
         // Validation
         if (!items.length) {
