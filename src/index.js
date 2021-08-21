@@ -1,32 +1,21 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { AccessLevel, CommandManager } from './commands.js';
+import { setAccessCommand } from "./commands/commands.js";
+import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
-    isAskedAboutVoting,
+    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForElectionSchedule, 
-    isAskedAboutModsOrModPowers, isAskedIfModsArePaid,
-    isAskedWhyNominationRemoved, 
-    isAskedAboutUsernameDiamond,
+    isAskedForElectionSchedule, isAskedIfModsArePaid,
+    isAskedWhyNominationRemoved
 } from "./guards.js";
 import {
-    sayAboutVoting,
-    sayCandidateScoreFormula, sayCurrentMods,
-    sayCurrentWinners, 
-    sayElectionSchedule, 
-    sayWhatModsDo, sayAreModsPaid, 
-    sayHI, sayWhatIsAnElection,
-    sayInformedDecision, 
-    sayNotStartedYet, 
-    sayNextPhase, sayElectionIsOver, 
-    sayRequiredBadges, sayBadgesByType, 
-    sayWhyNominationRemoved,
-    sayOffTopicMessage
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
+    sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhyNominationRemoved
 } from "./messages.js";
-import { getRandomPlop, getRandomGoodThanks, RandomArray } from "./random.js";
+import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import {
