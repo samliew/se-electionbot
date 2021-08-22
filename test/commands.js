@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { AccessLevel, CommandManager } from "../src/commands.js";
+import { AccessLevel, CommandManager } from "../src/commands/index.js";
 
 describe('Commander', () => {
 
@@ -19,17 +19,67 @@ describe('Commander', () => {
         return Object.assign(defaults, overrides);
     };
 
-    describe('aliases', () => {
-        const commander = new CommandManager(getMockUser());
-        commander.add("bark", "barks, what else?", () => "bark!");
-        commander.alias("bark", ["say"]);
+    describe('aliasing', () => {
+        it('"alias" should correctly add aliases', () => {
+            const commander = new CommandManager(getMockUser());
+            commander.add("bark", "barks, what else?", () => "bark!", AccessLevel.all);
+            commander.alias("bark", ["say"]);
 
-        it('should correctly add aliases', () => {
             expect(commander.commands.bark.aliases).length(1);
             expect(commander.commands.say.aliasFor).to.not.be.null;
         });
 
+        it('"aliases" method should correct set aliases', () => {
+
+            const commander = new CommandManager(getMockUser());
+            commander.add("♦", "gets a diamond", () => "♦");
+            commander.add("gold", "gets some gold", () => "#FFD700");
+
+            const goldAliases = ["aurum"];
+            const diamondAliases = ["diamond", "mod"];
+
+            commander.aliases({
+                "♦": diamondAliases,
+                "gold": goldAliases
+            });
+
+            const { commands } = commander;
+
+            expect(commands.gold.aliases.map((a) => a.name)).to.deep.equal(goldAliases);
+            expect(commands["♦"].aliases.map((a) => a.name)).to.deep.equal(diamondAliases);
+        });
+    });
+
+
+    describe('help', () => {
+
+        it('should only list available commands', () => {
+
+            const commander = new CommandManager(getMockUser({
+                access: AccessLevel.user
+            }));
+            commander.add("alive", "pings the bot", () => "I am alive", AccessLevel.all);
+            commander.add("stop", "stops the bot", () => "stopping...", AccessLevel.dev);
+
+            const aliveRegex = /\[alive\] pings the bot/;
+            const stopRegex = /\[stop\] stops the bot/;
+
+            const userHelp = commander.help();
+            expect(userHelp).to.match(aliveRegex);
+            expect(userHelp).to.not.match(stopRegex);
+
+            commander.user.access = AccessLevel.dev;
+
+            const devHelp = commander.help();
+            expect(devHelp).to.match(aliveRegex);
+            expect(devHelp).to.match(stopRegex);
+        });
+
         it('should correctly list aliases', () => {
+            const commander = new CommandManager(getMockUser());
+            commander.add("bark", "barks, what else?", () => "bark!", AccessLevel.all);
+            commander.alias("bark", ["say"]);
+
             const help = commander.help();
             expect(help).to.equal(`Commands\n- [bark] (say) barks, what else?`);
         });

@@ -1,32 +1,21 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { AccessLevel, CommandManager } from './commands.js';
+import { setAccessCommand } from "./commands/commands.js";
+import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
-    isAskedAboutVoting,
+    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForElectionSchedule, 
-    isAskedAboutModsOrModPowers, isAskedIfModsArePaid,
-    isAskedWhyNominationRemoved, 
-    isAskedAboutUsernameDiamond,
+    isAskedForElectionSchedule, isAskedIfModsArePaid,
+    isAskedWhyNominationRemoved
 } from "./guards.js";
 import {
-    sayAboutVoting,
-    sayCandidateScoreFormula, sayCurrentMods,
-    sayCurrentWinners, 
-    sayElectionSchedule, 
-    sayWhatModsDo, sayAreModsPaid, 
-    sayHI, sayWhatIsAnElection,
-    sayInformedDecision, 
-    sayNotStartedYet, 
-    sayNextPhase, sayElectionIsOver, 
-    sayRequiredBadges, sayBadgesByType, 
-    sayWhyNominationRemoved,
-    sayOffTopicMessage
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
+    sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhyNominationRemoved
 } from "./messages.js";
-import { getRandomPlop, getRandomGoodThanks, RandomArray } from "./random.js";
+import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import {
@@ -54,7 +43,10 @@ const announcement = new Announcement();
  *  lastMessageTime: number,
  *  activityCount: number,
  *  debug: boolean,
- *  verbose: boolean
+ *  verbose: boolean,
+ *  adminIds: Set<number>,
+ *  devIds: Set<number>,
+ *  ignoredUserIds: Set<number>
  * }} BotConfig
  *
  * @typedef {import("./utils").APIListResponse} APIListResponse
@@ -165,6 +157,9 @@ const announcement = new Announcement();
     const lowActivityCheckMins = Number(process.env.LOW_ACTIVITY_CHECK_MINS) || 15;
     const lowActivityCountThreshold = Number(process.env.LOW_ACTIVITY_COUNT_THRESHOLD) || 30;
 
+    /**
+     * @type {BotConfig}
+     */
     const BotConfig = {
         // To stop bot from replying to too many messages in a short time
         throttleSecs: +(process.env.THROTTLE_SECS) || 10,
@@ -179,9 +174,9 @@ const announcement = new Announcement();
         // Verbose logging
         verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false"),
         //user ids by level
-        adminIds: parseIds(process.env.ADMIN_IDS || ''),
-        ignoredUserIds: parseIds(process.env.IGNORED_USERIDS || ''),
-        devIds: parseIds(process.env.DEV_IDS || ""),
+        adminIds: new Set(parseIds(process.env.ADMIN_IDS || '')),
+        ignoredUserIds: new Set(parseIds(process.env.IGNORED_USERIDS || '')),
+        devIds: new Set(parseIds(process.env.DEV_IDS || "")),
     };
 
     // Overrides console.log/error to insert newlines
@@ -387,7 +382,7 @@ const announcement = new Announcement();
             if (meWithId.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
 
             // Ignore stuff from ignored users
-            if (BotConfig.ignoredUserIds.includes(resolvedMsg.userId)) return;
+            if (BotConfig.ignoredUserIds.has(resolvedMsg.userId)) return;
 
             // Ignore messages with oneboxes & links!
             if (content.includes('onebox') || content.includes('http')) return;
@@ -403,13 +398,13 @@ const announcement = new Announcement();
             if (!user) return console.log("missing user", resolvedMsg);
 
             // TODO: make a part of User
-            /** @type {[number[], number][]} */
+            /** @type {[Set<number>, number][]} */
             const userLevels = [
                 [BotConfig.adminIds, AccessLevel.admin],
                 [BotConfig.devIds, AccessLevel.dev]
             ];
 
-            const [, access] = userLevels.find(([ids]) => ids.includes(user.id)) || [, AccessLevel.user];
+            const [, access] = userLevels.find(([ids]) => ids.has(user.id)) || [, AccessLevel.user];
 
             user.access = access;
 
@@ -506,6 +501,8 @@ const announcement = new Announcement();
                     return `Brewing some ${coffee.getRandom()} for ${name || "somebody"}`;
                 }, AccessLevel.privileged);
 
+                commander.add("access", "sets user's access level", setAccessCommand, AccessLevel.dev);
+
                 commander.add("timetravel", "sends bot back in time to another phase", (election, content) => {
                     const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
 
@@ -544,11 +541,13 @@ const announcement = new Announcement();
 
                 commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
 
-                commander.alias("timetravel", ["delorean", "88 miles"]);
-                commander.alias("mute", ["timeout", "sleep"]);
-                commander.alias("commands", ["usage"]);
-                commander.alias("die", ["shutdown"]);
-                commander.alias("greet", ["welcome"]);
+                commander.aliases({
+                    timetravel: ["delorean", "88 miles"],
+                    mute: ["timeout", "sleep"],
+                    commands: ["usage"],
+                    die: ["shutdown"],
+                    greet: ["welcome"],
+                });
 
                 // TODO: Do not show dev-only commands to mods, split to separate dev menu?
                 const outputs = [
@@ -567,11 +566,12 @@ const announcement = new Announcement();
                     ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
                     ["debug", /debug(?:ing)?/, BotConfig, content],
                     ["die", /die|shutdown|turn off/],
-                    ["greet", /^(greet|welcome)/, room, election]
+                    ["greet", /^(greet|welcome)/, room, election],
+                    ["set access", /set (?:access|level)/, BotConfig, user, content]
                 ];
 
                 responseText = outputs.reduce(
-                    (a, args) => a || commander.runIfMatches.call(commander, content, ...args)
+                    (a, args) => a || commander.runIfMatches.call(commander, content, ...args) || ""
                     , "");
 
                 if (BotConfig.debug) {
