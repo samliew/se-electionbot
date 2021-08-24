@@ -67,6 +67,8 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             return errorResponse(false);
         }
 
+        const { debug } = config;
+
         const isStackOverflowChat = chatDomain === 'stackoverflow.com';
 
         const { arrNominees, electionUrl, phase, repNominate, siteUrl } = election;
@@ -222,6 +224,12 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                     ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
                     ` Having a high score is not a requirement - you can still nominate yourself!`;
             }
+        }
+        
+        if (config.debug) {
+            console.log("Election badges", electionBadges);
+            console.log("User site badges", items);
+            console.log("User missing badges", missingBadges);
         }
 
         return responseText;

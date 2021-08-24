@@ -26,6 +26,7 @@ import {
     linkToRelativeTimestamp,
     linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer
 } from './utils.js';
+import { getAllNamedBadges } from "./api.js";
 
 // preserves compatibility with older import style
 const announcement = new Announcement();
@@ -318,6 +319,23 @@ const announcement = new Announcement();
             filter: "!LnNkvq0d-S*rS_0sMTDFRm",
             key: stackApikey
         }).toString();
+
+        // Get current site named badges
+        if(!isStackOverflow) {
+
+            console.log('before', electionBadges);
+            debugger;
+
+            const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, stackApikey);
+            electionBadges.forEach(electionBadge => {
+                const matchedBadge = allNamedBadges.filter(namedBadge => electionBadge.name === namedBadge.name);
+                if(matchedBadge)
+                    electionBadge.id = matchedBadge[0].badge_id.toString();
+            });
+
+            console.log('after', electionBadges);
+            debugger;
+        }
 
         const currSiteModApiResponse = /** @type {APIListResponse|null} */(await fetchUrl(BotConfig, modURL.toString(), true));
         const currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1) : [];
