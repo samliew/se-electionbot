@@ -308,13 +308,13 @@ const announcement = new Announcement();
         }
 
         // Get current site named badges
-        if(!isStackOverflow) {
-
+        if (!isStackOverflow) {
             const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, stackApikey);
-            electionBadges.forEach(electionBadge => {
-                const matchedBadge = allNamedBadges.filter(namedBadge => electionBadge.name === namedBadge.name);
-                if(matchedBadge)
-                    electionBadge.id = matchedBadge[0].badge_id.toString();
+
+            electionBadges.forEach((electionBadge) => {
+                const { name: badgeName } = electionBadge;
+                const matchedBadge = allNamedBadges.find(({ name }) => badgeName === name);
+                if (matchedBadge) electionBadge.id = matchedBadge.badge_id.toString();
             });
 
             console.log('site election badges', electionBadges);
@@ -545,7 +545,7 @@ const announcement = new Announcement();
                 if (responseText) {
 
                     // Function sent the message and returned empty string, e.g.: sayHI
-                    if(responseText === '') return;
+                    if (responseText === '') return;
 
                     const messages = responseText.split(
                         new RegExp(`(^(?:.|\\n|\\r){1,${maxPerMessage}})(?:\\n|$)`, "gm")
