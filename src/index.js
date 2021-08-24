@@ -1,6 +1,7 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
+import { getAllNamedBadges, getModerators } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
@@ -20,13 +21,11 @@ import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import {
-    apiBase,
-    apiVer, dateToRelativetime,
-    dateToUtcTimestamp, fetchUrl, keepAlive,
+    dateToRelativetime,
+    dateToUtcTimestamp, keepAlive,
     linkToRelativeTimestamp,
     linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer
 } from './utils.js';
-import { getAllNamedBadges } from "./api.js";
 
 // preserves compatibility with older import style
 const announcement = new Announcement();
@@ -308,18 +307,6 @@ const announcement = new Announcement();
             console.log('DEBUG MODE ON!');
         }
 
-        // Get current site moderators
-        // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
-        const modURL = new URL(`${apiBase}/${apiVer}/users/moderators`);
-        modURL.search = new URLSearchParams({
-            pagesize: "100",
-            order: "desc",
-            sort: "reputation",
-            site: electionSiteApiSlug,
-            filter: "!LnNkvq0d-S*rS_0sMTDFRm",
-            key: stackApikey
-        }).toString();
-
         // Get current site named badges
         if(!isStackOverflow) {
 
@@ -333,9 +320,7 @@ const announcement = new Announcement();
             console.log('site election badges', electionBadges);
         }
 
-        const currSiteModApiResponse = /** @type {APIListResponse|null} */(await fetchUrl(BotConfig, modURL.toString(), true));
-        const currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1) : [];
-        currentSiteModIds = currentSiteMods.map(({ user_id }) => user_id);
+        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, stackApikey);
 
         // Wait for election page to be scraped
         election = new Election(electionUrl);
