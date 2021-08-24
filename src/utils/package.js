@@ -49,7 +49,10 @@ export const parsePerson = (info) => {
 /**
  * @summary reads and parses package content
  * @param {string} path path to package.json
- * @returns {Promise<PackageInfo|null>}
+ * @returns {Promise<(Omit<PackageInfo, "author"|"contributors"> & {
+ *  author: Exclude<PackagePerson,string>,
+ *  contributors: Exclude<PackagePerson,string>[]
+ * })|null>}
  */
 export const parsePackage = async (path) => {
     try {
