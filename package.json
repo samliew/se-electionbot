@@ -10,9 +10,15 @@
     "dev": "babel-node src/index.js",
     "test": "mocha"
   },
-  "author": "Samuel Liew",
+  "author": {
+    "name": "Samuel Liew",
+    "url": "https://so-user.com/584192?tab=profile"
+  },
   "contributors": [
-    "Oleg Valter"
+    {
+      "name": "Oleg Valter",
+      "url": "https://stackoverflow.com/users/11407695"
+    }
   ],
   "license": "MIT",
   "repository": {

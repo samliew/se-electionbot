@@ -1,7 +1,7 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { setAccessCommand } from "./commands/commands.js";
+import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
@@ -9,11 +9,12 @@ import {
     isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
     isAskedForElectionSchedule, isAskedIfModsArePaid,
+    isAskedWhoMadeMe,
     isAskedWhyNominationRemoved
 } from "./guards.js";
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
-    sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhyNominationRemoved
+    sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
 import Announcement from './ScheduledAnnouncement.js';
@@ -428,14 +429,7 @@ const announcement = new Announcement();
 
                 commander.add("say", "bot echoes something", (content) => content.replace(/^@\S+\s+say /i, ''), AccessLevel.privileged);
 
-                commander.add("alive", "bot reports on its status", (host, start) => {
-
-                    const hosted = `I'm alive on ${host || "planet Earth"}`;
-                    const started = `started on ${dateToUtcTimestamp(start)}`;
-                    const uptime = `uptime of ${Math.floor((Date.now() - start.getTime()) / 1e3)} seconds`;
-
-                    return `${hosted}, ${started} with an ${uptime}.${BotConfig.debug ? ' I am in debug mode.' : ''}`;
-                }, AccessLevel.privileged);
+                commander.add("alive", "bot reports on its status", isAliveCommand, AccessLevel.privileged);
 
                 commander.add("debug", "switches debugging on/off", (config, content) => {
                     const [, state = "on"] = /(on|off)/.exec(content) || [];
@@ -456,19 +450,7 @@ const announcement = new Announcement();
                     return `Reply throttle is currently ${throttle} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
                 }, AccessLevel.privileged);
 
-                commander.add("set throttle", "sets throttle to N (in seconds)", (content, config) => {
-                    const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
-                    const newThrottle = +match;
-
-                    const isValidThrottle = !isNaN(newThrottle) && newThrottle >= 0;
-
-                    if (isValidThrottle) {
-                        config.throttleSecs = newThrottle;
-                        return `*throttle set to ${newThrottle} seconds*`;
-                    }
-
-                    return `*invalid throttle value*`;
-                }, AccessLevel.privileged);
+                commander.add("set throttle", "sets throttle to N (in seconds)", setThrottleCommand, AccessLevel.privileged);
 
                 commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
@@ -501,35 +483,9 @@ const announcement = new Announcement();
                     return `Brewing some ${coffee.getRandom()} for ${name || "somebody"}`;
                 }, AccessLevel.privileged);
 
-                commander.add("access", "sets user's access level", setAccessCommand, AccessLevel.dev);
+                commander.add("set access", "sets user's access level", setAccessCommand, AccessLevel.dev);
 
-                commander.add("timetravel", "sends bot back in time to another phase", (election, content) => {
-                    const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
-
-                    if (!today && (!yyyy || !MM || !dd)) return "Sorry, Doc! Invalid coordinates";
-
-                    const destination = today ? new Date() : new Date(+yyyy, +MM - 1, +dd);
-
-                    const phase = Election.getPhase(election, destination);
-
-                    election.phase = phase;
-
-                    const intl = new Intl.DateTimeFormat("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "2-digit",
-                        hour12: true,
-                        hour: "2-digit",
-                        minute: "2-digit"
-                    });
-
-                    const arrived = intl
-                        .format(destination)
-                        .replace(/, /g, " ")
-                        .replace(/ (?:AM|PM)$/, "");
-
-                    return `Arrived at ${arrived}, today's phase: ${phase || "no phase"}`;
-                }, AccessLevel.dev);
+                commander.add("timetravel", "sends bot back in time to another phase", timetravelCommand, AccessLevel.dev);
 
                 // to reserve the keyword 'help' for normal users
                 commander.add("commands", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
@@ -553,7 +509,7 @@ const announcement = new Announcement();
                 const outputs = [
                     ["commands", /commands|usage/],
                     ["say", /say/, origContent],
-                    ["alive", /alive/, scriptHostname, scriptInitDate],
+                    ["alive", /alive/, scriptHostname, scriptInitDate, BotConfig],
                     ["test cron", /test cron/, announcement],
                     ["get cron", /get cron/, announcement],
                     ["get throttle", /get throttle/, BotConfig.throttleSecs],
@@ -638,8 +594,8 @@ const announcement = new Announcement();
                 else if (["about", "who are you?"].includes(content)) {
                     responseText = `I'm ${me.name} and ${me.about}`;
                 }
-                else if (content.includes('who') && ['made', 'created', 'owner', 'devs', 'developer'].some(x => content.includes(x)) && content.includes('you')) {
-                    responseText = `[Samuel](https://so-user.com/584192?tab=profile) created me. I am also maintained by [these developers](https://github.com/samliew/se-electionbot/graphs/contributors).`;
+                else if (isAskedWhoMadeMe(content)) {
+                    responseText = await sayWhoMadeMe(BotConfig);
                 }
                 else if (content.startsWith(`i love you`)) {
                     responseText = `I love you 3000`;

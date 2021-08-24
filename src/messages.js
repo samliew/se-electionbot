@@ -3,9 +3,11 @@ import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
     linkToUtcTimestamp, listify, makeURL, pluralize
 } from "./utils.js";
+import { parsePackage } from "./utils/package.js";
 
 /**
  * @typedef {import("./index").Badge} Badge
+ * @typedef {import("./index").BotConfig} BotConfig
  */
 
 /**
@@ -336,4 +338,25 @@ export const sayWhatIsAnElection = (election) => {
     const eligibility = `users with at least ${repVote} reputation can vote for them`;
 
     return `An ${electionURL} is where users nominate themselves as candidates for the role of ${diamondURL}, and ${eligibility}.`;
+};
+
+/**
+ * @summary builds a contributor list message
+ * @param {BotConfig} config
+ * @returns {Promise<string>}
+ */
+export const sayWhoMadeMe = async (config) => {
+    const info = await parsePackage("./package.json");
+    if (!info) {
+        if (config.debug) console.log("failed to parse bot package");
+        return `${makeURL("Samuel", "https://so-user.com/584192?tab=profile")} made me.`;
+    }
+
+    const { author, contributors } = info;
+
+    const created = `${makeURL(author.name, author.url)} created me`;
+    const contributed = listify(...contributors.map(({ name, url }) => makeURL(name, url)));
+    const maintainers = `I am also maintained by ${contributed}`;
+
+    return `${created}. ${maintainers}.`;
 };
