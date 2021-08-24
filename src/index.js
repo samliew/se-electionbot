@@ -14,7 +14,7 @@ import {
 } from "./guards.js";
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
-    sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhyNominationRemoved
+    sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
 import Announcement from './ScheduledAnnouncement.js';
@@ -595,7 +595,7 @@ const announcement = new Announcement();
                     responseText = `I'm ${me.name} and ${me.about}`;
                 }
                 else if (isAskedWhoMadeMe(content)) {
-                    responseText = `[Samuel](https://so-user.com/584192?tab=profile) created me. I am also maintained by [these developers](https://github.com/samliew/se-electionbot/graphs/contributors).`;
+                    responseText = await sayWhoMadeMe(BotConfig);
                 }
                 else if (content.startsWith(`i love you`)) {
                     responseText = `I love you 3000`;
