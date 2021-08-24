@@ -43,6 +43,7 @@ const announcement = new Announcement();
  *  lastActivityTime: number,
  *  lastMessageTime: number,
  *  activityCount: number,
+ *  scrapeIntervalMins: number,
  *  debug: boolean,
  *  verbose: boolean,
  *  adminIds: Set<number>,
@@ -81,7 +82,6 @@ const announcement = new Announcement();
     const electionSiteHostname = electionUrl.split('/')[2];
     const electionSiteUrl = 'https://' + electionSiteHostname;
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
-    const scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS) || 5;
     const stackApikey = process.env.STACK_API_KEY;
 
 
@@ -170,6 +170,8 @@ const announcement = new Announcement();
         lastMessageTime: -1,
         // Variable to track activity in the room
         activityCount: 0,
+        // Variable of rescrape interval of election page
+        scrapeIntervalMins: +(process.env.SCRAPE_INTERVAL_MINS) || 5,
         // Debug mode
         debug: JSON.parse(process.env.DEBUG?.toLowerCase() || "false"),
         // Verbose logging
@@ -201,7 +203,6 @@ const announcement = new Announcement();
 
         Object.entries(BotConfig).forEach(([key, val]) => console.log(key, val));
 
-        console.log('scrapeIntervalMins:', scrapeIntervalMins);
         console.log('lowActivityCheckMins:', lowActivityCheckMins);
         console.log('lowActivityCountThreshold:', lowActivityCountThreshold);
     }
@@ -969,7 +970,7 @@ const announcement = new Announcement();
                 BotConfig.activityCount = 0;
             }
 
-        }, scrapeIntervalMins * 60000);
+        }, BotConfig.scrapeIntervalMins * 60000);
 
 
         // Interval to keep-alive
