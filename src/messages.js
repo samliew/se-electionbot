@@ -14,9 +14,9 @@ import { parsePackage } from "./utils/package.js";
  * @summary makes bot remind users that they are here
  * @param {{ sendMessage(text:string): Promise<void> }} room
  * @param {Election} election
- * @returns {Promise<void>}
+ * @returns {string}
  */
-export const sayHI = async (room, election) => {
+export const sayHI = (room, election) => {
     const { arrNominees, electionUrl, phase } = election;
 
     const { length } = arrNominees;
@@ -28,6 +28,7 @@ export const sayHI = async (room, election) => {
         "null": `The ${electionLink} has not begun yet.`,
         "ended": `The ${electionLink} has ended.`,
         "cancelled": `The ${electionLink} has been cancelled.`,
+        "election": `The ${electionLink} is happening at the moment!`,
         "nomination": `${phasePrefix}, and currently there are ${length} candidates.`,
         "primary": `${phasePrefix}, and currently there are ${length} candidates.`,
     };
@@ -38,7 +39,9 @@ export const sayHI = async (room, election) => {
 
     const text = `${greeting}${phaseText} I can answer frequently-asked questions about elections (type *${helpCommand}* for more info).`;
 
-    await room.sendMessage(text);
+    room.sendMessage(text);
+
+    return '';
 };
 
 /**

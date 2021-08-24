@@ -543,6 +543,10 @@ const announcement = new Announcement();
                 const maxPerMessage = 500;
 
                 if (responseText) {
+
+                    // Function sent the message and returned empty string, e.g.: sayHI
+                    if(responseText === '') return;
+
                     const messages = responseText.split(
                         new RegExp(`(^(?:.|\\n|\\r){1,${maxPerMessage}})(?:\\n|$)`, "gm")
                     ).filter(Boolean);
