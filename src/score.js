@@ -227,7 +227,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         }
         
         if (config.debug) {
-            console.log("Election badges", electionBadges);
+            console.log("Election badges", badges);
             console.log("User site badges", items);
             console.log("User missing badges", missingBadges);
         }
