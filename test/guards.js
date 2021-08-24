@@ -1,8 +1,7 @@
 import { expect } from "chai";
 import {
-    isAskedForElectionSchedule,
     isAskedAboutModsOrModPowers,
-    isAskedAboutUsernameDiamond
+    isAskedAboutUsernameDiamond, isAskedForElectionSchedule, isAskedWhoMadeMe
 } from "../src/guards.js";
 
 describe('Message Guards', () => {
@@ -64,6 +63,30 @@ describe('Message Guards', () => {
 
             matches.forEach((txt) => {
                 const matched = isAskedAboutUsernameDiamond(txt);
+                expect(matched, `<${txt}> not matched`).to.be.true;
+            });
+
+        });
+
+    });
+
+    describe('isAskedWhoMadeMe', () => {
+
+        it('should correctly match content', () => {
+
+            const matches = [
+                "who made you?",
+                "who maintains you?",
+                "who develops you?",
+                "who are your developers?",
+                "who developed you?",
+                "who owns you?",
+                "who is your developer?",
+                "who is your maintainer?"
+            ];
+
+            matches.forEach((txt) => {
+                const matched = isAskedWhoMadeMe(txt);
                 expect(matched, `<${txt}> not matched`).to.be.true;
             });
 

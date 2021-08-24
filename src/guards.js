@@ -26,8 +26,8 @@ export const isAskedIfModsArePaid = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutModsOrModPowers = (text) => {
-    return /^(?:why|what|should|does)\b/.test(text) && 
-        /\b(?:should i (?:be|become)|is a|(?:do|does)(?: a)? (?:mod|moderator)s?|benefits?|privileges?|powers?|responsibilit(?:y|ies))\b/.test(text) && 
+    return /^(?:why|what|should|does)\b/.test(text) &&
+        /\b(?:should i (?:be|become)|is a|(?:do|does)(?: a)? (?:mod|moderator)s?|benefits?|privileges?|powers?|responsibilit(?:y|ies))\b/.test(text) &&
         /\b(?:mod|moderator)s?\b/.test(text);
 };
 
@@ -99,4 +99,13 @@ export const isAskedForElectionSchedule = (text) => {
  */
 export const isAskedAboutUsernameDiamond = (text) => {
     return /(?:edit|insert|add).+?(?:\u2666|diamond).+?(?:user)?name/.test(text);
+};
+
+/**
+ * @summary checks if the message asked who created or maintains the bot
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedWhoMadeMe = (text) => {
+    return /who(?:\s+(?:are|is) your)?\s+(?:made|created|owns|develop(?:s|ed|ers?)|maintain(?:s|ers?))(\s+you)?/.test(text);
 };

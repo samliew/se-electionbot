@@ -9,6 +9,7 @@ import {
     isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
     isAskedForElectionSchedule, isAskedIfModsArePaid,
+    isAskedWhoMadeMe,
     isAskedWhyNominationRemoved
 } from "./guards.js";
 import {
@@ -593,7 +594,7 @@ const announcement = new Announcement();
                 else if (["about", "who are you?"].includes(content)) {
                     responseText = `I'm ${me.name} and ${me.about}`;
                 }
-                else if (content.includes('who') && ['made', 'created', 'owner', 'devs', 'developer'].some(x => content.includes(x)) && content.includes('you')) {
+                else if (isAskedWhoMadeMe(content)) {
                     responseText = `[Samuel](https://so-user.com/584192?tab=profile) created me. I am also maintained by [these developers](https://github.com/samliew/se-electionbot/graphs/contributors).`;
                 }
                 else if (content.startsWith(`i love you`)) {
