@@ -377,13 +377,16 @@ const announcement = new Announcement();
                 content,
             };
 
+            // Ignore events from other rooms
+            if (msg.chatRoomId !== chatRoomId) return;
+
             // Ignore unnecessary events
             if (ignoredEventTypes.includes(resolvedMsg.eventType)) return;
 
-            // Ignore stuff from self, Community or Feeds users
+            // Ignore events by self, Community or Feeds users
             if (meWithId.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
 
-            // Ignore stuff from ignored users
+            // Ignore events by ignored users
             if (BotConfig.ignoredUserIds.has(resolvedMsg.userId)) return;
 
             // Ignore messages with oneboxes & links!
@@ -396,7 +399,7 @@ const announcement = new Announcement();
             // Get details of user who triggered the message
             const user = await getUser(client, resolvedMsg);
 
-            //if user is null, we have a problem
+            // If user is null, we have a problem
             if (!user) return console.log("missing user", resolvedMsg);
 
             // TODO: make a part of User
@@ -532,7 +535,7 @@ const announcement = new Announcement();
                     , "");
 
                 if (BotConfig.debug) {
-                    console.log(`response info:
+                    console.log(`Response info:
                 response chars: ${responseText.length}
                 content: ${content}
                 original: ${origContent}
