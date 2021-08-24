@@ -959,7 +959,7 @@ const announcement = new Announcement();
                 console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                     `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
-                await sayHI(room, election);
+                sayHI(room, election);
 
                 // Record last sent message time so we don't flood the room
                 BotConfig.lastMessageTime = Date.now();

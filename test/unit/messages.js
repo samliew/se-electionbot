@@ -94,7 +94,7 @@ describe("Messages module", () => {
                 }
             };
 
-            await sayHI(mockRoom, election);
+            sayHI(mockRoom, election);
         });
 
         it('should correctly add phase info', async () => {
@@ -111,7 +111,7 @@ describe("Messages module", () => {
                 }
             };
 
-            await sayHI(mockRoom, election);
+            sayHI(mockRoom, election);
         });
 
     });
