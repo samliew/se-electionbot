@@ -25,8 +25,7 @@ describe('Package Parsing', () => {
             const { author, contributors } = await parsePackage("./package.json");
             expect(author).to.deep.equal({
                 name: "Samuel Liew",
-                url: void 0,
-                email: void 0
+                url: "https://so-user.com/584192?tab=profile",
             });
             expect(contributors).to.be.an.instanceOf(Array);
         });
