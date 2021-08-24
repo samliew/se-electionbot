@@ -1,5 +1,5 @@
-import Election from "../election";
-import { dateToUtcTimestamp } from "../utils";
+import Election from "../election.js";
+import { dateToUtcTimestamp } from "../utils.js";
 
 /**
  * @typedef {import("../index").BotConfig} BotConfig
