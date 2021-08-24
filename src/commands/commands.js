@@ -1,4 +1,5 @@
 import Election from "../election";
+import { dateToUtcTimestamp } from "../utils";
 
 /**
  * @typedef {import("../index").BotConfig} BotConfig
@@ -90,4 +91,20 @@ export const setThrottleCommand = (content, config) => {
     }
 
     return `*invalid throttle value*`;
+};
+
+/**
+ * @summary pings the bot for uptime
+ * @param {string} host bot host name
+ * @param {Date} start election start date
+ * @param {BotConfig} config bot config
+ * @returns {string}
+ */
+export const isAliveCommand = (host, start, config) => {
+
+    const hosted = `I'm alive on ${host || "planet Earth"}`;
+    const started = `started on ${dateToUtcTimestamp(start)}`;
+    const uptime = `uptime of ${Math.floor((Date.now() - start.getTime()) / 1e3)} seconds`;
+
+    return `${hosted}, ${started} with an ${uptime}.${config.debug ? ' I am in debug mode.' : ''}`;
 };

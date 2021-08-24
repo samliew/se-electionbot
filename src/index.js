@@ -1,7 +1,7 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
+import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
@@ -428,14 +428,7 @@ const announcement = new Announcement();
 
                 commander.add("say", "bot echoes something", (content) => content.replace(/^@\S+\s+say /i, ''), AccessLevel.privileged);
 
-                commander.add("alive", "bot reports on its status", (host, start) => {
-
-                    const hosted = `I'm alive on ${host || "planet Earth"}`;
-                    const started = `started on ${dateToUtcTimestamp(start)}`;
-                    const uptime = `uptime of ${Math.floor((Date.now() - start.getTime()) / 1e3)} seconds`;
-
-                    return `${hosted}, ${started} with an ${uptime}.${BotConfig.debug ? ' I am in debug mode.' : ''}`;
-                }, AccessLevel.privileged);
+                commander.add("alive", "bot reports on its status", isAliveCommand, AccessLevel.privileged);
 
                 commander.add("debug", "switches debugging on/off", (config, content) => {
                     const [, state = "on"] = /(on|off)/.exec(content) || [];
@@ -515,7 +508,7 @@ const announcement = new Announcement();
                 const outputs = [
                     ["commands", /commands|usage/],
                     ["say", /say/, origContent],
-                    ["alive", /alive/, scriptHostname, scriptInitDate],
+                    ["alive", /alive/, scriptHostname, scriptInitDate, BotConfig],
                     ["test cron", /test cron/, announcement],
                     ["get cron", /get cron/, announcement],
                     ["get throttle", /get throttle/, BotConfig.throttleSecs],
