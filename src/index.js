@@ -1,7 +1,7 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { setAccessCommand } from "./commands/commands.js";
+import { setAccessCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
@@ -503,33 +503,7 @@ const announcement = new Announcement();
 
                 commander.add("set access", "sets user's access level", setAccessCommand, AccessLevel.dev);
 
-                commander.add("timetravel", "sends bot back in time to another phase", (election, content) => {
-                    const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
-
-                    if (!today && (!yyyy || !MM || !dd)) return "Sorry, Doc! Invalid coordinates";
-
-                    const destination = today ? new Date() : new Date(+yyyy, +MM - 1, +dd);
-
-                    const phase = Election.getPhase(election, destination);
-
-                    election.phase = phase;
-
-                    const intl = new Intl.DateTimeFormat("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "2-digit",
-                        hour12: true,
-                        hour: "2-digit",
-                        minute: "2-digit"
-                    });
-
-                    const arrived = intl
-                        .format(destination)
-                        .replace(/, /g, " ")
-                        .replace(/ (?:AM|PM)$/, "");
-
-                    return `Arrived at ${arrived}, today's phase: ${phase || "no phase"}`;
-                }, AccessLevel.dev);
+                commander.add("timetravel", "sends bot back in time to another phase", timetravelCommand, AccessLevel.dev);
 
                 // to reserve the keyword 'help' for normal users
                 commander.add("commands", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
