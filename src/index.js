@@ -323,9 +323,6 @@ const announcement = new Announcement();
         // Get current site named badges
         if(!isStackOverflow) {
 
-            console.log('before', electionBadges);
-            debugger;
-
             const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, stackApikey);
             electionBadges.forEach(electionBadge => {
                 const matchedBadge = allNamedBadges.filter(namedBadge => electionBadge.name === namedBadge.name);
@@ -333,8 +330,7 @@ const announcement = new Announcement();
                     electionBadge.id = matchedBadge[0].badge_id.toString();
             });
 
-            console.log('after', electionBadges);
-            debugger;
+            console.log('site election badges', electionBadges);
         }
 
         const currSiteModApiResponse = /** @type {APIListResponse|null} */(await fetchUrl(BotConfig, modURL.toString(), true));
