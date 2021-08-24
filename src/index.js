@@ -1,7 +1,7 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { setAccessCommand, timetravelCommand } from "./commands/commands.js";
+import { setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
@@ -456,19 +456,7 @@ const announcement = new Announcement();
                     return `Reply throttle is currently ${throttle} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
                 }, AccessLevel.privileged);
 
-                commander.add("set throttle", "sets throttle to N (in seconds)", (content, config) => {
-                    const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
-                    const newThrottle = +match;
-
-                    const isValidThrottle = !isNaN(newThrottle) && newThrottle >= 0;
-
-                    if (isValidThrottle) {
-                        config.throttleSecs = newThrottle;
-                        return `*throttle set to ${newThrottle} seconds*`;
-                    }
-
-                    return `*invalid throttle value*`;
-                }, AccessLevel.privileged);
+                commander.add("set throttle", "sets throttle to N (in seconds)", setThrottleCommand, AccessLevel.privileged);
 
                 commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;

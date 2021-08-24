@@ -1,8 +1,12 @@
 import Election from "../election";
 
 /**
+ * @typedef {import("../index").BotConfig} BotConfig
+ */
+
+/**
  * @summary changes user access level (can only de-elevate)
- * @param {import("../index").BotConfig} config bot config
+ * @param {BotConfig} config bot config
  * @param {import("../index").User} user message author
  * @param {string} content incoming message content
  * @returns {string}
@@ -66,4 +70,24 @@ export const timetravelCommand = (election, content) => {
         .replace(/ (?:AM|PM)$/, "");
 
     return `Arrived at ${arrived}, today's phase: ${phase || "no phase"}`;
+};
+
+/**
+ * @summary sets message throttle (in seconds)
+ * @param {string} content incoming message content
+ * @param {BotConfig} config bot config
+ * @returns {string}
+ */
+export const setThrottleCommand = (content, config) => {
+    const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
+    const newThrottle = +match;
+
+    const isValidThrottle = !isNaN(newThrottle) && newThrottle >= 0;
+
+    if (isValidThrottle) {
+        config.throttleSecs = newThrottle;
+        return `*throttle set to ${newThrottle} seconds*`;
+    }
+
+    return `*invalid throttle value*`;
 };
