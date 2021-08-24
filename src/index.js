@@ -716,7 +716,7 @@ const announcement = new Announcement();
 
                     //TODO: use config object pattern instead, 6 parameters is way too much
                     const calcCandidateScore = makeCandidateScoreCalc(BotConfig,
-                        scriptHostname, chatDomain, electionSiteApiSlug,
+                        electionSiteHostname, chatDomain, electionSiteApiSlug,
                         stackApikey, electionBadges, soPastAndPresentModIds
                     );
 

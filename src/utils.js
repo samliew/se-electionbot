@@ -9,7 +9,7 @@ export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`
 
 export const apiBase = `https://api.stackexchange.com`;
 
-export const apiVer = 2.2;
+export const apiVer = 2.3;
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
