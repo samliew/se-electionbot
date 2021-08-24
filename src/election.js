@@ -133,7 +133,7 @@ export default class Election {
 
             const [nominationDate, primaryDate, startDate, endDate] = metaVals;
 
-            const electionPost = $('#mainbar .js-post-body .wiki-ph');
+            const electionPost = $('#mainbar .s-prose').slice(0, 2);
 
             const conditionsNotice = $($('#mainbar').find('aside[role=status]').get(0));
 
