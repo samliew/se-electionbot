@@ -288,7 +288,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         }).toString();
 
         // Fetch network accounts via API to get the account of the site we want
-        const { items = [] } = /** @type {APIListResponse} */(await fetchUrl(config, url.toString()));
+        const { items = [] } = /** @type {APIListResponse} */(await fetchUrl(config, url.toString())) || {};
 
         const siteAccount = items.find(({ site_url }) => site_url.includes(hostname));
         console.log(`Site account: ${JSON.stringify(siteAccount || {})}`);
