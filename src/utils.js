@@ -117,13 +117,13 @@ export const fetchUrl = async (config, url, json = false) => {
         });
 
         if (config.debug) {
-            console.log(`FETCH - ${url}`, config.verbose ? (json ? JSON.stringify(data) : data) : '');
+            console.log(`fetch - ${url}`, config.verbose ? (json ? JSON.stringify(data) : data) : '');
         }
 
         return data;
     }
     catch (e) {
-        console.error('FETCH - ERROR:', e);
+        console.error(`fetch error - ${url}:`, config.verbose ? e : e.message);
         return null;
     }
 };
