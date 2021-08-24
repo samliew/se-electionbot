@@ -87,13 +87,12 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             }
         }
 
-        // If privileged user asking candidate score of another user, get user id from message
+        // If privileged user asking candidate score of another user, get user site id from message
         if (findingTargetCandidateScore) {
             userId = Number(content.match(/\d+$/)[0]);
         }
-
-        // If not Chat.SO, resolve election site user id from chat id (chat has different ids)
-        if (!isStackOverflowChat) {
+        // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
+        else if (!isStackOverflowChat) {
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname);
 
             // Unable to get user id on election site
