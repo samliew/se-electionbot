@@ -2,7 +2,7 @@ import { expect } from "chai";
 import {
     isAskedAboutModsOrModPowers,
     isAskedAboutUsernameDiamond, isAskedForElectionSchedule, isAskedWhoMadeMe
-} from "../src/guards.js";
+} from "../../src/guards.js";
 
 describe('Message Guards', () => {
 

@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import Election from "../src/election.js";
-import { sayBadgesByType, sayElectionSchedule, sayHI, sayInformedDecision } from "../src/messages.js";
-import { capitalize } from "../src/utils.js";
+import Election from "../../src/election.js";
+import { sayBadgesByType, sayElectionSchedule, sayHI, sayInformedDecision } from "../../src/messages.js";
+import { capitalize } from "../../src/utils.js";
 
 describe("Messages module", () => {
 
@@ -33,7 +33,7 @@ describe("Messages module", () => {
 
     describe('sayBadgesByType', () => {
 
-        /** @type {import("../src/index").Badge[]} */
+        /** @type {import("../../src/index").Badge[]} */
         const badges = [{
             id: "1", name: "Badge1", type: "moderation"
         },

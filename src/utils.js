@@ -117,13 +117,13 @@ export const fetchUrl = async (config, url, json = false) => {
         });
 
         if (config.debug) {
-            console.log(`FETCH - ${url}`, config.verbose ? (json ? JSON.stringify(data) : data) : '');
+            console.log(`fetch - ${url}`, config.verbose ? (json ? JSON.stringify(data) : data) : '');
         }
 
         return data;
     }
     catch (e) {
-        console.error('FETCH - ERROR:', e);
+        console.error(`fetch error - ${url}:`, config.verbose ? e : e.message);
         return null;
     }
 };
@@ -245,59 +245,61 @@ export const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${lin
 /**
  * @description Expensive, up to three requests. Only one, if the linked account is the site we want.
  * @param {import("./index").BotConfig} config
- * @param {number} chatUserId
- * @param {string} chatdomain
- * @param {string} siteUrl
- * @returns {Promise<number|null>}
+ * @param {number} chatUserId user id
+ * @param {string} chatdomain chat server domain
+ * @param {string} hostname election site hostname
+ * @param {string} [apiKey] Stack Exchange API key
+ * @returns {Promise<number|null>} resolved user id
  */
-export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, chatdomain, siteUrl) => {
-    const { STACK_API_KEY } = process.env;
-    let userId = null;
-
-    const chatUserPage = await fetchUrl(config, `https://chat.${chatdomain}/users/${chatUserId}`);
-
-    let $ = cheerio.load(/** @type {string} */(chatUserPage));
-
-    const linkedUserUrl = 'https:' + $('.user-stats a').first().attr('href');
-    console.log(`Linked site user url:`, linkedUserUrl);
-
-    // Linked site is the one we wanted, return site userid
-    if (linkedUserUrl.includes(siteUrl)) return +((linkedUserUrl.match(/\d+/))[0]);
-
-    // Linked site is not the one we wanted
+export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, chatdomain, hostname, apiKey) => {
     try {
+        const chatUserPage = await fetchUrl(config, `https://chat.${chatdomain}/users/${chatUserId}`);
+        if (!chatUserPage) return null;
+
+        const $chat = cheerio.load(/** @type {string} */(chatUserPage));
+
+        const linkedHref = $chat('.user-stats a').first().attr('href');
+        if (!linkedHref) return null;
+
+        // ensure the parse won't break if SE stops using protocol-relative URLs
+        const linkedUserUrl = linkedHref.replace(/^\/\//, "https://");
+        console.log(`Linked site user url: ${linkedUserUrl}`);
+
+        // Linked site is the one we wanted, return site userid
+        if (linkedUserUrl.includes(hostname)) return +((linkedUserUrl.match(/\d+/))[0]);
+
+        // Linked site is not the one we wanted
         // Fetch linked site profile page to get network link
         const linkedUserProfilePage = await fetchUrl(config, `${linkedUserUrl}?tab=profile`);
+        if (!linkedUserProfilePage) return null;
 
-        $ = cheerio.load(/** @type {string} */(linkedUserProfilePage));
+        const $profile = cheerio.load(/** @type {string} */(linkedUserProfilePage));
 
-        const networkUserUrl = $('.js-user-header a').last().attr('href');
+        const networkUserUrl = $profile('.js-user-header a').last().attr('href');
         const networkUserId = +(networkUserUrl.match(/\d+/));
-        console.log(`Network user url:`, networkUserUrl, networkUserId);
+        console.log(`Network user url: ${networkUserUrl}`, networkUserId);
 
         const url = new URL(`${apiBase}/${apiVer}/users/${networkUserId}/associated`);
         url.search = new URLSearchParams({
             pagesize: "100",
             types: "main_site",
             filter: "!myEHnzbmE0",
-            key: STACK_API_KEY
+            key: apiKey
         }).toString();
 
         // Fetch network accounts via API to get the account of the site we want
         const { items = [] } = /** @type {APIListResponse} */(await fetchUrl(config, url.toString()));
 
-        const siteAccount = items.filter(v => v.site_url.includes(siteUrl));
+        const siteAccount = items.find(({ site_url }) => site_url.includes(hostname));
+        console.log(`Site account: ${JSON.stringify(siteAccount || {})}`);
 
-        console.log(`Site account:`, siteAccount);
-
-        if (siteAccount.length === 1) userId = siteAccount[0].user_id;
+        return +siteAccount?.user_id || null;
     }
     catch (e) {
         console.error(e);
     }
 
-    console.log(`Resolved ${siteUrl} userId:`, userId);
-    return +userId;
+    return null;
 };
 
 /**

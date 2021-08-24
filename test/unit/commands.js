@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { AccessLevel, CommandManager } from "../src/commands/index.js";
+import { AccessLevel, CommandManager } from "../../src/commands/index.js";
 
 describe('Commander', () => {
 
