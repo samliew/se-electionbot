@@ -85,6 +85,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         if (config.debug) {
             console.log({
+                isSO,
                 isPrivileged,
                 isAskingForOtherUser,
                 isModerator,
@@ -98,7 +99,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         // If privileged user asking candidate score of another user, get user site id from message
         if (isAskingForOtherUser) {
-            userId = +(content.match(/\d+$/)[0]);
+            userId = +(content.match(/(\d+)(?:\?|$)/)[1]);
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
         else if (!isSO) {
