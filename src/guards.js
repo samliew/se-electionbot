@@ -115,3 +115,12 @@ export const isAskedWhoMadeMe = (text) => {
 export const isAskedForOtherScore = (text) => {
     return /what(?: i|')s(?: the)? candidate score (?:for|of) \d+(?:$|\?)/.test(text);
 };
+
+/**
+ * @summary checks if the message asked for candidate score calculation formula
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedForScoreFormula = (text) => {
+    return /(?:what|how) (?:is )?candidate score(?:(?: is)? calculated| formula)?(?:$|\?)/.test(text);
+};

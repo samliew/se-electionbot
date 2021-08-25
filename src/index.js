@@ -9,7 +9,7 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForElectionSchedule, isAskedIfModsArePaid,
+    isAskedForElectionSchedule, isAskedForScoreFormula, isAskedIfModsArePaid,
     isAskedWhoMadeMe,
     isAskedWhyNominationRemoved
 } from "./guards.js";
@@ -738,12 +738,9 @@ const announcement = new Announcement();
                         return; // stop here since we are using a different default response method
                     }
                 }
-
-                // Candidate score formula
-                else if (['how', 'what'].some(x => content.startsWith(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
+                else if (isAskedForScoreFormula(content)) {
                     responseText = sayCandidateScoreFormula(electionBadges);
                 }
-
                 // Current candidates
                 else if (isAskedForCurrentNominees(content)) {
                     if (election.phase === null) {
