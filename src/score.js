@@ -104,6 +104,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             }
         }
 
+        // TODO: Get a different API key here
         const items = await getBadges(config, userId, apiSlug, apiKey);
 
         // Validation

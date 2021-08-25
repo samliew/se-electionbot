@@ -83,7 +83,20 @@ const announcement = new Announcement();
     const electionSiteHostname = electionUrl.split('/')[2];
     const electionSiteUrl = 'https://' + electionSiteHostname;
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
-    const stackApikey = process.env.STACK_API_KEY;
+    const _stackApikey = process.env.STACK_API_KEY;
+    const _stackApikeys = process.env.STACK_API_KEYS.split('|').filter(x => x.length !== 0);
+
+    /**
+     * @summary Get the next API key from a rotating set
+     * @returns {string} API key
+     */
+    const getStackApiKey = () => {
+        if(_stackApikeys.length === 0) return _stackApikey;
+
+        _stackApikeys.push(_stackApikeys.shift());
+
+        return _stackApikeys[0];
+    };
 
 
     // App variables
@@ -317,13 +330,13 @@ const announcement = new Announcement();
             sort: "reputation",
             site: electionSiteApiSlug,
             filter: "!LnNkvq0d-S*rS_0sMTDFRm",
-            key: stackApikey
+            key: getStackApiKey()
         }).toString();
 
         // Get current site named badges
         if(!isStackOverflow) {
 
-            const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, stackApikey);
+            const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, getStackApiKey());
             electionBadges.forEach(electionBadge => {
                 const matchedBadge = allNamedBadges.filter(namedBadge => electionBadge.name === namedBadge.name);
                 if(matchedBadge)
@@ -736,7 +749,7 @@ const announcement = new Announcement();
                     //TODO: use config object pattern instead, 6 parameters is way too much
                     const calcCandidateScore = makeCandidateScoreCalc(BotConfig,
                         electionSiteHostname, chatDomain, electionSiteApiSlug,
-                        stackApikey, electionBadges, soPastAndPresentModIds
+                        getStackApiKey(), electionBadges, soPastAndPresentModIds
                     );
 
                     responseText = await calcCandidateScore(election, user, resolvedMsg, isStackOverflow);
