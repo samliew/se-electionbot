@@ -73,8 +73,6 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             return sayCalcFailed(false);
         }
 
-        const isStackOverflowChat = chatDomain === 'stackoverflow.com';
-
         const { electionUrl, phase, repNominate, siteUrl } = election;
 
         const { isModerator, access } = user;
@@ -103,7 +101,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             userId = +(content.match(/\d+$/)[0]);
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
-        else if (!isStackOverflowChat) {
+        else if (!isSO) {
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);
 
             // Unable to get user id on election site
