@@ -6,6 +6,18 @@ import { apiBase, apiVer, fetchUrl } from "./utils.js";
  */
 
 /**
+* @summary Get the next API key from a rotating set
+* @param {string[]} keyPool pool of API keys to rotate through
+* @returns {string|undefined} API key
+*/
+export const getStackApiKey = (keyPool) => {
+    if (keyPool.length === 0) return;
+    const [newKey] = keyPool;
+    keyPool.push(keyPool.shift());
+    return newKey;
+};
+
+/**
  * @summary gets all named badges from the API
  * @param {BotConfig} config
  * @param {string} site election site slug

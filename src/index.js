@@ -1,7 +1,7 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { getAllNamedBadges, getModerators } from "./api.js";
+import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
@@ -82,20 +82,8 @@ const announcement = new Announcement();
     const electionSiteHostname = electionUrl.split('/')[2];
     const electionSiteUrl = 'https://' + electionSiteHostname;
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
-    const _stackApikey = process.env.STACK_API_KEY;
-    const _stackApikeys = process.env.STACK_API_KEYS.split('|').filter(x => x.length !== 0);
-
-    /**
-     * @summary Get the next API key from a rotating set
-     * @returns {string} API key
-     */
-    const getStackApiKey = () => {
-        if (_stackApikeys.length === 0) return _stackApikey;
-
-        _stackApikeys.push(_stackApikeys.shift());
-
-        return _stackApikeys[0];
-    };
+    const defaultApiKey = process.env.STACK_API_KEY;
+    const apiKeyPool = process.env.STACK_API_KEYS.split('|').filter(x => x.length !== 0);
 
 
     // App variables
@@ -322,7 +310,7 @@ const announcement = new Announcement();
 
         // Get current site named badges
         if (!isStackOverflow) {
-            const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, getStackApiKey());
+            const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
 
             electionBadges.forEach((electionBadge) => {
                 const { name: badgeName } = electionBadge;
@@ -333,7 +321,7 @@ const announcement = new Announcement();
             console.log('site election badges', electionBadges);
         }
 
-        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, getStackApiKey());
+        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
 
         // Wait for election page to be scraped
         election = new Election(electionUrl);
