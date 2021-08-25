@@ -1,4 +1,5 @@
 import Election from "./election.js";
+import { getRandomOops } from "./random.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
     linkToUtcTimestamp, listify, makeURL, pluralize
@@ -12,11 +13,10 @@ import { parsePackage } from "./utils/package.js";
 
 /**
  * @summary makes bot remind users that they are here
- * @param {{ sendMessage(text:string): Promise<void> }} room
  * @param {Election} election
  * @returns {string}
  */
-export const sayHI = (room, election) => {
+export const sayHI = (election) => {
     const { arrNominees, electionUrl, phase } = election;
 
     const { length } = arrNominees;
@@ -37,11 +37,7 @@ export const sayHI = (room, election) => {
     const phaseText = phaseMap[phase] || "";
     const helpCommand = `@ElectionBot help`;
 
-    const text = `${greeting}${phaseText} I can answer frequently-asked questions about elections (type *${helpCommand}* for more info).`;
-
-    room.sendMessage(text);
-
-    return '';
+    return `${greeting}${phaseText} I can answer frequently-asked questions about elections (type *${helpCommand}* for more info).`;
 };
 
 /**
@@ -362,4 +358,24 @@ export const sayWhoMadeMe = async (config) => {
     const maintainers = `I am also maintained by ${contributed}`;
 
     return `${created}. ${maintainers}.`;
+};
+
+/**
+ * @summary builds an "already a diamond" message
+ * @param {boolean} isModerator is user a current moderator
+ * @param {boolean} wasModerator was user a moderator
+ * @returns {string}
+ */
+export const sayDiamondAlready = (isModerator, wasModerator) => {
+
+    /**
+     * @type {[boolean, string][]}
+     */
+    const messageMap = [
+        [isModerator, `${getRandomOops()} you already have a diamond!`],
+        [wasModerator, `are you *really* sure you want to be a moderator again?`]
+    ];
+
+    const [, message] = messageMap.find(([condition]) => condition) || [];
+    return message || `diamonds are forever!`;
 };

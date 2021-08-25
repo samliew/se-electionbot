@@ -1,11 +1,12 @@
 import { getBadges } from "./api.js";
+import { AccessLevel } from "./commands/index.js";
 import Election from './election.js';
-import { sayMissingBadges } from "./messages.js";
-import { getRandomOops } from "./random.js";
-import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, pluralize } from "./utils.js";
+import { isAskedForOtherScore } from "./guards.js";
+import { sayDiamondAlready, sayMissingBadges } from "./messages.js";
+import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, NO_ACCOUNT_ID, pluralize } from "./utils.js";
 
 /**
- * @typedef {import("chatexchange/dist/Browser").IProfileData} User
+ * @typedef {import("./index.js").User} User
  * @typedef {import("./index.js").BotConfig} BotConfig
  * @typedef {import("./utils").Badge} Badge
  * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
@@ -38,6 +39,13 @@ export const makeIsEligible = (requiredRep) =>
     };
 
 /**
+ * @summary internal builder for calc failure error message
+ * @param {boolean} [isAskingForOtherUser] is asking for another user
+ * @returns {string}
+ */
+const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurred when calculating ${isAskingForOtherUser ? `the user's` : `your`} score.`;
+
+/**
  * @summary HOF with common parameters
  * @param {BotConfig} config
  * @param {string} hostname
@@ -60,47 +68,52 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         //TODO: decide how to avoid mutation
         let { userId, content } = message;
 
-        const errorResponse = (otherUser = false) => `Sorry, an error occured when calculating ${otherUser ? `the user's` : `your`} candidate score.`;
-
         if (isNaN(userId) || userId <= 0) {
             console.error(`Invalid user id: ${userId}`);
-            return errorResponse(false);
+            return sayCalcFailed(false);
         }
 
-        const { debug } = config;
+        const { electionUrl, phase, repNominate, siteUrl } = election;
 
-        const isStackOverflowChat = chatDomain === 'stackoverflow.com';
+        const { isModerator, access } = user;
 
-        const { arrNominees, electionUrl, phase, repNominate, siteUrl } = election;
+        const isPrivileged = access & AccessLevel.privileged;
 
-        const { isModerator } = user;
-
-        let responseText = "";
-
-        const findingTargetCandidateScore = isModerator && /(what is|what's) the candidate score (for|of) \d+$/.test(content);
+        const isAskingForOtherUser = isPrivileged && isAskedForOtherScore(content);
 
         const wasModerator = modIds.includes(userId);
 
-        if (!findingTargetCandidateScore && isSO && (isModerator || wasModerator)) {
-            if (isModerator) {
-                return `${getRandomOops()} you already have a diamond!`;
-            } else if (wasModerator) {
-                return `are you *really* sure you want to be a moderator again???`;
-            }
+        if (config.debug) {
+            console.log({
+                isSO,
+                isPrivileged,
+                isAskingForOtherUser,
+                isModerator,
+                wasModerator
+            });
+        }
+
+        if (!isAskingForOtherUser && isSO && (isModerator || wasModerator)) {
+            return sayDiamondAlready(isModerator, wasModerator);
         }
 
         // If privileged user asking candidate score of another user, get user site id from message
-        if (findingTargetCandidateScore) {
-            userId = Number(content.match(/\d+$/)[0]);
+        if (isAskingForOtherUser) {
+            userId = +(content.match(/(\d+)(?:\?|$)/)[1]);
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
-        else if (!isStackOverflowChat) {
+        else if (!isSO) {
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);
 
             // Unable to get user id on election site
             if (userId === null) {
                 console.error(`Unable to get site user id for ${userId}.`);
-                return errorResponse(findingTargetCandidateScore);
+                return sayCalcFailed(isAskingForOtherUser);
+            }
+
+            // No account found
+            if (userId === NO_ACCOUNT_ID) {
+                return `Sorry, ${isAskingForOtherUser ? "the user" : "you"} must have an account on the site to get the score!`;
             }
         }
 
@@ -110,7 +123,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         // Validation
         if (!items.length) {
             console.error('No data from API.');
-            return errorResponse(findingTargetCandidateScore);
+            return sayCalcFailed(isAskingForOtherUser);
         }
 
         const userBadgeIds = items.map(mapToId);
@@ -120,7 +133,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         //TODO: why use badges for that if we pass an instance of User?
         const { reputation } = badge.user;
 
-        const hasNominated = arrNominees.some(v => v.userId === userId);
+        const hasNominated = election.isNominee(userId);
 
         const repScore = Math.min(Math.floor(reputation / 1000), 20);
         const badgeScore = userBadgeIds.filter(v => badges.some(({ id }) => id === v)).length;
@@ -145,10 +158,24 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         const currMaxScore = 40;
 
+        let responseText = "";
+
         const isEligible = makeIsEligible(repNominate);
 
+        if (config.debug) {
+            console.log({
+                "User site badges": items,
+                isEligible,
+                badges,
+                missingBadges,
+                hasNominated,
+                repScore,
+                badgeScore
+            });
+        }
+
         // Privileged user asking for candidate score of another user
-        if (findingTargetCandidateScore) {
+        if (isAskingForOtherUser) {
 
             responseText = `The candidate score for user ${makeURL(userId.toString(), `${siteUrl}/users/${userId}`)} is ${getScoreText(candidateScore, currMaxScore)}.`;
 
@@ -225,12 +252,6 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                     ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
                     ` Having a high score is not a requirement - you can still nominate yourself!`;
             }
-        }
-
-        if (config.debug) {
-            console.log("Election badges", badges);
-            console.log("User site badges", items);
-            console.log("User missing badges", missingBadges);
         }
 
         return responseText;

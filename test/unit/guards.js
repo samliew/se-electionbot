@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import {
     isAskedAboutModsOrModPowers,
-    isAskedAboutUsernameDiamond, isAskedForElectionSchedule, isAskedWhoMadeMe
+    isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForOtherScore, isAskedForScoreFormula, isAskedWhoMadeMe
 } from "../../src/guards.js";
 
 describe('Message Guards', () => {
@@ -20,6 +20,35 @@ describe('Message Guards', () => {
             matches.forEach((txt) => {
                 const matched = isAskedForElectionSchedule(txt);
                 expect(matched, `<${txt}> not matched`).to.be.true;
+            });
+        });
+
+    });
+
+    describe('isAskedForCurrentNominees', () => {
+
+        it('should correctly match content', () => {
+
+            const matches = [
+                "who are the nominees?",
+                "what are the participants?",
+                "who is the participant?",
+                "what were the nominations",
+            ];
+
+            matches.forEach((txt) => {
+                const matched = isAskedForCurrentNominees(txt);
+                expect(matched, `<${txt}> not matched`).to.be.true;
+            });
+        });
+
+        it('should not match other guards', () => {
+
+            const exceptions = ["what is the candidate score for 245113?"];
+
+            exceptions.forEach((txt) => {
+                const matched = isAskedForCurrentNominees(txt);
+                expect(matched, `<${txt}> matched`).to.be.false;
             });
         });
 
@@ -87,6 +116,45 @@ describe('Message Guards', () => {
 
             matches.forEach((txt) => {
                 const matched = isAskedWhoMadeMe(txt);
+                expect(matched, `<${txt}> not matched`).to.be.true;
+            });
+
+        });
+
+    });
+
+    describe('isAskedForOtherScore', () => {
+
+        it('should correctly match content', () => {
+
+            const matches = [
+                "what is the candidate score of 42",
+                "what's the candidate score of 9000",
+                "what is candidate score for 65536", // account for a common mistake
+                "what's the candidate score of 404?",
+            ];
+
+            matches.forEach((txt) => {
+                const matched = isAskedForOtherScore(txt);
+                expect(matched, `<${txt}> not matched`).to.be.true;
+            });
+
+        });
+
+    });
+
+    describe('isAskedForScoreFormula', () => {
+
+        it('should correctly match content', () => {
+
+            const matches = [
+                "how is candidate score calculated",
+                "what is candidate score?",
+                "what is candidate score formula?"
+            ];
+
+            matches.forEach((txt) => {
+                const matched = isAskedForScoreFormula(txt);
                 expect(matched, `<${txt}> not matched`).to.be.true;
             });
 

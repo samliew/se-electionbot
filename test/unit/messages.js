@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import Election from "../../src/election.js";
-import { sayBadgesByType, sayElectionSchedule, sayHI, sayInformedDecision } from "../../src/messages.js";
+import { sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI, sayInformedDecision } from "../../src/messages.js";
 import { capitalize } from "../../src/utils.js";
 
 describe("Messages module", () => {
@@ -87,14 +87,8 @@ describe("Messages module", () => {
 
         it('should not add phase info on no phase', async () => {
             const election = new Election("https://ja.stackoverflow.com/election");
-
-            const mockRoom = {
-                async sendMessage(txt) {
-                    expect(txt).to.not.match(/is in the.*? phase/);
-                }
-            };
-
-            sayHI(mockRoom, election);
+            const greeting = sayHI(election);
+            expect(greeting).to.not.match(/is in the.*? phase/);
         });
 
         it('should correctly add phase info', async () => {
@@ -105,13 +99,22 @@ describe("Messages module", () => {
             const election = new Election(electionLink, 12);
             election.phase = phase;
 
-            const mockRoom = {
-                async sendMessage(txt) {
-                    expect(txt).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
-                }
-            };
+            const greeting = sayHI(election);
+            expect(greeting).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
+        });
 
-            sayHI(mockRoom, election);
+    });
+
+    describe('sayDiamondAlready', () => {
+
+        it('should return correct version of the message based on mod status', () => {
+            const isModMessage = sayDiamondAlready(true, false);
+            const wasModMessage = sayDiamondAlready(false, true);
+            const shroedingerModMessage = sayDiamondAlready(true, true);
+
+            expect(isModMessage).to.match(/already have a diamond/);
+            expect(wasModMessage).to.match(/want to be a moderator again/);
+            expect(shroedingerModMessage).to.match(/already have a diamond/);
         });
 
     });

@@ -1,6 +1,10 @@
 import cheerio from 'cheerio';
 import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 
+/**
+ * @typedef {import("./index").User} User
+ */
+
 export default class Election {
 
     /** @type {Nominee[]} */
@@ -40,6 +44,17 @@ export default class Election {
             this.dateElection &&
             this.dateEnded
         );
+    }
+
+    /**
+     * @summary checks if a user (or their id) is amongst the nominees
+     * @param {number|User} target userId or user to check
+     * @returns {boolean}
+     */
+    isNominee(target) {
+        const { arrNominees } = this;
+        const id = typeof target === "number" ? target : target.id;
+        return arrNominees.some(({ userId }) => userId === id);
     }
 
     /**

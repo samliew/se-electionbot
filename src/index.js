@@ -1,7 +1,7 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { getAllNamedBadges, getModerators } from "./api.js";
+import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
@@ -9,7 +9,7 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForElectionSchedule, isAskedIfModsArePaid,
+    isAskedForElectionSchedule, isAskedForScoreFormula, isAskedIfModsArePaid,
     isAskedWhoMadeMe,
     isAskedWhyNominationRemoved
 } from "./guards.js";
@@ -82,25 +82,12 @@ const announcement = new Announcement();
     const electionSiteHostname = electionUrl.split('/')[2];
     const electionSiteUrl = 'https://' + electionSiteHostname;
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
-    const _stackApikey = process.env.STACK_API_KEY;
-    const _stackApikeys = process.env.STACK_API_KEYS.split('|').filter(x => x.length !== 0);
-
-    /**
-     * @summary Get the next API key from a rotating set
-     * @returns {string} API key
-     */
-    const getStackApiKey = () => {
-        if(_stackApikeys.length === 0) return _stackApikey;
-
-        _stackApikeys.push(_stackApikeys.shift());
-
-        return _stackApikeys[0];
-    };
+    const defaultApiKey = process.env.STACK_API_KEY;
+    const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
 
 
     // App variables
     const isStackOverflow = electionSiteHostname.includes('stackoverflow.com');
-    const isStackOverflowChat = chatDomain === 'stackoverflow.com';
     const scriptInitDate = new Date();
     const ignoredEventTypes = [
         //  1,  // MessagePosted
@@ -162,8 +149,7 @@ const announcement = new Announcement();
         1114, 100297, 229044, 1252759, 444991, 871050, 2057919, 3093387, 1849664, 2193767, 4099593,
         541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
     ];
-    let currentSiteModIds;
-    let rescraperInt, rejoinInt;
+    let rescraperInt;
     let election = /** @type {Election|null} */(null);
     let room = null;
 
@@ -322,7 +308,7 @@ const announcement = new Announcement();
 
         // Get current site named badges
         if (!isStackOverflow) {
-            const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, getStackApiKey());
+            const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
 
             electionBadges.forEach((electionBadge) => {
                 const { name: badgeName } = electionBadge;
@@ -333,7 +319,7 @@ const announcement = new Announcement();
             console.log('site election badges', electionBadges);
         }
 
-        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, stackApikey);
+        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
 
         // Wait for election page to be scraped
         election = new Election(electionUrl);
@@ -372,7 +358,7 @@ const announcement = new Announcement();
         }
 
         // Main event listener
-        room.on('message', async (msg) => {
+        room.on('message', async (/** @type {import("chatexchange/dist/Message").default} */ msg) => {
             const encoded = await msg.content;
 
             // Decode HTML entities in messages, lowercase version for matching
@@ -734,7 +720,7 @@ const announcement = new Announcement();
                     //TODO: use config object pattern instead, 6 parameters is way too much
                     const calcCandidateScore = makeCandidateScoreCalc(BotConfig,
                         electionSiteHostname, chatDomain, electionSiteApiSlug,
-                        getStackApiKey(), electionBadges, soPastAndPresentModIds
+                        getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
                     );
 
                     responseText = await calcCandidateScore(election, user, resolvedMsg, isStackOverflow);
@@ -750,12 +736,9 @@ const announcement = new Announcement();
                         return; // stop here since we are using a different default response method
                     }
                 }
-
-                // Candidate score formula
-                else if (['how', 'what'].some(x => content.startsWith(x)) && ['candidate score', 'score calculat'].some(x => content.includes(x))) {
+                else if (isAskedForScoreFormula(content)) {
                     responseText = sayCandidateScoreFormula(electionBadges);
                 }
-
                 // Current candidates
                 else if (isAskedForCurrentNominees(content)) {
                     if (election.phase === null) {
@@ -972,7 +955,7 @@ const announcement = new Announcement();
                 console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                     `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
-                sayHI(room, election);
+                await room.sendMessage(sayHI(election));
 
                 // Record last sent message time so we don't flood the room
                 BotConfig.lastMessageTime = Date.now();
@@ -986,7 +969,7 @@ const announcement = new Announcement();
 
 
         // Interval to keep-alive
-        rejoinInt = setInterval(async function () {
+        setInterval(async function () {
 
             // Try to stay-alive by rejoining room
             room = await client.joinRoom(chatRoomId);
