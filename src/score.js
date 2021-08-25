@@ -1,4 +1,4 @@
-import { getBadges } from "./api.js";
+import { getBadges, getUserInfo } from "./api.js";
 import { AccessLevel } from "./commands/index.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
@@ -177,7 +177,11 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         // Privileged user asking for candidate score of another user
         if (isAskingForOtherUser) {
 
-            responseText = `The candidate score for user ${makeURL(userId.toString(), `${siteUrl}/users/${userId}`)} is ${getScoreText(candidateScore, currMaxScore)}.`;
+            const { display_name } = await getUserInfo(config, userId, chatDomain, apiKey) || {};
+
+            responseText = `The candidate score for user ${makeURL(display_name || userId.toString(),
+                `${siteUrl}/users/${userId}`)
+                } is ${getScoreText(candidateScore, currMaxScore)}.`;
 
             if (numMissingRequiredBadges > 0) {
                 responseText += sayMissingBadges(missingRequiredBadgeNames, numMissingRequiredBadges, true);
