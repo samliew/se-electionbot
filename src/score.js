@@ -39,6 +39,13 @@ export const makeIsEligible = (requiredRep) =>
     };
 
 /**
+ * @summary internal builder for calc failure error message
+ * @param {boolean} [isAskingForOtherUser] is asking for another user
+ * @returns {string}
+ */
+const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurred when calculating ${isAskingForOtherUser ? `the user's` : `your`} score.`;
+
+/**
  * @summary HOF with common parameters
  * @param {BotConfig} config
  * @param {string} hostname
@@ -61,11 +68,9 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         //TODO: decide how to avoid mutation
         let { userId, content } = message;
 
-        const errorResponse = (otherUser = false) => `Sorry, an error occured when calculating ${otherUser ? `the user's` : `your`} candidate score.`;
-
         if (isNaN(userId) || userId <= 0) {
             console.error(`Invalid user id: ${userId}`);
-            return errorResponse(false);
+            return sayCalcFailed(false);
         }
 
         const isStackOverflowChat = chatDomain === 'stackoverflow.com';
@@ -104,7 +109,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             // Unable to get user id on election site
             if (userId === null) {
                 console.error(`Unable to get site user id for ${userId}.`);
-                return errorResponse(isAskingForOtherUser);
+                return sayCalcFailed(isAskingForOtherUser);
             }
 
             // No account found
@@ -119,7 +124,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         // Validation
         if (!items.length) {
             console.error('No data from API.');
-            return errorResponse(isAskingForOtherUser);
+            return sayCalcFailed(isAskingForOtherUser);
         }
 
         const userBadgeIds = items.map(mapToId);
