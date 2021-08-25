@@ -59,6 +59,18 @@ index d4fad6c..35c2dcb 100644
          };
      }
      /**
+diff --git a/node_modules/chatexchange/dist/Message.d.ts b/node_modules/chatexchange/dist/Message.d.ts
+index d4974b0..ba6f12c 100644
+--- a/node_modules/chatexchange/dist/Message.d.ts
++++ b/node_modules/chatexchange/dist/Message.d.ts
+@@ -33,6 +33,7 @@ declare class Message {
+     get roomId(): Promise<number>;
+     get content(): Promise<string>;
+     get userId(): Promise<number>;
++    get userName(): Promise<string>;
+     get targetUserId(): Promise<number>;
+     get parentId(): Promise<number>;
+     _setRoom(): Promise<void>;
 diff --git a/node_modules/chatexchange/dist/Message.js b/node_modules/chatexchange/dist/Message.js
 index f112fc8..b97644a 100644
 --- a/node_modules/chatexchange/dist/Message.js
