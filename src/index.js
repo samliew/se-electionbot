@@ -521,7 +521,7 @@ const announcement = new Announcement();
                     ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
                     ["debug", /debug(?:ing)?/, BotConfig, content],
                     ["die", /die|shutdown|turn off/],
-                    ["greet", /^(greet|welcome)/, room, election],
+                    ["greet", /^(greet|welcome)/, election],
                     ["set access", /set (?:access|level)/, BotConfig, user, content]
                 ];
 

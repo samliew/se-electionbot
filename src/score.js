@@ -1,5 +1,4 @@
-import { getBadges } from "./api.js";
-import { AccessLevel } from "./commands/index.js";
+import { getBadges, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
 import { sayDiamondAlready, sayMissingBadges } from "./messages.js";
@@ -49,11 +48,11 @@ const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurre
  * @summary HOF with common parameters
  * @param {BotConfig} config
  * @param {string} hostname
- * @param {string} chatDomain
- * @param {string} apiSlug
- * @param {string} apiKey
- * @param {Badge[]} badges
- * @param {number[]} modIds
+ * @param {string} chatDomain chat room domain name (i.e. stackexchange.com)
+ * @param {string} apiSlug election site to pass to the API 'site' parameter
+ * @param {string} apiKey current API key
+ * @param {Badge[]} badges list of badges
+ * @param {number[]} modIds ids of moderators of the network
  */
 export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
     /**
@@ -75,18 +74,15 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         const { electionUrl, phase, repNominate, siteUrl } = election;
 
-        const { isModerator, access } = user;
+        const { isModerator } = user;
 
-        const isPrivileged = access & AccessLevel.privileged;
-
-        const isAskingForOtherUser = isPrivileged && isAskedForOtherScore(content);
+        const isAskingForOtherUser = isAskedForOtherScore(content);
 
         const wasModerator = modIds.includes(userId);
 
         if (config.debug) {
             console.log({
                 isSO,
-                isPrivileged,
                 isAskingForOtherUser,
                 isModerator,
                 wasModerator
@@ -101,8 +97,9 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         if (isAskingForOtherUser) {
             userId = +(content.match(/(\d+)(?:\?|$)/)[1]);
         }
+
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
-        else if (!isSO) {
+        if (!isSO) {
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);
 
             // Unable to get user id on election site
@@ -177,7 +174,11 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         // Privileged user asking for candidate score of another user
         if (isAskingForOtherUser) {
 
-            responseText = `The candidate score for user ${makeURL(userId.toString(), `${siteUrl}/users/${userId}`)} is ${getScoreText(candidateScore, currMaxScore)}.`;
+            const { display_name } = await getUserInfo(config, userId, apiSlug, apiKey) || {};
+
+            responseText = `The candidate score for user ${makeURL(display_name || userId.toString(),
+                `${siteUrl}/users/${userId}`)
+                } is ${getScoreText(candidateScore, currMaxScore)}.`;
 
             if (numMissingRequiredBadges > 0) {
                 responseText += sayMissingBadges(missingRequiredBadgeNames, numMissingRequiredBadges, true);
