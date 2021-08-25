@@ -106,3 +106,12 @@ export const isAskedAboutUsernameDiamond = (text) => {
 export const isAskedWhoMadeMe = (text) => {
     return /who(?:\s+(?:are|is) your)?\s+(?:made|created|owns|develop(?:s|ed|ers?)|maintain(?:s|ers?))(\s+you)?/.test(text);
 };
+
+/**
+ * @summary checks if the message asked for candidate score of another user
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedForOtherScore = (text) => {
+    return /what(?: i|')s(?: the)? candidate score (?:for|of) \d+(?:$|\?)/.test(text);
+};

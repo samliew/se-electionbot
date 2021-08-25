@@ -1,6 +1,7 @@
 import { getBadges } from "./api.js";
 import { AccessLevel } from "./commands/index.js";
 import Election from './election.js';
+import { isAskedForOtherScore } from "./guards.js";
 import { sayMissingBadges } from "./messages.js";
 import { getRandomOops } from "./random.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, NO_ACCOUNT_ID, pluralize } from "./utils.js";
@@ -78,7 +79,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         let responseText = "";
 
-        const isAskingForOtherUser = isPrivileged && /(what is|what's) the candidate score (for|of) \d+$/.test(content);
+        const isAskingForOtherUser = isPrivileged && isAskedForOtherScore(content);
 
         const wasModerator = modIds.includes(userId);
 
