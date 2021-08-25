@@ -12,11 +12,10 @@ import { parsePackage } from "./utils/package.js";
 
 /**
  * @summary makes bot remind users that they are here
- * @param {{ sendMessage(text:string): Promise<void> }} room
  * @param {Election} election
  * @returns {string}
  */
-export const sayHI = (room, election) => {
+export const sayHI = (election) => {
     const { arrNominees, electionUrl, phase } = election;
 
     const { length } = arrNominees;
@@ -37,11 +36,7 @@ export const sayHI = (room, election) => {
     const phaseText = phaseMap[phase] || "";
     const helpCommand = `@ElectionBot help`;
 
-    const text = `${greeting}${phaseText} I can answer frequently-asked questions about elections (type *${helpCommand}* for more info).`;
-
-    room.sendMessage(text);
-
-    return '';
+    return `${greeting}${phaseText} I can answer frequently-asked questions about elections (type *${helpCommand}* for more info).`;
 };
 
 /**

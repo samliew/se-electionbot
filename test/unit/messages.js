@@ -87,14 +87,8 @@ describe("Messages module", () => {
 
         it('should not add phase info on no phase', async () => {
             const election = new Election("https://ja.stackoverflow.com/election");
-
-            const mockRoom = {
-                async sendMessage(txt) {
-                    expect(txt).to.not.match(/is in the.*? phase/);
-                }
-            };
-
-            sayHI(mockRoom, election);
+            const greeting = sayHI(election);
+            expect(greeting).to.not.match(/is in the.*? phase/);
         });
 
         it('should correctly add phase info', async () => {
@@ -105,13 +99,8 @@ describe("Messages module", () => {
             const election = new Election(electionLink, 12);
             election.phase = phase;
 
-            const mockRoom = {
-                async sendMessage(txt) {
-                    expect(txt).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
-                }
-            };
-
-            sayHI(mockRoom, election);
+            const greeting = sayHI(election);
+            expect(greeting).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
         });
 
     });

@@ -372,7 +372,7 @@ const announcement = new Announcement();
         }
 
         // Main event listener
-        room.on('message', async (msg) => {
+        room.on('message', async (/** @type {import("chatexchange/dist/Message").default} */ msg) => {
             const encoded = await msg.content;
 
             // Decode HTML entities in messages, lowercase version for matching
@@ -972,7 +972,7 @@ const announcement = new Announcement();
                 console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                     `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
-                sayHI(room, election);
+                await room.sendMessage(sayHI(election));
 
                 // Record last sent message time so we don't flood the room
                 BotConfig.lastMessageTime = Date.now();
