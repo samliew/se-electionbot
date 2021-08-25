@@ -114,7 +114,7 @@ describe("Messages module", () => {
 
             expect(isModMessage).to.match(/already have a diamond/);
             expect(wasModMessage).to.match(/want to be a moderator again/);
-            expect(isModMessage).to.equal(shroedingerModMessage);
+            expect(shroedingerModMessage).to.match(/already have a diamond/);
         });
 
     });
