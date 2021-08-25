@@ -77,7 +77,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         let responseText = "";
 
-        const findingTargetCandidateScore = isModerator && /what is the candidate score for \d+$/.test(content);
+        const findingTargetCandidateScore = isModerator && /(what is|what's) the candidate score (for|of) \d+$/.test(content);
 
         const wasModerator = modIds.includes(userId);
 
