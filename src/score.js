@@ -97,9 +97,8 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         if (isAskingForOtherUser) {
             userId = +(content.match(/(\d+)(?:\?|$)/)[1]);
         }
-
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
-        if (!isSO) {
+        else if (!isSO) {
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);
 
             // Unable to get user id on election site
