@@ -1,5 +1,4 @@
 import { getBadges, getUserInfo } from "./api.js";
-import { AccessLevel } from "./commands/index.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
 import { sayDiamondAlready, sayMissingBadges } from "./messages.js";
@@ -75,18 +74,15 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         const { electionUrl, phase, repNominate, siteUrl } = election;
 
-        const { isModerator, access } = user;
+        const { isModerator } = user;
 
-        const isPrivileged = access & AccessLevel.privileged;
-
-        const isAskingForOtherUser = isPrivileged && isAskedForOtherScore(content);
+        const isAskingForOtherUser = isAskedForOtherScore(content);
 
         const wasModerator = modIds.includes(userId);
 
         if (config.debug) {
             console.log({
                 isSO,
-                isPrivileged,
                 isAskingForOtherUser,
                 isModerator,
                 wasModerator
@@ -101,8 +97,9 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         if (isAskingForOtherUser) {
             userId = +(content.match(/(\d+)(?:\?|$)/)[1]);
         }
+
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
-        else if (!isSO) {
+        if (!isSO) {
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);
 
             // Unable to get user id on election site
