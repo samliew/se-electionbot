@@ -722,7 +722,7 @@ const announcement = new Announcement();
                     //TODO: use config object pattern instead, 6 parameters is way too much
                     const calcCandidateScore = makeCandidateScoreCalc(BotConfig,
                         electionSiteHostname, chatDomain, electionSiteApiSlug,
-                        getStackApiKey(), electionBadges, soPastAndPresentModIds
+                        getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
                     );
 
                     responseText = await calcCandidateScore(election, user, resolvedMsg, isStackOverflow);
