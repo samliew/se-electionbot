@@ -80,6 +80,15 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         const wasModerator = modIds.includes(userId);
 
+        if (config.debug) {
+            console.log({
+                isPrivileged,
+                isAskingForOtherUser,
+                isModerator,
+                wasModerator
+            });
+        }
+
         if (!isAskingForOtherUser && isSO && (isModerator || wasModerator)) {
             return sayDiamondAlready(isModerator, wasModerator);
         }
@@ -148,6 +157,18 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         let responseText = "";
 
         const isEligible = makeIsEligible(repNominate);
+
+        if (config.debug) {
+            console.log({
+                "User site badges": items,
+                isEligible,
+                badges,
+                missingBadges,
+                hasNominated,
+                repScore,
+                badgeScore
+            });
+        }
 
         // Privileged user asking for candidate score of another user
         if (isAskingForOtherUser) {
@@ -227,12 +248,6 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                     ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
                     ` Having a high score is not a requirement - you can still nominate yourself!`;
             }
-        }
-
-        if (config.debug) {
-            console.log("Election badges", badges);
-            console.log("User site badges", items);
-            console.log("User missing badges", missingBadges);
         }
 
         return responseText;
