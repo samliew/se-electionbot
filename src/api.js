@@ -113,3 +113,31 @@ export const getModerators = async (config, site, key, page = 1) => {
 
     return items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1);
 };
+
+/**
+ * @typedef {{
+ *  user_id: number,
+ *  display_name: string
+ * }} UserInfo
+ *
+ * @summary gets the user info from the API
+ * @param {BotConfig} config
+ * @param {number} userId userId to request info for
+ * @param {string} site election site slug
+ * @param {string} key api key
+ * @returns {Promise<UserInfo|null>}
+ */
+export const getUserInfo = async (config, userId, site, key) => {
+
+    const userURL = new URL(`${apiBase}/${apiVer}/users/${userId}`);
+    userURL.search = new URLSearchParams({
+        site,
+        filter: "sAR)YG", // unsafe
+        key
+    }).toString();
+
+    const { items = [] } = /** @type {{ items: UserInfo[] }} */(await fetchUrl(config, userURL.toString(), true)) || {};
+
+    const [userInfo] = items;
+    return userInfo || null;
+};
