@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import Election from "../../src/election.js";
-import { sayBadgesByType, sayElectionSchedule, sayHI, sayInformedDecision } from "../../src/messages.js";
+import { sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI, sayInformedDecision } from "../../src/messages.js";
 import { capitalize } from "../../src/utils.js";
 
 describe("Messages module", () => {
@@ -101,6 +101,20 @@ describe("Messages module", () => {
 
             const greeting = sayHI(election);
             expect(greeting).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
+        });
+
+    });
+
+    describe('sayDiamondAlready', () => {
+
+        it('should return correct version of the message based on mod status', () => {
+            const isModMessage = sayDiamondAlready(true, false);
+            const wasModMessage = sayDiamondAlready(false, true);
+            const shroedingerModMessage = sayDiamondAlready(true, true);
+
+            expect(isModMessage).to.match(/already have a diamond/);
+            expect(wasModMessage).to.match(/want to be a moderator again/);
+            expect(isModMessage).to.equal(shroedingerModMessage);
         });
 
     });

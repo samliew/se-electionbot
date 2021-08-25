@@ -2,8 +2,7 @@ import { getBadges } from "./api.js";
 import { AccessLevel } from "./commands/index.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
-import { sayMissingBadges } from "./messages.js";
-import { getRandomOops } from "./random.js";
+import { sayDiamondAlready, sayMissingBadges } from "./messages.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, NO_ACCOUNT_ID, pluralize } from "./utils.js";
 
 /**
@@ -84,11 +83,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         const wasModerator = modIds.includes(userId);
 
         if (!isAskingForOtherUser && isSO && (isModerator || wasModerator)) {
-            if (isModerator) {
-                return `${getRandomOops()} you already have a diamond!`;
-            } else if (wasModerator) {
-                return `are you *really* sure you want to be a moderator again???`;
-            }
+            return sayDiamondAlready(isModerator, wasModerator);
         }
 
         // If privileged user asking candidate score of another user, get user site id from message

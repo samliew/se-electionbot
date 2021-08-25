@@ -1,4 +1,5 @@
 import Election from "./election.js";
+import { getRandomOops } from "./random.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
     linkToUtcTimestamp, listify, makeURL, pluralize
@@ -357,4 +358,24 @@ export const sayWhoMadeMe = async (config) => {
     const maintainers = `I am also maintained by ${contributed}`;
 
     return `${created}. ${maintainers}.`;
+};
+
+/**
+ * @summary builds an "already a diamond" message
+ * @param {boolean} isModerator is user a current moderator
+ * @param {boolean} wasModerator was user a moderator
+ * @returns {string}
+ */
+export const sayDiamondAlready = (isModerator, wasModerator) => {
+
+    /**
+     * @type {[boolean, string][]}
+     */
+    const messageMap = [
+        [isModerator, `${getRandomOops()} you already have a diamond!`],
+        [wasModerator, `are you *really* sure you want to be a moderator again?`]
+    ];
+
+    const [, message] = messageMap.find(([condition]) => condition) || [];
+    return message || `diamonds are forever!`;
 };
