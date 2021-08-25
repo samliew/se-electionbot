@@ -60,10 +60,10 @@ index d4fad6c..35c2dcb 100644
      }
      /**
 diff --git a/node_modules/chatexchange/dist/Message.js b/node_modules/chatexchange/dist/Message.js
-index f112fc8..eca19c6 100644
+index f112fc8..b97644a 100644
 --- a/node_modules/chatexchange/dist/Message.js
 +++ b/node_modules/chatexchange/dist/Message.js
-@@ -33,29 +33,30 @@ class Message {
+@@ -33,29 +33,33 @@ class Message {
          return utils_1.lazy(() => this._room, () => this._setRoom());
      }
      get roomId() {
@@ -77,6 +77,9 @@ index f112fc8..eca19c6 100644
      get userId() {
 -        return utils_1.lazy(() => this._userId, () => this._scrapeTranscript());
 +        return utils_1.lazy(() => this._userId, () => this._scrapeTranscript("userId"));
++    }
++    get userName() {
++        return utils_1.lazy(() => this._userName, () => this._scrapeTranscript("userName"));
      }
      get targetUserId() {
 -        return utils_1.lazy(() => this._targetUserId, () => this._scrapeTranscript());
