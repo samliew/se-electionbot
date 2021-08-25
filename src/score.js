@@ -70,7 +70,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         const isStackOverflowChat = chatDomain === 'stackoverflow.com';
 
-        const { arrNominees, electionUrl, phase, repNominate, siteUrl } = election;
+        const { electionUrl, phase, repNominate, siteUrl } = election;
 
         const { isModerator, access } = user;
 
@@ -126,7 +126,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         //TODO: why use badges for that if we pass an instance of User?
         const { reputation } = badge.user;
 
-        const hasNominated = arrNominees.some(v => v.userId === userId);
+        const hasNominated = election.isNominee(userId);
 
         const repScore = Math.min(Math.floor(reputation / 1000), 20);
         const badgeScore = userBadgeIds.filter(v => badges.some(({ id }) => id === v)).length;

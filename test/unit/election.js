@@ -41,4 +41,28 @@ describe('Election', () => {
 
     });
 
+    describe('isNominee', () => {
+
+        it('should correctly determine if an id is a nominee', () => {
+            const testIds = [42, 24, -9000];
+
+            const election = new Election("https://stackoverflow.com/election/12", 12);
+            // @ts-expect-error
+            election.arrNominees.push(...testIds.map((i) => ({ userId: i })));
+            expect(election.isNominee(24)).to.be.true;
+            expect(election.isNominee(2048)).to.be.false;
+        });
+
+        it('should accept User instance instead of an id', () => {
+            const user = /** @type {import("../../src/index").User} */({ id: 42 });
+
+            const election = new Election("https://stackoverflow.com/election/42");
+            // @ts-expect-error
+            election.arrNominees.push({ userId: 42, userName: "answer" });
+
+            expect(election.isNominee(user));
+        });
+
+    });
+
 });
