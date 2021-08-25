@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import {
     isAskedAboutModsOrModPowers,
-    isAskedAboutUsernameDiamond, isAskedForElectionSchedule, isAskedForOtherScore, isAskedForScoreFormula, isAskedWhoMadeMe
+    isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForOtherScore, isAskedForScoreFormula, isAskedWhoMadeMe
 } from "../../src/guards.js";
 
 describe('Message Guards', () => {
@@ -20,6 +20,35 @@ describe('Message Guards', () => {
             matches.forEach((txt) => {
                 const matched = isAskedForElectionSchedule(txt);
                 expect(matched, `<${txt}> not matched`).to.be.true;
+            });
+        });
+
+    });
+
+    describe('isAskedForCurrentNominees', () => {
+
+        it('should correctly match content', () => {
+
+            const matches = [
+                "who are the nominees?",
+                "what are the participants?",
+                "who is the participant?",
+                "what were the nominations",
+            ];
+
+            matches.forEach((txt) => {
+                const matched = isAskedForCurrentNominees(txt);
+                expect(matched, `<${txt}> not matched`).to.be.true;
+            });
+        });
+
+        it('should not match other guards', () => {
+
+            const exceptions = ["what is the candidate score for 245113?"];
+
+            exceptions.forEach((txt) => {
+                const matched = isAskedForCurrentNominees(txt);
+                expect(matched, `<${txt}> matched`).to.be.false;
             });
         });
 

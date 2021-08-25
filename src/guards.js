@@ -77,7 +77,7 @@ export const isAskedForCurrentWinners = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCurrentNominees = (text) => {
-    return /(?:who|what) (?:are|were|was|is)/.test(text) && /(?:nomin(?:ee|ation)|participant|candidate)s?/.test(text);
+    return /(?:who|what) (?:are|were|was|is)( the)? (?:nomin(?:ee|ation)|participant|candidate)s?(?!\s+score)/.test(text);
 };
 
 /**
