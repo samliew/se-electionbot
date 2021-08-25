@@ -88,7 +88,6 @@ const announcement = new Announcement();
 
     // App variables
     const isStackOverflow = electionSiteHostname.includes('stackoverflow.com');
-    const isStackOverflowChat = chatDomain === 'stackoverflow.com';
     const scriptInitDate = new Date();
     const ignoredEventTypes = [
         //  1,  // MessagePosted
@@ -150,8 +149,7 @@ const announcement = new Announcement();
         1114, 100297, 229044, 1252759, 444991, 871050, 2057919, 3093387, 1849664, 2193767, 4099593,
         541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
     ];
-    let currentSiteModIds;
-    let rescraperInt, rejoinInt;
+    let rescraperInt;
     let election = /** @type {Election|null} */(null);
     let room = null;
 
@@ -971,7 +969,7 @@ const announcement = new Announcement();
 
 
         // Interval to keep-alive
-        rejoinInt = setInterval(async function () {
+        setInterval(async function () {
 
             // Try to stay-alive by rejoining room
             room = await client.joinRoom(chatRoomId);
