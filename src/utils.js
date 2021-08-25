@@ -155,6 +155,13 @@ export const capitalize = (word) => word[0].toUpperCase() + word.slice(1).toLowe
 export const pluralize = (amount, pluralSuffix = "s", singularSuffix = "") => amount !== 1 ? pluralSuffix : singularSuffix;
 
 /**
+ * @summary select output based on pluralization
+ * @param {number} amount
+ * @returns {string}
+ */
+export const pluralizePhrase = (amount, pluralText = "", singularText = "") => amount !== 1 ? pluralText : singularText;
+
+/**
  * @summary turns list of items into a enumeration
  * @param {...string} items
  * @returns {string}

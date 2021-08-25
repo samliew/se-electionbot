@@ -2,7 +2,7 @@ import Election from "./election.js";
 import { getRandomOops } from "./random.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
-    linkToUtcTimestamp, listify, makeURL, pluralize
+    linkToUtcTimestamp, listify, makeURL, pluralize, pluralizePhrase
 } from "./utils.js";
 import { parsePackage } from "./utils/package.js";
 
@@ -24,13 +24,15 @@ export const sayHI = (election) => {
     const electionLink = makeURL("election", `${electionUrl}?tab=${phase}`);
     const phasePrefix = `The ${electionLink} is in the ${phase} phase`;
 
+    const pluralCandidates = pluralizePhrase(length, `are ${length} candidates`, `is ${length} candidate`);
+
     const phaseMap = {
         "null": `The ${electionLink} has not begun yet.`,
         "ended": `The ${electionLink} has ended.`,
         "cancelled": `The ${electionLink} has been cancelled.`,
         "election": `The ${electionLink} is happening at the moment!`,
-        "nomination": `${phasePrefix}, and currently there are ${length} candidates.`,
-        "primary": `${phasePrefix}, and currently there are ${length} candidates.`,
+        "nomination": `${phasePrefix}, and currently there ${pluralCandidates}.`,
+        "primary": `${phasePrefix}, and currently there ${pluralCandidates}.`,
     };
 
     const greeting = 'Welcome to the election chat room! ';
