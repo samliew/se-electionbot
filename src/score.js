@@ -76,8 +76,6 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         const isPrivileged = access & AccessLevel.privileged;
 
-        let responseText = "";
-
         const isAskingForOtherUser = isPrivileged && isAskedForOtherScore(content);
 
         const wasModerator = modIds.includes(userId);
@@ -146,6 +144,8 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         if (numMissingBadges > 0) console.log('Missing Badges: ', missingBadgeNames.join(','));
 
         const currMaxScore = 40;
+
+        let responseText = "";
 
         const isEligible = makeIsEligible(repNominate);
 
