@@ -166,7 +166,7 @@ export const sayMissingBadges = (badgeNames, count, required = false) => ` The u
 /**
  * @summary builds current mods list response message
  * @param {Election} election
- * @param {import("./utils.js").ResItem[]} currMods
+ * @param {import("./api.js").ModeratorInfo[]} currMods
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */

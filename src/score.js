@@ -118,11 +118,11 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         const [badge] = items;
 
         //TODO: why use badges for that if we pass an instance of User?
-        const userRep = badge.user.reputation;
+        const { reputation } = badge.user;
 
         const hasNominated = arrNominees.some(v => v.userId === userId);
 
-        const repScore = Math.min(Math.floor(userRep / 1000), 20);
+        const repScore = Math.min(Math.floor(reputation / 1000), 20);
         const badgeScore = userBadgeIds.filter(v => badges.some(({ id }) => id === v)).length;
         const candidateScore = repScore + badgeScore;
 
@@ -159,10 +159,10 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             }
         }
         // Does not meet minimum requirements
-        else if (!isEligible(userRep, numMissingRequiredBadges)) {
+        else if (!isEligible(reputation, numMissingRequiredBadges)) {
             responseText = `You are not eligible to nominate yourself in the election`;
 
-            const isUnderRep = userRep < repNominate;
+            const isUnderRep = reputation < repNominate;
 
             // Not enough rep
             if (isUnderRep) {
@@ -197,7 +197,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                     "primary": `the nomination period is over`
                 };
 
-                responseText += `Alas, ${phaseMap[phase]} Hope to see your candidature next election!`;
+                responseText += ` Alas, ${phaseMap[phase]} Hope to see your candidature next election!`;
             } else {
                 console.error("this case??", {
                     candidateScore, currMaxScore, hasNominated, phase
@@ -226,7 +226,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                     ` Having a high score is not a requirement - you can still nominate yourself!`;
             }
         }
-        
+
         if (config.debug) {
             console.log("Election badges", badges);
             console.log("User site badges", items);

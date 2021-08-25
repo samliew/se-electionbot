@@ -1,6 +1,7 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
+import { getAllNamedBadges, getModerators } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
@@ -20,13 +21,11 @@ import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import {
-    apiBase,
-    apiVer, dateToRelativetime,
-    dateToUtcTimestamp, fetchUrl, keepAlive,
+    dateToRelativetime,
+    dateToUtcTimestamp, keepAlive,
     linkToRelativeTimestamp,
     linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer
 } from './utils.js';
-import { getAllNamedBadges } from "./api.js";
 
 // preserves compatibility with older import style
 const announcement = new Announcement();
@@ -321,34 +320,20 @@ const announcement = new Announcement();
             console.log('DEBUG MODE ON!');
         }
 
-        // Get current site moderators
-        // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
-        const modURL = new URL(`${apiBase}/${apiVer}/users/moderators`);
-        modURL.search = new URLSearchParams({
-            pagesize: "100",
-            order: "desc",
-            sort: "reputation",
-            site: electionSiteApiSlug,
-            filter: "!LnNkvq0d-S*rS_0sMTDFRm",
-            key: getStackApiKey()
-        }).toString();
-
         // Get current site named badges
-        if(!isStackOverflow) {
-
+        if (!isStackOverflow) {
             const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, getStackApiKey());
-            electionBadges.forEach(electionBadge => {
-                const matchedBadge = allNamedBadges.filter(namedBadge => electionBadge.name === namedBadge.name);
-                if(matchedBadge)
-                    electionBadge.id = matchedBadge[0].badge_id.toString();
+
+            electionBadges.forEach((electionBadge) => {
+                const { name: badgeName } = electionBadge;
+                const matchedBadge = allNamedBadges.find(({ name }) => badgeName === name);
+                if (matchedBadge) electionBadge.id = matchedBadge.badge_id.toString();
             });
 
             console.log('site election badges', electionBadges);
         }
 
-        const currSiteModApiResponse = /** @type {APIListResponse|null} */(await fetchUrl(BotConfig, modURL.toString(), true));
-        const currentSiteMods = currSiteModApiResponse ? currSiteModApiResponse.items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1) : [];
-        currentSiteModIds = currentSiteMods.map(({ user_id }) => user_id);
+        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, stackApikey);
 
         // Wait for election page to be scraped
         election = new Election(electionUrl);
@@ -573,7 +558,7 @@ const announcement = new Announcement();
                 if (responseText) {
 
                     // Function sent the message and returned empty string, e.g.: sayHI
-                    if(responseText === '') return;
+                    if (responseText === '') return;
 
                     const messages = responseText.split(
                         new RegExp(`(^(?:.|\\n|\\r){1,${maxPerMessage}})(?:\\n|$)`, "gm")
@@ -987,7 +972,7 @@ const announcement = new Announcement();
                 console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                     `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
-                await sayHI(room, election);
+                sayHI(room, election);
 
                 // Record last sent message time so we don't flood the room
                 BotConfig.lastMessageTime = Date.now();
