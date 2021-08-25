@@ -178,7 +178,6 @@ export default class Election {
             this.arrNominees.length = 0;
             this.arrNominees.push(...nominees);
 
-            this.qnaUrl = process.env.ELECTION_QA_URL || electionPost.find('a[href*="/questions/tagged/election"]').attr('href');
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/');
 
             this.phase = Election.getPhase(this);
@@ -222,7 +221,7 @@ export default class Election {
             console.log(
                 `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.\n` +
                 `-------- PHASE ${this.phase};  CANDIDATES ${this.arrNominees.length};  WINNERS ${this.arrWinners.length}\n` +
-                `-------- QNA ${this.qnaUrl};  CHAT ${this.chatUrl}`
+                `-------- CHAT ${this.chatUrl}`
             );
         }
         catch (err) {

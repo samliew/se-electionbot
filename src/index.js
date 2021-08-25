@@ -761,8 +761,8 @@ const announcement = new Announcement();
 
                 // How to choose/pick/decide/determine who to vote for
                 else if ((content.startsWith('how') && ['choose', 'pick', 'decide', 'determine'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
-                    if (election.qnaUrl) responseText = sayInformedDecision(election);
                     if (election.phase == null) responseText = sayNotStartedYet(election);
+                    else responseText = sayInformedDecision();
                 }
 
                 // Who is the best mod

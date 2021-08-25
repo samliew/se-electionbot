@@ -79,10 +79,9 @@ export const sayElectionIsOver = ({ electionUrl }) => `The ${makeURL("election",
 
 /**
  * @summary Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
- * @param {Election} election
  * @returns {string}
  */
-export const sayInformedDecision = ({ qnaUrl }) => qnaUrl ? `If you want to make an informed decision on who to vote for, you can also read the candidates' answers in the ${makeURL("election Q&A", qnaUrl)}, and you also can look at examples of their participation on Meta and how they conduct themselves.` : '';
+export const sayInformedDecision = () => `If you want to make an informed decision on who to vote for, you should read the candidates' answers to the questionnaire, and also look at examples of their participation on Meta and how they conduct themselves.`;
 
 /**
  * @summary builds a response to voting info query
@@ -92,16 +91,16 @@ export const sayInformedDecision = ({ qnaUrl }) => qnaUrl ? `If you want to make
 export const sayAboutVoting = (
     election
 ) => {
-    const { dateElection, electionUrl, phase, repVote, statVoters, qnaUrl } = election;
+    const { dateElection, electionUrl, phase, repVote, statVoters } = election;
 
     const comeBackFinalPhaseText = ` Don't forget to come back ${linkToRelativeTimestamp(dateElection)} to also vote in the election's final voting phase!`;
 
     const phaseMap = {
         cancelled: statVoters,
         ended: `The ${makeURL("election", electionUrl)} has ended. You can no longer vote.`,
-        election: `If you have at least ${repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${electionUrl}?tab=election). ${sayInformedDecision(election)}`,
-        nomination: `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${electionUrl}?tab=nomination)${qnaUrl ? `, as well as read the candidates' [answers to your questions](${qnaUrl}) to find out more` : ""}${comeBackFinalPhaseText}`,
-        primary: `If you have at least ${repVote} reputation, you can freely [vote on the candidates](${electionUrl}?tab=primary). ${sayInformedDecision(election)}${comeBackFinalPhaseText}`
+        election: `If you have at least ${repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${electionUrl}?tab=election). ${sayInformedDecision()}`,
+        nomination: `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${electionUrl}?tab=nomination) as well as their answers to the questionnaire to find out more about their moderation style.${comeBackFinalPhaseText}`,
+        primary: `If you have at least ${repVote} reputation, you can freely [vote on the candidates](${electionUrl}?tab=primary). ${sayInformedDecision()}${comeBackFinalPhaseText}`
     };
 
     return phaseMap[phase] || sayNotStartedYet(election);
