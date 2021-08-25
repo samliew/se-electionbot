@@ -90,7 +90,7 @@ const announcement = new Announcement();
      * @returns {string} API key
      */
     const getStackApiKey = () => {
-        if(_stackApikeys.length === 0) return _stackApikey;
+        if (_stackApikeys.length === 0) return _stackApikey;
 
         _stackApikeys.push(_stackApikeys.shift());
 
@@ -333,7 +333,7 @@ const announcement = new Announcement();
             console.log('site election badges', electionBadges);
         }
 
-        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, stackApikey);
+        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, getStackApiKey());
 
         // Wait for election page to be scraped
         election = new Election(electionUrl);
