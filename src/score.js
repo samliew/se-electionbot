@@ -1,11 +1,12 @@
 import { getBadges } from "./api.js";
+import { AccessLevel } from "./commands/index.js";
 import Election from './election.js';
 import { sayMissingBadges } from "./messages.js";
 import { getRandomOops } from "./random.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, NO_ACCOUNT_ID, pluralize } from "./utils.js";
 
 /**
- * @typedef {import("chatexchange/dist/Browser").IProfileData} User
+ * @typedef {import("./index.js").User} User
  * @typedef {import("./index.js").BotConfig} BotConfig
  * @typedef {import("./utils").Badge} Badge
  * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
@@ -71,11 +72,13 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         const { arrNominees, electionUrl, phase, repNominate, siteUrl } = election;
 
-        const { isModerator } = user;
+        const { isModerator, access } = user;
+
+        const isPrivileged = access & AccessLevel.privileged;
 
         let responseText = "";
 
-        const isAskingForOtherUser = isModerator && /(what is|what's) the candidate score (for|of) \d+$/.test(content);
+        const isAskingForOtherUser = isPrivileged && /(what is|what's) the candidate score (for|of) \d+$/.test(content);
 
         const wasModerator = modIds.includes(userId);
 
@@ -89,7 +92,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         // If privileged user asking candidate score of another user, get user site id from message
         if (isAskingForOtherUser) {
-            userId = Number(content.match(/\d+$/)[0]);
+            userId = +(content.match(/\d+$/)[0]);
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
         else if (!isStackOverflowChat) {
