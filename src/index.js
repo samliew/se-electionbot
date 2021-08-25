@@ -83,7 +83,7 @@ const announcement = new Announcement();
     const electionSiteUrl = 'https://' + electionSiteHostname;
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
     const defaultApiKey = process.env.STACK_API_KEY;
-    const apiKeyPool = process.env.STACK_API_KEYS.split('|').filter(Boolean);
+    const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
 
 
     // App variables
