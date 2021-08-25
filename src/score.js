@@ -67,8 +67,6 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             return errorResponse(false);
         }
 
-        const { debug } = config;
-
         const isStackOverflowChat = chatDomain === 'stackoverflow.com';
 
         const { arrNominees, electionUrl, phase, repNominate, siteUrl } = election;
