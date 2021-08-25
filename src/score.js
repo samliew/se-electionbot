@@ -49,11 +49,11 @@ const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurre
  * @summary HOF with common parameters
  * @param {BotConfig} config
  * @param {string} hostname
- * @param {string} chatDomain
- * @param {string} apiSlug
- * @param {string} apiKey
- * @param {Badge[]} badges
- * @param {number[]} modIds
+ * @param {string} chatDomain chat room domain name (i.e. stackexchange.com)
+ * @param {string} apiSlug election site to pass to the API 'site' parameter
+ * @param {string} apiKey current API key
+ * @param {Badge[]} badges list of badges
+ * @param {number[]} modIds ids of moderators of the network
  */
 export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
     /**
@@ -177,7 +177,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         // Privileged user asking for candidate score of another user
         if (isAskingForOtherUser) {
 
-            const { display_name } = await getUserInfo(config, userId, chatDomain, apiKey) || {};
+            const { display_name } = await getUserInfo(config, userId, apiSlug, apiKey) || {};
 
             responseText = `The candidate score for user ${makeURL(display_name || userId.toString(),
                 `${siteUrl}/users/${userId}`)
