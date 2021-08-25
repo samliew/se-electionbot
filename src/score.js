@@ -2,7 +2,7 @@ import { getBadges } from "./api.js";
 import Election from './election.js';
 import { sayMissingBadges } from "./messages.js";
 import { getRandomOops } from "./random.js";
-import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, pluralize } from "./utils.js";
+import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, NO_ACCOUNT_ID, pluralize } from "./utils.js";
 
 /**
  * @typedef {import("chatexchange/dist/Browser").IProfileData} User
@@ -75,11 +75,11 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         let responseText = "";
 
-        const findingTargetCandidateScore = isModerator && /(what is|what's) the candidate score (for|of) \d+$/.test(content);
+        const isAskingForOtherUser = isModerator && /(what is|what's) the candidate score (for|of) \d+$/.test(content);
 
         const wasModerator = modIds.includes(userId);
 
-        if (!findingTargetCandidateScore && isSO && (isModerator || wasModerator)) {
+        if (!isAskingForOtherUser && isSO && (isModerator || wasModerator)) {
             if (isModerator) {
                 return `${getRandomOops()} you already have a diamond!`;
             } else if (wasModerator) {
@@ -88,7 +88,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         }
 
         // If privileged user asking candidate score of another user, get user site id from message
-        if (findingTargetCandidateScore) {
+        if (isAskingForOtherUser) {
             userId = Number(content.match(/\d+$/)[0]);
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
@@ -98,7 +98,12 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             // Unable to get user id on election site
             if (userId === null) {
                 console.error(`Unable to get site user id for ${userId}.`);
-                return errorResponse(findingTargetCandidateScore);
+                return errorResponse(isAskingForOtherUser);
+            }
+
+            // No account found
+            if (userId === NO_ACCOUNT_ID) {
+                return `Sorry, ${isAskingForOtherUser ? "the user" : "you"} must have an account on the site to get the score!`;
             }
         }
 
@@ -108,7 +113,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         // Validation
         if (!items.length) {
             console.error('No data from API.');
-            return errorResponse(findingTargetCandidateScore);
+            return errorResponse(isAskingForOtherUser);
         }
 
         const userBadgeIds = items.map(mapToId);
@@ -146,7 +151,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         const isEligible = makeIsEligible(repNominate);
 
         // Privileged user asking for candidate score of another user
-        if (findingTargetCandidateScore) {
+        if (isAskingForOtherUser) {
 
             responseText = `The candidate score for user ${makeURL(userId.toString(), `${siteUrl}/users/${userId}`)} is ${getScoreText(candidateScore, currMaxScore)}.`;
 

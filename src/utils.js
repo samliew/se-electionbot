@@ -241,6 +241,7 @@ export const linkToRelativeTimestamp = (date) =>
  */
 export const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${link}${toTadParamFormat(date)})`;
 
+export const NO_ACCOUNT_ID = -42;
 
 /**
  * @description Expensive, up to three requests. Only one, if the linked account is the site we want.
@@ -292,6 +293,9 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
 
         const siteAccount = items.find(({ site_url }) => site_url.includes(hostname));
         console.log(`Site account: ${JSON.stringify(siteAccount || {})}`);
+
+        //successful response from the API, but no associated account found
+        if (!siteAccount && items.length) return NO_ACCOUNT_ID;
 
         return +siteAccount?.user_id || null;
     }
