@@ -10,14 +10,14 @@ export default class ScheduledAnnouncement {
         // Run the sub-functions once only
         this._nominationSchedule = null;
         this._primarySchedule = null;
-        this._electionSchedule = null;
-        this._winnerSchedule = null;
+        this._electionStartSchedule = null;
+        this._electionEndSchedule = null;
 
         // Store task so we can stop if needed
         this._nominationTask = null;
         this._primaryTask = null;
-        this._electionTask = null;
-        this._winnerTask = null;
+        this._electionStartTask = null;
+        this._electionEndTask = null;
     }
 
     get hasPrimary() {
@@ -28,8 +28,8 @@ export default class ScheduledAnnouncement {
         return {
             nomination: this._nominationSchedule,
             primary: this._primarySchedule,
-            election: this._electionSchedule,
-            ended: this._winnerSchedule
+            election: this._electionStartSchedule,
+            ended: this._electionEndSchedule
         };
     }
 
@@ -41,13 +41,13 @@ export default class ScheduledAnnouncement {
         this._election = election;
     }
 
-    initWinner(date) {
-        if (this._winnerSchedule != null || this._winnerTask != null) return false;
+    initElectionEnd(date) {
+        if (this._electionEndSchedule != null || this._electionEndTask != null) return false;
 
         const _endedDate = new Date(date);
         if (_endedDate.valueOf() > Date.now()) {
             const cs = `0 ${_endedDate.getHours()} ${_endedDate.getDate()} ${_endedDate.getMonth() + 1} *`;
-            this._winnerTask = cron.schedule(
+            this._electionEndTask = cron.schedule(
                 cs,
                 async () => {
                     await this._election.scrapeElection();
@@ -56,17 +56,17 @@ export default class ScheduledAnnouncement {
                 { timezone: "Etc/UTC" }
             );
             console.log('CRON - election end     - ', cs);
-            this._winnerSchedule = cs;
+            this._electionEndSchedule = cs;
         }
     }
 
-    initElection(date) {
-        if (this._electionSchedule != null || this._electionTask != null || typeof date == 'undefined') return false;
+    initElectionStart(date) {
+        if (this._electionStartSchedule != null || this._electionStartTask != null || typeof date == 'undefined') return false;
 
         const _electionDate = new Date(date);
         if (_electionDate.valueOf() > Date.now()) {
             const cs = `0 ${_electionDate.getHours()} ${_electionDate.getDate()} ${_electionDate.getMonth() + 1} *`;
-            this._electionTask = cron.schedule(
+            this._electionStartTask = cron.schedule(
                 cs,
                 async () => {
                     await this._election.scrapeElection();
@@ -75,7 +75,7 @@ export default class ScheduledAnnouncement {
                 { timezone: "Etc/UTC" }
             );
             console.log('CRON - election start   - ', cs);
-            this._electionSchedule = cs;
+            this._electionStartSchedule = cs;
         }
     }
 
@@ -137,19 +137,39 @@ export default class ScheduledAnnouncement {
     initAll() {
         this.initNomination(this._election.dateNomination);
         this.initPrimary(this._election.datePrimary);
-        this.initElection(this._election.dateElection);
-        this.initWinner(this._election.dateEnded);
+        this.initElectionStart(this._election.dateElection);
+        this.initElectionEnd(this._election.dateEnded);
     }
 
     cancelAll() {
         if (this._nominationTask != null) this._nominationTask.stop();
         if (this._primaryTask != null) this._primaryTask.stop();
-        if (this._electionTask != null) this._electionTask.stop();
-        if (this._winnerTask != null) this._winnerTask.stop();
+        if (this._electionStartTask != null) this._electionStartTask.stop();
+        if (this._electionEndTask != null) this._electionEndTask.stop();
 
         this._nominationSchedule = null;
         this._primarySchedule = null;
-        this._electionSchedule = null;
-        this._winnerSchedule = null;
+        this._electionStartSchedule = null;
+        this._electionEndSchedule = null;
+    }
+
+    cancelElectionEnd() {
+        if (this._electionEndTask != null) this._electionEndTask.stop();
+        this._electionEndSchedule = null;
+    }
+
+    cancelElectionStart() {
+        if (this._electionStartTask != null) this._electionStartTask.stop();
+        this._electionStartSchedule = null;
+    }
+
+    cancelPrimary() {
+        if (this._primaryTask != null) this._primaryTask.stop();
+        this._primarySchedule = null;
+    }
+
+    cancelNomination() {
+        if (this._nominationTask != null) this._nominationTask.stop();
+        this._nominationSchedule = null;
     }
 }
