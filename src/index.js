@@ -893,7 +893,7 @@ const announcement = new Announcement();
         announcement.initAll();
 
 
-        // Interval to re-scrape election data
+        // Interval to rescrape election data
         rescraperInt = setInterval(async function () {
 
             await election.scrapeElection(BotConfig);
@@ -916,22 +916,32 @@ const announcement = new Announcement();
             // No previous scrape results yet, do not proceed
             if (typeof election.prev === 'undefined') return;
 
-            // Previously had no primary, but after re-scraping there is one
+            // Previously had no primary, but after rescraping there is one
             if (!announcement.hasPrimary && election.datePrimary != null) {
                 announcement.initPrimary(election.datePrimary);
                 await room.sendMessage(`There will be a primary phase before the election now, as there are more than ten candidates.`);
             }
 
-            // After re-scraping the election was cancelled
+            // After rescraping the election was cancelled
             if (election.phase === 'cancelled' && election.prev.phase !== election.phase) {
                 await announceCancelled(election);
+            }
+
+            // After rescraping we have winners
+            else if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
+                await announceWinners(election);
+
+                // No more need to scrape the election or greet the room
+                BotConfig.scrapeIntervalMins = 999999;
+                clearInterval(rescraperInt);
                 return;
             }
 
-            // After re-scraping we have winners
-            else if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
-                await announceWinners(election);
-                return;
+            // After rescraping, the election is over but we do not have winners yet
+            else if(election.phase === 'ended' && !election.arrWinners.length) {
+
+                // Retry often
+                BotConfig.scrapeIntervalMins = 0.5;
             }
 
             // New nominations
