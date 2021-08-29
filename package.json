@@ -60,9 +60,9 @@
     "c8": "^7.9.0",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^9.1.0",
+    "mocha": "^9.1.1",
     "rimraf": "^3.0.2",
-    "typescript": "^4.3.5"
+    "typescript": "^4.4.2"
   },
   "type": "module"
 }
