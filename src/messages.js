@@ -158,7 +158,8 @@ export const sayRequiredBadges = (election, badges) => {
  * @param {boolean} [required]
  * @returns {string}
  */
-export const sayMissingBadges = (badgeNames, count, required = false) => ` The user is missing th${pluralize(count, 'ese', 'is')} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
+export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = false) => 
+    ` ${ownSelf ? "You are" : "The user is"} missing th${pluralize(count, "ese", "is")} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
 
 /**
  * @summary builds current mods list response message

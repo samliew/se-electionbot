@@ -150,6 +150,8 @@ export const capitalize = (word) => word[0].toUpperCase() + word.slice(1).toLowe
 /**
  * @summary base pluralization
  * @param {number} amount
+ * @param {string} pluralSuffix
+ * @param {string} singularSuffix
  * @returns {string}
  */
 export const pluralize = (amount, pluralSuffix = "s", singularSuffix = "") => amount !== 1 ? pluralSuffix : singularSuffix;
@@ -157,6 +159,8 @@ export const pluralize = (amount, pluralSuffix = "s", singularSuffix = "") => am
 /**
  * @summary select output based on pluralization
  * @param {number} amount
+ * @param {string} pluralText
+ * @param {string} singularText
  * @returns {string}
  */
 export const pluralizePhrase = (amount, pluralText = "", singularText = "") => amount !== 1 ? pluralText : singularText;

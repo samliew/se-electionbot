@@ -180,9 +180,9 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                 } is ${getScoreText(candidateScore, currMaxScore)}.`;
 
             if (numMissingRequiredBadges > 0) {
-                responseText += sayMissingBadges(missingRequiredBadgeNames, numMissingRequiredBadges, true);
+                responseText += sayMissingBadges(missingRequiredBadgeNames, numMissingRequiredBadges, false, true);
             } else if (numMissingBadges > 0) {
-                responseText += sayMissingBadges(missingBadgeNames, numMissingBadges);
+                responseText += sayMissingBadges(missingBadgeNames, numMissingBadges, false);
             }
         }
         // Does not meet minimum requirements
@@ -236,7 +236,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             responseText = `Your candidate score is **${candidateScore}** (out of ${currMaxScore}).`;
 
             if (numMissingBadges > 0) {
-                responseText += sayMissingBadges(missingBadgeNames, numMissingBadges);
+                responseText += sayMissingBadges(missingBadgeNames, numMissingBadges, true);
             }
 
             // Already nominated, and not ended/cancelled
