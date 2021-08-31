@@ -49,6 +49,7 @@ const announcement = new Announcement();
  *  adminIds: Set<number>,
  *  devIds: Set<number>,
  *  ignoredUserIds: Set<number>,
+ *  flags: Object,
  *  updateLastMessageTime: function,
  * }} BotConfig
  *
@@ -176,10 +177,14 @@ const announcement = new Announcement();
         debug: JSON.parse(process.env.DEBUG?.toLowerCase() || "false"),
         // Verbose logging
         verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false"),
-        //user ids by level
+        // User ids by level
         adminIds: new Set(parseIds(process.env.ADMIN_IDS || '')),
         ignoredUserIds: new Set(parseIds(process.env.IGNORED_USERIDS || '')),
         devIds: new Set(parseIds(process.env.DEV_IDS || "")),
+        // Other flags
+        flags: {
+            saidElectionEndingSoon: false,
+        },
 
         updateLastMessageTime: function(lastMessageTime = Date.now()) {
             BotConfig.lastMessageTime = lastMessageTime;
@@ -949,17 +954,29 @@ const announcement = new Announcement();
             else if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
                 await announceWinners(election);
 
-                // No more need to scrape the election or greet the room
-                BotConfig.scrapeIntervalMins = 999999;
+                // Stop scraping the election page or greeting the room
                 clearInterval(rescraperInt);
-                return;
             }
 
             // After rescraping, the election is over but we do not have winners yet
             else if(election.phase === 'ended' && !election.arrWinners.length) {
 
-                // Retry often
+                // Reduce scrape interval further
                 BotConfig.scrapeIntervalMins = 0.5;
+            }
+
+            // The election is ending within the next 10 minutes or less, do once only
+            else if(election.phase === 'election' && election.dateEnded - 10 * 6e5 <= Date.now() && !BotConfig.flags.saidElectionEndingSoon) {
+
+                // Reduce scrape interval
+                BotConfig.scrapeIntervalMins = 2;
+
+                // Announce election ending soon
+                await room.sendMessage(`The ${makeURL('election', election.electionUrl)} is ending soon. This is the final moment to cast your votes!`);
+                BotConfig.flags.saidElectionEndingSoon = true;
+
+                // Record last sent message time so we don't flood the room
+                BotConfig.updateLastMessageTime();
             }
 
             // New nominations
