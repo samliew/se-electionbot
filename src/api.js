@@ -44,6 +44,8 @@ export const getAllNamedBadges = async (config, site, key, page = 1) => {
         return [...items, ...otherItems];
     }
 
+    if(config.verbose) console.log('API - getAllNamedBadges\n', items);
+
     return items;
 };
 
@@ -74,6 +76,8 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
         const otherItems = await getBadges(config, userId, site, key, page + 1);
         return [...items, ...otherItems];
     }
+
+    if(config.verbose) console.log('API - getBadges\n', items);
 
     return items;
 };
@@ -111,7 +115,11 @@ export const getModerators = async (config, site, key, page = 1) => {
         return [...items, ...otherItems];
     }
 
-    return items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1);
+    const nonEmployeeMods = items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1);
+
+    if(config.verbose) console.log('API - getModerators\n', nonEmployeeMods);
+
+    return nonEmployeeMods;
 };
 
 /**
@@ -139,5 +147,8 @@ export const getUserInfo = async (config, userId, site, key) => {
     const { items = [] } = /** @type {{ items: UserInfo[] }} */(await fetchUrl(config, userURL.toString(), true)) || {};
 
     const [userInfo] = items;
+    
+    if(config.verbose) console.log('API - getUserInfo\n', userInfo || null);
+
     return userInfo || null;
 };
