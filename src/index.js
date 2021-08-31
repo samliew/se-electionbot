@@ -641,12 +641,12 @@ const announcement = new Announcement();
                 }
                 else if (['help', 'command', 'info'].some(x => content.includes(x))) {
                     responseText = '\n' + ['Examples of election FAQs I can help with:',
-                        'how does the election work', 'who are the candidates', 'how to nominate',
-                        'how to vote', 'how to decide who to vote for',
-                        'who are the current mods', 'are moderators paid',
-                        'what is the election status', 'when is the election starting', 'when is the election ending',
+                        'what is an election', 'how to nominate myself',
+                        'how to vote', 'who should I vote for',
                         'how is candidate score calculated', 'what is my candidate score',
-                        'what are moderation badges', 'what are participation badges', 'what are editing badges',
+                        'what are the moderation/participation/editing badges',
+                        'what is the election status', 'when is the election starting/ending', 'when is the next phase',
+                        'who are the candidates', 'who are the current mods',
                     ].join('\n- ');
                 }
                 // fun mode only for testing purposes
