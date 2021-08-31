@@ -922,14 +922,13 @@ const announcement = new Announcement();
                     console.log(`Election winners: ${arrWinners.map(x => x.userName).join(', ')}`);
                 }
 
-                console.log(`
-                Idle?
-                roomReachedMinimumActivityCount: ${roomReachedMinimumActivityCount}
-                roomBecameIdleAShortWhileAgo: ${roomBecameIdleAShortWhileAgo}
-                roomBecameIdleAFewHoursAgo: ${roomBecameIdleAFewHoursAgo}
-                botHasBeenQuiet: ${botHasBeenQuiet}
-                lastMessageIsPostedByBot: ${lastMessageIsPostedByBot}
-                idleDoSayHi: ${idleDoSayHi}`);
+                console.log(`Idle?
+                - roomReachedMinimumActivityCount: ${roomReachedMinimumActivityCount}
+                - roomBecameIdleAShortWhileAgo: ${roomBecameIdleAShortWhileAgo}
+                - roomBecameIdleAFewHoursAgo: ${roomBecameIdleAFewHoursAgo}
+                - botHasBeenQuiet: ${botHasBeenQuiet}
+                - lastMessageIsPostedByBot: ${lastMessageIsPostedByBot}
+                - idleDoSayHi: ${idleDoSayHi}`);
             }
 
             // No previous scrape results yet, do not proceed
