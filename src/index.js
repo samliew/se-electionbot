@@ -48,7 +48,8 @@ const announcement = new Announcement();
  *  verbose: boolean,
  *  adminIds: Set<number>,
  *  devIds: Set<number>,
- *  ignoredUserIds: Set<number>
+ *  ignoredUserIds: Set<number>,
+ *  updateLastMessageTime: function,
  * }} BotConfig
  *
  * @typedef {import("./utils").APIListResponse} APIListResponse
@@ -163,9 +164,9 @@ const announcement = new Announcement();
     const BotConfig = {
         // To stop bot from replying to too many messages in a short time
         throttleSecs: +(process.env.THROTTLE_SECS) || 10,
-        // Variable to store time of last message activity in the room
+        // Variable to store time of last message activity in the room (by anyone including bot)
         lastActivityTime: Date.now(),
-        // Variable to store time of last bot sent message for throttling
+        // Variable to store time of last bot sent message for throttling (by bot only)
         lastMessageTime: -1,
         // Variable to track activity in the room
         activityCount: 0,
@@ -179,6 +180,11 @@ const announcement = new Announcement();
         adminIds: new Set(parseIds(process.env.ADMIN_IDS || '')),
         ignoredUserIds: new Set(parseIds(process.env.IGNORED_USERIDS || '')),
         devIds: new Set(parseIds(process.env.DEV_IDS || "")),
+
+        updateLastMessageTime: function(lastMessageTime = Date.now()) {
+            BotConfig.lastMessageTime = lastMessageTime;
+            BotConfig.lastActivityTime = lastMessageTime;
+        }
     };
 
     // Overrides console.log/error to insert newlines
@@ -384,12 +390,12 @@ const announcement = new Announcement();
             // Ignore stuff from ignored users
             if (BotConfig.ignoredUserIds.has(resolvedMsg.userId)) return;
 
-            // Ignore messages with oneboxes & links!
-            if (content.includes('onebox') || content.includes('http')) return;
-
             // Record time of last new message/reply in room, and increment activity count
             BotConfig.lastActivityTime = Date.now();
             BotConfig.activityCount++;
+
+            // Ignore messages with oneboxes & links
+            if (content.includes('onebox') || content.includes('http')) return;
 
             // Get details of user who triggered the message
             const user = await getUser(client, resolvedMsg);
@@ -457,12 +463,12 @@ const announcement = new Announcement();
 
                 commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
                     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
-                    config.lastMessageTime = Date.now() + (+num * 6e4) - (throttle * 1e3);
+                    config.updateLastMessageTime(Date.now() + (+num * 6e4) - (throttle * 1e3));
                     return `*silenced for ${num} minutes*`;
                 }, AccessLevel.privileged);
 
                 commander.add("unmute", "allows the bot to speak immediately", (config) => {
-                    config.lastMessageTime = -1;
+                    config.updateLastMessageTime(-1);
                     return `*timeout cleared*`;
                 }, AccessLevel.privileged);
 
@@ -589,8 +595,7 @@ const announcement = new Announcement();
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.lastMessageTime = Date.now();
-                    BotConfig.lastActivityTime = BotConfig.lastMessageTime;
+                    BotConfig.updateLastMessageTime();
 
                     return; // stop here since we are using a different default response method
                 }
@@ -668,8 +673,7 @@ const announcement = new Announcement();
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.lastMessageTime = Date.now();
-                    BotConfig.lastActivityTime = BotConfig.lastMessageTime;
+                    BotConfig.updateLastMessageTime();
                     return;
                 }
 
@@ -678,8 +682,7 @@ const announcement = new Announcement();
                     await msg.reply(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.lastMessageTime = Date.now();
-                    BotConfig.lastActivityTime = BotConfig.lastMessageTime;
+                    BotConfig.updateLastMessageTime();
                 }
             }
 
@@ -730,8 +733,7 @@ const announcement = new Announcement();
                         await msg.reply(responseText);
 
                         // Record last sent message time so we don't flood the room
-                        BotConfig.lastMessageTime = Date.now();
-                        BotConfig.lastActivityTime = BotConfig.lastMessageTime;
+                        BotConfig.updateLastMessageTime();
 
                         return; // stop here since we are using a different default response method
                     }
@@ -875,8 +877,7 @@ const announcement = new Announcement();
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.lastMessageTime = Date.now();
-                    BotConfig.lastActivityTime = BotConfig.lastMessageTime;
+                    BotConfig.updateLastMessageTime();
                 }
             }
         });
@@ -899,6 +900,15 @@ const announcement = new Announcement();
             await election.scrapeElection(BotConfig);
             announcement.setElection(election);
 
+            const roomReachedMinimumActivityCount = BotConfig.activityCount >= lowActivityCountThreshold;
+            const roomBecameIdleAShortWhileAgo = BotConfig.lastActivityTime + 4 * 6e4 < Date.now();
+            const roomBecameIdleAFewHoursAgo = BotConfig.lastActivityTime + 3 * 60 * 6e4 < Date.now();
+            const botHasBeenQuiet = BotConfig.lastMessageTime + lowActivityCheckMins * 6e4 < Date.now();
+            const lastMessageIsPostedByBot = BotConfig.lastActivityTime === BotConfig.lastMessageTime;
+
+            const idleDoSayHi = (roomBecameIdleAShortWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
+                (isStackOverflow && roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
+
             if (BotConfig.verbose) {
                 console.log('SCRAPE', election.updated, election);
             }
@@ -911,6 +921,15 @@ const announcement = new Announcement();
                 if (phase === 'ended') {
                     console.log(`Election winners: ${arrWinners.map(x => x.userName).join(', ')}`);
                 }
+
+                console.log(`
+                Idle?
+                roomReachedMinimumActivityCount: ${roomReachedMinimumActivityCount}
+                roomBecameIdleAShortWhileAgo: ${roomBecameIdleAShortWhileAgo}
+                roomBecameIdleAFewHoursAgo: ${roomBecameIdleAFewHoursAgo}
+                botHasBeenQuiet: ${botHasBeenQuiet}
+                lastMessageIsPostedByBot: ${lastMessageIsPostedByBot}
+                idleDoSayHi: ${idleDoSayHi}`);
             }
 
             // No previous scrape results yet, do not proceed
@@ -958,18 +977,18 @@ const announcement = new Announcement();
                 });
             }
 
-            // Nothing new, there was at least some previous activity and if last bot message more than lowActivityCheckMins minutes,
-            // or no activity for 2 hours, remind users that bot is around to help, if last message was not posted by the bot
-            else if ((BotConfig.activityCount >= lowActivityCountThreshold && BotConfig.lastActivityTime + 4 * 60000 < Date.now() && BotConfig.lastMessageTime + lowActivityCheckMins * 60000 < Date.now()) ||
-                (isStackOverflow && BotConfig.lastActivityTime != BotConfig.lastMessageTime && BotConfig.lastActivityTime + 2 * 60 * 60000 < Date.now())) {
+            // Remind users that bot is around to help when:
+            //    1. Room is idle, and there was at least some previous activity, and last message more than lowActivityCheckMins minutes ago
+            // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
+            else if (idleDoSayHi) {
+                
                 console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                     `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
                 await room.sendMessage(sayHI(election));
 
                 // Record last sent message time so we don't flood the room
-                BotConfig.lastMessageTime = Date.now();
-                BotConfig.lastActivityTime = BotConfig.lastMessageTime;
+                BotConfig.updateLastMessageTime();
 
                 // Reset last activity count
                 BotConfig.activityCount = 0;
