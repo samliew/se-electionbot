@@ -14,7 +14,7 @@ General election help:
 - what is an election/ how does it work
 - how to nominate (myself/someone/others)
 - how to vote
-- how to decide who to vote for
+- who should I vote for/ how to decide who to vote for
 - how is the candidate score calculated
 - **what is my candidate score** *(calculates if ownself is eligible for nomination)*
 - what are the moderation badges
@@ -23,7 +23,7 @@ General election help:
 - what are the required badges *(SO-only)*
 
 Current election info:
-- what is the election schedule
+- election schedule
 - what is the election status
 - when is the election starting/ when is the next phase
 - when is the election ending
@@ -48,7 +48,7 @@ ElectionBot info *(reqires mention)*:
 
 ## Mod-only commands
 
-Moderators can also make use of these commands *(reqires mention)* to help moderate the chat room:
+Moderators can also make use of these commands *(requires mention)* to help moderate the chat room:
 - commands
 - say *message*
 - alive
