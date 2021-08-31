@@ -322,7 +322,7 @@ const announcement = new Announcement();
                 if (matchedBadge) electionBadge.id = matchedBadge.badge_id.toString();
             });
 
-            console.log('site election badges', electionBadges);
+            console.log('site election badges', electionBadges.map(badge => `${badge.name}: ${badge.id}`).join('\n'));
         }
 
         const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
