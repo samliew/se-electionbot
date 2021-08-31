@@ -141,35 +141,34 @@ export default class ScheduledAnnouncement {
         this.initElectionEnd(this._election.dateEnded);
     }
 
-    cancelAll() {
-        if (this._nominationTask != null) this._nominationTask.stop();
-        if (this._primaryTask != null) this._primaryTask.stop();
-        if (this._electionStartTask != null) this._electionStartTask.stop();
-        if (this._electionEndTask != null) this._electionEndTask.stop();
-
-        this._nominationSchedule = null;
-        this._primarySchedule = null;
-        this._electionStartSchedule = null;
-        this._electionEndSchedule = null;
-    }
-
     cancelElectionEnd() {
         if (this._electionEndTask != null) this._electionEndTask.stop();
         this._electionEndSchedule = null;
+        console.log('CRON - cancelled election end cron job');
     }
 
     cancelElectionStart() {
         if (this._electionStartTask != null) this._electionStartTask.stop();
         this._electionStartSchedule = null;
+        console.log('CRON - cancelled election start cron job');
     }
 
     cancelPrimary() {
         if (this._primaryTask != null) this._primaryTask.stop();
         this._primarySchedule = null;
+        console.log('CRON - cancelled primary phase cron job');
     }
 
     cancelNomination() {
         if (this._nominationTask != null) this._nominationTask.stop();
         this._nominationSchedule = null;
+        console.log('CRON - cancelled nomination phase cron job');
+    }
+
+    cancelAll() {
+        this.cancelElectionEnd();
+        this.cancelElectionStart();
+        this.cancelPrimary();
+        this.cancelNomination();
     }
 }
