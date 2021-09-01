@@ -39,6 +39,8 @@ const announcement = new Announcement();
  * }} Badge
  *
  * @typedef {{
+ *  chatRoomId: number,
+ *  chatDomain: string,
  *  throttleSecs: number,
  *  lastActivityTime: number,
  *  lastMessageTime: number,
@@ -76,8 +78,8 @@ const announcement = new Announcement();
     // Environment variables
     const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
-    const chatDomain = /** @type {import("chatexchange/dist/Client").Host} */ (process.env.CHAT_DOMAIN);
-    const chatRoomId = +process.env.CHAT_ROOM_ID;
+    const defaultChatDomain = /** @type {import("chatexchange/dist/Client").Host} */ (process.env.CHAT_DOMAIN);
+    const defaultChatRoomId = +process.env.CHAT_ROOM_ID;
     const accountEmail = process.env.ACCOUNT_EMAIL;
     const accountPassword = process.env.ACCOUNT_PASSWORD;
     const electionUrl = process.env.ELECTION_PAGE_URL;
@@ -163,6 +165,9 @@ const announcement = new Announcement();
      * @type {BotConfig}
      */
     const BotConfig = {
+        // Bot to detect which chat room to join
+        chatRoomId: defaultChatRoomId,
+        chatDomain: defaultChatDomain,
         // To stop bot from replying to too many messages in a short time
         throttleSecs: +(process.env.THROTTLE_SECS) || 10,
         // Variable to store time of last message activity in the room (by anyone including bot)
@@ -205,8 +210,8 @@ const announcement = new Announcement();
     if (BotConfig.debug) {
         console.error('WARNING - Debug mode is on.');
 
-        console.log('chatDomain:', chatDomain);
-        console.log('chatRoomId:', chatRoomId);
+        console.log('chatDomain:', BotConfig.chatDomain);
+        console.log('chatRoomId:', BotConfig.chatRoomId);
         console.log('electionUrl:', electionUrl);
         console.log('electionSiteHostname:', electionSiteHostname);
         console.log('electionSiteUrl:', electionSiteUrl);
@@ -339,8 +344,18 @@ const announcement = new Announcement();
             console.error('FATAL - Invalid election data!');
         }
 
-        // default is a temp fix for ChatExchange being served as CJS module
-        const client = new Client["default"](chatDomain);
+        // If not debug mode, and active election, auto detect chat domain and chat room ID
+        if(!BotConfig.debug && election.phase !== null && election.phase !== "ended") {
+            BotConfig.chatRoomId = election.chatRoomId;
+            BotConfig.chatDomain = election.chatDomain;
+
+            console.log('App is not in debug mode and election is active. Moved to live room.');
+            console.log(`DOMAIN:  ${defaultChatDomain} -> ${BotConfig.chatDomain}`);
+            console.log(`ROOMID:  ${defaultChatRoomId} -> ${BotConfig.chatRoomId}`);
+        }
+
+        // "default" is a temp fix for ChatExchange being served as CJS module
+        const client = new Client["default"](BotConfig.chatDomain);
         try {
             await client.login(accountEmail, accountPassword);
         }
@@ -354,14 +369,14 @@ const announcement = new Announcement();
         const _me = await client.getMe();
         const me = await client._browser.getProfile(_me.id);
 
-        //temporary required to work around IProfileData not being exported
+        // Temporary required workaround due to IProfileData not being exported
         const meWithId = /** @type {typeof me & { id: number }} */(me);
 
         meWithId.id = _me.id; // because getProfile() doesn't return id
-        console.log(`INIT - Logged in to ${chatDomain} as ${meWithId.name} (${meWithId.id})`);
+        console.log(`INIT - Logged in to ${BotConfig.chatDomain} as ${meWithId.name} (${meWithId.id})`);
 
         // Join room
-        room = await client.joinRoom(chatRoomId);
+        room = await client.joinRoom(BotConfig.chatRoomId);
 
         // Announce join room if in debug mode
         if (BotConfig.debug) {
@@ -727,7 +742,7 @@ const announcement = new Announcement();
 
                     //TODO: use config object pattern instead, 6 parameters is way too much
                     const calcCandidateScore = makeCandidateScoreCalc(BotConfig,
-                        electionSiteHostname, chatDomain, electionSiteApiSlug,
+                        electionSiteHostname, BotConfig.chatDomain, electionSiteApiSlug,
                         getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
                     );
 
@@ -890,7 +905,7 @@ const announcement = new Announcement();
 
         // Connect to the room, and listen for new events
         await room.watch();
-        console.log(`INIT - Joined and listening in room https://chat.${chatDomain}/rooms/${chatRoomId}`);
+        console.log(`INIT - Joined and listening in room https://chat.${BotConfig.chatDomain}/rooms/${BotConfig.chatRoomId}`);
 
 
         // Set cron jobs to announce the different phases
@@ -1017,7 +1032,7 @@ const announcement = new Announcement();
         setInterval(async function () {
 
             // Try to stay-alive by rejoining room
-            room = await client.joinRoom(chatRoomId);
+            room = await client.joinRoom(BotConfig.chatRoomId);
             if (BotConfig.debug) console.log('Stay alive rejoin room', room);
 
         }, 5 * 60000);
@@ -1040,7 +1055,7 @@ const announcement = new Announcement();
             res.send(`
             <link rel="icon" href="data:;base64,=" />
             <link rel="stylesheet" href="css/styles.css" />
-            <h3>ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatRoomId}</a>:</h3>
+            <h3>ElectionBot say to room <a href="https://chat.${BotConfig.chatDomain}/rooms/${BotConfig.chatRoomId}" target="_blank">${BotConfig.chatDomain}: ${BotConfig.chatRoomId}</a>:</h3>
             <form method="post">
                 <input type="text" name="message" placeholder="message" maxlength="500" value="${decodeURIComponent(message)}" />
                 <input type="hidden" name="password" value="${password}" />

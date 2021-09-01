@@ -179,6 +179,8 @@ export default class Election {
             this.arrNominees.push(...nominees);
 
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/');
+            this.chatRoomId = +this.chatUrl?.match(/\d+$/) || null;
+            this.chatDomain = this.chatUrl?.split('/')[2]?.replace('chat.', '');
 
             this.phase = Election.getPhase(this);
 
