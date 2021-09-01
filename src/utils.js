@@ -116,10 +116,6 @@ export const fetchUrl = async (config, url, json = false) => {
             },
         });
 
-        if (config.debug) {
-            console.log(`fetch - ${url}`, config.verbose ? (json ? JSON.stringify(data) : data) : '');
-        }
-
         return data;
     }
     catch (e) {
