@@ -349,9 +349,9 @@ const announcement = new Announcement();
             BotConfig.chatRoomId = election.chatRoomId;
             BotConfig.chatDomain = election.chatDomain;
 
-            console.log('App is not in debug mode and election is active. Moved to live room.');
-            console.log(`DOMAIN:  ${defaultChatDomain} -> ${BotConfig.chatDomain}`);
-            console.log(`ROOMID:  ${defaultChatRoomId} -> ${BotConfig.chatRoomId}`);
+            console.log(`App is not in debug mode and election is active - redirected to live room:
+            DOMAIN:  ${defaultChatDomain} -> ${BotConfig.chatDomain}
+            ROOMID:  ${defaultChatRoomId} -> ${BotConfig.chatRoomId}`);
         }
 
         // "default" is a temp fix for ChatExchange being served as CJS module
