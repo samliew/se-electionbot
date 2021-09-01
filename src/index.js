@@ -183,9 +183,9 @@ const announcement = new Announcement();
         // Verbose logging
         verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false"),
         // User ids by level
+        devIds: new Set(parseIds(process.env.DEV_IDS || "")),
         adminIds: new Set(parseIds(process.env.ADMIN_IDS || '')),
         ignoredUserIds: new Set(parseIds(process.env.IGNORED_USERIDS || '')),
-        devIds: new Set(parseIds(process.env.DEV_IDS || "")),
         // Other flags
         flags: {
             saidElectionEndingSoon: false,
