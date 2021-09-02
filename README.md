@@ -40,7 +40,7 @@ About moderators/moderating:
 - who is the best moderator
 - could we just insert a diamond into our username
 
-ElectionBot info *(reqires mention)*:
+ElectionBot info *(requires mention)*:
 - help
 - about
 - alive

@@ -920,14 +920,15 @@ const announcement = new Announcement();
             await election.scrapeElection(BotConfig);
             announcement.setElection(election);
 
+            const roomLongIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
             const roomReachedMinimumActivityCount = BotConfig.activityCount >= lowActivityCountThreshold;
-            const roomBecameIdleAShortWhileAgo = BotConfig.lastActivityTime + 4 * 6e4 < Date.now();
-            const roomBecameIdleAFewHoursAgo = BotConfig.lastActivityTime + 3 * 60 * 6e4 < Date.now();
-            const botHasBeenQuiet = BotConfig.lastMessageTime + lowActivityCheckMins * 6e4 < Date.now();
+            const roomBecameIdleAShortWhileAgo = BotConfig.lastActivityTime + (4 * 6e4) < Date.now();
+            const roomBecameIdleAFewHoursAgo = BotConfig.lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
+            const botHasBeenQuiet = BotConfig.lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
             const lastMessageIsPostedByBot = BotConfig.lastActivityTime === BotConfig.lastMessageTime;
 
             const idleDoSayHi = (roomBecameIdleAShortWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
-                (isStackOverflow && roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
+                (roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
 
             if (BotConfig.verbose) {
                 console.log('SCRAPE', election.updated, election);
