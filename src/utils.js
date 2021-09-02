@@ -283,7 +283,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
 
         const $profile = cheerio.load(/** @type {string} */(linkedUserProfilePage));
 
-        const networkUserUrl = $profile('.js-user-header a').last().attr('href');
+        const networkUserUrl = $profile('#profiles-menu a[href^="https://stackexchange.com/users/"]').attr("href");
         const networkUserId = +(networkUserUrl.match(/\d+/));
         console.log(`Network user url: ${networkUserUrl}`, networkUserId);
 
