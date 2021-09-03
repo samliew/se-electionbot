@@ -342,10 +342,12 @@ const announcement = new Announcement();
         await election.scrapeElection(BotConfig);
         if (election.validate() === false) {
             console.error('FATAL - Invalid election data!');
+            console.log(election);
+            return;
         }
 
-        // If not debug mode, and active election, auto detect chat domain and chat room ID
-        if(!BotConfig.debug && election.phase !== null && election.phase !== "ended") {
+        // If is in production mode, and is an active election, auto-detect and set chat domain and chat room ID to join
+        if(!BotConfig.debug && election.isActive()) {
             BotConfig.chatRoomId = election.chatRoomId;
             BotConfig.chatDomain = election.chatDomain;
 

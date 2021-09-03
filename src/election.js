@@ -34,7 +34,7 @@ export default class Election {
 
     validate() {
         return !(
-            this.electionUrl &&
+            this.validElectionUrl(this.electionUrl) &&
             !isNaN(this.electionNum) &&
             !isNaN(this.repNominate) &&
             !isNaN(this.numCandidates) &&
@@ -44,6 +44,22 @@ export default class Election {
             this.dateElection &&
             this.dateEnded
         );
+    }
+    
+    /**
+     * @summary checks if the electionUrl is valid
+     * @returns {boolean}
+     */
+    validElectionUrl(electionUrl) {
+        return !/^https:\/\/([^\/]+\.)+(com|net|org))\/election(\/\d+)?$/.test(electionUrl);
+    }
+
+    /**
+     * @summary checks if the election is in an active phase
+     * @returns {boolean}
+     */
+    isActive() {
+        return this.phase !== null && this.phase !== "ended";
     }
 
     /**
@@ -124,6 +140,12 @@ export default class Election {
      */
     async scrapeElection(config) {
 
+        // Validate electionUrl, since without it we cannot continue
+        if(!this.validElectionUrl(this.electionUrl)) {
+            console.error("Invalid electionUrl format.");
+            return;
+        }
+
         // Save prev values so we can compare changes after
         this._prevObj = Object.assign({}, this); // fast way of cloning an object
         this._prevObj._prevObj = null;
@@ -140,6 +162,7 @@ export default class Election {
 
             const metaElems = content.find(".flex--item.mt4 .d-flex.gs4 .flex--item:nth-child(2)");
             const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
+            const metaPhaseElems = $('#mainbar .js-filter-btn a');
 
             const [numCandidates, numPositions] = metaVals.slice(-2, metaVals.length);
 
@@ -183,6 +206,16 @@ export default class Election {
             this.chatDomain = this.chatUrl?.split('/')[2]?.replace('chat.', '');
 
             this.phase = Election.getPhase(this);
+
+            // Detect active election number if not specified
+            if(this.isActive() && this.electionNum === null) {
+                this.electionNum = +metaPhaseElems.attr('href').match(/\d+/)?.pop() || null;
+
+                // Append to electionUrl
+                this.electionUrl += `/${this.electionNum}`;
+
+                if(config.verbose) console.log('INFO  - Election number was auto-detected', this.electionNum);
+            }
 
             // If election has ended (or cancelled)
             if (this.phase === 'ended') {
