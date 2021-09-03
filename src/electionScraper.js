@@ -7,6 +7,16 @@ export class ElectionScraper {
     /** @type {Map<number, Election>} */
     elections = new Map();
 
+    /** @type {string[]} */
+    siteURLs = [];
+
+    /**
+     * @param {string[]} siteURLs list of network site urls
+     */
+    constructor(siteURLs = []) {
+        this.siteURLs.push(...siteURLs);
+    }
+
     /**
      * @summary extracts election id from election URL
      * @param {string} electionUrl election URL to extract from
