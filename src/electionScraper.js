@@ -7,14 +7,15 @@ export class ElectionScraper {
     /** @type {Map<number, Election>} */
     elections = new Map();
 
-    /** @type {string[]} */
-    siteURLs = [];
+    /** @type {Set<string>} */
+    siteURLs = new Set();
 
     /**
-     * @param {string[]} siteURLs list of network site urls
+     * @param {string[]} initURLs list of network site urls
      */
-    constructor(siteURLs = []) {
-        this.siteURLs.push(...siteURLs);
+    constructor(initURLs = []) {
+        const { siteURLs } = this;
+        initURLs.forEach((url) => siteURLs.add(url));
     }
 
     /**
