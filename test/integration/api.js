@@ -14,7 +14,7 @@ describe('getSiteUserIdFromChatStackExchangeId', function () {
             getMockBotConfig(),
             1, //Marc Gravell
             "stackexchange.com",
-            "academia",
+            "academia"
         );
 
         expect(userId).to.equal(10678);

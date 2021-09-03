@@ -19,6 +19,6 @@ jobs:
       - name: Run tests
         run: npm run test
         env:
-          STACK_API_KEY: ${{ secrets.STACK_API_KEY }}
+          STACK_API_KEYS: ${{ secrets.STACK_API_KEYS }}
       - name: "Run build"
         run: npm run build

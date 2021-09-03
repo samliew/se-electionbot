@@ -2,7 +2,7 @@ import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { getAllNamedBadges, getModerators } from "./api.js";
-import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
+import { isAliveCommand, setAccessCommand, setThrottleCommand, setScrapeIntCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
@@ -45,6 +45,8 @@ const announcement = new Announcement();
  *  lastActivityTime: number,
  *  lastMessageTime: number,
  *  activityCount: number,
+ *  lowActivityCheckMins: number,
+ *  lowActivityCountThreshold: number,
  *  scrapeIntervalMins: number,
  *  debug: boolean,
  *  verbose: boolean,
@@ -155,10 +157,6 @@ const announcement = new Announcement();
     let election = /** @type {Election|null} */(null);
     let room = null;
 
-    /* Low activity count variables */
-    const lowActivityCheckMins = Number(process.env.LOW_ACTIVITY_CHECK_MINS) || 15;
-    const lowActivityCountThreshold = Number(process.env.LOW_ACTIVITY_COUNT_THRESHOLD) || 30;
-
     /**
      * @type {BotConfig}
      */
@@ -167,15 +165,18 @@ const announcement = new Announcement();
         chatRoomId: defaultChatRoomId,
         chatDomain: defaultChatDomain,
         // To stop bot from replying to too many messages in a short time
-        throttleSecs: +(process.env.THROTTLE_SECS) || 10,
+        throttleSecs: 2,
         // Variable to store time of last message activity in the room (by anyone including bot)
         lastActivityTime: Date.now(),
         // Variable to store time of last bot sent message for throttling (by bot only)
         lastMessageTime: -1,
         // Variable to track activity in the room
         activityCount: 0,
+        // Low activity count variables
+        lowActivityCheckMins: 15,
+        lowActivityCountThreshold: 30,
         // Variable of rescrape interval of election page
-        scrapeIntervalMins: +(process.env.SCRAPE_INTERVAL_MINS) || 5,
+        scrapeIntervalMins: 5,
         // Debug mode
         debug: JSON.parse(process.env.DEBUG?.toLowerCase() || "false"),
         // Verbose logging
@@ -210,16 +211,11 @@ const announcement = new Announcement();
     if (BotConfig.debug) {
         console.error('WARNING - Debug mode is on.');
 
-        console.log('chatDomain:', BotConfig.chatDomain);
-        console.log('chatRoomId:', BotConfig.chatRoomId);
         console.log('electionUrl:', electionUrl);
         console.log('electionSiteHostname:', electionSiteHostname);
         console.log('electionSiteUrl:', electionSiteUrl);
 
         Object.entries(BotConfig).forEach(([key, val]) => console.log(key, val));
-
-        console.log('lowActivityCheckMins:', lowActivityCheckMins);
-        console.log('lowActivityCountThreshold:', lowActivityCountThreshold);
     }
 
     /**
@@ -479,6 +475,8 @@ const announcement = new Announcement();
 
                 commander.add("set throttle", "sets throttle to N (in seconds)", setThrottleCommand, AccessLevel.privileged);
 
+                commander.add("set scrapeint", "sets scrape interval to N (in minutes)", setScrapeIntCommand, AccessLevel.dev);
+
                 commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
                 }, AccessLevel.privileged);
@@ -541,6 +539,7 @@ const announcement = new Announcement();
                     ["get cron", /get cron/, announcement],
                     ["get throttle", /get throttle/, BotConfig.throttleSecs],
                     ["set throttle", /set throttle/, content, BotConfig],
+                    ["set scrapeint", /set scrapeint/, content, BotConfig],
                     ["get time", /get time/, election],
                     ["chatroom", /chatroom/, election],
                     ["coffee", /(?:brew|make).+coffee/, user],
@@ -926,10 +925,10 @@ const announcement = new Announcement();
             await election.scrapeElection(BotConfig);
 
             const roomLongIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
-            const roomReachedMinimumActivityCount = BotConfig.activityCount >= lowActivityCountThreshold;
+            const roomReachedMinimumActivityCount = BotConfig.activityCount >= BotConfig.lowActivityCountThreshold;
             const roomBecameIdleAShortWhileAgo = BotConfig.lastActivityTime + (4 * 6e4) < Date.now();
             const roomBecameIdleAFewHoursAgo = BotConfig.lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
-            const botHasBeenQuiet = BotConfig.lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
+            const botHasBeenQuiet = BotConfig.lastMessageTime + (BotConfig.lowActivityCheckMins * 6e4) < Date.now();
             const lastMessageIsPostedByBot = BotConfig.lastActivityTime === BotConfig.lastMessageTime;
 
             const idleDoSayHi = (roomBecameIdleAShortWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
@@ -1018,8 +1017,8 @@ const announcement = new Announcement();
             //    1. Room is idle, and there was at least some previous activity, and last message more than lowActivityCheckMins minutes ago
             // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
             else if (idleDoSayHi) {
-
-                console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
+                
+                console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${BotConfig.lowActivityCountThreshold}).`,
                     `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
                 await room.sendMessage(sayHI(election));

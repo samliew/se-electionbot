@@ -80,17 +80,37 @@ export const timetravelCommand = (election, content) => {
  * @returns {string}
  */
 export const setThrottleCommand = (content, config) => {
-    const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
+    const [match] = content.match(/\d+$/) || [];
     const newThrottle = +match;
 
-    const isValidThrottle = !isNaN(newThrottle) && newThrottle >= 0;
+    const isValidDuration = !isNaN(newThrottle) && newThrottle >= 0;
 
-    if (isValidThrottle) {
+    if (isValidDuration) {
         config.throttleSecs = newThrottle;
         return `*throttle set to ${newThrottle} seconds*`;
     }
 
     return `*invalid throttle value*`;
+};
+
+/**
+ * @summary sets scrape interval (in minutes)
+ * @param {string} content incoming message content
+ * @param {BotConfig} config bot config
+ * @returns {string}
+ */
+export const setScrapeIntCommand = (content, config) => {
+    const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
+    const newScrapeInterval = +match;
+
+    const isValidDuration = !isNaN(newScrapeInterval) && newScrapeInterval >= 0;
+
+    if (isValidDuration) {
+        config.scrapeIntervalMins = newScrapeInterval;
+        return `*scrape interval set to ${newScrapeInterval} minutes*`;
+    }
+
+    return `*invalid interval value*`;
 };
 
 /**

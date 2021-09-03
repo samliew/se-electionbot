@@ -203,9 +203,12 @@ export default class Election {
             this.arrNominees.length = 0;
             this.arrNominees.push(...nominees);
 
-            this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/');
-            this.chatRoomId = +this.chatUrl?.match(/\d+$/) || null;
-            this.chatDomain = this.chatUrl?.split('/')[2]?.replace('chat.', '');
+            this.chatUrl = electionPost.find('a[href*="/rooms/"]').attr('href')?.replace('/info/', '/') || `https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`;
+
+            if(this.chatUrl) {
+                this.chatRoomId = +this.chatUrl.match(/\d+$/) || null;
+                this.chatDomain = this.chatUrl.split('/')[2]?.replace('chat.', '');
+            }
 
             this.phase = Election.getPhase(this);
 
@@ -257,8 +260,7 @@ export default class Election {
 
             console.log(
                 `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.\n` +
-                `-------- PHASE ${this.phase};  CANDIDATES ${this.arrNominees.length};  WINNERS ${this.arrWinners.length}\n` +
-                `-------- CHAT ${this.chatUrl}`
+                `-------- PHASE ${this.phase};  CANDIDATES ${this.arrNominees.length};  WINNERS ${this.arrWinners.length};`
             );
         }
         catch (err) {
