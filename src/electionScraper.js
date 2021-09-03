@@ -29,12 +29,38 @@ export class ElectionScraper {
     }
 
     /**
+     * @see https://stackexchange.com/feeds/tagsets/421979/all-elections?sort=newest
+     *
+     * @summary attempts to get election URLs from the RSS feed
+     */
+    async getElectionUrlsFromRSS() {
+        throw new Error("method not implemented yet, sorry :(");
+    }
+
+    /**
+     * @see https://api.stackexchange.com/docs/sites
+     *
+     * @summary attempts to get election URLs from the API
+     */
+    async getElectionUrlsFromAPI() {
+        throw new Error("method not implemented yet, sorry :(");
+    }
+
+    /**
      * @summary finds election URLs to scrape
      */
     async findElectionUrls() {
         // TODO: implement
         // consider using headless browser like JSDom instead of cheerio since this is going to be heavy scraping
         // should fetch the list of network sites first
+
+        try {
+            await this.getElectionUrlsFromRSS();
+        } catch (error) {
+            console.log(`election RSS error:\n${error}`);
+            await this.getElectionUrlsFromAPI();
+        }
+
         throw new Error("method not implemented yet, sorry :(");
     }
 }
