@@ -15,7 +15,6 @@ describe('getSiteUserIdFromChatStackExchangeId', function () {
             1, //Marc Gravell
             "stackexchange.com",
             "academia",
-            process.env.STACK_API_KEY
         );
 
         expect(userId).to.equal(10678);

@@ -17,10 +17,11 @@ export const getMockBotConfig = (overrides = {}) => {
         devIds: new Set(),
         adminIds: new Set(),
         ignoredUserIds: new Set(),
+        apiKeyPool: [process.env.STACK_API_KEY],
         flags: {
             saidElectionEndingSoon: false,
         },
-        updateLastMessageTime: function() {}
+        updateLastMessageTime: function () { }
     };
     return Object.assign(defaults, overrides);
 };

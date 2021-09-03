@@ -1,4 +1,4 @@
-import { getBadges, getUserInfo } from "./api.js";
+import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
 import { sayDiamondAlready, sayMissingBadges } from "./messages.js";
@@ -50,11 +50,10 @@ const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurre
  * @param {string} hostname
  * @param {string} chatDomain chat room domain name (i.e. stackexchange.com)
  * @param {string} apiSlug election site to pass to the API 'site' parameter
- * @param {string} apiKey current API key
  * @param {Badge[]} badges list of badges
  * @param {number[]} modIds ids of moderators of the network
  */
-export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
+export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, badges, modIds) =>
     /**
      * @summary calculates candidate score
      * @param {Election} election
@@ -99,7 +98,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
         else if (!isSO) {
-            userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);
+            userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname);
 
             // Unable to get user id on election site
             if (userId === null) {
@@ -114,7 +113,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         }
 
         // TODO: Get a different API key here
-        const items = await getBadges(config, userId, apiSlug, apiKey);
+        const items = await getBadges(config, userId, apiSlug);
 
         // Validation
         if (!items.length) {
@@ -173,7 +172,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         // Privileged user asking for candidate score of another user
         if (isAskingForOtherUser) {
 
-            const { display_name } = await getUserInfo(config, userId, apiSlug, apiKey) || {};
+            const { display_name } = await getUserInfo(config, userId, apiSlug, getStackApiKey(config.apiKeyPool)) || {};
 
             responseText = `The candidate score for user ${makeURL(display_name || userId.toString(),
                 `${siteUrl}/users/${userId}`)

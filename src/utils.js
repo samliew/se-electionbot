@@ -4,6 +4,7 @@ import express from 'express';
 import { get } from 'https';
 import { join } from 'path';
 import { URL } from "url";
+import { getStackApiKey } from "./api.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
@@ -269,10 +270,9 @@ export const NO_ACCOUNT_ID = -42;
  * @param {number} chatUserId user id
  * @param {string} chatdomain chat server domain
  * @param {string} hostname election site hostname
- * @param {string} [apiKey] Stack Exchange API key
  * @returns {Promise<number|null>} resolved user id
  */
-export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, chatdomain, hostname, apiKey) => {
+export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, chatdomain, hostname) => {
     try {
         const chatUserPage = await fetchUrl(config, `https://chat.${chatdomain}/users/${chatUserId}`);
         if (!chatUserPage) return null;
@@ -305,7 +305,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
             pagesize: "100",
             types: "main_site",
             filter: "!myEHnzbmE0",
-            key: apiKey
+            key: getStackApiKey(config.apiKeyPool)
         }).toString();
 
         // Fetch network accounts via API to get the account of the site we want

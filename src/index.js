@@ -1,7 +1,7 @@
 import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
+import { getAllNamedBadges, getModerators } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
@@ -52,6 +52,7 @@ const announcement = new Announcement();
  *  devIds: Set<number>,
  *  ignoredUserIds: Set<number>,
  *  flags: Object,
+ *  apiKeyPool: string[],
  *  updateLastMessageTime: function,
  * }} BotConfig
  *
@@ -86,9 +87,6 @@ const announcement = new Announcement();
     const electionSiteHostname = electionUrl.split('/')[2];
     const electionSiteUrl = 'https://' + electionSiteHostname;
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
-    const defaultApiKey = process.env.STACK_API_KEY;
-    const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
-
 
     // App variables
     const isStackOverflow = electionSiteHostname.includes('stackoverflow.com');
@@ -190,8 +188,10 @@ const announcement = new Announcement();
         flags: {
             saidElectionEndingSoon: false,
         },
+        // list of API keys to rotate
+        apiKeyPool: process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [],
 
-        updateLastMessageTime: function(lastMessageTime = Date.now()) {
+        updateLastMessageTime: function (lastMessageTime = Date.now()) {
             BotConfig.lastMessageTime = lastMessageTime;
             BotConfig.lastActivityTime = lastMessageTime;
         }
@@ -324,7 +324,7 @@ const announcement = new Announcement();
 
         // Get current site named badges
         if (!isStackOverflow) {
-            const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
+            const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug);
 
             electionBadges.forEach((electionBadge) => {
                 const { name: badgeName } = electionBadge;
@@ -335,7 +335,7 @@ const announcement = new Announcement();
             console.log('API - Site election badges\n', electionBadges.map(badge => `${badge.name}: ${badge.id}`).join('\n'));
         }
 
-        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
+        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug);
 
         // Wait for election page to be scraped
         election = new Election(electionUrl);
@@ -347,7 +347,7 @@ const announcement = new Announcement();
         }
 
         // If is in production mode, and is an active election, auto-detect and set chat domain and chat room ID to join
-        if(!BotConfig.debug && election.isActive()) {
+        if (!BotConfig.debug && election.isActive()) {
             BotConfig.chatRoomId = election.chatRoomId;
             BotConfig.chatDomain = election.chatDomain;
 
@@ -743,9 +743,13 @@ const announcement = new Announcement();
                 else if (isAskedForCandidateScore(content)) {
 
                     //TODO: use config object pattern instead, 6 parameters is way too much
-                    const calcCandidateScore = makeCandidateScoreCalc(BotConfig,
-                        electionSiteHostname, BotConfig.chatDomain, electionSiteApiSlug,
-                        getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
+                    const calcCandidateScore = makeCandidateScoreCalc(
+                        BotConfig,
+                        electionSiteHostname,
+                        BotConfig.chatDomain,
+                        electionSiteApiSlug,
+                        electionBadges,
+                        soPastAndPresentModIds
                     );
 
                     responseText = await calcCandidateScore(election, user, resolvedMsg, isStackOverflow);
@@ -976,14 +980,14 @@ const announcement = new Announcement();
             }
 
             // After rescraping, the election is over but we do not have winners yet
-            else if(election.phase === 'ended' && !election.arrWinners.length) {
+            else if (election.phase === 'ended' && !election.arrWinners.length) {
 
                 // Reduce scrape interval further
                 BotConfig.scrapeIntervalMins = 0.5;
             }
 
             // The election is ending within the next 10 minutes or less, do once only
-            else if(election.phase === 'election' && election.dateEnded - 10 * 6e5 <= Date.now() && !BotConfig.flags.saidElectionEndingSoon) {
+            else if (election.phase === 'election' && election.dateEnded - 10 * 6e5 <= Date.now() && !BotConfig.flags.saidElectionEndingSoon) {
 
                 // Reduce scrape interval
                 BotConfig.scrapeIntervalMins = 2;
@@ -1014,7 +1018,7 @@ const announcement = new Announcement();
             //    1. Room is idle, and there was at least some previous activity, and last message more than lowActivityCheckMins minutes ago
             // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
             else if (idleDoSayHi) {
-                
+
                 console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                     `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
