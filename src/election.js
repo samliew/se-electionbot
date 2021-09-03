@@ -51,7 +51,7 @@ export default class Election {
      * @returns {boolean}
      */
     validElectionUrl(electionUrl) {
-        return !/^https:\/\/([^\/]+\.)+(com|net|org)\/election(\/\d+)?$/.test(electionUrl);
+        return /^https:\/\/([^\/]+\.)+(com|net|org)\/election(\/\d+)?$/.test(electionUrl);
     }
 
     /**
