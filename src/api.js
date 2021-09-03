@@ -29,10 +29,11 @@ export const getAllNamedBadges = async (config, site, key, page = 1) => {
     // https://api.stackexchange.com/2.3/badges/name?pagesize=100&order=desc&sort=rank&site=academia
     const badgeURI = new URL(`${apiBase}/${apiVer}/badges/name`);
     badgeURI.search = new URLSearchParams({
+        pagesize: "100",
+        page: page.toString(),
         site,
         order: "asc",
         sort: "name",
-        pagesize: "100",
         filter: ")j(RnCyiVMe7YpW4a2x",
         key
     }).toString();
@@ -62,10 +63,11 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
 
     const badgeURI = new URL(`${apiBase}/${apiVer}/users/${userId}/badges`);
     badgeURI.search = new URLSearchParams({
+        pagesize: "100",
+        page: page.toString(),
         site,
         order: "asc",
         sort: "type",
-        pagesize: "100",
         filter: "7W_5Hvzzo",
         key
     }).toString();
@@ -101,6 +103,7 @@ export const getModerators = async (config, site, key, page = 1) => {
     const modURL = new URL(`${apiBase}/${apiVer}/users/moderators`);
     modURL.search = new URLSearchParams({
         pagesize: "100",
+        page: page.toString(),
         order: "desc",
         sort: "reputation",
         site,
@@ -187,7 +190,9 @@ export const getAllNetworkSites = async (config, keyPool, page = 1) => {
 
     const siteURL = new URL(`${apiBase}/${apiVer}/sites`);
     siteURL.search = new URLSearchParams({
-        filter: "!3ynpeVzDR6qiwv1BQ",
+        pagesize: "100",
+        page: page.toString(),
+        filter: "!)rG7(aCNy-ka.VQ4RHGA",
         key: getStackApiKey(keyPool)
     }).toString();
 

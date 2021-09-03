@@ -1,6 +1,7 @@
 import RssParser from "rss-parser";
 import Election from "./election.js";
 import { fetchUrl } from "./utils.js";
+import { getAllNetworkSites } from "./api.js";
 
 export const INVALID_ELECTION_ID = -1;
 
@@ -57,9 +58,15 @@ export class ElectionScraper {
 
         const { items = [] } = await parser.parseString(rss);
 
-        console.log(items);
+        const electionLinks = items
+            .filter(item => item.title?.includes('Community Moderator Election') && !item.title?.includes('Results'))
+            .map(item => item.id.split('/questions/')[0].replace('meta.', '') + '/election');
 
-        throw new Error("method not implemented yet, sorry :(");
+        if(botConfig.verbose) {
+            console.log('ELSCRAPER - Election Links From RSS:\n', electionLinks);
+        }
+
+        return electionLinks;
     }
 
     /**
@@ -68,7 +75,19 @@ export class ElectionScraper {
      * @summary attempts to get election URLs from the API
      */
     async getElectionUrlsFromAPI() {
-        throw new Error("method not implemented yet, sorry :(");
+        const { botConfig } = this;
+
+        const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
+
+        const networkSites = await getAllNetworkSites(this.botConfig, apiKeyPool);
+
+        const electionLinks = networkSites.filter(site => site.site_type === "main_site").map(site => site.site_url + "/election");
+
+        if(botConfig.verbose) {
+            console.log('ELSCRAPER - Election Links From API:\n', electionLinks);
+        }
+
+        return electionLinks;
     }
 
     /**
