@@ -13,7 +13,7 @@ export class ElectionScraper {
      * @returns {number}
      */
     static getIdFromElectionUrl(electionUrl) {
-        const [, id] = /^https:\/\/(?:www\.)?(?:[^\/]+\.)+(?:com|net|org)\/election\/(\d+)$/.exec(electionUrl) || [];
+        const [, id] = /\/election\/(\d+)$/.exec(electionUrl) || [];
         return id ? +id : INVALID_ELECTION_ID;
     }
 
