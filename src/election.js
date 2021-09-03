@@ -45,9 +45,10 @@ export default class Election {
             this.dateEnded
         );
     }
-    
+
     /**
      * @summary checks if the electionUrl is valid
+     * @param {string} electionUrl election URL to test
      * @returns {boolean}
      */
     validElectionUrl(electionUrl) {
@@ -59,7 +60,8 @@ export default class Election {
      * @returns {boolean}
      */
     isActive() {
-        return this.phase !== null && this.phase !== "ended";
+        const { phase } = this;
+        return ![null, "ended", "cancelled"].includes(phase);
     }
 
     /**
@@ -141,7 +143,7 @@ export default class Election {
     async scrapeElection(config) {
 
         // Validate electionUrl, since without it we cannot continue
-        if(!this.validElectionUrl(this.electionUrl)) {
+        if (!this.validElectionUrl(this.electionUrl)) {
             console.error("Invalid electionUrl format.");
             return;
         }
@@ -208,13 +210,13 @@ export default class Election {
             this.phase = Election.getPhase(this);
 
             // Detect active election number if not specified
-            if(this.isActive() && this.electionNum === null) {
+            if (this.isActive() && this.electionNum === null) {
                 this.electionNum = +metaPhaseElems.attr('href').match(/\d+/)?.pop() || null;
 
                 // Append to electionUrl
                 this.electionUrl += `/${this.electionNum}`;
 
-                if(config.verbose) console.log('INFO  - Election number was auto-detected', this.electionNum);
+                if (config.verbose) console.log('INFO  - Election number was auto-detected', this.electionNum);
             }
 
             // If election has ended (or cancelled)

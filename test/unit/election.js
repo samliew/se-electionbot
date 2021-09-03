@@ -68,4 +68,29 @@ describe('Election', () => {
 
     });
 
+    describe('isActive', () => {
+
+        it('should correctly determine active state', () => {
+
+            const election = new Election("https://stackoverflow.com/election/12");
+
+            const inactivePhases = [null, "ended", "cancelled"];
+            const activePhases = ["election", "primary", "nomination"];
+
+            const allInactive = inactivePhases.every((phase) => {
+                election.phase = phase;
+                return !election.isActive();
+            });
+
+            const allActive = activePhases.every((phase) => {
+                election.phase = phase;
+                return election.isActive();
+            });
+
+            expect(allActive).to.be.true;
+            expect(allInactive).to.be.true;
+        });
+
+    });
+
 });
