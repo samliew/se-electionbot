@@ -1,0 +1,31 @@
+import Election from "./election";
+
+export const INVALID_ELECTION_ID = -1;
+
+export class ElectionScraper {
+
+    /** @type {Map<number, Election>} */
+    elections = new Map();
+
+    /**
+     * @summary extracts election id from election URL
+     * @param {string} electionUrl election URL to extract from
+     * @returns {number}
+     */
+    static getIdFromElectionUrl(electionUrl) {
+        const [, id] = /^https:\/\/(?:www\.)?(?:[^\/]+\.)+(?:com|net|org)\/election\/(\d+)$/.exec(electionUrl) || [];
+        return id ? +id : INVALID_ELECTION_ID;
+    }
+
+    /**
+     * @summary finds election URLs to scrape
+     */
+    async findElectionUrls() {
+        // TODO: implement
+        // consider using headless browser like JSDom instead of cheerio since this is going to be heavy scraping
+        // should fetch the list of network sites first
+        throw new Error("method not implemented yet, sorry :(");
+    }
+}
+
+export default ElectionScraper;
