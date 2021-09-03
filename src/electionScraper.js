@@ -59,7 +59,7 @@ export class ElectionScraper {
         const { items = [] } = await parser.parseString(rss);
 
         const electionLinks = items
-            .filter(item => item.title?.includes('Community Moderator Election') && !item.title?.includes('Results'))
+            .filter(item => item.id.includes('community-moderator-election') && !item.id.includes('results'))
             .map(item => item.id.split('/questions/')[0].replace('meta.', '') + '/election');
 
         if(botConfig.verbose) {
