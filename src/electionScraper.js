@@ -1,6 +1,12 @@
-import Election from "./election";
+import RssParser from "rss-parser";
+import Election from "./election.js";
+import { fetchUrl } from "./utils.js";
 
 export const INVALID_ELECTION_ID = -1;
+
+/**
+ * @typedef {import("./index").BotConfig} BotConfig
+ */
 
 export class ElectionScraper {
 
@@ -10,12 +16,17 @@ export class ElectionScraper {
     /** @type {Set<string>} */
     siteURLs = new Set();
 
+    /** @type {BotConfig} */
+    botConfig = null;
+
     /**
+     * @param {BotConfig} botConfig Bot configuration
      * @param {string[]} initURLs list of network site urls
      */
-    constructor(initURLs = []) {
+    constructor(botConfig, initURLs = []) {
         const { siteURLs } = this;
         initURLs.forEach((url) => siteURLs.add(url));
+        this.botConfig = botConfig;
     }
 
     /**
@@ -34,6 +45,20 @@ export class ElectionScraper {
      * @summary attempts to get election URLs from the RSS feed
      */
     async getElectionUrlsFromRSS() {
+        const { botConfig } = this;
+
+        const feedURL = new URL(`https://stackexchange.com/feeds/tagsets/421979/all-elections`);
+        const { searchParams } = feedURL;
+        searchParams.append("sort", "newest");
+
+        const rss = await fetchUrl(botConfig, feedURL.toString(), false);
+
+        const parser = new RssParser();
+
+        const { items = [] } = await parser.parseString(rss);
+
+        console.log(items);
+
         throw new Error("method not implemented yet, sorry :(");
     }
 
