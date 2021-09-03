@@ -44,7 +44,7 @@ export const getAllNamedBadges = async (config, site, key, page = 1) => {
         return [...items, ...otherItems];
     }
 
-    if(config.verbose) console.log('API - getAllNamedBadges\n', items);
+    if (config.verbose) console.log(`API - ${getAllNamedBadges.name}\n`, items);
 
     return items;
 };
@@ -77,7 +77,7 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
         return [...items, ...otherItems];
     }
 
-    if(config.verbose) console.log('API - getBadges\n', items);
+    if (config.verbose) console.log(`API - ${getBadges.name}\n`, items);
 
     return items;
 };
@@ -117,7 +117,7 @@ export const getModerators = async (config, site, key, page = 1) => {
 
     const nonEmployeeMods = items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1);
 
-    if(config.verbose) console.log('API - getModerators\n', nonEmployeeMods);
+    if (config.verbose) console.log(`API - ${getModerators.name}\n`, nonEmployeeMods);
 
     return nonEmployeeMods;
 };
@@ -147,8 +147,60 @@ export const getUserInfo = async (config, userId, site, key) => {
     const { items = [] } = /** @type {{ items: UserInfo[] }} */(await fetchUrl(config, userURL.toString(), true)) || {};
 
     const [userInfo] = items;
-    
-    if(config.verbose) console.log('API - getUserInfo\n', userInfo || null);
+
+    if (config.verbose) console.log(`API - ${getUserInfo.name}\n`, userInfo || null);
 
     return userInfo || null;
+};
+
+/**
+ * @typedef {{
+ *     site_url: string,
+ *     api_site_parameter: string,
+ *     name: string,
+ *     site_type: string,
+ *     site_state: string
+ * }} SiteInfo
+ *
+ * @see https://api.stackexchange.com/docs/sites
+ *
+ * @summary get all StackExchange network sites from the API
+ *
+ * @description
+ * fetches all network sites recursively
+ *
+ * Filter used exludes a bunch of fields not needed for the bot:
+ * - twitter_account
+ * - styling
+ * - related_sites
+ * - markdown_extensions
+ * - logo_url
+ * - icon_url
+ * - high_resolution_icon_url
+ * - favicon_url
+ *
+ * @param {BotConfig} config
+ * @param {string[]} keyPool pool of API keys to rotate through
+ * @param {number} [page=1] current page
+ */
+export const getAllNetworkSites = async (config, keyPool, page = 1) => {
+
+    const siteURL = new URL(`${apiBase}/${apiVer}/sites`);
+    siteURL.search = new URLSearchParams({
+        filter: "!3ynpeVzDR6qiwv1BQ",
+        key: getStackApiKey(keyPool)
+    }).toString();
+
+    const { items = [], has_more = false } = /** @type {{ items: SiteInfo[], has_more: boolean }} */(
+        await fetchUrl(config, siteURL.toString(), true)
+    ) || {};
+
+    if (has_more) {
+        const otherItems = await getAllNetworkSites(config, keyPool, page + 1);
+        return [...items, ...otherItems];
+    }
+
+    if (config.verbose) console.log(`API - ${getAllNetworkSites.name}\n`, items);
+
+    return items;
 };
