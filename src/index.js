@@ -344,12 +344,19 @@ const announcement = new Announcement();
 
         // If is in production mode, and is an active election, auto-detect and set chat domain and chat room ID to join
         if (!BotConfig.debug && election.isActive()) {
-            BotConfig.chatRoomId = election.chatRoomId;
-            BotConfig.chatDomain = election.chatDomain;
 
-            console.log(`App is not in debug mode and election is active - redirected to live room:
-            DOMAIN:  ${defaultChatDomain} -> ${BotConfig.chatDomain}
-            ROOMID:  ${defaultChatRoomId} -> ${BotConfig.chatRoomId}`);
+            // Chat room link was found on election page
+            if(election.chatRoomId && election.chatDomain) {
+                BotConfig.chatRoomId = election.chatRoomId;
+                BotConfig.chatDomain = election.chatDomain;
+
+                console.log(`App is not in debug mode and election is active - redirected to live room:
+                DOMAIN:  ${defaultChatDomain} -> ${BotConfig.chatDomain}
+                ROOMID:  ${defaultChatRoomId} -> ${BotConfig.chatRoomId}`);
+            }
+            else {
+                console.error(`App is not in debug mode and election is active - but unable to auto-detect chat room url from election page.`);
+            }
         }
 
         // "default" is a temp fix for ChatExchange being served as CJS module

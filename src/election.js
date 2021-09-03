@@ -203,12 +203,9 @@ export default class Election {
             this.arrNominees.length = 0;
             this.arrNominees.push(...nominees);
 
-            this.chatUrl = electionPost.find('a[href*="/rooms/"]').attr('href')?.replace('/info/', '/') || `https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`;
-
-            if(this.chatUrl) {
-                this.chatRoomId = +this.chatUrl.match(/\d+$/) || null;
-                this.chatDomain = this.chatUrl.split('/')[2]?.replace('chat.', '');
-            }
+            this.chatUrl = electionPost.find('a[href*="/rooms/"]').attr('href')?.replace('/info/', '/') || '';
+            this.chatRoomId = +this.chatUrl?.match(/\d+$/);
+            this.chatDomain = this.chatUrl?.split('/')[2]?.replace('chat.', '');
 
             this.phase = Election.getPhase(this);
 
