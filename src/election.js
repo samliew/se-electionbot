@@ -205,6 +205,17 @@ export default class Election {
     }
 
     /**
+     * @summary scrapes minimal rep to nominate in the election
+     * @param {cheerio.Root} $ Cheerio root element
+     * @returns {number}
+     */
+    scrapeElectionRepToNominate($) {
+        const conditionsNotice = $('#mainbar aside[role=status]').text();
+        const [, minRep = "0"] = /(?:more than )?(\d+,?\d+) reputation (?:may|to) nominate/m.exec(conditionsNotice) || [];
+        return +minRep.replace(/\D/g, "");
+    }
+
+    /**
      * @param {BotConfig} config bot config
      */
     async scrapeElection(config) {
@@ -244,12 +255,6 @@ export default class Election {
 
             const electionPost = $('#mainbar .s-prose').slice(0, 2);
 
-            const conditionsNotice = $($('#mainbar').find('aside[role=status]').get(0));
-
-            const [, minRep = "0"] = /with (?:more than )?(\d+,?\d+) reputation/m.exec(conditionsNotice.text()) || [];
-
-            const repToNominate = +minRep.replace(/\D/g, "");
-
             const candidateElems = $('#mainbar .candidate-row');
 
             const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get();
@@ -265,7 +270,7 @@ export default class Election {
             this.numCandidates = +numCandidates;
             this.numPositions = +numPositions;
             this.repVote = 150;
-            this.repNominate = repToNominate;
+            this.repNominate = this.scrapeElectionRepToNominate($);
 
             //clear an array before rescraping
             this.arrNominees.length = 0;

@@ -61,6 +61,23 @@ describe('Election', () => {
 
     });
 
+    describe('#scrapeElectionRepToNominate', () => {
+
+        it('should correctly scrape min rep to nominate', async () => {
+
+            const { readFile } = await import("fs/promises");
+            const activeMock = await readFile("./test/mocks/activeElection.html", { encoding: "utf-8" });
+
+            const election = new Election("https://linguistics.stackexchange.com/election/1");
+
+            const $ = cheerio.load(activeMock);
+
+            const minRep = election.scrapeElectionRepToNominate($);
+            expect(minRep).to.equal(300);
+        });
+
+    });
+
     describe('#scrapeElectionStats', () => {
 
         const election = new Election(sharedTestUrl);
