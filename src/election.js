@@ -1,4 +1,5 @@
 import cheerio from 'cheerio';
+import { GetterError } from './errors/getter.js';
 import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 
 /**
@@ -31,6 +32,17 @@ export default class Election {
 
     get prev() {
         return this._prevObj;
+    }
+
+    /**
+     * @summary returns an election chat room id
+     * @returns {number}
+     */
+    get chatRoomId() {
+        const { chatUrl } = this;
+        const id = +chatUrl?.replace(/.+\/rooms\/(\d+).*$/, "$1");
+        if (isNaN(id)) throw new GetterError(`got invalid chat id from ${chatUrl}`);
+        return id;
     }
 
     validate() {
@@ -306,7 +318,6 @@ export default class Election {
             this.arrNominees.length = 0;
             this.arrNominees.push(...nominees);
 
-            this.chatRoomId = +this.chatUrl?.match(/\d+$/);
             this.chatDomain = this.chatUrl?.split('/')[2]?.replace('chat.', '');
 
             this.phase = Election.getPhase(this);

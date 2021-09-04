@@ -1,8 +1,39 @@
 import { expect } from "chai";
 import Election from "../../src/election.js";
+import { GetterError } from "../../src/errors/getter.js";
 import { dateToUtcTimestamp } from "../../src/utils.js";
 
 describe('Election', () => {
+
+    describe('getters', () => {
+
+        describe('chatRoomId', () => {
+
+            it('should correctly return chat room id', () => {
+
+                const election = new Election("https://stackoverflow.com/election/12");
+
+                const chatUrls = [
+                    "https://chat.stackoverflow.com/rooms/217027/",
+                    // chat url can be postfixed with title
+                    "https://chat.stackoverflow.com/rooms/217027/2020-moderator-election-chat"
+                ];
+
+                chatUrls.forEach((url) => {
+                    election.chatUrl = url;
+                    const { chatRoomId } = election;
+                    expect(chatRoomId, `failed ${url}`).to.equal(217027);
+                });
+            });
+
+            it('should throw on trying to return NaN', () => {
+                const election = new Election("https://google.com");
+                expect(() => election.chatRoomId).to.throw(GetterError);
+            });
+
+        });
+
+    });
 
     describe('getPhase', () => {
 
