@@ -236,6 +236,16 @@ export default class Election {
     }
 
     /**
+     * @summary scrapes election chat room URL
+     * @param {cheerio.Root} $ Cheerio root element
+     * @returns {string}
+     */
+    scrapeChatURL($) {
+        const chatRoomLinkSelector = "#mainbar .s-prose a[href*=\"/rooms/\"]";
+        return $(chatRoomLinkSelector).attr('href')?.replace('/info/', '/') || "";
+    }
+
+    /**
      * @param {BotConfig} config bot config
      */
     async scrapeElection(config) {
@@ -297,7 +307,7 @@ export default class Election {
             this.arrNominees.length = 0;
             this.arrNominees.push(...nominees);
 
-            this.chatUrl = electionPost.find('a[href*="/rooms/"]').attr('href')?.replace('/info/', '/') || '';
+            this.chatUrl = this.scrapeChatURL($);
             this.chatRoomId = +this.chatUrl?.match(/\d+$/);
             this.chatDomain = this.chatUrl?.split('/')[2]?.replace('chat.', '');
 

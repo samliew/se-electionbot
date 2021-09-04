@@ -94,16 +94,25 @@ describe('Election', () => {
 
     });
 
+    describe('#scrapeChatURL', () => {
+
+        it('should correctly scrape chat URL', () => {
+
+            const election = new Election(sharedTestUrl);
+            const $ = cheerio.load(electionPage);
+
+            const chatURL = election.scrapeChatURL($);
+            expect(chatURL).to.match(/https:\/\/chat.stackoverflow.com\/rooms\/217027\//);
+        });
+
+    });
+
     describe('#scrapeElectionRepToVote', () => {
 
         it('should correctly scrape min rep to vote', async () => {
 
-            const electionURL = "https://academia.stackexchange.com/election/4";
-
-            const election = new Election(electionURL);
-
-            const page = await fetchUrl(mockBotConfig, electionURL, false);
-            const $ = cheerio.load(page);
+            const election = new Election(sharedTestUrl);
+            const $ = cheerio.load(electionPage);
 
             const sitename = election.scrapeElectionRepToVote($);
             expect(sitename).to.equal(150);
