@@ -287,10 +287,7 @@ export default class Election {
 
                 const resultsURL = $(resultsElem).find('a').first().attr('href') || "";
 
-                this.resultsUrl = resultsURL;
-
-                // incorrect/not available immediately
-                if (!resultsURL.includes('opavote.com')) this.resultsUrl = '';
+                this.resultsUrl = resultsURL.includes('opavote.com') ? resultsURL : "";
 
                 // Check if election was cancelled?
                 if ($(statusElem).text().includes('cancelled')) {
