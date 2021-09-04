@@ -3,6 +3,7 @@ import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 
 /**
  * @typedef {import("./index").User} User
+ * @typedef {import("./index.js").BotConfig} BotConfig
  */
 
 export default class Election {
@@ -138,19 +139,52 @@ export default class Election {
     }
 
     /**
+     * @typedef {{
+     *  text: string,
+     *  eligible: number,
+     *  visited: number,
+     *  visitedElection: number,
+     *  voted: number
+     * }} ElectionStats
+     *
      * @summary scrapes election stats element
      * @param {cheerio.Root} $ Cheerio root element
-     * @param {cheerio.Element} el stats element
-     * @returns {string}
+     * @param {BotConfig} config bot config
+     * @returns {ElectionStats}
      */
-    scrapeElectionStats($, el) {
-        return $(el).contents().map((_i, { data, type }) =>
+    scrapeElectionStats($, config) {
+        const statsSelector = "#mainbar aside[role=status]:not(:nth-child(1)) .flex--item:nth-child(3)";
+
+        const stats = $(statsSelector);
+
+        if (!stats.length && config.debug) console.log(`missing stats elem (${statsSelector})`);
+
+        const text = stats.contents().map((_i, { data, type }) =>
             type === 'text' ? data.trim() : ""
         ).get().join(' ').trim();
+
+        const exprs = [
+            /(\d+(?:,\d+)+)\s+voters?\s+(?:were|was)\s+eligible/,
+            /(\d+(?:,\d+)+)\s+visited/,
+            /(\d+(?:,\d+)+)\s+visited(?:\s+the)\s+election/,
+            /(\d+(?:,\d+)+)\s+voted/
+        ];
+
+        const [eligible, visited, visitedElection, voted] = exprs.map(
+            (r) => +(r.exec(text) || [])[1].replace(/,/g, "")
+        );
+
+        return {
+            text,
+            eligible,
+            visited,
+            visitedElection,
+            voted
+        };
     }
 
     /**
-     * @param {import("./index.js").BotConfig} config
+     * @param {BotConfig} config bot config
      */
     async scrapeElection(config) {
 
@@ -257,7 +291,9 @@ export default class Election {
                 }
                 // Election ended
                 else {
-                    this.statVoters = this.scrapeElectionStats($, statsElem);
+
+                    const { text } = this.scrapeElectionStats($, config);
+                    this.statVoters = text;
 
                     // Get winners
                     const winnerIds = $(statsElem).find('a').map((_i, el) => +($(el).attr('href').split('/')[2])).get();
