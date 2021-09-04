@@ -17,9 +17,27 @@ describe('Election', () => {
         electionPage = await fetchUrl(mockBotConfig, sharedTestUrl, false);
     });
 
+    describe('#scrapeElectionWinnerIds', () => {
+
+        const election = new Election(sharedTestUrl);
+
+        it('should correctly scrape winner ids', () => {
+            const $ = cheerio.load(electionPage);
+
+            const ids = election.scrapeElectionWinnerIds($);
+
+            const machavityId = 2370483;
+            const makyenId = 3773011;
+            expect(ids).to.include(machavityId);
+            expect(ids).to.include(makyenId);
+            expect(ids).length(2);
+        });
+
+    });
+
     describe('#scrapeElectionStats', () => {
 
-        const election = new Election("https://stackoverflow.com/election/12");
+        const election = new Election(sharedTestUrl);
 
         it('should correctly scrape election stats', () => {
             const $ = cheerio.load(electionPage);

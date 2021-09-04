@@ -184,6 +184,18 @@ export default class Election {
     }
 
     /**
+     * @summary scrapes election winners
+     * @param {cheerio.Root} $ Cheerio root element
+     * @returns {number[]}
+     */
+    scrapeElectionWinnerIds($) {
+        const statsSelector = "#mainbar aside[role=status]:not(:nth-child(1)) .flex--item:nth-child(3) a";
+        return $(statsSelector).map(
+            (_i, el) => +($(el).attr('href').replace(/.+users\/(\d+)/, "$1"))
+        ).get();
+    }
+
+    /**
      * @param {BotConfig} config bot config
      */
     async scrapeElection(config) {
@@ -271,7 +283,7 @@ export default class Election {
 
                 const resultsWrapper = $($('#mainbar').find('aside[role=status]').get(1));
 
-                const [statusElem, resultsElem, statsElem] = resultsWrapper.find(".flex--item").get();
+                const [statusElem, resultsElem] = resultsWrapper.find(".flex--item").get();
 
                 const resultsURL = $(resultsElem).find('a').first().attr('href') || "";
 
@@ -295,8 +307,7 @@ export default class Election {
                     const { text } = this.scrapeElectionStats($, config);
                     this.statVoters = text;
 
-                    // Get winners
-                    const winnerIds = $(statsElem).find('a').map((_i, el) => +($(el).attr('href').split('/')[2])).get();
+                    const winnerIds = this.scrapeElectionWinnerIds($);
                     this.arrWinners = this.getWinners(winnerIds);
                 }
             }
