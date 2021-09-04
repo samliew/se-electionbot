@@ -5,6 +5,10 @@
  */
 export const getMockBotConfig = (overrides = {}) => {
     const defaults = {
+        account: {
+            email: "test@ci",
+            version: "1.0.0"
+        },
         chatRoomId: 190503,
         chatDomain: 'stackoverflow.com',
         throttleSecs: 1,
