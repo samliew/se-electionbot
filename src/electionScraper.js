@@ -96,13 +96,15 @@ export class ElectionScraper {
     async findElectionUrls() {
         // TODO: implement
         // consider using headless browser like JSDom instead of cheerio since this is going to be heavy scraping
-        // should fetch the list of network sites first
+
+        /** @type {string[]} */
+        const electionUrls = [];
 
         try {
-            await this.getElectionUrlsFromRSS();
+            electionUrls.push(...await this.getElectionUrlsFromRSS());
         } catch (error) {
             console.log(`election RSS error:\n${error}`);
-            await this.getElectionUrlsFromAPI();
+            electionUrls.push(...await this.getElectionUrlsFromAPI());
         }
 
         throw new Error("method not implemented yet, sorry :(");
