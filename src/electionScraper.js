@@ -1,7 +1,7 @@
 import RssParser from "rss-parser";
+import { getAllNetworkSites } from "./api.js";
 import Election from "./election.js";
 import { fetchUrl } from "./utils.js";
-import { getAllNetworkSites } from "./api.js";
 
 export const INVALID_ELECTION_ID = -1;
 
@@ -59,10 +59,10 @@ export class ElectionScraper {
         const { items = [] } = await parser.parseString(rss);
 
         const electionLinks = items
-            .filter(item => item.id.includes('community-moderator-election') && !item.id.includes('results'))
-            .map(item => item.id.split('/questions/')[0].replace('meta.', '') + '/election');
+            .filter(({ id }) => id.includes('community-moderator-election') && !id.includes('results'))
+            .map(({ id }) => `${id.split('/questions/')[0].replace('meta.', '')}/election`);
 
-        if(botConfig.verbose) {
+        if (botConfig.verbose) {
             console.log('ELSCRAPER - Election Links From RSS:\n', electionLinks);
         }
 
@@ -81,9 +81,11 @@ export class ElectionScraper {
 
         const networkSites = await getAllNetworkSites(this.botConfig, apiKeyPool);
 
-        const electionLinks = networkSites.filter(site => site.site_type === "main_site").map(site => site.site_url + "/election");
+        const electionLinks = networkSites
+            .filter(({ site_type }) => site_type === "main_site")
+            .map(({ site_url }) => `${site_url}/election`);
 
-        if(botConfig.verbose) {
+        if (botConfig.verbose) {
             console.log('ELSCRAPER - Election Links From API:\n', electionLinks);
         }
 
