@@ -227,6 +227,15 @@ export default class Election {
     }
 
     /**
+     * @summary scrapes election title
+     * @param {cheerio.Root} $ Cheerio root element
+     * @returns {string}
+     */
+    scrapeElectionTitle($) {
+        return $('#content h1').first().text().trim();
+    }
+
+    /**
      * @param {BotConfig} config bot config
      */
     async scrapeElection(config) {
@@ -273,7 +282,7 @@ export default class Election {
             this.updated = Date.now();
             this.sitename = this.scrapeElectionSiteName($);
             this.siteUrl = `https://${electionUrl.split('/')[2]}`; // hostname only, exclude trailing slash
-            this.title = $('#content h1').first().text().trim();
+            this.title = this.scrapeElectionTitle($);
             this.dateNomination = nominationDate;
             this.datePrimary = primaryDate;
             this.dateElection = startDate;

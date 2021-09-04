@@ -13,8 +13,13 @@ describe('Election', () => {
 
     /** @type {string} */
     let electionPage;
+    /** @type {string} */
+    let activeMock;
     before(async () => {
         electionPage = await fetchUrl(mockBotConfig, sharedTestUrl, false);
+
+        const { readFile } = await import("fs/promises");
+        activeMock = await readFile("./test/mocks/activeElection.html", { encoding: "utf-8" });
     });
 
     describe('#scrapeElectionWinnerIds', () => {
@@ -63,10 +68,7 @@ describe('Election', () => {
 
     describe('#scrapeElectionRepToNominate', () => {
 
-        it('should correctly scrape min rep to nominate', async () => {
-
-            const { readFile } = await import("fs/promises");
-            const activeMock = await readFile("./test/mocks/activeElection.html", { encoding: "utf-8" });
+        it('should correctly scrape min rep to nominate', () => {
 
             const election = new Election("https://linguistics.stackexchange.com/election/1");
 
@@ -74,6 +76,20 @@ describe('Election', () => {
 
             const minRep = election.scrapeElectionRepToNominate($);
             expect(minRep).to.equal(300);
+        });
+
+    });
+
+    describe('#scrapeElectionTitle', () => {
+
+        it('should correctly scrape title', () => {
+
+            const election = new Election("https://linguistics.stackexchange.com/election/1");
+
+            const $ = cheerio.load(activeMock);
+
+            const title = election.scrapeElectionTitle($);
+            expect(title).to.equal("2021 Moderator Election");
         });
 
     });
