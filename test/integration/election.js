@@ -35,6 +35,32 @@ describe('Election', () => {
 
     });
 
+    describe('#scrapeElectionSiteName', () => {
+
+        it('should correctly scrape election site name on The Trinity', () => {
+
+            const election = new Election(sharedTestUrl);
+            const $ = cheerio.load(electionPage);
+
+            const sitename = election.scrapeElectionSiteName($);
+            expect(sitename).to.equal("Stack Overflow");
+        });
+
+        it('should correctly scrape election site name on SE subdomains', async () => {
+
+            const nonTrinityUrl = "https://academia.stackexchange.com/election/4";
+
+            const election = new Election(nonTrinityUrl);
+
+            const page = await fetchUrl(mockBotConfig, nonTrinityUrl, false);
+            const $ = cheerio.load(page);
+
+            const sitename = election.scrapeElectionSiteName($);
+            expect(sitename).to.equal("Academia");
+        });
+
+    });
+
     describe('#scrapeElectionStats', () => {
 
         const election = new Election(sharedTestUrl);

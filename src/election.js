@@ -196,6 +196,15 @@ export default class Election {
     }
 
     /**
+     * @summary scrapes election site name
+     * @param {cheerio.Root} $ Cheerio root element
+     * @returns {string}
+     */
+    scrapeElectionSiteName($) {
+        return $('meta[property="og:site_name"]').attr('content').replace('Stack Exchange', '').trim();
+    }
+
+    /**
      * @param {BotConfig} config bot config
      */
     async scrapeElection(config) {
@@ -246,7 +255,7 @@ export default class Election {
             const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get();
 
             this.updated = Date.now();
-            this.sitename = $('meta[property="og:site_name"]').attr('content').replace('Stack Exchange', '').trim();
+            this.sitename = this.scrapeElectionSiteName($);
             this.siteUrl = `https://${electionUrl.split('/')[2]}`; // hostname only, exclude trailing slash
             this.title = $('#content h1').first().text().trim();
             this.dateNomination = nominationDate;
