@@ -138,6 +138,18 @@ export default class Election {
     }
 
     /**
+     * @summary scrapes election stats element
+     * @param {cheerio.Root} $ Cheerio root element
+     * @param {cheerio.Element} el stats element
+     * @returns {string}
+     */
+    scrapeElectionStats($, el) {
+        return $(el).contents().map((_i, { data, type }) =>
+            type === 'text' ? data.trim() : ""
+        ).get().join(' ').trim();
+    }
+
+    /**
      * @param {import("./index.js").BotConfig} config
      */
     async scrapeElection(config) {
@@ -245,10 +257,7 @@ export default class Election {
                 }
                 // Election ended
                 else {
-                    // Get election stats
-                    this.statVoters = $(statsElem).contents().map((_i, { data, type }) =>
-                        type === 'text' ? data.trim() : ""
-                    ).get().join(' ').trim();
+                    this.statVoters = this.scrapeElectionStats($, statsElem);
 
                     // Get winners
                     const winnerIds = $(statsElem).find('a').map((_i, el) => +($(el).attr('href').split('/')[2])).get();
