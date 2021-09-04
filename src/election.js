@@ -280,17 +280,18 @@ export default class Election {
             const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get();
 
             this.updated = Date.now();
-            this.sitename = this.scrapeElectionSiteName($);
             this.siteUrl = `https://${electionUrl.split('/')[2]}`; // hostname only, exclude trailing slash
-            this.title = this.scrapeElectionTitle($);
             this.dateNomination = nominationDate;
             this.datePrimary = primaryDate;
             this.dateElection = startDate;
             this.dateEnded = endDate;
             this.numCandidates = +numCandidates;
             this.numPositions = +numPositions;
+
             this.repVote = this.scrapeElectionRepToVote($);
             this.repNominate = this.scrapeElectionRepToNominate($);
+            this.sitename = this.scrapeElectionSiteName($);
+            this.title = this.scrapeElectionTitle($);
 
             //clear an array before rescraping
             this.arrNominees.length = 0;
