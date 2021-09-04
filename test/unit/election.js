@@ -33,6 +33,18 @@ describe('Election', () => {
 
         });
 
+        describe('chatDomain', () => {
+
+            it('should correctly return chat domain', () => {
+
+                const election = new Election("https://stackoverflow.com/election/12");
+                election.chatUrl = "https://chat.stackoverflow.com/rooms/217027/";
+
+                expect(election.chatDomain).to.equal("stackoverflow.com");
+            });
+
+        });
+
     });
 
     describe('getPhase', () => {

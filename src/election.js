@@ -45,6 +45,16 @@ export default class Election {
         return id;
     }
 
+    /**
+     * @summary returns an election chat domain
+     * @returns {string}
+     */
+    get chatDomain() {
+        const { chatUrl } = this;
+        const { hostname } = new URL(chatUrl);
+        return hostname.replace(/chat\./, "");
+    }
+
     validate() {
         return !(
             this.validElectionUrl(this.electionUrl) &&
@@ -317,8 +327,6 @@ export default class Election {
             //clear an array before rescraping
             this.arrNominees.length = 0;
             this.arrNominees.push(...nominees);
-
-            this.chatDomain = this.chatUrl?.split('/')[2]?.replace('chat.', '');
 
             this.phase = Election.getPhase(this);
 
