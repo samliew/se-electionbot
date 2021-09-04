@@ -1,3 +1,4 @@
+import jsdom from "jsdom";
 import RssParser from "rss-parser";
 import { getAllNetworkSites } from "./api.js";
 import Election from "./election.js";
@@ -11,7 +12,7 @@ export const INVALID_ELECTION_ID = -1;
 
 export class ElectionScraper {
 
-    /** @type {Map<number, Election>} */
+    /** @type {Map<string, Map<number, Election>>} */
     elections = new Map();
 
     /** @type {Set<string>} */
@@ -90,6 +91,62 @@ export class ElectionScraper {
         }
 
         return electionLinks;
+    }
+
+    /**
+     * @summary scrapes election page given the URL and returns an election map
+     * @param {string} electionURL url of the page to scrape
+     * @returns {Promise<Map<number, Election>>}
+     */
+    async scrapeElectionsPage(electionURL) {
+        const { botConfig } = this;
+
+        /** @type {Map<number, Election>} */
+        const elections = new Map();
+
+        try {
+            const page = await fetchUrl(botConfig, electionURL, false);
+
+            const { window: { document } } = new jsdom.JSDOM(page, {
+                url: electionURL
+            });
+
+            // get election table wrapper
+            const main = document.getElementById("mainbar-full");
+            const electionTable = main?.querySelector("table");
+            if (!main || !electionTable) {
+                if (botConfig.debug) console.log(`no elections table on ${electionURL}`);
+                return elections;
+            }
+
+            const electionRows = electionTable.querySelectorAll("tr");
+
+            //table row structure: id, title+link, started, ended, results
+            electionRows.forEach((row) => {
+                /** @type {HTMLAnchorElement} */
+                const electionAnchor = row.querySelector(":nth-child(2) > a");
+
+                if (!electionAnchor) {
+                    if (botConfig.debug) console.log(`missing election link on ${electionURL}`);
+                    return;
+                }
+
+                const { href } = electionAnchor;
+                const electionId = ElectionScraper.getIdFromElectionUrl(href);
+                if (electionId === INVALID_ELECTION_ID) {
+                    console.log(`got invalid election id on ${electionURL}`);
+                    return;
+                }
+
+                const election = new Election(electionURL, electionId);
+                elections.set(electionId, election);
+            });
+
+        } catch (error) {
+            console.log(`ELSCRAPER - elections page scrape error:\n${error}`);
+        }
+
+        return elections;
     }
 
     /**
