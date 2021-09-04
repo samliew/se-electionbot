@@ -13,6 +13,8 @@ export const apiVer = 2.3;
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
+let _apiBackoff = Date.now();
+
 /**
  * @summary starts the bot server
  * @param {{ sendMessage(msg:string): Promise<any> }} room
@@ -107,6 +109,12 @@ export const startServer = async (room, config) => {
 export const fetchUrl = async (config, url, json = false) => {
     const { SOURCE_VERSION, ACCOUNT_EMAIL } = process.env;
 
+    // Delay SE API query if backoff still active
+    const backoffMillis = _apiBackoff - Date.now();
+    if(url.includes(apiBase) && backoffMillis > 0) {
+        await new Promise(resolve => setTimeout(resolve, backoffMillis));
+    }
+
     try {
         const { data } = await axios({
             url,
@@ -115,6 +123,11 @@ export const fetchUrl = async (config, url, json = false) => {
                 'User-Agent': `Node.js/ElectionBot ver.${SOURCE_VERSION}; AccountEmail ${ACCOUNT_EMAIL}`,
             },
         });
+
+        // Store backoff if SE API
+        if(url.includes(apiBase) && data.backoff) {
+            _apiBackoff = Date.now() + data.backoff * 1e4 + 50; // 50ms buffer
+        }
 
         return data;
     }
