@@ -78,6 +78,23 @@ describe('Election', () => {
 
     });
 
+    describe('#scrapeElectionRepToVote', () => {
+
+        it('should correctly scrape min rep to vote', async () => {
+
+            const electionURL = "https://academia.stackexchange.com/election/4";
+
+            const election = new Election(electionURL);
+
+            const page = await fetchUrl(mockBotConfig, electionURL, false);
+            const $ = cheerio.load(page);
+
+            const sitename = election.scrapeElectionRepToVote($);
+            expect(sitename).to.equal(150);
+        });
+
+    });
+
     describe('#scrapeElectionStats', () => {
 
         const election = new Election(sharedTestUrl);

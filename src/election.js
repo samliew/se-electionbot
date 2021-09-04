@@ -216,6 +216,17 @@ export default class Election {
     }
 
     /**
+     * @summary scrapes minimal rep to voe in the election
+     * @param {cheerio.Root} $ Cheerio root element
+     * @returns {number}
+     */
+    scrapeElectionRepToVote($) {
+        const conditionsNotice = $('#mainbar aside[role=status]').text();
+        const [, minRep = "0"] = /(?:more than )?(\d+,?\d+) reputation (?:may|to) vote/m.exec(conditionsNotice) || [];
+        return +minRep.replace(/\D/g, "");
+    }
+
+    /**
      * @param {BotConfig} config bot config
      */
     async scrapeElection(config) {
@@ -269,7 +280,7 @@ export default class Election {
             this.dateEnded = endDate;
             this.numCandidates = +numCandidates;
             this.numPositions = +numPositions;
-            this.repVote = 150;
+            this.repVote = this.scrapeElectionRepToVote($);
             this.repNominate = this.scrapeElectionRepToNominate($);
 
             //clear an array before rescraping
