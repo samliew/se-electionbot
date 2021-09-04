@@ -45,6 +45,15 @@ describe('Election', () => {
 
         });
 
+        describe('siteUrl', () => {
+
+            it('should correctly return election site URL', () => {
+                const { siteUrl } = new Election("https://linguistics.stackexchange.com/election/1");
+                expect(siteUrl).to.equal("https://linguistics.stackexchange.com");
+            });
+
+        });
+
     });
 
     describe('getPhase', () => {

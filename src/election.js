@@ -55,6 +55,18 @@ export default class Election {
         return hostname.replace(/chat\./, "");
     }
 
+    /**
+     * @summary returns clean election site URL
+     * @example
+     *      https://stackoverflow.com
+     * @returns {string}
+     */
+    get siteUrl() {
+        const { electionUrl } = this;
+        const { protocol, hostname } = new URL(electionUrl);
+        return `${protocol}//${hostname}`;
+    }
+
     validate() {
         return !(
             this.validElectionUrl(this.electionUrl) &&
@@ -310,7 +322,6 @@ export default class Election {
             const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get();
 
             this.updated = Date.now();
-            this.siteUrl = `https://${electionUrl.split('/')[2]}`; // hostname only, exclude trailing slash
             this.dateNomination = nominationDate;
             this.datePrimary = primaryDate;
             this.dateElection = startDate;
