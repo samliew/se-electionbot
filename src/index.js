@@ -153,7 +153,7 @@ const announcement = new Announcement();
         1114, 100297, 229044, 1252759, 444991, 871050, 2057919, 3093387, 1849664, 2193767, 4099593,
         541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
     ];
-    let rescraperInt;
+    let rescraperTimeout;
     let election = /** @type {Election|null} */(null);
     let room = null;
 
@@ -240,9 +240,9 @@ const announcement = new Announcement();
         announcement.cancelAll();
 
         // Stop scraper
-        if (rescraperInt) {
-            clearInterval(rescraperInt);
-            rescraperInt = null;
+        if (rescraperTimeout) {
+            clearTimeout(rescraperTimeout);
+            rescraperTimeout = null;
         }
 
         // Announce
@@ -274,9 +274,9 @@ const announcement = new Announcement();
         announcement.cancelAll();
 
         // Stop scraper
-        if (rescraperInt) {
-            clearInterval(rescraperInt);
-            rescraperInt = null;
+        if (rescraperTimeout) {
+            clearTimeout(rescraperTimeout);
+            rescraperTimeout = null;
         }
 
         const winnerList = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
@@ -916,11 +916,10 @@ const announcement = new Announcement();
         announcement.initAll();
 
 
-        // Interval to rescrape election data
-        rescraperInt = setInterval(async function () {
+        // Function to rescrape election data, and process election or chat room updates
+        const rescrapeFn = async function () {
 
             await election.scrapeElection(BotConfig);
-            announcement.setElection(election);
 
             const roomLongIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
             const roomReachedMinimumActivityCount = BotConfig.activityCount >= lowActivityCountThreshold;
@@ -973,7 +972,7 @@ const announcement = new Announcement();
                 await announceWinners(election);
 
                 // Stop scraping the election page or greeting the room
-                clearInterval(rescraperInt);
+                stopRescrape();
             }
 
             // After rescraping, the election is over but we do not have winners yet
@@ -1028,7 +1027,17 @@ const announcement = new Announcement();
                 BotConfig.activityCount = 0;
             }
 
-        }, BotConfig.scrapeIntervalMins * 60000);
+            startRescrape();
+        };
+        const stopRescrape = () => {
+            if (rescraperTimeout) {
+                clearTimeout(rescraperTimeout);
+                rescraperTimeout = null;
+            }
+        }
+        const startRescrape = () => {
+            rescraperTimeout = setTimeout(rescrapeFn, BotConfig.scrapeIntervalMins * 60000);
+        }
 
 
         // Interval to keep-alive
