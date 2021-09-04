@@ -39,6 +39,10 @@ const announcement = new Announcement();
  * }} Badge
  *
  * @typedef {{
+ *  account: {
+ *      version: string,
+ *      email: string
+ *  },
  *  chatRoomId: number,
  *  chatDomain: string,
  *  throttleSecs: number,
@@ -161,6 +165,12 @@ const announcement = new Announcement();
      * @type {BotConfig}
      */
     const BotConfig = {
+        //Bot account info
+        account: {
+            email: accountEmail,
+            version: process.env.SOURCE_VERSION
+        },
+
         // Bot to detect which chat room to join
         chatRoomId: defaultChatRoomId,
         chatDomain: defaultChatDomain,

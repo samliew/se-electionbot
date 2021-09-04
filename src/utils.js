@@ -14,8 +14,6 @@ export const apiVer = 2.3;
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
-let _apiBackoff = Date.now();
-
 /**
  * @summary delays execution for at least a specified number of seconds
  * @param {number} ms number of milliseconds to delay for
@@ -106,29 +104,31 @@ export const startServer = async (room, config) => {
  * }} APIListResponse
  */
 
+let _apiBackoff = Date.now();
 
 /**
  * @summary fetches the endpoint
- * @param {import("./index").BotConfig} config
- * @param {string} url
- * @param {boolean} [json]
- * @returns {Promise<any>}
+ * @param {import("./index").BotConfig} config bot configuration
+ * @param {string} url url to fetch
+ * @param {boolean} [json] whether to make a JSON request
+ * @returns {Promise<string|object|null>}
  */
 export const fetchUrl = async (config, url, json = false) => {
-    const { SOURCE_VERSION, ACCOUNT_EMAIL } = process.env;
-
     // Delay SE API query if backoff still active
     const backoffMillis = _apiBackoff - Date.now();
+
     if (url.includes(apiBase) && backoffMillis > 0) {
         await wait(backoffMillis);
     }
 
     try {
+        const { account: { email, version } } = config;
+
         const { data } = await axios({
             url,
             responseType: url.includes('api') || json ? "json" : "text", //TODO: check if same as `url.includes('api') || json`
             headers: {
-                'User-Agent': `Node.js/ElectionBot ver.${SOURCE_VERSION}; AccountEmail ${ACCOUNT_EMAIL}`,
+                'User-Agent': `Node.js/ElectionBot ver.${version}; AccountEmail ${email}`,
             },
         });
 
