@@ -152,7 +152,9 @@ export default class Election {
         this._prevObj = Object.assign({}, this); // fast way of cloning an object
         this._prevObj._prevObj = null;
 
-        const electionPageUrl = `${this.electionUrl}?tab=nomination`;
+        const { electionUrl } = this;
+
+        const electionPageUrl = `${electionUrl}?tab=nomination`;
 
         try {
             const pageHtml = await fetchUrl(config, electionPageUrl);
@@ -187,8 +189,7 @@ export default class Election {
 
             this.updated = Date.now();
             this.sitename = $('meta[property="og:site_name"]').attr('content').replace('Stack Exchange', '').trim();
-            this.siteHostname = this.electionUrl.split('/')[2]; // hostname only, exclude trailing slash
-            this.siteUrl = 'https://' + this.siteHostname;
+            this.siteUrl = `https://${electionUrl.split('/')[2]}`; // hostname only, exclude trailing slash
             this.title = $('#content h1').first().text().trim();
             this.dateNomination = nominationDate;
             this.datePrimary = primaryDate;
