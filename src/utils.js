@@ -18,10 +18,10 @@ let _apiBackoff = Date.now();
 
 /**
  * @summary delays execution for at least a specified number of seconds
- * @param {number} seconds number of seconds to delay for
+ * @param {number} ms number of milliseconds to delay for
  * @returns {Promise<void>}
  */
-export const wait = (seconds) => new Promise((res) => setTimeout(res, seconds * 1e3));
+export const wait = (ms) => new Promise((res) => setTimeout(res, ms));
 
 /**
  * @summary starts the bot server
@@ -120,7 +120,7 @@ export const fetchUrl = async (config, url, json = false) => {
     // Delay SE API query if backoff still active
     const backoffMillis = _apiBackoff - Date.now();
     if (url.includes(apiBase) && backoffMillis > 0) {
-        await new Promise(resolve => setTimeout(resolve, backoffMillis));
+        await wait(backoffMillis);
     }
 
     try {

@@ -9,15 +9,16 @@ describe('String-related utils', () => {
 
     describe('delay', () => {
 
-        const clock = sinon.useFakeTimers();
-        after(() => clock.restore());
+        let clock;
+        beforeEach(() => clock = sinon.useFakeTimers());
+        afterEach(() => clock.restore());
 
         it('should correctly delay execution', async () => {
-            const sleep = 3;
+            const sleep = 3e3;
 
             const prom = wait(sleep);
 
-            clock.tick(sleep * 1e3);
+            clock.tick(sleep);
 
             await expect(prom).to.eventually.be.fulfilled;
         });
