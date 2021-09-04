@@ -1,7 +1,28 @@
-import { expect } from "chai";
-import { listify, parseIds, pluralize } from "../../src/utils.js";
+import chai, { expect } from "chai";
+import prom from "chai-as-promised";
+import sinon from "sinon";
+import { listify, parseIds, pluralize, wait } from "../../src/utils.js";
+
+chai.use(prom);
 
 describe('String-related utils', () => {
+
+    describe('delay', () => {
+
+        const clock = sinon.useFakeTimers();
+        after(() => clock.restore());
+
+        it('should correctly delay execution', async () => {
+            const sleep = 3;
+
+            const prom = wait(sleep);
+
+            clock.tick(sleep * 1e3);
+
+            await expect(prom).to.eventually.be.fulfilled;
+        });
+
+    });
 
     describe('listify', () => {
 

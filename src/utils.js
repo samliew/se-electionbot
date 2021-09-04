@@ -17,6 +17,13 @@ const __dirname = new URL(".", import.meta.url).pathname;
 let _apiBackoff = Date.now();
 
 /**
+ * @summary delays execution for at least a specified number of seconds
+ * @param {number} seconds number of seconds to delay for
+ * @returns {Promise<void>}
+ */
+export const wait = (seconds) => new Promise((res) => setTimeout(res, seconds * 1e3));
+
+/**
  * @summary starts the bot server
  * @param {{ sendMessage(msg:string): Promise<any> }} room
  * @param {import("./index").BotConfig} config
@@ -112,7 +119,7 @@ export const fetchUrl = async (config, url, json = false) => {
 
     // Delay SE API query if backoff still active
     const backoffMillis = _apiBackoff - Date.now();
-    if(url.includes(apiBase) && backoffMillis > 0) {
+    if (url.includes(apiBase) && backoffMillis > 0) {
         await new Promise(resolve => setTimeout(resolve, backoffMillis));
     }
 
@@ -126,7 +133,7 @@ export const fetchUrl = async (config, url, json = false) => {
         });
 
         // Store backoff if SE API
-        if(url.includes(apiBase) && data.backoff) {
+        if (url.includes(apiBase) && data.backoff) {
             _apiBackoff = Date.now() + data.backoff * 1e4 + 50; // 50ms buffer
         }
 
