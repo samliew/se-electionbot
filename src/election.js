@@ -283,8 +283,6 @@ export default class Election {
 
             const [nominationDate, primaryDate, startDate, endDate] = metaVals;
 
-            const electionPost = $('#mainbar .s-prose').slice(0, 2);
-
             const candidateElems = $('#mainbar .candidate-row');
 
             const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get();
@@ -302,12 +300,12 @@ export default class Election {
             this.repNominate = this.scrapeElectionRepToNominate($);
             this.sitename = this.scrapeElectionSiteName($);
             this.title = this.scrapeElectionTitle($);
+            this.chatUrl = this.scrapeChatURL($);
 
             //clear an array before rescraping
             this.arrNominees.length = 0;
             this.arrNominees.push(...nominees);
 
-            this.chatUrl = this.scrapeChatURL($);
             this.chatRoomId = +this.chatUrl?.match(/\d+$/);
             this.chatDomain = this.chatUrl?.split('/')[2]?.replace('chat.', '');
 
