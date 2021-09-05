@@ -4,6 +4,7 @@
   "description": "Stack Exchange Election Bot",
   "main": "src/index.js",
   "scripts": {
+    "typecheck": "tsc --noEmit --project tsconfig.json",
     "postinstall": "patch-package",
     "build": "rimraf dist/ && babel src/ --out-dir dist/",
     "start": "node dist/index.js",
