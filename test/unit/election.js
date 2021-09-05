@@ -49,6 +49,20 @@ describe('Election', () => {
 
         });
 
+        describe('electionNum', () => {
+
+            it('should correctly return election number', () => {
+                const num = 12345;
+
+                const election = new Election({
+                    electionURL: `https://stackoverflow.com/election/${num}`
+                });
+
+                expect(election.electionNum).to.equal(num);
+            });
+
+        });
+
         describe('siteUrl', () => {
 
             it('should correctly return election site URL', () => {

@@ -8,7 +8,6 @@ import { dateToUtcTimestamp, fetchUrl } from './utils.js';
  *
  * @typedef {{
  *  electionURL     : string,
- *  electionNum    ?: number,
  *  arrNominees    ?: Nominee[],
  *  arrWinners     ?: Nominee[],
  *  dateNomination ?: number,
@@ -38,13 +37,6 @@ export default class Election {
     constructor(init) {
         Object.assign(this, init);
 
-        //TODO: change the property into a getter
-        const { electionNum, electionURL } = init;
-
-        this.electionNum = electionNum ?
-            +electionNum :
-            +electionURL.split('/').pop() || null;
-
         // private
         this._prevObj = null;
     }
@@ -72,6 +64,15 @@ export default class Election {
         const { chatUrl } = this;
         const { hostname } = new URL(chatUrl);
         return hostname.replace(/chat\./, "");
+    }
+
+    /**
+     * @summary returns an election number
+     * @returns {number}
+     */
+    get electionNum() {
+        const { electionURL } = this;
+        return +electionURL.replace(/\D+(\d+)$/, "$1");
     }
 
     /**
@@ -369,7 +370,6 @@ export default class Election {
 
             // Detect active election number if not specified
             if (this.isActive() && this.electionNum === null) {
-                this.electionNum = +metaPhaseElems.attr('href').match(/\d+/)?.pop() || null;
 
                 // Append to electionURL
                 this.electionURL += `/${this.electionNum}`;
