@@ -1,23 +1,43 @@
 import cron from "node-cron";
 import { dateToUtcTimestamp } from "./utils.js";
 
+/**
+ * @typedef {import("chatexchange/dist/Room").default} Room
+ * @typedef {import("./election").default} Election
+ *
+ * @typedef {{
+ *  nomination : string,
+ *  primary : string,
+ *  election : string,
+ *  ended : string
+ * }} ElectionSchedules
+ */
+
 export default class ScheduledAnnouncement {
 
+    // Run the sub-functions once only
+    /** @type {string} */
+    _nominationSchedule = null;
+    /** @type {string} */
+    _primarySchedule = null;
+    /** @type {string} */
+    _electionStartSchedule = null;
+    /** @type {string} */
+    _electionEndSchedule = null;
+
     /**
-     * @param {import("chatexchange/dist/Room").default} [room]
-     * @param {import("./election").default} [election]
+     * @param {Room} [room]
+     * @param {Election} [election]
      * @param {import("./index").BotConfig} [config]
      */
     constructor(room, election, config) {
+        /** @type {Room} */
         this._room = room;
-        this._election = election;
-        this._botConfig = config;
 
-        // Run the sub-functions once only
-        this._nominationSchedule = null;
-        this._primarySchedule = null;
-        this._electionStartSchedule = null;
-        this._electionEndSchedule = null;
+        /** @type {Election} */
+        this._election = election;
+
+        this._botConfig = config;
 
         // Store task so we can stop if needed
         this._nominationTask = null;
@@ -26,10 +46,18 @@ export default class ScheduledAnnouncement {
         this._electionEndTask = null;
     }
 
+    /**
+     * @summary checks if the election has "primary" schedule
+     * @returns {boolean}
+     */
     get hasPrimary() {
         return !this._primarySchedule;
     }
 
+    /**
+     * @summary returns election schedules
+     * @returns {ElectionSchedules}
+     */
     get schedules() {
         return {
             nomination: this._nominationSchedule,
@@ -39,14 +67,27 @@ export default class ScheduledAnnouncement {
         };
     }
 
+    /**
+     * @summary sets announcement Room
+     * @param {Room} room room to set
+     */
     setRoom(room) {
         this._room = room;
     }
 
+    /**
+     * @summary sets announcement Election
+     * @param {Election} election election to set
+     */
     setElection(election) {
         this._election = election;
     }
 
+    /**
+     * @summary initializes election "end" CRON job
+     * @param {string|number|Date} date date to set
+     * @returns {boolean}
+     */
     initElectionEnd(date) {
         if (this._electionEndSchedule != null || this._electionEndTask != null) return false;
 
@@ -66,6 +107,11 @@ export default class ScheduledAnnouncement {
         }
     }
 
+    /**
+     * @summary initializes election "start" CRON job
+     * @param {string|number|Date} date date to set
+     * @returns {boolean}
+     */
     initElectionStart(date) {
         if (this._electionStartSchedule != null || this._electionStartTask != null || typeof date == 'undefined') return false;
 
@@ -85,6 +131,11 @@ export default class ScheduledAnnouncement {
         }
     }
 
+    /**
+     * @summary initializes election "primary" CRON job
+     * @param {string|number|Date} date date to set
+     * @returns {boolean}
+     */
     initPrimary(date) {
         if (this._primarySchedule != null || this._primaryTask != null || typeof date == 'undefined') return false;
 
@@ -104,6 +155,11 @@ export default class ScheduledAnnouncement {
         }
     }
 
+    /**
+     * @summary initializes election "nomination" CRON job
+     * @param {string|number|Date} date date to set
+     * @returns {boolean}
+     */
     initNomination(date) {
         if (this._nominationSchedule != null || this._nominationTask != null || typeof date == 'undefined') return false;
 
@@ -140,37 +196,67 @@ export default class ScheduledAnnouncement {
         console.log('CRON - testing cron     - ', cs);
     }
 
+    /**
+     * @summary initializes all CRON jobs
+     * @returns {boolean}
+     */
     initAll() {
-        this.initNomination(this._election.dateNomination);
-        this.initPrimary(this._election.datePrimary);
-        this.initElectionStart(this._election.dateElection);
-        this.initElectionEnd(this._election.dateEnded);
+        const { _election } = this;
+
+        const statuses = [
+            this.initNomination(_election.dateNomination),
+            this.initPrimary(_election.datePrimary),
+            this.initElectionStart(_election.dateElection),
+            this.initElectionEnd(_election.dateEnded),
+        ];
+
+        return statuses.every(Boolean);
     }
 
+    /**
+     * @summary cancels the "end" job
+     * @returns {void}
+     */
     cancelElectionEnd() {
         if (this._electionEndTask != null) this._electionEndTask.stop();
         this._electionEndSchedule = null;
         console.log('CRON - cancelled election end cron job');
     }
 
+    /**
+     * @summary cancels the "start" job
+     * @returns {void}
+     */
     cancelElectionStart() {
         if (this._electionStartTask != null) this._electionStartTask.stop();
         this._electionStartSchedule = null;
         console.log('CRON - cancelled election start cron job');
     }
 
+    /**
+     * @summary cancels the "primary" job
+     * @returns {void}
+     */
     cancelPrimary() {
         if (this._primaryTask != null) this._primaryTask.stop();
         this._primarySchedule = null;
         console.log('CRON - cancelled primary phase cron job');
     }
 
+    /**
+     * @summary cacels the "nomination" job
+     * @returns {void}
+     */
     cancelNomination() {
         if (this._nominationTask != null) this._nominationTask.stop();
         this._nominationSchedule = null;
         console.log('CRON - cancelled nomination phase cron job');
     }
 
+    /**
+     * @summary cancels all CRON jobs
+     * @returns {void}
+     */
     cancelAll() {
         this.cancelElectionEnd();
         this.cancelElectionStart();

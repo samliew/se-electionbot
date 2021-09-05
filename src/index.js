@@ -18,7 +18,7 @@ import {
     sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
-import Announcement from './ScheduledAnnouncement.js';
+import Announcement from './announcement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import {
     dateToRelativetime,
