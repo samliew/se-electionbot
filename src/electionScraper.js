@@ -138,7 +138,7 @@ export class ElectionScraper {
                     return;
                 }
 
-                const election = new Election({ electionURL, electionNum });
+                const election = new Election({ electionURL });
 
                 elections.set(electionNum, election);
             });
