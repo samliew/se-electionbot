@@ -71,7 +71,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ba
             return sayCalcFailed(false);
         }
 
-        const { electionUrl, phase, repNominate, siteUrl } = election;
+        const { electionURL, phase, repNominate, siteUrl } = election;
 
         const { isModerator } = user;
 
@@ -211,7 +211,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ba
             }
             // If have not begun, or nomination phase, ask user to nominate themselves
             else if (['null', 'nomination'].includes(phase)) {
-                responseText += ` Please consider nominating yourself in the ${makeURL("election", electionUrl)}!`;
+                responseText += ` Please consider nominating yourself in the ${makeURL("election", electionURL)}!`;
             }
             // Did not nominate (primary, election, ended, cancelled)
             else if (!hasNominated) {
@@ -248,7 +248,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ba
                 const perhapsNominateThreshold = 30;
 
                 responseText += candidateScore >= perhapsNominateThreshold ?
-                    ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
+                    ` Perhaps consider nominating in the ${makeURL("election", electionURL)}?` :
                     ` Having a high score is not a requirement - you can still nominate yourself!`;
             }
         }

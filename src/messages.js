@@ -17,11 +17,11 @@ import { parsePackage } from "./utils/package.js";
  * @returns {string}
  */
 export const sayHI = (election) => {
-    const { arrNominees, electionUrl, phase } = election;
+    const { arrNominees, electionURL, phase } = election;
 
     const { length } = arrNominees;
 
-    const electionLink = makeURL("election", `${electionUrl}?tab=${phase}`);
+    const electionLink = makeURL("election", `${electionURL}?tab=${phase}`);
     const phasePrefix = `The ${electionLink} is in the ${phase} phase`;
 
     const pluralCandidates = pluralizePhrase(length, `are ${length} candidates`, `is ${length} candidate`);
@@ -70,14 +70,14 @@ export const sayAreModsPaid = (election) => {
  * @param {Election} election
  * @returns {string}
  */
-export const sayNotStartedYet = ({ dateNomination, electionUrl }) => `The ${makeURL("election", electionUrl)} has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativetime(dateNomination)}).`;
+export const sayNotStartedYet = ({ dateNomination, electionURL }) => `The ${makeURL("election", electionURL)} has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativetime(dateNomination)}).`;
 
 /**
  * @summary gets election is over response text
  * @param {Election} election
  * @returns {string}
  */
-export const sayElectionIsOver = ({ electionUrl }) => `The ${makeURL("election", electionUrl)} is over. See you next time!`;
+export const sayElectionIsOver = ({ electionURL }) => `The ${makeURL("election", electionURL)} is over. See you next time!`;
 
 /**
  * @summary Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
@@ -93,16 +93,16 @@ export const sayInformedDecision = () => `If you want to make an informed decisi
 export const sayAboutVoting = (
     election
 ) => {
-    const { dateElection, electionUrl, phase, repVote, statVoters } = election;
+    const { dateElection, electionURL, phase, repVote, statVoters } = election;
 
     const comeBackFinalPhaseText = ` Don't forget to come back ${linkToRelativeTimestamp(dateElection)} to also vote in the election's final voting phase!`;
 
     const phaseMap = {
         cancelled: statVoters,
-        ended: `The ${makeURL("election", electionUrl)} has ended. You can no longer vote.`,
-        election: `If you have at least ${repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${electionUrl}?tab=election). ${sayInformedDecision()}`,
-        nomination: `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${electionUrl}?tab=nomination) as well as their answers to the questionnaire to find out more about their moderation style.${comeBackFinalPhaseText}`,
-        primary: `If you have at least ${repVote} reputation, you can freely [vote on the candidates](${electionUrl}?tab=primary). ${sayInformedDecision()}${comeBackFinalPhaseText}`
+        ended: `The ${makeURL("election", electionURL)} has ended. You can no longer vote.`,
+        election: `If you have at least ${repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${electionURL}?tab=election). ${sayInformedDecision()}`,
+        nomination: `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${electionURL}?tab=nomination) as well as their answers to the questionnaire to find out more about their moderation style.${comeBackFinalPhaseText}`,
+        primary: `If you have at least ${repVote} reputation, you can freely [vote on the candidates](${electionURL}?tab=primary). ${sayInformedDecision()}${comeBackFinalPhaseText}`
     };
 
     return phaseMap[phase] || sayNotStartedYet(election);
@@ -158,7 +158,7 @@ export const sayRequiredBadges = (election, badges) => {
  * @param {boolean} [required]
  * @returns {string}
  */
-export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = false) => 
+export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = false) =>
     ` ${ownSelf ? "You are" : "The user is"} missing ${pluralizePhrase(count, "these", "this")} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
 
 /**
@@ -188,11 +188,11 @@ export const sayCurrentMods = (election, currMods, decodeEntities) => {
  * @returns {string}
  */
 export const sayNextPhase = (election) => {
-    const { phase, datePrimary, dateElection, dateEnded, electionUrl, statVoters } = election;
+    const { phase, datePrimary, dateElection, dateEnded, electionURL, statVoters } = election;
 
     const phaseMap = {
         "cancelled": statVoters,
-        "election": `The [election](${electionUrl}?tab=election) is currently in the final voting phase, ending at ${linkToUtcTimestamp(dateEnded)} (${dateToRelativetime(dateEnded)}).`,
+        "election": `The [election](${electionURL}?tab=election) is currently in the final voting phase, ending at ${linkToUtcTimestamp(dateEnded)} (${dateToRelativetime(dateEnded)}).`,
         "ended": sayElectionIsOver(election),
         "null": sayNotStartedYet(election),
         "nomination": `The next phase is the ${datePrimary ?
@@ -210,12 +210,12 @@ export const sayNextPhase = (election) => {
  * @returns {string}
  */
 export const sayCurrentWinners = (election) => {
-    const { phase, arrWinners = [], siteUrl, electionUrl } = election;
+    const { phase, arrWinners = [], siteUrl, electionURL } = election;
 
     const phaseMap = {
         "default": `The election is not over yet. Stay tuned for the winners!`,
         "null": sayNotStartedYet(election),
-        "ended": `The winners can be found on the ${makeURL("election page", electionUrl)}.`
+        "ended": `The winners can be found on the ${makeURL("election page", electionURL)}.`
     };
 
     const { length } = arrWinners;
@@ -263,9 +263,9 @@ export const sayElectionSchedule = (election) => {
  * @returns {string}
  */
 export const sayOffTopicMessage = (election, asked) => {
-    const { electionUrl } = election;
+    const { electionURL } = election;
 
-    const text = `This room is for discussion about the ${makeURL("election", electionUrl)}. Please try to keep the room on-topic. Thank you!`;
+    const text = `This room is for discussion about the ${makeURL("election", electionURL)}. Please try to keep the room on-topic. Thank you!`;
 
     const [, messageId] = asked.split('offtopic');
 

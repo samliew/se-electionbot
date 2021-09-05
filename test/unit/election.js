@@ -11,7 +11,9 @@ describe('Election', () => {
 
             it('should correctly return chat room id', () => {
 
-                const election = new Election("https://stackoverflow.com/election/12");
+                const election = new Election({
+                    electionURL: "https://stackoverflow.com/election/12"
+                });
 
                 const chatUrls = [
                     "https://chat.stackoverflow.com/rooms/217027/",
@@ -27,7 +29,9 @@ describe('Election', () => {
             });
 
             it('should throw on trying to return NaN', () => {
-                const election = new Election("https://google.com");
+                const election = new Election({
+                    electionURL: "https://google.com"
+                });
                 expect(() => election.chatRoomId).to.throw(GetterError);
             });
 
@@ -37,7 +41,7 @@ describe('Election', () => {
 
             it('should correctly return chat domain', () => {
 
-                const election = new Election("https://stackoverflow.com/election/12");
+                const election = new Election({ electionURL: "https://stackoverflow.com/election/12" });
                 election.chatUrl = "https://chat.stackoverflow.com/rooms/217027/";
 
                 expect(election.chatDomain).to.equal("stackoverflow.com");
@@ -48,7 +52,7 @@ describe('Election', () => {
         describe('siteUrl', () => {
 
             it('should correctly return election site URL', () => {
-                const { siteUrl } = new Election("https://linguistics.stackexchange.com/election/1");
+                const { siteUrl } = new Election({ electionURL: "https://linguistics.stackexchange.com/election/1" });
                 expect(siteUrl).to.equal("https://linguistics.stackexchange.com");
             });
 
@@ -64,7 +68,7 @@ describe('Election', () => {
             const tomorrow = dateToUtcTimestamp(new Date(now + 864e5));
             const yesterday = dateToUtcTimestamp(new Date(now - 864e5));
 
-            const election = new Election("https://stackoverflow.com/election/12", 12);
+            const election = new Election({ electionURL: "https://stackoverflow.com/election/12" });
             election.dateElection = tomorrow;
             election.dateEnded = tomorrow;
             election.datePrimary = tomorrow;
@@ -101,7 +105,7 @@ describe('Election', () => {
         it('should correctly determine if an id is a nominee', () => {
             const testIds = [42, 24, -9000];
 
-            const election = new Election("https://stackoverflow.com/election/12", 12);
+            const election = new Election({ electionURL: "https://stackoverflow.com/election/12" });
             // @ts-expect-error
             election.arrNominees.push(...testIds.map((i) => ({ userId: i })));
             expect(election.isNominee(24)).to.be.true;
@@ -111,7 +115,7 @@ describe('Election', () => {
         it('should accept User instance instead of an id', () => {
             const user = /** @type {import("../../src/index").User} */({ id: 42 });
 
-            const election = new Election("https://stackoverflow.com/election/42");
+            const election = new Election({ electionURL: "https://stackoverflow.com/election/42" });
             // @ts-expect-error
             election.arrNominees.push({ userId: 42, userName: "answer" });
 
@@ -124,7 +128,7 @@ describe('Election', () => {
 
         it('should correctly determine active state', () => {
 
-            const election = new Election("https://stackoverflow.com/election/12");
+            const election = new Election({ electionURL: "https://stackoverflow.com/election/12" });
 
             const inactivePhases = [null, "ended", "cancelled"];
             const activePhases = ["election", "primary", "nomination"];

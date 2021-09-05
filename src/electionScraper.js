@@ -33,11 +33,11 @@ export class ElectionScraper {
 
     /**
      * @summary extracts election id from election URL
-     * @param {string} electionUrl election URL to extract from
+     * @param {string} electionURL election URL to extract from
      * @returns {number}
      */
-    static getIdFromElectionUrl(electionUrl) {
-        const [, id] = /\/election\/(\d+)$/.exec(electionUrl) || [];
+    static getIdFromElectionUrl(electionURL) {
+        const [, id] = /\/election\/(\d+)$/.exec(electionURL) || [];
         return id ? +id : INVALID_ELECTION_ID;
     }
 
@@ -132,14 +132,15 @@ export class ElectionScraper {
                 }
 
                 const { href } = electionAnchor;
-                const electionId = ElectionScraper.getIdFromElectionUrl(href);
-                if (electionId === INVALID_ELECTION_ID) {
+                const electionNum = ElectionScraper.getIdFromElectionUrl(href);
+                if (electionNum === INVALID_ELECTION_ID) {
                     console.log(`got invalid election id on ${electionURL}`);
                     return;
                 }
 
-                const election = new Election(electionURL, electionId);
-                elections.set(electionId, election);
+                const election = new Election({ electionURL, electionNum });
+
+                elections.set(electionNum, election);
             });
 
         } catch (error) {

@@ -2,7 +2,7 @@ import Client from "chatexchange";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { getAllNamedBadges, getModerators } from "./api.js";
-import { isAliveCommand, setAccessCommand, setThrottleCommand, setScrapeIntCommand, timetravelCommand } from "./commands/commands.js";
+import { isAliveCommand, setAccessCommand, setScrapeIntCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
@@ -85,8 +85,8 @@ const announcement = new Announcement();
     const defaultChatRoomId = +process.env.CHAT_ROOM_ID;
     const accountEmail = process.env.ACCOUNT_EMAIL;
     const accountPassword = process.env.ACCOUNT_PASSWORD;
-    const electionUrl = process.env.ELECTION_PAGE_URL;
-    const electionSiteHostname = electionUrl.split('/')[2];
+    const electionURL = process.env.ELECTION_PAGE_URL;
+    const electionSiteHostname = electionURL.split('/')[2];
     const electionSiteUrl = 'https://' + electionSiteHostname;
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
 
@@ -211,7 +211,7 @@ const announcement = new Announcement();
     if (BotConfig.debug) {
         console.error('WARNING - Debug mode is on.');
 
-        console.log('electionUrl:', electionUrl);
+        console.log('electionURL:', electionURL);
         console.log('electionSiteHostname:', electionSiteHostname);
         console.log('electionSiteUrl:', electionSiteUrl);
 
@@ -334,7 +334,7 @@ const announcement = new Announcement();
         const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug);
 
         // Wait for election page to be scraped
-        election = new Election(electionUrl);
+        election = new Election({ electionURL });
         await election.scrapeElection(BotConfig);
         if (election.validate() === false) {
             console.error('FATAL - Invalid election data!');
@@ -346,7 +346,7 @@ const announcement = new Announcement();
         if (!BotConfig.debug && election.isActive()) {
 
             // Chat room link was found on election page
-            if(election.chatRoomId && election.chatDomain) {
+            if (election.chatRoomId && election.chatDomain) {
                 BotConfig.chatRoomId = election.chatRoomId;
                 BotConfig.chatDomain = election.chatDomain;
 
@@ -780,7 +780,7 @@ const announcement = new Announcement();
                     }
                     else if (election.arrNominees.length > 0) {
                         // Don't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
-                        responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.electionUrl}): ` +
+                        responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.electionURL}): ` +
                             election.arrNominees.map(v => v.userName).join(', ');
                     }
                     else {
@@ -840,7 +840,7 @@ const announcement = new Announcement();
                         responseText = sayNotStartedYet(election);
                     }
                     else if (election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                        responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}.`;
+                        responseText = `The [election](${election.electionURL}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${electionSiteUrl + '/users/' + v.userId})`).join(', ')}.`;
 
                         if (election.resultsUrl) {
                             responseText += ` You can [view the results online via OpaVote](${election.resultsUrl}).`;
@@ -853,12 +853,12 @@ const announcement = new Announcement();
                         responseText = election.statVoters;
                     }
                     else if (election.phase === 'election') {
-                        responseText = `The [election](${election.electionUrl}?tab=election) is in the final voting phase. `;
+                        responseText = `The [election](${election.electionURL}?tab=election) is in the final voting phase. `;
                         responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
                     }
                     // Nomination or primary phase
                     else {
-                        responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.arrNominees.length} candidates.`;
+                        responseText = `The [election](${election.electionURL}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.arrNominees.length} candidates.`;
 
                         if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${linkToRelativeTimestamp(election.dateElection)} to vote in the final election voting phase.`;
                     }
@@ -999,7 +999,7 @@ const announcement = new Announcement();
                 BotConfig.scrapeIntervalMins = 2;
 
                 // Announce election ending soon
-                await room.sendMessage(`The ${makeURL('election', election.electionUrl)} is ending soon. This is the final moment to cast your votes!`);
+                await room.sendMessage(`The ${makeURL('election', election.electionURL)} is ending soon. This is the final moment to cast your votes!`);
                 BotConfig.flags.saidElectionEndingSoon = true;
 
                 // Record last sent message time so we don't flood the room
@@ -1015,7 +1015,7 @@ const announcement = new Announcement();
 
                 // Announce
                 newNominees.forEach(async nominee => {
-                    await room.sendMessage(`**We have a new [nomination](${election.electionUrl}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${nominee.permalink})!`);
+                    await room.sendMessage(`**We have a new [nomination](${election.electionURL}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${nominee.permalink})!`);
                     console.log(`NOMINATION`, nominee);
                 });
             }
@@ -1024,7 +1024,7 @@ const announcement = new Announcement();
             //    1. Room is idle, and there was at least some previous activity, and last message more than lowActivityCheckMins minutes ago
             // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
             else if (idleDoSayHi) {
-                
+
                 console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${BotConfig.lowActivityCountThreshold}).`,
                     `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
@@ -1044,10 +1044,10 @@ const announcement = new Announcement();
                 clearTimeout(rescraperTimeout);
                 rescraperTimeout = null;
             }
-        }
+        };
         const startRescrape = () => {
             rescraperTimeout = setTimeout(rescrapeFn, BotConfig.scrapeIntervalMins * 60000);
-        }
+        };
 
 
         // Interval to keep-alive

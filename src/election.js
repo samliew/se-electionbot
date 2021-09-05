@@ -5,6 +5,20 @@ import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 /**
  * @typedef {import("./index").User} User
  * @typedef {import("./index.js").BotConfig} BotConfig
+ *
+ * @typedef {{
+ *  electionURL     : string,
+ *  electionNum    ?: number,
+ *  arrNominees    ?: Nominee[],
+ *  arrWinners     ?: Nominee[],
+ *  dateNomination ?: number,
+ *  datePrimary    ?: number,
+ *  dateElection   ?: number,
+ *  dateEnded      ?: number,
+ * }} ElectionInit
+ *
+ * for the 'this' annotations, see my answer (OW):
+ * @see https://stackoverflow.com/a/69059671/11407695
  */
 
 export default class Election {
@@ -15,16 +29,21 @@ export default class Election {
     /** @type {Nominee[]} */
     arrWinners = [];
 
+    /** @type {string} */
+    electionURL;
+
     /**
-     * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
-     * @param {string|number} [electionNum] number of election, can be a numeric string
+     * @param {ElectionInit} init election data to instantiate with (`electionURL` is required)
      */
-    constructor(electionUrl, electionNum = null) {
-        this.electionUrl = electionUrl;
+    constructor(init) {
+        Object.assign(this, init);
+
+        //TODO: change the property into a getter
+        const { electionNum, electionURL } = init;
 
         this.electionNum = electionNum ?
             +electionNum :
-            +electionUrl.split('/').pop() || null;
+            +electionURL.split('/').pop() || null;
 
         // private
         this._prevObj = null;
@@ -60,16 +79,22 @@ export default class Election {
      * @example
      *      https://stackoverflow.com
      * @returns {string}
+     * @this {Election & ElectionInit}
      */
     get siteUrl() {
-        const { electionUrl } = this;
-        const { protocol, hostname } = new URL(electionUrl);
+        const { electionURL } = this;
+        const { protocol, hostname } = new URL(electionURL);
         return `${protocol}//${hostname}`;
     }
 
+    /**
+     * @summary validates the instance
+     * @returns {boolean}
+     * @this {Election & ElectionInit}
+     */
     validate() {
         return !(
-            this.validElectionUrl(this.electionUrl) &&
+            this.validElectionUrl(this.electionURL) &&
             !isNaN(this.electionNum) &&
             !isNaN(this.repNominate) &&
             !isNaN(this.numCandidates) &&
@@ -82,12 +107,12 @@ export default class Election {
     }
 
     /**
-     * @summary checks if the electionUrl is valid
-     * @param {string} electionUrl election URL to test
+     * @summary checks if the electionURL is valid
+     * @param {string} electionURL election URL to test
      * @returns {boolean}
      */
-    validElectionUrl(electionUrl) {
-        return /^https:\/\/([^\/]+\.)+(com|net|org)\/election(\/\d+)?$/.test(electionUrl);
+    validElectionUrl(electionURL) {
+        return /^https:\/\/([^\/]+\.)+(com|net|org)\/election(\/\d+)?$/.test(electionURL);
     }
 
     /**
@@ -281,12 +306,13 @@ export default class Election {
 
     /**
      * @param {BotConfig} config bot config
+     * @this {Election & ElectionInit}
      */
     async scrapeElection(config) {
 
-        // Validate electionUrl, since without it we cannot continue
-        if (!this.validElectionUrl(this.electionUrl)) {
-            console.error("Invalid electionUrl format.");
+        // Validate electionURL, since without it we cannot continue
+        if (!this.validElectionUrl(this.electionURL)) {
+            console.error("Invalid electionURL format.");
             return;
         }
 
@@ -294,9 +320,9 @@ export default class Election {
         this._prevObj = Object.assign({}, this); // fast way of cloning an object
         this._prevObj._prevObj = null;
 
-        const { electionUrl } = this;
+        const { electionURL } = this;
 
-        const electionPageUrl = `${electionUrl}?tab=nomination`;
+        const electionPageUrl = `${electionURL}?tab=nomination`;
 
         try {
             const pageHtml = await fetchUrl(config, electionPageUrl);
@@ -345,8 +371,8 @@ export default class Election {
             if (this.isActive() && this.electionNum === null) {
                 this.electionNum = +metaPhaseElems.attr('href').match(/\d+/)?.pop() || null;
 
-                // Append to electionUrl
-                this.electionUrl += `/${this.electionNum}`;
+                // Append to electionURL
+                this.electionURL += `/${this.electionNum}`;
 
                 if (config.verbose) console.log('INFO  - Election number was auto-detected', this.electionNum);
             }
@@ -383,12 +409,12 @@ export default class Election {
             }
 
             console.log(
-                `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.\n` +
+                `SCRAPE - Election page ${this.electionURL} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.\n` +
                 `-------- PHASE ${this.phase};  CANDIDATES ${this.arrNominees.length};  WINNERS ${this.arrWinners.length};`
             );
         }
         catch (err) {
-            console.error(`SCRAPE - Failed scraping ${this.electionUrl}`, err);
+            console.error(`SCRAPE - Failed scraping ${this.electionURL}`, err);
         }
     }
 
