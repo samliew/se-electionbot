@@ -63,6 +63,22 @@ describe('Election', () => {
 
         });
 
+        describe('numCandidates', () => {
+
+            it('should correctly return the number of candidates', () => {
+
+                const election = new Election({
+                    electionURL: "bogus.com", arrNominees: [
+                        { userId: 42, userName: "Answer", permalink: "a.com", userScore: "42", userYears: "unknown" },
+                        { userId: -1, userName: "Question", permalink: "q.org", userScore: "0", userYears: "unknown" }
+                    ]
+                });
+
+                expect(election.numCandidates).to.equal(2);
+            });
+
+        });
+
         describe('siteUrl', () => {
 
             it('should correctly return election site URL', () => {

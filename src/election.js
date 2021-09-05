@@ -76,6 +76,15 @@ export default class Election {
     }
 
     /**
+     * @summary returns number of candidates (nominees)
+     * @returns {number}
+     */
+    get numCandidates() {
+        const { arrNominees } = this;
+        return arrNominees.length;
+    }
+
+    /**
      * @summary returns clean election site URL
      * @example
      *      https://stackoverflow.com
@@ -335,9 +344,8 @@ export default class Election {
 
             const metaElems = content.find(".flex--item.mt4 .d-flex.gs4 .flex--item:nth-child(2)");
             const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
-            const metaPhaseElems = $('#mainbar .js-filter-btn a');
 
-            const [numCandidates, numPositions] = metaVals.slice(-2, metaVals.length);
+            const [, numPositions] = metaVals.slice(-2, metaVals.length);
 
             // Insert null value in second position for elections with no primary phase
             if (metaVals.length === 5) metaVals.splice(1, 0, null);
@@ -353,7 +361,6 @@ export default class Election {
             this.datePrimary = primaryDate;
             this.dateElection = startDate;
             this.dateEnded = endDate;
-            this.numCandidates = +numCandidates;
             this.numPositions = +numPositions;
 
             this.repVote = this.scrapeElectionRepToVote($);
