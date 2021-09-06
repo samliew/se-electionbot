@@ -1,5 +1,5 @@
 import Client from "chatexchange";
-import { ChatEventType } from "chatexchange/dist/WebsocketEvent";
+import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
@@ -41,6 +41,10 @@ const announcement = new Announcement();
  *
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} WebsocketEvent
  *
+ * @typedef {typeof import("chatexchange/dist/WebsocketEvent").ChatEventType} EventType
+ *
+ * @typedef {import("chatexchange/dist/Client").Host} Host
+ *
  * @typedef {{
  *  chatRoomId: number,
  *  chatDomain: string,
@@ -81,7 +85,7 @@ const announcement = new Announcement();
     // Environment variables
     const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
-    const defaultChatDomain = /** @type {import("chatexchange/dist/Client").Host} */ (process.env.CHAT_DOMAIN);
+    const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN);
     const defaultChatRoomId = +process.env.CHAT_ROOM_ID;
     const accountEmail = process.env.ACCOUNT_EMAIL;
     const accountPassword = process.env.ACCOUNT_PASSWORD;
@@ -92,6 +96,9 @@ const announcement = new Announcement();
     const defaultApiKey = process.env.STACK_API_KEY;
     const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
 
+    /** @type {{ ChatEventType: EventType }} */
+    //@ts-expect-error
+    const { ChatEventType } = WE;
 
     // App variables
     const isStackOverflow = electionSiteHostname.includes('stackoverflow.com');
@@ -192,7 +199,7 @@ const announcement = new Announcement();
             saidElectionEndingSoon: false,
         },
 
-        updateLastMessageTime: function(lastMessageTime = Date.now()) {
+        updateLastMessageTime: function (lastMessageTime = Date.now()) {
             BotConfig.lastMessageTime = lastMessageTime;
             BotConfig.lastActivityTime = lastMessageTime;
         }
@@ -348,7 +355,7 @@ const announcement = new Announcement();
         }
 
         // If is in production mode, and is an active election, auto-detect and set chat domain and chat room ID to join
-        if(!BotConfig.debug && election.isActive()) {
+        if (!BotConfig.debug && election.isActive()) {
             BotConfig.chatRoomId = election.chatRoomId;
             BotConfig.chatDomain = election.chatDomain;
 
@@ -387,7 +394,7 @@ const announcement = new Announcement();
         }
 
         // Main event listener
-        room.on('message', async (/** @type {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} */ msg) => {
+        room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
             const encoded = await msg.content;
 
             // Decode HTML entities in messages, lowercase version for matching
@@ -977,14 +984,14 @@ const announcement = new Announcement();
             }
 
             // After rescraping, the election is over but we do not have winners yet
-            else if(election.phase === 'ended' && !election.arrWinners.length) {
+            else if (election.phase === 'ended' && !election.arrWinners.length) {
 
                 // Reduce scrape interval further
                 BotConfig.scrapeIntervalMins = 0.5;
             }
 
             // The election is ending within the next 10 minutes or less, do once only
-            else if(election.phase === 'election' && election.dateEnded - 10 * 6e5 <= Date.now() && !BotConfig.flags.saidElectionEndingSoon) {
+            else if (election.phase === 'election' && election.dateEnded - 10 * 6e5 <= Date.now() && !BotConfig.flags.saidElectionEndingSoon) {
 
                 // Reduce scrape interval
                 BotConfig.scrapeIntervalMins = 2;
@@ -1015,7 +1022,7 @@ const announcement = new Announcement();
             //    1. Room is idle, and there was at least some previous activity, and last message more than lowActivityCheckMins minutes ago
             // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
             else if (idleDoSayHi) {
-                
+
                 console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${lowActivityCountThreshold}).`,
                     `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
 
@@ -1035,10 +1042,10 @@ const announcement = new Announcement();
                 clearTimeout(rescraperTimeout);
                 rescraperTimeout = null;
             }
-        }
+        };
         const startRescrape = () => {
             rescraperTimeout = setTimeout(rescrapeFn, BotConfig.scrapeIntervalMins * 60000);
-        }
+        };
 
 
         // Interval to keep-alive
