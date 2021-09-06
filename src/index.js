@@ -1,4 +1,5 @@
 import Client from "chatexchange";
+import { ChatEventType } from "chatexchange/dist/WebsocketEvent";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
@@ -37,6 +38,8 @@ const announcement = new Announcement();
  *  id:string,
  *  required?: boolean
  * }} Badge
+ *
+ * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} WebsocketEvent
  *
  * @typedef {{
  *  chatRoomId: number,
@@ -94,16 +97,14 @@ const announcement = new Announcement();
     const isStackOverflow = electionSiteHostname.includes('stackoverflow.com');
     const scriptInitDate = new Date();
     const ignoredEventTypes = [
-        //  1,  // MessagePosted
-        2,  // MessageEdited
-        3,  // UserEntered
-        4,  // UserLeft
-        5,  // RoomNameChanged
-        6,  // MessageStarred
-        //  8,  // UserMentioned
-        9,  // MessageFlagged
-        10, // MessageDeleted
-        11, // FileAdded
+        ChatEventType.MESSAGE_EDITED,
+        ChatEventType.USER_JOINED,
+        ChatEventType.USER_LEFT,
+        ChatEventType.ROOM_RENAMED,
+        ChatEventType.STARS_CHANGED,
+        ChatEventType.MESSAGE_FLAGGED,
+        ChatEventType.MESSAGE_DELETED,
+        ChatEventType.FILE_ADDED,
         12, // MessageFlaggedForModerator
         13, // UserSettingsChanged
         14, // GlobalNotification
@@ -386,7 +387,7 @@ const announcement = new Announcement();
         }
 
         // Main event listener
-        room.on('message', async (/** @type {import("chatexchange/dist/Message").default} */ msg) => {
+        room.on('message', async (/** @type {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} */ msg) => {
             const encoded = await msg.content;
 
             // Decode HTML entities in messages, lowercase version for matching
@@ -396,10 +397,10 @@ const announcement = new Announcement();
 
             /** @type {ResolvedMessage} */
             const resolvedMsg = {
-                eventType: msg._eventType,
-                userName: await msg.userName,
-                userId: await msg.userId,
-                targetUserId: [8, 18].includes(msg._eventType) ? await msg.targetUserId : undefined,
+                eventType: msg.eventType,
+                userName: msg.userName,
+                userId: msg.userId,
+                targetUserId: msg.targetUserId,
                 content,
             };
 
