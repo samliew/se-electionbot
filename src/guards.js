@@ -43,17 +43,6 @@ export const isAskedAboutVoting = (text) => {
 };
 
 /**
- * @summary checks if the message asked to tell one's candidate score
- * @param {string} text
- * @returns {boolean}
- */
-export const isAskedForCandidateScore = (text) => {
-    return /my candidate score/.test(text) ||
-        /(what is|what's) the candidate score (for|of) \d+$/.test(text);
-};
-
-
-/**
  * @summary checks if the message asked to tell who the current mods are
  * @param {string} text
  * @returns {boolean}
@@ -105,6 +94,15 @@ export const isAskedAboutUsernameDiamond = (text) => {
  */
 export const isAskedWhoMadeMe = (text) => {
     return /who(?:\s+(?:are|is) your)?\s+(?:made|created|owns|develop(?:s|ed|ers?)|maintain(?:s|ers?))(\s+you)?/.test(text);
+};
+
+/**
+ * @summary checks if the message asked for one's candidate score
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedForOwnScore = (text) => {
+    return /what(?: i|')s\s+my(?:\s+candidate)?\s+score(?:$|\?)/i.test(text);
 };
 
 /**
