@@ -3,6 +3,13 @@ import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 
 /**
  * @typedef {import("./index").User} User
+ * @typedef {{
+ *  userId: number,
+ *  userName: string,
+ *  userYears: string,
+ *  userScore: string,
+ *  permalink: string
+ * }} Nominee
  */
 
 export default class Election {
@@ -109,14 +116,6 @@ export default class Election {
     }
 
     /**
-     * @typedef {{
-     *  userId: number,
-     *  userName: string,
-     *  userYears: string,
-     *  userScore: string,
-     *  permalink: string
-     * }} Nominee
-     *
      * @summary scrapes nominee element
      * @param {cheerio.Root} $ Cheerio root element
      * @param {cheerio.Element} el nominee element
