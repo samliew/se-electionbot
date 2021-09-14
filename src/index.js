@@ -417,6 +417,10 @@ const announcement = new Announcement();
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
+
+            // Ignore unnecessary events - always check first
+            if (ignoredEventTypes.includes(msg.eventType)) return;
+
             const encoded = await msg.content;
 
             // Decode HTML entities in messages, lowercase version for matching
@@ -432,9 +436,6 @@ const announcement = new Announcement();
                 targetUserId: msg.targetUserId,
                 content,
             };
-
-            // Ignore unnecessary events
-            if (ignoredEventTypes.includes(resolvedMsg.eventType)) return;
 
             // Ignore stuff from self, Community or Feeds users
             if (meWithId.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
