@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import {
     isAskedAboutModsOrModPowers,
-    isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForOtherScore, isAskedForScoreFormula, isAskedWhoMadeMe
+    isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe
 } from "../../src/guards.js";
 
 /**
@@ -87,6 +87,20 @@ describe('Message Guards', () => {
                 "who is your developer?",
                 "who is your maintainer?"
             ]);
+        });
+    });
+
+    describe(isAskedForOwnScore.name, () => {
+        it('should correctly match my score', () => {
+            allMatch(isAskedForOwnScore, [
+                "what is my candidate score?",
+                "What's my candidate score?",
+                "what is my score?"
+            ]);
+
+            allMatch(isAskedForOwnScore, [
+                "what is candidate score of 42",
+            ], false);
         });
     });
 
