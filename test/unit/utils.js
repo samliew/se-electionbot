@@ -1,7 +1,8 @@
 import { expect } from "chai";
-import { listify, parseIds, pluralize } from "../../src/utils.js";
+import { listify, parseIds, pluralize, fetchChatTranscript } from "../../src/utils.js";
+import { getMockBotConfig } from "../mocks/bot.js";
 
-describe('String-related utils', () => {
+describe('String-related utils', async () => {
 
     describe('listify', () => {
 
@@ -36,6 +37,18 @@ describe('String-related utils', () => {
         it('should parse id strings correctly', () => {
             const parsed = parseIds("1234|56789|101010");
             expect(parsed).to.deep.equal([1234, 56789, 101010]);
+        });
+
+    });
+
+    describe('fetchChatTranscript', async () => {
+
+        it('should fetch chat transcript correctly', async () => {
+            const transcriptUrl = "https://chat.stackoverflow.com/transcript/190503/2019/3/20";
+            const chatMessages = await fetchChatTranscript(getMockBotConfig(), transcriptUrl);
+
+            expect(chatMessages).to.not.be.empty;
+            expect(chatMessages[0].message).to.equal("how do I vote?");
         });
 
     });

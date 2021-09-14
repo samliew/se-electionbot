@@ -25,7 +25,8 @@ import {
     dateToRelativetime,
     dateToUtcTimestamp, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer
+    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer,
+    fetchChatTranscript
 } from './utils.js';
 
 // preserves compatibility with older import style
@@ -238,7 +239,7 @@ const announcement = new Announcement();
         console.log('electionUrl:', electionUrl);
         console.log('electionSiteHostname:', electionSiteHostname);
 
-        Object.entries(BotConfig).forEach(([key, val]) => console.log(key, val));
+        Object.entries(BotConfig).forEach(([key, val]) => typeof val !== 'function' ? console.log(key, val) : 0);
     }
 
     /**
@@ -402,6 +403,16 @@ const announcement = new Announcement();
         // Announce join room if in debug mode
         if (BotConfig.debug) {
             await room.sendMessage(getRandomPlop());
+        }
+
+        // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
+        if (BotConfig.debug && election.phase === 'ended') {
+            const transcriptMessages = await fetchChatTranscript(BotConfig, '');
+            const winnersNotAnnouncedYet = !transcriptMessages.some(v => /^The winners? (are|is) /.test(v.message));
+
+            if(winnersNotAnnouncedYet && election.arrWinners.length > 0) {
+                sayCurrentWinners(election);
+            }
         }
 
         // Main event listener

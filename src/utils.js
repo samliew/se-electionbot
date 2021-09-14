@@ -138,6 +138,39 @@ export const fetchUrl = async (config, url, json = false) => {
 };
 
 /**
+ * @summary fetches the chat room transcript and retrieve messages
+ * @param {import("./index").BotConfig} config
+ * @param {string} url
+ * @returns {Promise<any>}
+ */
+export const fetchChatTranscript = async (config, url) => {
+
+    // Validate chat transcript url
+    if(!/^https:\/\/chat\.stack(?:exchange|overflow)\.com\/transcript\/\d+/.test(url)) return null;
+
+    const chatTranscript = await fetchUrl(config, url);
+
+    const $chat = cheerio.load(/** @type {string} */(chatTranscript));
+
+    const messages = $chat('#transcript .message').map(function(el) {
+        const $this = $chat(el);
+        const userlink = $this.parent().siblings('.signature').find('a');
+        return {
+            username: userlink.text(),
+            chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
+            message: $this.find('.content').text().trim(),
+        };
+    });
+
+    if(config.verbose) {
+        console.log('Transcript:', $chat);
+        console.log('Messages:', messages);
+    }
+
+    return messages;
+};
+
+/**
  * @summary pings endpoint periodically to prevent idling
  * @param {string} url
  * @param {number} mins
