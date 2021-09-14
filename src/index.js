@@ -407,7 +407,7 @@ const announcement = new Announcement();
 
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
         if (BotConfig.debug && election.phase === 'ended') {
-            const transcriptMessages = await fetchChatTranscript(BotConfig, '');
+            const transcriptMessages = await fetchChatTranscript(BotConfig, `https://chat.${BotConfig.chatDomain}/transcript/${BotConfig.chatRoomId}`);
             const winnersAnnounced = transcriptMessages && transcriptMessages.some(v => /^The winners? (are|is) /.test(v.message));
 
             if(!winnersAnnounced && election.arrWinners.length > 0) {
