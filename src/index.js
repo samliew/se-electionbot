@@ -1133,6 +1133,10 @@ const announcement = new Announcement();
             res.redirect(`/say?password=${password}&success=true`);
         });
 
+        // catch all handler to swallow non-crashing rejecions
+        process.on("unhandledRejection", (reason) => {
+            if (BotConfig.debug) console.log(`uncaught rejection: ${reason}`);
+        });
 
     }; // End main fn
     main();
