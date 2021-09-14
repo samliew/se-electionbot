@@ -135,7 +135,12 @@ export const sayBadgesByType = (badges, type, isSO = true) => {
  * @param {Badge[]} badges
  * @returns {string}
  */
-export const sayRequiredBadges = (election, badges) => {
+export const sayRequiredBadges = (election, badges, isSO = true) => {
+
+    if(!isSO) {
+        return "There are no required badges for elections on this site.";
+    }
+
     const { repNominate } = election;
 
     const required = badges.filter(({ required }) => required);

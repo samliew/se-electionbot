@@ -111,7 +111,7 @@ export const isAskedForOwnScore = (text) => {
  * @returns {boolean}
  */
 export const isAskedForOtherScore = (text) => {
-    return /what(?: i|')s(?: the)? candidate score (?:for|of) \d+(?:$|\?)/.test(text);
+    return /what(?: i|')s(?: the)? candidate score (?:for|of)\s+(?:\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/.test(text);
 };
 
 /**

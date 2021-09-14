@@ -10,9 +10,8 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedIfModsArePaid,
-    isAskedWhoMadeMe,
-    isAskedWhyNominationRemoved
+    isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, 
+    isAskedIfModsArePaid, isAskedWhoMadeMe, isAskedWhyNominationRemoved
 } from "./guards.js";
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
@@ -766,8 +765,8 @@ const announcement = new Announcement();
                 }
 
                 // SO required badges
-                else if (isStackOverflow && ['what', 'required', 'badges'].every(x => content.includes(x))) {
-                    responseText = sayRequiredBadges(election, electionBadges);
+                else if (['what', 'required', 'badges'].every(x => content.includes(x))) {
+                    responseText = sayRequiredBadges(election, electionBadges, isStackOverflow);
                 }
 
                 // What are the benefits of mods

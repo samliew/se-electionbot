@@ -95,7 +95,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         // If privileged user asking candidate score of another user, get user site id from message
         if (isAskingForOtherUser) {
-            userId = +(content.match(/(\d+)(?:\?|$)/)[1]);
+            userId = +(content.match(/https:\/\/.+\/users\/(\d+).*(?:\?|$)/)[1]) || +(content.match(/(\d+)(?:\?|$)/)[1]);
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
         else if (!isSO) {
@@ -126,7 +126,6 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         const [badge] = items;
 
-        //TODO: why use badges for that if we pass an instance of User?
         const { reputation } = badge.user;
 
         const hasNominated = election.isNominee(userId);
