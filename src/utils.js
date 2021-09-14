@@ -144,27 +144,28 @@ export const fetchUrl = async (config, url, json = false) => {
  * @returns {Promise<any>}
  */
 export const fetchChatTranscript = async (config, url) => {
-    console.log('Fetched chat transcript', url);
 
     // Validate chat transcript url
     if(!/^https:\/\/chat\.stack(?:exchange|overflow)\.com\/transcript\/\d+/i.test(url)) return null;
 
+    console.log('Fetching chat transcript:', url);
+
     const chatTranscript = await fetchUrl(config, url);
-
     const $chat = cheerio.load(/** @type {string} */(chatTranscript));
+    const messages = [];
 
-    const messages = $chat('#transcript .message').map(function(i, el) {
+    $chat('#transcript .message').each(function(i, el) {
         const $this = $chat(el);
         const userlink = $this.parent().siblings('.signature').find('a');
-        return {
+        messages.push({
             username: userlink.text(),
             chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
             message: $this.find('.content').text().trim(),
-        };
-    });
+        });
+    }).get();
 
     if(config.verbose) {
-        console.log('Messages:', messages);
+        console.log('Transcript Messages:', messages);
     }
 
     return messages || [];
