@@ -10,7 +10,7 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, 
+    isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula,
     isAskedIfModsArePaid, isAskedWhoMadeMe, isAskedWhyNominationRemoved
 } from "./guards.js";
 import {
@@ -22,10 +22,9 @@ import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import {
     dateToRelativetime,
-    dateToUtcTimestamp, keepAlive,
+    dateToUtcTimestamp, fetchChatTranscript, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer,
-    fetchChatTranscript
+    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer
 } from './utils.js';
 
 // preserves compatibility with older import style
@@ -176,7 +175,7 @@ const announcement = new Announcement();
         // Bot to later join live chat room if not in debug mode
         chatRoomId: defaultChatRoomId,
         chatDomain: defaultChatDomain,
-        
+
         /* Low activity count variables */
 
         // Variable to trigger an action only after this time of inactivity
@@ -211,7 +210,7 @@ const announcement = new Announcement();
         ignoredUserIds: new Set(parseIds(process.env.IGNORED_USERIDS || '')),
 
         /* Flags and methods */
-        
+
         flags: {
             saidElectionEndingSoon: false,
         },
@@ -404,7 +403,7 @@ const announcement = new Announcement();
             const transcriptMessages = await fetchChatTranscript(BotConfig, `https://chat.${BotConfig.chatDomain}/transcript/${BotConfig.chatRoomId}`);
             const winnersAnnounced = transcriptMessages?.some(item => item.message && /^The winners? (are|is) /.test(item.message));
 
-            if(BotConfig.debug) {
+            if (BotConfig.debug) {
                 console.log("winnersAnnounced:", winnersAnnounced);
                 console.log(
                     "Transcript messages:",
@@ -412,7 +411,7 @@ const announcement = new Announcement();
                 );
             }
 
-            if(!winnersAnnounced && election.arrWinners) {
+            if (!winnersAnnounced && election.arrWinners) {
                 await room.sendMessage(sayCurrentWinners(election));
             }
         }
@@ -1036,8 +1035,7 @@ const announcement = new Announcement();
             else if (election.phase == 'nomination' && election.prev.arrNominees.length !== election.arrNominees.length) {
 
                 // Get diff between the arrays
-                const prevIds = election.prev.arrNominees.map(v => v.userId);
-                const newNominees = election.arrNominees.filter(v => !prevIds.includes(v.userId));
+                const { newNominees } = election;
 
                 // Announce
                 newNominees.forEach(async nominee => {
