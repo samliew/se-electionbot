@@ -452,8 +452,8 @@ const announcement = new Announcement();
             BotConfig.lastActivityTime = Date.now();
             BotConfig.activityCount++;
 
-            // Ignore messages with oneboxes & links
-            if (content.includes('onebox') || content.includes('http')) return;
+            // Ignore messages with oneboxes
+            if (content.includes('onebox')) return;
 
             // Get details of user who triggered the message
             const user = await getUser(client, resolvedMsg);
