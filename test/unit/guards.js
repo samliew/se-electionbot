@@ -4,61 +4,53 @@ import {
     isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForOtherScore, isAskedForScoreFormula, isAskedWhoMadeMe
 } from "../../src/guards.js";
 
+/**
+ * @summary utility for running tests on sets of strings
+ * @param {(text:string) => boolean} funcUnderTest tested function
+ * @param {string[]} matches list of strings to test against
+ * @param {boolean} [shouldMatch] optionally invert matching
+ * @returns {void}
+ */
+const allMatch = (funcUnderTest, matches, shouldMatch = true) => matches.forEach((txt) => {
+    const matched = funcUnderTest(txt);
+    expect(matched, `<${txt}> not matched`).to.be[shouldMatch.toString()];
+});
+
 describe('Message Guards', () => {
 
     describe('isAskedForElectionSchedule', () => {
-
         it('should correctly match content', () => {
-
-            const matches = [
+            allMatch(isAskedForElectionSchedule, [
                 "when is the election?",
                 "what is the election schedule?",
                 "how is the election scheduled?",
                 "election schedule, please"
-            ];
-
-            matches.forEach((txt) => {
-                const matched = isAskedForElectionSchedule(txt);
-                expect(matched, `<${txt}> not matched`).to.be.true;
-            });
+            ]);
         });
-
     });
 
     describe('isAskedForCurrentNominees', () => {
-
         it('should correctly match content', () => {
-
-            const matches = [
+            allMatch(isAskedForCurrentNominees, [
                 "who are the nominees?",
                 "what are the participants?",
                 "who is the participant?",
                 "what were the nominations",
-            ];
-
-            matches.forEach((txt) => {
-                const matched = isAskedForCurrentNominees(txt);
-                expect(matched, `<${txt}> not matched`).to.be.true;
-            });
+            ]);
         });
 
         it('should not match other guards', () => {
-
-            const exceptions = ["what is the candidate score for 245113?"];
-
-            exceptions.forEach((txt) => {
-                const matched = isAskedForCurrentNominees(txt);
-                expect(matched, `<${txt}> matched`).to.be.false;
-            });
+            allMatch(
+                isAskedForCurrentNominees,
+                ["what is the candidate score for 245113?"],
+                false
+            );
         });
-
     });
 
     describe('isAskedAboutModsOrModPowers', () => {
-
         it('should correctly match content', () => {
-
-            const matches = [
+            allMatch(isAskedAboutModsOrModPowers, [
                 "what is a moderator",
                 "what do moderators do?",
                 "what do mods do",
@@ -69,41 +61,23 @@ describe('Message Guards', () => {
                 "what are the benefits of being a moderator",
                 "should i be a mod",
                 "does moderators have extra privileges"
-            ];
-
-            matches.forEach((txt) => {
-                const matched = isAskedAboutModsOrModPowers(txt);
-                expect(matched, `<${txt}> not matched`).to.be.true;
-            });
-
+            ]);
         });
-
     });
 
     describe('isAskedAboutUsernameDiamond', () => {
-
         it('should correctly match content', () => {
-
-            const matches = [
+            allMatch(isAskedAboutUsernameDiamond, [
                 "edit diamond into name",
                 "can somebody edit a ♦ into their username?",
                 "can someone add a diamond to their name?"
-            ];
-
-            matches.forEach((txt) => {
-                const matched = isAskedAboutUsernameDiamond(txt);
-                expect(matched, `<${txt}> not matched`).to.be.true;
-            });
-
+            ]);
         });
-
     });
 
     describe('isAskedWhoMadeMe', () => {
-
         it('should correctly match content', () => {
-
-            const matches = [
+            allMatch(isAskedWhoMadeMe, [
                 "who made you?",
                 "who maintains you?",
                 "who develops you?",
@@ -112,54 +86,29 @@ describe('Message Guards', () => {
                 "who owns you?",
                 "who is your developer?",
                 "who is your maintainer?"
-            ];
-
-            matches.forEach((txt) => {
-                const matched = isAskedWhoMadeMe(txt);
-                expect(matched, `<${txt}> not matched`).to.be.true;
-            });
-
+            ]);
         });
-
     });
 
     describe('isAskedForOtherScore', () => {
-
         it('should correctly match content', () => {
-
-            const matches = [
+            allMatch(isAskedForOtherScore, [
+                "what is candidate score for 007?",
                 "what is the candidate score of 42",
                 "what's the candidate score of 9000",
                 "what is candidate score for 65536", // account for a common mistake
                 "what's the candidate score of 404?",
-            ];
-
-            matches.forEach((txt) => {
-                const matched = isAskedForOtherScore(txt);
-                expect(matched, `<${txt}> not matched`).to.be.true;
-            });
-
+            ]);
         });
-
     });
 
     describe('isAskedForScoreFormula', () => {
-
         it('should correctly match content', () => {
-
-            const matches = [
+            allMatch(isAskedForScoreFormula, [
                 "how is candidate score calculated",
                 "what is candidate score?",
                 "what is candidate score formula?"
-            ];
-
-            matches.forEach((txt) => {
-                const matched = isAskedForScoreFormula(txt);
-                expect(matched, `<${txt}> not matched`).to.be.true;
-            });
-
+            ]);
         });
-
     });
-
 });
