@@ -410,8 +410,8 @@ const announcement = new Announcement();
             const transcriptMessages = await fetchChatTranscript(BotConfig, `https://chat.${BotConfig.chatDomain}/transcript/${BotConfig.chatRoomId}`);
             const winnersAnnounced = transcriptMessages && transcriptMessages.some(v => v.message && /^The winners? (are|is) /.test(v.message));
 
-            if(!winnersAnnounced && election.arrWinners.length > 0) {
-                sayCurrentWinners(election);
+            if(!winnersAnnounced && election.arrWinners) {
+                await room.sendMessage(sayCurrentWinners(election));
             }
         }
 
