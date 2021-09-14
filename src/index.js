@@ -8,9 +8,9 @@ import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
-    isAskedForCandidateScore, isAskedForCurrentMods,
+    isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForElectionSchedule, isAskedForScoreFormula, isAskedIfModsArePaid,
+    isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedIfModsArePaid,
     isAskedWhoMadeMe,
     isAskedWhyNominationRemoved
 } from "./guards.js";
@@ -748,7 +748,7 @@ const announcement = new Announcement();
                 }
 
                 // Calculate own candidate score
-                else if (isAskedForCandidateScore(content)) {
+                else if (isAskedForOwnScore(content) || isAskedForOtherScore(content)) {
 
                     //TODO: use config object pattern instead, 6 parameters is way too much
                     const calcCandidateScore = makeCandidateScoreCalc(BotConfig,
