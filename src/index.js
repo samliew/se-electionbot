@@ -355,7 +355,7 @@ const announcement = new Announcement();
         }
 
         // If is in production mode, and is an active election, auto-detect and set chat domain and chat room ID to join
-        if (!BotConfig.debug && election.isActive()) {
+        if (!BotConfig.debug && election.isActive() && election.chatRoomId && election.chatDomain) {
             BotConfig.chatRoomId = election.chatRoomId;
             BotConfig.chatDomain = election.chatDomain;
 
