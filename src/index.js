@@ -335,11 +335,6 @@ const announcement = new Announcement();
      */
     const main = async () => {
 
-        // Inform if in debug mode
-        if (BotConfig.debug) {
-            console.log('DEBUG MODE ON!');
-        }
-
         // Get current site named badges
         if (!isStackOverflow) {
             const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
