@@ -39,6 +39,16 @@ export default class Election {
         return this._prevObj;
     }
 
+    /**
+     * @summary gets a list of new Nominees
+     * @returns {Nominee[]}
+     */
+    get newNominees() {
+        const { prev, arrNominees } = this;
+        const prevIds = prev.arrNominees.map(({ userId }) => userId);
+        return arrNominees.filter(({ userId }) => !prevIds.includes(userId));
+    }
+
     validate() {
         return !(
             this.validElectionUrl(this.electionUrl) &&
