@@ -400,19 +400,26 @@ const announcement = new Announcement();
         // Join room
         room = await client.joinRoom(BotConfig.chatRoomId);
 
-        // Announce join room if in debug mode
-        if (BotConfig.debug) {
-            await room.sendMessage(getRandomPlop());
-        }
-
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended') {
             const transcriptMessages = await fetchChatTranscript(BotConfig, `https://chat.${BotConfig.chatDomain}/transcript/${BotConfig.chatRoomId}`);
-            const winnersAnnounced = transcriptMessages && transcriptMessages.some(v => v.message && /^The winners? (are|is) /.test(v.message));
+            const winnersAnnounced = transcriptMessages?.slice(-30).some(item => item.message && /^The winners? (are|is) /.test(item.message));
+
+            if(BotConfig.debug) {
+                console.log("winnersAnnounced:", winnersAnnounced);
+                console.log(
+                    "Transcript messages:",
+                    transcriptMessages.map(item => `${/^The winners? (are|is) /.test(item.message)} - ${item.message}`).join("\n")
+                );
+            }
 
             if(!winnersAnnounced && election.arrWinners) {
                 await room.sendMessage(sayCurrentWinners(election));
             }
+        }
+        // Announce join room if in debug mode
+        else if (BotConfig.debug) {
+            await room.sendMessage(getRandomPlop());
         }
 
         // Main event listener
