@@ -3,6 +3,7 @@ import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
+import { getEnvironmentVars, updateEnvironmentVars } from "./api-heroku.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
@@ -1079,34 +1080,35 @@ const announcement = new Announcement();
 
         }, 5 * 60000);
 
-
-        // Listen to requests from web form
+        
+        // Start server
         const app = await startServer(room, BotConfig);
+
+        // Serve /say form
         app.get('/say', ({ query }, res) => {
             const { success, password = "", message = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
-
-            let postHtml = '';
 
             const statusMap = {
                 true: `<div class="result success">Success!</div>`,
                 false: `<div class="result error">Error. Could not send message.</div>`
             };
 
-            postHtml = statusMap[success];
-
             res.send(`
-            <link rel="icon" href="data:;base64,=" />
-            <link rel="stylesheet" href="css/styles.css" />
-            <h3>ElectionBot say to room <a href="https://chat.${BotConfig.chatDomain}/rooms/${BotConfig.chatRoomId}" target="_blank">${BotConfig.chatDomain}: ${BotConfig.chatRoomId}</a>:</h3>
-            <form method="post">
-                <input type="text" name="message" placeholder="message" maxlength="500" value="${decodeURIComponent(message)}" />
-                <input type="hidden" name="password" value="${password}" />
-                <button>Send</button>
-            </form>
-            ${postHtml}
-        `);
+                <link rel="icon" href="data:;base64,=" />
+                <link rel="stylesheet" href="css/styles.css" />
+                <h3>ElectionBot say to room <a href="https://chat.${BotConfig.chatDomain}/rooms/${BotConfig.chatRoomId}" target="_blank">${BotConfig.chatDomain}: ${BotConfig.chatRoomId}</a>:</h3>
+                <form method="post">
+                    <input type="text" name="message" placeholder="message" maxlength="500" value="${decodeURIComponent(message)}" />
+                    <input type="hidden" name="password" value="${password}" />
+                    <button>Send</button>
+                </form>
+                ${statusMap[success]}
+            `);
+
             return;
         });
+
+        // POST event from /say form
         app.post('/say', async ({ body }, res) => {
             const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
 
@@ -1129,7 +1131,63 @@ const announcement = new Announcement();
             res.redirect(`/say?password=${password}&success=true`);
         });
 
-        // catch all handler to swallow non-crashing rejecions
+        // Serve /envvar form
+        app.get('/envvar', ({ query }, res) => {
+            const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
+
+            const validPwd = password === process.env.PASSWORD;
+
+            let kvpHtml = [];
+
+            const statusMap = {
+                true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
+                false: `<div class="result error">Error. Could not perform action.</div>`
+            };
+
+            if(validPwd) {
+                const envVars = getEnvironmentVars();
+                kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`);
+            }
+
+            res.send(`
+                <link rel="icon" href="data:;base64,=" />
+                <link rel="stylesheet" href="css/styles.css" />
+                <h3>Update ElectionBot environment variables</h3>
+                <form method="post">
+                    ${kvpHtml}
+                    <input type="hidden" name="password" value="${password}" />
+                    <button>Submit</button>
+                </form>
+                ${statusMap[success]}
+            `);
+
+            return;
+        });
+        
+        // POST event from /envvar form
+        app.post('/envvar', async ({ body }, res) => {
+            const { password, values = "" } = /** @type {{ password:string, values?:string }} */(body);
+
+            const validPwd = password === process.env.PASSWORD;
+
+            // Convert request to JSON object - see https://stackoverflow.com/a/8649003
+            const kvps = JSON.parse('{"' + values.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) });
+
+            // Validation
+            if (!validPwd || Object.keys(kvps).length === 0) {
+                console.error(`'Invalid ${validPwd ? 'request' : 'password'}`, password);
+                res.redirect(`/envvar?success=false`);
+                return;
+            }
+
+            // Update environment variables
+            updateEnvironmentVars(kvps);
+
+            res.redirect(`/envvar?password=${password}&success=true`);
+        });
+
+
+        // Catch all handler to swallow non-crashing rejecions
         process.on("unhandledRejection", (reason) => {
             if (BotConfig.debug) console.log(`uncaught rejection: ${reason}`);
         });
