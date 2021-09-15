@@ -1146,7 +1146,17 @@ const announcement = new Announcement();
 
             if(validPwd) {
                 const envVars = getEnvironmentVars();
-                kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`);
+
+                // Remove keys that should never be allowed to be displayed/updated via the form
+                const unsafeKeys = [
+                    "ACCOUNT_EMAIL",
+                    "ACCOUNT_PASSWORD",
+                    "NODE_ENV",
+                    "PASSWORD",
+                ];
+                unsafeKeys.forEach(x => delete envVars[x]);
+
+                kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`);
             }
 
             res.send(`
@@ -1166,22 +1176,31 @@ const announcement = new Announcement();
         
         // POST event from /envvar form
         app.post('/envvar', async ({ body }, res) => {
-            const { password, values = "" } = /** @type {{ password:string, values?:string }} */(body);
+            const { password } = /** @type {{ password:string }} */(body);
 
             const validPwd = password === process.env.PASSWORD;
 
             // Convert request to JSON object - see https://stackoverflow.com/a/8649003
-            const kvps = JSON.parse('{"' + values.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) });
+            const envVars = JSON.parse('{"' + body.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) });
+
+            // Remove keys that should never be allowed to be displayed/updated via the form
+            const unsafeKeys = [
+                "ACCOUNT_EMAIL",
+                "ACCOUNT_PASSWORD",
+                "NODE_ENV",
+                "PASSWORD",
+            ];
+            unsafeKeys.forEach(x => delete envVars[x]);
 
             // Validation
-            if (!validPwd || Object.keys(kvps).length === 0) {
+            if (!validPwd || Object.keys(envVars).length === 0) {
                 console.error(`'Invalid ${validPwd ? 'request' : 'password'}`, password);
                 res.redirect(`/envvar?success=false`);
                 return;
             }
 
             // Update environment variables
-            updateEnvironmentVars(kvps);
+            updateEnvironmentVars(envVars);
 
             res.redirect(`/envvar?password=${password}&success=true`);
         });
