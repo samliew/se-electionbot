@@ -1,8 +1,32 @@
 import { expect } from "chai";
 import Election from "../../src/election.js";
 import { dateToUtcTimestamp } from "../../src/utils.js";
+import { getMockNominee } from "../mocks/nominee.js";
 
 describe('Election', () => {
+
+    describe('getters', () => {
+
+        describe('newNominees', () => {
+
+            it('should correctly return only new Nominees', () => {
+                const oldNominee = getMockNominee({ userId: 1 });
+                const newNominee = getMockNominee({ userId: 2 });
+
+                const election = new Election("https://stackoverflow.com/election/12");
+                election._prevObj = { arrNominees: [oldNominee] };
+                election.arrNominees.push(newNominee);
+
+                const { newNominees } = election;
+                expect(newNominees).length(1);
+
+                const [nominee] = newNominees;
+                expect(nominee.userId).to.equal(2);
+            });
+
+        });
+
+    });
 
     describe('getPhase', () => {
 

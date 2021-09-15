@@ -3,6 +3,13 @@ import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 
 /**
  * @typedef {import("./index").User} User
+ * @typedef {{
+ *  userId: number,
+ *  userName: string,
+ *  userYears: string,
+ *  userScore: string,
+ *  permalink: string
+ * }} Nominee
  */
 
 export default class Election {
@@ -30,6 +37,16 @@ export default class Election {
 
     get prev() {
         return this._prevObj;
+    }
+
+    /**
+     * @summary gets a list of new Nominees
+     * @returns {Nominee[]}
+     */
+    get newNominees() {
+        const { prev, arrNominees } = this;
+        const prevIds = prev.arrNominees.map(({ userId }) => userId);
+        return arrNominees.filter(({ userId }) => !prevIds.includes(userId));
     }
 
     validate() {
@@ -109,14 +126,6 @@ export default class Election {
     }
 
     /**
-     * @typedef {{
-     *  userId: number,
-     *  userName: string,
-     *  userYears: string,
-     *  userScore: string,
-     *  permalink: string
-     * }} Nominee
-     *
      * @summary scrapes nominee element
      * @param {cheerio.Root} $ Cheerio root element
      * @param {cheerio.Element} el nominee element

@@ -10,7 +10,7 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, 
+    isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula,
     isAskedIfModsArePaid, isAskedWhoMadeMe, isAskedWhyNominationRemoved
 } from "./guards.js";
 import {
@@ -22,10 +22,9 @@ import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import {
     dateToRelativetime,
-    dateToUtcTimestamp, keepAlive,
+    dateToUtcTimestamp, fetchChatTranscript, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer,
-    fetchChatTranscript
+    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer
 } from './utils.js';
 
 // preserves compatibility with older import style
@@ -176,7 +175,7 @@ const announcement = new Announcement();
         // Bot to later join live chat room if not in debug mode
         chatRoomId: defaultChatRoomId,
         chatDomain: defaultChatDomain,
-        
+
         /* Low activity count variables */
 
         // Variable to trigger an action only after this time of inactivity
@@ -211,7 +210,7 @@ const announcement = new Announcement();
         ignoredUserIds: new Set(parseIds(process.env.IGNORED_USERIDS || '')),
 
         /* Flags and methods */
-        
+
         flags: {
             saidElectionEndingSoon: false,
         },
@@ -336,11 +335,6 @@ const announcement = new Announcement();
      */
     const main = async () => {
 
-        // Inform if in debug mode
-        if (BotConfig.debug) {
-            console.log('DEBUG MODE ON!');
-        }
-
         // Get current site named badges
         if (!isStackOverflow) {
             const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
@@ -404,7 +398,7 @@ const announcement = new Announcement();
             const transcriptMessages = await fetchChatTranscript(BotConfig, `https://chat.${BotConfig.chatDomain}/transcript/${BotConfig.chatRoomId}`);
             const winnersAnnounced = transcriptMessages?.some(item => item.message && /^The winners? (are|is) /.test(item.message));
 
-            if(BotConfig.debug) {
+            if (BotConfig.debug) {
                 console.log("winnersAnnounced:", winnersAnnounced);
                 console.log(
                     "Transcript messages:",
@@ -412,7 +406,7 @@ const announcement = new Announcement();
                 );
             }
 
-            if(!winnersAnnounced && election.arrWinners) {
+            if (!winnersAnnounced && election.arrWinners) {
                 await room.sendMessage(sayCurrentWinners(election));
             }
         }
@@ -423,6 +417,10 @@ const announcement = new Announcement();
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
+
+            // Ignore unnecessary events - always check first
+            if (ignoredEventTypes.includes(msg.eventType)) return;
+
             const encoded = await msg.content;
 
             // Decode HTML entities in messages, lowercase version for matching
@@ -438,9 +436,6 @@ const announcement = new Announcement();
                 targetUserId: msg.targetUserId,
                 content,
             };
-
-            // Ignore unnecessary events
-            if (ignoredEventTypes.includes(resolvedMsg.eventType)) return;
 
             // Ignore stuff from self, Community or Feeds users
             if (meWithId.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
@@ -1036,8 +1031,7 @@ const announcement = new Announcement();
             else if (election.phase == 'nomination' && election.prev.arrNominees.length !== election.arrNominees.length) {
 
                 // Get diff between the arrays
-                const prevIds = election.prev.arrNominees.map(v => v.userId);
-                const newNominees = election.arrNominees.filter(v => !prevIds.includes(v.userId));
+                const { newNominees } = election;
 
                 // Announce
                 newNominees.forEach(async nominee => {
@@ -1135,6 +1129,10 @@ const announcement = new Announcement();
             res.redirect(`/say?password=${password}&success=true`);
         });
 
+        // catch all handler to swallow non-crashing rejecions
+        process.on("unhandledRejection", (reason) => {
+            if (BotConfig.debug) console.log(`uncaught rejection: ${reason}`);
+        });
 
     }; // End main fn
     main();
