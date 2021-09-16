@@ -1263,8 +1263,6 @@ const announcement = new Announcement();
                 return;
             }
 
-            console.log("configVars", configVars);
-
             // Update environment variables
             await updateConfigVars(configVars);
 
@@ -1274,7 +1272,7 @@ const announcement = new Announcement();
 
         // Catch all handler to swallow non-crashing rejecions
         process.on("unhandledRejection", (reason) => {
-            if (BotConfig.debug) console.log(`uncaught rejection: ${reason}`);
+            if (BotConfig.debug) console.log(`Uncaught rejection: ${reason}`);
         });
 
     }; // End main fn

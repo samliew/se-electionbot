@@ -5,8 +5,8 @@ export const APP_NAME = "se-electionbot";
 export const herokuClient = new Heroku({
     token: process.env.HEROKU_API_TOKEN,
     parseJSON: true,
-    debug: process.env.DEBUG,
-    debugHeaders: process.env.VERBOSE,
+    debug: false,
+    debugHeaders: false,
     logger: console,
 });
 
