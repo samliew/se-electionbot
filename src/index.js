@@ -518,7 +518,7 @@ const announcement = new Announcement();
                 commander.add("fun", "switches fun mode on/off", (config, content) => {
                     const [, state = "on"] = /(on|off)/.exec(content) || [];
                     config.funMode = state === "on";
-                    return state ? "I am having fun." : "I'm no longer funny.";
+                    return config.funMode ? "I am having fun." : "I'm no longer funny.";
                 }, AccessLevel.privileged);
 
                 commander.add("test cron", "sets up a test cron job", (announcement) => {
@@ -604,7 +604,7 @@ const announcement = new Announcement();
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
                     ["unmute", /unmute|clear timeout/, BotConfig],
                     ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
-                    ["fun", /fun|fun mode/, BotConfig, content],
+                    ["fun", /fun/, BotConfig, content],
                     ["debug", /debug(?:ing)?/, BotConfig, content],
                     ["die", /die|shutdown|turn off/],
                     ["greet", /^(greet|welcome)/, election],
