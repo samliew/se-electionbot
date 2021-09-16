@@ -1080,7 +1080,7 @@ const announcement = new Announcement();
             }
 
             // New nominations
-            else if (election.phase == 'nomination' && election.prev.arrNominees.length !== election.arrNominees.length) {
+            else if (election.phase == 'nomination' && election.newNominees.length) {
 
                 // Get diff between the arrays
                 const { newNominees } = election;
