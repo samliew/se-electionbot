@@ -1192,7 +1192,7 @@ const announcement = new Announcement();
         });
 
         // Serve /config form
-        app.get('/config', ({ query }, res) => {
+        app.get('/config', async ({ query }, res) => {
             const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
 
             const validPwd = password === process.env.PASSWORD;
@@ -1208,7 +1208,7 @@ const announcement = new Announcement();
                 undefined: ""
             };
 
-            const configVars = fetchConfigVars();
+            const configVars = await fetchConfigVars();
 
             console.log("configVars", configVars);
 
@@ -1274,7 +1274,7 @@ const announcement = new Announcement();
             console.log("configVars", configVars);
 
             // Update environment variables
-            updateConfigVars(configVars);
+            await updateConfigVars(configVars);
 
             res.redirect(`/config?password=${password}&success=true`);
         });
