@@ -8,13 +8,13 @@ import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
-    isAskedForCurrentMods,
+    isAskedForCandidateScore, isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula,
-    isAskedIfModsArePaid, isAskedWhoMadeMe, isAskedWhyNominationRemoved
+    isAskedForOtherScore, isAskedForOwnScore,
+    isAskedForNominatingInfo
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods, sayHowToNominate,
     sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
@@ -791,9 +791,11 @@ const announcement = new Announcement();
                         return; // stop here since we are using a different default response method
                     }
                 }
+                
                 else if (isAskedForScoreFormula(content)) {
                     responseText = sayCandidateScoreFormula(electionBadges);
                 }
+
                 // Current candidates
                 else if (isAskedForCurrentNominees(content)) {
                     if (election.phase === null) {
@@ -832,28 +834,19 @@ const announcement = new Announcement();
 
                 // How to nominate self/others
                 // - can't use keyword "vote" here
-                else if ((['how', 'where'].some(x => content.startsWith(x)) && ['nominate', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && [' i ', 'myself', 'name', 'user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)))
-                    || (['how to', 'how can'].some(x => content.startsWith(x)) && ['be', 'mod'].every(x => content.includes(x)))) {
-
-                    const requiredBadges = electionBadges.filter(mapToRequired);
-                    const requiredBadgeNames = requiredBadges.map(mapToName);
-
-                    let reqs = [`at least ${election.repNominate} reputation`];
-                    if (isStackOverflow) reqs.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
-                    if (electionSiteHostname.includes('askubuntu.com')) reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
-                    reqs.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
-
-                    // Bold additional text if talking about nominating others
-                    const mentionsAnotherBold = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)) ? '**' : '';
-
-                    responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need ${reqs.join(', ')}. ${mentionsAnotherBold}You cannot nominate another user.${mentionsAnotherBold}`;
+                else if (isAskedForNominatingInfo(content)) {
+                    const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x));
+                    responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
                 }
+
                 else if (isAskedWhyNominationRemoved(content)) {
                     responseText = sayWhyNominationRemoved();
                 }
+
                 else if (isAskedIfModsArePaid(content)) {
                     responseText = sayAreModsPaid(election);
                 }
+
                 // Status
                 else if (content.includes('election') && ['status', 'progress'].some(x => content.includes(x))) {
 

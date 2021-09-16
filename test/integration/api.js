@@ -7,7 +7,7 @@ describe('getSiteUserIdFromChatStackExchangeId', function () {
 
     dotenv.config();
 
-    this.timeout(5e3); // id getter can be quite slow
+    this.timeout(10e3); // id getter can be quite slow
 
     it('should return user id on success', async () => {
         const userId = await getSiteUserIdFromChatStackExchangeId(
