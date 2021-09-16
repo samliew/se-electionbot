@@ -82,6 +82,17 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election is ending soon
+     * @param {number} [threshold] offset to consider the election ending from (10 mins by default)
+     * @returns {boolean}
+     */
+    isEnding(threshold = 10 * 6e5) {
+        const { phase, dateEnded } = this;
+        const isUnderThreshold = dateEnded.valueOf() - threshold <= Date.now();
+        return phase === 'election' && isUnderThreshold;
+    }
+
+    /**
      * @summary checks if a user (or their id) is amongst the nominees
      * @param {number|User} target userId or user to check
      * @returns {boolean}

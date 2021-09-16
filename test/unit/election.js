@@ -117,4 +117,29 @@ describe('Election', () => {
 
     });
 
+    describe('isEnding', () => {
+
+        it('should correctly check if election is ending', () => {
+            const offset = 5 * 6e5;
+
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.phase = "election";
+            election.dateEnded = Date.now();
+
+            const isEndedInThePast = election.isEnding(offset);
+            expect(isEndedInThePast).to.be.true;
+
+            election.dateEnded = Date.now() + offset * 2;
+
+            const isEndedInTheFuture = election.isEnding(offset);
+            expect(isEndedInTheFuture).to.be.false;
+
+            election.phase = "nomination";
+
+            const isEndedInNomination = election.isEnding(offset);
+            expect(isEndedInNomination).to.be.false;
+        });
+
+    });
+
 });
