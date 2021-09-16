@@ -1191,8 +1191,8 @@ const announcement = new Announcement();
             res.redirect(`/say?password=${password}&success=true`);
         });
 
-        // Serve /envvar form
-        app.get('/envvar', ({ query }, res) => {
+        // Serve /config form
+        app.get('/config', ({ query }, res) => {
             const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
 
             const validPwd = password === process.env.PASSWORD;
@@ -1208,7 +1208,9 @@ const announcement = new Announcement();
                 undefined: ""
             };
 
-            const envVars = fetchConfigVars();
+            const configVars = fetchConfigVars();
+
+            if(BotConfig.debug) console.log(configVars);
 
             // Remove keys that should never be allowed to be displayed/updated via the form
             const unsafeKeys = [
@@ -1217,10 +1219,14 @@ const announcement = new Announcement();
                 "NODE_ENV",
                 "PASSWORD",
             ];
-            const removedSensitiveKeys = unsafeKeys.every(x => delete envVars[x]);
+            const removedSensitiveKeys = unsafeKeys.every(x => delete configVars[x]);
             if(!removedSensitiveKeys) return;
 
-            const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`).join("\n");
+            if(BotConfig.debug) console.log(configVars);
+
+            const kvpHtml = Object.keys(configVars).map(key => `<div>${key} <input type="text" name="${key}" value="${configVars[key]}" /></div>`).join("\n");
+
+            if(BotConfig.debug) console.log(kvpHtml);
 
             res.send(`
                 <link rel="icon" href="data:;base64,=" />
@@ -1237,14 +1243,16 @@ const announcement = new Announcement();
             return;
         });
         
-        // POST event from /envvar form
-        app.post('/envvar', async ({ body }, res) => {
+        // POST event from /config form
+        app.post('/config', async ({ body }, res) => {
             const { password } = /** @type {{ password:string }} */(body);
 
             const validPwd = password === process.env.PASSWORD;
 
+            if(BotConfig.debug) console.log(body);
+
             // Convert request to JSON object - see https://stackoverflow.com/a/8649003
-            const envVars = JSON.parse('{"' + body.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) });
+            const configVars = JSON.parse('{"' + body.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) });
 
             // Remove keys that should never be allowed to be displayed/updated via the form
             const unsafeKeys = [
@@ -1253,20 +1261,22 @@ const announcement = new Announcement();
                 "NODE_ENV",
                 "PASSWORD",
             ];
-            const removedSensitiveKeys = unsafeKeys.every(x => delete envVars[x]);
+            const removedSensitiveKeys = unsafeKeys.every(x => delete configVars[x]);
             if(!removedSensitiveKeys) return;
 
             // Validation
-            if (!validPwd || Object.keys(envVars).length === 0) {
+            if (!validPwd || Object.keys(configVars).length === 0) {
                 console.error(`'Invalid ${validPwd ? 'request' : 'password'}`, password);
                 res.sendStatus(404);
                 return;
             }
 
-            // Update environment variables
-            updateConfigVars(envVars);
+            if(BotConfig.debug) console.log(configVars);
 
-            res.redirect(`/envvar?password=${password}&success=true`);
+            // Update environment variables
+            updateConfigVars(configVars);
+
+            res.redirect(`/config?password=${password}&success=true`);
         });
 
 
