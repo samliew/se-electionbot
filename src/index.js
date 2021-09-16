@@ -1210,8 +1210,6 @@ const announcement = new Announcement();
 
             const configVars = await fetchConfigVars();
 
-            console.log("configVars", configVars);
-
             // Remove keys that should never be allowed to be displayed/updated via the form
             const unsafeKeys = [
                 "ACCOUNT_EMAIL",
@@ -1222,11 +1220,7 @@ const announcement = new Announcement();
             const removedSensitiveKeys = unsafeKeys.every(x => delete configVars[x]);
             if(!removedSensitiveKeys) return;
 
-            console.log("configVars 2", configVars);
-
             const kvpHtml = Object.keys(configVars).map(key => `<div>${key} <input type="text" name="${key}" value="${configVars[key]}" /></div>`).join("\n");
-
-            console.log("kvpHtml", kvpHtml);
 
             res.send(`
                 <link rel="icon" href="data:;base64,=" />
@@ -1249,10 +1243,7 @@ const announcement = new Announcement();
 
             const validPwd = password === process.env.PASSWORD;
 
-            console.log("Response Body", typeof body, body.length, body);
-
-            // Convert request to JSON object - see https://stackoverflow.com/a/8649003
-            const configVars = JSON.parse('{"' + body.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) });
+            const configVars = body;
 
             // Remove keys that should never be allowed to be displayed/updated via the form
             const unsafeKeys = [
@@ -1260,6 +1251,7 @@ const announcement = new Announcement();
                 "ACCOUNT_PASSWORD",
                 "NODE_ENV",
                 "PASSWORD",
+                "password",
             ];
             const removedSensitiveKeys = unsafeKeys.every(x => delete configVars[x]);
             if(!removedSensitiveKeys) return;
