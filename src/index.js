@@ -57,6 +57,7 @@ const announcement = new Announcement();
  *  activityCount: number,
  *  scrapeIntervalMins: number,
  *  duplicateResponseText: string,
+ *  funMode: boolean,
  *  debug: boolean,
  *  verbose: boolean,
  *  devIds: Set<number>,
@@ -207,6 +208,8 @@ const announcement = new Announcement();
 
         /* Debug variables */
 
+        // Fun mode
+        funMode: JSON.parse(process.env.FUN_MODE?.toLowerCase() || "true"),
         // Debug mode
         debug: JSON.parse(process.env.DEBUG?.toLowerCase() || "false"),
         // Verbose logging
@@ -423,6 +426,7 @@ const announcement = new Announcement();
             }
 
             if (!winnersAnnounced && election.arrWinners) {
+                BotConfig.flags.saidElectionEndingSoon = true;
                 await room.sendMessage(sayCurrentWinners(election));
             }
         }
@@ -510,6 +514,12 @@ const announcement = new Announcement();
                     config.debug = state === "on";
                     return `Debug mode ${state}`;
                 }, AccessLevel.dev);
+
+                commander.add("fun", "switches fun mode on/off", (config, content) => {
+                    const [, state = "on"] = /(on|off)/.exec(content) || [];
+                    config.funMode = state === "on";
+                    return state ? "I am having fun." : "I'm no longer funny.";
+                }, AccessLevel.privileged);
 
                 commander.add("test cron", "sets up a test cron job", (announcement) => {
                     announcement.initTest();
@@ -673,7 +683,7 @@ const announcement = new Announcement();
 
                     return; // stop here since we are using a different default response method
                 }
-                else if (["about", "who are you?"].includes(content)) {
+                else if (["who are you", "about"].some(x => content.startsWith(x))) {
                     responseText = `I'm ${me.name} and ${me.about}`;
                 }
                 else if (isAskedWhoMadeMe(content)) {
@@ -682,7 +692,7 @@ const announcement = new Announcement();
                 else if (content.startsWith(`i love you`)) {
                     responseText = `I love you 3000`;
                 }
-                else if (content === `how are you?`) {
+                else if (["how are you", "are you okay"].some(x => content.startsWith(x))) {
                     responseText = new RandomArray(
                         `good, and you?`,
                         `I'm fine, thank you.`,
@@ -691,7 +701,7 @@ const announcement = new Announcement();
                         `Today, I consider myself the luckiest bot on the face of the earth.`,
                     ).getRandom();
                 }
-                else if (["alive", "where are you?"].includes(content)) {
+                else if (["where are you", "alive", "ping"].some(x => content.startsWith(x))) {
                     responseText = new RandomArray(
                         `No. I'm not here.`,
                         `I'm here, aren't I?`,
@@ -699,7 +709,7 @@ const announcement = new Announcement();
                         `I'm here and everywhere`,
                     ).getRandom();
                 }
-                else if (content.includes(`your name?`) || content === `what are you?`) {
+                else if (["what are you", "what is your name"].some(x => content.startsWith(x))) {
                     responseText = new RandomArray(
                         `Bot. James Bot.`,
                         `I'm a robot. Beep boop.`,
@@ -708,14 +718,13 @@ const announcement = new Announcement();
                         `I could've been somebody, instead of a lame bot, which is what I am.`,
                     ).getRandom();
                 }
-                else if (content === 'why are you?') {
+                else if (["what are you"].some(x => content.startsWith(x))) {
                     responseText = new RandomArray(
                         `because.`,
                         `why what???`,
                         `Show me the money!`,
                         `Well, nobody's perfect.`,
                         `You can't handle the truth!`,
-                        `After all, tomorrow is another day`,
                     ).getRandom();
                 }
                 else if (/thanks?(?: you)?/.test(content)) {
@@ -735,8 +744,8 @@ const announcement = new Announcement();
                         'who are the candidates', 'who are the current mods',
                     ].join('\n- ');
                 }
-                // fun mode only for testing purposes
-                else if (BotConfig.debug) {
+                // Fun mode only for testing purposes
+                else if (BotConfig.funMode || /[\?\!]+$/.test(content)) {
 
                     // random response in room
                     responseText = new RandomArray(
