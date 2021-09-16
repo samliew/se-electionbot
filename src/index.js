@@ -638,9 +638,9 @@ const announcement = new Announcement();
                         await new Promise((resolve) => setTimeout(resolve, BotConfig.throttleSecs * 1e3));
                     }
 
-                    // Record last activity time only
-                    // so this doesn't reset any mute, if active
-                    BotConfig.lastActivityTime = Date.now();
+                    // Record last activity time only so this doesn't reset an active mute
+                    // Future-dated so the poem wouldn't be interrupted
+                    BotConfig.lastActivityTime = Date.now() + (messages.length - 1) * BotConfig.throttleSecs * 1e3;
 
                     return; // no further action
                 }
@@ -687,35 +687,42 @@ const announcement = new Announcement();
                         `good, and you?`,
                         `I'm fine, thank you.`,
                         `I'm bored. Amuse me.`,
+                        `Why don't you come up sometime and see me?`,
+                        `Today, I consider myself the luckiest bot on the face of the earth.`,
                     ).getRandom();
                 }
                 else if (["alive", "where are you?"].includes(content)) {
                     responseText = new RandomArray(
-                        `I'm on the interwebs`,
-                        `I'm here, aren't I?`,
-                        `I'm here and everywhere`,
                         `No. I'm not here.`,
+                        `I'm here, aren't I?`,
+                        `I'm on the interwebs`,
+                        `I'm here and everywhere`,
                     ).getRandom();
                 }
                 else if (content.includes(`your name?`) || content === `what are you?`) {
                     responseText = new RandomArray(
-                        `I'm a robot. Bleep bloop.`,
-                        `I'm a teacup, short and stout. Here is my handle, here is my spout.`,
+                        `Bot. James Bot.`,
+                        `I'm a robot. Beep boop.`,
                         `I'm a crystal ball; I already know the winners.`,
+                        `I'm a teacup, short and stout. Here is my handle, here is my spout.`,
+                        `I could've been somebody, instead of a lame bot, which is what I am.`,
                     ).getRandom();
                 }
                 else if (content === 'why are you?') {
                     responseText = new RandomArray(
                         `because.`,
                         `why what???`,
-                        `Why am I here? To serve the community`,
+                        `Show me the money!`,
+                        `Well, nobody's perfect.`,
+                        `You can't handle the truth!`,
+                        `After all, tomorrow is another day`,
                     ).getRandom();
                 }
                 else if (/thanks?(?: you)?/.test(content)) {
                     responseText = new RandomArray(
-                        "You are welcome",
+                        "Not at all",
                         "My pleasure",
-                        "Not at all"
+                        "You are welcome",
                     ).getRandom();
                 }
                 else if (['help', 'command', 'info'].some(x => content.includes(x))) {
@@ -734,18 +741,20 @@ const announcement = new Announcement();
                     // random response in room
                     responseText = new RandomArray(
                         content,
-                        `Keep talking and nobody explodes`,
-                        `What do you think?`,
-                        `*deploying payload*`,
-                        `*disengaging safety*`,
+                        `You talking to me?`,
+                        `I know your thoughts.`,
                         `*reticulating splines*`,
-                        `*calculating distortion error*`,
-                        `[Here are my thoughts](https://bit.ly/2CJKBkk)`,
+                        `Tell that to the aliens.`,
+                        `May the Force be with you.`,
+                        `Houston, we have a problem.`,
+                        `Keep talking and nobody explodes.`,
+                        `The stuff that dreams are made of.`,
+                        `Frankly, my dear, I don't give a damn.`,
+                        `What we've got here is failure to communicate.`,
+                        `There will be no more free will, only my will.`,
+                        `Time will tell. Sooner or later, time will tell...`,
+                        `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
-
-                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
-                        responseText = BotConfig.duplicateResponseText;
-                    }
 
                     console.log('RESPONSE', responseText);
                     await room.sendMessage(responseText);
@@ -1156,8 +1165,7 @@ const announcement = new Announcement();
 
             await room.sendMessage(trimmed);
 
-            // Record last activity time only
-            // so this doesn't reset any mute, if active
+            // Record last activity time only so this doesn't reset an active mute
             BotConfig.lastActivityTime = Date.now();
 
             res.redirect(`/say?password=${password}&success=true`);
