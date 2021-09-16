@@ -1051,7 +1051,7 @@ const announcement = new Announcement();
             }
 
             // After rescraping we have winners
-            else if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
+            else if (election.phase === 'ended' && election.newWinners.length) {
                 await announceWinners(election);
 
                 // Stop scraping the election page or greeting the room
@@ -1059,7 +1059,7 @@ const announcement = new Announcement();
             }
 
             // After rescraping, the election is over but we do not have winners yet
-            else if (election.phase === 'ended' && !election.arrWinners.length) {
+            else if (election.phase === 'ended' && !election.newWinners.length) {
 
                 // Reduce scrape interval further
                 BotConfig.scrapeIntervalMins = 0.5;

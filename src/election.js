@@ -49,6 +49,16 @@ export default class Election {
         return arrNominees.filter(({ userId }) => !prevIds.includes(userId));
     }
 
+    /**
+     * @summary gets a list of new Winners
+     * @returns {Nominee[]}
+     */
+    get newWinners() {
+        const { prev, arrWinners } = this;
+        const prevIds = prev.arrWinners.map(({ userId }) => userId);
+        return arrWinners.filter(({ userId }) => !prevIds.includes(userId));
+    }
+
     validate() {
         return !(
             this.validElectionUrl(this.electionUrl) &&

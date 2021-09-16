@@ -26,6 +26,31 @@ describe('Election', () => {
 
         });
 
+        describe('newWinners', () => {
+
+            it('should correctly return only new Winners', () => {
+                const newWinner = getMockNominee({ userId: 2 });
+
+                const election = new Election("https://stackoverflow.com/election/12");
+                election._prevObj = { arrWinners: [] };
+                election.arrWinners.push(newWinner);
+
+                const { newWinners } = election;
+                expect(newWinners).length(1);
+
+                const [nominee] = newWinners;
+                expect(nominee.userId).to.equal(2);
+            });
+
+            it('should return an empty array on no Winners', () => {
+                const election = new Election("https://stackoverflow.com/election/12");
+                election._prevObj = { arrWinners: [] };
+
+                const { newWinners } = election;
+                expect(newWinners).be.empty;
+            });
+        });
+
     });
 
     describe('getPhase', () => {
