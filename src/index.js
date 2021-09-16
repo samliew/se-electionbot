@@ -48,20 +48,24 @@ const announcement = new Announcement();
  * @typedef {{
  *  chatRoomId: number,
  *  chatDomain: string,
+ *  lowActivityCheckMins: number,
+ *  lowActivityCountThreshold: number,
  *  throttleSecs: number,
  *  lastActivityTime: number,
  *  lastMessageTime: number,
+ *  lastMessageContent: string,
  *  activityCount: number,
  *  scrapeIntervalMins: number,
- *  lowActivityCheckMins: number,
- *  lowActivityCountThreshold: number,
+ *  duplicateResponseText: string,
  *  debug: boolean,
  *  verbose: boolean,
- *  adminIds: Set<number>,
  *  devIds: Set<number>,
+ *  adminIds: Set<number>,
  *  ignoredUserIds: Set<number>,
  *  flags: Object,
  *  updateLastMessageTime: function,
+ *  updateLastMessage: function,
+ *  checkSameResponseAsPrevious: function
  * }} BotConfig
  *
  * @typedef {import("./utils").APIListResponse} APIListResponse
@@ -192,10 +196,14 @@ const announcement = new Announcement();
         lastActivityTime: Date.now(),
         // Variable to store time of last bot sent message for throttling purposes
         lastMessageTime: -1,
+        // Variable to store last message to detect duplicate responses within a short time
+        lastMessageContent: "",
         // Variable to track activity count in the room, to see if it reached lowActivityCountThreshold
         activityCount: 0,
         // Variable of rescrape interval of election page
         scrapeIntervalMins: +(process.env.SCRAPE_INTERVAL_MINS) || 5,
+        // Response when bot tries to post the exact same response again
+        duplicateResponseText: "Please read my previous message - I can't send the exact same message again.",
 
         /* Debug variables */
 
@@ -210,7 +218,7 @@ const announcement = new Announcement();
         adminIds: new Set(parseIds(process.env.ADMIN_IDS || '')),
         ignoredUserIds: new Set(parseIds(process.env.IGNORED_USERIDS || '')),
 
-        /* Flags and methods */
+        /* Flags and bot-specific utility functions */
 
         flags: {
             saidElectionEndingSoon: false,
@@ -219,6 +227,13 @@ const announcement = new Announcement();
         updateLastMessageTime: function (lastMessageTime = Date.now()) {
             BotConfig.lastMessageTime = lastMessageTime;
             BotConfig.lastActivityTime = lastMessageTime;
+        },
+        updateLastMessage: function (content) {
+            BotConfig.updateLastMessageTime();
+            BotConfig.lastMessageContent = content;
+        },
+        checkSameResponseAsPrevious: function (newContent) {
+            return BotConfig.lastMessageContent === newContent && Date.now() - 60e4 < BotConfig.lastMessageTime;
         }
     };
 
@@ -645,11 +660,16 @@ const announcement = new Announcement();
 
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
+
+                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                        responseText = BotConfig.duplicateResponseText;
+                    }
+
                     console.log('RESPONSE', responseText);
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessageTime();
+                    BotConfig.updateLastMessage(responseText);
 
                     return; // stop here since we are using a different default response method
                 }
@@ -723,20 +743,30 @@ const announcement = new Announcement();
                         `[Here are my thoughts](https://bit.ly/2CJKBkk)`,
                     ).getRandom();
 
+                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                        responseText = BotConfig.duplicateResponseText;
+                    }
+
                     console.log('RESPONSE', responseText);
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessageTime();
-                    return;
+                    BotConfig.updateLastMessage(responseText);
+
+                    return; // stop here since we are using a different default response method
                 }
 
                 if (responseText != null && responseText.length <= 500) {
+
+                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                        responseText = BotConfig.duplicateResponseText;
+                    }
+
                     console.log('RESPONSE', responseText);
                     await msg.reply(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessageTime();
+                    BotConfig.updateLastMessage(responseText);
                 }
             }
 
@@ -783,11 +813,16 @@ const announcement = new Announcement();
                     responseText = await calcCandidateScore(election, user, resolvedMsg, isStackOverflow);
 
                     if (responseText != null) {
+
+                        if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                            responseText = BotConfig.duplicateResponseText;
+                        }
+
                         console.log('RESPONSE', responseText);
                         await msg.reply(responseText);
 
                         // Record last sent message time so we don't flood the room
-                        BotConfig.updateLastMessageTime();
+                        BotConfig.updateLastMessage(responseText);
 
                         return; // stop here since we are using a different default response method
                     }
@@ -920,11 +955,16 @@ const announcement = new Announcement();
 
 
                 if (responseText != null && responseText.length <= 500) {
+
+                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                        responseText = BotConfig.duplicateResponseText;
+                    }
+
                     console.log('RESPONSE', responseText);
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessageTime();
+                    BotConfig.updateLastMessage(responseText);
                 }
             }
         });
