@@ -3,7 +3,7 @@ import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
-import { getEnvironmentVars, updateEnvironmentVars } from "./api-heroku.js";
+import { fetchConfigVars, updateConfigVars } from "./api-heroku.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
@@ -1208,7 +1208,7 @@ const announcement = new Announcement();
                 undefined: ""
             };
 
-            const envVars = getEnvironmentVars();
+            const envVars = fetchConfigVars();
 
             // Remove keys that should never be allowed to be displayed/updated via the form
             const unsafeKeys = [
@@ -1264,7 +1264,7 @@ const announcement = new Announcement();
             }
 
             // Update environment variables
-            updateEnvironmentVars(envVars);
+            updateConfigVars(envVars);
 
             res.redirect(`/envvar?password=${password}&success=true`);
         });
