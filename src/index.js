@@ -1178,8 +1178,8 @@ const announcement = new Announcement();
 
             // Validation
             if (!validPwd || !trimmed) {
-                console.error(`'Invalid ${validPwd ? 'message' : 'password'}`, password);
-                res.redirect(`/say?message=${encodeURIComponent(trimmed)}&success=false`);
+                console.error(`Invalid ${validPwd ? 'message' : 'password'}`, password);
+                res.sendStatus(404);
                 return;
             }
 
@@ -1202,8 +1202,6 @@ const announcement = new Announcement();
                 return;
             }
 
-            let kvpHtml = [];
-
             const statusMap = {
                 true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
                 false: `<div class="result error">Error. Could not perform action.</div>`,
@@ -1222,7 +1220,7 @@ const announcement = new Announcement();
             const removedSensitiveKeys = unsafeKeys.every(x => delete envVars[x]);
             if(!removedSensitiveKeys) return;
 
-            kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`);
+            const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`).join("\n");
 
             res.send(`
                 <link rel="icon" href="data:;base64,=" />
@@ -1261,7 +1259,7 @@ const announcement = new Announcement();
             // Validation
             if (!validPwd || Object.keys(envVars).length === 0) {
                 console.error(`'Invalid ${validPwd ? 'request' : 'password'}`, password);
-                res.redirect(`/envvar?success=false`);
+                res.sendStatus(404);
                 return;
             }
 
