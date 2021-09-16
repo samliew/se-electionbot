@@ -1,4 +1,14 @@
 /**
+ * @summary checks if the message asked how or where to nominate
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedForNominatingInfo = (text) => {
+    return (/^(?:how|where|can i)/.test(text) && /\b(?:nominate|submit|register|enter|apply|elect)\b/.test(text)) ||
+        /^(?:how to|how can|can i).+be (?:a )?mod/.test(text);
+};
+
+/**
  * @summary checks if the message asked why a nomination was removed
  * @param {string} text
  * @returns {boolean}
@@ -41,6 +51,7 @@ export const isAskedAboutVoting = (text) => {
         /\b(?:do|can|to|give|cast|should)\b/.test(text) &&
         /\b(?:voting|vote|elect)\b/.test(text);
 };
+
 
 /**
  * @summary checks if the message asked to tell who the current mods are
@@ -102,7 +113,8 @@ export const isAskedWhoMadeMe = (text) => {
  * @returns {boolean}
  */
 export const isAskedForOwnScore = (text) => {
-    return /what(?: i|')s\s+my(?:\s+candidate)?\s+score(?:$|\?)/i.test(text);
+    return /can i nominate myself/.test(text) || 
+        /what(?: i|')s\s+my(?:\s+candidate)?\s+score(?:$|\?)/i.test(text);
 };
 
 /**

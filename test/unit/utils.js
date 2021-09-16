@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { listify, parseIds, pluralize, fetchChatTranscript } from "../../src/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
-describe('String-related utils', async () => {
+describe('String-related utils', async function () {
 
     describe('listify', () => {
 
@@ -40,6 +40,8 @@ describe('String-related utils', async () => {
         });
 
     });
+    
+    this.timeout(10e3); // fetching transcript can be slow
 
     describe('fetchChatTranscript', async () => {
 

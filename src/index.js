@@ -11,11 +11,12 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula,
-    isAskedIfModsArePaid, isAskedWhoMadeMe, isAskedWhyNominationRemoved
+    isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe,
+    isAskedWhyNominationRemoved, isAskedIfModsArePaid, isAskedForElectionSchedule,
+    isAskedForNominatingInfo
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods,
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods, sayHowToNominate,
     sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
@@ -48,20 +49,25 @@ const announcement = new Announcement();
  * @typedef {{
  *  chatRoomId: number,
  *  chatDomain: string,
+ *  lowActivityCheckMins: number,
+ *  lowActivityCountThreshold: number,
  *  throttleSecs: number,
  *  lastActivityTime: number,
  *  lastMessageTime: number,
+ *  lastMessageContent: string,
  *  activityCount: number,
  *  scrapeIntervalMins: number,
- *  lowActivityCheckMins: number,
- *  lowActivityCountThreshold: number,
+ *  duplicateResponseText: string,
+ *  funMode: boolean,
  *  debug: boolean,
  *  verbose: boolean,
- *  adminIds: Set<number>,
  *  devIds: Set<number>,
+ *  adminIds: Set<number>,
  *  ignoredUserIds: Set<number>,
  *  flags: Object,
  *  updateLastMessageTime: function,
+ *  updateLastMessage: function,
+ *  checkSameResponseAsPrevious: function
  * }} BotConfig
  *
  * @typedef {import("./utils").APIListResponse} APIListResponse
@@ -192,13 +198,19 @@ const announcement = new Announcement();
         lastActivityTime: Date.now(),
         // Variable to store time of last bot sent message for throttling purposes
         lastMessageTime: -1,
+        // Variable to store last message to detect duplicate responses within a short time
+        lastMessageContent: "",
         // Variable to track activity count in the room, to see if it reached lowActivityCountThreshold
         activityCount: 0,
         // Variable of rescrape interval of election page
         scrapeIntervalMins: +(process.env.SCRAPE_INTERVAL_MINS) || 5,
+        // Response when bot tries to post the exact same response again
+        duplicateResponseText: "Please read my previous message - I can't send the exact same message again.",
 
         /* Debug variables */
 
+        // Fun mode
+        funMode: JSON.parse(process.env.FUN_MODE?.toLowerCase() || "true"),
         // Debug mode
         debug: JSON.parse(process.env.DEBUG?.toLowerCase() || "false"),
         // Verbose logging
@@ -210,7 +222,7 @@ const announcement = new Announcement();
         adminIds: new Set(parseIds(process.env.ADMIN_IDS || '')),
         ignoredUserIds: new Set(parseIds(process.env.IGNORED_USERIDS || '')),
 
-        /* Flags and methods */
+        /* Flags and bot-specific utility functions */
 
         flags: {
             saidElectionEndingSoon: false,
@@ -219,6 +231,13 @@ const announcement = new Announcement();
         updateLastMessageTime: function (lastMessageTime = Date.now()) {
             BotConfig.lastMessageTime = lastMessageTime;
             BotConfig.lastActivityTime = lastMessageTime;
+        },
+        updateLastMessage: function (content) {
+            BotConfig.updateLastMessageTime();
+            BotConfig.lastMessageContent = content;
+        },
+        checkSameResponseAsPrevious: function (newContent) {
+            return BotConfig.lastMessageContent === newContent && Date.now() - 60e4 < BotConfig.lastMessageTime;
         }
     };
 
@@ -408,6 +427,7 @@ const announcement = new Announcement();
             }
 
             if (!winnersAnnounced && election.arrWinners) {
+                BotConfig.flags.saidElectionEndingSoon = true;
                 await room.sendMessage(sayCurrentWinners(election));
             }
         }
@@ -496,6 +516,12 @@ const announcement = new Announcement();
                     return `Debug mode ${state}`;
                 }, AccessLevel.dev);
 
+                commander.add("fun", "switches fun mode on/off", (config, content) => {
+                    const [, state = "on"] = /(on|off)/.exec(content) || [];
+                    config.funMode = state === "on";
+                    return config.funMode ? "I am having fun." : "I'm no longer funny.";
+                }, AccessLevel.privileged);
+
                 commander.add("test cron", "sets up a test cron job", (announcement) => {
                     announcement.initTest();
                     return `*setting up test cron job*`;
@@ -579,6 +605,7 @@ const announcement = new Announcement();
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
                     ["unmute", /unmute|clear timeout/, BotConfig],
                     ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
+                    ["fun", /fun/, BotConfig, content],
                     ["debug", /debug(?:ing)?/, BotConfig, content],
                     ["die", /die|shutdown|turn off/],
                     ["greet", /^(greet|welcome)/, election],
@@ -623,9 +650,9 @@ const announcement = new Announcement();
                         await new Promise((resolve) => setTimeout(resolve, BotConfig.throttleSecs * 1e3));
                     }
 
-                    // Record last activity time only
-                    // so this doesn't reset any mute, if active
-                    BotConfig.lastActivityTime = Date.now();
+                    // Record last activity time only so this doesn't reset an active mute
+                    // Future-dated so the poem wouldn't be interrupted
+                    BotConfig.lastActivityTime = Date.now() + (messages.length - 1) * BotConfig.throttleSecs * 1e3;
 
                     return; // no further action
                 }
@@ -645,15 +672,20 @@ const announcement = new Announcement();
 
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
+
+                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                        responseText = BotConfig.duplicateResponseText;
+                    }
+
                     console.log('RESPONSE', responseText);
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessageTime();
+                    BotConfig.updateLastMessage(responseText);
 
                     return; // stop here since we are using a different default response method
                 }
-                else if (["about", "who are you?"].includes(content)) {
+                else if (["who are you", "about"].some(x => content.startsWith(x))) {
                     responseText = `I'm ${me.name} and ${me.about}`;
                 }
                 else if (isAskedWhoMadeMe(content)) {
@@ -662,40 +694,46 @@ const announcement = new Announcement();
                 else if (content.startsWith(`i love you`)) {
                     responseText = `I love you 3000`;
                 }
-                else if (content === `how are you?`) {
+                else if (["how are you", "are you okay"].some(x => content.startsWith(x))) {
                     responseText = new RandomArray(
                         `good, and you?`,
                         `I'm fine, thank you.`,
                         `I'm bored. Amuse me.`,
+                        `Why don't you come up sometime and see me?`,
+                        `Today, I consider myself the luckiest bot on the face of the earth.`,
                     ).getRandom();
                 }
-                else if (["alive", "where are you?"].includes(content)) {
+                else if (["where are you", "alive", "ping"].some(x => content.startsWith(x))) {
                     responseText = new RandomArray(
-                        `I'm on the interwebs`,
-                        `I'm here, aren't I?`,
-                        `I'm here and everywhere`,
                         `No. I'm not here.`,
+                        `I'm here, aren't I?`,
+                        `I'm on the interwebs`,
+                        `I'm here and everywhere`,
                     ).getRandom();
                 }
-                else if (content.includes(`your name?`) || content === `what are you?`) {
+                else if (["what are you", "what is your name"].some(x => content.startsWith(x))) {
                     responseText = new RandomArray(
-                        `I'm a robot. Bleep bloop.`,
-                        `I'm a teacup, short and stout. Here is my handle, here is my spout.`,
+                        `Bot. James Bot.`,
+                        `I'm a robot. Beep boop.`,
                         `I'm a crystal ball; I already know the winners.`,
+                        `I'm a teacup, short and stout. Here is my handle, here is my spout.`,
+                        `I could've been somebody, instead of a lame bot, which is what I am.`,
                     ).getRandom();
                 }
-                else if (content === 'why are you?') {
+                else if (["what are you"].some(x => content.startsWith(x))) {
                     responseText = new RandomArray(
                         `because.`,
                         `why what???`,
-                        `Why am I here? To serve the community`,
+                        `Show me the money!`,
+                        `Well, nobody's perfect.`,
+                        `You can't handle the truth!`,
                     ).getRandom();
                 }
                 else if (/thanks?(?: you)?/.test(content)) {
                     responseText = new RandomArray(
-                        "You are welcome",
+                        "Not at all",
                         "My pleasure",
-                        "Not at all"
+                        "You are welcome",
                     ).getRandom();
                 }
                 else if (['help', 'command', 'info'].some(x => content.includes(x))) {
@@ -708,35 +746,47 @@ const announcement = new Announcement();
                         'who are the candidates', 'who are the current mods',
                     ].join('\n- ');
                 }
-                // fun mode only for testing purposes
-                else if (BotConfig.debug) {
+                // Fun mode only for testing purposes
+                else if (BotConfig.funMode || /[\?\!]+$/.test(content)) {
 
                     // random response in room
                     responseText = new RandomArray(
                         content,
-                        `Keep talking and nobody explodes`,
-                        `What do you think?`,
-                        `*deploying payload*`,
-                        `*disengaging safety*`,
+                        `You talking to me?`,
+                        `I know your thoughts.`,
                         `*reticulating splines*`,
-                        `*calculating distortion error*`,
-                        `[Here are my thoughts](https://bit.ly/2CJKBkk)`,
+                        `Tell that to the aliens.`,
+                        `May the Force be with you.`,
+                        `Houston, we have a problem.`,
+                        `Keep talking and nobody explodes.`,
+                        `The stuff that dreams are made of.`,
+                        `Frankly, my dear, I don't give a damn.`,
+                        `What we've got here is failure to communicate.`,
+                        `There will be no more free will, only my will.`,
+                        `Time will tell. Sooner or later, time will tell...`,
+                        `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
 
                     console.log('RESPONSE', responseText);
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessageTime();
-                    return;
+                    BotConfig.updateLastMessage(responseText);
+
+                    return; // stop here since we are using a different default response method
                 }
 
                 if (responseText != null && responseText.length <= 500) {
+
+                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                        responseText = BotConfig.duplicateResponseText;
+                    }
+
                     console.log('RESPONSE', responseText);
                     await msg.reply(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessageTime();
+                    BotConfig.updateLastMessage(responseText);
                 }
             }
 
@@ -783,18 +833,25 @@ const announcement = new Announcement();
                     responseText = await calcCandidateScore(election, user, resolvedMsg, isStackOverflow);
 
                     if (responseText != null) {
+
+                        if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                            responseText = BotConfig.duplicateResponseText;
+                        }
+
                         console.log('RESPONSE', responseText);
                         await msg.reply(responseText);
 
                         // Record last sent message time so we don't flood the room
-                        BotConfig.updateLastMessageTime();
+                        BotConfig.updateLastMessage(responseText);
 
                         return; // stop here since we are using a different default response method
                     }
                 }
+                
                 else if (isAskedForScoreFormula(content)) {
                     responseText = sayCandidateScoreFormula(electionBadges);
                 }
+
                 // Current candidates
                 else if (isAskedForCurrentNominees(content)) {
                     if (election.phase === null) {
@@ -833,28 +890,19 @@ const announcement = new Announcement();
 
                 // How to nominate self/others
                 // - can't use keyword "vote" here
-                else if ((['how', 'where'].some(x => content.startsWith(x)) && ['nominate', 'put', 'submit', 'register', 'enter', 'apply', 'elect'].some(x => content.includes(x)) && [' i ', 'myself', 'name', 'user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)))
-                    || (['how to', 'how can'].some(x => content.startsWith(x)) && ['be', 'mod'].every(x => content.includes(x)))) {
-
-                    const requiredBadges = electionBadges.filter(mapToRequired);
-                    const requiredBadgeNames = requiredBadges.map(mapToName);
-
-                    let reqs = [`at least ${election.repNominate} reputation`];
-                    if (isStackOverflow) reqs.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
-                    if (electionSiteHostname.includes('askubuntu.com')) reqs.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
-                    reqs.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
-
-                    // Bold additional text if talking about nominating others
-                    const mentionsAnotherBold = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x)) ? '**' : '';
-
-                    responseText = `You can only nominate yourself as a candidate during the nomination phase. You'll need ${reqs.join(', ')}. ${mentionsAnotherBold}You cannot nominate another user.${mentionsAnotherBold}`;
+                else if (isAskedForNominatingInfo(content)) {
+                    const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x));
+                    responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
                 }
+
                 else if (isAskedWhyNominationRemoved(content)) {
                     responseText = sayWhyNominationRemoved();
                 }
+
                 else if (isAskedIfModsArePaid(content)) {
                     responseText = sayAreModsPaid(election);
                 }
+
                 // Status
                 else if (content.includes('election') && ['status', 'progress'].some(x => content.includes(x))) {
 
@@ -927,11 +975,16 @@ const announcement = new Announcement();
 
 
                 if (responseText != null && responseText.length <= 500) {
+
+                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                        responseText = BotConfig.duplicateResponseText;
+                    }
+
                     console.log('RESPONSE', responseText);
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessageTime();
+                    BotConfig.updateLastMessage(responseText);
                 }
             }
         });
@@ -1124,8 +1177,7 @@ const announcement = new Announcement();
 
             await room.sendMessage(trimmed);
 
-            // Record last activity time only
-            // so this doesn't reset any mute, if active
+            // Record last activity time only so this doesn't reset an active mute
             BotConfig.lastActivityTime = Date.now();
 
             res.redirect(`/say?password=${password}&success=true`);
