@@ -1141,12 +1141,18 @@ const announcement = new Announcement();
         app.get('/say', ({ query }, res) => {
             const { success, password = "", message = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
+            const validPwd = password === process.env.PASSWORD;
+            
+            if(!validPwd) {
+                res.sendStatus(404);
+                return;
+            }
+
             const statusMap = {
                 true: `<div class="result success">Success!</div>`,
-                false: `<div class="result error">Error. Could not send message.</div>`
+                false: `<div class="result error">Error. Could not send message.</div>`,
+                undefined: ""
             };
-
-            const statusHtml = statusMap[success] || [];
 
             res.send(`
                 <link rel="icon" href="data:;base64,=" />
@@ -1157,7 +1163,7 @@ const announcement = new Announcement();
                     <input type="hidden" name="password" value="${password}" />
                     <button>Send</button>
                 </form>
-                ${statusHtml}
+                ${statusMap[success]}
             `);
 
             return;
@@ -1191,30 +1197,32 @@ const announcement = new Announcement();
 
             const validPwd = password === process.env.PASSWORD;
 
+            if(!validPwd) {
+                res.sendStatus(404);
+                return;
+            }
+
             let kvpHtml = [];
 
             const statusMap = {
                 true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
-                false: `<div class="result error">Error. Could not perform action.</div>`
+                false: `<div class="result error">Error. Could not perform action.</div>`,
+                undefined: ""
             };
 
-            const statusHtml = statusMap[success] || [];
+            const envVars = getEnvironmentVars();
 
-            if(validPwd) {
-                const envVars = getEnvironmentVars();
+            // Remove keys that should never be allowed to be displayed/updated via the form
+            const unsafeKeys = [
+                "ACCOUNT_EMAIL",
+                "ACCOUNT_PASSWORD",
+                "NODE_ENV",
+                "PASSWORD",
+            ];
+            const removedSensitiveKeys = unsafeKeys.every(x => delete envVars[x]);
+            if(!removedSensitiveKeys) return;
 
-                // Remove keys that should never be allowed to be displayed/updated via the form
-                const unsafeKeys = [
-                    "ACCOUNT_EMAIL",
-                    "ACCOUNT_PASSWORD",
-                    "NODE_ENV",
-                    "PASSWORD",
-                ];
-                const removedSensitiveKeys = unsafeKeys.every(x => delete envVars[x]);
-                if(!removedSensitiveKeys) return;
-
-                kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`);
-            }
+            kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`);
 
             res.send(`
                 <link rel="icon" href="data:;base64,=" />
@@ -1225,7 +1233,7 @@ const announcement = new Announcement();
                     <input type="hidden" name="password" value="${password}" />
                     <button>Submit</button>
                 </form>
-                ${statusHtml}
+                ${statusMap[success]}
             `);
 
             return;
