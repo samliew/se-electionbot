@@ -4,8 +4,8 @@
  * @returns {boolean}
  */
 export const isAskedForNominatingInfo = (text) => {
-    return /^(?:how|where|can i) (?:put|nominate|submit|register|enter|apply|elect).+\b(?:i\b|myself|user|person|some\s?(?:one|body)|other)/.test(text) ||
-        /^(?:how to|how can|can i).+\bi\b.+be (?:a )?mod/.test(text);
+    return (/^(?:how|where|can i)/.test(text) && /\b(?:nominate|submit|register|enter|apply|elect)\b/.test(text)) ||
+        /^(?:how to|how can|can i).+be (?:a )?mod/.test(text);
 };
 
 /**
@@ -50,16 +50,6 @@ export const isAskedAboutVoting = (text) => {
     return /^(?:where|how|want|when)\b/.test(text) &&
         /\b(?:do|can|to|give|cast|should)\b/.test(text) &&
         /\b(?:voting|vote|elect)\b/.test(text);
-};
-
-/**
- * @summary checks if the message asked to tell one's candidate score
- * @param {string} text
- * @returns {boolean}
- */
-export const isAskedForCandidateScore = (text) => {
-    return /can i nominate myself/.test(text) || /my candidate score/.test(text) ||
-        /(what is|what's) the candidate score (for|of) \d+$/.test(text);
 };
 
 
@@ -123,7 +113,8 @@ export const isAskedWhoMadeMe = (text) => {
  * @returns {boolean}
  */
 export const isAskedForOwnScore = (text) => {
-    return /what(?: i|')s\s+my(?:\s+candidate)?\s+score(?:$|\?)/i.test(text);
+    return /can i nominate myself/.test(text) || 
+        /what(?: i|')s\s+my(?:\s+candidate)?\s+score(?:$|\?)/i.test(text);
 };
 
 /**

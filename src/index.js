@@ -8,9 +8,10 @@ import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
 import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
-    isAskedForCandidateScore, isAskedForCurrentMods,
+    isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForOtherScore, isAskedForOwnScore,
+    isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe,
+    isAskedWhyNominationRemoved, isAskedIfModsArePaid, isAskedForElectionSchedule,
     isAskedForNominatingInfo
 } from "./guards.js";
 import {

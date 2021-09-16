@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import {
-    isAskedAboutModsOrModPowers,
+    isAskedAboutModsOrModPowers, isAskedForNominatingInfo,
     isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe
 } from "../../src/guards.js";
 
@@ -95,7 +95,8 @@ describe('Message Guards', () => {
             allMatch(isAskedForOwnScore, [
                 "what is my candidate score?",
                 "What's my candidate score?",
-                "what is my score?"
+                "what is my score?",
+                "can i nominate myself"
             ]);
 
             allMatch(isAskedForOwnScore, [
@@ -122,6 +123,19 @@ describe('Message Guards', () => {
                 "how is candidate score calculated",
                 "what is candidate score?",
                 "what is candidate score formula?"
+            ]);
+        });
+    });
+
+    describe('isAskedForNominatingInfo', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForNominatingInfo, [
+                "how to nominate",
+                "where can i register",
+                "how to register someone",
+                "how to be a mod",
+                "how can i be mod",
+                "can i nominate another user"
             ]);
         });
     });
