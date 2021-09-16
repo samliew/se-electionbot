@@ -1146,6 +1146,8 @@ const announcement = new Announcement();
                 false: `<div class="result error">Error. Could not send message.</div>`
             };
 
+            const statusHtml = statusMap[success] || [];
+
             res.send(`
                 <link rel="icon" href="data:;base64,=" />
                 <link rel="stylesheet" href="css/styles.css" />
@@ -1155,7 +1157,7 @@ const announcement = new Announcement();
                     <input type="hidden" name="password" value="${password}" />
                     <button>Send</button>
                 </form>
-                ${statusMap[success]}
+                ${statusHtml}
             `);
 
             return;
@@ -1196,6 +1198,8 @@ const announcement = new Announcement();
                 false: `<div class="result error">Error. Could not perform action.</div>`
             };
 
+            const statusHtml = statusMap[success] || [];
+
             if(validPwd) {
                 const envVars = getEnvironmentVars();
 
@@ -1206,7 +1210,8 @@ const announcement = new Announcement();
                     "NODE_ENV",
                     "PASSWORD",
                 ];
-                unsafeKeys.forEach(x => delete envVars[x]);
+                const removedSensitiveKeys = unsafeKeys.every(x => delete envVars[x]);
+                if(!removedSensitiveKeys) return;
 
                 kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`);
             }
@@ -1220,7 +1225,7 @@ const announcement = new Announcement();
                     <input type="hidden" name="password" value="${password}" />
                     <button>Submit</button>
                 </form>
-                ${statusMap[success]}
+                ${statusHtml}
             `);
 
             return;
@@ -1242,7 +1247,8 @@ const announcement = new Announcement();
                 "NODE_ENV",
                 "PASSWORD",
             ];
-            unsafeKeys.forEach(x => delete envVars[x]);
+            const removedSensitiveKeys = unsafeKeys.every(x => delete envVars[x]);
+            if(!removedSensitiveKeys) return;
 
             // Validation
             if (!validPwd || Object.keys(envVars).length === 0) {
