@@ -167,4 +167,22 @@ describe('Election', () => {
 
     });
 
+    describe('isNewPhase', () => {
+
+        it('should ', () => {
+
+            const election = new Election("https://stackoverflow.com/election/12");
+            election._prevObj = { phase: "nomination" };
+            election.phase = "election";
+
+            const newPhase = election.isNewPhase();
+            expect(newPhase).to.be.true;
+
+            election._prevObj.phase = "election";
+
+            const oldPhase = election.isNewPhase();
+            expect(oldPhase).to.be.false;
+        });
+    });
+
 });

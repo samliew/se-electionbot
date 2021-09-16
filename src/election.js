@@ -103,6 +103,15 @@ export default class Election {
     }
 
     /**
+     * @summary checks if election phase has changed
+     * @returns {boolean}
+     */
+    isNewPhase() {
+        const { prev, phase } = this;
+        return prev?.phase !== phase;
+    }
+
+    /**
      * @summary checks if a user (or their id) is amongst the nominees
      * @param {number|User} target userId or user to check
      * @returns {boolean}

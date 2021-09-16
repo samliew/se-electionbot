@@ -1046,7 +1046,7 @@ const announcement = new Announcement();
             }
 
             // After rescraping the election was cancelled
-            if (election.phase === 'cancelled' && election.prev.phase !== election.phase) {
+            if (election.phase === 'cancelled' && election.isNewPhase()) {
                 await announceCancelled(election);
             }
 
