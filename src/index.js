@@ -604,6 +604,7 @@ const announcement = new Announcement();
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
                     ["unmute", /unmute|clear timeout/, BotConfig],
                     ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
+                    ["fun", /fun|fun mode/, BotConfig, content],
                     ["debug", /debug(?:ing)?/, BotConfig, content],
                     ["die", /die|shutdown|turn off/],
                     ["greet", /^(greet|welcome)/, election],
