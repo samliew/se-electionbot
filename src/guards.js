@@ -5,7 +5,7 @@
  */
 export const isAskedForNominatingInfo = (text) => {
     return /^(?:how|where|can i) (?:put|nominate|submit|register|enter|apply|elect).+\b(?:i\b|myself|user|person|some\s?(?:one|body)|other)/.test(text) ||
-        /^(?:how to|how can|can i).+\bi\b.+be (?:a )?mod)/.test(text);
+        /^(?:how to|how can|can i).+\bi\b.+be (?:a )?mod/.test(text);
 };
 
 /**
