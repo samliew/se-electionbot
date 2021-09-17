@@ -1,6 +1,12 @@
 import { apiBase, apiVer, fetchUrl } from "./utils.js";
 
 /**
+ * @description A simple in-memory cached list of network sites
+ * @type {SiteInfo[]}
+ */
+export let allNetworkSites = [];
+
+/**
  * @typedef {import("./utils.js").BadgeItem} BadgeItem
  * @typedef {import("./index.js").BotConfig} BotConfig
  */
@@ -185,6 +191,8 @@ export const getUserInfo = async (config, userId, site, key) => {
  */
 export const getAllNetworkSites = async (config, keyPool, page = 1) => {
 
+    if(allNetworkSites.length > 0) return allNetworkSites;
+
     const siteURL = new URL(`${apiBase}/${apiVer}/sites`);
     siteURL.search = new URLSearchParams({
         filter: "!3ynpeVzDR6qiwv1BQ",
@@ -199,8 +207,30 @@ export const getAllNetworkSites = async (config, keyPool, page = 1) => {
         const otherItems = await getAllNetworkSites(config, keyPool, page + 1);
         return [...items, ...otherItems];
     }
+    else {
+        allNetworkSites = items;
+    }
 
     if (config.verbose) console.log(`API - ${getAllNetworkSites.name}\n`, items);
 
     return items;
+};
+
+/**
+ * @summary get all StackExchange network main sites from the API
+ *
+ * @description
+ * fetches all network sites recursively, then filters out non-main sites
+ *
+ * @param {BotConfig} config
+ * @param {string[]} keyPool pool of API keys to rotate through
+ */
+export const getAllMainNetworkSites = async (config, keyPool) => {
+
+    const allSites = await getAllNetworkSites(config, keyPool);
+    const mainSites = allSites.filter(site => site.site_type === "main_site");
+
+    if (config.verbose) console.log(`API - ${getAllMainNetworkSites.name}\n`, mainSites);
+
+    return mainSites;
 };

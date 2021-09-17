@@ -361,6 +361,42 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
 };
 
 /**
+ * @summary get a site's default chat room
+ * @param {string} siteUrl
+ * @returns {Promise<object|null>} chatUrl
+ */
+export const getSiteDefaultChatroom = async (config, siteUrl) => {
+
+    // Validate siteUrl
+    siteUrl = siteUrl.replace(/^https?:\/\//i, "");
+    if(!/^\w+(?:\.stackexchange)?\.(?:com|net|org)$/.test(siteUrl)) return null;
+
+    // If SO, use The Meta Room as default
+    if(siteUrl === "stackoverflow.com") {
+        return {
+            chatRoomUrl: "https://chat.stackoverflow.com/rooms/197438/the-meta-room",
+            chatDomain: "stackoverflow.com",
+            chatRoomId: 197438
+        };
+    }
+
+    const siteChatIndex = await fetchUrl(config, `https://chat.stackexchange.com?tab=site&sort=people&host=${siteUrl}`);
+    if (!siteChatIndex) return null;
+
+    const $chat = cheerio.load(/** @type {string} */(siteChatIndex));
+    const $roomList = $chat("#roomlist .roomcard a");
+
+    const firstRoomUrl = $roomList.first().attr("href");
+    const firstRoomId = +firstRoomUrl?.match(/\d+/)[0];
+
+    return {
+        chatRoomUrl: `https://chat.stackexchange.com/rooms/${firstRoomId}`,
+        chatDomain: "stackexchange.com",
+        chatRoomId: firstRoomId
+    };
+};
+
+/**
  * @summary makes a postable URL of form [label](uri)
  * @param {string} label
  * @param {string} uri

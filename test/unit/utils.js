@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { listify, parseIds, pluralize, fetchChatTranscript } from "../../src/utils.js";
+import { listify, parseIds, pluralize, fetchChatTranscript, getSiteDefaultChatroom } from "../../src/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('String-related utils', async function () {
@@ -51,6 +51,22 @@ describe('String-related utils', async function () {
 
             expect(chatMessages).to.not.be.empty;
             expect(chatMessages[0].message).to.equal("how do I vote?");
+        });
+
+    });
+
+    describe('getSiteDefaultChatroom', async () => {
+
+        it('should fetch a site\'s default chat room correctly', async () => {
+            const chatroom = await getSiteDefaultChatroom(getMockBotConfig(), "https://stackoverflow.com");
+
+            expect(chatroom.chatRoomId).to.equal(197438);
+            expect(chatroom.chatDomain).to.equal("stackoverflow.com");
+            
+            const chatroom2 = await getSiteDefaultChatroom(getMockBotConfig(), "https://superuser.com");
+
+            expect(chatroom2.chatRoomId).to.equal(118);
+            expect(chatroom2.chatDomain).to.equal("stackexchange.com");
         });
 
     });

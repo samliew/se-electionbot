@@ -1,7 +1,9 @@
+import { util } from "chai";
 import Client from "chatexchange";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
+import { utils } from "mocha";
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
@@ -21,7 +23,7 @@ import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import {
     dateToRelativetime,
-    dateToUtcTimestamp, fetchChatTranscript, keepAlive,
+    dateToUtcTimestamp, fetchChatTranscript, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
     linkToUtcTimestamp, makeURL, parseIds, pluralize, startServer
 } from './utils.js';
@@ -377,9 +379,21 @@ const announcement = new Announcement();
         }
 
         // If is in production mode, and is an active election, auto-detect and set chat domain and chat room ID to join
-        if (!BotConfig.debug && election.isActive() && election.chatRoomId && election.chatDomain) {
-            BotConfig.chatRoomId = election.chatRoomId;
-            BotConfig.chatDomain = election.chatDomain;
+        if (!BotConfig.debug && election.isActive()) {
+
+            // Election chat room found on election page
+            if(election.chatRoomId && election.chatDomain) {
+                BotConfig.chatRoomId = election.chatRoomId;
+                BotConfig.chatDomain = election.chatDomain;
+            }
+            // Default to site's default chat room
+            else {
+                const defaultRoom = await getSiteDefaultChatroom(BotConfig, election.siteHostname);
+                if(defaultRoom) {
+                    BotConfig.chatRoomId = defaultRoom.chatRoomId;
+                    BotConfig.chatDomain = defaultRoom.chatDomain;
+                }
+            }
 
             console.log(`App is not in debug mode and election is active - redirected to live room:
             DOMAIN:  ${defaultChatDomain} -> ${BotConfig.chatDomain}
@@ -670,7 +684,7 @@ const announcement = new Announcement();
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
 
-                    if (BotConfig.checkSameResponseAsPrevious(responseText)) {
+                    if (BotConfig.debug && BotConfig.checkSameResponseAsPrevious(responseText)) {
                         responseText = BotConfig.duplicateResponseText;
                     }
 
@@ -775,7 +789,7 @@ const announcement = new Announcement();
 
                 if (responseText != null && responseText.length <= 500) {
 
-                    if (BotConfig.checkSameResponseAsPrevious(responseText)) {
+                    if (BotConfig.debug && BotConfig.checkSameResponseAsPrevious(responseText)) {
                         responseText = BotConfig.duplicateResponseText;
                     }
 
@@ -831,7 +845,7 @@ const announcement = new Announcement();
 
                     if (responseText != null) {
 
-                        if (BotConfig.checkSameResponseAsPrevious(responseText)) {
+                        if (BotConfig.debug && BotConfig.checkSameResponseAsPrevious(responseText)) {
                             responseText = BotConfig.duplicateResponseText;
                         }
 
@@ -973,7 +987,7 @@ const announcement = new Announcement();
 
                 if (responseText != null && responseText.length <= 500) {
 
-                    if (BotConfig.checkSameResponseAsPrevious(responseText)) {
+                    if (BotConfig.debug && BotConfig.checkSameResponseAsPrevious(responseText)) {
                         responseText = BotConfig.duplicateResponseText;
                     }
 
