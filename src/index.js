@@ -500,7 +500,7 @@ const announcement = new Announcement();
             console.log('EVENT', JSON.stringify({ msg, user }));
 
             // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
-            if (eventType === 8 && targetUserId === me.id) {
+            if (eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id) {
                 let responseText = "";
 
                 const commander = new CommandManager(user);
@@ -666,7 +666,7 @@ const announcement = new Announcement();
 
 
             // Mentioned bot (8)
-            if (eventType === 8 && targetUserId === me.id && BotConfig.throttleSecs <= 10) {
+            if (eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id && BotConfig.throttleSecs <= 10) {
                 let responseText = null;
 
                 if (content.startsWith('offtopic')) {
@@ -791,7 +791,7 @@ const announcement = new Announcement();
 
 
             // Any new message that does not reply-to or mention any user (1)
-            else if (eventType === 1 && !targetUserId) {
+            else if (eventType === ChatEventType.MESSAGE_POSTED && !targetUserId) {
                 let responseText = null;
 
                 // Moderation badges
