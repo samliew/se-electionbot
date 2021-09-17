@@ -8,7 +8,7 @@ export let allNetworkSites = [];
 
 /**
  * @typedef {import("./utils.js").BadgeItem} BadgeItem
- * @typedef {import("./index.js").BotConfig} BotConfig
+ * @typedef {import("./config.js").BotConfig} BotConfig
  */
 
 /**

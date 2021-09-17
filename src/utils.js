@@ -19,7 +19,7 @@ let _apiBackoff = Date.now();
 /**
  * @summary starts the bot server
  * @param {{ sendMessage(msg:string): Promise<any> }} room
- * @param {import("./index").BotConfig} config
+ * @param {import("./config").BotConfig} config
  * @returns {Promise<import("express").Application>}
  */
 export const startServer = async (room, config) => {
@@ -102,7 +102,7 @@ export const startServer = async (room, config) => {
 
 /**
  * @summary fetches the endpoint
- * @param {import("./index").BotConfig} config
+ * @param {import("./config").BotConfig} config
  * @param {string} url
  * @param {boolean} [json]
  * @returns {Promise<any>}
@@ -140,7 +140,7 @@ export const fetchUrl = async (config, url, json = false) => {
 
 /**
  * @summary fetches the chat room transcript and retrieve messages
- * @param {import("./index").BotConfig} config
+ * @param {import("./config").BotConfig} config
  * @param {string} url
  * @returns {Promise<any>}
  */
@@ -300,7 +300,7 @@ export const NO_ACCOUNT_ID = -42;
 
 /**
  * @description Expensive, up to three requests. Only one, if the linked account is the site we want.
- * @param {import("./index").BotConfig} config
+ * @param {import("./config").BotConfig} config
  * @param {number} chatUserId user id
  * @param {string} chatdomain chat server domain
  * @param {string} hostname election site hostname
