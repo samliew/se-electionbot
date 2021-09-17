@@ -3,7 +3,6 @@ import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
-import { fetchConfigVars, updateConfigVars } from "./api-heroku.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import Election from './election.js';
@@ -1187,84 +1186,6 @@ const announcement = new Announcement();
             BotConfig.lastActivityTime = Date.now();
 
             res.redirect(`/say?password=${password}&success=true`);
-        });
-
-        // Serve /config form
-        app.get('/config', async ({ query }, res) => {
-            const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
-
-            const validPwd = password === process.env.PASSWORD;
-
-            if (!validPwd) {
-                res.sendStatus(404);
-                return;
-            }
-
-            const statusMap = {
-                true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
-                false: `<div class="result error">Error. Could not perform action.</div>`,
-                undefined: ""
-            };
-
-            const configVars = await fetchConfigVars();
-
-            // Remove keys that should never be allowed to be displayed/updated via the form
-            const unsafeKeys = [
-                "ACCOUNT_EMAIL",
-                "ACCOUNT_PASSWORD",
-                "NODE_ENV",
-                "PASSWORD",
-            ];
-            const removedSensitiveKeys = unsafeKeys.every(x => delete configVars[x]);
-            if(!removedSensitiveKeys) return;
-
-            const kvpHtml = Object.keys(configVars).map(key => `<div>${key} <input type="text" name="${key}" value="${configVars[key]}" /></div>`).join("\n");
-
-            res.send(`
-                <link rel="icon" href="data:;base64,=" />
-                <link rel="stylesheet" href="css/styles.css" />
-                <h3>Update ElectionBot environment variables</h3>
-                <form method="post">
-                    ${kvpHtml}
-                    <input type="hidden" name="password" value="${password}" />
-                    <button>Submit</button>
-                </form>
-                ${statusMap[success]}
-            `);
-
-            return;
-        });
-
-        // POST event from /config form
-        app.post('/config', async ({ body }, res) => {
-            const { password } = /** @type {{ password:string }} */(body);
-
-            const validPwd = password === process.env.PASSWORD;
-
-            const configVars = body;
-
-            // Remove keys that should never be allowed to be displayed/updated via the form
-            const unsafeKeys = [
-                "ACCOUNT_EMAIL",
-                "ACCOUNT_PASSWORD",
-                "NODE_ENV",
-                "PASSWORD",
-                "password",
-            ];
-            const removedSensitiveKeys = unsafeKeys.every(x => delete configVars[x]);
-            if(!removedSensitiveKeys) return;
-
-            // Validation
-            if (!validPwd || Object.keys(configVars).length === 0) {
-                console.error(`'Invalid ${validPwd ? 'request' : 'password'}`, password);
-                res.sendStatus(404);
-                return;
-            }
-
-            // Update environment variables
-            await updateConfigVars(configVars);
-
-            res.redirect(`/config?password=${password}&success=true`);
         });
 
 

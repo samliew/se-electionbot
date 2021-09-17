@@ -39,7 +39,6 @@
     "cheerio": "^1.0.0-rc.10",
     "dotenv": "^10.0.0",
     "express": "^4.16.4",
-    "heroku-client": "^3.1.0",
     "html-entities": "^2.3.2",
     "node-cron": "^3.0.0",
     "patch-package": "^6.2.2"
