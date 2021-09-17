@@ -59,7 +59,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
      * @summary calculates candidate score
      * @param {Election} election
      * @param {User} user
-     * @param {ResolvedMessage} message
+     * @param {Pick<ResolvedMessage, "userId"|"content">} message
      * @param {boolean} [isSO]
      * @returns {Promise<string>}
      */

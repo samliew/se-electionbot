@@ -333,11 +333,11 @@ const announcement = new Announcement();
 
     /**
      * @summary gets a User given a resolved message from them
-     * @param {import("chatexchange").default} client
-     * @param {ResolvedMessage} message
+     * @param {Client} client ChatExchange client
+     * @param {number} userId chat user id
      * @returns {Promise<User|null>}
      */
-    const getUser = async (client, { userId }) => {
+    const getUser = async (client, userId) => {
         try {
             // This is so we can get extra info about the user
             // @ts-expect-error
@@ -456,20 +456,13 @@ const announcement = new Announcement();
 
             const content = origContent.toLowerCase().replace(/^@\S+\s+/, '');
 
-            /** @type {ResolvedMessage} */
-            const resolvedMsg = {
-                eventType: msg.eventType,
-                userName: msg.userName,
-                userId: msg.userId,
-                targetUserId: msg.targetUserId,
-                content,
-            };
+            const { eventType, userId, targetUserId } = msg;
 
             // Ignore stuff from self, Community or Feeds users
-            if (me.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
+            if (me.id === userId || userId <= 0) return;
 
             // Ignore stuff from ignored users
-            if (BotConfig.ignoredUserIds.has(resolvedMsg.userId)) return;
+            if (BotConfig.ignoredUserIds.has(userId)) return;
 
             // Record time of last new message/reply in room, and increment activity count
             BotConfig.lastActivityTime = Date.now();
@@ -479,10 +472,10 @@ const announcement = new Announcement();
             if (content.includes('onebox')) return;
 
             // Get details of user who triggered the message
-            const user = await getUser(client, resolvedMsg);
+            const user = await getUser(client, userId);
 
             //if user is null, we have a problem
-            if (!user) return console.log("missing user", resolvedMsg);
+            if (!user) return console.log(`missing user ${userId}`);
 
             // TODO: make a part of User
             /** @type {[Set<number>, number][]} */
@@ -500,15 +493,14 @@ const announcement = new Announcement();
             // If message is too short or long, ignore (most likely FP, except if an admin issues the message)
             const { length } = content;
             if ((length < 4 || length > 69) && !isPrivileged) {
-                const { content } = resolvedMsg;
                 console.log(`EVENT - Ignoring due to message length ${content.length}: ${content}`);
                 return;
             }
 
-            console.log('EVENT', JSON.stringify({ resolvedMsg, user }));
+            console.log('EVENT', JSON.stringify({ msg, user }));
 
             // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
-            if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id) {
+            if (eventType === 8 && targetUserId === me.id) {
                 let responseText = "";
 
                 const commander = new CommandManager(user);
@@ -674,7 +666,7 @@ const announcement = new Announcement();
 
 
             // Mentioned bot (8)
-            if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && BotConfig.throttleSecs <= 10) {
+            if (eventType === 8 && targetUserId === me.id && BotConfig.throttleSecs <= 10) {
                 let responseText = null;
 
                 if (content.startsWith('offtopic')) {
@@ -799,7 +791,7 @@ const announcement = new Announcement();
 
 
             // Any new message that does not reply-to or mention any user (1)
-            else if (resolvedMsg.eventType === 1 && !resolvedMsg.targetUserId) {
+            else if (eventType === 1 && !targetUserId) {
                 let responseText = null;
 
                 // Moderation badges
@@ -837,7 +829,7 @@ const announcement = new Announcement();
                         getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
                     );
 
-                    responseText = await calcCandidateScore(election, user, resolvedMsg, isStackOverflow);
+                    responseText = await calcCandidateScore(election, user, { userId, content }, isStackOverflow);
 
                     if (responseText != null) {
 
