@@ -1,4 +1,5 @@
 import Client from "chatexchange";
+import Room from "chatexchange/dist/Room";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
@@ -167,7 +168,6 @@ const announcement = new Announcement();
     ];
     let rescraperTimeout;
     let election = /** @type {Election|null} */(null);
-    let room = null;
 
     /**
      * @type {BotConfig}
@@ -259,10 +259,11 @@ const announcement = new Announcement();
 
     /**
      * @summary Election cancelled
-     * @param {Election} [election]
+     * @param {Room} room chatroom to post to
+     * @param {Election} [election] election to announce for
      * @returns {Promise<boolean>}
      */
-    async function announceCancelled(election = null) {
+    async function announceCancelled(room, election = null) {
 
         if (election === null) return false;
 
@@ -288,10 +289,11 @@ const announcement = new Announcement();
 
     /**
      * @summary Announces winners when available
-     * @param {Election} [election]
+     * @param {Room} room chatroom to post to
+     * @param {Election} [election] election to announce for
      * @returns {Promise<boolean>}
      */
-    async function announceWinners(election = null) {
+    async function announceWinners(room, election = null) {
 
         //exit early if no election
         if (election === null) return false;
@@ -380,14 +382,14 @@ const announcement = new Announcement();
         if (!BotConfig.debug && election.isActive()) {
 
             // Election chat room found on election page
-            if(election.chatRoomId && election.chatDomain) {
+            if (election.chatRoomId && election.chatDomain) {
                 BotConfig.chatRoomId = election.chatRoomId;
                 BotConfig.chatDomain = election.chatDomain;
             }
             // Default to site's default chat room
             else {
                 const defaultRoom = await getSiteDefaultChatroom(BotConfig, election.siteHostname);
-                if(defaultRoom) {
+                if (defaultRoom) {
                     BotConfig.chatRoomId = defaultRoom.chatRoomId;
                     BotConfig.chatDomain = defaultRoom.chatDomain;
                 }
@@ -399,6 +401,7 @@ const announcement = new Announcement();
         }
 
         // "default" is a temp fix for ChatExchange being served as CJS module
+        /** @type {Client} */
         const client = new Client["default"](BotConfig.chatDomain);
         try {
             await client.login(accountEmail, accountPassword);
@@ -413,14 +416,10 @@ const announcement = new Announcement();
         const _me = await client.getMe();
         const me = await client._browser.getProfile(_me.id);
 
-        // Temporary required workaround due to IProfileData not being exported
-        const meWithId = /** @type {typeof me & { id: number }} */(me);
+        me.id = _me.id; // because getProfile() doesn't return id
+        console.log(`INIT - Logged in to ${BotConfig.chatDomain} as ${me.name} (${me.id})`);
 
-        meWithId.id = _me.id; // because getProfile() doesn't return id
-        console.log(`INIT - Logged in to ${BotConfig.chatDomain} as ${meWithId.name} (${meWithId.id})`);
-
-        // Join room
-        room = await client.joinRoom(BotConfig.chatRoomId);
+        const room = await client.joinRoom(BotConfig.chatRoomId);
 
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended' && election.chatRoomId) {
@@ -468,7 +467,7 @@ const announcement = new Announcement();
             };
 
             // Ignore stuff from self, Community or Feeds users
-            if (meWithId.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
+            if (me.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
 
             // Ignore stuff from ignored users
             if (BotConfig.ignoredUserIds.has(resolvedMsg.userId)) return;
@@ -510,7 +509,7 @@ const announcement = new Announcement();
             console.log('EVENT', JSON.stringify({ resolvedMsg, user }));
 
             // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
-            if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id) {
+            if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id) {
                 let responseText = "";
 
                 const commander = new CommandManager(user);
@@ -676,7 +675,7 @@ const announcement = new Announcement();
 
 
             // Mentioned bot (8)
-            if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id && BotConfig.throttleSecs <= 10) {
+            if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === me.id && BotConfig.throttleSecs <= 10) {
                 let responseText = null;
 
                 if (content.startsWith('offtopic')) {
@@ -1011,7 +1010,7 @@ const announcement = new Announcement();
 
 
         // Function to rescrape election data, and process election or chat room updates
-        const rescrapeFn = async function () {
+        const rescrapeFn = async () => {
 
             await election.scrapeElection(BotConfig);
 
@@ -1058,12 +1057,12 @@ const announcement = new Announcement();
 
             // After rescraping the election was cancelled
             if (election.phase === 'cancelled' && election.isNewPhase()) {
-                await announceCancelled(election);
+                await announceCancelled(room, election);
             }
 
             // After rescraping we have winners
             else if (election.phase === 'ended' && election.newWinners.length) {
-                await announceWinners(election);
+                await announceWinners(room, election);
 
                 // Stop scraping the election page or greeting the room
                 stopRescrape();
@@ -1137,7 +1136,7 @@ const announcement = new Announcement();
         setInterval(async function () {
 
             // Try to stay-alive by rejoining room
-            room = await client.joinRoom(BotConfig.chatRoomId);
+            await client.joinRoom(BotConfig.chatRoomId);
             if (BotConfig.debug) console.log('Stay alive rejoin room', room);
 
         }, 5 * 60000);
