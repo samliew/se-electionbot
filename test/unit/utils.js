@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { listify, parseIds, pluralize, fetchChatTranscript, getSiteDefaultChatroom } from "../../src/utils.js";
+import { asyncCacheable, fetchChatTranscript, getSiteDefaultChatroom, listify, parseIds, pluralize } from "../../src/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('String-related utils', async function () {
@@ -40,7 +40,7 @@ describe('String-related utils', async function () {
         });
 
     });
-    
+
     this.timeout(10e3); // fetching transcript can be slow
 
     describe('fetchChatTranscript', async () => {
@@ -62,13 +62,32 @@ describe('String-related utils', async function () {
 
             expect(chatroom.chatRoomId).to.equal(197438);
             expect(chatroom.chatDomain).to.equal("stackoverflow.com");
-            
+
             const chatroom2 = await getSiteDefaultChatroom(getMockBotConfig(), "https://superuser.com");
 
             expect(chatroom2.chatRoomId).to.equal(118);
             expect(chatroom2.chatDomain).to.equal("stackexchange.com");
         });
 
+    });
+
+    describe('cacheable', () => {
+        it('should use cached value if available', async () => {
+            const obj = {
+                curr: 0,
+                get next() {
+                    return Promise.resolve(++this.curr);
+                }
+            };
+
+            const func = (/** @type {typeof obj} */o) => o.next;
+
+            const cached = asyncCacheable("obj", func);
+
+            expect(await cached(obj)).to.equal(1);
+            expect(await cached(obj)).to.equal(1);
+            expect(obj.curr).to.equal(1);
+        });
     });
 
 });
