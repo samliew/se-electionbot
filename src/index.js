@@ -66,6 +66,7 @@ const announcement = new Announcement();
  *  updateLastMessageTime: function,
  *  updateLastMessage: function,
  *  checkSameResponseAsPrevious: function
+ *  roomReachedMinimumActivityCount: boolean
  * }} BotConfig
  *
  * @typedef {import("./utils").APIListResponse} APIListResponse
@@ -186,6 +187,11 @@ const announcement = new Announcement();
         lowActivityCheckMins: +process.env.LOW_ACTIVITY_CHECK_MINS || 15,
         // Variable to trigger an action only after this amount of minimum messages
         lowActivityCountThreshold: +process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 30,
+
+        get roomReachedMinimumActivityCount() {
+            const { activityCount, lowActivityCountThreshold } = this;
+            return activityCount >= lowActivityCountThreshold;
+        },
 
         /* Bot variables */
 
@@ -1006,7 +1012,7 @@ const announcement = new Announcement();
             await election.scrapeElection(BotConfig);
 
             const roomLongIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
-            const roomReachedMinimumActivityCount = BotConfig.activityCount >= BotConfig.lowActivityCountThreshold;
+            const { roomReachedMinimumActivityCount } = BotConfig;
             const roomBecameIdleAShortWhileAgo = BotConfig.lastActivityTime + (4 * 6e4) < Date.now();
             const roomBecameIdleAFewHoursAgo = BotConfig.lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
             const botHasBeenQuiet = BotConfig.lastMessageTime + (BotConfig.lowActivityCheckMins * 6e4) < Date.now();
