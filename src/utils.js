@@ -2,6 +2,7 @@ import axios from "axios";
 import cheerio from 'cheerio';
 import express from 'express';
 import { get } from 'https';
+import Cache from "node-cache";
 import { join } from 'path';
 import { URL } from "url";
 
@@ -111,7 +112,7 @@ export const fetchUrl = async (config, url, json = false) => {
 
     // Delay SE API query if backoff still active
     const backoffMillis = _apiBackoff - Date.now();
-    if(url.includes(apiBase) && backoffMillis > 0) {
+    if (url.includes(apiBase) && backoffMillis > 0) {
         await new Promise(resolve => setTimeout(resolve, backoffMillis));
     }
 
@@ -125,7 +126,7 @@ export const fetchUrl = async (config, url, json = false) => {
         });
 
         // Store backoff if SE API
-        if(url.includes(apiBase) && data.backoff) {
+        if (url.includes(apiBase) && data.backoff) {
             _apiBackoff = Date.now() + data.backoff * 1e4 + 50; // 50ms buffer
         }
 
@@ -146,7 +147,7 @@ export const fetchUrl = async (config, url, json = false) => {
 export const fetchChatTranscript = async (config, url) => {
 
     // Validate chat transcript url
-    if(!/^https:\/\/chat\.stack(?:exchange|overflow)\.com\/transcript\/\d+/i.test(url)) return null;
+    if (!/^https:\/\/chat\.stack(?:exchange|overflow)\.com\/transcript\/\d+/i.test(url)) return null;
 
     console.log('Fetching chat transcript:', url);
 
@@ -154,7 +155,7 @@ export const fetchChatTranscript = async (config, url) => {
     const $chat = cheerio.load(/** @type {string} */(chatTranscript));
     const messages = [];
 
-    $chat('#transcript .message').each(function(i, el) {
+    $chat('#transcript .message').each(function (i, el) {
         const $this = $chat(el);
         const userlink = $this.parent().siblings('.signature').find('a');
         messages.push({
@@ -164,7 +165,7 @@ export const fetchChatTranscript = async (config, url) => {
         });
     }).get();
 
-    if(config.verbose) {
+    if (config.verbose) {
         console.log('Transcript Messages:', messages);
     }
 
@@ -369,10 +370,10 @@ export const getSiteDefaultChatroom = async (config, siteUrl) => {
 
     // Validate siteUrl
     siteUrl = siteUrl.replace(/^https?:\/\//i, "");
-    if(!/^\w+(?:\.stackexchange)?\.(?:com|net|org)$/.test(siteUrl)) return null;
+    if (!/^\w+(?:\.stackexchange)?\.(?:com|net|org)$/.test(siteUrl)) return null;
 
     // If SO, use The Meta Room as default
-    if(siteUrl === "stackoverflow.com") {
+    if (siteUrl === "stackoverflow.com") {
         return {
             chatRoomUrl: "https://chat.stackoverflow.com/rooms/197438/the-meta-room",
             chatDomain: "stackoverflow.com",
@@ -434,3 +435,25 @@ export const mapToRequired = ({ required }) => required;
  * @returns {number[]}
  */
 export const parseIds = (ids) => ids.split(/\D+/).map(Number);
+
+/**
+ * @template {(...args: any[]) => any} T
+ * @template {ReturnType<T> extends PromiseLike<infer U> ? U : ReturnType<T>} U
+ *
+ * @summary makes function cacheable
+ * @param {string} key cache key
+ * @param {T} func cacheable function
+ * @returns {(...args: Parameters<T>) => Promise<U>}
+ */
+export const asyncCacheable = (key, func) => {
+    const cache = new Cache();
+    return async (...args) => {
+        if (cache.has(key)) {
+            return cache.get(key);
+        }
+
+        const result = await func(...args);
+        cache.set(key, result);
+        return result;
+    };
+};
