@@ -444,11 +444,10 @@ const announcement = new Announcement();
             await room.sendMessage(getRandomPlop());
         }
 
+        room.ignore(...ignoredEventTypes);
+
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
-
-            // Ignore unnecessary events - always check first
-            if (ignoredEventTypes.includes(msg.eventType)) return;
 
             const encoded = await msg.content;
 
