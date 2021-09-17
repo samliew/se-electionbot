@@ -49,6 +49,16 @@ export default class Election {
         return arrNominees.filter(({ userId }) => !prevIds.includes(userId));
     }
 
+    /**
+     * @summary gets a list of new Winners
+     * @returns {Nominee[]}
+     */
+    get newWinners() {
+        const { prev, arrWinners } = this;
+        const prevIds = prev.arrWinners.map(({ userId }) => userId);
+        return arrWinners.filter(({ userId }) => !prevIds.includes(userId));
+    }
+
     validate() {
         return !(
             this.validElectionUrl(this.electionUrl) &&
@@ -79,6 +89,26 @@ export default class Election {
     isActive() {
         const { phase } = this;
         return ![null, "ended", "cancelled"].includes(phase);
+    }
+
+    /**
+     * @summary checks if the election is ending soon
+     * @param {number} [threshold] offset to consider the election ending from (10 mins by default)
+     * @returns {boolean}
+     */
+    isEnding(threshold = 10 * 6e5) {
+        const { phase, dateEnded } = this;
+        const isUnderThreshold = dateEnded.valueOf() - threshold <= Date.now();
+        return phase === 'election' && isUnderThreshold;
+    }
+
+    /**
+     * @summary checks if election phase has changed
+     * @returns {boolean}
+     */
+    isNewPhase() {
+        const { prev, phase } = this;
+        return prev?.phase !== phase;
     }
 
     /**

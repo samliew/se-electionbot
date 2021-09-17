@@ -26,6 +26,31 @@ describe('Election', () => {
 
         });
 
+        describe('newWinners', () => {
+
+            it('should correctly return only new Winners', () => {
+                const newWinner = getMockNominee({ userId: 2 });
+
+                const election = new Election("https://stackoverflow.com/election/12");
+                election._prevObj = { arrWinners: [] };
+                election.arrWinners.push(newWinner);
+
+                const { newWinners } = election;
+                expect(newWinners).length(1);
+
+                const [nominee] = newWinners;
+                expect(nominee.userId).to.equal(2);
+            });
+
+            it('should return an empty array on no Winners', () => {
+                const election = new Election("https://stackoverflow.com/election/12");
+                election._prevObj = { arrWinners: [] };
+
+                const { newWinners } = election;
+                expect(newWinners).be.empty;
+            });
+        });
+
     });
 
     describe('getPhase', () => {
@@ -115,6 +140,49 @@ describe('Election', () => {
             expect(allInactive).to.be.true;
         });
 
+    });
+
+    describe('isEnding', () => {
+
+        it('should correctly check if election is ending', () => {
+            const offset = 5 * 6e5;
+
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.phase = "election";
+            election.dateEnded = Date.now();
+
+            const isEndedInThePast = election.isEnding(offset);
+            expect(isEndedInThePast).to.be.true;
+
+            election.dateEnded = Date.now() + offset * 2;
+
+            const isEndedInTheFuture = election.isEnding(offset);
+            expect(isEndedInTheFuture).to.be.false;
+
+            election.phase = "nomination";
+
+            const isEndedInNomination = election.isEnding(offset);
+            expect(isEndedInNomination).to.be.false;
+        });
+
+    });
+
+    describe('isNewPhase', () => {
+
+        it('should ', () => {
+
+            const election = new Election("https://stackoverflow.com/election/12");
+            election._prevObj = { phase: "nomination" };
+            election.phase = "election";
+
+            const newPhase = election.isNewPhase();
+            expect(newPhase).to.be.true;
+
+            election._prevObj.phase = "election";
+
+            const oldPhase = election.isNewPhase();
+            expect(oldPhase).to.be.false;
+        });
     });
 
 });

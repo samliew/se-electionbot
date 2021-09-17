@@ -10,14 +10,12 @@ import Election from './election.js';
 import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
-    isAskedForCurrentNominees, isAskedForCurrentWinners,
-    isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe,
-    isAskedWhyNominationRemoved, isAskedIfModsArePaid, isAskedForElectionSchedule,
-    isAskedForNominatingInfo
+    isAskedForCurrentNominees, isAskedForCurrentWinners, isAskedForElectionSchedule,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedIfModsArePaid, isAskedWhoMadeMe,
+    isAskedWhyNominationRemoved
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods, sayHowToNominate,
-    sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
 import Announcement from './ScheduledAnnouncement.js';
@@ -26,7 +24,7 @@ import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, mapToName, mapToRequired, parseIds, pluralize, startServer
+    linkToUtcTimestamp, makeURL, parseIds, pluralize, startServer
 } from './utils.js';
 
 // preserves compatibility with older import style
@@ -673,7 +671,7 @@ const announcement = new Announcement();
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
 
-                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                    if (BotConfig.checkSameResponseAsPrevious(responseText)) {
                         responseText = BotConfig.duplicateResponseText;
                     }
 
@@ -778,7 +776,7 @@ const announcement = new Announcement();
 
                 if (responseText != null && responseText.length <= 500) {
 
-                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                    if (BotConfig.checkSameResponseAsPrevious(responseText)) {
                         responseText = BotConfig.duplicateResponseText;
                     }
 
@@ -834,7 +832,7 @@ const announcement = new Announcement();
 
                     if (responseText != null) {
 
-                        if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                        if (BotConfig.checkSameResponseAsPrevious(responseText)) {
                             responseText = BotConfig.duplicateResponseText;
                         }
 
@@ -847,7 +845,7 @@ const announcement = new Announcement();
                         return; // stop here since we are using a different default response method
                     }
                 }
-                
+
                 else if (isAskedForScoreFormula(content)) {
                     responseText = sayCandidateScoreFormula(electionBadges);
                 }
@@ -976,7 +974,7 @@ const announcement = new Announcement();
 
                 if (responseText != null && responseText.length <= 500) {
 
-                    if(BotConfig.checkSameResponseAsPrevious(responseText)) {
+                    if (BotConfig.checkSameResponseAsPrevious(responseText)) {
                         responseText = BotConfig.duplicateResponseText;
                     }
 
@@ -1048,12 +1046,12 @@ const announcement = new Announcement();
             }
 
             // After rescraping the election was cancelled
-            if (election.phase === 'cancelled' && election.prev.phase !== election.phase) {
+            if (election.phase === 'cancelled' && election.isNewPhase()) {
                 await announceCancelled(election);
             }
 
             // After rescraping we have winners
-            else if (election.phase === 'ended' && election.prev.arrWinners.length != election.arrWinners.length && election.arrWinners.length > 0) {
+            else if (election.phase === 'ended' && election.newWinners.length) {
                 await announceWinners(election);
 
                 // Stop scraping the election page or greeting the room
@@ -1061,14 +1059,14 @@ const announcement = new Announcement();
             }
 
             // After rescraping, the election is over but we do not have winners yet
-            else if (election.phase === 'ended' && !election.arrWinners.length) {
+            else if (election.phase === 'ended' && !election.newWinners.length) {
 
                 // Reduce scrape interval further
                 BotConfig.scrapeIntervalMins = 0.5;
             }
 
             // The election is ending within the next 10 minutes or less, do once only
-            else if (election.phase === 'election' && election.dateEnded - 10 * 6e5 <= Date.now() && !BotConfig.flags.saidElectionEndingSoon) {
+            else if (election.isEnding() && !BotConfig.flags.saidElectionEndingSoon) {
 
                 // Reduce scrape interval
                 BotConfig.scrapeIntervalMins = 2;
@@ -1082,7 +1080,7 @@ const announcement = new Announcement();
             }
 
             // New nominations
-            else if (election.phase == 'nomination' && election.prev.arrNominees.length !== election.arrNominees.length) {
+            else if (election.phase == 'nomination' && election.newNominees.length) {
 
                 // Get diff between the arrays
                 const { newNominees } = election;
@@ -1133,7 +1131,7 @@ const announcement = new Announcement();
 
         }, 5 * 60000);
 
-        
+
         // Start server
         const app = await startServer(room, BotConfig);
 
@@ -1142,8 +1140,8 @@ const announcement = new Announcement();
             const { success, password = "", message = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
             const validPwd = password === process.env.PASSWORD;
-            
-            if(!validPwd) {
+
+            if (!validPwd) {
                 res.sendStatus(404);
                 return;
             }
@@ -1197,7 +1195,7 @@ const announcement = new Announcement();
 
             const validPwd = password === process.env.PASSWORD;
 
-            if(!validPwd) {
+            if (!validPwd) {
                 res.sendStatus(404);
                 return;
             }
@@ -1236,7 +1234,7 @@ const announcement = new Announcement();
 
             return;
         });
-        
+
         // POST event from /config form
         app.post('/config', async ({ body }, res) => {
             const { password } = /** @type {{ password:string }} */(body);
