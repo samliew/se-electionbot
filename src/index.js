@@ -331,25 +331,53 @@ const announcement = new Announcement();
 
         const room = await client.joinRoom(config.chatRoomId);
 
-        // TODO: message queue
+        // TODO: implement message queue
         /**
-         * @description function to handle room.sendMessage and msg.reply from main function, so we can apply throttle and queue messages
+         * @description private function to actually send the message, so we can apply throttle and queue messages
+         * @param {string} message Message to send
+         * @param {null|number} inResponseTo message ID to reply to
+         * @returns {Promise<any>}
+         */
+        const _sendTheMessage = async function (message, inResponseTo = null, isPrivileged = false) {
+
+            const isValid = message?.length <= 500;
+
+            if (isValid) {
+
+                // Notify same previous message if in debug mode
+                if (config.debug && config.checkSameResponseAsPrevious(message)) {
+                    message = config.duplicateResponseText;
+                }
+
+                await room.sendMessage.apply(this, (inResponseTo ? `:${inResponseTo} ` : "") + message);
+
+                // Record last sent message and time so we don't flood the room
+                config.updateLastMessage(message);
+            }
+
+            console.log(`RESPONSE ${!isValid ? "- INVALID " : ""}- `, message);
+
+            return;
+        };
+
+        /**
+         * @description replacement function to handle room.sendMessage
          * @param {string} message Message to send
          * @param {null|number} inResponseTo message ID to reply to
          * @returns {Promise<any>}
          */
         const sendMessage = async function (message, inResponseTo = null, isPrivileged = false) {
-            return await room.sendMessage.apply(this, (inResponseTo ? `:${inResponseTo} ` : "") + message);
+            return await _sendTheMessage.call(this, arguments);
         };
 
         /**
-         * @description function to handle msg.reply from main function
+         * @description replacement function to handle msg.reply
          * @param {string} message Message to send
          * @param {null|number} inResponseTo message ID to reply to
          * @returns {Promise<any>}
          */
         const sendReply = async function (message, inResponseTo, isPrivileged = false) {
-            return await sendMessage.call(this, arguments);
+            return await _sendTheMessage.call(this, arguments);
         };
 
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
@@ -366,13 +394,13 @@ const announcement = new Announcement();
             }
 
             if (!winnersAnnounced && election.arrWinners) {
+                await sendMessage(sayCurrentWinners(election), null, true);
                 config.flags.saidElectionEndingSoon = true;
-                await sendMessage(sayCurrentWinners(election));
             }
         }
         // Announce join room if in debug mode
         else if (config.debug) {
-            await sendMessage(getRandomPlop());
+            await sendMessage(getRandomPlop(), null, true);
         }
 
         room.ignore(...ignoredEventTypes);
@@ -569,20 +597,22 @@ const announcement = new Announcement();
 
                     console.log(`RESPONSE (${messages.length})`, responseText);
 
+                    // Record last activity time only so this doesn't reset an active mute
+                    // Future-dated so poem wouldn't be interrupted by another response elsewhere
+                    config.lastActivityTime = Date.now() + messages.length * 2e3;
+
                     if (messages.length > 3) {
-                        await sendMessage(`I wrote a poem of ${messages.length} messages for you!`);
-                        return;
+
+                        await msg.reply(`I wrote a poem of ${messages.length} messages for you!`);
+                        // short delay - avoid getting throttled
+                        await new Promise((resolve) => setTimeout(resolve, 2e3));
                     }
 
                     for (const message of messages) {
-                        await sendMessage(message);
-                        //avoid getting throttled ourselves
-                        await new Promise((resolve) => setTimeout(resolve, config.throttleSecs * 1e3));
+                        await room.sendMessage(message);
+                        // short delay - avoid getting throttled
+                        await new Promise((resolve) => setTimeout(resolve, 2e3));
                     }
-
-                    // Record last activity time only so this doesn't reset an active mute
-                    // Future-dated so the poem wouldn't be interrupted
-                    config.lastActivityTime = Date.now() + (messages.length - 1) * config.throttleSecs * 1e3;
 
                     return; // no further action
                 }
@@ -603,15 +633,7 @@ const announcement = new Announcement();
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
 
-                    if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
-                        responseText = config.duplicateResponseText;
-                    }
-
-                    console.log('RESPONSE', responseText);
-                    await sendMessage(responseText);
-
-                    // Record last sent message time so we don't flood the room
-                    config.updateLastMessage(responseText);
+                    await sendMessage(responseText, null, false);
 
                     return; // stop here since we are using a different default response method
                 }
@@ -697,27 +719,12 @@ const announcement = new Announcement();
                         `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
 
-                    console.log('RESPONSE', responseText);
-                    await sendMessage(responseText);
-
-                    // Record last sent message time so we don't flood the room
-                    config.updateLastMessage(responseText);
+                    await sendMessage(responseText, null, false);
 
                     return; // stop here since we are using a different default response method
                 }
 
-                if (responseText != null && responseText.length <= 500) {
-
-                    if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
-                        responseText = config.duplicateResponseText;
-                    }
-
-                    console.log('RESPONSE', responseText);
-                    await sendReply(responseText, msg.id);
-
-                    // Record last sent message time so we don't flood the room
-                    config.updateLastMessage(responseText);
-                }
+                await sendReply(responseText, msg.id, false);
             }
 
 
@@ -762,20 +769,9 @@ const announcement = new Announcement();
 
                     responseText = await calcCandidateScore(election, user, { userId, content }, isStackOverflow);
 
-                    if (responseText != null) {
+                    await sendReply(responseText, msg.id, false);
 
-                        if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
-                            responseText = config.duplicateResponseText;
-                        }
-
-                        console.log('RESPONSE', responseText);
-                        await sendReply(responseText, msg.id);
-
-                        // Record last sent message time so we don't flood the room
-                        config.updateLastMessage(responseText);
-
-                        return; // stop here since we are using a different default response method
-                    }
+                    return; // stop here since we are using a different default response method
                 }
 
                 else if (isAskedForScoreFormula(content)) {
@@ -904,18 +900,7 @@ const announcement = new Announcement();
                 }
 
 
-                if (responseText != null && responseText.length <= 500) {
-
-                    if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
-                        responseText = config.duplicateResponseText;
-                    }
-
-                    console.log('RESPONSE', responseText);
-                    await sendMessage(responseText);
-
-                    // Record last sent message time so we don't flood the room
-                    config.updateLastMessage(responseText);
-                }
+                await sendMessage(responseText, null, false);
             }
         });
 
@@ -1032,10 +1017,7 @@ const announcement = new Announcement();
                 console.log(`Room is inactive with ${config.activityCount} messages posted so far (min ${config.lowActivityCountThreshold}).`,
                     `Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
 
-                await sendMessage(sayHI(election));
-
-                // Record last sent message time so we don't flood the room
-                config.updateLastMessageTime();
+                await sendMessage(sayHI(election), null, true);
 
                 // Reset last activity count
                 config.activityCount = 0;
@@ -1113,7 +1095,7 @@ const announcement = new Announcement();
                 return;
             }
 
-            await sendMessage(trimmed);
+            await room.sendMessage(trimmed);
 
             // Record last activity time only so this doesn't reset an active mute
             config.lastActivityTime = Date.now();
