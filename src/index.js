@@ -18,6 +18,7 @@ import {
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
+import { sendMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
@@ -331,54 +332,7 @@ const announcement = new Announcement();
 
         const room = await client.joinRoom(config.chatRoomId);
 
-        // TODO: implement message queue
-        /**
-         * @description private function to actually send the message, so we can apply throttle and queue messages
-         * @param {string} message Message to send
-         * @param {null|number} inResponseTo message ID to reply to
-         * @returns {Promise<any>}
-         */
-        const _sendTheMessage = async function (message, inResponseTo = null, isPrivileged = false) {
 
-            const isInvalid = message?.length > 500;
-
-            if (isInvalid) {
-                console.log(`RESPONSE ${!isInvalid ? "- INVALID " : ""}- `, message);
-                return;
-            }
-
-            // Notify same previous message if in debug mode
-            if (config.debug && config.checkSameResponseAsPrevious(message)) {
-                message = config.duplicateResponseText;
-            }
-
-            await room.sendMessage.apply(this, (inResponseTo ? `:${inResponseTo} ` : "") + message);
-
-            // Record last sent message and time so we don't flood the room
-            config.updateLastMessage(message);
-        };
-
-        /**
-         * @description replacement function to handle room.sendMessage
-         * @param {string} message Message to send
-         * @param {null|number} [inResponseTo] message ID to reply to
-         * @param {boolean} [isPrivileged] privileged user flag
-         * @returns {Promise<any>}
-         */
-        const sendMessage = async function (message, inResponseTo = null, isPrivileged = false) {
-            return _sendTheMessage.call(this, message, inResponseTo, isPrivileged);
-        };
-
-        /**
-         * @description replacement function to handle msg.reply
-         * @param {string} message Message to send
-         * @param {null|number} [inResponseTo] message ID to reply to
-         * @param {boolean} [isPrivileged] privileged user flag
-         * @returns {Promise<any>}
-         */
-        const sendReply = async function (message, inResponseTo, isPrivileged = false) {
-            return _sendTheMessage.call(this, message, inResponseTo, isPrivileged);
-        };
 
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended' && election.chatRoomId) {
@@ -394,13 +348,13 @@ const announcement = new Announcement();
             }
 
             if (!winnersAnnounced && election.arrWinners) {
-                await sendMessage(sayCurrentWinners(election), null, true);
+                await sendMessage(config, room, sayCurrentWinners(election), null, true);
                 config.flags.saidElectionEndingSoon = true;
             }
         }
         // Announce join room if in debug mode
         else if (config.debug) {
-            await sendMessage(getRandomPlop(), null, true);
+            await sendMessage(config, room, getRandomPlop(), null, true);
         }
 
         room.ignore(...ignoredEventTypes);
@@ -631,7 +585,7 @@ const announcement = new Announcement();
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
 
-                    await sendMessage(responseText, null, false);
+                    await sendMessage(config, room, responseText, null, false);
 
                     return; // stop here since we are using a different default response method
                 }
@@ -717,12 +671,12 @@ const announcement = new Announcement();
                         `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
 
-                    await sendMessage(responseText, null, false);
+                    await sendMessage(config, room, responseText, null, false);
 
                     return; // stop here since we are using a different default response method
                 }
 
-                await sendReply(responseText, msg.id, false);
+                await sendReply(config, room, responseText, msg.id, false);
             }
 
 
@@ -767,7 +721,7 @@ const announcement = new Announcement();
 
                     responseText = await calcCandidateScore(election, user, { userId, content }, isStackOverflow);
 
-                    await sendReply(responseText, msg.id, false);
+                    await sendReply(config, room, responseText, msg.id, false);
 
                     return; // stop here since we are using a different default response method
                 }
@@ -898,7 +852,7 @@ const announcement = new Announcement();
                 }
 
 
-                await sendMessage(responseText, null, false);
+                await sendMessage(config, room, responseText, null, false);
             }
         });
 
