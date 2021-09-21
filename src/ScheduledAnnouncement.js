@@ -1,11 +1,26 @@
 import cron from "node-cron";
-import { dateToUtcTimestamp } from "./utils.js";
+import { dateToUtcTimestamp, makeURL, pluralize } from "./utils.js";
+
+/**
+ * @typedef {import("./config.js").BotConfig} BotConfig
+ * @typedef {import("./election.js").default} Election
+ * @typedef {import("chatexchange/dist/Room").default} Room
+ * @typedef {import("./rescraper.js").default} Rescraper
+ */
 
 export default class ScheduledAnnouncement {
 
-    constructor(room, election) {
+    /**
+     * @param {BotConfig} config bot configuration
+     * @param {Room} room room to announce in
+     * @param {Election} election election to announce for
+     * @param {Rescraper} rescraper election rescraper
+     */
+    constructor(config, room, election, rescraper) {
         this._room = room;
         this._election = election;
+        this.rescraper = rescraper;
+        this.config = config;
 
         // Run the sub-functions once only
         this._nominationSchedule = null;
@@ -33,10 +48,93 @@ export default class ScheduledAnnouncement {
         };
     }
 
+    /**
+     * @summary Election cancelled
+     * @param {Room} room chatroom to post to
+     * @param {Election} [election] election to announce for
+     * @returns {Promise<boolean>}
+     */
+    async announceCancelled(room, election = null) {
+
+        if (election === null) return false;
+
+        const { cancelledText, phase } = election;
+
+        // Needs to be cancelled
+        if (!cancelledText || phase == 'cancelled') return false;
+
+        // Stop all cron jobs
+        this.cancelAll();
+
+        this.rescraper.stop();
+
+        // Announce
+        await room.sendMessage(cancelledText);
+
+        return true;
+    }
+
+
+    /**
+     * @summary Announces winners when available
+     * @param {Room} room chatroom to post to
+     * @param {Election} [election] election to announce for
+     * @returns {Promise<boolean>}
+     */
+    async announceWinners(room, election = null) {
+        const { config } = this;
+
+        //exit early if no election
+        if (election === null) return false;
+
+        const { arrWinners, phase, resultsUrl, siteUrl } = election;
+
+        const { length } = arrWinners;
+
+        if (config.debug) console.log('announceWinners() called: ', arrWinners);
+
+        // Needs to have ended and have winners
+        if (phase != 'ended' || length === 0) return false;
+
+        this.cancelAll();
+
+        this.rescraper.stop();
+
+        const winnerList = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
+
+        // Build the message
+        let msg = `**Congratulations to the winner${pluralize(length)}** ${winnerList.join(', ')}!`;
+
+        if (resultsUrl) {
+            msg += ` You can ${makeURL("view the results online via OpaVote", resultsUrl)}.`;
+        }
+
+        // Announce
+        await room.sendMessage(msg);
+
+        return true;
+    }
+
+    /**
+     * @summary convenience method for updating Rescraper
+     * @param {Rescraper} rescraper rescraper instance
+     */
+    setRescraper(rescraper) {
+        this.rescraper = rescraper;
+    }
+
+    /**
+     * @summary convenience method for updating the Room
+     * @param {Room} room the room to announce in
+     */
     setRoom(room) {
         this._room = room;
     }
 
+    /**
+     * @summary convenience method for updating the Election
+     * @param {Election} election election to announce for
+     */
     setElection(election) {
         this._election = election;
     }
@@ -50,7 +148,7 @@ export default class ScheduledAnnouncement {
             this._electionEndTask = cron.schedule(
                 cs,
                 async () => {
-                    await this._election.scrapeElection();
+                    await this._election.scrapeElection(this.config);
                     await this._room.sendMessage(`**The [election](${this._election.electionUrl}?tab=election) has now ended.** The winners will be announced shortly.`);
                 },
                 { timezone: "Etc/UTC" }
@@ -69,7 +167,7 @@ export default class ScheduledAnnouncement {
             this._electionStartTask = cron.schedule(
                 cs,
                 async () => {
-                    await this._election.scrapeElection();
+                    await this._election.scrapeElection(this.config);
                     await this._room.sendMessage(`**The [election's final voting phase](${this._election.electionUrl}?tab=election) is now open.** You may now cast your election ballot for your top three preferred candidates. Good luck to all candidates!`);
                 },
                 { timezone: "Etc/UTC" }
@@ -88,7 +186,7 @@ export default class ScheduledAnnouncement {
             this._primaryTask = cron.schedule(
                 cs,
                 async () => {
-                    await this._election.scrapeElection();
+                    await this._election.scrapeElection(this.config);
                     await this._room.sendMessage(`**The [primary phase](${this._election.electionUrl}?tab=primary) is now open.** You can now vote on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
                 },
                 { timezone: "Etc/UTC" }
@@ -107,7 +205,7 @@ export default class ScheduledAnnouncement {
             this._nominationTask = cron.schedule(
                 cs,
                 async () => {
-                    await this._election.scrapeElection();
+                    await this._election.scrapeElection(this.config);
                     await this._room.sendMessage(`**The [nomination phase](${this._election.electionUrl}?tab=nomination) is now open.** Users may now nominate themselves for the election. **You cannot vote yet.**`);
                 },
                 { timezone: "Etc/UTC" }
@@ -125,7 +223,7 @@ export default class ScheduledAnnouncement {
             cs,
             async () => {
                 console.log('TEST CRON STARTED');
-                await this._election.scrapeElection();
+                await this._election.scrapeElection(this.config);
                 await this._room.sendMessage(`Test cron job succesfully completed at ${dateToUtcTimestamp(this._election.updated)}.`);
                 console.log('TEST CRON ENDED', this._election, '\n', this._room);
             },
