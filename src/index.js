@@ -340,24 +340,22 @@ const announcement = new Announcement();
          */
         const _sendTheMessage = async function (message, inResponseTo = null, isPrivileged = false) {
 
-            const isValid = message?.length <= 500;
+            const isInvalid = message?.length > 500;
 
-            if (isValid) {
-
-                // Notify same previous message if in debug mode
-                if (config.debug && config.checkSameResponseAsPrevious(message)) {
-                    message = config.duplicateResponseText;
-                }
-
-                await room.sendMessage.apply(this, (inResponseTo ? `:${inResponseTo} ` : "") + message);
-
-                // Record last sent message and time so we don't flood the room
-                config.updateLastMessage(message);
+            if (isInvalid) {
+                console.log(`RESPONSE ${!isInvalid ? "- INVALID " : ""}- `, message);
+                return;
             }
 
-            console.log(`RESPONSE ${!isValid ? "- INVALID " : ""}- `, message);
+            // Notify same previous message if in debug mode
+            if (config.debug && config.checkSameResponseAsPrevious(message)) {
+                message = config.duplicateResponseText;
+            }
 
-            return;
+            await room.sendMessage.apply(this, (inResponseTo ? `:${inResponseTo} ` : "") + message);
+
+            // Record last sent message and time so we don't flood the room
+            config.updateLastMessage(message);
         };
 
         /**
