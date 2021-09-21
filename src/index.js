@@ -361,21 +361,23 @@ const announcement = new Announcement();
         /**
          * @description replacement function to handle room.sendMessage
          * @param {string} message Message to send
-         * @param {null|number} inResponseTo message ID to reply to
+         * @param {null|number} [inResponseTo] message ID to reply to
+         * @param {boolean} [isPrivileged] privileged user flag
          * @returns {Promise<any>}
          */
         const sendMessage = async function (message, inResponseTo = null, isPrivileged = false) {
-            return await _sendTheMessage.call(this, arguments);
+            return _sendTheMessage.call(this, message, inResponseTo, isPrivileged);
         };
 
         /**
          * @description replacement function to handle msg.reply
          * @param {string} message Message to send
-         * @param {null|number} inResponseTo message ID to reply to
+         * @param {null|number} [inResponseTo] message ID to reply to
+         * @param {boolean} [isPrivileged] privileged user flag
          * @returns {Promise<any>}
          */
         const sendReply = async function (message, inResponseTo, isPrivileged = false) {
-            return await _sendTheMessage.call(this, arguments);
+            return _sendTheMessage.call(this, message, inResponseTo, isPrivileged);
         };
 
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
