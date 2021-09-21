@@ -27,7 +27,7 @@ export class BotConfig {
     /* Bot variables */
 
     // To stop bot from replying to too many messages in a short time
-    throttleSecs = +(process.env.THROTTLE_SECS) || 10;
+    throttleSecs = +(process.env.THROTTLE_SECS) || 2;
     // Variable to store time of last message in the room (by anyone, including bot)
     lastActivityTime = Date.now();
     // Variable to store time of last bot sent message for throttling purposes

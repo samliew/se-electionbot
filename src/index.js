@@ -146,6 +146,7 @@ const announcement = new Announcement();
     let rescraperTimeout;
     let election = /** @type {Election|null} */(null);
 
+    // Init bot config with defaults
     const config = new BotConfig(defaultChatDomain, defaultChatRoomId);
 
     // Overrides console.log/error to insert newlines
