@@ -1,5 +1,5 @@
 /**
- * @typedef {import("../../src/index").BotConfig} BotConfig
+ * @typedef {import("../../src/config").BotConfig} BotConfig
  * @param {Partial<BotConfig>} [overrides]
  * @returns {BotConfig}
  */

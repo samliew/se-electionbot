@@ -9,7 +9,7 @@ import { parsePackage } from "./utils/package.js";
 
 /**
  * @typedef {import("./index").Badge} Badge
- * @typedef {import("./index").BotConfig} BotConfig
+ * @typedef {import("./config.js").BotConfig} BotConfig
  */
 
 /**
@@ -60,12 +60,12 @@ export const sayWhyNominationRemoved = () => {
  * @returns {string}
  */
 export const sayHowToNominate = (election, electionBadges, mentionsAnother = false) => {
-    
+
     const requiredBadges = electionBadges.filter(mapToRequired);
     const requiredBadgeNames = requiredBadges.map(mapToName);
 
     const isStackOverflow = election.siteHostname === "stackoverflow.com";
-    
+
     // Markup to bold additional text if talking about nominating others
     const mentionsAnotherBold = mentionsAnother ? '**' : '';
 
@@ -189,7 +189,7 @@ export const sayRequiredBadges = (election, badges, isSO = true) => {
  * @param {boolean} [required]
  * @returns {string}
  */
-export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = false) => 
+export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = false) =>
     ` ${ownSelf ? "You are" : "The user is"} missing ${pluralizePhrase(count, "these", "this")} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
 
 /**

@@ -2,7 +2,7 @@ import Election from "../election.js";
 import { dateToUtcTimestamp } from "../utils.js";
 
 /**
- * @typedef {import("../index").BotConfig} BotConfig
+ * @typedef {import("../config.js").BotConfig} BotConfig
  */
 
 /**

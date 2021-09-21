@@ -19,7 +19,7 @@ let _apiBackoff = Date.now();
 /**
  * @summary starts the bot server
  * @param {{ sendMessage(msg:string): Promise<any> }} room
- * @param {import("./config").BotConfig} config
+ * @param {import("./config.js").BotConfig} config
  * @returns {Promise<import("express").Application>}
  */
 export const startServer = async (room, config) => {
