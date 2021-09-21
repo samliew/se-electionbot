@@ -1,11 +1,14 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
 import { getSiteUserIdFromChatStackExchangeId } from "../../src/utils.js";
+import { getStackApiKey } from "../../src/api.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('getSiteUserIdFromChatStackExchangeId', function () {
 
     dotenv.config();
+
+    const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
 
     this.timeout(10e3); // id getter can be quite slow
 
@@ -15,7 +18,7 @@ describe('getSiteUserIdFromChatStackExchangeId', function () {
             1, //Marc Gravell
             "stackexchange.com",
             "academia",
-            process.env.STACK_API_KEY
+            getStackApiKey(apiKeyPool)
         );
 
         expect(userId).to.equal(10678);

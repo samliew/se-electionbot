@@ -19,7 +19,7 @@ jobs:
       - name: Run tests
         run: npm run test
         env:
-          STACK_API_KEY: ${{ secrets.STACK_API_KEY }}
+          STACK_API_KEYS: ${{ secrets.STACK_API_KEYS }}
           HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
       - name: "Run build"
         run: npm run build

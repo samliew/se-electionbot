@@ -75,7 +75,6 @@ const announcement = new Announcement();
     const electionUrl = process.env.ELECTION_URL;
     const electionSiteHostname = electionUrl.split('/')[2];
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
-    const defaultApiKey = process.env.STACK_API_KEY;
     const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
 
     /** @type {{ ChatEventType: EventType }} */
@@ -267,7 +266,7 @@ const announcement = new Announcement();
 
         // Get current site named badges
         if (!isStackOverflow) {
-            const allNamedBadges = await getAllNamedBadges(config, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
+            const allNamedBadges = await getAllNamedBadges(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
 
             electionBadges.forEach((electionBadge) => {
                 const { name: badgeName } = electionBadge;
@@ -278,7 +277,7 @@ const announcement = new Announcement();
             console.log('API - Site election badges\n', electionBadges.map(badge => `${badge.name}: ${badge.id}`).join('\n'));
         }
 
-        const currentSiteMods = await getModerators(config, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
+        const currentSiteMods = await getModerators(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
 
         // Wait for election page to be scraped
         election = new Election(electionUrl);
