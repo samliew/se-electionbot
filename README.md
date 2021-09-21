@@ -64,27 +64,27 @@ Moderators can also make use of these commands *(requires mention)* to help mode
 
 Default values in square brackets.
 
-> `ACCOUNT_EMAIL` - **(required)** email of bot account
-> `ACCOUNT_PASSWORD` - **(required)** password of bot account
-> `ELECTION_URL` - **(required)** URL of election page (with ID) that the bot will scrape
+> `ACCOUNT_EMAIL` - **(required)** email of bot account<br>
+> `ACCOUNT_PASSWORD` - **(required)** password of bot account<br>
+> `ELECTION_URL` - **(required)** URL of election page (with ID) that the bot will scrape<br>
 > `STACK_API_KEYS` - **(recommended)** Stack Exchange API key(s) (pipe-delimited)
 
-> `CHAT_DOMAIN` - default chat domain (stackexchange.com | stackoverflow.com)
-> `CHAT_ROOM_ID` - default chat room ID that the bot will join
-> `IGNORED_USERIDS` - user chat IDs that the bot will ignore (pipe-delimited)
-> `ADMIN_IDS` - user chat IDs to grant manage bot privileges (pipe-delimited)
-> `DEV_IDS` - user chat IDs to grant dev bot privileges (pipe-delimited)
-> `LOW_ACTIVITY_CHECK_MINS` - [`15`]  interval (minutes) for bot to check room for inactivity
-> `LOW_ACTIVITY_COUNT_THRESHOLD` - [`30`]  bot can classify room as inactive only after these amount of messages have been sent
-> `SCRAPE_INTERVAL_MINS` - [`5`]  interval (minutes) for bot to scrape election page for updates
+> `CHAT_DOMAIN` - default chat domain (stackexchange.com | stackoverflow.com)<br>
+> `CHAT_ROOM_ID` - default chat room ID that the bot will join<br>
+> `IGNORED_USERIDS` - user chat IDs that the bot will ignore (pipe-delimited)<br>
+> `ADMIN_IDS` - user chat IDs to grant manage bot privileges (pipe-delimited)<br>
+> `DEV_IDS` - user chat IDs to grant dev bot privileges (pipe-delimited)<br>
+> `LOW_ACTIVITY_CHECK_MINS` - [`15`]  interval (minutes) for bot to check room for inactivity<br>
+> `LOW_ACTIVITY_COUNT_THRESHOLD` - [`30`]  bot can classify room as inactive only after these amount of messages have been sent<br>
+> `SCRAPE_INTERVAL_MINS` - [`5`]  interval (minutes) for bot to scrape election page for updates<br>
 > `THROTTLE_SECS` - [`3`]  seconds before bot can send another response
 
-> `DEBUG` - [`false`]  whether bot is in debug mode
-> `FUN_MODE` - [`true`]  a debug variable
+> `DEBUG` - [`false`]  whether bot is in debug mode<br>
+> `FUN_MODE` - [`true`]  a debug variable<br>
 > `VERBOSE` - [`false`]  a debug variable
 
-> `SCRIPT_HOSTNAME` - bot identifier, base hostname for web pages / dashboard
-> `HEROKU_API_TOKEN` - to be used only when hosted on Heroku for bot dashboard
-> `PASSWORD` - password for bot dashboard
-> `MAINTENANCE_PAGE_URL` - not in use
+> `SCRIPT_HOSTNAME` - bot identifier, base hostname for web pages / dashboard<br>
+> `HEROKU_API_TOKEN` - to be used only when hosted on Heroku for bot dashboard<br>
+> `PASSWORD` - password for bot dashboard<br>
+> `MAINTENANCE_PAGE_URL` - page to display for web pages when bot is offline on Heroku<br>
 > `NODE_ENV` - [`production`]  whether bot is in Node debug mode
