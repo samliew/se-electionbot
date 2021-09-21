@@ -331,6 +331,27 @@ const announcement = new Announcement();
 
         const room = await client.joinRoom(config.chatRoomId);
 
+        // TODO: message queue
+        /**
+         * @description function to handle room.sendMessage and msg.reply from main function, so we can apply throttle and queue messages
+         * @param {string} message Message to send
+         * @param {null|number} inResponseTo message ID to reply to
+         * @returns {Promise<any>}
+         */
+        const sendMessage = async function (message, inResponseTo = null, isPrivileged = false) {
+            return await room.sendMessage.apply(this, (inResponseTo ? `:${inResponseTo} ` : "") + message);
+        };
+
+        /**
+         * @description function to handle msg.reply from main function
+         * @param {string} message Message to send
+         * @param {null|number} inResponseTo message ID to reply to
+         * @returns {Promise<any>}
+         */
+        const sendReply = async function (message, inResponseTo, isPrivileged = false) {
+            return await sendMessage.call(this, arguments);
+        };
+
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended' && election.chatRoomId) {
             const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
@@ -346,12 +367,12 @@ const announcement = new Announcement();
 
             if (!winnersAnnounced && election.arrWinners) {
                 config.flags.saidElectionEndingSoon = true;
-                await room.sendMessage(sayCurrentWinners(election));
+                await sendMessage(sayCurrentWinners(election));
             }
         }
         // Announce join room if in debug mode
         else if (config.debug) {
-            await room.sendMessage(getRandomPlop());
+            await sendMessage(getRandomPlop());
         }
 
         room.ignore(...ignoredEventTypes);
@@ -549,12 +570,12 @@ const announcement = new Announcement();
                     console.log(`RESPONSE (${messages.length})`, responseText);
 
                     if (messages.length > 3) {
-                        await room.sendMessage(`I wrote a poem of ${messages.length} messages for you!`);
+                        await sendMessage(`I wrote a poem of ${messages.length} messages for you!`);
                         return;
                     }
 
                     for (const message of messages) {
-                        await room.sendMessage(message);
+                        await sendMessage(message);
                         //avoid getting throttled ourselves
                         await new Promise((resolve) => setTimeout(resolve, config.throttleSecs * 1e3));
                     }
@@ -587,7 +608,7 @@ const announcement = new Announcement();
                     }
 
                     console.log('RESPONSE', responseText);
-                    await room.sendMessage(responseText);
+                    await sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
                     config.updateLastMessage(responseText);
@@ -677,7 +698,7 @@ const announcement = new Announcement();
                     ).getRandom();
 
                     console.log('RESPONSE', responseText);
-                    await room.sendMessage(responseText);
+                    await sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
                     config.updateLastMessage(responseText);
@@ -692,7 +713,7 @@ const announcement = new Announcement();
                     }
 
                     console.log('RESPONSE', responseText);
-                    await msg.reply(responseText);
+                    await sendReply(responseText, msg.id);
 
                     // Record last sent message time so we don't flood the room
                     config.updateLastMessage(responseText);
@@ -748,7 +769,7 @@ const announcement = new Announcement();
                         }
 
                         console.log('RESPONSE', responseText);
-                        await msg.reply(responseText);
+                        await sendReply(responseText, msg.id);
 
                         // Record last sent message time so we don't flood the room
                         config.updateLastMessage(responseText);
@@ -890,7 +911,7 @@ const announcement = new Announcement();
                     }
 
                     console.log('RESPONSE', responseText);
-                    await room.sendMessage(responseText);
+                    await sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
                     config.updateLastMessage(responseText);
@@ -953,7 +974,7 @@ const announcement = new Announcement();
             // Previously had no primary, but after rescraping there is one
             if (!announcement.hasPrimary && election.datePrimary != null) {
                 announcement.initPrimary(election.datePrimary);
-                await room.sendMessage(`There will be a primary phase before the election now, as there are more than ten candidates.`);
+                await sendMessage(`There will be a primary phase before the election now, as there are more than ten candidates.`);
             }
 
             // After rescraping the election was cancelled
@@ -983,7 +1004,7 @@ const announcement = new Announcement();
                 config.scrapeIntervalMins = 2;
 
                 // Announce election ending soon
-                await room.sendMessage(`The ${makeURL('election', election.electionUrl)} is ending soon. This is the final moment to cast your votes!`);
+                await sendMessage(`The ${makeURL('election', election.electionUrl)} is ending soon. This is the final moment to cast your votes!`);
                 config.flags.saidElectionEndingSoon = true;
 
                 // Record last sent message time so we don't flood the room
@@ -998,7 +1019,7 @@ const announcement = new Announcement();
 
                 // Announce
                 newNominees.forEach(async nominee => {
-                    await room.sendMessage(`**We have a new [nomination](${election.electionUrl}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${nominee.permalink})!`);
+                    await sendMessage(`**We have a new [nomination](${election.electionUrl}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${nominee.permalink})!`);
                     console.log(`NOMINATION`, nominee);
                 });
             }
@@ -1011,7 +1032,7 @@ const announcement = new Announcement();
                 console.log(`Room is inactive with ${config.activityCount} messages posted so far (min ${config.lowActivityCountThreshold}).`,
                     `Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
 
-                await room.sendMessage(sayHI(election));
+                await sendMessage(sayHI(election));
 
                 // Record last sent message time so we don't flood the room
                 config.updateLastMessageTime();
@@ -1092,7 +1113,7 @@ const announcement = new Announcement();
                 return;
             }
 
-            await room.sendMessage(trimmed);
+            await sendMessage(trimmed);
 
             // Record last activity time only so this doesn't reset an active mute
             config.lastActivityTime = Date.now();
