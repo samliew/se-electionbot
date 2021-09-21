@@ -1,10 +1,12 @@
 import Client from "chatexchange";
+import Room from "chatexchange/dist/Room.js";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
+import BotConfig from "./config.js";
 import Election from './election.js';
 import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
@@ -23,7 +25,7 @@ import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, parseIds, pluralize, startServer
+    linkToUtcTimestamp, makeURL, pluralize, startServer
 } from './utils.js';
 
 // preserves compatibility with older import style
@@ -42,30 +44,6 @@ const announcement = new Announcement();
  * @typedef {typeof import("chatexchange/dist/WebsocketEvent").ChatEventType} EventType
  *
  * @typedef {import("chatexchange/dist/Client").Host} Host
- *
- * @typedef {{
- *  chatRoomId: number,
- *  chatDomain: string,
- *  lowActivityCheckMins: number,
- *  lowActivityCountThreshold: number,
- *  throttleSecs: number,
- *  lastActivityTime: number,
- *  lastMessageTime: number,
- *  lastMessageContent: string,
- *  activityCount: number,
- *  scrapeIntervalMins: number,
- *  duplicateResponseText: string,
- *  funMode: boolean,
- *  debug: boolean,
- *  verbose: boolean,
- *  devIds: Set<number>,
- *  adminIds: Set<number>,
- *  ignoredUserIds: Set<number>,
- *  flags: Object,
- *  updateLastMessageTime: function,
- *  updateLastMessage: function,
- *  checkSameResponseAsPrevious: function
- * }} BotConfig
  *
  * @typedef {import("./utils").APIListResponse} APIListResponse
  *
@@ -167,76 +145,8 @@ const announcement = new Announcement();
     ];
     let rescraperTimeout;
     let election = /** @type {Election|null} */(null);
-    let room = null;
 
-    /**
-     * @type {BotConfig}
-     */
-    const BotConfig = {
-
-        /* Site variables */
-
-        // Bot to later join live chat room if not in debug mode
-        chatRoomId: defaultChatRoomId,
-        chatDomain: defaultChatDomain,
-
-        /* Low activity count variables */
-
-        // Variable to trigger an action only after this time of inactivity
-        lowActivityCheckMins: +process.env.LOW_ACTIVITY_CHECK_MINS || 15,
-        // Variable to trigger an action only after this amount of minimum messages
-        lowActivityCountThreshold: +process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 30,
-
-        /* Bot variables */
-
-        // To stop bot from replying to too many messages in a short time
-        throttleSecs: +(process.env.THROTTLE_SECS) || 10,
-        // Variable to store time of last message in the room (by anyone, including bot)
-        lastActivityTime: Date.now(),
-        // Variable to store time of last bot sent message for throttling purposes
-        lastMessageTime: -1,
-        // Variable to store last message to detect duplicate responses within a short time
-        lastMessageContent: "",
-        // Variable to track activity count in the room, to see if it reached lowActivityCountThreshold
-        activityCount: 0,
-        // Variable of rescrape interval of election page
-        scrapeIntervalMins: +(process.env.SCRAPE_INTERVAL_MINS) || 5,
-        // Response when bot tries to post the exact same response again
-        duplicateResponseText: "Please read my previous message - I can't send the exact same message again.",
-
-        /* Debug variables */
-
-        // Fun mode
-        funMode: JSON.parse(process.env.FUN_MODE?.toLowerCase() || "true"),
-        // Debug mode
-        debug: JSON.parse(process.env.DEBUG?.toLowerCase() || "false"),
-        // Verbose logging
-        verbose: JSON.parse(process.env.VERBOSE?.toLowerCase() || "false"),
-
-        /* User groups */
-
-        devIds: new Set(parseIds(process.env.DEV_IDS || "")),
-        adminIds: new Set(parseIds(process.env.ADMIN_IDS || '')),
-        ignoredUserIds: new Set(parseIds(process.env.IGNORED_USERIDS || '')),
-
-        /* Flags and bot-specific utility functions */
-
-        flags: {
-            saidElectionEndingSoon: false,
-        },
-
-        updateLastMessageTime: function (lastMessageTime = Date.now()) {
-            BotConfig.lastMessageTime = lastMessageTime;
-            BotConfig.lastActivityTime = lastMessageTime;
-        },
-        updateLastMessage: function (content) {
-            BotConfig.updateLastMessageTime();
-            BotConfig.lastMessageContent = content;
-        },
-        checkSameResponseAsPrevious: function (newContent) {
-            return BotConfig.lastMessageContent === newContent && Date.now() - 60e4 < BotConfig.lastMessageTime;
-        }
-    };
+    const config = new BotConfig(defaultChatDomain, defaultChatRoomId);
 
     // Overrides console.log/error to insert newlines
     (function () {
@@ -248,21 +158,22 @@ const announcement = new Announcement();
 
 
     // App setup
-    if (BotConfig.debug) {
+    if (config.debug) {
         console.error('WARNING - Debug mode is on.');
 
         console.log('electionUrl:', electionUrl);
         console.log('electionSiteHostname:', electionSiteHostname);
 
-        Object.entries(BotConfig).forEach(([key, val]) => typeof val !== 'function' ? console.log(key, val) : 0);
+        Object.entries(config).forEach(([key, val]) => typeof val !== 'function' ? console.log(key, val) : 0);
     }
 
     /**
      * @summary Election cancelled
-     * @param {Election} [election]
+     * @param {Room} room chatroom to post to
+     * @param {Election} [election] election to announce for
      * @returns {Promise<boolean>}
      */
-    async function announceCancelled(election = null) {
+    async function announceCancelled(room, election = null) {
 
         if (election === null) return false;
 
@@ -288,10 +199,11 @@ const announcement = new Announcement();
 
     /**
      * @summary Announces winners when available
-     * @param {Election} [election]
+     * @param {Room} room chatroom to post to
+     * @param {Election} [election] election to announce for
      * @returns {Promise<boolean>}
      */
-    async function announceWinners(election = null) {
+    async function announceWinners(room, election = null) {
 
         //exit early if no election
         if (election === null) return false;
@@ -300,7 +212,7 @@ const announcement = new Announcement();
 
         const { length } = arrWinners;
 
-        if (BotConfig.debug) console.log('announceWinners() called: ', arrWinners);
+        if (config.debug) console.log('announceWinners() called: ', arrWinners);
 
         // Needs to have ended and have winners
         if (phase != 'ended' || length === 0) return false;
@@ -331,11 +243,11 @@ const announcement = new Announcement();
 
     /**
      * @summary gets a User given a resolved message from them
-     * @param {import("chatexchange").default} client
-     * @param {ResolvedMessage} message
+     * @param {Client} client ChatExchange client
+     * @param {number} userId chat user id
      * @returns {Promise<User|null>}
      */
-    const getUser = async (client, { userId }) => {
+    const getUser = async (client, userId) => {
         try {
             // This is so we can get extra info about the user
             // @ts-expect-error
@@ -354,7 +266,7 @@ const announcement = new Announcement();
 
         // Get current site named badges
         if (!isStackOverflow) {
-            const allNamedBadges = await getAllNamedBadges(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
+            const allNamedBadges = await getAllNamedBadges(config, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
 
             electionBadges.forEach((electionBadge) => {
                 const { name: badgeName } = electionBadge;
@@ -365,11 +277,11 @@ const announcement = new Announcement();
             console.log('API - Site election badges\n', electionBadges.map(badge => `${badge.name}: ${badge.id}`).join('\n'));
         }
 
-        const currentSiteMods = await getModerators(BotConfig, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
+        const currentSiteMods = await getModerators(config, electionSiteApiSlug, getStackApiKey(apiKeyPool) || defaultApiKey);
 
         // Wait for election page to be scraped
         election = new Election(electionUrl);
-        await election.scrapeElection(BotConfig);
+        await election.scrapeElection(config);
         if (election.validate() === false) {
             console.error('FATAL - Invalid election data!');
             console.log(election);
@@ -377,29 +289,30 @@ const announcement = new Announcement();
         }
 
         // If is in production mode, and is an active election, auto-detect and set chat domain and chat room ID to join
-        if (!BotConfig.debug && election.isActive()) {
+        if (!config.debug && election.isActive()) {
 
             // Election chat room found on election page
-            if(election.chatRoomId && election.chatDomain) {
-                BotConfig.chatRoomId = election.chatRoomId;
-                BotConfig.chatDomain = election.chatDomain;
+            if (election.chatRoomId && election.chatDomain) {
+                config.chatRoomId = election.chatRoomId;
+                config.chatDomain = election.chatDomain;
             }
             // Default to site's default chat room
             else {
-                const defaultRoom = await getSiteDefaultChatroom(BotConfig, election.siteHostname);
-                if(defaultRoom) {
-                    BotConfig.chatRoomId = defaultRoom.chatRoomId;
-                    BotConfig.chatDomain = defaultRoom.chatDomain;
+                const defaultRoom = await getSiteDefaultChatroom(config, election.siteHostname);
+                if (defaultRoom) {
+                    config.chatRoomId = defaultRoom.chatRoomId;
+                    config.chatDomain = defaultRoom.chatDomain;
                 }
             }
 
             console.log(`App is not in debug mode and election is active - redirected to live room:
-            DOMAIN:  ${defaultChatDomain} -> ${BotConfig.chatDomain}
-            ROOMID:  ${defaultChatRoomId} -> ${BotConfig.chatRoomId}`);
+            DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
+            ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
         }
 
         // "default" is a temp fix for ChatExchange being served as CJS module
-        const client = new Client["default"](BotConfig.chatDomain);
+        /** @type {Client} */
+        const client = new Client["default"](config.chatDomain);
         try {
             await client.login(accountEmail, accountPassword);
         }
@@ -413,21 +326,17 @@ const announcement = new Announcement();
         const _me = await client.getMe();
         const me = await client._browser.getProfile(_me.id);
 
-        // Temporary required workaround due to IProfileData not being exported
-        const meWithId = /** @type {typeof me & { id: number }} */(me);
+        me.id = _me.id; // because getProfile() doesn't return id
+        console.log(`INIT - Logged in to ${config.chatDomain} as ${me.name} (${me.id})`);
 
-        meWithId.id = _me.id; // because getProfile() doesn't return id
-        console.log(`INIT - Logged in to ${BotConfig.chatDomain} as ${meWithId.name} (${meWithId.id})`);
-
-        // Join room
-        room = await client.joinRoom(BotConfig.chatRoomId);
+        const room = await client.joinRoom(config.chatRoomId);
 
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended' && election.chatRoomId) {
-            const transcriptMessages = await fetchChatTranscript(BotConfig, `https://chat.${BotConfig.chatDomain}/transcript/${BotConfig.chatRoomId}`);
+            const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
             const winnersAnnounced = transcriptMessages?.some(item => item.message && /^The winners? (are|is) /.test(item.message));
 
-            if (BotConfig.debug) {
+            if (config.debug) {
                 console.log("winnersAnnounced:", winnersAnnounced);
                 console.log(
                     "Transcript messages:",
@@ -436,20 +345,19 @@ const announcement = new Announcement();
             }
 
             if (!winnersAnnounced && election.arrWinners) {
-                BotConfig.flags.saidElectionEndingSoon = true;
+                config.flags.saidElectionEndingSoon = true;
                 await room.sendMessage(sayCurrentWinners(election));
             }
         }
         // Announce join room if in debug mode
-        else if (BotConfig.debug) {
+        else if (config.debug) {
             await room.sendMessage(getRandomPlop());
         }
 
+        room.ignore(...ignoredEventTypes);
+
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
-
-            // Ignore unnecessary events - always check first
-            if (ignoredEventTypes.includes(msg.eventType)) return;
 
             const encoded = await msg.content;
 
@@ -458,39 +366,32 @@ const announcement = new Announcement();
 
             const content = origContent.toLowerCase().replace(/^@\S+\s+/, '');
 
-            /** @type {ResolvedMessage} */
-            const resolvedMsg = {
-                eventType: msg.eventType,
-                userName: msg.userName,
-                userId: msg.userId,
-                targetUserId: msg.targetUserId,
-                content,
-            };
+            const { eventType, userId, targetUserId } = msg;
 
             // Ignore stuff from self, Community or Feeds users
-            if (meWithId.id === resolvedMsg.userId || resolvedMsg.userId <= 0) return;
+            if (me.id === userId || userId <= 0) return;
 
             // Ignore stuff from ignored users
-            if (BotConfig.ignoredUserIds.has(resolvedMsg.userId)) return;
+            if (config.ignoredUserIds.has(userId)) return;
 
             // Record time of last new message/reply in room, and increment activity count
-            BotConfig.lastActivityTime = Date.now();
-            BotConfig.activityCount++;
+            config.lastActivityTime = Date.now();
+            config.activityCount++;
 
             // Ignore messages with oneboxes
             if (content.includes('onebox')) return;
 
             // Get details of user who triggered the message
-            const user = await getUser(client, resolvedMsg);
+            const user = await getUser(client, userId);
 
             //if user is null, we have a problem
-            if (!user) return console.log("missing user", resolvedMsg);
+            if (!user) return console.log(`missing user ${userId}`);
 
             // TODO: make a part of User
             /** @type {[Set<number>, number][]} */
             const userLevels = [
-                [BotConfig.adminIds, AccessLevel.admin],
-                [BotConfig.devIds, AccessLevel.dev]
+                [config.adminIds, AccessLevel.admin],
+                [config.devIds, AccessLevel.dev]
             ];
 
             const [, access] = userLevels.find(([ids]) => ids.has(user.id)) || [, AccessLevel.user];
@@ -502,15 +403,14 @@ const announcement = new Announcement();
             // If message is too short or long, ignore (most likely FP, except if an admin issues the message)
             const { length } = content;
             if ((length < 4 || length > 69) && !isPrivileged) {
-                const { content } = resolvedMsg;
                 console.log(`EVENT - Ignoring due to message length ${content.length}: ${content}`);
                 return;
             }
 
-            console.log('EVENT', JSON.stringify({ resolvedMsg, user }));
+            console.log('EVENT', JSON.stringify({ msg, user }));
 
             // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
-            if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id) {
+            if (eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id) {
                 let responseText = "";
 
                 const commander = new CommandManager(user);
@@ -603,35 +503,35 @@ const announcement = new Announcement();
                 const outputs = [
                     ["commands", /commands|usage/],
                     ["say", /say/, origContent],
-                    ["alive", /alive/, scriptHostname, scriptInitDate, BotConfig],
+                    ["alive", /alive/, scriptHostname, scriptInitDate, config],
                     ["test cron", /test cron/, announcement],
                     ["get cron", /get cron/, announcement],
-                    ["get throttle", /get throttle/, BotConfig.throttleSecs],
-                    ["set throttle", /set throttle/, content, BotConfig],
+                    ["get throttle", /get throttle/, config.throttleSecs],
+                    ["set throttle", /set throttle/, content, config],
                     ["get time", /get time/, election],
                     ["chatroom", /chatroom/, election],
                     ["coffee", /(?:brew|make).+coffee/, user],
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
-                    ["unmute", /unmute|clear timeout/, BotConfig],
-                    ["mute", /mute|timeout|sleep/, BotConfig, content, BotConfig.throttleSecs],
-                    ["fun", /fun/, BotConfig, content],
-                    ["debug", /debug(?:ing)?/, BotConfig, content],
+                    ["unmute", /unmute|clear timeout/, config],
+                    ["mute", /mute|timeout|sleep/, config, content, config.throttleSecs],
+                    ["fun", /fun/, config, content],
+                    ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
                     ["greet", /^(greet|welcome)/, election],
-                    ["set access", /set (?:access|level)/, BotConfig, user, content]
+                    ["set access", /set (?:access|level)/, config, user, content]
                 ];
 
                 responseText = outputs.reduce(
                     (a, args) => a || commander.runIfMatches.call(commander, content, ...args) || ""
                     , "");
 
-                if (BotConfig.debug) {
+                if (config.debug) {
                     console.log(`response info:
                 response chars: ${responseText.length}
                 content: ${content}
                 original: ${origContent}
-                last message: ${BotConfig.lastMessageTime}
-                last activty: ${BotConfig.lastActivityTime}
+                last message: ${config.lastMessageTime}
+                last activty: ${config.lastActivityTime}
                 `);
                 }
 
@@ -656,12 +556,12 @@ const announcement = new Announcement();
                     for (const message of messages) {
                         await room.sendMessage(message);
                         //avoid getting throttled ourselves
-                        await new Promise((resolve) => setTimeout(resolve, BotConfig.throttleSecs * 1e3));
+                        await new Promise((resolve) => setTimeout(resolve, config.throttleSecs * 1e3));
                     }
 
                     // Record last activity time only so this doesn't reset an active mute
                     // Future-dated so the poem wouldn't be interrupted
-                    BotConfig.lastActivityTime = Date.now() + (messages.length - 1) * BotConfig.throttleSecs * 1e3;
+                    config.lastActivityTime = Date.now() + (messages.length - 1) * config.throttleSecs * 1e3;
 
                     return; // no further action
                 }
@@ -669,28 +569,28 @@ const announcement = new Announcement();
 
 
             // If too close to previous message, ignore (apply throttle)
-            if (Date.now() < BotConfig.lastMessageTime + BotConfig.throttleSecs * 1000) {
+            if (Date.now() < config.lastMessageTime + config.throttleSecs * 1000) {
                 console.log('THROTTLE - too close to previous message');
                 return;
             }
 
 
             // Mentioned bot (8)
-            if (resolvedMsg.eventType === 8 && resolvedMsg.targetUserId === meWithId.id && BotConfig.throttleSecs <= 10) {
+            if (eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id && config.throttleSecs <= 10) {
                 let responseText = null;
 
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
 
-                    if (BotConfig.debug && BotConfig.checkSameResponseAsPrevious(responseText)) {
-                        responseText = BotConfig.duplicateResponseText;
+                    if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
+                        responseText = config.duplicateResponseText;
                     }
 
                     console.log('RESPONSE', responseText);
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessage(responseText);
+                    config.updateLastMessage(responseText);
 
                     return; // stop here since we are using a different default response method
                 }
@@ -698,7 +598,7 @@ const announcement = new Announcement();
                     responseText = `I'm ${me.name} and ${me.about}`;
                 }
                 else if (isAskedWhoMadeMe(content)) {
-                    responseText = await sayWhoMadeMe(BotConfig);
+                    responseText = await sayWhoMadeMe(config);
                 }
                 else if (content.startsWith(`i love you`)) {
                     responseText = `I love you 3000`;
@@ -756,7 +656,7 @@ const announcement = new Announcement();
                     ].join('\n- ');
                 }
                 // Fun mode only for testing purposes
-                else if (BotConfig.funMode || /[\?\!]+$/.test(content)) {
+                else if (config.funMode || /[\?\!]+$/.test(content)) {
 
                     // random response in room
                     responseText = new RandomArray(
@@ -780,28 +680,28 @@ const announcement = new Announcement();
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessage(responseText);
+                    config.updateLastMessage(responseText);
 
                     return; // stop here since we are using a different default response method
                 }
 
                 if (responseText != null && responseText.length <= 500) {
 
-                    if (BotConfig.debug && BotConfig.checkSameResponseAsPrevious(responseText)) {
-                        responseText = BotConfig.duplicateResponseText;
+                    if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
+                        responseText = config.duplicateResponseText;
                     }
 
                     console.log('RESPONSE', responseText);
                     await msg.reply(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessage(responseText);
+                    config.updateLastMessage(responseText);
                 }
             }
 
 
             // Any new message that does not reply-to or mention any user (1)
-            else if (resolvedMsg.eventType === 1 && !resolvedMsg.targetUserId) {
+            else if (eventType === ChatEventType.MESSAGE_POSTED && !targetUserId) {
                 let responseText = null;
 
                 // Moderation badges
@@ -834,24 +734,24 @@ const announcement = new Announcement();
                 else if (isAskedForOwnScore(content) || isAskedForOtherScore(content)) {
 
                     //TODO: use config object pattern instead, 6 parameters is way too much
-                    const calcCandidateScore = makeCandidateScoreCalc(BotConfig,
-                        electionSiteHostname, BotConfig.chatDomain, electionSiteApiSlug,
+                    const calcCandidateScore = makeCandidateScoreCalc(config,
+                        electionSiteHostname, config.chatDomain, electionSiteApiSlug,
                         getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
                     );
 
-                    responseText = await calcCandidateScore(election, user, resolvedMsg, isStackOverflow);
+                    responseText = await calcCandidateScore(election, user, { userId, content }, isStackOverflow);
 
                     if (responseText != null) {
 
-                        if (BotConfig.debug && BotConfig.checkSameResponseAsPrevious(responseText)) {
-                            responseText = BotConfig.duplicateResponseText;
+                        if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
+                            responseText = config.duplicateResponseText;
                         }
 
                         console.log('RESPONSE', responseText);
                         await msg.reply(responseText);
 
                         // Record last sent message time so we don't flood the room
-                        BotConfig.updateLastMessage(responseText);
+                        config.updateLastMessage(responseText);
 
                         return; // stop here since we are using a different default response method
                     }
@@ -985,15 +885,15 @@ const announcement = new Announcement();
 
                 if (responseText != null && responseText.length <= 500) {
 
-                    if (BotConfig.debug && BotConfig.checkSameResponseAsPrevious(responseText)) {
-                        responseText = BotConfig.duplicateResponseText;
+                    if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
+                        responseText = config.duplicateResponseText;
                     }
 
                     console.log('RESPONSE', responseText);
                     await room.sendMessage(responseText);
 
                     // Record last sent message time so we don't flood the room
-                    BotConfig.updateLastMessage(responseText);
+                    config.updateLastMessage(responseText);
                 }
             }
         });
@@ -1001,7 +901,7 @@ const announcement = new Announcement();
 
         // Connect to the room, and listen for new events
         await room.watch();
-        console.log(`INIT - Joined and listening in room https://chat.${BotConfig.chatDomain}/rooms/${BotConfig.chatRoomId}`);
+        console.log(`INIT - Joined and listening in room https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`);
 
 
         // Set cron jobs to announce the different phases
@@ -1011,25 +911,25 @@ const announcement = new Announcement();
 
 
         // Function to rescrape election data, and process election or chat room updates
-        const rescrapeFn = async function () {
+        const rescrapeFn = async () => {
 
-            await election.scrapeElection(BotConfig);
+            await election.scrapeElection(config);
 
             const roomLongIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
-            const roomReachedMinimumActivityCount = BotConfig.activityCount >= BotConfig.lowActivityCountThreshold;
-            const roomBecameIdleAShortWhileAgo = BotConfig.lastActivityTime + (4 * 6e4) < Date.now();
-            const roomBecameIdleAFewHoursAgo = BotConfig.lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
-            const botHasBeenQuiet = BotConfig.lastMessageTime + (BotConfig.lowActivityCheckMins * 6e4) < Date.now();
-            const lastMessageIsPostedByBot = BotConfig.lastActivityTime === BotConfig.lastMessageTime;
+            const { roomReachedMinimumActivityCount } = config;
+            const roomBecameIdleAShortWhileAgo = config.lastActivityTime + (4 * 6e4) < Date.now();
+            const roomBecameIdleAFewHoursAgo = config.lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
+            const botHasBeenQuiet = config.lastMessageTime + (config.lowActivityCheckMins * 6e4) < Date.now();
+            const lastMessageIsPostedByBot = config.lastActivityTime === config.lastMessageTime;
 
             const idleDoSayHi = (roomBecameIdleAShortWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
                 (roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
 
-            if (BotConfig.verbose) {
+            if (config.verbose) {
                 console.log('SCRAPE', election.updated, election);
             }
 
-            if (BotConfig.debug) {
+            if (config.debug) {
                 const { arrNominees, arrWinners, phase } = election;
 
                 console.log(`Election candidates: ${arrNominees.map(x => x.userName).join(', ')}`);
@@ -1058,12 +958,12 @@ const announcement = new Announcement();
 
             // After rescraping the election was cancelled
             if (election.phase === 'cancelled' && election.isNewPhase()) {
-                await announceCancelled(election);
+                await announceCancelled(room, election);
             }
 
             // After rescraping we have winners
             else if (election.phase === 'ended' && election.newWinners.length) {
-                await announceWinners(election);
+                await announceWinners(room, election);
 
                 // Stop scraping the election page or greeting the room
                 stopRescrape();
@@ -1073,21 +973,21 @@ const announcement = new Announcement();
             else if (election.phase === 'ended' && !election.newWinners.length) {
 
                 // Reduce scrape interval further
-                BotConfig.scrapeIntervalMins = 0.5;
+                config.scrapeIntervalMins = 0.5;
             }
 
             // The election is ending within the next 10 minutes or less, do once only
-            else if (election.isEnding() && !BotConfig.flags.saidElectionEndingSoon) {
+            else if (election.isEnding() && !config.flags.saidElectionEndingSoon) {
 
                 // Reduce scrape interval
-                BotConfig.scrapeIntervalMins = 2;
+                config.scrapeIntervalMins = 2;
 
                 // Announce election ending soon
                 await room.sendMessage(`The ${makeURL('election', election.electionUrl)} is ending soon. This is the final moment to cast your votes!`);
-                BotConfig.flags.saidElectionEndingSoon = true;
+                config.flags.saidElectionEndingSoon = true;
 
                 // Record last sent message time so we don't flood the room
-                BotConfig.updateLastMessageTime();
+                config.updateLastMessageTime();
             }
 
             // New nominations
@@ -1108,16 +1008,16 @@ const announcement = new Announcement();
             // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
             else if (idleDoSayHi) {
 
-                console.log(`Room is inactive with ${BotConfig.activityCount} messages posted so far (min ${BotConfig.lowActivityCountThreshold}).`,
-                    `Last activity ${BotConfig.lastActivityTime}; Last bot message ${BotConfig.lastMessageTime}`);
+                console.log(`Room is inactive with ${config.activityCount} messages posted so far (min ${config.lowActivityCountThreshold}).`,
+                    `Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
 
                 await room.sendMessage(sayHI(election));
 
                 // Record last sent message time so we don't flood the room
-                BotConfig.updateLastMessageTime();
+                config.updateLastMessageTime();
 
                 // Reset last activity count
-                BotConfig.activityCount = 0;
+                config.activityCount = 0;
             }
 
             startRescrape();
@@ -1129,7 +1029,7 @@ const announcement = new Announcement();
             }
         };
         const startRescrape = () => {
-            rescraperTimeout = setTimeout(rescrapeFn, BotConfig.scrapeIntervalMins * 60000);
+            rescraperTimeout = setTimeout(rescrapeFn, config.scrapeIntervalMins * 60000);
         };
 
 
@@ -1137,14 +1037,14 @@ const announcement = new Announcement();
         setInterval(async function () {
 
             // Try to stay-alive by rejoining room
-            room = await client.joinRoom(BotConfig.chatRoomId);
-            if (BotConfig.debug) console.log('Stay alive rejoin room', room);
+            await client.joinRoom(config.chatRoomId);
+            if (config.debug) console.log('Stay alive rejoin room', room);
 
         }, 5 * 60000);
 
 
         // Start server
-        const app = await startServer(room, BotConfig);
+        const app = await startServer(room, config);
 
         // Serve /say form
         app.get('/say', ({ query }, res) => {
@@ -1166,7 +1066,7 @@ const announcement = new Announcement();
             res.send(`
                 <link rel="icon" href="data:;base64,=" />
                 <link rel="stylesheet" href="css/styles.css" />
-                <h3>ElectionBot say to room <a href="https://chat.${BotConfig.chatDomain}/rooms/${BotConfig.chatRoomId}" target="_blank">${BotConfig.chatDomain}: ${BotConfig.chatRoomId}</a>:</h3>
+                <h3>ElectionBot say to room <a href="https://chat.${config.chatDomain}/rooms/${config.chatRoomId}" target="_blank">${config.chatDomain}: ${config.chatRoomId}</a>:</h3>
                 <form method="post">
                     <input type="text" name="message" placeholder="message" maxlength="500" value="${decodeURIComponent(message)}" />
                     <input type="hidden" name="password" value="${password}" />
@@ -1195,7 +1095,7 @@ const announcement = new Announcement();
             await room.sendMessage(trimmed);
 
             // Record last activity time only so this doesn't reset an active mute
-            BotConfig.lastActivityTime = Date.now();
+            config.lastActivityTime = Date.now();
 
             res.redirect(`/say?password=${password}&success=true`);
         });
@@ -1203,7 +1103,7 @@ const announcement = new Announcement();
 
         // Catch all handler to swallow non-crashing rejecions
         process.on("unhandledRejection", (reason) => {
-            if (BotConfig.debug) console.log(`Uncaught rejection: ${reason}`);
+            if (config.debug) console.log(`Uncaught rejection: ${reason}`);
         });
 
     }; // End main fn

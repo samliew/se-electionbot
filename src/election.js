@@ -2,6 +2,8 @@ import cheerio from 'cheerio';
 import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 
 /**
+ * @typedef {import('chatexchange/dist/Client').Host} Host
+ * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./index").User} User
  * @typedef {{
  *  userId: number,
@@ -13,6 +15,9 @@ import { dateToUtcTimestamp, fetchUrl } from './utils.js';
  */
 
 export default class Election {
+
+    /** @type {Host} */
+    chatDomain;
 
     /** @type {Nominee[]} */
     arrNominees = [];
@@ -177,7 +182,7 @@ export default class Election {
     }
 
     /**
-     * @param {import("./index.js").BotConfig} config
+     * @param {BotConfig} config
      */
     async scrapeElection(config) {
 
@@ -244,7 +249,7 @@ export default class Election {
 
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/');
             this.chatRoomId = +this.chatUrl?.match(/\d+$/) || null;
-            this.chatDomain = this.chatUrl?.split('/')[2]?.replace('chat.', '');
+            this.chatDomain = /** @type {Host} */(this.chatUrl?.split('/')[2]?.replace('chat.', ''));
 
             this.phase = Election.getPhase(this);
 
