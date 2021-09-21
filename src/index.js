@@ -25,7 +25,7 @@ import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, pluralize, startServer
+    linkToUtcTimestamp, makeURL, pluralize, startServer, wait
 } from './utils.js';
 
 // preserves compatibility with older import style
@@ -534,7 +534,7 @@ const announcement = new Announcement();
                 commander.add("commands", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
 
                 commander.add("die", "shuts down the bot in case of emergency", () => {
-                    setTimeout(() => process.exit(0), 3e3);
+                    wait(3).then(() => process.exit(0));
                     return "initiating shutdown sequence";
                 }, AccessLevel.dev);
 
@@ -604,14 +604,12 @@ const announcement = new Announcement();
                     if (messages.length > 3) {
 
                         await msg.reply(`I wrote a poem of ${messages.length} messages for you!`);
-                        // short delay - avoid getting throttled
-                        await new Promise((resolve) => setTimeout(resolve, 2e3));
+                        await wait(2);
                     }
 
                     for (const message of messages) {
                         await room.sendMessage(message);
-                        // short delay - avoid getting throttled
-                        await new Promise((resolve) => setTimeout(resolve, 2e3));
+                        await wait(2);
                     }
 
                     return; // no further action
