@@ -201,6 +201,7 @@ import {
             console.log('API - Site election badges\n', electionBadges.map(badge => `${badge.name}: ${badge.id}`).join('\n'));
         }
 
+        // Get current site mods via API
         const currentSiteMods = await getModerators(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
 
         // Wait for election page to be scraped
@@ -246,16 +247,15 @@ import {
             return;
         }
 
-        // Get chat profile
+        // Get bot's chat profile
         const _me = await client.getMe();
         const me = await client._browser.getProfile(_me.id);
 
         me.id = _me.id; // because getProfile() doesn't return id
         console.log(`INIT - Logged in to ${config.chatDomain} as ${me.name} (${me.id})`);
 
+        // Join the election chat room
         const room = await client.joinRoom(config.chatRoomId);
-
-
 
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended' && election.chatRoomId) {
@@ -280,11 +280,14 @@ import {
             await sendMessage(config, room, getRandomPlop(), null, true);
         }
 
+        // Ignore ignored event types
         room.ignore(...ignoredEventTypes);
 
+        // Start rescraper utility, and initialise announcement cron jobs
         const rescraper = new Rescraper(config, room, election);
         const announcement = new Announcement(config, room, election, rescraper);
         announcement.setRescraper(rescraper);
+        rescraper.start();
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
