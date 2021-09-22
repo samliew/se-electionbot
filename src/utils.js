@@ -457,3 +457,10 @@ export const asyncCacheable = (key, func) => {
         return result;
     };
 };
+
+/**
+ * @summary waits a specified number of seconds
+ * @param {number} [seconds] seconds to wait
+ * @returns {Promise<void>}
+ */
+export const wait = (seconds = 1) => new Promise((r) => setTimeout(r, seconds * 1e3));

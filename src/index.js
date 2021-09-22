@@ -1,5 +1,4 @@
 import Client from "chatexchange";
-import Room from "chatexchange/dist/Room.js";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
@@ -18,18 +17,17 @@ import {
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
+import { sendMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
+import Rescraper from "./rescraper.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, pluralize, startServer
+    linkToUtcTimestamp, pluralize, startServer, wait
 } from './utils.js';
-
-// preserves compatibility with older import style
-const announcement = new Announcement();
 
 /**
  * @typedef {{
@@ -142,7 +140,7 @@ const announcement = new Announcement();
         1114, 100297, 229044, 1252759, 444991, 871050, 2057919, 3093387, 1849664, 2193767, 4099593,
         541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
     ];
-    let rescraperTimeout;
+
     let election = /** @type {Election|null} */(null);
 
     // Init bot config with defaults
@@ -165,80 +163,6 @@ const announcement = new Announcement();
         console.log('electionSiteHostname:', electionSiteHostname);
 
         Object.entries(config).forEach(([key, val]) => typeof val !== 'function' ? console.log(key, val) : 0);
-    }
-
-    /**
-     * @summary Election cancelled
-     * @param {Room} room chatroom to post to
-     * @param {Election} [election] election to announce for
-     * @returns {Promise<boolean>}
-     */
-    async function announceCancelled(room, election = null) {
-
-        if (election === null) return false;
-
-        const { cancelledText, phase } = election;
-
-        // Needs to be cancelled
-        if (!cancelledText || phase == 'cancelled') return false;
-
-        // Stop all cron jobs
-        announcement.cancelAll();
-
-        // Stop scraper
-        if (rescraperTimeout) {
-            clearTimeout(rescraperTimeout);
-            rescraperTimeout = null;
-        }
-
-        // Announce
-        await room.sendMessage(cancelledText);
-
-        return true;
-    }
-
-    /**
-     * @summary Announces winners when available
-     * @param {Room} room chatroom to post to
-     * @param {Election} [election] election to announce for
-     * @returns {Promise<boolean>}
-     */
-    async function announceWinners(room, election = null) {
-
-        //exit early if no election
-        if (election === null) return false;
-
-        const { arrWinners, phase, resultsUrl, siteUrl } = election;
-
-        const { length } = arrWinners;
-
-        if (config.debug) console.log('announceWinners() called: ', arrWinners);
-
-        // Needs to have ended and have winners
-        if (phase != 'ended' || length === 0) return false;
-
-        // Stop all cron jobs
-        announcement.cancelAll();
-
-        // Stop scraper
-        if (rescraperTimeout) {
-            clearTimeout(rescraperTimeout);
-            rescraperTimeout = null;
-        }
-
-        const winnerList = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
-
-        // Build the message
-        let msg = `**Congratulations to the winner${pluralize(length)}** ${winnerList.join(', ')}!`;
-
-        if (resultsUrl) {
-            msg += ` You can ${makeURL("view the results online via OpaVote", resultsUrl)}.`;
-        }
-
-        // Announce
-        await room.sendMessage(msg);
-
-        return true;
     }
 
     /**
@@ -277,6 +201,7 @@ const announcement = new Announcement();
             console.log('API - Site election badges\n', electionBadges.map(badge => `${badge.name}: ${badge.id}`).join('\n'));
         }
 
+        // Get current site mods via API
         const currentSiteMods = await getModerators(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
 
         // Wait for election page to be scraped
@@ -322,13 +247,14 @@ const announcement = new Announcement();
             return;
         }
 
-        // Get chat profile
+        // Get bot's chat profile
         const _me = await client.getMe();
         const me = await client._browser.getProfile(_me.id);
 
         me.id = _me.id; // because getProfile() doesn't return id
         console.log(`INIT - Logged in to ${config.chatDomain} as ${me.name} (${me.id})`);
 
+        // Join the election chat room
         const room = await client.joinRoom(config.chatRoomId);
 
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
@@ -345,16 +271,23 @@ const announcement = new Announcement();
             }
 
             if (!winnersAnnounced && election.arrWinners) {
+                await sendMessage(config, room, sayCurrentWinners(election), null, true);
                 config.flags.saidElectionEndingSoon = true;
-                await room.sendMessage(sayCurrentWinners(election));
             }
         }
         // Announce join room if in debug mode
         else if (config.debug) {
-            await room.sendMessage(getRandomPlop());
+            await sendMessage(config, room, getRandomPlop(), null, true);
         }
 
+        // Ignore ignored event types
         room.ignore(...ignoredEventTypes);
+
+        // Start rescraper utility, and initialise announcement cron jobs
+        const rescraper = new Rescraper(config, room, election);
+        const announcement = new Announcement(config, room, election, rescraper);
+        announcement.setRescraper(rescraper);
+        rescraper.start();
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
@@ -485,7 +418,7 @@ const announcement = new Announcement();
                 commander.add("commands", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
 
                 commander.add("die", "shuts down the bot in case of emergency", () => {
-                    setTimeout(() => process.exit(0), 3e3);
+                    wait(3).then(() => process.exit(0));
                     return "initiating shutdown sequence";
                 }, AccessLevel.dev);
 
@@ -548,20 +481,20 @@ const announcement = new Announcement();
 
                     console.log(`RESPONSE (${messages.length})`, responseText);
 
+                    // Record last activity time only so this doesn't reset an active mute
+                    // Future-dated so poem wouldn't be interrupted by another response elsewhere
+                    config.lastActivityTime = Date.now() + messages.length * 2e3;
+
                     if (messages.length > 3) {
-                        await room.sendMessage(`I wrote a poem of ${messages.length} messages for you!`);
-                        return;
+
+                        await msg.reply(`I wrote a poem of ${messages.length} messages for you!`);
+                        await wait(2);
                     }
 
                     for (const message of messages) {
                         await room.sendMessage(message);
-                        //avoid getting throttled ourselves
-                        await new Promise((resolve) => setTimeout(resolve, config.throttleSecs * 1e3));
+                        await wait(2);
                     }
-
-                    // Record last activity time only so this doesn't reset an active mute
-                    // Future-dated so the poem wouldn't be interrupted
-                    config.lastActivityTime = Date.now() + (messages.length - 1) * config.throttleSecs * 1e3;
 
                     return; // no further action
                 }
@@ -582,15 +515,7 @@ const announcement = new Announcement();
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
 
-                    if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
-                        responseText = config.duplicateResponseText;
-                    }
-
-                    console.log('RESPONSE', responseText);
-                    await room.sendMessage(responseText);
-
-                    // Record last sent message time so we don't flood the room
-                    config.updateLastMessage(responseText);
+                    await sendMessage(config, room, responseText, null, false);
 
                     return; // stop here since we are using a different default response method
                 }
@@ -676,27 +601,12 @@ const announcement = new Announcement();
                         `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
 
-                    console.log('RESPONSE', responseText);
-                    await room.sendMessage(responseText);
-
-                    // Record last sent message time so we don't flood the room
-                    config.updateLastMessage(responseText);
+                    await sendMessage(config, room, responseText, null, false);
 
                     return; // stop here since we are using a different default response method
                 }
 
-                if (responseText != null && responseText.length <= 500) {
-
-                    if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
-                        responseText = config.duplicateResponseText;
-                    }
-
-                    console.log('RESPONSE', responseText);
-                    await msg.reply(responseText);
-
-                    // Record last sent message time so we don't flood the room
-                    config.updateLastMessage(responseText);
-                }
+                await sendReply(config, room, responseText, msg.id, false);
             }
 
 
@@ -741,20 +651,9 @@ const announcement = new Announcement();
 
                     responseText = await calcCandidateScore(election, user, { userId, content }, isStackOverflow);
 
-                    if (responseText != null) {
+                    await sendReply(config, room, responseText, msg.id, false);
 
-                        if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
-                            responseText = config.duplicateResponseText;
-                        }
-
-                        console.log('RESPONSE', responseText);
-                        await msg.reply(responseText);
-
-                        // Record last sent message time so we don't flood the room
-                        config.updateLastMessage(responseText);
-
-                        return; // stop here since we are using a different default response method
-                    }
+                    return; // stop here since we are using a different default response method
                 }
 
                 else if (isAskedForScoreFormula(content)) {
@@ -883,18 +782,7 @@ const announcement = new Announcement();
                 }
 
 
-                if (responseText != null && responseText.length <= 500) {
-
-                    if (config.debug && config.checkSameResponseAsPrevious(responseText)) {
-                        responseText = config.duplicateResponseText;
-                    }
-
-                    console.log('RESPONSE', responseText);
-                    await room.sendMessage(responseText);
-
-                    // Record last sent message time so we don't flood the room
-                    config.updateLastMessage(responseText);
-                }
+                await sendMessage(config, room, responseText, null, false);
             }
         });
 
@@ -905,133 +793,7 @@ const announcement = new Announcement();
 
 
         // Set cron jobs to announce the different phases
-        announcement.setRoom(room);
-        announcement.setElection(election);
         announcement.initAll();
-
-
-        // Function to rescrape election data, and process election or chat room updates
-        const rescrapeFn = async () => {
-
-            await election.scrapeElection(config);
-
-            const roomLongIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
-            const { roomReachedMinimumActivityCount } = config;
-            const roomBecameIdleAShortWhileAgo = config.lastActivityTime + (4 * 6e4) < Date.now();
-            const roomBecameIdleAFewHoursAgo = config.lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
-            const botHasBeenQuiet = config.lastMessageTime + (config.lowActivityCheckMins * 6e4) < Date.now();
-            const lastMessageIsPostedByBot = config.lastActivityTime === config.lastMessageTime;
-
-            const idleDoSayHi = (roomBecameIdleAShortWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
-                (roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
-
-            if (config.verbose) {
-                console.log('SCRAPE', election.updated, election);
-            }
-
-            if (config.debug) {
-                const { arrNominees, arrWinners, phase } = election;
-
-                console.log(`Election candidates: ${arrNominees.map(x => x.userName).join(', ')}`);
-
-                if (phase === 'ended') {
-                    console.log(`Election winners: ${arrWinners.map(x => x.userName).join(', ')}`);
-                }
-
-                console.log(`Idle?
-                - roomReachedMinimumActivityCount: ${roomReachedMinimumActivityCount}
-                - roomBecameIdleAShortWhileAgo: ${roomBecameIdleAShortWhileAgo}
-                - roomBecameIdleAFewHoursAgo: ${roomBecameIdleAFewHoursAgo}
-                - botHasBeenQuiet: ${botHasBeenQuiet}
-                - lastMessageIsPostedByBot: ${lastMessageIsPostedByBot}
-                - idleDoSayHi: ${idleDoSayHi}`);
-            }
-
-            // No previous scrape results yet, do not proceed
-            if (typeof election.prev === 'undefined') return;
-
-            // Previously had no primary, but after rescraping there is one
-            if (!announcement.hasPrimary && election.datePrimary != null) {
-                announcement.initPrimary(election.datePrimary);
-                await room.sendMessage(`There will be a primary phase before the election now, as there are more than ten candidates.`);
-            }
-
-            // After rescraping the election was cancelled
-            if (election.phase === 'cancelled' && election.isNewPhase()) {
-                await announceCancelled(room, election);
-            }
-
-            // After rescraping we have winners
-            else if (election.phase === 'ended' && election.newWinners.length) {
-                await announceWinners(room, election);
-
-                // Stop scraping the election page or greeting the room
-                stopRescrape();
-            }
-
-            // After rescraping, the election is over but we do not have winners yet
-            else if (election.phase === 'ended' && !election.newWinners.length) {
-
-                // Reduce scrape interval further
-                config.scrapeIntervalMins = 0.5;
-            }
-
-            // The election is ending within the next 10 minutes or less, do once only
-            else if (election.isEnding() && !config.flags.saidElectionEndingSoon) {
-
-                // Reduce scrape interval
-                config.scrapeIntervalMins = 2;
-
-                // Announce election ending soon
-                await room.sendMessage(`The ${makeURL('election', election.electionUrl)} is ending soon. This is the final moment to cast your votes!`);
-                config.flags.saidElectionEndingSoon = true;
-
-                // Record last sent message time so we don't flood the room
-                config.updateLastMessageTime();
-            }
-
-            // New nominations
-            else if (election.phase == 'nomination' && election.newNominees.length) {
-
-                // Get diff between the arrays
-                const { newNominees } = election;
-
-                // Announce
-                newNominees.forEach(async nominee => {
-                    await room.sendMessage(`**We have a new [nomination](${election.electionUrl}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${nominee.permalink})!`);
-                    console.log(`NOMINATION`, nominee);
-                });
-            }
-
-            // Remind users that bot is around to help when:
-            //    1. Room is idle, and there was at least some previous activity, and last message more than lowActivityCheckMins minutes ago
-            // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
-            else if (idleDoSayHi) {
-
-                console.log(`Room is inactive with ${config.activityCount} messages posted so far (min ${config.lowActivityCountThreshold}).`,
-                    `Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
-
-                await room.sendMessage(sayHI(election));
-
-                // Record last sent message time so we don't flood the room
-                config.updateLastMessageTime();
-
-                // Reset last activity count
-                config.activityCount = 0;
-            }
-
-            startRescrape();
-        };
-        const stopRescrape = () => {
-            if (rescraperTimeout) {
-                clearTimeout(rescraperTimeout);
-                rescraperTimeout = null;
-            }
-        };
-        const startRescrape = () => {
-            rescraperTimeout = setTimeout(rescrapeFn, config.scrapeIntervalMins * 60000);
-        };
-
 
         // Interval to keep-alive
         setInterval(async function () {

@@ -73,7 +73,8 @@ export class BotConfig {
     }
 
     checkSameResponseAsPrevious(newContent) {
-        return this.lastMessageContent === newContent && Date.now() - 60e4 < this.lastMessageTime;
+        // Unable to repost same message within 30 seconds
+        return this.lastMessageContent === newContent && Date.now() - 30e4 < this.lastMessageTime;
     }
 };
 

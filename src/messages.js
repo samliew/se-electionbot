@@ -2,14 +2,13 @@ import Election from "./election.js";
 import { getRandomOops } from "./random.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
-    linkToUtcTimestamp, listify, makeURL, pluralize, pluralizePhrase,
-    mapToRequired, mapToName
+    linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, pluralize, pluralizePhrase
 } from "./utils.js";
 import { parsePackage } from "./utils/package.js";
 
 /**
  * @typedef {import("./index").Badge} Badge
- * @typedef {import("./config.js").BotConfig} BotConfig
+ * @typedef {import("./config").BotConfig} BotConfig
  */
 
 /**
@@ -60,12 +59,12 @@ export const sayWhyNominationRemoved = () => {
  * @returns {string}
  */
 export const sayHowToNominate = (election, electionBadges, mentionsAnother = false) => {
-
+    
     const requiredBadges = electionBadges.filter(mapToRequired);
     const requiredBadgeNames = requiredBadges.map(mapToName);
 
     const isStackOverflow = election.siteHostname === "stackoverflow.com";
-
+    
     // Markup to bold additional text if talking about nominating others
     const mentionsAnotherBold = mentionsAnother ? '**' : '';
 
@@ -163,7 +162,7 @@ export const sayBadgesByType = (badges, type, isSO = true) => {
  */
 export const sayRequiredBadges = (election, badges, isSO = true) => {
 
-    if(!isSO) {
+    if (!isSO) {
         return "There are no required badges for elections on this site.";
     }
 
@@ -189,7 +188,7 @@ export const sayRequiredBadges = (election, badges, isSO = true) => {
  * @param {boolean} [required]
  * @returns {string}
  */
-export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = false) =>
+export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = false) => 
     ` ${ownSelf ? "You are" : "The user is"} missing ${pluralizePhrase(count, "these", "this")} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
 
 /**

@@ -2,13 +2,14 @@ import Election from "../election.js";
 import { dateToUtcTimestamp } from "../utils.js";
 
 /**
- * @typedef {import("../config.js").BotConfig} BotConfig
+ * @typedef {import("../config").BotConfig} BotConfig
+ * @typedef {import("../index").User} User
  */
 
 /**
  * @summary changes user access level (can only de-elevate)
  * @param {BotConfig} config bot config
- * @param {import("../index").User} user message author
+ * @param {User} user message author
  * @param {string} content incoming message content
  * @returns {string}
  */
