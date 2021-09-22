@@ -63,14 +63,16 @@ export const sayHowToNominate = (election, electionBadges, mentionsAnother = fal
     const requiredBadges = electionBadges.filter(mapToRequired);
     const requiredBadgeNames = requiredBadges.map(mapToName);
 
-    const isStackOverflow = election.siteHostname === "stackoverflow.com";
+    const { siteHostname } = election;
+
+    const isStackOverflow = siteHostname === "stackoverflow.com";
 
     // Markup to bold additional text if talking about nominating others
     const mentionsAnotherBold = mentionsAnother ? '**' : '';
 
     let requirements = [`at least ${election.repNominate} reputation`];
     if (isStackOverflow) requirements.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
-    if (election.siteHostname?.includes('askubuntu.com')) requirements.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
+    if (siteHostname && /askubuntu\.com$/.test(siteHostname)) requirements.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
     requirements.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
 
     return `You can only nominate yourself as a candidate during the nomination phase. You'll need ${requirements.join(', ')}. ${mentionsAnotherBold}You cannot nominate another user.${mentionsAnotherBold}`;
