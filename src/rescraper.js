@@ -124,15 +124,7 @@ export default class Rescraper {
 
         // New nominations
         else if (election.phase == 'nomination' && election.newNominees.length) {
-
-            // Get diff between the arrays
-            const { newNominees } = election;
-
-            // Announce
-            newNominees.forEach(async nominee => {
-                await sendMessage(config, room, `**We have a new [nomination](${election.electionUrl}?tab=nomination)!** Please welcome our latest candidate [${nominee.userName}](${nominee.permalink})!`);
-                console.log(`NOMINATION`, nominee);
-            });
+            await announcement.announceNewNominees();
         }
 
         // Remind users that bot is around to help when:
