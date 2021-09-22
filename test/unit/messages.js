@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import Election from "../../src/election.js";
-import { sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI, sayInformedDecision } from "../../src/messages.js";
+import { sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI } from "../../src/messages.js";
 import { capitalize } from "../../src/utils.js";
 
 describe("Messages module", () => {

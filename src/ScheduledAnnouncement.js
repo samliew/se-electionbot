@@ -1,4 +1,5 @@
 import cron from "node-cron";
+import { sendMessage } from "./queue.js";
 import { dateToUtcTimestamp, makeURL, pluralize } from "./utils.js";
 
 /**
@@ -54,9 +55,9 @@ export default class ScheduledAnnouncement {
      * @param {Election} [election] election to announce for
      * @returns {Promise<boolean>}
      */
-    async announceCancelled(room, election = null) {
+    async announceCancelled(room, election) {
 
-        if (election === null) return false;
+        if (!election) return false;
 
         const { cancelledText, phase } = election;
 
@@ -74,6 +75,24 @@ export default class ScheduledAnnouncement {
         return true;
     }
 
+    /**
+     * @summary announces new nominees arrival
+     * @returns {Promise<void>}
+     */
+    async announceNewNominees() {
+        const { _room, config, _election } = this;
+
+        const { newNominees, electionUrl } = _election;
+
+        const nominationTab = `${electionUrl}?tab=nomination`;
+
+        newNominees.forEach(async ({ permalink, userName }, i) => {
+            await sendMessage(config, _room, `**We have a new ${makeURL("nomination", nominationTab)
+                }!** Please welcome our latest candidate ${makeURL(userName, permalink)
+                }!`);
+            console.log(`NOMINATION`, newNominees[i]);
+        });
+    }
 
     /**
      * @summary Announces winners when available
@@ -81,11 +100,11 @@ export default class ScheduledAnnouncement {
      * @param {Election} [election] election to announce for
      * @returns {Promise<boolean>}
      */
-    async announceWinners(room, election = null) {
+    async announceWinners(room, election) {
         const { config } = this;
 
         //exit early if no election
-        if (election === null) return false;
+        if (!election) return false;
 
         const { arrWinners, phase, resultsUrl, siteUrl } = election;
 
@@ -224,7 +243,7 @@ export default class ScheduledAnnouncement {
             async () => {
                 console.log('TEST CRON STARTED');
                 await this._election.scrapeElection(this.config);
-                await this._room.sendMessage(`Test cron job succesfully completed at ${dateToUtcTimestamp(this._election.updated)}.`);
+                await this._room.sendMessage(`Test cron job succesfully completed at ${dateToUtcTimestamp(/**  @type {number} */(this._election.updated))}.`);
                 console.log('TEST CRON ENDED', this._election, '\n', this._room);
             },
             { timezone: "Etc/UTC" }

@@ -18,7 +18,7 @@ export const AccessLevel = {
 
 export class Command {
 
-    /** @type {Command} */
+    /** @type {Command|null} */
     aliasFor = null;
 
     /** @type {Command[]} */
@@ -132,11 +132,11 @@ export class CommandManager {
     /**
      * @summary gets a command that matches a regular expression
      * @param {RegExp} regex
-     * @returns {Command}
+     * @returns {Command|null}
      */
     getMatching(regex) {
         const [, command] = Object.entries(this.commands).find(([name]) => regex.test(name)) || [];
-        return this.canRun(command) ? command : null;
+        return this.canRun(command) && command || null;
     }
 
     /**

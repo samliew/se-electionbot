@@ -4,9 +4,9 @@ import { getStackApiKey } from "../../src/api.js";
 describe('SE API', () => {
     describe('getStackApiKey', () => {
 
-        it('should return undefined on empty pool', () => {
+        it('should return empty string on empty pool', () => {
             const key = getStackApiKey([]);
-            expect(key).to.be.undefined;
+            expect(key).to.be.empty;
         });
 
         it('should rotate the keys sequentially', () => {

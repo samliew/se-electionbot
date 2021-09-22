@@ -14,12 +14,12 @@ export let allNetworkSites = [];
 /**
 * @summary Get the next API key from a rotating set
 * @param {string[]} keyPool pool of API keys to rotate through
-* @returns {string|undefined} API key
+* @returns {string} API key
 */
 export const getStackApiKey = (keyPool) => {
-    if (keyPool.length === 0) return;
+    if (keyPool.length === 0) return "";
     const [newKey] = keyPool;
-    keyPool.push(keyPool.shift());
+    keyPool.push(/** @type {string} */(keyPool.shift()));
     return newKey;
 };
 
@@ -191,7 +191,7 @@ export const getUserInfo = async (config, userId, site, key) => {
  */
 export const getAllNetworkSites = async (config, keyPool, page = 1) => {
 
-    if(allNetworkSites.length > 0) return allNetworkSites;
+    if (allNetworkSites.length > 0) return allNetworkSites;
 
     const siteURL = new URL(`${apiBase}/${apiVer}/sites`);
     siteURL.search = new URLSearchParams({
