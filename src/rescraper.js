@@ -47,6 +47,10 @@ export default class Rescraper {
     async rescrape() {
         const { election, config, announcement, room } = this;
 
+        if (config.verbose) {
+            console.log(`RESCRAPER - Rescrape function called.`);
+        }
+
         await election.scrapeElection(config);
 
         const roomLongIdleDuration = this.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
@@ -60,7 +64,7 @@ export default class Rescraper {
             (roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
 
         if (config.verbose) {
-            console.log('SCRAPE', election.updated, election);
+            console.log('RESCRAPER - ', election.updated, election);
         }
 
         if (config.debug) {
@@ -82,7 +86,13 @@ export default class Rescraper {
         }
 
         // No previous scrape results yet, do not proceed
-        if (typeof election.prev === 'undefined') return;
+        if (typeof election.prev === 'undefined') {
+
+            if (config.debug) {
+                console.log(`RESCRAPER - No previous scrape.`);
+            }
+            return;
+        }
 
         // Previously had no primary, but after rescraping there is one
         if (!announcement.hasPrimary && election.datePrimary != null) {
@@ -93,12 +103,20 @@ export default class Rescraper {
         // After rescraping the election was cancelled
         if (election.phase === 'cancelled' && election.isNewPhase()) {
             await announcement.announceCancelled(room, election);
+
+            if (config.debug) {
+                console.log(`RESCRAPER - Election was cancelled.`);
+            }
         }
 
         // After rescraping we have winners
         else if (election.phase === 'ended' && election.newWinners.length) {
             await announcement.announceWinners(room, election);
             this.stop();
+
+            if (config.debug) {
+                console.log(`RESCRAPER - No previous scrape.`);
+            }
         }
 
         // After rescraping, the election is over but we do not have winners yet
@@ -106,6 +124,10 @@ export default class Rescraper {
 
             // Reduce scrape interval further
             config.scrapeIntervalMins = 0.5;
+
+            if (config.debug) {
+                console.log(`RESCRAPER - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
+            }
         }
 
         // The election is ending within the next 10 minutes or less, do once only
@@ -118,13 +140,18 @@ export default class Rescraper {
             await sendMessage(config, room, `The ${makeURL('election', election.electionUrl)} is ending soon. This is the final moment to cast your votes!`);
             config.flags.saidElectionEndingSoon = true;
 
-            // Record last sent message time so we don't flood the room
-            config.updateLastMessageTime();
+            if (config.debug) {
+                console.log(`RESCRAPER - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
+            }
         }
 
         // New nominations
         else if (election.phase == 'nomination' && election.newNominees.length) {
             await announcement.announceNewNominees();
+
+            if (config.debug) {
+                console.log(`RESCRAPER - New nominees announced.`);
+            }
         }
 
         // Remind users that bot is around to help when:
@@ -142,20 +169,33 @@ export default class Rescraper {
         }
 
         this.start();
+
+        if (config.verbose) {
+            console.log(`RESCRAPER - Rescrape function completed.`);
+        }
     };
 
     /**
      * @summary stops the rescraper
      */
     stop() {
+        const { config } = this;
         this.timeout &&= clearTimeout(this.timeout);
+
+        if (config.verbose) {
+            console.log(`RESCRAPER - Next rescrape cleared.`);
+        }
     }
 
     /**
      * @summary starts the rescraper
      */
     start() {
-        const { config: { scrapeIntervalMins } } = this;
-        this.timeout = setTimeout(this.rescrape.bind(this), scrapeIntervalMins * 60000);
+        const { config } = this;
+        this.timeout = setTimeout(this.rescrape.bind(this), config.scrapeIntervalMins * 60000);
+
+        if (config.verbose) {
+            console.log(`RESCRAPER - Next rescrape scheduled in ${config.scrapeIntervalMins} mins.`);
+        }
     }
 }
