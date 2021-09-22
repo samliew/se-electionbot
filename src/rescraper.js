@@ -42,6 +42,14 @@ export default class Rescraper {
     }
 
     /**
+     * @summary convenience method for updating Announcement
+     * @param {Announcement} announcement announcement instance
+     */
+    setAnnouncement(announcement) {
+        this.announcement = announcement;
+    }
+
+    /**
      * @summary Function to rescrape election data, and process election or chat room updates
      */
     async rescrape() {
@@ -95,14 +103,14 @@ export default class Rescraper {
         }
 
         // Previously had no primary, but after rescraping there is one
-        if (!announcement.hasPrimary && election.datePrimary != null) {
-            announcement.initPrimary(election.datePrimary);
+        if (!announcement?.hasPrimary && election.datePrimary != null) {
+            announcement?.initPrimary(election.datePrimary);
             await sendMessage(config, room, `There will be a primary phase before the election now, as there are more than ten candidates.`);
         }
 
         // After rescraping the election was cancelled
         if (election.phase === 'cancelled' && election.isNewPhase()) {
-            await announcement.announceCancelled(room, election);
+            await announcement?.announceCancelled(room, election);
 
             if (config.debug) {
                 console.log(`RESCRAPER - Election was cancelled.`);
@@ -111,7 +119,7 @@ export default class Rescraper {
 
         // After rescraping we have winners
         else if (election.phase === 'ended' && election.newWinners.length) {
-            await announcement.announceWinners(room, election);
+            await announcement?.announceWinners(room, election);
             this.stop();
 
             if (config.debug) {
@@ -147,7 +155,7 @@ export default class Rescraper {
 
         // New nominations
         else if (election.phase == 'nomination' && election.newNominees.length) {
-            await announcement.announceNewNominees();
+            await announcement?.announceNewNominees();
 
             if (config.debug) {
                 console.log(`RESCRAPER - New nominees announced.`);
