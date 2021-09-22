@@ -140,7 +140,7 @@ import {
         1114, 100297, 229044, 1252759, 444991, 871050, 2057919, 3093387, 1849664, 2193767, 4099593,
         541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
     ];
-    let rescraperTimeout;
+
     let election = /** @type {Election|null} */(null);
 
     // Init bot config with defaults
