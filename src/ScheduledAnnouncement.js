@@ -1,4 +1,5 @@
 import cron from "node-cron";
+import { sendMessage } from "./queue.js";
 import { dateToUtcTimestamp, makeURL, pluralize } from "./utils.js";
 
 /**
@@ -74,6 +75,24 @@ export default class ScheduledAnnouncement {
         return true;
     }
 
+    /**
+     * @summary announces new nominees arrival
+     * @returns {Promise<void>}
+     */
+    async announceNewNominees() {
+        const { _room, config, _election } = this;
+
+        const { newNominees, electionUrl } = _election;
+
+        const nominationTab = `${electionUrl}?tab=nomination`;
+
+        newNominees.forEach(async ({ permalink, userName }, i) => {
+            await sendMessage(config, _room, `**We have a new ${makeURL("nomination", nominationTab)
+                }!** Please welcome our latest candidate ${makeURL(userName, permalink)
+                }!`);
+            console.log(`NOMINATION`, newNominees[i]);
+        });
+    }
 
     /**
      * @summary Announces winners when available
