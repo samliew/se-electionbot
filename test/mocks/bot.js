@@ -1,26 +1,10 @@
+import BotConfig from "../../src/config.js";
+
 /**
- * @typedef {import("../../src/config").BotConfig} BotConfig
  * @param {Partial<BotConfig>} [overrides]
  * @returns {BotConfig}
  */
 export const getMockBotConfig = (overrides = {}) => {
-    const defaults = {
-        chatRoomId: 190503,
-        chatDomain: 'stackoverflow.com',
-        throttleSecs: 1,
-        lastActivityTime: -1,
-        lastMessageTime: -1,
-        activityCount: -1,
-        scrapeIntervalMins: 5,
-        debug: false,
-        verbose: false,
-        devIds: new Set(),
-        adminIds: new Set(),
-        ignoredUserIds: new Set(),
-        flags: {
-            saidElectionEndingSoon: false,
-        },
-        updateLastMessageTime: function() {}
-    };
-    return Object.assign(defaults, overrides);
+    const config = new BotConfig("stackoverflow.com", 190503);
+    return Object.assign(config, overrides);
 };
