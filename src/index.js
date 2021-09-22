@@ -341,7 +341,8 @@ import {
                 return;
             }
 
-            console.log('EVENT', JSON.stringify({ msg, user }));
+            // Log all unignored events
+            console.log('EVENT', JSON.stringify({ msg, content, user }));
 
             // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
             if (eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id) {
