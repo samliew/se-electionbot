@@ -50,11 +50,11 @@ export default class Rescraper {
         await election.scrapeElection(config);
 
         const roomLongIdleDuration = this.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
-        const { roomReachedMinimumActivityCount } = config;
-        const roomBecameIdleAShortWhileAgo = config.lastActivityTime + (4 * 6e4) < Date.now();
-        const roomBecameIdleAFewHoursAgo = config.lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
-        const botHasBeenQuiet = config.lastMessageTime + (config.lowActivityCheckMins * 6e4) < Date.now();
-        const lastMessageIsPostedByBot = config.lastActivityTime === config.lastMessageTime;
+        const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = config;
+        const roomBecameIdleAShortWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
+        const roomBecameIdleAFewHoursAgo = lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
+        const botHasBeenQuiet = lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
+        const lastMessageIsPostedByBot = lastActivityTime === lastMessageTime;
 
         const idleDoSayHi = (roomBecameIdleAShortWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
             (roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
