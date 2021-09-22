@@ -6,7 +6,7 @@ import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapT
 
 /**
  * @typedef {import("./index.js").User} User
- * @typedef {import("./index.js").BotConfig} BotConfig
+ * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./utils").Badge} Badge
  * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
  */
