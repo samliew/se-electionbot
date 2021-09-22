@@ -14,10 +14,13 @@
  */
 const _sendTheMessage = async function (config, room, message, inResponseTo = null, isPrivileged = false) {
 
-    const isInvalid = message?.length > 500;
+    const messageLength = message?.length || 0;
+    const isInvalid = messageLength <= 0 || messageLength > 500;
+
+    // Log message whether valid or otherwise
+    console.log(`RESPONSE ${isInvalid ? "- INVALID " : ""}- `, message);
 
     if (isInvalid) {
-        console.log(`RESPONSE ${!isInvalid ? "- INVALID " : ""}- `, message);
         return;
     }
 
@@ -26,6 +29,7 @@ const _sendTheMessage = async function (config, room, message, inResponseTo = nu
         message = config.duplicateResponseText;
     }
 
+    // Send the message
     await room.sendMessage.apply(this, (inResponseTo ? `:${inResponseTo} ` : "") + message);
 
     // Record last sent message and time so we don't flood the room
