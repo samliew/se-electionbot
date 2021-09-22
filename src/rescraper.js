@@ -187,8 +187,9 @@ export default class Rescraper {
      * @summary stops the rescraper
      */
     stop() {
-        const { config } = this;
-        this.timeout &&= clearTimeout(this.timeout);
+        const { config, timeout } = this;
+
+        if (timeout) this.timeout = clearTimeout(timeout);
 
         if (config.verbose) {
             console.log(`RESCRAPER - Next rescrape cleared.`);
