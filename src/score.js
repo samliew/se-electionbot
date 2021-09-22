@@ -95,10 +95,12 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         // If privileged user asking candidate score of another user, get user site id from message
         if (isAskingForOtherUser) {
+            // @ts-expect-error FIXME
             userId = content.includes(`${election.siteUrl}/users/`) ? +(content.match(/\/users\/(\d+).*(?:\?|$)/)[1]) : +(content.match(/(\d+)(?:\?|$)/)[1]);
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
         else if (!isSO) {
+            // @ts-expect-error FIXME
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);
 
             // Unable to get user id on election site
@@ -155,6 +157,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         let responseText = "";
 
+        // @ts-expect-error FIXME
         const isEligible = makeIsEligible(repNominate);
 
         if (config.debug) {
@@ -188,6 +191,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         else if (!isEligible(reputation, numMissingRequiredBadges)) {
             responseText = `You are not eligible to nominate yourself in the election`;
 
+            // @ts-expect-error FIXME
             const isUnderRep = reputation < repNominate;
 
             // Not enough rep
@@ -206,11 +210,11 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             responseText = `Wow! You have a maximum candidate score of **${currMaxScore}**!`;
 
             // Already nominated, and not ended/cancelled
-            if (hasNominated && ['nomination', 'primary', 'election'].includes(phase)) {
+            if (hasNominated && ['nomination', 'primary', 'election'].includes(/** @type {string} */(phase))) {
                 responseText += ` I can see you're already a candidate - good luck!`;
             }
             // If have not begun, or nomination phase, ask user to nominate themselves
-            else if (['null', 'nomination'].includes(phase)) {
+            else if (['null', 'nomination'].includes(/** @type {string} */(phase))) {
                 responseText += ` Please consider nominating yourself in the ${makeURL("election", electionUrl)}!`;
             }
             // Did not nominate (primary, election, ended, cancelled)
@@ -239,11 +243,11 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             }
 
             // Already nominated, and not ended/cancelled
-            if (hasNominated && ['nomination', 'primary', 'election'].includes(phase)) {
+            if (hasNominated && ['nomination', 'primary', 'election'].includes(/** @type {string} */(phase))) {
                 responseText += ` I can see you're already a candidate. Good luck!`;
             }
             // If have not begun, or nomination phase, ask user to nominate themselves
-            else if (['null', 'nomination'].includes(phase)) {
+            else if (['null', 'nomination'].includes(/** @type {string} */(phase))) {
 
                 const perhapsNominateThreshold = 30;
 

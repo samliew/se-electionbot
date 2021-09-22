@@ -55,9 +55,9 @@ export default class ScheduledAnnouncement {
      * @param {Election} [election] election to announce for
      * @returns {Promise<boolean>}
      */
-    async announceCancelled(room, election = null) {
+    async announceCancelled(room, election) {
 
-        if (election === null) return false;
+        if (!election) return false;
 
         const { cancelledText, phase } = election;
 
@@ -100,11 +100,11 @@ export default class ScheduledAnnouncement {
      * @param {Election} [election] election to announce for
      * @returns {Promise<boolean>}
      */
-    async announceWinners(room, election = null) {
+    async announceWinners(room, election) {
         const { config } = this;
 
         //exit early if no election
-        if (election === null) return false;
+        if (!election) return false;
 
         const { arrWinners, phase, resultsUrl, siteUrl } = election;
 
@@ -243,7 +243,7 @@ export default class ScheduledAnnouncement {
             async () => {
                 console.log('TEST CRON STARTED');
                 await this._election.scrapeElection(this.config);
-                await this._room.sendMessage(`Test cron job succesfully completed at ${dateToUtcTimestamp(this._election.updated)}.`);
+                await this._room.sendMessage(`Test cron job succesfully completed at ${dateToUtcTimestamp(/**  @type {number} */(this._election.updated))}.`);
                 console.log('TEST CRON ENDED', this._election, '\n', this._room);
             },
             { timezone: "Etc/UTC" }

@@ -66,14 +66,24 @@ import {
     // Environment variables
     const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
-    const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN);
-    const defaultChatRoomId = +process.env.CHAT_ROOM_ID;
+    const { CHAT_ROOM_ID } = process.env;
+
     const accountEmail = process.env.ACCOUNT_EMAIL;
     const accountPassword = process.env.ACCOUNT_PASSWORD;
     const electionUrl = process.env.ELECTION_URL;
+
+    if (!electionUrl || !CHAT_ROOM_ID || !accountEmail || !accountPassword) {
+        console.error('FATAL - missing required ENV');
+        return;
+    }
+
+    const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN);
+    const defaultChatRoomId = +CHAT_ROOM_ID;
+
     const electionSiteHostname = electionUrl.split('/')[2];
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
     const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
+
 
     /** @type {{ ChatEventType: EventType }} */
     //@ts-expect-error
@@ -141,8 +151,6 @@ import {
         541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
     ];
 
-    let election = /** @type {Election|null} */(null);
-
     // Init bot config with defaults
     const config = new BotConfig(defaultChatDomain, defaultChatRoomId);
 
@@ -205,7 +213,7 @@ import {
         const currentSiteMods = await getModerators(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
 
         // Wait for election page to be scraped
-        election = new Election(electionUrl);
+        const election = new Election(electionUrl);
         await election.scrapeElection(config);
         if (election.validate() === false) {
             console.error('FATAL - Invalid election data!');
@@ -223,6 +231,7 @@ import {
             }
             // Default to site's default chat room
             else {
+                // @ts-expect-error FIXME
                 const defaultRoom = await getSiteDefaultChatroom(config, election.siteHostname);
                 if (defaultRoom) {
                     config.chatRoomId = defaultRoom.chatRoomId;
@@ -606,7 +615,8 @@ import {
                     return; // stop here since we are using a different default response method
                 }
 
-                await sendReply(config, room, responseText, msg.id, false);
+                // TODO: msg.id might be undefined
+                await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
             }
 
 
@@ -651,7 +661,8 @@ import {
 
                     responseText = await calcCandidateScore(election, user, { userId, content }, isStackOverflow);
 
-                    await sendReply(config, room, responseText, msg.id, false);
+                    // TODO: msg.id is not guaranteed to be defined
+                    await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
 
                     return; // stop here since we are using a different default response method
                 }

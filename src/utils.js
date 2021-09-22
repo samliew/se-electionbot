@@ -160,6 +160,7 @@ export const fetchChatTranscript = async (config, url) => {
         const userlink = $this.parent().siblings('.signature').find('a');
         messages.push({
             username: userlink.text(),
+            // @ts-expect-error
             chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
             message: $this.find('.content').text().trim(),
         });
@@ -322,6 +323,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         console.log(`Linked site user url: ${linkedUserUrl}`);
 
         // Linked site is the one we wanted, return site userid
+        // @ts-expect-error FIXME
         if (linkedUserUrl.includes(hostname)) return +((linkedUserUrl.match(/\d+/))[0]);
 
         // Linked site is not the one we wanted
@@ -332,10 +334,12 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         const $profile = cheerio.load(/** @type {string} */(linkedUserProfilePage));
 
         const networkUserUrl = $profile('#profiles-menu a[href^="https://stackexchange.com/users/"]').attr("href");
+        // @ts-expect-error FIXME
         const networkUserId = +(networkUserUrl.match(/\d+/));
         console.log(`Network user url: ${networkUserUrl}`, networkUserId);
 
         const url = new URL(`${apiBase}/${apiVer}/users/${networkUserId}/associated`);
+        // @ts-expect-error FIXME
         url.search = new URLSearchParams({
             pagesize: "100",
             types: "main_site",
@@ -352,6 +356,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         //successful response from the API, but no associated account found
         if (!siteAccount && items.length) return NO_ACCOUNT_ID;
 
+        // @ts-expect-error FIXME
         return +siteAccount?.user_id || null;
     }
     catch (e) {
@@ -388,6 +393,8 @@ export const getSiteDefaultChatroom = async (config, siteUrl) => {
     const $roomList = $chat("#roomlist .roomcard a");
 
     const firstRoomUrl = $roomList.first().attr("href");
+
+    // @ts-expect-error FIXME
     const firstRoomId = +firstRoomUrl?.match(/\d+/)[0];
 
     return {
@@ -427,7 +434,7 @@ export const mapToName = ({ name }) => name;
  * @param {Badge} badge
  * @returns {boolean}
  */
-export const mapToRequired = ({ required }) => required;
+export const mapToRequired = ({ required }) => !!required;
 
 /**
  * @summary parses user ids from ENV

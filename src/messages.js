@@ -59,18 +59,18 @@ export const sayWhyNominationRemoved = () => {
  * @returns {string}
  */
 export const sayHowToNominate = (election, electionBadges, mentionsAnother = false) => {
-    
+
     const requiredBadges = electionBadges.filter(mapToRequired);
     const requiredBadgeNames = requiredBadges.map(mapToName);
 
     const isStackOverflow = election.siteHostname === "stackoverflow.com";
-    
+
     // Markup to bold additional text if talking about nominating others
     const mentionsAnotherBold = mentionsAnother ? '**' : '';
 
     let requirements = [`at least ${election.repNominate} reputation`];
     if (isStackOverflow) requirements.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
-    if (election.siteHostname.includes('askubuntu.com')) requirements.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
+    if (election.siteHostname?.includes('askubuntu.com')) requirements.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
     requirements.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
 
     return `You can only nominate yourself as a candidate during the nomination phase. You'll need ${requirements.join(', ')}. ${mentionsAnotherBold}You cannot nominate another user.${mentionsAnotherBold}`;
@@ -188,7 +188,7 @@ export const sayRequiredBadges = (election, badges, isSO = true) => {
  * @param {boolean} [required]
  * @returns {string}
  */
-export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = false) => 
+export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = false) =>
     ` ${ownSelf ? "You are" : "The user is"} missing ${pluralizePhrase(count, "these", "this")} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
 
 /**
@@ -385,8 +385,8 @@ export const sayWhoMadeMe = async (config) => {
 
     const { author, contributors } = info;
 
-    const created = `${makeURL(author.name, author.url)} created me`;
-    const contributed = listify(...contributors.map(({ name, url }) => makeURL(name, url)));
+    const created = `${makeURL(author.name, /** @type {string} */(author.url))} created me`;
+    const contributed = listify(...contributors.map(({ name, url }) => makeURL(name, /** @type {string} */(url))));
     const maintainers = `I am also maintained by ${contributed}`;
 
     return `${created}. ${maintainers}.`;

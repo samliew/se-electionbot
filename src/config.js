@@ -15,9 +15,9 @@ export class BotConfig {
     /* Low activity count variables */
 
     // Variable to trigger an action only after this time of inactivity
-    lowActivityCheckMins = +process.env.LOW_ACTIVITY_CHECK_MINS || 15;
+    lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 15);
     // Variable to trigger an action only after this amount of minimum messages
-    lowActivityCountThreshold = +process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 30;
+    lowActivityCountThreshold = +(process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 30);
 
     get roomReachedMinimumActivityCount() {
         const { activityCount, lowActivityCountThreshold } = this;
@@ -27,7 +27,7 @@ export class BotConfig {
     /* Bot variables */
 
     // To stop bot from replying to too many messages in a short time
-    throttleSecs = +(process.env.THROTTLE_SECS) || 2;
+    throttleSecs = +(process.env.THROTTLE_SECS || 2);
     // Variable to store time of last message in the room (by anyone, including bot)
     lastActivityTime = Date.now();
     // Variable to store time of last bot sent message for throttling purposes
@@ -37,7 +37,7 @@ export class BotConfig {
     // Variable to track activity count in the room, to see if it reached lowActivityCountThreshold
     activityCount = 0;
     // Variable of rescrape interval of election page
-    scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS) || 5;
+    scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS || 5);
     // Response when bot tries to post the exact same response again
     duplicateResponseText = "Please read my previous message - I can't send the exact same message again.";
 
