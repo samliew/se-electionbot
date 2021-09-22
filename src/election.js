@@ -192,13 +192,13 @@ export default class Election {
             return;
         }
 
-        // Save prev values so we can compare changes after
-        this._prevObj = Object.assign({}, this); // fast way of cloning an object
-        this._prevObj._prevObj = null;
-
-        const electionPageUrl = `${this.electionUrl}?tab=nomination`;
-
         try {
+            // Save prev values so we can compare changes after
+            this._prevObj = Object.assign({}, this); // fast way of cloning an object
+            this._prevObj._prevObj = null;
+
+            const electionPageUrl = `${this.electionUrl}?tab=nomination`;
+
             const pageHtml = await fetchUrl(config, electionPageUrl);
 
             // Parse election page
