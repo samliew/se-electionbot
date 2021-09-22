@@ -296,6 +296,7 @@ import {
         const rescraper = new Rescraper(config, room, election);
         const announcement = new Announcement(config, room, election, rescraper);
         announcement.setRescraper(rescraper);
+        announcement.initAll();
         rescraper.start();
 
         // Main event listener
@@ -349,7 +350,8 @@ import {
                 return;
             }
 
-            console.log('EVENT', JSON.stringify({ msg, user }));
+            // Log all unignored events
+            console.log('EVENT', JSON.stringify({ msg, content, user }));
 
             // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
             if (eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id) {
@@ -803,15 +805,12 @@ import {
         console.log(`INIT - Joined and listening in room https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`);
 
 
-        // Set cron jobs to announce the different phases
-        announcement.initAll();
-
         // Interval to keep-alive
         setInterval(async function () {
 
             // Try to stay-alive by rejoining room
             await client.joinRoom(config.chatRoomId);
-            if (config.debug) console.log('Stay alive rejoin room', room);
+            if (config.verbose) console.log('KEEP ALIVE - rejoin room:', config.chatDomain, config.chatRoomId);
 
         }, 5 * 60000);
 
