@@ -297,6 +297,7 @@ import {
         const announcement = new Announcement(config, room, election, rescraper);
         announcement.setRescraper(rescraper);
         announcement.initAll();
+        rescraper.setAnnouncement(announcement);
         rescraper.start();
 
         // Main event listener
