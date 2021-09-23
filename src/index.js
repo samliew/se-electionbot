@@ -12,7 +12,8 @@ import {
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners, isAskedForElectionSchedule,
     isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedIfModsArePaid, isAskedWhoMadeMe,
-    isAskedWhyNominationRemoved
+    isAskedWhyNominationRemoved,
+    isLovingTheBot
 } from "./guards.js";
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
@@ -58,40 +59,38 @@ import {
 
 (async () => {
 
-    // If running locally, load env vars from .env file
+    // If running locally, load environment variables from .env file
     if (process.env.NODE_ENV !== 'production') {
         dotenv.config({ debug: process.env.DEBUG === 'true' });
     }
 
     // Environment variables
-    const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
-
     const { CHAT_ROOM_ID } = process.env;
 
     const accountEmail = process.env.ACCOUNT_EMAIL;
     const accountPassword = process.env.ACCOUNT_PASSWORD;
     const electionUrl = process.env.ELECTION_URL;
 
+    // TODO: in future, CHAT_ROOM_ID may not be required if it's in prod mode
     if (!electionUrl || !CHAT_ROOM_ID || !accountEmail || !accountPassword) {
-        console.error('FATAL - missing required ENV');
+        console.error('FATAL - missing required environment variables.');
         return;
     }
 
     const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN);
     const defaultChatRoomId = +CHAT_ROOM_ID;
-
     const electionSiteHostname = electionUrl.split('/')[2];
     const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');
     const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
+    const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
 
     /** @type {{ ChatEventType: EventType }} */
     //@ts-expect-error
     const { ChatEventType } = WE;
 
-    // App variables
+    // Other app constants
     const isStackOverflow = electionSiteHostname.includes('stackoverflow.com');
-    const scriptInitDate = new Date();
     const ignoredEventTypes = [
         ChatEventType.MESSAGE_EDITED,
         ChatEventType.USER_JOINED,
@@ -117,8 +116,11 @@ import {
         34, // UserNameOrAvatarChanged
         7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
     ];
+    const maxMessageLength = 500; // should rarely, if never change
+    const scriptInitDate = new Date();
 
     /**
+     * @description Site election badges, defaults to Stack Overflow's
      * @type {Badge[]}
      */
     const electionBadges = [
@@ -144,6 +146,7 @@ import {
         { name: 'Strunk & White', required: true, type: "editing", id: "12" },
     ];
 
+    // Rarely changed until there's a Stack Overflow election
     const soPastAndPresentModIds = [
         34397, 50049, 102937, 267, 419, 106224, 396458, 50776, 105971, 2598,
         298479, 19679, 16587, 246246, 707111, 168175, 208809, 59303, 237838, 426671, 716216, 256196,
@@ -161,7 +164,6 @@ import {
         console.log = (...args) => _origLog.call(console, ...args, '\n');
         console.error = (...args) => _origErr.call(console, ...args, '\n');
     })();
-
 
     // App setup
     if (config.debug) {
@@ -191,12 +193,13 @@ import {
         }
     };
 
+
     /**
      * @summary main bot function
      */
     const main = async () => {
 
-        // Get current site named badges
+        // Get current site named badges (i.e.: non-tag badges)
         if (!isStackOverflow) {
             const allNamedBadges = await getAllNamedBadges(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
 
@@ -206,7 +209,9 @@ import {
                 if (matchedBadge) electionBadge.id = matchedBadge.badge_id.toString();
             });
 
-            console.log('API - Site election badges\n', electionBadges.map(badge => `${badge.name}: ${badge.id}`).join('\n'));
+            if (config.debug || config.verbose) {
+                console.log('API - Site election badges\n', electionBadges.map(badge => `${badge.name}: ${badge.id}`).join('\n'));
+            }
         }
 
         // Get current site mods via API
@@ -239,7 +244,7 @@ import {
                 }
             }
 
-            console.log(`App is not in debug mode and election is active - redirected to live room:
+            console.log(`App is in production with active election - redirected to live room:
             DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
             ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
         }
@@ -259,7 +264,6 @@ import {
         // Get bot's chat profile
         const _me = await client.getMe();
         const me = await client._browser.getProfile(_me.id);
-
         me.id = _me.id; // because getProfile() doesn't return id
         console.log(`INIT - Logged in to ${config.chatDomain} as ${me.name} (${me.id})`);
 
@@ -300,22 +304,21 @@ import {
         rescraper.setAnnouncement(announcement);
         rescraper.start();
 
+
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
+            const encodedMessage = await msg.content;
 
-            const encoded = await msg.content;
-
-            // Decode HTML entities in messages, lowercase version for matching
-            const origContent = entities.decode(encoded);
-
-            const content = origContent.toLowerCase().replace(/^@\S+\s+/, '');
+            // Decode HTML entities in messages, create lowercase copy for guard matching
+            const originalMessage = entities.decode(encodedMessage);
+            const content = originalMessage.toLowerCase().replace(/^@\S+\s+/, '');
 
             const { eventType, userId, targetUserId } = msg;
 
-            // Ignore stuff from self, Community or Feeds users
+            // Ignore events from self, Community or Feeds users
             if (me.id === userId || userId <= 0) return;
 
-            // Ignore stuff from ignored users
+            // Ignore events from ignored users
             if (config.ignoredUserIds.has(userId)) return;
 
             // Record time of last new message/reply in room, and increment activity count
@@ -344,7 +347,7 @@ import {
 
             const isPrivileged = user.isModerator || ((AccessLevel.privileged) & access);
 
-            // If message is too short or long, ignore (most likely FP, except if an admin issues the message)
+            // If message is too short or long, ignore (most likely FP, except if an admin sent the message)
             const { length } = content;
             if ((length < 4 || length > 69) && !isPrivileged) {
                 console.log(`EVENT - Ignoring due to message length ${content.length}: ${content}`);
@@ -352,7 +355,7 @@ import {
             }
 
             // Log all unignored events
-            console.log('EVENT', JSON.stringify({ msg, content, user }));
+            console.log('EVENT -', JSON.stringify({ content, msg, user }));
 
             // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
             if (eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id) {
@@ -447,7 +450,7 @@ import {
                 // TODO: Do not show dev-only commands to mods, split to separate dev menu?
                 const outputs = [
                     ["commands", /commands|usage/],
-                    ["say", /say/, origContent],
+                    ["say", /say/, originalMessage],
                     ["alive", /alive/, scriptHostname, scriptInitDate, config],
                     ["test cron", /test cron/, announcement],
                     ["get cron", /get cron/, announcement],
@@ -474,21 +477,26 @@ import {
                     console.log(`response info:
                 response chars: ${responseText.length}
                 content: ${content}
-                original: ${origContent}
+                original: ${originalMessage}
                 last message: ${config.lastMessageTime}
                 last activty: ${config.lastActivityTime}
                 `);
                 }
 
-                const maxPerMessage = 500;
-
+                /* Note:
+                 * Be careful if integrating this section with message queue,
+                 *   since it is currently for long responses to dev/admin commands only, and does not reset active mutes.
+                 * We should also avoid long responses for normal users and continue to contain them within a single message,
+                 *   so we could possibly leave this block as it is
+                 */
                 if (responseText) {
 
                     // Function sent the message and returned empty string, e.g.: sayHI
                     if (responseText === '') return;
 
                     const messages = responseText.split(
-                        new RegExp(`(^(?:.|\\n|\\r){1,${maxPerMessage}})(?:\\n|$)`, "gm")
+                        // TODO: This regexp only splits the message at newlines, which may cause an issue if there aren't any
+                        new RegExp(`(^(?:.|\\n|\\r){1,${maxMessageLength}})(?:\\n|$)`, "gm")
                     ).filter(Boolean);
 
                     console.log(`RESPONSE (${messages.length})`, responseText);
@@ -498,14 +506,13 @@ import {
                     config.lastActivityTime = Date.now() + messages.length * 2e3;
 
                     if (messages.length > 3) {
-
                         await msg.reply(`I wrote a poem of ${messages.length} messages for you!`);
                         await wait(2);
                     }
 
                     for (const message of messages) {
                         await room.sendMessage(message);
-                        await wait(2);
+                        await wait(1);
                     }
 
                     return; // no further action
@@ -513,6 +520,11 @@ import {
             }
 
 
+            /* TODO:
+             *   When message queue is implemented, this will need to go as well.
+             *   In it's place to avoid bot abuse, we can implement auto user mutes/ignores
+             *   (e.g.: if an individual user makes bot respond more than 5 times in 30 seconds, ignore 2 minutes)
+             */
             // If too close to previous message, ignore (apply throttle)
             if (Date.now() < config.lastMessageTime + config.throttleSecs * 1000) {
                 console.log('THROTTLE - too close to previous message');
@@ -595,7 +607,7 @@ import {
                 // Fun mode only for testing purposes
                 else if (config.funMode || /[\?\!]+$/.test(content)) {
 
-                    // random response in room
+                    // Random response
                     responseText = new RandomArray(
                         content,
                         `You talking to me?`,
@@ -656,7 +668,7 @@ import {
                 // Calculate own candidate score
                 else if (isAskedForOwnScore(content) || isAskedForOtherScore(content)) {
 
-                    //TODO: use config object pattern instead, 6 parameters is way too much
+                    // TODO: use config object pattern instead, 6 parameters is way too much
                     const calcCandidateScore = makeCandidateScoreCalc(config,
                         electionSiteHostname, config.chatDomain, electionSiteApiSlug,
                         getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
@@ -707,11 +719,12 @@ import {
 
                 // Current mods
                 else if (isAskedForCurrentMods(content)) {
+                    // Should we do this, or just link to the site's mod page since it's more useful than just usernames?
                     responseText = sayCurrentMods(election, currentSiteMods, entities.decode);
                 }
 
                 // How to nominate self/others
-                // - can't use keyword "vote" here
+                // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
                 else if (isAskedForNominatingInfo(content)) {
                     const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x));
                     responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
@@ -774,24 +787,28 @@ import {
                 }
 
                 // What is an election
-                else if (content.length <= 56 && (/^what( i|')?s (an|the) election/.test(content) || /^how does (an|the) election work/.test(content))) {
+                else if (content.length <= 56 && (/^(?:what|what's)(?: is)? (?:a|an|the) election/.test(content) || /^how do(?:es)? (a|an|the) election work/.test(content))) {
                     responseText = sayWhatIsAnElection(election);
                 }
+                // How to vote
                 else if (isAskedAboutVoting(content)) {
                     responseText = sayAboutVoting(election);
                 }
+                // Who are the winners
                 else if (isAskedForCurrentWinners(content)) {
                     responseText = sayCurrentWinners(election);
                 }
+                // Election schedule
                 else if (isAskedForElectionSchedule(content)) {
                     responseText = sayElectionSchedule(election);
                 }
+                // Can't we just edit the diamond in our username
                 else if (isAskedAboutUsernameDiamond(content)) {
                     responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
                 }
 
-                // Good bot
-                if (['the', 'this', 'i'].some(x => content.startsWith(x)) && content.includes('bot') && ['good', 'excellent', 'wonderful', 'well done', 'nice', 'great', 'like'].some(x => content.includes(x))) {
+                // Good bot; I love this bot
+                if (isLovingTheBot(content)) {
                     responseText = getRandomGoodThanks();
                 }
 

@@ -15,7 +15,7 @@ export const isAskedForNominatingInfo = (text) => {
  */
 export const isAskedWhyNominationRemoved = (text) => {
     return /^(?:why|what)\b/.test(text) &&
-        /\b(?:nomination|nominees|candidate)\b/.test(text) &&
+        /\b(?:nomination|nominee|candidate)s?\b/.test(text) &&
         /\b(?:removed|withdraw|fewer|lesser|resign)\b/.test(text);
 };
 
@@ -26,7 +26,7 @@ export const isAskedWhyNominationRemoved = (text) => {
  */
 export const isAskedIfModsArePaid = (text) => {
     return /^(?:why|what|are|how)\b/.test(text) &&
-        /\b(?:reward|paid|compensated|money)\b/.test(text) &&
+        /\b(?:reward|rewarded|paid|compensated|money)\b/.test(text) &&
         /\b(?:mods|moderators)\b/.test(text);
 };
 
@@ -113,7 +113,7 @@ export const isAskedWhoMadeMe = (text) => {
  * @returns {boolean}
  */
 export const isAskedForOwnScore = (text) => {
-    return /can i nominate myself/.test(text) || 
+    return /can i nominate myself/.test(text) ||
         /what(?: i|')s\s+my(?:\s+candidate)?\s+score(?:$|\?)/i.test(text);
 };
 
@@ -133,4 +133,30 @@ export const isAskedForOtherScore = (text) => {
  */
 export const isAskedForScoreFormula = (text) => {
     return /(?:what|how) (?:is )?candidate score(?:(?: is)? calculated| formula)?(?:$|\?)/.test(text);
+};
+
+/**
+ * @summary detects if someone is thanking, praising, or loving the bot
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isLovingTheBot = (text) => {
+    return text.includes('bot') &&
+        (
+            /(?:^the|^this)?.*(?:thank|nice|good|great|wonderful|awesome|excellent)/.test(text) ||
+            /^i (?:like|love) (?:the|this|electionbot)/.test(text)
+        );
+};
+
+/**
+ * @summary detects if someone hates the bot
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isHatingTheBot = (text) => {
+    return text.includes('bot') &&
+        (
+            /(?:^the|^this)?.*(?:bad|terrible|horrible|broken|buggy)/.test(text) ||
+            /^i (?:dislike|hate|detest) (?:the|this|electionbot)/.test(text)
+        );
 };

@@ -39,7 +39,7 @@ export class BotConfig {
     // Variable of rescrape interval of election page
     scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS || 5);
     // Response when bot tries to post the exact same response again
-    duplicateResponseText = "Please read my previous message - I can't send the exact same message again.";
+    duplicateResponseText = "Please read my previous message...";
 
     /* Debug variables */
 

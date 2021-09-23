@@ -249,7 +249,7 @@ export const toTadParamFormat = (date) => validateDate(date).toISOString()
 
 
 /**
- * @summary formats date to UTC timestamp
+ * @summary formats date input to UTC timestamp in Stack Exchange's format
  * @param {Date|string|number} date
  * @returns {string}
  */
