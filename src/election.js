@@ -64,6 +64,17 @@ export default class Election {
         return arrWinners.filter(({ userId }) => !prevIds.includes(userId));
     }
 
+    /**
+     * @summary checks if dates of election phases (except primary) has changed
+     * @returns {boolean}
+     */
+    get electionDatesChanged() {
+        const { prev, dateNomination, dateElection, dateEnded } = this;
+        return prev.dateNomination !== dateNomination ||
+            prev.dateElection !== dateElection ||
+            prev.dateEnded !== dateEnded;
+    }
+
     validate() {
         return !(
             this.validElectionUrl(this.electionUrl) &&
@@ -76,7 +87,6 @@ export default class Election {
             // @ts-expect-error FIXME
             !isNaN(this.numPositions) &&
             this.dateNomination &&
-            this.datePrimary &&
             this.dateElection &&
             this.dateEnded
         );

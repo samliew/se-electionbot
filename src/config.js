@@ -50,6 +50,10 @@ export class BotConfig {
     // Verbose logging
     verbose = JSON.parse(process.env.VERBOSE?.toLowerCase() || "false");
 
+    get debugOrVerbose() {
+        return this.debug || this.verbose;
+    }
+
     /* User groups */
 
     devIds = new Set(parseIds(process.env.DEV_IDS || ""));

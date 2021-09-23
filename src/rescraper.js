@@ -1,6 +1,6 @@
-import { sayHI } from "./messages.js";
+import { sayElectionSchedule, sayHI } from "./messages.js";
 import { sendMessage } from "./queue.js";
-import { makeURL } from "./utils.js";
+import { makeURL, wait } from "./utils.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -55,7 +55,7 @@ export default class Rescraper {
     async rescrape() {
         const { election, config, announcement, room } = this;
 
-        if (config.verbose) {
+        if (config.debugOrVerbose) {
             console.log(`RESCRAPER - Rescrape function called.`);
         }
 
@@ -75,7 +75,7 @@ export default class Rescraper {
             console.log('RESCRAPER - ', election.updated, election);
         }
 
-        if (config.debug) {
+        if (config.debugOrVerbose) {
             const { arrNominees, arrWinners, phase } = election;
 
             console.log(`Election candidates: ${arrNominees.map(x => x.userName).join(', ')}`);
@@ -102,38 +102,56 @@ export default class Rescraper {
             return;
         }
 
-        // Previously had no primary, but after rescraping there is one
+        // Primary phase was activated (due to >10 candidates)
         if (!announcement?.hasPrimary && election.datePrimary != null) {
             announcement?.initPrimary(election.datePrimary);
-            await sendMessage(config, room, `There will be a primary phase before the election now, as there are more than ten candidates.`);
+            await sendMessage(config, room, `There will be a **${makeURL("primary", election.electionUrl + "?tab=primary")}** phase before the election now, as there are more than ten candidates.`);
         }
 
-        // After rescraping the election was cancelled
+        // Election dates has changed (manually by CM)
+        if (election.electionDatesChanged) {
+            announcement?.stopAll();
+            announcement?.initAll();
+            await sendMessage(config, room, `The ${makeURL("election", election.electionUrl)} dates have changed:`);
+            wait(1);
+            await sendMessage(config, room, sayElectionSchedule(election));
+        }
+
+        // The election was cancelled
         if (election.phase === 'cancelled' && election.isNewPhase()) {
             await announcement?.announceCancelled(room, election);
 
-            if (config.debug) {
+            if (config.debugOrVerbose) {
                 console.log(`RESCRAPER - Election was cancelled.`);
             }
         }
 
-        // After rescraping we have winners
+        // New nominations
+        else if (election.phase == 'nomination' && election.newNominees.length) {
+            await announcement?.announceNewNominees();
+
+            if (config.debugOrVerbose) {
+                console.log(`RESCRAPER - New nominees announced.`);
+            }
+        }
+
+        // Official results out
         else if (election.phase === 'ended' && election.newWinners.length) {
             await announcement?.announceWinners(room, election);
             this.stop();
 
-            if (config.debug) {
+            if (config.debugOrVerbose) {
                 console.log(`RESCRAPER - No previous scrape.`);
             }
         }
 
-        // After rescraping, the election is over but we do not have winners yet
+        // Election is over but we do not have winners yet
         else if (election.phase === 'ended' && !election.newWinners.length) {
 
             // Reduce scrape interval further
             config.scrapeIntervalMins = 0.5;
 
-            if (config.debug) {
+            if (config.debugOrVerbose) {
                 console.log(`RESCRAPER - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
             }
         }
@@ -145,20 +163,11 @@ export default class Rescraper {
             config.scrapeIntervalMins = 2;
 
             // Announce election ending soon
-            await sendMessage(config, room, `The ${makeURL('election', election.electionUrl)} is ending soon. This is the final moment to cast your votes!`);
+            await sendMessage(config, room, `The ${makeURL('election', election.electionUrl)} is ending soon. This is the final chance to cast your votes!`);
             config.flags.saidElectionEndingSoon = true;
 
-            if (config.debug) {
+            if (config.debugOrVerbose) {
                 console.log(`RESCRAPER - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
-            }
-        }
-
-        // New nominations
-        else if (election.phase == 'nomination' && election.newNominees.length) {
-            await announcement?.announceNewNominees();
-
-            if (config.debug) {
-                console.log(`RESCRAPER - New nominees announced.`);
             }
         }
 

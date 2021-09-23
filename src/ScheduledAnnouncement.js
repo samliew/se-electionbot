@@ -65,7 +65,7 @@ export default class ScheduledAnnouncement {
         if (!cancelledText || phase == 'cancelled') return false;
 
         // Stop all cron jobs
-        this.cancelAll();
+        this.stopAll();
 
         this.rescraper.stop();
 
@@ -115,7 +115,7 @@ export default class ScheduledAnnouncement {
         // Needs to have ended and have winners
         if (phase != 'ended' || length === 0) return false;
 
-        this.cancelAll();
+        this.stopAll();
 
         this.rescraper.stop();
 
@@ -258,34 +258,34 @@ export default class ScheduledAnnouncement {
         this.initElectionEnd(this._election.dateEnded);
     }
 
-    cancelElectionEnd() {
+    stopElectionEnd() {
         if (this._electionEndTask != null) this._electionEndTask.stop();
         this._electionEndSchedule = null;
-        console.log('CRON - cancelled election end cron job');
+        console.log('CRON - stopped election end cron job');
     }
 
-    cancelElectionStart() {
+    stopElectionStart() {
         if (this._electionStartTask != null) this._electionStartTask.stop();
         this._electionStartSchedule = null;
-        console.log('CRON - cancelled election start cron job');
+        console.log('CRON - stopped election start cron job');
     }
 
-    cancelPrimary() {
+    stopPrimary() {
         if (this._primaryTask != null) this._primaryTask.stop();
         this._primarySchedule = null;
-        console.log('CRON - cancelled primary phase cron job');
+        console.log('CRON - stopped primary phase cron job');
     }
 
-    cancelNomination() {
+    stopNomination() {
         if (this._nominationTask != null) this._nominationTask.stop();
         this._nominationSchedule = null;
-        console.log('CRON - cancelled nomination phase cron job');
+        console.log('CRON - stopped nomination phase cron job');
     }
 
-    cancelAll() {
-        this.cancelElectionEnd();
-        this.cancelElectionStart();
-        this.cancelPrimary();
-        this.cancelNomination();
+    stopAll() {
+        this.stopElectionEnd();
+        this.stopElectionStart();
+        this.stopPrimary();
+        this.stopNomination();
     }
 }
