@@ -65,6 +65,18 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election chat room link has changed/found for the first time
+     * @returns {boolean}
+     */
+    get electionChatChanged() {
+        const { prev, chatUrl, chatDomain, chatRoomId } = this;
+        const chatUrlChanged = prev.chatUrl !== chatUrl;
+        const chatDomainChanged = prev.chatDomain !== chatDomain;
+        const chatRoomIdChanged = prev.chatRoomId !== chatRoomId;
+        return chatUrlChanged || chatDomainChanged || chatRoomIdChanged;
+    }
+
+    /**
      * @summary checks if dates of election phases (except primary) has changed
      * @returns {boolean}
      */
@@ -255,10 +267,11 @@ export default class Election {
             this.repVote = 150;
             this.repNominate = repToNominate;
 
-            //clear an array before rescraping
+            // Clear an array before rescraping
             this.arrNominees.length = 0;
             this.arrNominees.push(...nominees);
 
+            // Empty string if not set as environment variable, or not found on election page
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/');
             // @ts-expect-error FIXME
             this.chatRoomId = +this.chatUrl?.match(/\d+$/) || null;

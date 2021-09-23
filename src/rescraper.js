@@ -102,6 +102,14 @@ export default class Rescraper {
             return;
         }
 
+        // Election chat room has changed
+        if (election.electionChatChanged) {
+
+            // TODO: Force a restart
+            // Restart Heroku dyno via API, or
+            // Change an environment variable via API
+        }
+
         // Primary phase was activated (due to >10 candidates)
         if (!announcement?.hasPrimary && election.datePrimary != null) {
             announcement?.initPrimary(election.datePrimary);
