@@ -1,0 +1,10 @@
+{
+    "reporter": "html",
+    "all": true,
+    "check-coverage": true,
+    "exclude": [
+        "dist",
+        "coverage",
+        "test"
+    ]
+}
