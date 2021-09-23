@@ -4,7 +4,7 @@
  * @typedef {import("chatexchange/dist/WebSocketEvent").WebsocketEvent} WebsocketEvent
  */
 
-import { wait } from "./utils";
+import { wait } from "./utils.js";
 
 // TODO: implement message queue
 /**
