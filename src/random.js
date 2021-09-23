@@ -38,3 +38,11 @@ export const getRandomGoodThanks = () => new RandomArray(
     `Thanks! You're awesome!`,
     `I'm only as good as the one who made me.`,
 ).getRandom();
+export const getRandomNegative = () => new RandomArray(
+    `Why so serious?`,
+    `I want to be alone.`,
+    `Well, nobody's perfect.`,
+    `You can't handle the truth!`,
+    `Frankly, my dear, I don't give a damn.`,
+    `What we've got here is a small misunderstanding.`,
+).getRandom();
