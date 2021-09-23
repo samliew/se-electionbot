@@ -45,6 +45,15 @@ export default class Election {
     }
 
     /**
+     * @summary gets current number of Nominees
+     * @returns {number}
+     */
+    get numCandidates() {
+        const { arrNominees } = this;
+        return arrNominees.length;
+    }
+
+    /**
      * @summary gets a list of new Nominees
      * @returns {Nominee[]}
      */
@@ -234,7 +243,7 @@ export default class Election {
             const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
             const metaPhaseElems = $('#mainbar .js-filter-btn a');
 
-            const [numCandidates, numPositions] = metaVals.slice(-2, metaVals.length);
+            const [_numCandidates, numPositions] = metaVals.slice(-2, metaVals.length);
 
             // Insert null value in second position for elections with no primary phase
             if (metaVals.length === 5) metaVals.splice(1, 0, null);
@@ -262,7 +271,6 @@ export default class Election {
             this.datePrimary = primaryDate;
             this.dateElection = startDate;
             this.dateEnded = endDate;
-            this.numCandidates = +numCandidates;
             this.numPositions = +numPositions;
             this.repVote = 150;
             this.repNominate = repToNominate;
