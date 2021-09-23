@@ -30,7 +30,7 @@ const _sendTheMessage = async function (config, room, message, inResponseTo = nu
     }
 
     // Send the message
-    await room.sendMessage.call(this, (inResponseTo ? `:${inResponseTo} ` : "") + message);
+    await room.sendMessage.call(room, (inResponseTo ? `:${inResponseTo} ` : "") + message);
 
     // Record last sent message and time so we don't flood the room
     config.updateLastMessage(message);
