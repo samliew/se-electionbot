@@ -76,7 +76,7 @@ export default class Election {
     }
 
     validate() {
-        return !(
+        return (
             this.validElectionUrl(this.electionUrl) &&
             typeof this.electionNum === "number" &&
             typeof this.repNominate === "number" &&
