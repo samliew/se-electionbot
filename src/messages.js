@@ -359,6 +359,15 @@ export const sayCandidateScoreFormula = (badges) => {
 };
 
 /**
+ * @summary builds a candidate score formula message
+ * @param {string} electionSiteApiSlug
+ * @returns {string}
+ */
+export const sayCandidateScoreLeaderboard = (electionSiteApiSlug) => {
+    return `Here are the top ${makeURL("users sorted by candidate score and reputation", `https://data.stackexchange.com/${electionSiteApiSlug}/query/1467000`)}.`;
+};
+
+/**
  * @summary builds an election definition message
  * @param {Election} election
  * @returns {string}

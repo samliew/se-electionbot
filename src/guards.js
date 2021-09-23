@@ -136,16 +136,34 @@ export const isAskedForScoreFormula = (text) => {
 };
 
 /**
+ * @summary checks if the message asked for candidate score leaderboard
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedForScoreLeaderboard = (text) => {
+    return /who\b.*\b(?:highest|greatest|most)\b.*\bcandidate score/.test(text) ||
+        /candidate score leaderboard(?:$|\?)/.test(text);
+};
+
+/**
+ * @summary detects if someone is thanking the bot
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isThankingTheBot = (text) => {
+    return /^(?:thanks|thank you)$/.test(text);
+};
+
+/**
  * @summary detects if someone is thanking, praising, or loving the bot
  * @param {string} text
  * @returns {boolean}
  */
 export const isLovingTheBot = (text) => {
-    return text.includes('bot') &&
-        (
-            /(?:^the|^this)?.*(?:thank|nice|good|great|wonderful|awesome|excellent)/.test(text) ||
-            /^i (?:like|love) (?:the|this|electionbot)/.test(text)
-        );
+    return text.includes('bot') && (
+        /(?:^the|^this)?.*(?:nice|good|great|wonderful|awesome|excellent)/.test(text) ||
+        /^i (?:like|love) (?:the|this|electionbot)/.test(text)
+    );
 };
 
 /**
@@ -154,9 +172,8 @@ export const isLovingTheBot = (text) => {
  * @returns {boolean}
  */
 export const isHatingTheBot = (text) => {
-    return text.includes('bot') &&
-        (
-            /(?:^the|^this)?.*(?:bad|terrible|horrible|broken|buggy)/.test(text) ||
-            /^i (?:dislike|hate|detest) (?:the|this|electionbot)/.test(text)
-        );
+    return text.includes('bot') && (
+        /(?:^the|^this)?.*(?:bad|terrible|horrible|broken|buggy)/.test(text) ||
+        /^i (?:dislike|hate|detest) (?:the|this|electionbot)/.test(text)
+    );
 };

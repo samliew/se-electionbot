@@ -11,15 +11,17 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentWinners, isAskedForElectionSchedule,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedIfModsArePaid, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedIfModsArePaid, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
-    isLovingTheBot
+    isHatingTheBot,
+    isLovingTheBot,
+    isThankingTheBot
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendReply } from "./queue.js";
-import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
+import { getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
@@ -543,11 +545,11 @@ import {
 
                     return; // stop here since we are using a different default response method
                 }
-                else if (["who are you", "about"].some(x => content.startsWith(x))) {
-                    responseText = `I'm ${me.name} and ${me.about}`;
-                }
                 else if (isAskedWhoMadeMe(content)) {
                     responseText = await sayWhoMadeMe(config);
+                }
+                else if (["who are you", "about"].some(x => content.startsWith(x))) {
+                    responseText = `I'm ${me.name} and ${me.about}`;
                 }
                 else if (content.startsWith(`i love you`)) {
                     responseText = `I love you 3000`;
@@ -587,12 +589,18 @@ import {
                         `You can't handle the truth!`,
                     ).getRandom();
                 }
-                else if (/thanks?(?: you)?/.test(content)) {
+                else if (isThankingTheBot(content)) {
                     responseText = new RandomArray(
                         "Not at all",
                         "My pleasure",
                         "You are welcome",
                     ).getRandom();
+                }
+                else if (isLovingTheBot(content)) {
+                    responseText = getRandomGoodThanks();
+                }
+                else if (isHatingTheBot(content)) {
+                    responseText = getRandomNegative();
                 }
                 else if (['help', 'command', 'info'].some(x => content.includes(x))) {
                     responseText = '\n' + ['Examples of election FAQs I can help with:',
@@ -609,7 +617,6 @@ import {
 
                     // Random response
                     responseText = new RandomArray(
-                        content,
                         `You talking to me?`,
                         `I know your thoughts.`,
                         `*reticulating splines*`,
@@ -682,8 +689,14 @@ import {
                     return; // stop here since we are using a different default response method
                 }
 
+                // How is candidate score calculated
                 else if (isAskedForScoreFormula(content)) {
                     responseText = sayCandidateScoreFormula(electionBadges);
+                }
+
+                // Who has the highest candidate score
+                else if (isAskedForScoreLeaderboard(content)) {
+                    responseText = sayCandidateScoreLeaderboard(electionSiteApiSlug);
                 }
 
                 // Current candidates
@@ -730,15 +743,17 @@ import {
                     responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
                 }
 
+                // Why was the nomination removed
                 else if (isAskedWhyNominationRemoved(content)) {
                     responseText = sayWhyNominationRemoved();
                 }
 
+                // Are moderators paid
                 else if (isAskedIfModsArePaid(content)) {
                     responseText = sayAreModsPaid(election);
                 }
 
-                // Status
+                // Status of the election
                 else if (content.includes('election') && ['status', 'progress'].some(x => content.includes(x))) {
 
                     if (election.phase == null) {
@@ -769,7 +784,7 @@ import {
                     }
                 }
 
-                // Next phase
+                // Next phase/ When is the election starting
                 else if (content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
                     responseText = sayNextPhase(election);
                 }
@@ -807,9 +822,11 @@ import {
                     responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
                 }
 
-                // Good bot; I love this bot
                 if (isLovingTheBot(content)) {
                     responseText = getRandomGoodThanks();
+                }
+                else if (isHatingTheBot(content)) {
+                    responseText = getRandomNegative();
                 }
 
 
