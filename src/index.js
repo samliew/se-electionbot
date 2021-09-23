@@ -82,7 +82,7 @@ import {
     const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN);
     const defaultChatRoomId = +CHAT_ROOM_ID;
     const electionSiteHostname = electionUrl.split('/')[2];
-    const electionSiteApiSlug = electionSiteHostname.replace(/\.stackexchange/i, '').replace(/(?:com|org|net)/i, '');
+    const electionSiteApiSlug = electionSiteHostname.replace(/\.stackexchange/i, '').replace(/\.(?:com|org|net)/i, '');
     const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
     const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
