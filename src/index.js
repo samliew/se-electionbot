@@ -576,7 +576,7 @@ import {
                         `Bot. James Bot.`,
                         `I'm a robot. Beep boop.`,
                         `I'm a crystal ball; I already know the winners.`,
-                        `I'm a teacup, short and stout. Here is my handle, here is my spout.`,
+                        `I'm a teapot, short and stout. Here is my handle, here is my spout.`,
                         `I could've been somebody, instead of a lame bot, which is what I am.`,
                     ).getRandom();
                 }
