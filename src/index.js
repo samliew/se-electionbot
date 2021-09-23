@@ -548,13 +548,13 @@ import {
                 else if (isAskedWhoMadeMe(content)) {
                     responseText = await sayWhoMadeMe(config);
                 }
-                else if (["who are you", "about"].some(x => content.startsWith(x))) {
+                else if (/^(who are you\??|about)$/.test(content)) {
                     responseText = `I'm ${me.name} and ${me.about}`;
                 }
                 else if (content.startsWith(`i love you`)) {
                     responseText = `I love you 3000`;
                 }
-                else if (["how are you", "are you okay"].some(x => content.startsWith(x))) {
+                else if (/^how are you\??$/.test(content)) {
                     responseText = new RandomArray(
                         `good, and you?`,
                         `I'm fine, thank you.`,
@@ -563,7 +563,7 @@ import {
                         `Today, I consider myself the luckiest bot on the face of the earth.`,
                     ).getRandom();
                 }
-                else if (["where are you", "alive", "ping"].some(x => content.startsWith(x))) {
+                else if (/^(where are you\??|alive|ping)$/.test(content)) {
                     responseText = new RandomArray(
                         `No. I'm not here.`,
                         `I'm here, aren't I?`,
@@ -571,7 +571,7 @@ import {
                         `I'm here and everywhere`,
                     ).getRandom();
                 }
-                else if (["what are you", "what is your name"].some(x => content.startsWith(x))) {
+                else if (/^what are you\??$/.test(content)) {
                     responseText = new RandomArray(
                         `Bot. James Bot.`,
                         `I'm a robot. Beep boop.`,
@@ -580,13 +580,10 @@ import {
                         `I could've been somebody, instead of a lame bot, which is what I am.`,
                     ).getRandom();
                 }
-                else if (["what are you"].some(x => content.startsWith(x))) {
+                else if (/^why are you\??$/.test(content)) {
                     responseText = new RandomArray(
                         `because.`,
                         `why what???`,
-                        `Show me the money!`,
-                        `Well, nobody's perfect.`,
-                        `You can't handle the truth!`,
                     ).getRandom();
                 }
                 else if (isThankingTheBot(content)) {
@@ -756,7 +753,7 @@ import {
                 // Status of the election
                 else if (content.includes('election') && ['status', 'progress'].some(x => content.includes(x))) {
 
-                    if (election.phase == null) {
+                    if (election.phase === null) {
                         responseText = sayNotStartedYet(election);
                     }
                     else if (election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
@@ -822,7 +819,7 @@ import {
                     responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
                 }
 
-                if (isLovingTheBot(content)) {
+                else if (isLovingTheBot(content)) {
                     responseText = getRandomGoodThanks();
                 }
                 else if (isHatingTheBot(content)) {

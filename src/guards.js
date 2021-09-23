@@ -77,7 +77,7 @@ export const isAskedForCurrentWinners = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCurrentNominees = (text) => {
-    return /(?:who|what) (?:are|were|was|is)( the)? (?:nomin(?:ee|ation)|participant|candidate)s?(?!\s+score)/.test(text);
+    return /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/.test(text);
 };
 
 /**
@@ -104,7 +104,7 @@ export const isAskedAboutUsernameDiamond = (text) => {
  * @returns {boolean}
  */
 export const isAskedWhoMadeMe = (text) => {
-    return /who(?:\s+(?:are|is) your)?\s+(?:made|created|owns|develop(?:s|ed|ers?)|maintain(?:s|ers?))(\s+you)?/.test(text);
+    return /who(?:\s+(?:are|is) your)?\s+(?:made|created|own(?:s|ers?)|develop(?:s|ed|ers?)|maintain(?:s|ers?))(?:\s+you)?/.test(text);
 };
 
 /**
@@ -132,7 +132,8 @@ export const isAskedForOtherScore = (text) => {
  * @returns {boolean}
  */
 export const isAskedForScoreFormula = (text) => {
-    return /(?:what|how) (?:is )?candidate score(?:(?: is)? calculated| formula)?(?:$|\?)/.test(text);
+    return /(?:what|how)\b.+\bcandidate score\b.*\b(?:calculated|formula)?(?:$|\?)/.test(text) ||
+        /what\b.+\bformula\b.+\bcandidate score(?:$|\?)/.test(text);
 };
 
 /**

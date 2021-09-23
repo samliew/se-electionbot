@@ -25,7 +25,7 @@ const _sendTheMessage = async function (config, room, message, inResponseTo = nu
     }
 
     // Notify same previous message if in debug mode
-    if (config.debug && config.checkSameResponseAsPrevious(message)) {
+    if (config.checkSameResponseAsPrevious(message)) {
         message = config.duplicateResponseText;
     }
 
