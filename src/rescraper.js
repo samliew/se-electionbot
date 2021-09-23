@@ -121,7 +121,7 @@ export default class Rescraper {
             announcement?.stopAll();
             announcement?.initAll();
             await sendMessage(config, room, `The ${makeURL("election", election.electionUrl)} dates have changed:`);
-            wait(1);
+            await wait(1);
             await sendMessage(config, room, sayElectionSchedule(election));
         }
 
