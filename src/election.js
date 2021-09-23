@@ -78,14 +78,12 @@ export default class Election {
     validate() {
         return !(
             this.validElectionUrl(this.electionUrl) &&
-            // @ts-expect-error FIXME
-            !isNaN(this.electionNum) &&
-            // @ts-expect-error FIXME
-            !isNaN(this.repNominate) &&
-            // @ts-expect-error FIXME
-            !isNaN(this.numCandidates) &&
-            // @ts-expect-error FIXME
-            !isNaN(this.numPositions) &&
+            typeof this.electionNum === "number" &&
+            typeof this.repNominate === "number" &&
+            typeof this.numCandidates === "number" &&
+            typeof this.numPositions === "number" &&
+            this.electionNum > 0 &&
+            this.numPositions > 0 &&
             this.dateNomination &&
             this.dateElection &&
             this.dateEnded
