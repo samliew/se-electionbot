@@ -41,6 +41,16 @@ export class BotConfig {
     // Response when bot tries to post the exact same response again
     duplicateResponseText = "Please read my previous message...";
 
+    /**
+     * Maximum length a single message can have
+     */
+    maxMessageLength = 500;
+
+    /**
+     * Maximum number of parts a bot can split a message into
+     */
+    maxMessageParts = 3;
+
     /* Debug variables */
 
     // Fun mode
