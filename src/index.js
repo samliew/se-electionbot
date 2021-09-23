@@ -18,7 +18,7 @@ import {
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
-import { sendMessage, sendReply } from "./queue.js";
+import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import Announcement from './ScheduledAnnouncement.js';
@@ -116,7 +116,6 @@ import {
         34, // UserNameOrAvatarChanged
         7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
     ];
-    const maxMessageLength = 500; // should rarely, if never change
     const scriptInitDate = new Date();
 
     /**
@@ -490,30 +489,7 @@ import {
                  *   so we could possibly leave this block as it is
                  */
                 if (responseText) {
-
-                    // Function sent the message and returned empty string, e.g.: sayHI
-                    if (responseText === '') return;
-
-                    const messages = responseText.split(
-                        new RegExp(`(^(?:.|\\n|\\r){1,${maxMessageLength}})(?:\\n|\\s|$)`, "gm")
-                    ).filter(Boolean);
-
-                    console.log(`RESPONSE (${messages.length})`, responseText);
-
-                    // Record last activity time only so this doesn't reset an active mute
-                    // Future-dated so poem wouldn't be interrupted by another response elsewhere
-                    config.lastActivityTime = Date.now() + messages.length * 2e3;
-
-                    if (messages.length > 3) {
-                        await msg.reply(`I wrote a poem of ${messages.length} messages for you!`);
-                        await wait(2);
-                    }
-
-                    for (const message of messages) {
-                        await room.sendMessage(message);
-                        await wait(1);
-                    }
-
+                    await sendMultipartMessage(config, room, responseText, msg);
                     return; // no further action
                 }
             }
