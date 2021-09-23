@@ -26,10 +26,37 @@ let BOT_CONFIG;
  */
 let BOT_ROOM;
 
-app.use("/say", ({ query }, res, next) => {
-    const { password = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
+const staticPath = join(__dirname, '../static');
+
+//see https://stackoverflow.com/a/59892173/11407695
+app.use(express.urlencoded({ extended: true }));
+
+app.use((_req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+app.use('/', express.static(staticPath));
+
+app.use("/say", ({ query, ip, hostname, body = {} }, res, next) => {
+    const { password: pwdFromBody = "" } = body;
+    const { password: pwdFromQuery = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
+
+    const password = pwdFromQuery || pwdFromBody;
+
     const validPwd = password === process.env.PASSWORD;
-    return validPwd ? next() : res.sendStatus(404);
+
+    if (!validPwd) {
+        console.log(`unauthorized connect from:
+        IP:   ${ip}
+        Host: ${hostname}
+        Pass:  ${password}
+        `);
+        return res.sendStatus(404);
+    }
+
+    next();
 });
 
 // Serve /say form
@@ -65,18 +92,10 @@ app.get('/say', ({ query }, res) => {
 });
 
 // POST event from /say form
-app.post('/say', async ({ body }, res) => {
+app.post('/say', async ({ body = {} }, res) => {
     const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
 
-    const validPwd = password === process.env.PASSWORD;
     const trimmed = message.trim();
-
-    // Validation
-    if (!validPwd || !trimmed) {
-        console.error(`Invalid ${validPwd ? 'message' : 'password'}`, password);
-        res.sendStatus(404);
-        return;
-    }
 
     if (!BOT_CONFIG) {
         console.error("bot configuration missing");
@@ -117,19 +136,6 @@ export const start = async (room, config) => {
 
     setBot(config);
     setRoom(room);
-
-    const staticPath = join(__dirname, '../static');
-
-    //see https://stackoverflow.com/a/59892173/11407695
-    app.use(express.urlencoded({ extended: true }));
-
-    app.use((_req, res, next) => {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-        next();
-    });
-
-    app.use('/', express.static(staticPath));
 
     const server = app.listen(app.get('port'), () => {
         console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
