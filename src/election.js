@@ -45,6 +45,15 @@ export default class Election {
     }
 
     /**
+     * @summary gets current number of Nominees
+     * @returns {number}
+     */
+    get numCandidates() {
+        const { arrNominees } = this;
+        return arrNominees.length;
+    }
+
+    /**
      * @summary gets a list of new Nominees
      * @returns {Nominee[]}
      */
@@ -62,6 +71,15 @@ export default class Election {
         const { prev, arrWinners } = this;
         const prevIds = prev.arrWinners.map(({ userId }) => userId);
         return arrWinners.filter(({ userId }) => !prevIds.includes(userId));
+    }
+
+    /**
+     * @summary checks if election has new winners
+     * @returns {boolean}
+     */
+    get hasNewWinners() {
+        const { newWinners } = this;
+        return !!newWinners.length;
     }
 
     /**
@@ -87,19 +105,31 @@ export default class Election {
             prev.dateEnded !== dateEnded;
     }
 
+    /**
+     * @summary validates an instance of Election
+     * @returns {{ status: boolean, errors: string[] }}
+     */
     validate() {
-        return (
-            this.validElectionUrl(this.electionUrl) &&
-            typeof this.electionNum === "number" &&
-            typeof this.repNominate === "number" &&
-            typeof this.numCandidates === "number" &&
-            typeof this.numPositions === "number" &&
-            this.electionNum > 0 &&
-            this.numPositions > 0 &&
-            this.dateNomination &&
-            this.dateElection &&
-            this.dateEnded
-        );
+
+        // validation rules with error messages
+        const rules = [
+            [this.validElectionUrl(this.electionUrl), "invalid election URL"],
+            [typeof this.electionNum === "number", "invalid election number"],
+            [typeof this.repNominate === "number", "invalid rep to nominate"],
+            [typeof this.numCandidates === "number", "num candidates is not a number"],
+            [(this.electionNum || 0) > 0, "missing election number"],
+            [(this.numPositions || 0) > 0, "missing number of positions"],
+            [this.dateNomination, "missing nomination date"],
+            [this.dateElection, "missing election date"],
+            [this.dateEnded, "missing ending date"]
+        ];
+
+        const invalid = rules.filter(([condition]) => !condition);
+
+        return {
+            status: !invalid.length,
+            errors: invalid.map(([, msg]) => msg)
+        };
     }
 
     /**
@@ -234,7 +264,7 @@ export default class Election {
             const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
             const metaPhaseElems = $('#mainbar .js-filter-btn a');
 
-            const [numCandidates, numPositions] = metaVals.slice(-2, metaVals.length);
+            const [_numCandidates, numPositions] = metaVals.slice(-2, metaVals.length);
 
             // Insert null value in second position for elections with no primary phase
             if (metaVals.length === 5) metaVals.splice(1, 0, null);
@@ -262,7 +292,6 @@ export default class Election {
             this.datePrimary = primaryDate;
             this.dateElection = startDate;
             this.dateEnded = endDate;
-            this.numCandidates = +numCandidates;
             this.numPositions = +numPositions;
             this.repVote = 150;
             this.repNominate = repToNominate;

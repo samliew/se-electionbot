@@ -220,9 +220,9 @@ import {
         // Wait for election page to be scraped
         const election = new Election(electionUrl);
         await election.scrapeElection(config);
-        if (election.validate() === false) {
-            console.error('FATAL - Invalid election data!');
-            console.log(election);
+        const { status, errors } = election.validate();
+        if (!status) {
+            console.error(`FATAL - Invalid election data:\n${errors.join("\n")}`);
             return;
         }
 
