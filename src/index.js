@@ -495,8 +495,7 @@ import {
                     if (responseText === '') return;
 
                     const messages = responseText.split(
-                        // TODO: This regexp only splits the message at newlines, which may cause an issue if there aren't any
-                        new RegExp(`(^(?:.|\\n|\\r){1,${maxMessageLength}})(?:\\n|$)`, "gm")
+                        new RegExp(`(^(?:.|\\n|\\r){1,${maxMessageLength}})(?:\\n|\\s|$)`, "gm")
                     ).filter(Boolean);
 
                     console.log(`RESPONSE (${messages.length})`, responseText);
