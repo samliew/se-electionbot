@@ -66,6 +66,8 @@ describe('Election', () => {
             election.dateEnded = tomorrow;
             election.datePrimary = tomorrow;
             election.dateNomination = tomorrow;
+            election.numPositions = 2;
+            election.repNominate = 150;
 
             const noPhase = Election.getPhase(election);
 
@@ -81,14 +83,15 @@ describe('Election', () => {
             election.dateEnded = yesterday;
             const ended = Election.getPhase(election);
 
-            const validElection = election.validate();
+            const { status, errors } = election.validate();
 
             expect(noPhase).to.equal(null);
             expect(nomination).to.equal("nomination");
             expect(primary).to.equal("primary");
             expect(start).to.equal("election");
             expect(ended).to.equal("ended");
-            expect(validElection).to.be.true;
+            expect(status).to.be.true;
+            expect(errors).to.be.empty;
         });
 
     });
