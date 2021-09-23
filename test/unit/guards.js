@@ -21,10 +21,11 @@ describe('Message Guards', () => {
     describe('isAskedForElectionSchedule', () => {
         it('should correctly match content', () => {
             allMatch(isAskedForElectionSchedule, [
+                "election schedule",
                 "when is the election?",
                 "what is the election schedule?",
                 "how is the election scheduled?",
-                "election schedule, please"
+                "election schedule, please",
             ]);
         });
     });
@@ -32,7 +33,10 @@ describe('Message Guards', () => {
     describe('isAskedForCurrentNominees', () => {
         it('should correctly match content', () => {
             allMatch(isAskedForCurrentNominees, [
+                "who has nominated",
+                "who has participated",
                 "who are the nominees?",
+                "who are the candidates?",
                 "what are the participants?",
                 "who is the participant?",
                 "what were the nominations",
@@ -40,11 +44,10 @@ describe('Message Guards', () => {
         });
 
         it('should not match other guards', () => {
-            allMatch(
-                isAskedForCurrentNominees,
-                ["what is the candidate score for 245113?"],
-                false
-            );
+            allMatch(isAskedForCurrentNominees, [
+                "what is my candidate score",
+                "what is the candidate score for 245113",
+            ], false);
         });
     });
 
@@ -56,11 +59,13 @@ describe('Message Guards', () => {
                 "what do mods do",
                 "what does mods do",
                 "what powers do mods have",
+                "what are mod responsibility",
+                "what are the mod responsibilities",
                 "what are the responsibilities of a mod",
                 "what are the responsibilities of moderators",
                 "what are the benefits of being a moderator",
                 "should i be a mod",
-                "does moderators have extra privileges"
+                "does moderators have extra privileges",
             ]);
         });
     });
@@ -68,9 +73,13 @@ describe('Message Guards', () => {
     describe('isAskedAboutUsernameDiamond', () => {
         it('should correctly match content', () => {
             allMatch(isAskedAboutUsernameDiamond, [
-                "edit diamond into name",
+                "why don't I just edit a diamond into my name",
+                "edit diamond into my username",
+                "how to edit diamond into my display name",
+                "edit diamond into my user name",
                 "can somebody edit a ♦ into their username?",
-                "can someone add a diamond to their name?"
+                "can't somebody just edit a diamond into their user name?",
+                "can someone add a diamond to their name?",
             ]);
         });
     });
@@ -85,7 +94,8 @@ describe('Message Guards', () => {
                 "who developed you?",
                 "who owns you?",
                 "who is your developer?",
-                "who is your maintainer?"
+                "who is your maintainer?",
+                "who is your owner",
             ]);
         });
     });
@@ -96,7 +106,7 @@ describe('Message Guards', () => {
                 "what is my candidate score?",
                 "What's my candidate score?",
                 "what is my score?",
-                "can i nominate myself"
+                "can i nominate myself",
             ]);
 
             allMatch(isAskedForOwnScore, [
@@ -121,8 +131,11 @@ describe('Message Guards', () => {
         it('should correctly match content', () => {
             allMatch(isAskedForScoreFormula, [
                 "how is candidate score calculated",
+                "how is the candidate score calculated",
                 "what is candidate score?",
-                "what is candidate score formula?"
+                "what is candidate score formula?",
+                "what is the candidate score formula?",
+                "what is the formula for candidate score?",
             ]);
         });
     });
@@ -135,7 +148,7 @@ describe('Message Guards', () => {
                 "how to register someone",
                 "how to be a mod",
                 "how can i be mod",
-                "can i nominate another user"
+                "can i nominate another user",
             ]);
         });
     });

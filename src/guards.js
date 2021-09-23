@@ -77,7 +77,7 @@ export const isAskedForCurrentWinners = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCurrentNominees = (text) => {
-    return /(?:who|what) (?:are|were|was|is)( the)? (?:nomin(?:ee|ation)|participant|candidate)s?(?!\s+score)/.test(text);
+    return /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/.test(text);
 };
 
 /**
@@ -104,7 +104,7 @@ export const isAskedAboutUsernameDiamond = (text) => {
  * @returns {boolean}
  */
 export const isAskedWhoMadeMe = (text) => {
-    return /who(?:\s+(?:are|is) your)?\s+(?:made|created|owns|develop(?:s|ed|ers?)|maintain(?:s|ers?))(\s+you)?/.test(text);
+    return /who(?:\s+(?:are|is) your)?\s+(?:made|created|own(?:s|ers?)|develop(?:s|ed|ers?)|maintain(?:s|ers?))(?:\s+you)?/.test(text);
 };
 
 /**
@@ -132,7 +132,27 @@ export const isAskedForOtherScore = (text) => {
  * @returns {boolean}
  */
 export const isAskedForScoreFormula = (text) => {
-    return /(?:what|how) (?:is )?candidate score(?:(?: is)? calculated| formula)?(?:$|\?)/.test(text);
+    return /(?:what|how)\b.+\bcandidate score\b.*\b(?:calculated|formula)?(?:$|\?)/.test(text) ||
+        /what\b.+\bformula\b.+\bcandidate score(?:$|\?)/.test(text);
+};
+
+/**
+ * @summary checks if the message asked for candidate score leaderboard
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedForScoreLeaderboard = (text) => {
+    return /who\b.*\b(?:highest|greatest|most)\b.*\bcandidate score/.test(text) ||
+        /candidate score leaderboard(?:$|\?)/.test(text);
+};
+
+/**
+ * @summary detects if someone is thanking the bot
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isThankingTheBot = (text) => {
+    return /^(?:thanks|thank you)$/.test(text);
 };
 
 /**
@@ -141,11 +161,10 @@ export const isAskedForScoreFormula = (text) => {
  * @returns {boolean}
  */
 export const isLovingTheBot = (text) => {
-    return text.includes('bot') &&
-        (
-            /(?:^the|^this)?.*(?:thank|nice|good|great|wonderful|awesome|excellent)/.test(text) ||
-            /^i (?:like|love) (?:the|this|electionbot)/.test(text)
-        );
+    return text.includes('bot') && (
+        /(?:^the|^this)?.*(?:nice|good|great|wonderful|awesome|excellent)/.test(text) ||
+        /^i (?:like|love) (?:the|this|electionbot)/.test(text)
+    );
 };
 
 /**
@@ -154,9 +173,8 @@ export const isLovingTheBot = (text) => {
  * @returns {boolean}
  */
 export const isHatingTheBot = (text) => {
-    return text.includes('bot') &&
-        (
-            /(?:^the|^this)?.*(?:bad|terrible|horrible|broken|buggy)/.test(text) ||
-            /^i (?:dislike|hate|detest) (?:the|this|electionbot)/.test(text)
-        );
+    return text.includes('bot') && (
+        /(?:^the|^this)?.*(?:bad|terrible|horrible|broken|buggy)/.test(text) ||
+        /^i (?:dislike|hate|detest) (?:the|this|electionbot)/.test(text)
+    );
 };
