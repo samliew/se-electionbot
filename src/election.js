@@ -96,19 +96,31 @@ export default class Election {
             prev.dateEnded !== dateEnded;
     }
 
+    /**
+     * @summary validates an instance of Election
+     * @returns {{ status: boolean, errors: string[] }}
+     */
     validate() {
-        return (
-            this.validElectionUrl(this.electionUrl) &&
-            typeof this.electionNum === "number" &&
-            typeof this.repNominate === "number" &&
-            typeof this.numCandidates === "number" &&
-            typeof this.numPositions === "number" &&
-            this.electionNum > 0 &&
-            this.numPositions > 0 &&
-            this.dateNomination &&
-            this.dateElection &&
-            this.dateEnded
-        );
+
+        // validation rules with error messages
+        const rules = [
+            [this.validElectionUrl(this.electionUrl), "invalid election URL"],
+            [typeof this.electionNum === "number", "invalid election number"],
+            [typeof this.repNominate === "number", "invalid rep to nominate"],
+            [typeof this.numCandidates === "number", "num candidates is not a number"],
+            [(this.electionNum || 0) > 0, "missing election number"],
+            [(this.numPositions || 0) > 0, "missing number of positions"],
+            [this.dateNomination, "missing nomination date"],
+            [this.dateElection, "missing election date"],
+            [this.dateEnded, "missing ending date"]
+        ];
+
+        const invalid = rules.filter(([condition]) => !condition);
+
+        return {
+            status: !invalid.length,
+            errors: invalid.map(([, msg]) => msg)
+        };
     }
 
     /**
