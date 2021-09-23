@@ -74,6 +74,15 @@ export default class Election {
     }
 
     /**
+     * @summary checks if election has new winners
+     * @returns {boolean}
+     */
+    get hasNewWinners() {
+        const { newWinners } = this;
+        return !!newWinners.length;
+    }
+
+    /**
      * @summary checks if the election chat room link has changed/found for the first time
      * @returns {boolean}
      */

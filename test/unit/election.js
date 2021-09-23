@@ -26,7 +26,7 @@ describe('Election', () => {
 
         });
 
-        describe('newWinners', () => {
+        describe('New winners', () => {
 
             it('should correctly return only new Winners', () => {
                 const newWinner = getMockNominee({ userId: 2 });
@@ -48,6 +48,20 @@ describe('Election', () => {
 
                 const { newWinners } = election;
                 expect(newWinners).be.empty;
+            });
+
+            it('hasNewWinners should correctly check if there are new winners', () => {
+                const newWinner = getMockNominee({ userId: 42 });
+
+                const election = new Election("https://stackoverflow.com/election/12");
+                election._prevObj = { arrWinners: [] };
+                election.arrWinners.push(newWinner);
+
+                expect(election.hasNewWinners).to.be.true;
+
+                election.arrWinners.pop();
+
+                expect(election.hasNewWinners).to.be.false;
             });
         });
 

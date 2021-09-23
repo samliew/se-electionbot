@@ -144,7 +144,7 @@ export default class Rescraper {
         }
 
         // Official results out
-        else if (election.phase === 'ended' && election.newWinners.length) {
+        else if (election.phase === 'ended' && election.hasNewWinners) {
             await announcement?.announceWinners(room, election);
             this.stop();
 
@@ -154,7 +154,7 @@ export default class Rescraper {
         }
 
         // Election is over but we do not have winners yet
-        else if (election.phase === 'ended' && !election.newWinners.length) {
+        else if (election.phase === 'ended' && !election.hasNewWinners) {
 
             // Reduce scrape interval further
             config.scrapeIntervalMins = 0.5;
