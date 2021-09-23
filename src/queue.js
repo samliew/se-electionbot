@@ -88,15 +88,17 @@ export const sendMultipartMessage = async (config, room, response, msg) => {
     ).filter(Boolean);
 
     const { length } = response;
+    const { length: numParts } = messages;
 
-    console.log(`RESPONSE (${length})`, response);
+    console.log(`RESPONSE (${length}/${numParts})`, response);
 
     // Record last activity time only so this doesn't reset an active mute
     // Future-dated so poem wouldn't be interrupted by another response elsewhere
     config.lastActivityTime = Date.now() + length * 2e3;
 
-    if (length > maxMessageParts) {
-        await msg.reply(`I wrote a poem of ${length} messages for you!`);
+
+    if (numParts > maxMessageParts) {
+        await msg.reply(`I wrote a poem of ${numParts} messages for you!`);
         await wait(2);
     }
 
