@@ -151,6 +151,18 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election has ended
+     * @returns {boolean}
+     */
+    isEnded() {
+        const { phase, dateEnded } = this;
+        return phase !== "cancelled" && [
+            phase === "ended",
+            dateEnded < Date.now()
+        ].some(Boolean);
+    }
+
+    /**
      * @summary checks if the election is ending soon
      * @param {number} [threshold] offset to consider the election ending from (10 mins by default)
      * @returns {boolean}

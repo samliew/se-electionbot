@@ -159,6 +159,21 @@ describe('Election', () => {
 
     });
 
+    describe('isEnded', () => {
+        it('should correectly check if election has ended', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+
+            election.dateEnded = Date.now() - 100 * 864e5;
+            expect(election.isEnded()).to.be.true;
+
+            election.dateEnded = Date.now() + 2 * 64e5;
+            expect(election.isEnded()).to.be.false;
+
+            election.phase = "cancelled";
+            expect(election.isEnded()).to.be.false;
+        });
+    });
+
     describe('isEnding', () => {
 
         it('should correctly check if election is ending', () => {
