@@ -163,6 +163,15 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election is only pending
+     * @returns {boolean}
+     */
+    isNotEvenStarted() {
+        const { phase, dateNomination } = this;
+        return !phase || dateNomination > Date.now();
+    }
+
+    /**
      * @summary checks if the election is ending soon
      * @param {number} [threshold] offset to consider the election ending from (10 mins by default)
      * @returns {boolean}
