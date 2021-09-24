@@ -218,7 +218,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                 responseText += ` Please consider nominating yourself in the ${makeURL("election", electionUrl)}!`;
             }
             // Did not nominate (primary, election, ended, cancelled)
-            else if (!hasNominated) {
+            else if (!hasNominated && election.phase && election.phase !== 'nomination') {
 
                 const phaseMap = {
                     "ended": `the election has ended.`,
