@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import {
-    isAskedAboutModsOrModPowers, isAskedForNominatingInfo,
-    isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe, isThankingTheBot, isLovingTheBot, isHatingTheBot
+    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
 } from "../../src/guards.js";
 
 /**
@@ -159,8 +158,15 @@ describe('Message Guards', () => {
                 "thanks?",
                 "thanks!",
                 "thank you",
+                "thank you?",
                 "thank you!",
+                "thank bot?",
+                "thanks, bot!"
             ]);
+
+            allMatch(isThankingTheBot, [
+                "thank god"
+            ], false);
         });
     });
 
