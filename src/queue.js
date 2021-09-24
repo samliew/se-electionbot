@@ -83,14 +83,14 @@ export const sendMultipartMessage = async (config, room, response, msg) => {
     // see https://regex101.com/r/qfO6vy/3
     if (/\n/.test(response)) {
         messages = response.split(
-            new RegExp(`^[\w\W]{1,${maxMessageLength - 1}}(?:\\n|$)`, "gm")
+            new RegExp(`^[\\w\\W]{1,${maxMessageLength - 1}}(?:\\n|$)`, "gm")
         ).filter(Boolean);
     }
     // else split by spaces, commas, semicolons (avoid breaking up hyperlinks)
     // see https://regex101.com/r/9z9DAX/1
     else {
         messages = response.split(
-            new RegExp(`.{1,${maxMessageLength - 1}}(?:[\s,;]|\.(?!\w)|$)`, "gm")
+            new RegExp(`.{1,${maxMessageLength - 1}}(?:[\\s,;]|\\.(?!\\w)|$)`, "gm")
         ).filter(Boolean);
     }
 
