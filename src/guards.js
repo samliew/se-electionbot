@@ -152,7 +152,7 @@ export const isAskedForScoreLeaderboard = (text) => {
  * @returns {boolean}
  */
 export const isThankingTheBot = (text) => {
-    return /(?:thank you|thanks)/.test(text);
+    return /thanks?(?= you|,? bot|[!?]|$)/.test(text);
 };
 
 /**
