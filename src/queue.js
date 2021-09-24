@@ -20,12 +20,14 @@ const _sendTheMessage = async function (config, room, message, inResponseTo = nu
     const messageLength = message?.length || 0;
     const isInvalid = messageLength <= 0 || messageLength > 500;
 
-    // Log message whether valid or otherwise
-    console.log(`RESPONSE ${isInvalid ? "- INVALID " : ""}- `, message);
-
+    // Validate response
     if (isInvalid) {
+        if (config.verbose) console.log("RESPONSE (INVALID) - ", message);
         return;
     }
+
+    // Log message
+    console.log("RESPONSE - ", message);
 
     // Notify same previous message if in debug mode
     if (config.checkSameResponseAsPrevious(message)) {
