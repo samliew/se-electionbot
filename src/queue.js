@@ -94,7 +94,7 @@ export const sendMultipartMessage = async (config, room, response, msg) => {
 
     // Record last activity time only so this doesn't reset an active mute
     // Future-dated so poem wouldn't be interrupted by another response elsewhere
-    config.lastActivityTime = Date.now() + length * 2e3;
+    config.lastActivityTime = Date.now() + numParts * 2e3;
 
 
     if (numParts > maxMessageParts) {
