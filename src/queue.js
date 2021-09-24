@@ -81,7 +81,7 @@ export const sendReply = async function (config, room, message, inResponseTo, is
  * @returns {Promise<void>}
  */
 export const sendMultipartMessage = async (config, room, response, msg) => {
-    const { maxMessageLength, maxMessageParts } = config;
+    const { maxMessageLength, maxMessageParts, throttleSecs } = config;
 
     const messages = response.split(
         new RegExp(`(^(?:.|\\n|\\r){1,${maxMessageLength}})(?:\\n|\\s|$)`, "gm")
@@ -99,11 +99,11 @@ export const sendMultipartMessage = async (config, room, response, msg) => {
 
     if (numParts > maxMessageParts) {
         await msg.reply(`I wrote a poem of ${numParts} messages for you!`);
-        await wait(2);
+        await wait(throttleSecs);
     }
 
     for (const message of messages) {
         await room.sendMessage(message);
-        await wait(1);
+        await wait(throttleSecs);
     }
 };
