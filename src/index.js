@@ -10,7 +10,7 @@ import Election from './election.js';
 import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
-    isAskedForCurrentNominees, isAskedForCurrentWinners, isAskedForElectionSchedule,
+    isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
     isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedIfModsArePaid, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
     isHatingTheBot,
@@ -18,7 +18,7 @@ import {
     isThankingTheBot
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecret, RandomArray } from "./random.js";
@@ -638,8 +638,26 @@ import {
 
             // Any new message that does not reply-to or mention any user (1)
             else if (eventType === ChatEventType.MESSAGE_POSTED && !targetUserId) {
+
+                /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string) => string][]} */
+                const rules = [
+                    [isAskedForCurrentPositions, sayNumberOfPositions]
+                ];
+
+                const matched = rules.find(([expr]) => expr(content));
+
                 /** @type {string | null} */
                 let responseText = null;
+
+                // TODO: this is the next step in refactoring the main module
+                // the rest of the if...else...elseif are to be switched to reducer
+                // we also need to unify the parameters passed to each builder so as
+                // we can simply hook new builders up with little to no effort
+                if (matched) {
+                    const [matcher, builder] = matched;
+                    if (config.debug) console.log(`matched msg: ${matcher.name}`);
+                    responseText = builder(config, election, content);
+                }
 
                 // Moderation badges
                 if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
