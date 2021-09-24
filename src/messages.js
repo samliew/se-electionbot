@@ -422,3 +422,22 @@ export const sayDiamondAlready = (isModerator, wasModerator) => {
     const [, message] = messageMap.find(([condition]) => condition) || [];
     return message || `diamonds are forever!`;
 };
+
+/**
+ * @summary builds a "number of positions" message
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @param {string} _text message content
+ * @returns {string}
+ */
+export const sayNumberOfPositions = (_config, election, _text) => {
+    const { numPositions = 0 } = election;
+
+    const suffix = pluralize(numPositions, "s", "");
+    const pastBe = pluralize(numPositions, "were", "was");
+    const currBe = pluralize(numPositions, "are", "is");
+
+    const modal = election.isActive() ? currBe : pastBe;
+
+    return `${numPositions} mod${suffix} ${modal} elected`;
+};
