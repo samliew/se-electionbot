@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import {
     isAskedAboutModsOrModPowers, isAskedForNominatingInfo,
-    isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe
+    isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe, isThankingTheBot, isLovingTheBot, isHatingTheBot
 } from "../../src/guards.js";
 
 /**
@@ -149,6 +149,51 @@ describe('Message Guards', () => {
                 "how to be a mod",
                 "how can i be mod",
                 "can i nominate another user",
+            ]);
+        });
+    });
+
+    describe('isThankingTheBot', () => {
+        it('should correctly match content', () => {
+            allMatch(isThankingTheBot, [
+                "thanks?",
+                "thanks!",
+                "thank you",
+                "thank you!",
+            ]);
+        });
+    });
+
+    describe('isLovingTheBot', () => {
+        it('should correctly match content', () => {
+            allMatch(isLovingTheBot, [
+                "good bot",
+                "good bot!",
+                "this is an awesome bot",
+                "this bot is good",
+                "i like the bot",
+                "i love this bot!",
+                "i love this bot already",
+                "i love electionbot",
+            ]);
+        });
+    });
+
+    describe('isHatingTheBot', () => {
+        it('should correctly match content', () => {
+            allMatch(isHatingTheBot, [
+                "bad bot",
+                "bad bot!",
+                "this is an bad bot",
+                "this bot is bad",
+                "this bot is broken",
+                "this bot is buggy",
+                "terrible bot",
+                "horrible bot",
+                "i hate the bot",
+                "i dislike this bot!",
+                "i hate this bot already",
+                "i hate electionbot",
             ]);
         });
     });
