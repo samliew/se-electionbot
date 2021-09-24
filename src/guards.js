@@ -68,7 +68,16 @@ export const isAskedForCurrentMods = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCurrentWinners = (text) => {
-    return /^who/.test(text) && /winners|new mod|will win|future mod/.test(text);
+    return /^who/.test(text) && /winners|new mod|will win|future mod/i.test(text);
+};
+
+/**
+ * @summary checks if the message asked to tell how many positions are due
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedForCurrentPositions = (text) => {
+    return /^how many (?:positions|mod(?:erator)?s) are(?: being)? elected/i.test(text);
 };
 
 /**
@@ -77,7 +86,7 @@ export const isAskedForCurrentWinners = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCurrentNominees = (text) => {
-    return /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/.test(text);
+    return /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/i.test(text);
 };
 
 /**
@@ -86,7 +95,7 @@ export const isAskedForCurrentNominees = (text) => {
  * @returns {boolean}
  */
 export const isAskedForElectionSchedule = (text) => {
-    return /(?:when|how) is the election(?: scheduled)?|election schedule/.test(text);
+    return /(?:when|how) is the election(?: scheduled)?|election schedule/i.test(text);
 };
 
 /**
@@ -95,7 +104,7 @@ export const isAskedForElectionSchedule = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutUsernameDiamond = (text) => {
-    return /(?:edit|insert|add).+?(?:\u2666|diamond).+?(?:user)?name/.test(text);
+    return /(?:edit|insert|add).+?(?:\u2666|diamond).+?(?:user)?name/i.test(text);
 };
 
 /**
@@ -104,7 +113,7 @@ export const isAskedAboutUsernameDiamond = (text) => {
  * @returns {boolean}
  */
 export const isAskedWhoMadeMe = (text) => {
-    return /who(?:\s+(?:are|is) your)?\s+(?:made|created|own(?:s|ers?)|develop(?:s|ed|ers?)|maintain(?:s|ers?))(?:\s+you)?/.test(text);
+    return /who(?:\s+(?:are|is) your)?\s+(?:made|created|own(?:s|ers?)|develop(?:s|ed|ers?)|maintain(?:s|ers?))(?:\s+you)?/i.test(text);
 };
 
 /**
@@ -123,7 +132,7 @@ export const isAskedForOwnScore = (text) => {
  * @returns {boolean}
  */
 export const isAskedForOtherScore = (text) => {
-    return /what(?: i|')s(?: the)? candidate score (?:for|of)\s+(?:\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/.test(text);
+    return /what(?: i|')s(?: the)? candidate score (?:for|of)\s+(?:\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/i.test(text);
 };
 
 /**

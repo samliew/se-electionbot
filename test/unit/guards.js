@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import {
-    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
+    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
 } from "../../src/guards.js";
 
 /**
@@ -136,6 +136,22 @@ describe('Message Guards', () => {
                 "what is the candidate score formula?",
                 "what is the formula for candidate score?",
             ]);
+        });
+    });
+
+    describe('isAskedForCurrentPositions', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForCurrentPositions, [
+                // https://chat.stackoverflow.com/transcript/message/53095011#53095011
+                "How many mods are being elected this time around?",
+                "how many positions are elected",
+                "how many mods are elected today?",
+                "how many moderators are elected"
+            ]);
+
+            allMatch(isAskedForCurrentPositions, [
+                "who moderators are?"
+            ], false);
         });
     });
 
