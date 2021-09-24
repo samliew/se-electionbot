@@ -217,7 +217,7 @@ describe('Election', () => {
 
     describe('isNewPhase', () => {
 
-        it('should ', () => {
+        it('should correctly determine new phase', () => {
 
             const election = new Election("https://stackoverflow.com/election/12");
             election._prevObj = { phase: "nomination" };
