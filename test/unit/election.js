@@ -163,15 +163,15 @@ describe('Election', () => {
         it('should coreectly check if election is only upcoming', () => {
             const election = new Election("https://stackoverflow.com/election/13");
 
-            expect(election.isNotEvenStarted()).to.be.true;
+            expect(election.isNotStartedYet()).to.be.true;
 
             election.dateNomination = Date.now() - 864e5;
             election.phase = "nomination";
-            expect(election.isNotEvenStarted()).to.be.false;
+            expect(election.isNotStartedYet()).to.be.false;
 
             // TODO: investigate if we can eliminate type hopping
             election.phase = null;
-            expect(election.isNotEvenStarted()).to.be.true;
+            expect(election.isNotStartedYet()).to.be.true;
         });
     });
 

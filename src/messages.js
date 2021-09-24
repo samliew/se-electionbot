@@ -440,7 +440,7 @@ export const sayNumberOfPositions = (_config, election, _text) => {
 
     const rules = [
         [election.isActive(), currBe],
-        [election.isNotEvenStarted(), future],
+        [election.isNotStartedYet(), future],
         [election.isEnded(), pastBe]
     ];
 

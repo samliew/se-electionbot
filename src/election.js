@@ -166,7 +166,7 @@ export default class Election {
      * @summary checks if the election is only pending
      * @returns {boolean}
      */
-    isNotEvenStarted() {
+    isNotStartedYet() {
         const { phase, dateNomination } = this;
         return !phase || dateNomination > Date.now();
     }
