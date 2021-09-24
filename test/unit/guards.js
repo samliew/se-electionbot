@@ -146,7 +146,8 @@ describe('Message Guards', () => {
                 "How many mods are being elected this time around?",
                 "how many positions are elected",
                 "how many mods are elected today?",
-                "how many moderators are elected"
+                "how many moderators are elected",
+                "how many mods will be elected?"
             ]);
 
             allMatch(isAskedForCurrentPositions, [
