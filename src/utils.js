@@ -1,9 +1,7 @@
 import axios from "axios";
 import cheerio from 'cheerio';
-import express from 'express';
 import { get } from 'https';
 import Cache from "node-cache";
-import { join } from 'path';
 import { URL } from "url";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
@@ -12,64 +10,7 @@ export const apiBase = `https://api.stackexchange.com`;
 
 export const apiVer = 2.3;
 
-const __dirname = new URL(".", import.meta.url).pathname;
-
 let _apiBackoff = Date.now();
-
-/**
- * @summary starts the bot server
- * @param {{ sendMessage(msg:string): Promise<any> }} room
- * @param {import("./config.js").BotConfig} config
- * @returns {Promise<import("express").Application>}
- */
-export const startServer = async (room, config) => {
-    const app = express().set('port', process.env.PORT || 5000);
-    const staticPath = join(__dirname, '../static');
-
-    //see https://stackoverflow.com/a/59892173/11407695
-    app.use(express.urlencoded({ extended: true }));
-
-    app.use((_req, res, next) => {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-        next();
-    });
-
-    app.use('/', express.static(staticPath));
-
-    const server = app.listen(app.get('port'), () => {
-        console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
-    });
-
-    const farewell = async () => {
-        if (config.debug) {
-            await room.sendMessage("have to go now, will be back soon");
-        }
-        terminate(server);
-    };
-
-    /** @param {import("http").Server} server */
-    const terminate = (server) => server.close(() => {
-        console.log('gracefully shutting down');
-        process.exit(0);
-    });
-
-    /** @see https://stackoverflow.com/a/67567395/11407695 */
-    if (process.platform === "win32") {
-        const rl = await import("readline");
-        const rli = rl.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-
-        rli.on("SIGINT", farewell);
-        return app;
-    }
-
-    /** @see https://stackoverflow.com/a/14516195/11407695 */
-    process.on('SIGINT', farewell);
-    return app;
-};
 
 /**
  * @typedef {{

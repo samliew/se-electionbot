@@ -25,11 +25,12 @@ import { getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } fr
 import Rescraper from "./rescraper.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
+import { start } from "./server.js";
 import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, pluralize, startServer, wait
+    linkToUtcTimestamp, pluralize, wait
 } from './utils.js';
 
 /**
@@ -821,64 +822,8 @@ import {
 
         }, 5 * 60000);
 
-
         // Start server
-        const app = await startServer(room, config);
-
-        // Serve /say form
-        app.get('/say', ({ query }, res) => {
-            const { success, password = "", message = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
-
-            const validPwd = password === process.env.PASSWORD;
-
-            if (!validPwd) {
-                res.sendStatus(404);
-                return;
-            }
-
-            const statusMap = {
-                true: `<div class="result success">Success!</div>`,
-                false: `<div class="result error">Error. Could not send message.</div>`,
-                undefined: ""
-            };
-
-            res.send(`
-                <link rel="icon" href="data:;base64,=" />
-                <link rel="stylesheet" href="css/styles.css" />
-                <h3>ElectionBot say to room <a href="https://chat.${config.chatDomain}/rooms/${config.chatRoomId}" target="_blank">${config.chatDomain}: ${config.chatRoomId}</a>:</h3>
-                <form method="post">
-                    <input type="text" name="message" placeholder="message" maxlength="500" value="${decodeURIComponent(message)}" />
-                    <input type="hidden" name="password" value="${password}" />
-                    <button>Send</button>
-                </form>
-                ${statusMap[success]}
-            `);
-
-            return;
-        });
-
-        // POST event from /say form
-        app.post('/say', async ({ body }, res) => {
-            const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
-
-            const validPwd = password === process.env.PASSWORD;
-            const trimmed = message.trim();
-
-            // Validation
-            if (!validPwd || !trimmed) {
-                console.error(`Invalid ${validPwd ? 'message' : 'password'}`, password);
-                res.sendStatus(404);
-                return;
-            }
-
-            await room.sendMessage(trimmed);
-
-            // Record last activity time only so this doesn't reset an active mute
-            config.lastActivityTime = Date.now();
-
-            res.redirect(`/say?password=${password}&success=true`);
-        });
-
+        await start(room, config);
 
         // Catch all handler to swallow non-crashing rejecions
         process.on("unhandledRejection", (reason) => {
