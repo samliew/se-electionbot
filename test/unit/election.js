@@ -160,7 +160,7 @@ describe('Election', () => {
     });
 
     describe('isNotEvenStarted', () => {
-        it('should coreectly check if election is only upcoming', () => {
+        it('should correctly check if election is only upcoming', () => {
             const election = new Election("https://stackoverflow.com/election/13");
 
             expect(election.isNotStartedYet()).to.be.true;
@@ -176,7 +176,7 @@ describe('Election', () => {
     });
 
     describe('isEnded', () => {
-        it('should correectly check if election has ended', () => {
+        it('should corrrectly check if election has ended', () => {
             const election = new Election("https://stackoverflow.com/election/12");
 
             election.dateEnded = Date.now() - 100 * 864e5;
