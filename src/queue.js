@@ -68,12 +68,6 @@ export const sendReply = async function (config, room, message, inResponseTo, is
 };
 
 /**
- * Note:
- * Be careful if integrating this section with message queue,
- * since it is currently for long responses to dev/admin commands only, and does not reset active mutes.
- * We should also avoid long responses for normal users and continue to contain them within a single message,
- * so we could possibly leave this block as it is
- *
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to announce in
  * @param {string} response Message to send
@@ -81,29 +75,49 @@ export const sendReply = async function (config, room, message, inResponseTo, is
  * @returns {Promise<void>}
  */
 export const sendMultipartMessage = async (config, room, response, msg) => {
-    const { maxMessageLength, maxMessageParts, throttleSecs } = config;
+    const { maxMessageLength, maxMessageParts, minThrottleSecs } = config;
 
-    const messages = response.split(
-        new RegExp(`(^(?:.|\\n|\\r){1,${maxMessageLength}})(?:\\n|\\s|$)`, "gm")
-    ).filter(Boolean);
+    let messages = [];
+
+    // If there are newlines in the message, split by newlines
+    // see https://regex101.com/r/qfO6vy/3
+    if (/\n/.test(response)) {
+        messages = response.split(
+            new RegExp(`^[\w\W]{1,${maxMessageLength - 1}}(?:\\n|$)`, "gm")
+        ).filter(Boolean);
+    }
+    // else split by spaces, commas, semicolons (avoid breaking up hyperlinks)
+    // see https://regex101.com/r/9z9DAX/1
+    else {
+        messages = response.split(
+            new RegExp(`.{1,${maxMessageLength - 1}}(?:[\s,;]|\.(?!\w)|$)`, "gm")
+        ).filter(Boolean);
+    }
 
     const { length } = response;
     const { length: numParts } = messages;
 
     console.log(`RESPONSE (${length}/${numParts})`, response);
 
-    // Record last activity time only so this doesn't reset an active mute
-    // Future-dated so poem wouldn't be interrupted by another response elsewhere
-    config.lastActivityTime = Date.now() + length * 2e3;
+    const completionDate = Date.now() + numParts * minThrottleSecs;
 
+    // If bot isn't already muted, temporarily mute for the minimum required duration to get the message parts out
+    // Future-dated so poem wouldn't be interrupted by another response elsewhere
+    if (!config.isMuted) {
+        config.lastMessageTime = completionDate;
+    }
+    // Record last activity time only (for room idle checks) so this doesn't override the mute
+    else {
+        config.lastActivityTime = completionDate;
+    }
 
     if (numParts > maxMessageParts) {
         await msg.reply(`I wrote a poem of ${numParts} messages for you!`);
-        await wait(throttleSecs);
+        await wait(minThrottleSecs);
     }
 
     for (const message of messages) {
         await room.sendMessage(message);
-        await wait(throttleSecs);
+        await wait(minThrottleSecs);
     }
 };

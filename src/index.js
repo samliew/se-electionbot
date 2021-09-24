@@ -504,8 +504,8 @@ import {
              *   (e.g.: if an individual user makes bot respond more than 5 times in 30 seconds, ignore 2 minutes)
              */
             // If too close to previous message, ignore (apply throttle)
-            if (Date.now() < config.lastMessageTime + config.throttleSecs * 1000) {
-                console.log('THROTTLE - too close to previous message');
+            if (config.isMuted) {
+                console.log('THROTTLE - too close to previous message, or is muted');
                 return;
             }
 
