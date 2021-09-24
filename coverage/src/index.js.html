@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/910</span>
+                <span class='fraction'>0/899</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/910</span>
+                <span class='fraction'>0/899</span>
             </div>
         
             
@@ -955,29 +955,7 @@
 <a name='L896'></a><a href='#L896'>896</a>
 <a name='L897'></a><a href='#L897'>897</a>
 <a name='L898'></a><a href='#L898'>898</a>
-<a name='L899'></a><a href='#L899'>899</a>
-<a name='L900'></a><a href='#L900'>900</a>
-<a name='L901'></a><a href='#L901'>901</a>
-<a name='L902'></a><a href='#L902'>902</a>
-<a name='L903'></a><a href='#L903'>903</a>
-<a name='L904'></a><a href='#L904'>904</a>
-<a name='L905'></a><a href='#L905'>905</a>
-<a name='L906'></a><a href='#L906'>906</a>
-<a name='L907'></a><a href='#L907'>907</a>
-<a name='L908'></a><a href='#L908'>908</a>
-<a name='L909'></a><a href='#L909'>909</a>
-<a name='L910'></a><a href='#L910'>910</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L899'></a><a href='#L899'>899</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1888,15 +1866,17 @@
 <span class="cstat-no" title="statement not covered" >    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,</span>
 <span class="cstat-no" title="statement not covered" >    isAskedForCurrentMods,</span>
 <span class="cstat-no" title="statement not covered" >    isAskedForCurrentNominees, isAskedForCurrentWinners, isAskedForElectionSchedule,</span>
-<span class="cstat-no" title="statement not covered" >    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedIfModsArePaid, isAskedWhoMadeMe,</span>
+<span class="cstat-no" title="statement not covered" >    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedIfModsArePaid, isAskedWhoMadeMe,</span>
 <span class="cstat-no" title="statement not covered" >    isAskedWhyNominationRemoved,</span>
-<span class="cstat-no" title="statement not covered" >    isLovingTheBot</span>
+<span class="cstat-no" title="statement not covered" >    isHatingTheBot,</span>
+<span class="cstat-no" title="statement not covered" >    isLovingTheBot,</span>
+<span class="cstat-no" title="statement not covered" >    isThankingTheBot</span>
 <span class="cstat-no" title="statement not covered" >} from "./guards.js";</span>
 <span class="cstat-no" title="statement not covered" >import {</span>
-<span class="cstat-no" title="statement not covered" >    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved</span>
+<span class="cstat-no" title="statement not covered" >    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved</span>
 <span class="cstat-no" title="statement not covered" >} from "./messages.js";</span>
-<span class="cstat-no" title="statement not covered" >import { sendMessage, sendReply } from "./queue.js";</span>
-<span class="cstat-no" title="statement not covered" >import { getRandomGoodThanks, getRandomPlop, RandomArray } from "./random.js";</span>
+<span class="cstat-no" title="statement not covered" >import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";</span>
+<span class="cstat-no" title="statement not covered" >import { getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";</span>
 <span class="cstat-no" title="statement not covered" >import Rescraper from "./rescraper.js";</span>
 <span class="cstat-no" title="statement not covered" >import Announcement from './ScheduledAnnouncement.js';</span>
 <span class="cstat-no" title="statement not covered" >import { makeCandidateScoreCalc } from "./score.js";</span>
@@ -1957,7 +1937,7 @@
 <span class="cstat-no" title="statement not covered" >    const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN);</span>
 <span class="cstat-no" title="statement not covered" >    const defaultChatRoomId = +CHAT_ROOM_ID;</span>
 <span class="cstat-no" title="statement not covered" >    const electionSiteHostname = electionUrl.split('/')[2];</span>
-<span class="cstat-no" title="statement not covered" >    const electionSiteApiSlug = electionSiteHostname.replace('.stackexchange.com', '');</span>
+<span class="cstat-no" title="statement not covered" >    const electionSiteApiSlug = electionSiteHostname.replace(/\.stackexchange/i, '').replace(/\.(?:com|org|net)/i, '');</span>
 <span class="cstat-no" title="statement not covered" >    const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];</span>
 <span class="cstat-no" title="statement not covered" >    const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -1993,7 +1973,6 @@
 <span class="cstat-no" title="statement not covered" >        34, // UserNameOrAvatarChanged</span>
 <span class="cstat-no" title="statement not covered" >        7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents</span>
 <span class="cstat-no" title="statement not covered" >    ];</span>
-<span class="cstat-no" title="statement not covered" >    const maxMessageLength = 500; // should rarely, if never change</span>
 <span class="cstat-no" title="statement not covered" >    const scriptInitDate = new Date();</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    /**</span>
@@ -2367,31 +2346,7 @@
 <span class="cstat-no" title="statement not covered" >                 *   so we could possibly leave this block as it is</span>
 <span class="cstat-no" title="statement not covered" >                 */</span>
 <span class="cstat-no" title="statement not covered" >                if (responseText) {</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                    // Function sent the message and returned empty string, e.g.: sayHI</span>
-<span class="cstat-no" title="statement not covered" >                    if (responseText === '') return;</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                    const messages = responseText.split(</span>
-<span class="cstat-no" title="statement not covered" >                        // TODO: This regexp only splits the message at newlines, which may cause an issue if there aren't any</span>
-<span class="cstat-no" title="statement not covered" >                        new RegExp(`(^(?:.|\\n|\\r){1,${maxMessageLength}})(?:\\n|$)`, "gm")</span>
-<span class="cstat-no" title="statement not covered" >                    ).filter(Boolean);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                    console.log(`RESPONSE (${messages.length})`, responseText);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                    // Record last activity time only so this doesn't reset an active mute</span>
-<span class="cstat-no" title="statement not covered" >                    // Future-dated so poem wouldn't be interrupted by another response elsewhere</span>
-<span class="cstat-no" title="statement not covered" >                    config.lastActivityTime = Date.now() + messages.length * 2e3;</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                    if (messages.length &gt; 3) {</span>
-<span class="cstat-no" title="statement not covered" >                        await msg.reply(`I wrote a poem of ${messages.length} messages for you!`);</span>
-<span class="cstat-no" title="statement not covered" >                        await wait(2);</span>
-<span class="cstat-no" title="statement not covered" >                    }</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                    for (const message of messages) {</span>
-<span class="cstat-no" title="statement not covered" >                        await room.sendMessage(message);</span>
-<span class="cstat-no" title="statement not covered" >                        await wait(1);</span>
-<span class="cstat-no" title="statement not covered" >                    }</span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >                    await sendMultipartMessage(config, room, responseText, msg);</span>
 <span class="cstat-no" title="statement not covered" >                    return; // no further action</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" >            }</span>
@@ -2420,16 +2375,16 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                    return; // stop here since we are using a different default response method</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
-<span class="cstat-no" title="statement not covered" >                else if (["who are you", "about"].some(x =&gt; content.startsWith(x))) {</span>
-<span class="cstat-no" title="statement not covered" >                    responseText = `I'm ${me.name} and ${me.about}`;</span>
-<span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" >                else if (isAskedWhoMadeMe(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = await sayWhoMadeMe(config);</span>
+<span class="cstat-no" title="statement not covered" >                }</span>
+<span class="cstat-no" title="statement not covered" >                else if (/^(who are you\??|about)$/.test(content)) {</span>
+<span class="cstat-no" title="statement not covered" >                    responseText = `I'm ${me.name} and ${me.about}`;</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" >                else if (content.startsWith(`i love you`)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = `I love you 3000`;</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
-<span class="cstat-no" title="statement not covered" >                else if (["how are you", "are you okay"].some(x =&gt; content.startsWith(x))) {</span>
+<span class="cstat-no" title="statement not covered" >                else if (/^how are you\??$/.test(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = new RandomArray(</span>
 <span class="cstat-no" title="statement not covered" >                        `good, and you?`,</span>
 <span class="cstat-no" title="statement not covered" >                        `I'm fine, thank you.`,</span>
@@ -2438,7 +2393,7 @@
 <span class="cstat-no" title="statement not covered" >                        `Today, I consider myself the luckiest bot on the face of the earth.`,</span>
 <span class="cstat-no" title="statement not covered" >                    ).getRandom();</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
-<span class="cstat-no" title="statement not covered" >                else if (["where are you", "alive", "ping"].some(x =&gt; content.startsWith(x))) {</span>
+<span class="cstat-no" title="statement not covered" >                else if (/^(where are you\??|alive|ping)$/.test(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = new RandomArray(</span>
 <span class="cstat-no" title="statement not covered" >                        `No. I'm not here.`,</span>
 <span class="cstat-no" title="statement not covered" >                        `I'm here, aren't I?`,</span>
@@ -2446,30 +2401,33 @@
 <span class="cstat-no" title="statement not covered" >                        `I'm here and everywhere`,</span>
 <span class="cstat-no" title="statement not covered" >                    ).getRandom();</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
-<span class="cstat-no" title="statement not covered" >                else if (["what are you", "what is your name"].some(x =&gt; content.startsWith(x))) {</span>
+<span class="cstat-no" title="statement not covered" >                else if (/^what are you\??$/.test(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = new RandomArray(</span>
 <span class="cstat-no" title="statement not covered" >                        `Bot. James Bot.`,</span>
 <span class="cstat-no" title="statement not covered" >                        `I'm a robot. Beep boop.`,</span>
 <span class="cstat-no" title="statement not covered" >                        `I'm a crystal ball; I already know the winners.`,</span>
-<span class="cstat-no" title="statement not covered" >                        `I'm a teacup, short and stout. Here is my handle, here is my spout.`,</span>
+<span class="cstat-no" title="statement not covered" >                        `I'm a teapot, short and stout. Here is my handle, here is my spout.`,</span>
 <span class="cstat-no" title="statement not covered" >                        `I could've been somebody, instead of a lame bot, which is what I am.`,</span>
 <span class="cstat-no" title="statement not covered" >                    ).getRandom();</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
-<span class="cstat-no" title="statement not covered" >                else if (["what are you"].some(x =&gt; content.startsWith(x))) {</span>
+<span class="cstat-no" title="statement not covered" >                else if (/^why are you\??$/.test(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = new RandomArray(</span>
 <span class="cstat-no" title="statement not covered" >                        `because.`,</span>
 <span class="cstat-no" title="statement not covered" >                        `why what???`,</span>
-<span class="cstat-no" title="statement not covered" >                        `Show me the money!`,</span>
-<span class="cstat-no" title="statement not covered" >                        `Well, nobody's perfect.`,</span>
-<span class="cstat-no" title="statement not covered" >                        `You can't handle the truth!`,</span>
 <span class="cstat-no" title="statement not covered" >                    ).getRandom();</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
-<span class="cstat-no" title="statement not covered" >                else if (/thanks?(?: you)?/.test(content)) {</span>
+<span class="cstat-no" title="statement not covered" >                else if (isThankingTheBot(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = new RandomArray(</span>
 <span class="cstat-no" title="statement not covered" >                        "Not at all",</span>
 <span class="cstat-no" title="statement not covered" >                        "My pleasure",</span>
 <span class="cstat-no" title="statement not covered" >                        "You are welcome",</span>
 <span class="cstat-no" title="statement not covered" >                    ).getRandom();</span>
+<span class="cstat-no" title="statement not covered" >                }</span>
+<span class="cstat-no" title="statement not covered" >                else if (isLovingTheBot(content)) {</span>
+<span class="cstat-no" title="statement not covered" >                    responseText = getRandomGoodThanks();</span>
+<span class="cstat-no" title="statement not covered" >                }</span>
+<span class="cstat-no" title="statement not covered" >                else if (isHatingTheBot(content)) {</span>
+<span class="cstat-no" title="statement not covered" >                    responseText = getRandomNegative();</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" >                else if (['help', 'command', 'info'].some(x =&gt; content.includes(x))) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = '\n' + ['Examples of election FAQs I can help with:',</span>
@@ -2486,7 +2444,6 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                    // Random response</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = new RandomArray(</span>
-<span class="cstat-no" title="statement not covered" >                        content,</span>
 <span class="cstat-no" title="statement not covered" >                        `You talking to me?`,</span>
 <span class="cstat-no" title="statement not covered" >                        `I know your thoughts.`,</span>
 <span class="cstat-no" title="statement not covered" >                        `*reticulating splines*`,</span>
@@ -2559,8 +2516,14 @@
 <span class="cstat-no" title="statement not covered" >                    return; // stop here since we are using a different default response method</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >                // How is candidate score calculated</span>
 <span class="cstat-no" title="statement not covered" >                else if (isAskedForScoreFormula(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = sayCandidateScoreFormula(electionBadges);</span>
+<span class="cstat-no" title="statement not covered" >                }</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >                // Who has the highest candidate score</span>
+<span class="cstat-no" title="statement not covered" >                else if (isAskedForScoreLeaderboard(content)) {</span>
+<span class="cstat-no" title="statement not covered" >                    responseText = sayCandidateScoreLeaderboard(electionSiteApiSlug);</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                // Current candidates</span>
@@ -2607,18 +2570,20 @@
 <span class="cstat-no" title="statement not covered" >                    responseText = sayHowToNominate(election, electionBadges, mentionsAnother);</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >                // Why was the nomination removed</span>
 <span class="cstat-no" title="statement not covered" >                else if (isAskedWhyNominationRemoved(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = sayWhyNominationRemoved();</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >                // Are moderators paid</span>
 <span class="cstat-no" title="statement not covered" >                else if (isAskedIfModsArePaid(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = sayAreModsPaid(election);</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                // Status</span>
+<span class="cstat-no" title="statement not covered" >                // Status of the election</span>
 <span class="cstat-no" title="statement not covered" >                else if (content.includes('election') &amp;&amp; ['status', 'progress'].some(x =&gt; content.includes(x))) {</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                    if (election.phase == null) {</span>
+<span class="cstat-no" title="statement not covered" >                    if (election.phase === null) {</span>
 <span class="cstat-no" title="statement not covered" >                        responseText = sayNotStartedYet(election);</span>
 <span class="cstat-no" title="statement not covered" >                    }</span>
 <span class="cstat-no" title="statement not covered" >                    else if (election.phase === 'ended' &amp;&amp; election.arrWinners &amp;&amp; election.arrWinners.length &gt; 0) {</span>
@@ -2646,7 +2611,7 @@
 <span class="cstat-no" title="statement not covered" >                    }</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                // Next phase</span>
+<span class="cstat-no" title="statement not covered" >                // Next phase/ When is the election starting</span>
 <span class="cstat-no" title="statement not covered" >                else if (content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = sayNextPhase(election);</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
@@ -2684,9 +2649,11 @@
 <span class="cstat-no" title="statement not covered" >                    responseText = `No one is able to edit the diamond symbol (♦) into their username.`;</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                // Good bot; I love this bot</span>
-<span class="cstat-no" title="statement not covered" >                if (isLovingTheBot(content)) {</span>
+<span class="cstat-no" title="statement not covered" >                else if (isLovingTheBot(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                    responseText = getRandomGoodThanks();</span>
+<span class="cstat-no" title="statement not covered" >                }</span>
+<span class="cstat-no" title="statement not covered" >                else if (isHatingTheBot(content)) {</span>
+<span class="cstat-no" title="statement not covered" >                    responseText = getRandomNegative();</span>
 <span class="cstat-no" title="statement not covered" >                }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -2791,7 +2758,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Thu Sep 23 2021 12:56:03 GMT+0300 (Moscow Standard Time)
+                at Fri Sep 24 2021 10:47:39 GMT+0800 (Australian Western Standard Time)
             </div>
         </div>
         <script src="../prettify.js"></script>
