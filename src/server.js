@@ -143,8 +143,11 @@ app.get('/config', async ({ query }, res) => {
         false: `<div class="result error">Error. Could not perform action.</div>`
     };
 
+    // prevents 'undefined' from being shown
+    const status = statusMap[success] || "";
+
     const envVars = await heroku.fetchConfigVars();
-    const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`);
+    const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`).join("");
 
     res.send(`
         <link rel="icon" href="data:;base64,=" />
@@ -155,7 +158,7 @@ app.get('/config', async ({ query }, res) => {
             <input type="hidden" name="password" value="${password}" />
             <button>Submit</button>
         </form>
-        ${statusMap[success]}
+        ${status}
     `);
 
     return;
