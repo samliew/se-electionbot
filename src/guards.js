@@ -187,3 +187,12 @@ export const isHatingTheBot = (text) => {
         /^i (?:dislike|hate|detest) (?:the|this|electionbot)/.test(text)
     );
 };
+
+/**
+ * @summary checks if the message is asking about user eligibility
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedForUserEligibility = (text) => {
+    return /^(?:can|is) user \d+(?: be)? (?:eligible|(?:nominate|electe)d?)/i.test(text);
+};

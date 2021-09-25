@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import {
-    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
+    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
 } from "../../src/guards.js";
 
 /**
@@ -135,6 +135,17 @@ describe('Message Guards', () => {
                 "what is candidate score formula?",
                 "what is the candidate score formula?",
                 "what is the formula for candidate score?",
+            ]);
+        });
+    });
+
+    describe('isAskedForUserEligibility', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForUserEligibility, [
+                "can user 123 be elected?",
+                "can user 456 be nominated?",
+                "can user 789 be eligible?",
+                "is user 012 eligible?"
             ]);
         });
     });
