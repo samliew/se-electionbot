@@ -7,7 +7,7 @@ import {
 import { parsePackage } from "./utils/package.js";
 
 /**
- * @typedef {import("./index").Badge} Badge
+ * @typedef {import("./index").ElectionBadge} Badge
  * @typedef {import("./config").BotConfig} BotConfig
  */
 
@@ -151,7 +151,7 @@ export const sayBadgesByType = (badges, type, isSO = true) => {
 
     return numBadgesPrefix + (
         isSO ?
-            filtered.map(({ id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${id}`)) :
+            filtered.map(({ badge_id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${badge_id}`)) :
             filtered.map(({ name }) => name)
     ).join(", ");
 };
@@ -176,7 +176,7 @@ export const sayRequiredBadges = (election, badges, isSO = true) => {
 
     const numBadgesPrefix = `The ${length} required badge${pluralize(length)} to nominate yourself ${pluralize(length, "are", "is")}: `;
 
-    const badgeList = required.map(({ id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${id}`)).join(", ");
+    const badgeList = required.map(({ badge_id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${badge_id}`)).join(", ");
 
     const repPostfix = ` You'll also need ${repNominate} reputation.`;
 

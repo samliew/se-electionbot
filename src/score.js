@@ -7,8 +7,9 @@ import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapT
 /**
  * @typedef {import("./index.js").User} User
  * @typedef {import("./config.js").BotConfig} BotConfig
- * @typedef {import("./utils").Badge} Badge
  * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
+ * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
+ * @typedef {import("./index").ElectionBadge} ElectionBadge
  */
 
 /**
@@ -45,13 +46,44 @@ export const makeIsEligible = (requiredRep) =>
 const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurred when calculating ${isAskingForOtherUser ? `the user's` : `your`} score.`;
 
 /**
+ * @summary calculates the score
+ * @param {User} user API user object
+ * @param {Badge[]} badges user badges
+ * @param {ElectionBadge[]} electionBadges election badges
+ * @returns {{
+ *  score: number,
+ *  missing: {
+ *      badges: ElectionBadge[]
+ *  }
+ * }}
+ */
+export const calculateScore = (user, badges, electionBadges) => {
+    const maxRepScore = 20;
+    const repRepScore = 1000;
+
+    const { reputation } = user;
+
+    const userBadgeIds = badges.map(mapToId);
+
+    const repScore = Math.min(Math.floor(reputation / repRepScore), maxRepScore);
+    const badgeScore = userBadgeIds.filter(v => electionBadges.some(({ badge_id }) => badge_id === v)).length;
+
+    return {
+        score: repScore + badgeScore,
+        missing: {
+            badges: electionBadges.filter(({ badge_id }) => !userBadgeIds.includes(badge_id))
+        }
+    };
+};
+
+/**
  * @summary HOF with common parameters
  * @param {BotConfig} config
  * @param {string} hostname
  * @param {string} chatDomain chat room domain name (i.e. stackexchange.com)
  * @param {string} apiSlug election site to pass to the API 'site' parameter
  * @param {string} apiKey current API key
- * @param {Badge[]} badges list of badges
+ * @param {ElectionBadge[]} badges list of election badges
  * @param {number[]} modIds ids of moderators of the network
  */
 export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
@@ -117,33 +149,29 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         }
 
         // TODO: Get a different API key here
-        const items = await getBadges(config, userId, apiSlug, apiKey);
+        const userBadges = await getBadges(config, userId, apiSlug, apiKey);
 
         // Validation
-        if (!items.length) {
+        if (!userBadges.length) {
             console.error('No data from API.');
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        const userBadgeIds = items.map(mapToId);
-
-        const [badge] = items;
+        const [badge] = userBadges;
 
         const { reputation } = badge.user;
 
         const hasNominated = election.isNominee(userId);
 
-        const repScore = Math.min(Math.floor(reputation / 1000), 20);
-        const badgeScore = userBadgeIds.filter(v => badges.some(({ id }) => id === v)).length;
-        const candidateScore = repScore + badgeScore;
+        const { score, missing } = calculateScore(user, userBadges, badges);
 
-        const missingBadges = badges.filter(({ id }) => !userBadgeIds.includes(id));
+        const missingBadges = missing.badges;
 
         const requiredBadges = badges.filter(mapToRequired);
 
-        const missingBadgeIds = missingBadges.map(({ id }) => id);
+        const missingBadgeIds = missingBadges.map(mapToId);
 
-        const missingRequiredBadges = isSO ? requiredBadges.filter(({ id }) => missingBadgeIds.includes(id)) : [];
+        const missingRequiredBadges = isSO ? requiredBadges.filter(({ badge_id }) => missingBadgeIds.includes(badge_id)) : [];
 
         const { length: numMissingBadges } = missingBadges;
 
@@ -163,13 +191,11 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         if (config.debug) {
             console.log({
-                "User site badges": items,
+                "User site badges": userBadges,
                 isEligible,
                 badges,
                 missingBadges,
                 hasNominated,
-                repScore,
-                badgeScore
             });
         }
 
@@ -180,7 +206,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
             responseText = `The candidate score for user ${makeURL(display_name || userId.toString(),
                 `${siteUrl}/users/${userId}`)
-                } is ${getScoreText(candidateScore, currMaxScore)}.`;
+                } is ${getScoreText(score, currMaxScore)}.`;
 
             if (numMissingRequiredBadges > 0) {
                 responseText += sayMissingBadges(missingRequiredBadgeNames, numMissingRequiredBadges, false, true);
@@ -206,8 +232,8 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                 responseText += ` missing the required badge${pluralize(numMissingRequiredBadges)}: ${missingRequiredBadgeNames.join(', ')}`;
             }
 
-            responseText += `. Your candidate score is ${getScoreText(candidateScore, currMaxScore)}.`;
-        } else if (candidateScore >= currMaxScore) {
+            responseText += `. Your candidate score is ${getScoreText(score, currMaxScore)}.`;
+        } else if (score >= currMaxScore) {
             responseText = `Wow! You have a maximum candidate score of **${currMaxScore}**!`;
 
             // Already nominated, and not ended/cancelled
@@ -231,13 +257,13 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                 responseText += ` Alas, ${phaseMap[phase]} Hope to see your candidature next election!`;
             } else {
                 console.error("this case??", {
-                    candidateScore, currMaxScore, hasNominated, phase
+                    score, currMaxScore, hasNominated, phase
                 });
             }
         }
         // All others
         else {
-            responseText = `Your candidate score is **${candidateScore}** (out of ${currMaxScore}).`;
+            responseText = `Your candidate score is **${score}** (out of ${currMaxScore}).`;
 
             if (numMissingBadges > 0) {
                 responseText += sayMissingBadges(missingBadgeNames, numMissingBadges, true);
@@ -252,7 +278,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
                 const perhapsNominateThreshold = 30;
 
-                responseText += candidateScore >= perhapsNominateThreshold ?
+                responseText += score >= perhapsNominateThreshold ?
                     ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
                     ` Having a high score is not a requirement - you can still nominate yourself!`;
             }
