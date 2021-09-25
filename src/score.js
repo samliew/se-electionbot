@@ -32,7 +32,6 @@ const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurre
  * @summary calculates the score
  * @param {ApiUser} user API user object
  * @param {Badge[]} userBadges user badges
- * @param {ElectionBadge[]} electionBadges election badges
  * @param {Election} election current election
  * @param {boolean} [isSO] is Stack Overflow election
  * @returns {{
@@ -46,10 +45,11 @@ const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurre
  *  isEligible: boolean
  * }}
  */
-export const calculateScore = (user, userBadges, electionBadges, election, isSO = false) => {
+export const calculateScore = (user, userBadges, election, isSO = false) => {
     const maxRepScore = 20;
     const repRepScore = 1000;
 
+    const { electionBadges } = election;
     const { reputation } = user;
 
     const repScore = Math.min(Math.floor(reputation / repRepScore), maxRepScore);
@@ -170,7 +170,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        const { score, missing, isEligible } = calculateScore(requestedUser, userBadges, badges, election);
+        const { score, missing, isEligible } = calculateScore(requestedUser, userBadges, election);
 
         const missingBadges = missing.badges.election;
         const missingRequiredBadges = missing.badges.required;
