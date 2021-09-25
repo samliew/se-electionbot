@@ -2,7 +2,6 @@ import Client from "chatexchange";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { HerokuClient } from "./herokuClient.js";
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
@@ -18,6 +17,7 @@ import {
     isLovingTheBot,
     isThankingTheBot
 } from "./guards.js";
+import { HerokuClient } from "./herokuClient.js";
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
@@ -408,7 +408,7 @@ import {
                     let [chatDomain, chatRoomId] = chatUrl.split("/rooms/");
                     chatRoomId = +(chatRoomId.match(/^\d+/) || []).pop();
 
-                    if (!["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].some(x => x === `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
+                    if (["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].every(x => x !== `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
                         return `Invalid chat room URL parameter`;
                     }
 
