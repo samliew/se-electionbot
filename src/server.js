@@ -175,22 +175,31 @@ app.get('/config', async ({ query }, res) => {
 app.post('/config', async ({ body }, res) => {
     const { password, values = "" } = /** @type {{ password:string, values?:string }} */(body);
 
-    // Convert request to JSON object - see https://stackoverflow.com/a/8649003
-    const kvps = JSON.parse('{"' + values.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value); });
-
-    // Validation
-    if (Object.keys(kvps).length === 0 || !BOT_CONFIG) {
-        console.error(`Invalid request`);
-        res.redirect(`/config?success=false`);
-        return;
+    if (!BOT_CONFIG) {
+        console.error("bot configuration missing");
+        return res.sendStatus(500);
     }
 
-    const heroku = new HerokuClient(BOT_CONFIG);
+    try {
+        // Convert request to JSON object - see https://stackoverflow.com/a/8649003
+        const kvps = JSON.parse('{"' + values.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value); });
 
-    // Update environment variables
-    await heroku.updateConfigVars(kvps);
+        // Validation
+        if (Object.keys(kvps).length === 0) {
+            console.error(`Invalid request`);
+            return res.redirect(`/config?password=${password}&success=false`);
+        }
 
-    res.redirect(`/config?password=${password}&success=true`);
+        const heroku = new HerokuClient(BOT_CONFIG);
+
+        // Update environment variables
+        await heroku.updateConfigVars(kvps);
+
+        res.redirect(`/config?password=${password}&success=true`);
+    } catch (error) {
+        console.error(`config submit error:\n${error}`);
+        res.redirect(`/config?password=${password}&success=false`);
+    }
 });
 
 /**
