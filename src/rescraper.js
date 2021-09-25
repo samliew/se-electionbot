@@ -1,3 +1,4 @@
+import { HerokuClient } from "./herokuClient.js";
 import { sayElectionSchedule, sayHI } from "./messages.js";
 import { sendMessage } from "./queue.js";
 import { makeURL, wait } from "./utils.js";
@@ -15,7 +16,7 @@ import { makeURL, wait } from "./utils.js";
 export default class Rescraper {
 
     /**
-     * @summary next reschedule timout
+     * @summary next reschedule timeout
      * @type {NodeJS.Timeout|void}
      */
     timeout;
@@ -103,11 +104,11 @@ export default class Rescraper {
         }
 
         // Election chat room has changed
-        if (election.electionChatChanged) {
+        if (election.electionChatRoomChanged) {
 
-            // TODO: Force a restart
-            // Restart Heroku dyno via API, or
-            // Change an environment variable via API
+            // Restart Heroku dyno via API
+            const heroku = new HerokuClient();
+            return await heroku.restartApp() || process.exit(1);
         }
 
         // Primary phase was activated (due to >10 candidates)

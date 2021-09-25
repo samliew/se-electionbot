@@ -2,6 +2,7 @@ import Client from "chatexchange";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
+import { HerokuClient } from "./herokuClient.js";
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
@@ -403,6 +404,24 @@ import {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
                 }, AccessLevel.privileged);
 
+                commander.add("set chatroom", "sets election chat room link", async ({ chatUrl }) => {
+                    let [chatDomain, chatRoomId] = chatUrl.split("/rooms/");
+                    chatRoomId = +(chatRoomId.match(/^\d+/) || []).pop();
+
+                    if (!["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].some(x => x === `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
+                        return `Invalid chat room URL parameter`;
+                    }
+
+                    const heroku = new HerokuClient();
+                    await heroku.updateConfigVars({
+                        "CHAT_DOMAIN": chatDomain,
+                        "CHAT_ROOM_ID": chatRoomId,
+                    });
+
+                    // Unlikely to respond since app is restarting
+                    return `Election chat room changed.`;
+                }, AccessLevel.dev);
+
                 commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
                     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
                     config.updateLastMessageTime(Date.now() + (+num * 6e4) - (throttle * 1e3));
@@ -455,22 +474,23 @@ import {
                 // TODO: Do not show dev-only commands to mods, split to separate dev menu?
                 const outputs = [
                     ["commands", /commands|usage/],
+                    ["alive", /alive|awake|ping/, scriptHostname, scriptInitDate, config],
                     ["say", /say/, originalMessage],
-                    ["alive", /alive/, scriptHostname, scriptInitDate, config],
-                    ["test cron", /test cron/, announcement],
+                    ["greet", /^(greet|welcome)/, election],
+                    ["get time", /get time|time/, election],
                     ["get cron", /get cron/, announcement],
+                    ["test cron", /test cron/, announcement],
                     ["get throttle", /get throttle/, config.throttleSecs],
                     ["set throttle", /set throttle/, content, config],
-                    ["get time", /get time/, election],
-                    ["chatroom", /chatroom/, election],
+                    ["get chatroom", /get chatroom/, election],
+                    ["set chatroom", /set chatroom/, election],
+                    ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
+                    ["unmute", /unmute|clear timeout/, config],
                     ["coffee", /(?:brew|make).+coffee/, user],
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
-                    ["unmute", /unmute|clear timeout/, config],
-                    ["mute", /mute|timeout|sleep/, config, content, config.throttleSecs],
                     ["fun", /fun/, config, content],
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
-                    ["greet", /^(greet|welcome)/, election],
                     ["set access", /set (?:access|level)/, config, user, content]
                 ];
 
