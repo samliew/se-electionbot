@@ -173,7 +173,7 @@ app.get('/config', async ({ query }, res) => {
 
 // POST event from /config form
 app.post('/config', async ({ body }, res) => {
-    const { password, values = "" } = body;
+    const { password, ...fields } = body;
 
     if (!BOT_CONFIG) {
         console.error("bot configuration missing");
@@ -185,11 +185,8 @@ app.post('/config', async ({ body }, res) => {
             console.log(`submitted body:\n"${JSON.stringify(body)}"`);
         }
 
-        // Convert request to JSON object - see https://stackoverflow.com/a/8649003
-        const kvps = JSON.parse('{"' + values.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value); });
-
         // Validation
-        if (Object.keys(kvps).length === 0) {
+        if (Object.keys(fields).length === 0) {
             console.error(`Invalid request`);
             return res.redirect(`/config?password=${password}&success=false`);
         }
@@ -197,7 +194,7 @@ app.post('/config', async ({ body }, res) => {
         const heroku = new HerokuClient(BOT_CONFIG);
 
         // Update environment variables
-        await heroku.updateConfigVars(kvps);
+        await heroku.updateConfigVars(fields);
 
         res.redirect(`/config?password=${password}&success=true`);
     } catch (error) {
