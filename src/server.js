@@ -179,7 +179,7 @@ app.post('/config', async ({ body }, res) => {
     }
 
     // Update environment variables
-    heroku.updateConfigVars(kvps);
+    await heroku.updateConfigVars(kvps);
 
     res.redirect(`/config?password=${password}&success=true`);
 });
