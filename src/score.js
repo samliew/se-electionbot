@@ -71,7 +71,8 @@ export const calculateScore = (user, userBadges, election, isSO = false) => {
             }
         },
         get isEligible() {
-            return !missingRequiredBadges.length && (election.repNominate || 0) <= reputation;
+            const { repNominate = 0 } = election;
+            return !missingRequiredBadges.length && (repNominate <= reputation);
         }
     };
 };
