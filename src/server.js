@@ -1,10 +1,12 @@
 import express from 'express';
 import { join } from 'path';
-import { fetchConfigVars, updateConfigVars } from './api-heroku';
+import { HerokuClient } from "./herokuClient.js";
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
 const app = express().set('port', process.env.PORT || 5000);
+
+const heroku = new HerokuClient();
 
 /**
  * @typedef {import("./config").BotConfig} BotConfig
@@ -143,7 +145,7 @@ app.get('/config', ({ query }, res) => {
         false: `<div class="result error">Error. Could not perform action.</div>`
     };
 
-    const envVars = fetchConfigVars();
+    const envVars = heroku.fetchConfigVars();
     kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`);
 
     res.send(`
@@ -176,7 +178,7 @@ app.post('/config', async ({ body }, res) => {
     }
 
     // Update environment variables
-    updateConfigVars(kvps);
+    heroku.updateConfigVars(kvps);
 
     res.redirect(`/config?password=${password}&success=true`);
 });

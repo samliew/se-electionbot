@@ -1,4 +1,4 @@
-import { restartApp } from "./api-heroku.js";
+import { HerokuClient } from "./herokuClient.js";
 import { sayElectionSchedule, sayHI } from "./messages.js";
 import { sendMessage } from "./queue.js";
 import { makeURL, wait } from "./utils.js";
@@ -107,7 +107,8 @@ export default class Rescraper {
         if (election.electionChatRoomChanged) {
 
             // Restart Heroku dyno via API
-            return await restartApp() || process.exit(1);
+            const heroku = new HerokuClient();
+            return await heroku.restartApp() || process.exit(1);
         }
 
         // Primary phase was activated (due to >10 candidates)

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
-import { fetchConfigVars, updateConfigVars } from "../../src/api-heroku.js";
+import { HerokuClient } from "../../src/herokuClient.js";
 
 describe('Heroku API', function () {
 
@@ -8,19 +8,19 @@ describe('Heroku API', function () {
 
     this.timeout(5e3); // APIs can be slow
 
-    it('should be able to fetch environment variables', async () => {
-        
-        const response = await fetchConfigVars();
+    const heroku = new HerokuClient();
 
-        expect(typeof response).to.equal("object");
+    it('should be able to fetch environment variables', async () => {
+
+        const configVars = await heroku.fetchConfigVars();
+        expect(typeof configVars).to.equal("object");
     });
 
     it('should be able to update environment variables', async () => {
 
-        const configVars = await updateConfigVars({
+        const configVars = await heroku.updateConfigVars({
             "TEST": "pass"
         });
-
         expect(configVars.TEST).to.equal("pass");
     });
 

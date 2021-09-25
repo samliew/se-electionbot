@@ -2,7 +2,7 @@ import Client from "chatexchange";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { updateConfigVars } from "./api-heroku.js";
+import { HerokuClient } from "./herokuClient.js";
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
@@ -409,7 +409,8 @@ import {
                         return `Invalid chat room URL parameter`;
                     }
 
-                    await updateConfigVars({
+                    const heroku = new HerokuClient();
+                    await heroku.updateConfigVars({
                         "CHAT_DOMAIN": chatDomain,
                         "CHAT_ROOM_ID": chatRoomId,
                     });
