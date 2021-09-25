@@ -135,18 +135,16 @@ app.post('/say', async ({ body = {} }, res) => {
 
 
 // Serve /config form
-app.get('/config', ({ query }, res) => {
+app.get('/config', async ({ query }, res) => {
     const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
-
-    let kvpHtml = [];
 
     const statusMap = {
         true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
         false: `<div class="result error">Error. Could not perform action.</div>`
     };
 
-    const envVars = heroku.fetchConfigVars();
-    kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`);
+    const envVars = await heroku.fetchConfigVars();
+    const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`);
 
     res.send(`
         <link rel="icon" href="data:;base64,=" />
@@ -168,7 +166,7 @@ app.post('/config', async ({ body }, res) => {
     const { password, values = "" } = /** @type {{ password:string, values?:string }} */(body);
 
     // Convert request to JSON object - see https://stackoverflow.com/a/8649003
-    const kvps = JSON.parse('{"' + values.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value) });
+    const kvps = JSON.parse('{"' + values.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value); });
 
     // Validation
     if (Object.keys(kvps).length === 0) {
