@@ -219,6 +219,9 @@ import {
         // Get current site mods via API
         const currentSiteMods = await getModerators(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
 
+        // TODO: Also add room owners to list of admins (privileged users)
+        // Then maybe we can do away with ADMIN_IDs env var
+
         // Wait for election page to be scraped
         const election = new Election(electionUrl);
         await election.scrapeElection(config);
