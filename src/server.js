@@ -173,7 +173,7 @@ app.get('/config', async ({ query }, res) => {
 
 // POST event from /config form
 app.post('/config', async ({ body }, res) => {
-    const { password, values = "" } = /** @type {{ password:string, values?:string }} */(body);
+    const { password, values = "" } = body;
 
     if (!BOT_CONFIG) {
         console.error("bot configuration missing");
@@ -182,7 +182,7 @@ app.post('/config', async ({ body }, res) => {
 
     try {
         if (BOT_CONFIG.verbose) {
-            console.log(`submitted values:\n${values}`);
+            console.log(`submitted body:\n"${JSON.stringify(body)}"`);
         }
 
         // Convert request to JSON object - see https://stackoverflow.com/a/8649003
