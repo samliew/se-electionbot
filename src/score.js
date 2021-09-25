@@ -94,7 +94,8 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         }
 
         // If privileged user asking candidate score of another user, get user site id from message
-        if (isAskingForOtherUser) {
+        // TODO: Allow Admins and Devs too, not just mods
+        if (isAskingForOtherUser && isModerator) {
             // @ts-expect-error FIXME
             userId = content.includes(`${election.siteUrl}/users/`) ? +(content.match(/\/users\/(\d+).*(?:\?|$)/)[1]) : +(content.match(/(\d+)(?:\?|$)/)[1]);
         }

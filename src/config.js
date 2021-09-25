@@ -26,11 +26,20 @@ export class BotConfig {
 
     /* Bot variables */
 
-    // To stop bot from replying to too many messages in a short time
-    throttleSecs = +(process.env.THROTTLE_SECS || 2);
-    // Variable to store time of last message in the room (by anyone, including bot)
+    // To stop bot from replying to too many messages in a short time, maintain a throttle with minimum
+    minThrottleSecs = 1.5;
+    _throttleSecs = +(process.env.THROTTLE_SECS || this.minThrottleSecs);
+
+    get throttleSecs() {
+        return this._throttleSecs;
+    }
+    set throttleSecs(newValue) {
+        this._throttleSecs = newValue > this.minThrottleSecs ? newValue : this.minThrottleSecs;
+    }
+
+    // Variable to store time of last message in the room (by anyone, including bot), for idle checking purposes
     lastActivityTime = Date.now();
-    // Variable to store time of last bot sent message for throttling purposes
+    // Variable to store time of last bot sent message, for throttling and muting purposes
     lastMessageTime = -1;
     // Variable to store last message to detect duplicate responses within a short time
     lastMessageContent = "";
@@ -40,6 +49,11 @@ export class BotConfig {
     scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS || 5);
     // Response when bot tries to post the exact same response again
     duplicateResponseText = "Please read my previous message...";
+
+    // Checks if the bot is currently muted
+    get isMuted() {
+        return Date.now() < this.lastMessageTime + this.throttleSecs * 1000;
+    }
 
     /**
      * Maximum length a single message can have

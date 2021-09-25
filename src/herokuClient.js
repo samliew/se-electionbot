@@ -21,19 +21,9 @@ export class HerokuClient {
             debugHeaders: false,
             logger: console,
         });
-    }
-
-    /**
-     * @param {string} name Heroku app name
-     */
-    set appName(name) {
-        this._appName = name || this._appName;
-    }
-
-    /**
      * @param {string} apiKey Heroku API key
      */
-    setApiKey = (apiKey) => {
+    setApiKey(apiKey) {
         this._client.key = apiKey;
     }
 
@@ -41,17 +31,17 @@ export class HerokuClient {
      * @summary get environment variables
      * @return {Promise<any>}
      */
-    fetchConfigVars = async () => {
-        return await this._client.get(`/apps/${this._appName}/config-vars`);
+    async fetchConfigVars() {
+        return await this._client.get(`/apps/${APP_NAME}/config-vars`);
     };
 
     /**
      * @summary update environment variables
      * @param {object} kvp key-value environment variable pairs
      */
-    updateConfigVars = async (kvp) => {
+    async updateConfigVars(kvp) {
         if (typeof kvp !== 'object') return false;
-        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: kvp });
+        return await this._client.patch(`/apps/${APP_NAME}/config-vars`, { body: kvp });
     };
 
     /**
@@ -59,16 +49,16 @@ export class HerokuClient {
      * @param {string} key
      * @param {string} value
      */
-    updateConfigVar = async (key, value) => {
+    async updateConfigVar(key, value) {
         if (key?.length === 0 || value?.length === 0) return false;
-        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: { key: value } });
+        return await this._client.patch(`/apps/${APP_NAME}/config-vars`, { body: { key: value } });
     };
 
     /**
      * @summary restart app by updating a config variable
      * @return {Promise<any>}
      */
-    restartApp = async () => {
+    async restartApp() {
         return await this.updateConfigVar("TEST", "restart-" + Math.floor(Math.random() * 99999) + 1);
     };
 }

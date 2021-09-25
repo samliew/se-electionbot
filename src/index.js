@@ -2,7 +2,6 @@ import Client from "chatexchange";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { HerokuClient } from "./herokuClient.js";
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
@@ -18,6 +17,7 @@ import {
     isLovingTheBot,
     isThankingTheBot
 } from "./guards.js";
+import { HerokuClient } from "./herokuClient.js";
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
@@ -220,6 +220,9 @@ import {
         // Get current site mods via API
         const currentSiteMods = await getModerators(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
 
+        // TODO: Also add room owners to list of admins (privileged users)
+        // Then maybe we can do away with ADMIN_IDs env var
+
         // Wait for election page to be scraped
         const election = new Election(electionUrl);
         await election.scrapeElection(config);
@@ -405,7 +408,7 @@ import {
                     let [chatDomain, chatRoomId] = chatUrl.split("/rooms/");
                     chatRoomId = +(chatRoomId.match(/^\d+/) || []).pop();
 
-                    if (!["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].some(x => x === `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
+                    if (["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].every(x => x !== `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
                         return `Invalid chat room URL parameter`;
                     }
 
@@ -524,8 +527,8 @@ import {
              *   (e.g.: if an individual user makes bot respond more than 5 times in 30 seconds, ignore 2 minutes)
              */
             // If too close to previous message, ignore (apply throttle)
-            if (Date.now() < config.lastMessageTime + config.throttleSecs * 1000) {
-                console.log('THROTTLE - too close to previous message');
+            if (config.isMuted) {
+                console.log('THROTTLE - too close to previous message, or is muted');
                 return;
             }
 
