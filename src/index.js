@@ -411,8 +411,11 @@ import {
                     chatDomain = chatDomain.replace("chat.", "");
 
                     if (["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].every(x => x !== `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
+                        console.error("set chatroom invalid", chatDomain, chatRoomId);
                         return `Invalid chat room URL parameter`;
                     }
+
+                    console.log("set chatroom", chatDomain, chatRoomId);
 
                     const heroku = new HerokuClient();
                     await heroku.updateConfigVars({
