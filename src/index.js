@@ -411,7 +411,7 @@ import {
                     let chatRoomId = +(num.match(/^\d+/)?.pop() || []);
                     chatDomain = chatDomain.replace(/^https?:\/\/(?:chat.)?/, "");
 
-                    if (["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].every(x => x !== `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
+                    if (["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].every(x => x !== chatDomain) || Number.isNaN(chatRoomId)) {
                         console.error("set chatroom invalid", chatDomain, chatRoomId);
                         return `Invalid chat room URL parameter`;
                     }
