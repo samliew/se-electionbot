@@ -45,7 +45,8 @@
     "html-entities": "^2.3.2",
     "node-cache": "^5.1.2",
     "node-cron": "^3.0.0",
-    "patch-package": "^6.2.2"
+    "patch-package": "^6.2.2",
+    "rm": "^0.1.8"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.8",
@@ -59,6 +60,7 @@
     "@types/express": "^4.17.13",
     "@types/express-handlebars": "^5.3.1",
     "@types/mocha": "^9.0.0",
+    "@userscripters/stackexchange-api-types": "^0.3.0",
     "c8": "^7.9.0",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
