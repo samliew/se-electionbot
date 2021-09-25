@@ -416,7 +416,7 @@ import {
 
                     // Unlikely to respond since app is restarting
                     return `Election chat room changed.`;
-                }, AccessLevel.privileged);
+                }, AccessLevel.dev);
 
                 commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
                     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
