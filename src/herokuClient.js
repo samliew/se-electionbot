@@ -43,7 +43,7 @@ export class HerokuClient {
 
     /**
      * @summary get environment variables
-     * @return {Promise<any>}
+     * @return {Promise<object>}
      */
     async fetchConfigVars() {
         const configVars = await this._client.get(`/apps/${this._appName}/config-vars`);
@@ -57,6 +57,7 @@ export class HerokuClient {
     /**
      * @summary update environment variables
      * @param {object} configVars key-value environment variable pairs
+     * @returns {Promise<boolean>}
      */
     async updateConfigVars(configVars) {
         if (typeof configVars !== 'object') return false;
@@ -71,6 +72,7 @@ export class HerokuClient {
      * @summary update a single environment variable
      * @param {string} key
      * @param {string} value
+     * @returns {Promise<boolean>}
      */
     async updateConfigVar(key, value) {
         if (key?.length === 0 || value?.length === 0) return false;
@@ -83,7 +85,7 @@ export class HerokuClient {
 
     /**
      * @summary restart app by updating a config variable
-     * @return {Promise<any>}
+     * @return {Promise<boolean>}
      */
     async restartApp() {
         return await this.updateConfigVar("TEST", "restart-" + Math.floor(Math.random() * 99999) + 1);
