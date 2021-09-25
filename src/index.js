@@ -406,7 +406,9 @@ import {
 
                 commander.add("set chatroom", "sets election chat room link", async ({ chatUrl }) => {
                     let [chatDomain, chatRoomId] = chatUrl.split("/rooms/");
+
                     chatRoomId = +(chatRoomId.match(/^\d+/) || []).pop();
+                    chatDomain = chatDomain.replace("chat.", "");
 
                     if (["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].every(x => x !== `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
                         return `Invalid chat room URL parameter`;
