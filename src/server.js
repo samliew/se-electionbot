@@ -194,7 +194,12 @@ app.post('/config', async ({ body }, res) => {
         const heroku = new HerokuClient(BOT_CONFIG);
 
         // Update environment variables
-        await heroku.updateConfigVars(fields);
+        const status = await heroku.updateConfigVars(fields);
+
+        if (status && BOT_ROOM) {
+            const status = await BOT_ROOM.leave();
+            console.log(`left room ${BOT_ROOM.id} after update: ${status}`);
+        }
 
         res.redirect(`/config?password=${password}&success=true`);
     } catch (error) {
