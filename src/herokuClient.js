@@ -21,6 +21,9 @@ export class HerokuClient {
             debugHeaders: false,
             logger: console,
         });
+    }
+
+    /**
      * @param {string} apiKey Heroku API key
      */
     setApiKey(apiKey) {
@@ -32,7 +35,7 @@ export class HerokuClient {
      * @return {Promise<any>}
      */
     async fetchConfigVars() {
-        return await this._client.get(`/apps/${APP_NAME}/config-vars`);
+        return await this._client.get(`/apps/${this._appName}/config-vars`);
     };
 
     /**
@@ -41,7 +44,7 @@ export class HerokuClient {
      */
     async updateConfigVars(kvp) {
         if (typeof kvp !== 'object') return false;
-        return await this._client.patch(`/apps/${APP_NAME}/config-vars`, { body: kvp });
+        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: kvp });
     };
 
     /**
@@ -51,7 +54,7 @@ export class HerokuClient {
      */
     async updateConfigVar(key, value) {
         if (key?.length === 0 || value?.length === 0) return false;
-        return await this._client.patch(`/apps/${APP_NAME}/config-vars`, { body: { key: value } });
+        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: { key: value } });
     };
 
     /**
