@@ -400,14 +400,15 @@ import {
 
                 commander.add("set throttle", "sets throttle to N (in seconds)", setThrottleCommand, AccessLevel.privileged);
 
-                commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
+                commander.add("get chatroom", "gets election chat room link", ({ chatUrl }) => {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
                 }, AccessLevel.privileged);
 
-                commander.add("set chatroom", "sets election chat room link", async ({ chatUrl }) => {
-                    let [chatDomain, chatRoomId] = chatUrl.split("/rooms/");
+                commander.add("set chatroom", "sets election chat room link", async (content) => {
+                    const [, url] = /(https.+)$/.exec(content) || [];
+                    let [chatDomain, num] = url.split("/rooms/");
 
-                    chatRoomId = +(chatRoomId.match(/^\d+/) || []).pop();
+                    let chatRoomId = +(num.match(/^\d+/)?.pop() || []);
                     chatDomain = chatDomain.replace("chat.", "");
 
                     if (["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].every(x => x !== `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
@@ -488,7 +489,7 @@ import {
                     ["get throttle", /get throttle/, config.throttleSecs],
                     ["set throttle", /set throttle/, content, config],
                     ["get chatroom", /get chatroom/, election],
-                    ["set chatroom", /set chatroom/, election],
+                    ["set chatroom", /set chatroom/, content],
                     ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
                     ["coffee", /(?:brew|make).+coffee/, user],
