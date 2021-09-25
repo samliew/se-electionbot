@@ -10,11 +10,11 @@ export const herokuClient = new Heroku({
     logger: console,
 });
 
-// API documentation
+// Heroku API documentation
 // https://devcenter.heroku.com/articles/platform-api-reference
 
 /**
- * @summary get Heroku environment variable(s)
+ * @summary get environment variables
  * @return {Promise<any>}
  */
 export const fetchConfigVars = async () => {
@@ -22,10 +22,28 @@ export const fetchConfigVars = async () => {
 };
 
 /**
- * @summary update Heroku environment variable(s)
+ * @summary update environment variables
  * @param {object} kvp key-value environment variable pairs
  */
 export const updateConfigVars = async (kvp) => {
     if(typeof kvp !== 'object') return false;
     return await herokuClient.patch(`/apps/${APP_NAME}/config-vars`, { body: kvp });
+};
+
+/**
+ * @summary update a single environment variable
+ * @param {string} key
+ * @param {string} value
+ */
+export const updateConfigVar = async (key, value) => {
+    if (key?.length === 0 || value?.length === 0) return false;
+    return await herokuClient.patch(`/apps/${APP_NAME}/config-vars`, { body: { key: value } });
+};
+
+/**
+ * @summary restart app by updating a config variable
+ * @return {Promise<any>}
+ */
+export const restartApp = async () => {
+    return await updateConfigVar("TEST", "restart-" + Math.floor(Math.random() * 99999) + 1);
 };

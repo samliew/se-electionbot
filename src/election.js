@@ -86,7 +86,7 @@ export default class Election {
      * @summary checks if the election chat room link has changed/found for the first time
      * @returns {boolean}
      */
-    get electionChatChanged() {
+    get electionChatRoomChanged() {
         const { prev, chatUrl, chatDomain, chatRoomId } = this;
         const chatUrlChanged = prev.chatUrl !== chatUrl;
         const chatDomainChanged = prev.chatDomain !== chatDomain;

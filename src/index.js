@@ -2,6 +2,7 @@ import Client from "chatexchange";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
+import { updateConfigVars } from "./api-heroku.js";
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
@@ -400,6 +401,23 @@ import {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
                 }, AccessLevel.privileged);
 
+                commander.add("set chatroom", "sets election chat room link", async ({ chatUrl }) => {
+                    let [chatDomain, chatRoomId] = chatUrl.split("/rooms/");
+                    chatRoomId = +chatRoomId.replace(/\D+/g, "");
+
+                    if (!["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].some(x => x === `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
+                        return `Invalid chat room URL parameter`;
+                    }
+
+                    await updateConfigVars({
+                        "CHAT_DOMAIN": chatDomain,
+                        "CHAT_ROOM_ID": chatRoomId,
+                    });
+
+                    // Unlikely to respond since app is restarting
+                    return `Election chat room changed.`;
+                }, AccessLevel.privileged);
+
                 commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
                     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
                     config.updateLastMessageTime(Date.now() + (+num * 6e4) - (throttle * 1e3));
@@ -460,6 +478,7 @@ import {
                     ["set throttle", /set throttle/, content, config],
                     ["get time", /get time/, election],
                     ["chatroom", /chatroom/, election],
+                    ["set chatroom", /set chatroom/, election],
                     ["coffee", /(?:brew|make).+coffee/, user],
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
                     ["unmute", /unmute|clear timeout/, config],
