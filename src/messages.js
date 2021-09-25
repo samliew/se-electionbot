@@ -1,5 +1,7 @@
+import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
-import { getRandomOops } from "./random.js";
+import { getRandomOops, RandomArray } from "./random.js";
+import { calculateScore } from "./score.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, pluralize, pluralizePhrase
@@ -447,4 +449,32 @@ export const sayNumberOfPositions = (_config, election, _text) => {
     const [_rule, modal] = rules.find(([rule]) => rule) || [, `${currBe}/${pastBe}/${future}`];
 
     return `${numPositions} mod${suffix} ${modal} elected`;
+};
+
+/**
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {string} text message content
+ * @returns {Promise<string>}
+ */
+export const sayUserEligibility = async (config, election, text) => {
+    const userId = +text.replace(/\D/g, "");
+
+    const { chatDomain, apiKeyPool } = config;
+
+    const apiSlug = chatDomain.split(".").slice(0, -1).join(".");
+
+    const userBadges = await getBadges(config, userId, apiSlug, getStackApiKey(apiKeyPool));
+
+    const requestedUser = await getUserInfo(config, userId, apiSlug, getStackApiKey(apiKeyPool));
+
+    if (!requestedUser) {
+        return `Can't answer now, please ask me about it later`;
+    };
+
+    const { isEligible } = calculateScore(requestedUser, userBadges, election);
+
+    const nlp = new RandomArray("nominate", "be elected", "become a mod");
+
+    return `User ${requestedUser.display_name} is${isEligible ? "" : " not"} eligible to ${nlp.getRandom()}`;
 };
