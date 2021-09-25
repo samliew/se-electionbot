@@ -8,16 +8,17 @@ export class HerokuClient {
     _client;
 
     /**
+     * @param {import("./config").BotConfig} config bot configuration
      * @param {string|null} apiKey Heroku API key
      */
-    constructor(apiKey = null) {
+    constructor(config, apiKey = null) {
 
         this._appName = process.env.HEROKU_APP_NAME;
 
         this._client = new Heroku({
             token: apiKey || process.env.HEROKU_API_TOKEN,
             parseJSON: true,
-            debug: process.env.DEBUG === "true" && process.env.VERBOSE === "true",
+            debug: config.debug && config.verbose,
             debugHeaders: false,
             logger: console,
         });

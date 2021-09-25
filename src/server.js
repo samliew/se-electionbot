@@ -6,8 +6,6 @@ const __dirname = new URL(".", import.meta.url).pathname;
 
 const app = express().set('port', process.env.PORT || 5000);
 
-const heroku = new HerokuClient();
-
 /**
  * @typedef {import("./config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
@@ -146,6 +144,13 @@ app.get('/config', async ({ query }, res) => {
     // prevents 'undefined' from being shown
     const status = statusMap[success] || "";
 
+    if (!BOT_CONFIG) {
+        console.error("bot configuration missing");
+        return res.sendStatus(500);
+    }
+
+    const heroku = new HerokuClient(BOT_CONFIG);
+
     const envVars = await heroku.fetchConfigVars();
     const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`).join("");
 
@@ -172,11 +177,13 @@ app.post('/config', async ({ body }, res) => {
     const kvps = JSON.parse('{"' + values.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value); });
 
     // Validation
-    if (Object.keys(kvps).length === 0) {
+    if (Object.keys(kvps).length === 0 || !BOT_CONFIG) {
         console.error(`Invalid request`);
         res.redirect(`/config?success=false`);
         return;
     }
+
+    const heroku = new HerokuClient(BOT_CONFIG);
 
     // Update environment variables
     await heroku.updateConfigVars(kvps);

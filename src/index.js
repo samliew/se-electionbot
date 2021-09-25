@@ -418,7 +418,7 @@ import {
 
                     console.log("set chatroom", chatDomain, chatRoomId);
 
-                    const heroku = new HerokuClient();
+                    const heroku = new HerokuClient(config);
                     await heroku.updateConfigVars({
                         "CHAT_DOMAIN": chatDomain,
                         "CHAT_ROOM_ID": chatRoomId,
