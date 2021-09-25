@@ -181,6 +181,10 @@ app.post('/config', async ({ body }, res) => {
     }
 
     try {
+        if (BOT_CONFIG.verbose) {
+            console.log(`submitted values:\n${values}`);
+        }
+
         // Convert request to JSON object - see https://stackoverflow.com/a/8649003
         const kvps = JSON.parse('{"' + values.replace(/&/g, '","').replace(/=/g, '":"') + '"}', function (key, value) { return key === "" ? value : decodeURIComponent(value); });
 
