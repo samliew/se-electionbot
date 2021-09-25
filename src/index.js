@@ -403,7 +403,7 @@ import {
 
                 commander.add("set chatroom", "sets election chat room link", async ({ chatUrl }) => {
                     let [chatDomain, chatRoomId] = chatUrl.split("/rooms/");
-                    chatRoomId = +chatRoomId.replace(/\D+/g, "");
+                    chatRoomId = +(chatRoomId.match(/^\d+/) || []).pop();
 
                     if (!["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].some(x => x === `https://${chatDomain}`) || Number.isNaN(chatRoomId)) {
                         return `Invalid chat room URL parameter`;
@@ -471,23 +471,23 @@ import {
                 // TODO: Do not show dev-only commands to mods, split to separate dev menu?
                 const outputs = [
                     ["commands", /commands|usage/],
+                    ["alive", /alive|awake|ping/, scriptHostname, scriptInitDate, config],
                     ["say", /say/, originalMessage],
-                    ["alive", /alive/, scriptHostname, scriptInitDate, config],
-                    ["test cron", /test cron/, announcement],
+                    ["greet", /^(greet|welcome)/, election],
+                    ["get time", /get time|time/, election],
                     ["get cron", /get cron/, announcement],
+                    ["test cron", /test cron/, announcement],
                     ["get throttle", /get throttle/, config.throttleSecs],
                     ["set throttle", /set throttle/, content, config],
-                    ["get time", /get time/, election],
-                    ["chatroom", /chatroom/, election],
+                    ["get chatroom", /get chatroom/, election],
                     ["set chatroom", /set chatroom/, election],
+                    ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
+                    ["unmute", /unmute|clear timeout/, config],
                     ["coffee", /(?:brew|make).+coffee/, user],
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
-                    ["unmute", /unmute|clear timeout/, config],
-                    ["mute", /mute|timeout|sleep/, config, content, config.throttleSecs],
                     ["fun", /fun/, config, content],
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
-                    ["greet", /^(greet|welcome)/, election],
                     ["set access", /set (?:access|level)/, config, user, content]
                 ];
 
