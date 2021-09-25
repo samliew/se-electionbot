@@ -11,14 +11,14 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedIfModsArePaid, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedIfModsArePaid, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
     isHatingTheBot,
     isLovingTheBot,
     isThankingTheBot
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecret, RandomArray } from "./random.js";
@@ -113,33 +113,6 @@ import {
     ];
     const scriptInitDate = new Date();
 
-    /**
-     * @description Site election badges, defaults to Stack Overflow's
-     * @type {ElectionBadge[]}
-     */
-    const electionBadges = [
-        { name: 'Deputy', required: true, type: "moderation", badge_id: 1002 },
-        { name: 'Civic Duty', required: true, type: "moderation", badge_id: 32 },
-        { name: 'Cleanup', required: false, type: "moderation", badge_id: 4 },
-        { name: 'Electorate', required: false, type: "moderation", badge_id: 155 },
-        { name: 'Marshal', required: false, type: "moderation", badge_id: 1298 },
-        { name: 'Sportsmanship', required: false, type: "moderation", badge_id: 805 },
-        { name: 'Reviewer', required: false, type: "moderation", badge_id: 1478 },
-        { name: 'Steward', required: false, type: "moderation", badge_id: 2279 },
-        { name: 'Constituent', required: false, type: "participation", badge_id: 1974 },
-        { name: 'Convention', required: true, type: "participation", badge_id: 901 },
-        { name: 'Enthusiast', required: false, type: "participation", badge_id: 71 },
-        { name: 'Investor', required: false, type: "participation", badge_id: 219 },
-        { name: 'Quorum', required: false, type: "participation", badge_id: 900 },
-        { name: 'Yearling', required: false, type: "participation", badge_id: 13 },
-        { name: 'Organizer', required: false, type: "editing", badge_id: 5 },
-        { name: 'Copy Editor', required: false, type: "editing", badge_id: 223 },
-        { name: 'Explainer', required: false, type: "editing", badge_id: 4368 },
-        { name: 'Refiner', required: false, type: "editing", badge_id: 4369 },
-        { name: 'Tag Editor', required: false, type: "editing", badge_id: 254 },
-        { name: 'Strunk & White', required: true, type: "editing", badge_id: 12 },
-    ];
-
     // Rarely changed until there's a Stack Overflow election
     const soPastAndPresentModIds = [
         34397, 50049, 102937, 267, 419, 106224, 396458, 50776, 105971, 2598,
@@ -193,6 +166,9 @@ import {
      */
     const main = async () => {
 
+        const election = new Election(electionUrl);
+        const { electionBadges } = election;
+
         // Get current site named badges (i.e.: non-tag badges)
         if (!isStackOverflow) {
             const allNamedBadges = await getAllNamedBadges(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
@@ -215,7 +191,6 @@ import {
         // Then maybe we can do away with ADMIN_IDs env var
 
         // Wait for election page to be scraped
-        const election = new Election(electionUrl);
         await election.scrapeElection(config);
         const { status, errors } = election.validate();
         if (!status) {
@@ -848,6 +823,9 @@ import {
                 }
                 else if (isHatingTheBot(content)) {
                     responseText = getRandomNegative();
+                }
+                else if (isAskedForUserEligibility(content)) {
+                    responseText = await sayUserEligibility(config, election, content);
                 }
 
 
