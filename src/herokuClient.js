@@ -26,7 +26,7 @@ export class HerokuClient {
     /**
      * @param {string} apiKey Heroku API key
      */
-    setApiKey = (apiKey) => {
+    setApiKey(apiKey) {
         this._client.key = apiKey;
     }
 
@@ -34,7 +34,7 @@ export class HerokuClient {
      * @summary get environment variables
      * @return {Promise<any>}
      */
-    fetchConfigVars = async () => {
+    async fetchConfigVars() {
         return await this._client.get(`/apps/${APP_NAME}/config-vars`);
     };
 
@@ -42,7 +42,7 @@ export class HerokuClient {
      * @summary update environment variables
      * @param {object} kvp key-value environment variable pairs
      */
-    updateConfigVars = async (kvp) => {
+    async updateConfigVars(kvp) {
         if (typeof kvp !== 'object') return false;
         return await this._client.patch(`/apps/${APP_NAME}/config-vars`, { body: kvp });
     };
@@ -52,7 +52,7 @@ export class HerokuClient {
      * @param {string} key
      * @param {string} value
      */
-    updateConfigVar = async (key, value) => {
+    async updateConfigVar(key, value) {
         if (key?.length === 0 || value?.length === 0) return false;
         return await this._client.patch(`/apps/${APP_NAME}/config-vars`, { body: { key: value } });
     };
@@ -61,7 +61,7 @@ export class HerokuClient {
      * @summary restart app by updating a config variable
      * @return {Promise<any>}
      */
-    restartApp = async () => {
+    async restartApp() {
         return await this.updateConfigVar("TEST", "restart-" + Math.floor(Math.random() * 99999) + 1);
     };
 }
