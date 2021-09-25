@@ -7,6 +7,16 @@ export class HerokuClient {
 
     _client;
 
+    // Mask some config vars
+    _sensitiveKeys = [
+        "ACCOUNT_EMAIL",
+        "ACCOUNT_PASSWORD",
+        "HEROKU_API_TOKEN",
+        "HEROKU_APP_NAME",
+        "MAINTENANCE_PAGE_URL",
+        "SCRIPT_HOSTNAME",
+    ];
+
     /**
      * @param {string|null} apiKey Heroku API key
      */
@@ -35,16 +45,25 @@ export class HerokuClient {
      * @return {Promise<any>}
      */
     async fetchConfigVars() {
-        return await this._client.get(`/apps/${this._appName}/config-vars`);
+        const configVars = await this._client.get(`/apps/${this._appName}/config-vars`);
+
+        // Remove sensitive keys
+        this._sensitiveKeys.every(key => delete configVars[key]);
+
+        return configVars;
     };
 
     /**
      * @summary update environment variables
-     * @param {object} kvp key-value environment variable pairs
+     * @param {object} configVars key-value environment variable pairs
      */
-    async updateConfigVars(kvp) {
-        if (typeof kvp !== 'object') return false;
-        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: kvp });
+    async updateConfigVars(configVars) {
+        if (typeof configVars !== 'object') return false;
+
+        // Do not update requests with sensitive keys
+        if (this._sensitiveKeys.some(key => Object.keys(configVars).includes(key))) return false;
+
+        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: configVars }) && true;
     };
 
     /**
@@ -54,7 +73,11 @@ export class HerokuClient {
      */
     async updateConfigVar(key, value) {
         if (key?.length === 0 || value?.length === 0) return false;
-        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: { key: value } });
+
+        // Do not update sensitive keys
+        if (this._sensitiveKeys.includes(key)) return false;
+
+        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: { key: value } }) && true;
     };
 
     /**

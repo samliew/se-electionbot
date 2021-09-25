@@ -54,7 +54,7 @@ app.use("/say", ({ query, ip, hostname, body = {} }, res, next) => {
         console.log(`Unauthorized connect from:
         IP:   ${ip}
         Host: ${hostname}
-        Pass:  ${password}
+        Pass: ${password}
         `);
         return res.sendStatus(404);
     }
@@ -74,7 +74,7 @@ app.use("/config", ({ query, ip, hostname, body = {} }, res, next) => {
         console.log(`Unauthorized connect from:
         IP:   ${ip}
         Host: ${hostname}
-        Pass:  ${password}
+        Pass: ${password}
         `);
         return res.sendStatus(404);
     }
@@ -140,13 +140,15 @@ app.get('/config', async ({ query }, res) => {
 
     const statusMap = {
         true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
-        false: `<div class="result error">Error. Could not perform action.</div>`
+        false: `<div class="result error">Error. Could not perform action.</div>`,
+        undefined: ""
     };
 
     // prevents 'undefined' from being shown
-    const status = statusMap[success] || "";
+    const status = statusMap[success];
 
     const envVars = await heroku.fetchConfigVars();
+
     const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`).join("");
 
     res.send(`

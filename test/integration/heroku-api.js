@@ -18,10 +18,20 @@ describe('Heroku API', function () {
 
     it('should be able to update environment variables', async () => {
 
-        const configVars = await heroku.updateConfigVars({
+        const success = await heroku.updateConfigVars({
             "TEST": "pass"
         });
-        expect(configVars.TEST).to.equal("pass");
+        expect(success).to.be.true;
+    });
+
+    it('should not be able to update sensitive environment variables', async () => {
+
+        const success = await heroku.updateConfigVars({
+            "TEST": "fail",
+            "ACCOUNT_EMAIL": "fail",
+            "ACCOUNT_PASSWORD": "fail"
+        });
+        expect(success).to.be.false;
     });
 
 });
