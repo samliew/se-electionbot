@@ -17,6 +17,7 @@ import {
     isLovingTheBot,
     isThankingTheBot
 } from "./guards.js";
+import { HerokuClient } from "./herokuClient.js";
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
@@ -438,7 +439,10 @@ import {
                 commander.add("commands", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
 
                 commander.add("die", "shuts down the bot in case of emergency", () => {
-                    wait(3).then(() => process.exit(0));
+                    wait(3).then(() => {
+                        room.leave();
+                        process.exit(0);
+                    });
                     return "initiating shutdown sequence";
                 }, AccessLevel.dev);
 
@@ -455,22 +459,22 @@ import {
                 // TODO: Do not show dev-only commands to mods, split to separate dev menu?
                 const outputs = [
                     ["commands", /commands|usage/],
+                    ["alive", /alive|awake|ping/, scriptHostname, scriptInitDate, config],
                     ["say", /say/, originalMessage],
-                    ["alive", /alive/, scriptHostname, scriptInitDate, config],
-                    ["test cron", /test cron/, announcement],
+                    ["greet", /^(greet|welcome)/, election],
+                    ["get time", /get time|time/, election],
                     ["get cron", /get cron/, announcement],
+                    ["test cron", /test cron/, announcement],
                     ["get throttle", /get throttle/, config.throttleSecs],
                     ["set throttle", /set throttle/, content, config],
-                    ["get time", /get time/, election],
                     ["chatroom", /chatroom/, election],
+                    ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
+                    ["unmute", /unmute|clear timeout/, config],
                     ["coffee", /(?:brew|make).+coffee/, user],
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
-                    ["unmute", /unmute|clear timeout/, config],
-                    ["mute", /mute|timeout|sleep/, config, content, config.throttleSecs],
                     ["fun", /fun/, config, content],
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
-                    ["greet", /^(greet|welcome)/, election],
                     ["set access", /set (?:access|level)/, config, user, content]
                 ];
 

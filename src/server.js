@@ -1,5 +1,6 @@
 import express from 'express';
 import { join } from 'path';
+import { HerokuClient } from "./herokuClient.js";
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
@@ -48,10 +49,30 @@ app.use("/say", ({ query, ip, hostname, body = {} }, res, next) => {
     const validPwd = password === process.env.PASSWORD;
 
     if (!validPwd) {
-        console.log(`unauthorized connect from:
+        console.log(`Unauthorized connect from:
         IP:   ${ip}
         Host: ${hostname}
-        Pass:  ${password}
+        Pass: ${password}
+        `);
+        return res.sendStatus(404);
+    }
+
+    next();
+});
+
+app.use("/config", ({ query, ip, hostname, body = {} }, res, next) => {
+    const { password: pwdFromBody = "" } = body;
+    const { password: pwdFromQuery = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
+
+    const password = pwdFromQuery || pwdFromBody;
+
+    const validPwd = password === process.env.PASSWORD;
+
+    if (!validPwd) {
+        console.log(`Unauthorized connect from:
+        IP:   ${ip}
+        Host: ${hostname}
+        Pass: ${password}
         `);
         return res.sendStatus(404);
     }
@@ -70,23 +91,23 @@ app.get('/say', ({ query }, res) => {
     };
 
     if (!BOT_CONFIG) {
-        console.error("bot configuration missing");
+        console.error("Bot configuration missing");
         return res.sendStatus(500);
     }
 
     const { chatDomain, chatRoomId, } = BOT_CONFIG;
 
     res.send(`
-                <link rel="icon" href="data:;base64,=" />
-                <link rel="stylesheet" href="css/styles.css" />
-                <h3>ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}: ${chatRoomId}</a>:</h3>
-                <form method="post">
-                    <input type="text" name="message" placeholder="message" maxlength="500" value="${decodeURIComponent(message)}" />
-                    <input type="hidden" name="password" value="${password}" />
-                    <button>Send</button>
-                </form>
-                ${statusMap[success]}
-            `);
+        <link rel="icon" href="data:;base64,=" />
+        <link rel="stylesheet" href="css/styles.css" />
+        <h3>ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}: ${chatRoomId}</a>:</h3>
+        <form method="post">
+            <input type="text" name="message" placeholder="message" maxlength="500" value="${decodeURIComponent(message)}" />
+            <input type="hidden" name="password" value="${password}" />
+            <button>Send</button>
+        </form>
+        ${statusMap[success]}
+    `);
 
     return;
 });
@@ -108,6 +129,83 @@ app.post('/say', async ({ body = {} }, res) => {
     BOT_CONFIG.lastActivityTime = Date.now();
 
     res.redirect(`/say?password=${password}&success=true`);
+});
+
+
+// Serve /config form
+app.get('/config', async ({ query }, res) => {
+    const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
+
+    const statusMap = {
+        true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
+        false: `<div class="result error">Error. Could not perform action.</div>`,
+        undefined: ""
+    };
+
+    // prevents 'undefined' from being shown
+    const status = statusMap[success];
+
+    if (!BOT_CONFIG) {
+        console.error("bot configuration missing");
+        return res.sendStatus(500);
+    }
+
+    const heroku = new HerokuClient(BOT_CONFIG);
+
+    const envVars = await heroku.fetchConfigVars();
+
+    const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`).join("");
+
+    res.send(`
+        <link rel="icon" href="data:;base64,=" />
+        <link rel="stylesheet" href="css/styles.css" />
+        <h3>Update ElectionBot environment variables</h3>
+        <form method="post">
+            ${kvpHtml}
+            <input type="hidden" name="password" value="${password}" />
+            <button>Submit</button>
+        </form>
+        ${status}
+    `);
+
+    return;
+});
+
+// POST event from /config form
+app.post('/config', async ({ body }, res) => {
+    const { password, ...fields } = body;
+
+    if (!BOT_CONFIG) {
+        console.error("bot configuration missing");
+        return res.sendStatus(500);
+    }
+
+    try {
+        if (BOT_CONFIG.verbose) {
+            console.log(`submitted body:\n"${JSON.stringify(body)}"`);
+        }
+
+        // Validation
+        if (Object.keys(fields).length === 0) {
+            console.error(`Invalid request`);
+            return res.redirect(`/config?password=${password}&success=false`);
+        }
+
+        const heroku = new HerokuClient(BOT_CONFIG);
+
+        // Update environment variables
+        const status = await heroku.updateConfigVars(fields);
+
+        if (status && BOT_ROOM) {
+            const status = await BOT_ROOM.leave();
+            console.log(`left room ${BOT_ROOM.id} after update: ${status}`);
+        }
+
+        res.redirect(`/config?password=${password}&success=true`);
+    } catch (error) {
+        console.error(`config submit error:\n${error}`);
+        res.redirect(`/config?password=${password}&success=false`);
+    }
 });
 
 /**
