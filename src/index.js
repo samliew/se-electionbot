@@ -400,38 +400,9 @@ import {
 
                 commander.add("set throttle", "sets throttle to N (in seconds)", setThrottleCommand, AccessLevel.privileged);
 
-                commander.add("get chatroom", "gets election chat room link", ({ chatUrl }) => {
+                commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
                 }, AccessLevel.privileged);
-
-                commander.add("set chatroom", "sets election chat room link", async (content) => {
-                    const [, url] = /(https.+)$/.exec(content) || [];
-                    let [chatDomain, num] = url.split("/rooms/");
-
-                    let chatRoomId = +(num.match(/^\d+/)?.pop() || []);
-                    chatDomain = chatDomain.replace(/^https?:\/\/(?:chat.)?/, "");
-
-                    if (["stackoverflow.com", "stackexchange.com", "meta.stackexchange.com"].every(x => x !== chatDomain) || Number.isNaN(chatRoomId)) {
-                        console.error("set chatroom invalid", chatDomain, chatRoomId);
-                        return `Invalid chat room URL parameter`;
-                    }
-
-                    console.log("set chatroom", chatDomain, chatRoomId);
-
-                    const heroku = new HerokuClient(config);
-                    const status = await heroku.updateConfigVars({
-                        "CHAT_DOMAIN": chatDomain,
-                        "CHAT_ROOM_ID": chatRoomId,
-                    });
-
-                    if (status && room) {
-                        const status = await room.leave();
-                        console.log(`left room ${room.id} after update: ${status}`);
-                    }
-
-                    // Unlikely to respond since app is restarting
-                    return `Election chat room changed.`;
-                }, AccessLevel.dev);
 
                 commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
                     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
@@ -496,8 +467,7 @@ import {
                     ["test cron", /test cron/, announcement],
                     ["get throttle", /get throttle/, config.throttleSecs],
                     ["set throttle", /set throttle/, content, config],
-                    ["get chatroom", /get chatroom/, election],
-                    ["set chatroom", /set chatroom/, content],
+                    ["chatroom", /chatroom/, election],
                     ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
                     ["coffee", /(?:brew|make).+coffee/, user],

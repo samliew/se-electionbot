@@ -107,7 +107,7 @@ export default class Rescraper {
         if (election.electionChatRoomChanged) {
 
             // Restart Heroku dyno via API
-            const heroku = new HerokuClient();
+            const heroku = new HerokuClient(config);
             return await heroku.restartApp() || process.exit(1);
         }
 
