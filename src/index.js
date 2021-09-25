@@ -419,10 +419,15 @@ import {
                     console.log("set chatroom", chatDomain, chatRoomId);
 
                     const heroku = new HerokuClient(config);
-                    await heroku.updateConfigVars({
+                    const status = await heroku.updateConfigVars({
                         "CHAT_DOMAIN": chatDomain,
                         "CHAT_ROOM_ID": chatRoomId,
                     });
+
+                    if (status && room) {
+                        const status = await room.leave();
+                        console.log(`left room ${room.id} after update: ${status}`);
+                    }
 
                     // Unlikely to respond since app is restarting
                     return `Election chat room changed.`;
@@ -463,7 +468,10 @@ import {
                 commander.add("commands", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
 
                 commander.add("die", "shuts down the bot in case of emergency", () => {
-                    wait(3).then(() => process.exit(0));
+                    wait(3).then(() => {
+                        room.leave();
+                        process.exit(0);
+                    });
                     return "initiating shutdown sequence";
                 }, AccessLevel.dev);
 
