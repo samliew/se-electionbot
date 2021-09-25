@@ -147,7 +147,7 @@ app.get('/config', async ({ query }, res) => {
     const status = statusMap[success] || "";
 
     const envVars = await heroku.fetchConfigVars();
-    const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`);
+    const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`).join("");
 
     res.send(`
         <link rel="icon" href="data:;base64,=" />
