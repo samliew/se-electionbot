@@ -1,7 +1,5 @@
 import Heroku from 'heroku-client';
 
-export const APP_NAME = "se-electionbot";
-
 // Heroku API documentation
 // https://devcenter.heroku.com/articles/platform-api-reference
 
@@ -14,6 +12,8 @@ export class HerokuClient {
      */
     constructor(apiKey = null) {
 
+        this._appName = process.env.HEROKU_APP_NAME;
+
         this._client = new Heroku({
             token: apiKey || process.env.HEROKU_API_TOKEN,
             parseJSON: true,
@@ -21,6 +21,13 @@ export class HerokuClient {
             debugHeaders: false,
             logger: console,
         });
+    }
+
+    /**
+     * @param {string} name Heroku app name
+     */
+    set appName(name) {
+        this._appName = name || this._appName;
     }
 
     /**
@@ -35,7 +42,7 @@ export class HerokuClient {
      * @return {Promise<any>}
      */
     fetchConfigVars = async () => {
-        return await this._client.get(`/apps/${APP_NAME}/config-vars`);
+        return await this._client.get(`/apps/${this._appName}/config-vars`);
     };
 
     /**
@@ -44,7 +51,7 @@ export class HerokuClient {
      */
     updateConfigVars = async (kvp) => {
         if (typeof kvp !== 'object') return false;
-        return await this._client.patch(`/apps/${APP_NAME}/config-vars`, { body: kvp });
+        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: kvp });
     };
 
     /**
@@ -54,7 +61,7 @@ export class HerokuClient {
      */
     updateConfigVar = async (key, value) => {
         if (key?.length === 0 || value?.length === 0) return false;
-        return await this._client.patch(`/apps/${APP_NAME}/config-vars`, { body: { key: value } });
+        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: { key: value } });
     };
 
     /**
