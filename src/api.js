@@ -7,7 +7,8 @@ import { apiBase, apiVer, fetchUrl } from "./utils.js";
 export let allNetworkSites = [];
 
 /**
- * @typedef {import("./utils.js").BadgeItem} BadgeItem
+ * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
+ * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
  * @typedef {import("./config.js").BotConfig} BotConfig
  */
 
@@ -29,7 +30,7 @@ export const getStackApiKey = (keyPool) => {
  * @param {string} site election site slug
  * @param {string} key api key
  * @param {number} [page] API response page
- * @returns {Promise<BadgeItem[]>}
+ * @returns {Promise<Badge[]>}
  */
 export const getAllNamedBadges = async (config, site, key, page = 1) => {
     // https://api.stackexchange.com/2.3/badges/name?pagesize=100&order=desc&sort=rank&site=academia
@@ -43,7 +44,7 @@ export const getAllNamedBadges = async (config, site, key, page = 1) => {
         key
     }).toString();
 
-    const { items = [], has_more } = /**@type {{ items: BadgeItem[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
+    const { items = [], has_more } = /**@type {{ items: Badge[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
 
     if (has_more) {
         const otherItems = await getAllNamedBadges(config, site, key, page + 1);
@@ -62,7 +63,7 @@ export const getAllNamedBadges = async (config, site, key, page = 1) => {
  * @param {string} site election site slug
  * @param {string} key api key
  * @param {number} [page] API response page
- * @returns {Promise<BadgeItem[]>}
+ * @returns {Promise<Badge[]>}
  */
 export const getBadges = async (config, userId, site, key, page = 1) => {
 
@@ -76,7 +77,7 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
         key
     }).toString();
 
-    const { items = [], has_more } = /**@type {{ items: BadgeItem[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
+    const { items = [], has_more } = /**@type {{ items: Badge[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
 
     if (has_more) {
         const otherItems = await getBadges(config, userId, site, key, page + 1);
@@ -129,17 +130,12 @@ export const getModerators = async (config, site, key, page = 1) => {
 };
 
 /**
- * @typedef {{
- *  user_id: number,
- *  display_name: string
- * }} UserInfo
- *
  * @summary gets the user info from the API
  * @param {BotConfig} config
  * @param {number} userId userId to request info for
  * @param {string} site election site slug
  * @param {string} key api key
- * @returns {Promise<UserInfo|null>}
+ * @returns {Promise<User|null>}
  */
 export const getUserInfo = async (config, userId, site, key) => {
 
@@ -150,7 +146,7 @@ export const getUserInfo = async (config, userId, site, key) => {
         key
     }).toString();
 
-    const { items = [] } = /** @type {{ items: UserInfo[] }} */(await fetchUrl(config, userURL.toString(), true)) || {};
+    const { items = [] } = /** @type {{ items: User[] }} */(await fetchUrl(config, userURL.toString(), true)) || {};
 
     const [userInfo] = items;
 
