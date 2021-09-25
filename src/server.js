@@ -138,15 +138,13 @@ app.post('/say', async ({ body = {} }, res) => {
 app.get('/config', async ({ query }, res) => {
     const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
 
-    let kvpHtml = [];
-
     const statusMap = {
         true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
         false: `<div class="result error">Error. Could not perform action.</div>`
     };
 
     const envVars = await heroku.fetchConfigVars();
-    kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`);
+    const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" value="${envVars[key]}" /></div>`);
 
     res.send(`
         <link rel="icon" href="data:;base64,=" />
