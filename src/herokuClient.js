@@ -29,16 +29,16 @@ export class HerokuClient {
             token: apiKey || process.env.HEROKU_API_TOKEN,
             parseJSON: true,
             debug: config.debug && config.verbose,
-            debugHeaders: false,
             logger: console,
         });
     }
 
     /**
-     * @param {string} apiKey Heroku API key
+     * @summary sets client API key
+     * @param {string} token Heroku API key
      */
-    setApiKey(apiKey) {
-        this._client.key = apiKey;
+    setApiKey(token) {
+        this._client.options.token = token;
     }
 
     /**
