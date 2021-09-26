@@ -417,13 +417,20 @@ import {
 
                 commander.add("get time", "gets current UTC time and the election phase time", ({ phase, dateElection }) => {
                     const current = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
-
                     if (!['election', 'ended', 'cancelled'].includes(phase)) {
                         return `${current} (election phase starts ${linkToRelativeTimestamp(dateElection)})`;
                     }
-
                     return current;
                 }, AccessLevel.privileged);
+
+                commander.add("leave room", "leave room (room ID)", async (content, client) => {
+                    const [, roomId = ""] = /\s+(\d+)$/.exec(content) || [];
+                    return roomId && await client.leaveRoom(roomId) && `*left room ${roomId}*` || "*missing room ID*";
+                }, AccessLevel.dev);
+
+                commander.add("leave all rooms", "leave all rooms", async (client) => {
+                    return await client.leaveAllRooms() && "*left all rooms*" || "*unable to perform action*";
+                }, AccessLevel.dev);
 
                 commander.add("coffee", "brews some coffee for the requestor", ({ name }) => {
                     //TODO: add for whom the coffee
@@ -468,6 +475,8 @@ import {
                     ["get throttle", /get throttle/, config.throttleSecs],
                     ["set throttle", /set throttle/, content, config],
                     ["chatroom", /chatroom/, election],
+                    ["leave all rooms", /leave all rooms/, client],
+                    ["leave room", /leave room/, content, client],
                     ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
                     ["coffee", /(?:brew|make).+coffee/, user],
