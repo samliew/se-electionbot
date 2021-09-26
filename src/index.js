@@ -532,6 +532,7 @@ import {
 
             // Mentioned bot (8)
             if (config.throttleSecs <= 10 && eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id) {
+                /** @type {string | null} */
                 let responseText = null;
 
                 if (content.startsWith('offtopic')) {
@@ -637,6 +638,7 @@ import {
 
             // Any new message that does not reply-to or mention any user (1)
             else if (eventType === ChatEventType.MESSAGE_POSTED && !targetUserId) {
+                /** @type {string | null} */
                 let responseText = null;
 
                 // Moderation badges
@@ -709,7 +711,7 @@ import {
 
                 // Election stats - How many voted/participants/participated
                 else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
-                    responseText = election.phase == 'ended' ? election.statVoters : `We won't know until the election ends. Come back ${linkToRelativeTimestamp(election.dateEnded)}.`;
+                    responseText = election.phase == 'ended' ? (election.statVoters || null) : `We won't know until the election ends. Come back ${linkToRelativeTimestamp(election.dateEnded)}.`;
                 }
 
                 // How to choose/pick/decide/determine who to vote for
@@ -725,7 +727,7 @@ import {
                         responseText = `${user.name} is the best mod!!!`;
                     }
                     else {
-                        responseText = new RandomArray(currModNames.map(name => `${getRandomSecret()} ${name} is the best mod!`)).getRandom();
+                        responseText = new RandomArray(...currModNames.map(name => `${getRandomSecret()} ${name} is the best mod!`)).getRandom();
                     }
                 }
 
@@ -769,7 +771,7 @@ import {
                         responseText = sayElectionIsOver(election);
                     }
                     else if (election.phase === 'cancelled') {
-                        responseText = election.statVoters;
+                        responseText = election.statVoters || null;
                     }
                     else if (election.phase === 'election') {
                         responseText = `The [election](${election.electionUrl}?tab=election) is in the final voting phase. `;

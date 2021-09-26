@@ -1,6 +1,9 @@
+/**
+ * @template {unknown} T
+ */
 export class RandomArray extends Array {
     /**
-     * @param {...any} init
+     * @param {...T} init
      */
     constructor(...init) {
         super(...init);
@@ -8,7 +11,7 @@ export class RandomArray extends Array {
 
     /**
      * @summary gets a random element
-     * @returns {any}
+     * @returns {T}
      */
     getRandom() {
         const rnd = Math.floor(Math.random() * this.length);
@@ -17,7 +20,7 @@ export class RandomArray extends Array {
 
     /**
      * @summary sorts in random order
-     * @returns {RandomArray}
+     * @returns {RandomArray<T>}
      */
     sortByRandom() {
         // https://stackoverflow.com/a/46545530
