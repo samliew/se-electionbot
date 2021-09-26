@@ -723,11 +723,13 @@ import {
                 // Who is the best mod
                 else if (['who', 'which'].some(x => content.startsWith(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
                     const currModNames = currentSiteMods.map(({ display_name }) => display_name);
+
                     if (user.isModerator && currModNames.includes(user.name)) {
                         responseText = `${user.name} is the best mod!!!`;
                     }
                     else {
-                        responseText = new RandomArray(...currModNames.map(name => `${getRandomSecret()} ${name} is the best mod!`)).getRandom();
+                        const pool = currModNames.map(name => `${getRandomSecret()} ${name} is the best mod!`);
+                        responseText = new RandomArray(...pool).getRandom();
                     }
                 }
 
