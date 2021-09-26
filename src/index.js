@@ -17,7 +17,6 @@ import {
     isLovingTheBot,
     isThankingTheBot
 } from "./guards.js";
-import { HerokuClient } from "./herokuClient.js";
 import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
@@ -31,7 +30,7 @@ import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, pluralize, wait
+    linkToUtcTimestamp, makeURL, pluralize, wait
 } from './utils.js';
 
 /**
@@ -423,13 +422,17 @@ import {
                     return current;
                 }, AccessLevel.privileged);
 
-                commander.add("leave room", "leave room (room ID)", async (content, client) => {
-                    const [, roomId = ""] = /\s+(\d+)$/.exec(content) || [];
-                    return roomId && await client.leaveRoom(roomId) && `*left room ${roomId}*` || "*missing room ID*";
+                commander.add("get rooms", "get list of rooms where bot is in", async (config, client) => {
+                    const rooms = client.getRooms();
+                    const roomIds = [...rooms.keys()];
+                    return `I am in these rooms: ` +
+                        roomIds.map(id => `${makeURL(id, `https://chat.${config.chatDomain}/rooms/${id}/info`)}`).join(", ");
                 }, AccessLevel.dev);
 
-                commander.add("leave all rooms", "leave all rooms", async (client) => {
-                    return await client.leaveAllRooms() && "*left all rooms*" || "*unable to perform action*";
+                commander.add("leave room", "makes bot leave a room (room ID)", async (content, client) => {
+                    const [, roomId = ""] = /\s+(\d+)$/.exec(content) || [];
+                    roomId && client.leaveRoom(roomId);
+                    return roomId ? `*left room ${roomId}*` : "*missing room ID*";
                 }, AccessLevel.dev);
 
                 commander.add("coffee", "brews some coffee for the requestor", ({ name }) => {
@@ -475,7 +478,7 @@ import {
                     ["get throttle", /get throttle/, config.throttleSecs],
                     ["set throttle", /set throttle/, content, config],
                     ["chatroom", /chatroom/, election],
-                    ["leave all rooms", /leave all rooms/, client],
+                    ["get rooms", /get rooms/, config, client],
                     ["leave room", /leave room/, content, client],
                     ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
