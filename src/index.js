@@ -725,7 +725,7 @@ import {
                         responseText = `${user.name} is the best mod!!!`;
                     }
                     else {
-                        responseText = new RandomArray(`All the mods are great?`, currModNames.map(name => `${getRandomSecret()} ${name} is the best mod!`)).getRandom();
+                        responseText = new RandomArray(currModNames.map(name => `${getRandomSecret()} ${name} is the best mod!`)).getRandom();
                     }
                 }
 
