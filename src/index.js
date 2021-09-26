@@ -423,10 +423,11 @@ import {
                 }, AccessLevel.privileged);
 
                 commander.add("get rooms", "get list of rooms where bot is in", async (config, client) => {
-                    const rooms = client.getRooms();
+                    const rooms = await client.getRooms();
                     const roomIds = [...rooms.keys()];
-                    return `I am in these rooms: ` +
-                        roomIds.map(id => `${makeURL(id, `https://chat.${config.chatDomain}/rooms/${id}/info`)}`).join(", ");
+                    return roomIds.length > 1 ? `I'm in these rooms: ` +
+                        roomIds.map(id => `${makeURL(id, `https://chat.${config.chatDomain}/rooms/${id}/info`)}`).join(", ") :
+                        "I'm only in this room.";
                 }, AccessLevel.dev);
 
                 commander.add("leave room", "makes bot leave a room (room ID)", async (content, client) => {
