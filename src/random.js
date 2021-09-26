@@ -31,7 +31,13 @@ export class RandomArray extends Array {
 
 export const getRandomModal = () => new RandomArray(`want to`, `have to`, `ought to`, `gotta`, `must`).getRandom();
 export const getRandomPlop = () => new RandomArray(`I'm back.`, `*plop*`, `I am reborn`, `Hello world!`, `mic check`, `testing 1, 2, 3`).getRandom();
-export const getRandomOops = () => new RandomArray(`very funny,`, `oops!`, `hmm...`, `hey,`, `sorry,`).getRandom() + ` `;
+export const getRandomOops = () => new RandomArray(`very funny,`, `oops!`, `hmm...`, `hey,`, `sorry,`).getRandom();
+export const getRandomSecret = () => new RandomArray(
+    `don't tell anyone I said this, but`,
+    `I'm not supposed to say this, but`,
+    `*shhh...*`,
+    `*whispers* I think...`,
+).getRandom();
 export const getRandomGoodThanks = () => new RandomArray(
     `I know, right?`,
     `You're welcome.`,

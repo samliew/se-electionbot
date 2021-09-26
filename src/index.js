@@ -21,7 +21,7 @@ import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
-import { getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
+import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecret, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
@@ -720,7 +720,7 @@ import {
 
                 // Who is the best mod
                 else if (['who', 'which'].some(x => content.startsWith(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
-                    responseText = `All the mods are great!`;
+                    responseText = new RandomArray(`All the mods are great?`, currentSiteMods.map(mod => `${getRandomSecret()} ${mod.display_name} is the best mod!`)).getRandom();
                 }
 
                 // Current mods
