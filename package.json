@@ -40,6 +40,7 @@
     "cheerio": "^1.0.0-rc.10",
     "dotenv": "^10.0.0",
     "express": "^4.16.4",
+    "express-handlebars": "^5.3.4",
     "heroku-client": "^3.1.0",
     "html-entities": "^2.3.2",
     "node-cache": "^5.1.2",

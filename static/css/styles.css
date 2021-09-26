@@ -1,13 +1,21 @@
 * {
-    font: 16px sans-serif;
+    font-family: Arial, sans-serif;
     color: #333;
 }
 body {
     margin: 0;
     padding: 20px;
+    background-color: rgb(240, 225, 210);
+}
+h1 {
+    font-size: 1.17rem;
+    color: #000;
+}
+div, p, span {
+    font-size: 1.05rem;
 }
 form {
-    max-width: 500px;
+    max-width: 800px;
 }
 form input {
     display: block;

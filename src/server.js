@@ -1,10 +1,14 @@
 import express from 'express';
 import { join } from 'path';
+import Handlebars from 'express-handlebars';
 import { HerokuClient } from "./herokuClient.js";
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
 const app = express().set('port', process.env.PORT || 5000);
+
+app.engine('handlebars', Handlebars());
+app.set('view engine', 'handlebars');
 
 /**
  * @typedef {import("./config").BotConfig} BotConfig
@@ -29,7 +33,7 @@ let BOT_ROOM;
 
 const staticPath = join(__dirname, '../static');
 
-//see https://stackoverflow.com/a/59892173/11407695
+// see https://stackoverflow.com/a/59892173/11407695
 app.use(express.urlencoded({ extended: true }));
 
 app.use((_req, res, next) => {
@@ -38,9 +42,12 @@ app.use((_req, res, next) => {
     next();
 });
 
-app.use('/', express.static(staticPath));
+// Password-protect pages
+app.use(({ query, ip, hostname, path, body = {} }, res, next) => {
 
-app.use("/say", ({ query, ip, hostname, body = {} }, res, next) => {
+    // Only root will be non-password protected
+    if (path === "/") next();
+
     const { password: pwdFromBody = "" } = body;
     const { password: pwdFromQuery = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
@@ -49,10 +56,11 @@ app.use("/say", ({ query, ip, hostname, body = {} }, res, next) => {
     const validPwd = password === process.env.PASSWORD;
 
     if (!validPwd) {
-        console.log(`Unauthorized connect from:
-        IP:   ${ip}
-        Host: ${hostname}
-        Pass: ${password}
+        console.log(`Unauthorized connect -
+            Path: ${path}
+            IP:   ${ip}
+            Host: ${hostname}
+            Pass: ${password}
         `);
         return res.sendStatus(404);
     }
@@ -60,29 +68,30 @@ app.use("/say", ({ query, ip, hostname, body = {} }, res, next) => {
     next();
 });
 
-app.use("/config", ({ query, ip, hostname, body = {} }, res, next) => {
-    const { password: pwdFromBody = "" } = body;
-    const { password: pwdFromQuery = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
-    const password = pwdFromQuery || pwdFromBody;
+// GET /
+app.get('/', (req, res) => {
 
-    const validPwd = password === process.env.PASSWORD;
-
-    if (!validPwd) {
-        console.log(`Unauthorized connect from:
-        IP:   ${ip}
-        Host: ${hostname}
-        Pass: ${password}
-        `);
-        return res.sendStatus(404);
+    if (!BOT_CONFIG) {
+        console.error("Bot configuration missing");
+        return res.sendStatus(500);
     }
 
-    next();
+    const { chatDomain, chatRoomId } = BOT_CONFIG;
+
+    res.render('index', {
+        "name": "ElectionBot",
+        "title": `Chatbot up and running.`,
+        "data": {
+            "content": `<a href="https://chat.${chatDomain}/rooms/${chatRoomId}">${chatDomain}; room ${chatRoomId}</a>`
+        }
+    });
 });
 
-// Serve /say form
+
+// GET /say
 app.get('/say', ({ query }, res) => {
-    const { success, password = "", message = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
+    const { success, password = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
     const statusMap = {
         true: `<div class="result success">Success!</div>`,
@@ -95,24 +104,19 @@ app.get('/say', ({ query }, res) => {
         return res.sendStatus(500);
     }
 
-    const { chatDomain, chatRoomId, } = BOT_CONFIG;
+    const { chatDomain, chatRoomId } = BOT_CONFIG;
 
-    res.send(`
-        <link rel="icon" href="data:;base64,=" />
-        <link rel="stylesheet" href="css/styles.css" />
-        <h3>ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}: ${chatRoomId}</a>:</h3>
-        <form method="post">
-            <input type="text" name="message" placeholder="message" maxlength="500" value="${decodeURIComponent(message)}" />
-            <input type="hidden" name="password" value="${password}" />
-            <button>Send</button>
-        </form>
-        ${statusMap[success]}
-    `);
-
-    return;
+    res.render('say', {
+        "name": "ElectionBot | Privileged Say",
+        "title": `ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+        "data": {
+            "password": password,
+            "statusText": statusMap[success]
+        }
+    });
 });
 
-// POST event from /say form
+// POST /say
 app.post('/say', async ({ body = {} }, res) => {
     const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
 
@@ -132,7 +136,7 @@ app.post('/say', async ({ body = {} }, res) => {
 });
 
 
-// Serve /config form
+// GET /config
 app.get('/config', async ({ query }, res) => {
     const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
 
@@ -142,36 +146,29 @@ app.get('/config', async ({ query }, res) => {
         undefined: ""
     };
 
-    // prevents 'undefined' from being shown
-    const status = statusMap[success];
-
     if (!BOT_CONFIG) {
         console.error("bot configuration missing");
         return res.sendStatus(500);
     }
 
+    // Fetch config vars
     const heroku = new HerokuClient(BOT_CONFIG);
-
     const envVars = await heroku.fetchConfigVars();
 
     const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`).join("");
 
-    res.send(`
-        <link rel="icon" href="data:;base64,=" />
-        <link rel="stylesheet" href="css/styles.css" />
-        <h3>Update ElectionBot environment variables</h3>
-        <form method="post">
-            ${kvpHtml}
-            <input type="hidden" name="password" value="${password}" />
-            <button>Submit</button>
-        </form>
-        ${status}
-    `);
-
-    return;
+    res.render('config', {
+        "pageName": "ElectionBot | Config",
+        "title": `Update ElectionBot environment variables`,
+        "data": {
+            "configFieldsHtml": kvpHtml,
+            "password": password,
+            "statusText": statusMap[success]
+        }
+    });
 });
 
-// POST event from /config form
+// POST /config
 app.post('/config', async ({ body }, res) => {
     const { password, ...fields } = body;
 
@@ -191,9 +188,8 @@ app.post('/config', async ({ body }, res) => {
             return res.redirect(`/config?password=${password}&success=false`);
         }
 
-        const heroku = new HerokuClient(BOT_CONFIG);
-
         // Update environment variables
+        const heroku = new HerokuClient(BOT_CONFIG);
         const status = await heroku.updateConfigVars(fields);
 
         if (status && BOT_ROOM) {
@@ -203,10 +199,11 @@ app.post('/config', async ({ body }, res) => {
 
         res.redirect(`/config?password=${password}&success=true`);
     } catch (error) {
-        console.error(`config submit error:\n${error}`);
+        console.error(`Config submit error:`, error);
         res.redirect(`/config?password=${password}&success=false`);
     }
 });
+
 
 /**
  * @summary sets the server's bot config
