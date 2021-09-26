@@ -109,7 +109,7 @@ import {
         15, // AccessLevelChanged
         16, // UserNotification
         17, // Invitation
-        //18, // MessageReply
+        18, // MessageReply
         19, // MessageMovedOut
         20, // MessageMovedIn
         21, // TimeBreak
@@ -359,7 +359,7 @@ import {
                 return;
             }
 
-            // Log all unignored events
+            // Log all un-ignored events
             console.log('EVENT -', JSON.stringify({ content, msg, user }));
 
             // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
@@ -496,12 +496,12 @@ import {
                     , "");
 
                 if (config.debug) {
-                    console.log(`response info:
+                    console.log(`Response info -
                 response chars: ${responseText.length}
                 content: ${content}
                 original: ${originalMessage}
                 last message: ${config.lastMessageTime}
-                last activty: ${config.lastActivityTime}
+                last activity: ${config.lastActivityTime}
                 `);
                 }
 
@@ -530,9 +530,8 @@ import {
             }
 
 
-            // Mentioned bot (8), or replied-to bot (18)
-            if ((eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id && config.throttleSecs <= 10) ||
-                (eventType === 18 && targetUserId === me.id && config.throttleSecs <= 10)) {
+            // Mentioned bot (8)
+            if (config.throttleSecs <= 10 && eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id) {
                 let responseText = null;
 
                 if (content.startsWith('offtopic')) {
@@ -709,7 +708,7 @@ import {
                 }
 
                 // Election stats - How many voted/participants/participated
-                else if (['how', 'many'].every(x => content.includes(x)) && ['voted', 'participa'].some(x => content.includes(x))) {
+                else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
                     responseText = election.phase == 'ended' ? election.statVoters : `We won't know until the election ends. Come back ${linkToRelativeTimestamp(election.dateEnded)}.`;
                 }
 
@@ -846,7 +845,7 @@ import {
         // Start server
         await start(room, config);
 
-        // Catch all handler to swallow non-crashing rejecions
+        // Catch all handler to swallow non-crashing rejections
         process.on("unhandledRejection", (reason) => {
             if (config.debug) console.log(`Uncaught rejection: ${reason}`);
         });
