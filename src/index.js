@@ -109,7 +109,7 @@ import {
         15, // AccessLevelChanged
         16, // UserNotification
         17, // Invitation
-        18, // MessageReply
+        //18, // MessageReply
         19, // MessageMovedOut
         20, // MessageMovedIn
         21, // TimeBreak
@@ -530,8 +530,9 @@ import {
             }
 
 
-            // Mentioned bot (8)
-            if (eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id && config.throttleSecs <= 10) {
+            // Mentioned bot (8), or replied-to bot (18)
+            if ((eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id && config.throttleSecs <= 10) ||
+                (eventType === 18 && targetUserId === me.id && config.throttleSecs <= 10)) {
                 let responseText = null;
 
                 if (content.startsWith('offtopic')) {
