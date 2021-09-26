@@ -11,7 +11,7 @@ import { wait } from "./utils.js";
  * @description private function to actually send the message, so we can apply throttle and queue messages
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to announce in
- * @param {string} responseText Message to send
+ * @param {null|string} responseText Message to send
  * @param {null|number} inResponseTo message ID to reply to
  * @returns {Promise<any>}
  */
@@ -46,7 +46,7 @@ const _sendTheMessage = async function (config, room, responseText, inResponseTo
  *
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to announce in
- * @param {string} responseText Message to send
+ * @param {null|string} responseText Message to send
  * @param {null|number} [inResponseTo] message ID to reply to
  * @param {boolean} [isPrivileged] privileged user flag
  * @returns {Promise<any>}
@@ -60,7 +60,7 @@ export const sendMessage = async function (config, room, responseText, inRespons
  *
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to announce in
- * @param {string} responseText Message to send
+ * @param {null|string} responseText Message to send
  * @param {number} inResponseTo message ID to reply to
  * @param {boolean} [isPrivileged] privileged user flag
  * @returns {Promise<any>}
