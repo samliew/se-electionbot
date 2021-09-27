@@ -8,11 +8,17 @@ body {
     background-color: rgb(240, 225, 210);
 }
 h1 {
-    font-size: 1.17rem;
+    font-size: 1.3rem;
     color: #000;
 }
 div, p, span {
     font-size: 1.05rem;
+}
+a {
+    color: rgb(0, 0, 139);
+}
+a:visited {
+    color: rgb(0, 0, 0);
 }
 form {
     max-width: 800px;
@@ -29,10 +35,14 @@ form button {
 }
 .result {
     margin-top: 10px;
+    padding: 3px 12px;
+    border-radius: 5px;
 }
 .result.success {
     color: darkgreen;
+    background-color: rgb(248, 255, 238);
 }
 .result.error {
     color: indianred;
+    background-color: rgb(255, 238, 238);
 }

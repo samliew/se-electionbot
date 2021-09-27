@@ -49,7 +49,7 @@ app.use((req, res, next) => {
     const publicPaths = [
         "/",
         "/favicon.ico",
-        "/static/css/styles.css"
+        "/css/styles.css"
     ];
 
     // Password-protect pages
