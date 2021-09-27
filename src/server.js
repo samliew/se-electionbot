@@ -79,17 +79,22 @@ app.route('/')
             return res.sendStatus(500);
         }
 
-        const { chatDomain, chatRoomId } = BOT_CONFIG;
+        try {
+            const { chatDomain, chatRoomId } = BOT_CONFIG;
 
-        res.render('index', {
-            "page": {
-                "title": "ElectionBot"
-            },
-            "heading": `Chatbot up and running.`,
-            "data": {
-                "content": `<a href="https://chat.${chatDomain}/rooms/${chatRoomId}">${chatDomain}; room ${chatRoomId}</a>`
-            }
-        });
+            res.render('index', {
+                "page": {
+                    "title": "ElectionBot"
+                },
+                "heading": `Chatbot up and running.`,
+                "data": {
+                    "content": `<a href="https://chat.${chatDomain}/rooms/${chatRoomId}">${chatDomain}; room ${chatRoomId}</a>`
+                }
+            });
+        } catch (error) {
+            console.error(`failed to render home route:`, error);
+            res.sendStatus(500);
+        }
     });
 
 
