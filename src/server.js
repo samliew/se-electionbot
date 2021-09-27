@@ -126,23 +126,28 @@ app.route('/say')
             res.sendStatus(500);
         }
     })
-    .post(async (req, res) => {
-        const { body = {} } = req;
+    .post(async ({ body = {} }, res) => {
         const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
-
-        const trimmed = message.trim();
 
         if (!BOT_CONFIG) {
             console.error("bot configuration missing");
             return res.sendStatus(500);
         }
 
-        await BOT_ROOM?.sendMessage(trimmed);
+        try {
+            const trimmed = message.trim();
 
-        // Record last activity time only so this doesn't reset an active mute
-        BOT_CONFIG.lastActivityTime = Date.now();
+            await BOT_ROOM?.sendMessage(trimmed);
 
-        res.redirect(`/say?password=${password}&success=true`);
+            // Record last activity time only so this doesn't reset an active mute
+            BOT_CONFIG.lastActivityTime = Date.now();
+
+            res.redirect(`/say?password=${password}&success=true`);
+
+        } catch (error) {
+            console.error(`message submit error:`, error);
+            res.redirect(`/say?password=${password}&success=false`);
+        }
     });
 
 
