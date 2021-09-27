@@ -823,8 +823,8 @@ import {
                 }
                 else if (isHatingTheBot(content)) {
                     responseText = getRandomNegative();
-                }
-                else if (isAskedForUserEligibility(content)) {
+                } // TODO: allow privileged use after the election
+                else if (isAskedForUserEligibility(content) && (AccessLevel.dev & access)) {
                     responseText = await sayUserEligibility(config, election, content);
                 }
 
