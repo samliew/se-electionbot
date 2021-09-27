@@ -33,10 +33,10 @@ let BOT_CONFIG;
 let BOT_ROOM;
 
 const staticPath = join(__dirname, '../static');
+app.use(express.static(staticPath));
 
 // see https://stackoverflow.com/a/59892173
 app.use(express.urlencoded({ extended: true }));
-
 
 // Middleware
 app.use((req, res, next) => {
@@ -47,9 +47,7 @@ app.use((req, res, next) => {
 
     // Only these paths will be non-password protected
     const publicPaths = [
-        "/",
-        "/favicon.ico",
-        "/css/styles.css"
+        "/"
     ];
 
     // Password-protect pages
