@@ -9,7 +9,6 @@ const app = express().set('port', process.env.PORT || 5000);
 
 app.engine('handlebars', Handlebars());
 app.set('view engine', 'handlebars');
-app.set('views', process.cwd() + '../views');
 app.set('view cache', 'false');
 
 /**
