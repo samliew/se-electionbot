@@ -1,7 +1,7 @@
-<h1>{{title}}</h1>
+<h1>{{{heading}}}</h1>
+{{{data/statusText}}}
 <form method="post">
-    {{data/configFieldsHtml}}
+    {{{data/configFieldsHtml}}}
     <input type="hidden" name="password" value="{{data/password}}" />
     <button>Save</button>
 </form>
-{{data/statusText}}

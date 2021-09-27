@@ -45,14 +45,18 @@ app.use((_req, res, next) => {
 // Password-protect pages
 app.use(({ query, ip, hostname, path, body = {} }, res, next) => {
 
-    // Only root will be non-password protected
-    if (path === "/") next();
+    // Only these paths will be non-password protected
+    const publicPaths = [
+        "/",
+        "/favicon.ico",
+        "/static/css/styles.css"
+    ];
+    if (publicPaths.includes(path)) next();
 
+    const { password: pwdFromQuery = "" } = query;
     const { password: pwdFromBody = "" } = body;
-    const { password: pwdFromQuery = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
     const password = pwdFromQuery || pwdFromBody;
-
     const validPwd = password === process.env.PASSWORD;
 
     if (!validPwd) {
@@ -80,8 +84,10 @@ app.get('/', (req, res) => {
     const { chatDomain, chatRoomId } = BOT_CONFIG;
 
     res.render('index', {
-        "name": "ElectionBot",
-        "title": `Chatbot up and running.`,
+        "page": {
+            "title": "ElectionBot"
+        },
+        "heading": `Chatbot up and running.`,
         "data": {
             "content": `<a href="https://chat.${chatDomain}/rooms/${chatRoomId}">${chatDomain}; room ${chatRoomId}</a>`
         }
@@ -107,8 +113,10 @@ app.get('/say', ({ query }, res) => {
     const { chatDomain, chatRoomId } = BOT_CONFIG;
 
     res.render('say', {
-        "name": "ElectionBot | Privileged Say",
-        "title": `ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+        "page": {
+            "title": "ElectionBot | Privileged Say"
+        },
+        "heading": `ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
         "data": {
             "password": password,
             "statusText": statusMap[success]
@@ -158,8 +166,10 @@ app.get('/config', async ({ query }, res) => {
     const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`).join("");
 
     res.render('config', {
-        "pageName": "ElectionBot | Config",
-        "title": `Update ElectionBot environment variables`,
+        "page": {
+            "title": "ElectionBot | Config"
+        },
+        "heading": `Update ElectionBot environment variables`,
         "data": {
             "configFieldsHtml": kvpHtml,
             "password": password,
