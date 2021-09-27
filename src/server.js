@@ -152,38 +152,42 @@ app.route('/say')
 
 
 app.route('/config')
-    .get(async (req, res) => {
-        const { query } = req;
+    .get(async ({ query }, res) => {
         const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
-
-        const statusMap = {
-            true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
-            false: `<div class="result error">Error. Could not perform action.</div>`,
-            undefined: ""
-        };
 
         if (!BOT_CONFIG) {
             console.error("bot configuration missing");
             return res.sendStatus(500);
         }
 
-        // Fetch config vars
-        const heroku = new HerokuClient(BOT_CONFIG);
-        const envVars = await heroku.fetchConfigVars();
+        try {
+            const statusMap = {
+                true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
+                false: `<div class="result error">Error. Could not perform action.</div>`,
+                undefined: ""
+            };
 
-        const kvpHtml = Object.keys(envVars).map(key => `<div><label>${key} <input type="text" name="${key}" value="${envVars[key]}" /></label></div>`).join("");
+            // Fetch config vars
+            const heroku = new HerokuClient(BOT_CONFIG);
+            const envVars = await heroku.fetchConfigVars();
 
-        res.render('config', {
-            "page": {
-                "title": "ElectionBot | Config"
-            },
-            "heading": `Update ElectionBot environment variables`,
-            "data": {
-                "configFieldsHtml": kvpHtml,
-                "password": password,
-                "statusText": statusMap[success]
-            }
-        });
+            const kvpHtml = Object.keys(envVars).map(key => `<div><label>${key} <input type="text" name="${key}" value="${envVars[key]}" /></label></div>`).join("");
+
+            res.render('config', {
+                "page": {
+                    "title": "ElectionBot | Config"
+                },
+                "heading": `Update ElectionBot environment variables`,
+                "data": {
+                    "configFieldsHtml": kvpHtml,
+                    "password": password,
+                    "statusText": statusMap[success]
+                }
+            });
+        } catch (error) {
+            console.error(`failed to display config dashboard:`, error);
+            res.sendStatus(500);
+        }
     })
     .post(async (req, res) => {
         const { body } = req;
