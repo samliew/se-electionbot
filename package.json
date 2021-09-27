@@ -57,6 +57,7 @@
     "@types/chai-as-promised": "^7.1.4",
     "@types/cheerio": "^0.22.30",
     "@types/express": "^4.17.13",
+    "@types/express-handlebars": "^5.3.1",
     "@types/mocha": "^9.0.0",
     "c8": "^7.9.0",
     "chai": "^4.3.4",

@@ -1,6 +1,6 @@
 import express from 'express';
-import { join } from 'path';
 import Handlebars from 'express-handlebars';
+import { join } from 'path';
 import { HerokuClient } from "./herokuClient.js";
 
 const __dirname = new URL(".", import.meta.url).pathname;
@@ -79,102 +79,120 @@ app.route('/')
             return res.sendStatus(500);
         }
 
-        const { chatDomain, chatRoomId } = BOT_CONFIG;
+        try {
+            const { chatDomain, chatRoomId } = BOT_CONFIG;
 
-        res.render('index', {
-            "page": {
-                "title": "ElectionBot"
-            },
-            "heading": `Chatbot up and running.`,
-            "data": {
-                "content": `<a href="https://chat.${chatDomain}/rooms/${chatRoomId}">${chatDomain}; room ${chatRoomId}</a>`
-            }
-        });
+            res.render('index', {
+                "page": {
+                    "title": "ElectionBot"
+                },
+                "heading": `Chatbot up and running.`,
+                "data": {
+                    "content": `<a href="https://chat.${chatDomain}/rooms/${chatRoomId}">${chatDomain}; room ${chatRoomId}</a>`
+                }
+            });
+        } catch (error) {
+            console.error(`failed to render home route:`, error);
+            res.sendStatus(500);
+        }
     });
 
 
 app.route('/say')
-    .get((req, res) => {
-        const { query } = req;
+    .get(({ query }, res) => {
         const { success, password = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
-
-        const statusMap = {
-            true: `<div class="result success">Success!</div>`,
-            false: `<div class="result error">Error. Could not send message.</div>`,
-            undefined: ""
-        };
 
         if (!BOT_CONFIG) {
             console.error("Bot configuration missing");
             return res.sendStatus(500);
         }
 
-        const { chatDomain, chatRoomId } = BOT_CONFIG;
+        try {
+            const statusMap = {
+                true: `<div class="result success">Success!</div>`,
+                false: `<div class="result error">Error. Could not send message.</div>`,
+                undefined: ""
+            };
 
-        res.render('say', {
-            "page": {
-                "title": "ElectionBot | Privileged Say"
-            },
-            "heading": `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
-            "data": {
-                "password": password,
-                "statusText": statusMap[success]
-            }
-        });
+            const { chatDomain, chatRoomId } = BOT_CONFIG;
+
+            res.render('say', {
+                "page": {
+                    "title": "ElectionBot | Privileged Say"
+                },
+                "heading": `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+                "data": {
+                    "password": password,
+                    "statusText": statusMap[success]
+                }
+            });
+        } catch (error) {
+            console.error(`failed to display message dashboard:`, error);
+            res.sendStatus(500);
+        }
     })
-    .post(async (req, res) => {
-        const { body = {} } = req;
+    .post(async ({ body = {} }, res) => {
         const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
-
-        const trimmed = message.trim();
 
         if (!BOT_CONFIG) {
             console.error("bot configuration missing");
             return res.sendStatus(500);
         }
 
-        await BOT_ROOM?.sendMessage(trimmed);
+        try {
+            const trimmed = message.trim();
 
-        // Record last activity time only so this doesn't reset an active mute
-        BOT_CONFIG.lastActivityTime = Date.now();
+            await BOT_ROOM?.sendMessage(trimmed);
 
-        res.redirect(`/say?password=${password}&success=true`);
+            // Record last activity time only so this doesn't reset an active mute
+            BOT_CONFIG.lastActivityTime = Date.now();
+
+            res.redirect(`/say?password=${password}&success=true`);
+
+        } catch (error) {
+            console.error(`message submit error:`, error);
+            res.redirect(`/say?password=${password}&success=false`);
+        }
     });
 
 
 app.route('/config')
-    .get(async (req, res) => {
-        const { query } = req;
+    .get(async ({ query }, res) => {
         const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
-
-        const statusMap = {
-            true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
-            false: `<div class="result error">Error. Could not perform action.</div>`,
-            undefined: ""
-        };
 
         if (!BOT_CONFIG) {
             console.error("bot configuration missing");
             return res.sendStatus(500);
         }
 
-        // Fetch config vars
-        const heroku = new HerokuClient(BOT_CONFIG);
-        const envVars = await heroku.fetchConfigVars();
+        try {
+            const statusMap = {
+                true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
+                false: `<div class="result error">Error. Could not perform action.</div>`,
+                undefined: ""
+            };
 
-        const kvpHtml = Object.keys(envVars).map(key => `<div><label>${key} <input type="text" name="${key}" value="${envVars[key]}" /></label></div>`).join("");
+            // Fetch config vars
+            const heroku = new HerokuClient(BOT_CONFIG);
+            const envVars = await heroku.fetchConfigVars();
 
-        res.render('config', {
-            "page": {
-                "title": "ElectionBot | Config"
-            },
-            "heading": `Update ElectionBot environment variables`,
-            "data": {
-                "configFieldsHtml": kvpHtml,
-                "password": password,
-                "statusText": statusMap[success]
-            }
-        });
+            const kvpHtml = Object.keys(envVars).map(key => `<div><label>${key} <input type="text" name="${key}" value="${envVars[key]}" /></label></div>`).join("");
+
+            res.render('config', {
+                "page": {
+                    "title": "ElectionBot | Config"
+                },
+                "heading": `Update ElectionBot environment variables`,
+                "data": {
+                    "configFieldsHtml": kvpHtml,
+                    "password": password,
+                    "statusText": statusMap[success]
+                }
+            });
+        } catch (error) {
+            console.error(`failed to display config dashboard:`, error);
+            res.sendStatus(500);
+        }
     })
     .post(async (req, res) => {
         const { body } = req;
