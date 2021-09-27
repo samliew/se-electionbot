@@ -1,6 +1,6 @@
 import express from 'express';
-import { join } from 'path';
 import Handlebars from 'express-handlebars';
+import { join } from 'path';
 import { HerokuClient } from "./herokuClient.js";
 
 const __dirname = new URL(".", import.meta.url).pathname;
@@ -94,33 +94,37 @@ app.route('/')
 
 
 app.route('/say')
-    .get((req, res) => {
-        const { query } = req;
+    .get(({ query }, res) => {
         const { success, password = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
-
-        const statusMap = {
-            true: `<div class="result success">Success!</div>`,
-            false: `<div class="result error">Error. Could not send message.</div>`,
-            undefined: ""
-        };
 
         if (!BOT_CONFIG) {
             console.error("Bot configuration missing");
             return res.sendStatus(500);
         }
 
-        const { chatDomain, chatRoomId } = BOT_CONFIG;
+        try {
+            const statusMap = {
+                true: `<div class="result success">Success!</div>`,
+                false: `<div class="result error">Error. Could not send message.</div>`,
+                undefined: ""
+            };
 
-        res.render('say', {
-            "page": {
-                "title": "ElectionBot | Privileged Say"
-            },
-            "heading": `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
-            "data": {
-                "password": password,
-                "statusText": statusMap[success]
-            }
-        });
+            const { chatDomain, chatRoomId } = BOT_CONFIG;
+
+            res.render('say', {
+                "page": {
+                    "title": "ElectionBot | Privileged Say"
+                },
+                "heading": `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+                "data": {
+                    "password": password,
+                    "statusText": statusMap[success]
+                }
+            });
+        } catch (error) {
+            console.error(`failed to display message dashboard:`, error);
+            res.sendStatus(500);
+        }
     })
     .post(async (req, res) => {
         const { body = {} } = req;
