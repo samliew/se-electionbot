@@ -63,7 +63,7 @@ app.use((req, res, next) => {
             Host: ${hostname}
             Pass: ${password}
         `);
-        return res.sendStatus(404);
+        return res.sendStatus(401);
     }
 
     next();
@@ -115,7 +115,7 @@ app.route('/say')
             "page": {
                 "title": "ElectionBot | Privileged Say"
             },
-            "heading": `ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+            "heading": `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
             "data": {
                 "password": password,
                 "statusText": statusMap[success]
@@ -162,7 +162,7 @@ app.route('/config')
         const heroku = new HerokuClient(BOT_CONFIG);
         const envVars = await heroku.fetchConfigVars();
 
-        const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`).join("");
+        const kvpHtml = Object.keys(envVars).map(key => `<div><label>${key} <input type="text" name="${key}" value="${envVars[key]}" /></label></div>`).join("");
 
         res.render('config', {
             "page": {

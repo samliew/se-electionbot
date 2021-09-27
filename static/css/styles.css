@@ -1,6 +1,6 @@
 * {
     font-family: Arial, sans-serif;
-    color: #333;
+    color: #000;
 }
 body {
     margin: 0;
@@ -23,19 +23,26 @@ a:visited {
 form {
     max-width: 800px;
 }
+form * {
+    font-size: 0.9rem;
+}
 form input {
     display: block;
     width: 100%;
-    margin-bottom: 8px;
-    padding: 5px 10px;
+    margin-bottom: 1em;
+    padding: 8px 12px;
     border-radius: 5px;
+    border: 1px solid #999;
+}
+form label {
+    font-weight: bold;
 }
 form button {
-    padding: 5px 10px;
+    padding: 8px 20px;
 }
 .result {
-    margin-top: 10px;
-    padding: 3px 12px;
+    margin: 30px 0px;
+    padding: 12px 14px;
     border-radius: 5px;
 }
 .result.success {
