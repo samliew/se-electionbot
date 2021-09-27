@@ -80,7 +80,7 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
     const { maxMessageLength, maxMessageParts, minThrottleSecs } = config;
 
     const messageLength = responseText?.length || 0;
-    const isInvalid = messageLength <= 0 || messageLength > 500;
+    const isInvalid = messageLength <= 0;
 
     // Validate response
     if (isInvalid) {
