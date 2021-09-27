@@ -123,7 +123,7 @@ app.route('/say')
         });
     })
     .post(async (req, res) => {
-        const { body = {} } = req.query;
+        const { body = {} } = req;
         const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
 
         const trimmed = message.trim();
