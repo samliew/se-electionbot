@@ -9,6 +9,8 @@ const app = express().set('port', process.env.PORT || 5000);
 
 app.engine('handlebars', Handlebars());
 app.set('view engine', 'handlebars');
+app.set('views', process.cwd() + '../views');
+app.set('view cache', 'false');
 
 /**
  * @typedef {import("./config").BotConfig} BotConfig
@@ -33,17 +35,16 @@ let BOT_ROOM;
 
 const staticPath = join(__dirname, '../static');
 
-// see https://stackoverflow.com/a/59892173/11407695
+// see https://stackoverflow.com/a/59892173
 app.use(express.urlencoded({ extended: true }));
 
-app.use((_req, res, next) => {
+
+// Middleware
+app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
 
-// Password-protect pages
-app.use(({ query, ip, hostname, path, body = {} }, res, next) => {
+    const { query, ip, hostname, path, body = {} } = req;
 
     // Only these paths will be non-password protected
     const publicPaths = [
@@ -51,17 +52,16 @@ app.use(({ query, ip, hostname, path, body = {} }, res, next) => {
         "/favicon.ico",
         "/static/css/styles.css"
     ];
-    if (publicPaths.includes(path)) next();
 
+    // Password-protect pages
     const { password: pwdFromQuery = "" } = query;
     const { password: pwdFromBody = "" } = body;
 
     const password = pwdFromQuery || pwdFromBody;
     const validPwd = password === process.env.PASSWORD;
 
-    if (!validPwd) {
-        console.log(`Unauthorized connect -
-            Path: ${path}
+    if (!publicPaths.includes(path) && !validPwd) {
+        console.log(`Unauthorised connect - "${path}"
             IP:   ${ip}
             Host: ${hostname}
             Pass: ${password}
@@ -74,145 +74,146 @@ app.use(({ query, ip, hostname, path, body = {} }, res, next) => {
 
 
 // GET /
-app.get('/', (req, res) => {
+app.route('/')
+    .get((_req, res) => {
 
-    if (!BOT_CONFIG) {
-        console.error("Bot configuration missing");
-        return res.sendStatus(500);
-    }
-
-    const { chatDomain, chatRoomId } = BOT_CONFIG;
-
-    res.render('index', {
-        "page": {
-            "title": "ElectionBot"
-        },
-        "heading": `Chatbot up and running.`,
-        "data": {
-            "content": `<a href="https://chat.${chatDomain}/rooms/${chatRoomId}">${chatDomain}; room ${chatRoomId}</a>`
+        if (!BOT_CONFIG) {
+            console.error("Bot configuration missing");
+            return res.sendStatus(500);
         }
+
+        const { chatDomain, chatRoomId } = BOT_CONFIG;
+
+        res.render('index', {
+            "page": {
+                "title": "ElectionBot"
+            },
+            "heading": `Chatbot up and running.`,
+            "data": {
+                "content": `<a href="https://chat.${chatDomain}/rooms/${chatRoomId}">${chatDomain}; room ${chatRoomId}</a>`
+            }
+        });
     });
-});
 
 
-// GET /say
-app.get('/say', ({ query }, res) => {
-    const { success, password = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
+app.route('/say')
+    .get((req, res) => {
+        const { query } = req;
+        const { success, password = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
-    const statusMap = {
-        true: `<div class="result success">Success!</div>`,
-        false: `<div class="result error">Error. Could not send message.</div>`,
-        undefined: ""
-    };
+        const statusMap = {
+            true: `<div class="result success">Success!</div>`,
+            false: `<div class="result error">Error. Could not send message.</div>`,
+            undefined: ""
+        };
 
-    if (!BOT_CONFIG) {
-        console.error("Bot configuration missing");
-        return res.sendStatus(500);
-    }
-
-    const { chatDomain, chatRoomId } = BOT_CONFIG;
-
-    res.render('say', {
-        "page": {
-            "title": "ElectionBot | Privileged Say"
-        },
-        "heading": `ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
-        "data": {
-            "password": password,
-            "statusText": statusMap[success]
+        if (!BOT_CONFIG) {
+            console.error("Bot configuration missing");
+            return res.sendStatus(500);
         }
+
+        const { chatDomain, chatRoomId } = BOT_CONFIG;
+
+        res.render('say', {
+            "page": {
+                "title": "ElectionBot | Privileged Say"
+            },
+            "heading": `ElectionBot say to room <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+            "data": {
+                "password": password,
+                "statusText": statusMap[success]
+            }
+        });
+    })
+    .post(async (req, res) => {
+        const { body = {} } = req.query;
+        const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
+
+        const trimmed = message.trim();
+
+        if (!BOT_CONFIG) {
+            console.error("bot configuration missing");
+            return res.sendStatus(500);
+        }
+
+        await BOT_ROOM?.sendMessage(trimmed);
+
+        // Record last activity time only so this doesn't reset an active mute
+        BOT_CONFIG.lastActivityTime = Date.now();
+
+        res.redirect(`/say?password=${password}&success=true`);
     });
-});
-
-// POST /say
-app.post('/say', async ({ body = {} }, res) => {
-    const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
-
-    const trimmed = message.trim();
-
-    if (!BOT_CONFIG) {
-        console.error("bot configuration missing");
-        return res.sendStatus(500);
-    }
-
-    await BOT_ROOM?.sendMessage(trimmed);
-
-    // Record last activity time only so this doesn't reset an active mute
-    BOT_CONFIG.lastActivityTime = Date.now();
-
-    res.redirect(`/say?password=${password}&success=true`);
-});
 
 
-// GET /config
-app.get('/config', async ({ query }, res) => {
-    const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
+app.route('/config')
+    .get(async (req, res) => {
+        const { query } = req;
+        const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
 
-    const statusMap = {
-        true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
-        false: `<div class="result error">Error. Could not perform action.</div>`,
-        undefined: ""
-    };
+        const statusMap = {
+            true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
+            false: `<div class="result error">Error. Could not perform action.</div>`,
+            undefined: ""
+        };
 
-    if (!BOT_CONFIG) {
-        console.error("bot configuration missing");
-        return res.sendStatus(500);
-    }
-
-    // Fetch config vars
-    const heroku = new HerokuClient(BOT_CONFIG);
-    const envVars = await heroku.fetchConfigVars();
-
-    const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`).join("");
-
-    res.render('config', {
-        "page": {
-            "title": "ElectionBot | Config"
-        },
-        "heading": `Update ElectionBot environment variables`,
-        "data": {
-            "configFieldsHtml": kvpHtml,
-            "password": password,
-            "statusText": statusMap[success]
-        }
-    });
-});
-
-// POST /config
-app.post('/config', async ({ body }, res) => {
-    const { password, ...fields } = body;
-
-    if (!BOT_CONFIG) {
-        console.error("bot configuration missing");
-        return res.sendStatus(500);
-    }
-
-    try {
-        if (BOT_CONFIG.verbose) {
-            console.log(`submitted body:\n"${JSON.stringify(body)}"`);
+        if (!BOT_CONFIG) {
+            console.error("bot configuration missing");
+            return res.sendStatus(500);
         }
 
-        // Validation
-        if (Object.keys(fields).length === 0) {
-            console.error(`Invalid request`);
-            return res.redirect(`/config?password=${password}&success=false`);
-        }
-
-        // Update environment variables
+        // Fetch config vars
         const heroku = new HerokuClient(BOT_CONFIG);
-        const status = await heroku.updateConfigVars(fields);
+        const envVars = await heroku.fetchConfigVars();
 
-        if (status && BOT_ROOM) {
-            const status = await BOT_ROOM.leave();
-            console.log(`left room ${BOT_ROOM.id} after update: ${status}`);
+        const kvpHtml = Object.keys(envVars).map(key => `<div>${key} <input type="text" name="${key}" value="${envVars[key]}" /></div>`).join("");
+
+        res.render('config', {
+            "page": {
+                "title": "ElectionBot | Config"
+            },
+            "heading": `Update ElectionBot environment variables`,
+            "data": {
+                "configFieldsHtml": kvpHtml,
+                "password": password,
+                "statusText": statusMap[success]
+            }
+        });
+    })
+    .post(async (req, res) => {
+        const { body } = req;
+        const { password, ...fields } = body;
+
+        if (!BOT_CONFIG) {
+            console.error("bot configuration missing");
+            return res.sendStatus(500);
         }
 
-        res.redirect(`/config?password=${password}&success=true`);
-    } catch (error) {
-        console.error(`Config submit error:`, error);
-        res.redirect(`/config?password=${password}&success=false`);
-    }
-});
+        try {
+            if (BOT_CONFIG.verbose) {
+                console.log(`submitted body:\n"${JSON.stringify(body)}"`);
+            }
+
+            // Validation
+            if (Object.keys(fields).length === 0) {
+                console.error(`Invalid request`);
+                return res.redirect(`/config?password=${password}&success=false`);
+            }
+
+            // Update environment variables
+            const heroku = new HerokuClient(BOT_CONFIG);
+            const status = await heroku.updateConfigVars(fields);
+
+            if (status && BOT_ROOM) {
+                const status = await BOT_ROOM.leave();
+                console.log(`left room ${BOT_ROOM.id} after update: ${status}`);
+            }
+
+            res.redirect(`/config?password=${password}&success=true`);
+        } catch (error) {
+            console.error(`Config submit error:`, error);
+            res.redirect(`/config?password=${password}&success=false`);
+        }
+    });
 
 
 /**
@@ -259,7 +260,7 @@ export const start = async (room, config) => {
         process.exit(0);
     });
 
-    /** @see https://stackoverflow.com/a/67567395/11407695 */
+    // https://stackoverflow.com/a/67567395
     if (process.platform === "win32") {
         const rl = await import("readline");
         const rli = rl.createInterface({
@@ -271,7 +272,7 @@ export const start = async (room, config) => {
         return app;
     }
 
-    /** @see https://stackoverflow.com/a/14516195/11407695 */
+    // https://stackoverflow.com/a/14516195
     process.on('SIGINT', farewell);
     return app;
 };
