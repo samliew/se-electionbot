@@ -95,8 +95,8 @@ export default class Rescraper {
                 - idleDoSayHi: ${idleDoSayHi}`);
             }
 
-            // No previous scrape results yet, do not proceed
-            if (typeof election.prev === 'undefined') {
+            // No previous scrape results yet, do not proceed (prev can be null)
+            if (!election.prev) {
 
                 if (config.debug) {
                     console.log(`RESCRAPER - No previous scrape.`);
