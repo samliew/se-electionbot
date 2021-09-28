@@ -60,141 +60,145 @@ export default class Rescraper {
             console.log(`RESCRAPER - Rescrape function called.`);
         }
 
-        await election.scrapeElection(config);
+        try {
+            await election.scrapeElection(config);
 
-        const roomLongIdleDuration = this.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
-        const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = config;
-        const roomBecameIdleAShortWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
-        const roomBecameIdleAFewHoursAgo = lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
-        const botHasBeenQuiet = lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
-        const lastMessageIsPostedByBot = lastActivityTime === lastMessageTime;
+            const roomLongIdleDuration = this.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
+            const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = config;
+            const roomBecameIdleAShortWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
+            const roomBecameIdleAFewHoursAgo = lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
+            const botHasBeenQuiet = lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
+            const lastMessageIsPostedByBot = lastActivityTime === lastMessageTime;
 
-        const idleDoSayHi = (roomBecameIdleAShortWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
-            (roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
+            const idleDoSayHi = (roomBecameIdleAShortWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
+                (roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
 
-        if (config.verbose) {
-            console.log('RESCRAPER - ', election.updated, election);
-        }
-
-        if (config.debugOrVerbose) {
-            const { arrNominees, arrWinners, phase } = election;
-
-            console.log(`Election candidates: ${arrNominees.map(x => x.userName).join(', ')}`);
-
-            if (phase === 'ended') {
-                console.log(`Election winners: ${arrWinners.map(x => x.userName).join(', ')}`);
+            if (config.verbose) {
+                console.log('RESCRAPER - ', election.updated, election);
             }
 
-            console.log(`Idle?
+            if (config.debugOrVerbose) {
+                const { arrNominees, arrWinners, phase } = election;
+
+                console.log(`Election candidates: ${arrNominees.map(x => x.userName).join(', ')}`);
+
+                if (phase === 'ended') {
+                    console.log(`Election winners: ${arrWinners.map(x => x.userName).join(', ')}`);
+                }
+
+                console.log(`Idle?
                 - roomReachedMinimumActivityCount: ${roomReachedMinimumActivityCount}
                 - roomBecameIdleAShortWhileAgo: ${roomBecameIdleAShortWhileAgo}
                 - roomBecameIdleAFewHoursAgo: ${roomBecameIdleAFewHoursAgo}
                 - botHasBeenQuiet: ${botHasBeenQuiet}
                 - lastMessageIsPostedByBot: ${lastMessageIsPostedByBot}
                 - idleDoSayHi: ${idleDoSayHi}`);
-        }
-
-        // No previous scrape results yet, do not proceed
-        if (typeof election.prev === 'undefined') {
-
-            if (config.debug) {
-                console.log(`RESCRAPER - No previous scrape.`);
             }
-            return;
-        }
 
-        // Election chat room has changed
-        if (election.electionChatRoomChanged) {
+            // No previous scrape results yet, do not proceed
+            if (typeof election.prev === 'undefined') {
 
-            // Restart Heroku dyno via API
-            const heroku = new HerokuClient(config);
-            return await heroku.restartApp() || process.exit(1);
-        }
-
-        // Primary phase was activated (due to >10 candidates)
-        if (!announcement?.hasPrimary && election.datePrimary != null) {
-            announcement?.initPrimary(election.datePrimary);
-            await sendMessage(config, room, `There will be a **${makeURL("primary", election.electionUrl + "?tab=primary")}** phase before the election now, as there are more than ten candidates.`);
-        }
-
-        // Election dates has changed (manually by CM)
-        if (election.electionDatesChanged) {
-            announcement?.stopAll();
-            announcement?.initAll();
-            await sendMessage(config, room, `The ${makeURL("election", election.electionUrl)} dates have changed:`);
-            await wait(1);
-            await sendMessage(config, room, sayElectionSchedule(election));
-        }
-
-        // The election was cancelled
-        if (election.phase === 'cancelled' && election.isNewPhase()) {
-            await announcement?.announceCancelled(room, election);
-
-            if (config.debugOrVerbose) {
-                console.log(`RESCRAPER - Election was cancelled.`);
+                if (config.debug) {
+                    console.log(`RESCRAPER - No previous scrape.`);
+                }
+                return;
             }
-        }
 
-        // New nominations
-        else if (election.phase == 'nomination' && election.newNominees.length) {
-            await announcement?.announceNewNominees();
+            // Election chat room has changed
+            if (election.electionChatRoomChanged) {
 
-            if (config.debugOrVerbose) {
-                console.log(`RESCRAPER - New nominees announced.`);
+                // Restart Heroku dyno via API
+                const heroku = new HerokuClient(config);
+                return await heroku.restartApp() || process.exit(1);
             }
-        }
 
-        // Official results out
-        else if (election.phase === 'ended' && election.hasNewWinners) {
-            await announcement?.announceWinners(room, election);
-            this.stop();
-
-            if (config.debugOrVerbose) {
-                console.log(`RESCRAPER - No previous scrape.`);
+            // Primary phase was activated (due to >10 candidates)
+            if (!announcement?.hasPrimary && election.datePrimary != null) {
+                announcement?.initPrimary(election.datePrimary);
+                await sendMessage(config, room, `There will be a **${makeURL("primary", election.electionUrl + "?tab=primary")}** phase before the election now, as there are more than ten candidates.`);
             }
-        }
 
-        // Election is over but we do not have winners yet
-        else if (election.phase === 'ended' && !election.hasNewWinners) {
-
-            // Reduce scrape interval further
-            config.scrapeIntervalMins = 0.5;
-
-            if (config.debugOrVerbose) {
-                console.log(`RESCRAPER - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
+            // Election dates has changed (manually by CM)
+            if (election.electionDatesChanged) {
+                announcement?.stopAll();
+                announcement?.initAll();
+                await sendMessage(config, room, `The ${makeURL("election", election.electionUrl)} dates have changed:`);
+                await wait(1);
+                await sendMessage(config, room, sayElectionSchedule(election));
             }
-        }
 
-        // The election is ending within the next 10 minutes or less, do once only
-        else if (election.isEnding() && !config.flags.saidElectionEndingSoon) {
+            // The election was cancelled
+            if (election.phase === 'cancelled' && election.isNewPhase()) {
+                await announcement?.announceCancelled(room, election);
 
-            // Reduce scrape interval
-            config.scrapeIntervalMins = 2;
-
-            // Announce election ending soon
-            await sendMessage(config, room, `The ${makeURL('election', election.electionUrl)} is ending soon. This is the final chance to cast your votes!`);
-            config.flags.saidElectionEndingSoon = true;
-
-            if (config.debugOrVerbose) {
-                console.log(`RESCRAPER - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
+                if (config.debugOrVerbose) {
+                    console.log(`RESCRAPER - Election was cancelled.`);
+                }
             }
+
+            // New nominations
+            else if (election.phase == 'nomination' && election.newNominees.length) {
+                await announcement?.announceNewNominees();
+
+                if (config.debugOrVerbose) {
+                    console.log(`RESCRAPER - New nominees announced.`);
+                }
+            }
+
+            // Official results out
+            else if (election.phase === 'ended' && election.hasNewWinners) {
+                await announcement?.announceWinners(room, election);
+                this.stop();
+
+                if (config.debugOrVerbose) {
+                    console.log(`RESCRAPER - No previous scrape.`);
+                }
+            }
+
+            // Election is over but we do not have winners yet
+            else if (election.phase === 'ended' && !election.hasNewWinners) {
+
+                // Reduce scrape interval further
+                config.scrapeIntervalMins = 0.5;
+
+                if (config.debugOrVerbose) {
+                    console.log(`RESCRAPER - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
+                }
+            }
+
+            // The election is ending within the next 10 minutes or less, do once only
+            else if (election.isEnding() && !config.flags.saidElectionEndingSoon) {
+
+                // Reduce scrape interval
+                config.scrapeIntervalMins = 2;
+
+                // Announce election ending soon
+                await sendMessage(config, room, `The ${makeURL('election', election.electionUrl)} is ending soon. This is the final chance to cast your votes!`);
+                config.flags.saidElectionEndingSoon = true;
+
+                if (config.debugOrVerbose) {
+                    console.log(`RESCRAPER - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
+                }
+            }
+
+            // Remind users that bot is around to help when:
+            //    1. Room is idle, and there was at least some previous activity, and last message more than lowActivityCheckMins minutes ago
+            // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
+            else if (idleDoSayHi) {
+
+                console.log(`Room is inactive with ${config.activityCount} messages posted so far (min ${config.lowActivityCountThreshold}).`,
+                    `Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
+
+                await sendMessage(config, room, sayHI(election), null, true);
+
+                // Reset last activity count
+                config.activityCount = 0;
+            }
+
+            this.start();
+        } catch (error) {
+            console.error(`rescraping failure:\n${error}`);
         }
-
-        // Remind users that bot is around to help when:
-        //    1. Room is idle, and there was at least some previous activity, and last message more than lowActivityCheckMins minutes ago
-        // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
-        else if (idleDoSayHi) {
-
-            console.log(`Room is inactive with ${config.activityCount} messages posted so far (min ${config.lowActivityCountThreshold}).`,
-                `Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
-
-            await sendMessage(config, room, sayHI(election), null, true);
-
-            // Reset last activity count
-            config.activityCount = 0;
-        }
-
-        this.start();
 
         if (config.verbose) {
             console.log(`RESCRAPER - Rescrape function completed.`);
