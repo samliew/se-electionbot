@@ -95,8 +95,8 @@ export class BotConfig {
         this.lastActivityTime = lastMessageTime;
     }
 
-    updateLastMessage(content) {
-        this.updateLastMessageTime();
+    updateLastMessage(content, lastMessageTime = Date.now()) {
+        this.updateLastMessageTime(lastMessageTime);
         this.lastMessageContent = content;
     }
 

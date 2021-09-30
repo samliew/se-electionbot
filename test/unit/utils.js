@@ -41,20 +41,6 @@ describe('String-related utils', async function () {
 
     });
 
-    this.timeout(10e3); // fetching transcript can be slow
-
-    describe('fetchChatTranscript', async () => {
-
-        it('should fetch chat transcript correctly', async () => {
-            const transcriptUrl = "https://chat.stackoverflow.com/transcript/190503/2019/3/20";
-            const chatMessages = await fetchChatTranscript(getMockBotConfig(), transcriptUrl);
-
-            expect(chatMessages).to.not.be.empty;
-            expect(chatMessages[0].message).to.equal("how do I vote?");
-        });
-
-    });
-
     describe('getSiteDefaultChatroom', async () => {
 
         it('should fetch a site\'s default chat room correctly', async () => {
@@ -71,7 +57,34 @@ describe('String-related utils', async function () {
 
     });
 
+    this.timeout(10e3); // fetching transcript can be slow
+
+    describe('fetchChatTranscript', async () => {
+
+        it('should fetch chat transcript correctly', async () => {
+            const transcriptUrl = "https://chat.stackoverflow.com/transcript/190503/2019/3/20";
+            const chatMessages = await fetchChatTranscript(getMockBotConfig(), transcriptUrl);
+
+            expect(chatMessages).to.not.be.empty;
+
+            expect(chatMessages[0].username).to.equal("Samuel Liew");
+            expect(chatMessages[0].chatUserId).to.equal(584192);
+            expect(chatMessages[0].message).to.equal("how do I vote?");
+            expect(chatMessages[0].date).to.equal(1553052480000);
+
+            expect(chatMessages[1].date).to.equal(1553052481000);
+            expect(chatMessages[2].date).to.equal(1553052482000);
+            expect(chatMessages[3].date).to.equal(1553052483000);
+            expect(chatMessages[4].date).to.equal(1553052484000);
+            expect(chatMessages[5].date).to.equal(1553052485000);
+
+            expect(chatMessages[6].date).to.equal(1553053320000);
+        });
+
+    });
+
     describe('cacheable', () => {
+
         it('should use cached value if available', async () => {
             const obj = {
                 curr: 0,
@@ -88,6 +101,7 @@ describe('String-related utils', async function () {
             expect(await cached(obj)).to.equal(1);
             expect(obj.curr).to.equal(1);
         });
+
     });
 
 });

@@ -84,6 +84,16 @@ export const fetchUrl = async (config, url, json = false) => {
  * @param {import("./config").BotConfig} config
  * @param {string} url
  * @returns {Promise<any>}
+ * [{
+ *   username,
+ *   chatUserId,
+ *   message,
+ *   date
+ * }]
+ *
+ * INFO:
+ * To get the rough datetime for a single message that doesn't have a timestamp, this function currently uses the UTC time of last message + 1 second.
+ * If a more accurate solution is required, we'll need to take the amount of messages posted within known times and extrapolate an estimate.
  */
 export const fetchChatTranscript = async (config, url) => {
 
@@ -96,14 +106,32 @@ export const fetchChatTranscript = async (config, url) => {
     const $chat = cheerio.load(/** @type {string} */(chatTranscript));
     const messages = [];
 
+    // Get date from transcript
+    const [, year, m, date] = $chat('head title').text().match(/(\d+)-(\d+)-(\d+)/) || [, null, null, null];
+    const month = m ? +m - 1 : null;
+
+    let lastKnownDatetime = null;
+
     $chat('#transcript .message').each(function (i, el) {
         const $this = $chat(el);
         const userlink = $this.parent().siblings('.signature').find('a');
+
+        const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [, null, null, null];
+        const hour = h && apm ? (
+            apm === 'A' ? (
+                h === '12' ? +h - 12 : +h
+            ) : +h + 12
+        ) : null;
+
+        // Increment by 1s if no timestamp, otherwise new UTC timestamp
+        lastKnownDatetime = year && month && date && hour && min ? Date.UTC(+year, month, +date, hour, +min, 0) : lastKnownDatetime + 1000;
+
         messages.push({
             username: userlink.text(),
             // @ts-expect-error
             chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
             message: $this.find('.content').text().trim(),
+            date: lastKnownDatetime
         });
     }).get();
 

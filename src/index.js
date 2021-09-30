@@ -276,8 +276,8 @@ import {
         const room = await client.joinRoom(config.chatRoomId);
 
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
+        const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
         if (election.phase === 'ended' && election.chatRoomId) {
-            const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
             const winnersAnnounced = transcriptMessages?.some(item => item.message && /^The winners? (are|is) /.test(item.message));
 
             if (config.debug) {
@@ -296,6 +296,16 @@ import {
         // Announce join room if in debug mode
         else if (config.debug) {
             await sendMessage(config, room, getRandomPlop(), null, true);
+        }
+        // Not in debug mode, if bot sent last message in room, sync on startup
+        // Don't need to do this in debug mode because we're sending join room message
+        else {
+            const lastMessage = transcriptMessages?.last();
+            const lastMessageByBot = lastMessage.message && (lastMessage.username === me.name || lastMessage.chatUserId === me.id);
+
+            if (lastMessageByBot) {
+                config.updateLastMessage(lastMessage.message, lastMessage.date);
+            }
         }
 
         // Ignore ignored event types
