@@ -249,7 +249,7 @@ import {
                 }
             }
 
-            console.log(`App is in production with active election - redirected to live room:
+            console.log(`INIT - App is in production with active election - redirected to live room:
             DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
             ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
         }
@@ -281,10 +281,9 @@ import {
             const winnersAnnounced = transcriptMessages?.some(item => item.message && /^The winners? (are|is) /.test(item.message));
 
             if (config.debug) {
-                console.log("winnersAnnounced:", winnersAnnounced);
                 console.log(
-                    "Transcript messages:",
-                    transcriptMessages.map(item => `${/^The winners? (are|is) /.test(item.message)} - ${item.message}`).join("\n")
+                    "INIT - winnersAnnounced:", winnersAnnounced,
+                    "\n" + transcriptMessages.map(item => `${/^The winners? (are|is) /.test(item.message)} - ${item.message}`).join("\n")
                 );
             }
 
@@ -299,12 +298,14 @@ import {
         }
         // Not in debug mode, if bot sent last message in room, sync on startup
         // Don't need to do this in debug mode because we're sending join room message
-        else {
-            const lastMessage = transcriptMessages?.last();
+        else if (transcriptMessages) {
+            const lastMessage = transcriptMessages[transcriptMessages.length - 1];
             const lastMessageByBot = lastMessage.message && (lastMessage.username === me.name || lastMessage.chatUserId === me.id);
 
             if (lastMessageByBot) {
                 config.updateLastMessage(lastMessage.message, lastMessage.date);
+
+                console.log(`INIT - Previous message in room was by bot at ${lastMessage.date}:`, lastMessage.message);
             }
         }
 
