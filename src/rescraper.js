@@ -73,25 +73,23 @@ export default class Rescraper {
             (roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
 
         if (config.verbose) {
-            console.log('RESCRAPER - ', election.updated, election);
+            console.log('RESCRAPER -', election.updated, election);
         }
 
         if (config.debugOrVerbose) {
             const { arrNominees, arrWinners, phase } = election;
 
-            console.log(`Election candidates: ${arrNominees.map(x => x.userName).join(', ')}`);
+            console.log(`RESCRAPER - Candidates: ${arrNominees.map(x => x.userName).join(', ')}`);
 
             if (phase === 'ended') {
-                console.log(`Election winners: ${arrWinners.map(x => x.userName).join(', ')}`);
+                console.log(`RESCRAPER - Winners: ${arrWinners.map(x => x.userName).join(', ')}`);
             }
 
-            console.log(`Idle?
-                - roomReachedMinimumActivityCount: ${roomReachedMinimumActivityCount}
-                - roomBecameIdleAShortWhileAgo: ${roomBecameIdleAShortWhileAgo}
-                - roomBecameIdleAFewHoursAgo: ${roomBecameIdleAFewHoursAgo}
-                - botHasBeenQuiet: ${botHasBeenQuiet}
-                - lastMessageIsPostedByBot: ${lastMessageIsPostedByBot}
-                - idleDoSayHi: ${idleDoSayHi}`);
+            console.log(`RESCRAPER - IDLE? idleDoSayHi: ${idleDoSayHi}
+                ----------- reachedMinActivity: ${roomReachedMinimumActivityCount};
+                ----------- becameIdleAWhileAgo: ${roomBecameIdleAShortWhileAgo}; becameIdleAFewHoursAgo: ${roomBecameIdleAFewHoursAgo}
+                ----------- botHasBeenQuiet: ${botHasBeenQuiet}; lastMessageIsPostedByBot: ${lastMessageIsPostedByBot}`
+            );
         }
 
         // No previous scrape results yet, do not proceed
@@ -185,8 +183,8 @@ export default class Rescraper {
         // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
         else if (idleDoSayHi) {
 
-            console.log(`Room is inactive with ${config.activityCount} messages posted so far (min ${config.lowActivityCountThreshold}).`,
-                `Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
+            console.log(`RESCRAPER - Room is inactive with ${config.activityCount} messages posted so far (min ${config.lowActivityCountThreshold}).`,
+                `----------- Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
 
             await sendMessage(config, room, sayHI(election), null, true);
 
@@ -196,7 +194,7 @@ export default class Rescraper {
 
         this.start();
 
-        if (config.verbose) {
+        if (config.debugOrVerbose) {
             console.log(`RESCRAPER - Rescrape function completed.`);
         }
     };
@@ -209,7 +207,7 @@ export default class Rescraper {
 
         if (timeout) this.timeout = clearTimeout(timeout);
 
-        if (config.verbose) {
+        if (config.debugOrVerbose) {
             console.log(`RESCRAPER - Next rescrape cleared.`);
         }
     }
@@ -221,7 +219,7 @@ export default class Rescraper {
         const { config } = this;
         this.timeout = setTimeout(this.rescrape.bind(this), config.scrapeIntervalMins * 60000);
 
-        if (config.verbose) {
+        if (config.debugOrVerbose) {
             console.log(`RESCRAPER - Next rescrape scheduled in ${config.scrapeIntervalMins} mins.`);
         }
     }
