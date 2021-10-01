@@ -1,37 +1,71 @@
 <h1>{{{heading}}}</h1>
 
-<div>
-    <a href="{{data/election.electionUrl}}">election</a> | <a href="{{data/chatRoomUrl}}">chatroom</a>
-</div>
+<blockquote>
+    <p>I am <strong><a href="https://github.com/samliew/se-electionbot">ElectionBot</a></strong>, a chatbot to handle queries for commonly-asked questions in an election chat room.</p>
+    <p>Please direct any queries &amp; feedback to <a href="https://github.com/samliew/se-electionbot/graphs/contributors">my developers</a> in the <a href="https://chat.stackoverflow.com/rooms/190503/electionbot-development">development chatroom</a> or <a href="https://github.com/samliew/se-electionbot/issues">create an issue on Github</a>.</p>
+</blockquote>
 
 <div>
+    <h2>Election Info</h2>
     <table>
         {{#with data/election}}
-        <tr><td>Last Updated</td><td>{{updated}}</td></tr>
-        <tr><td>Election URL</td><td>{{electionUrl}}</td></tr>
+        <tr><td>Last Updated</td><td>{{utcTimestamp updated}}</td></tr>
+        <tr><td>Site Name</td><td>{{sitename}}</td></tr>
         <tr><td>Election Title</td><td>{{title}}</td></tr>
         <tr><td>Election #</td><td>{{electionNum}}</td></tr>
-        <tr><td>Site Name</td><td>{{sitename}}</td></tr>
         <tr><td>Host Name</td><td>{{siteHostname}}</td></tr>
-        <tr><td>Chat URL</td><td>{{chatUrl}}</td></tr>
-        <tr><td>Current Phase</td><td>{{phase}}</td></tr>
-        <tr><td>Cancelled?</td><td>{{data/electionMeta/cancelled}}</td></tr>
-        <tr><td>Nomination Start Date</td><td>{{utcTimestamp dateNomination}}</td></tr>
-        <tr><td>Primary Start Date</td><td>{{utcTimestamp datePrimary}}</td></tr>
-        <tr><td>Election Start Date</td><td>{{utcTimestamp dateElection}}</td></tr>
-        <tr><td>Election End Date</td><td>{{utcTimestamp dateEnded}}</td></tr>
+        <tr><td>Election URL</td><td>{{url electionUrl}}</td></tr>
+        <tr><td>Chat URL</td><td>{{url chatUrl}}</td></tr>
         <tr><td>Positions</td><td>{{numPositions}}</td></tr>
         <tr><td>Rep. Vote</td><td>{{repVote}}</td></tr>
         <tr><td>Rep. Nominate</td><td>{{repNominate}}</td></tr>
         <tr><td>Voter Stats</td><td>{{statVoters}}</td></tr>
+        <tr><td>Current Phase</td><td>{{phase}}</td></tr>
+        <tr><td>Nomination Start Date</td><td>{{utcTimestamp dateNomination}}</td></tr>
+        <tr><td>Primary Start Date</td><td>{{utcTimestamp datePrimary}}</td></tr>
+        <tr><td>Election Start Date</td><td>{{utcTimestamp dateElection}}</td></tr>
+        <tr><td>Election End Date</td><td>{{utcTimestamp dateEnded}}</td></tr>
         {{/with}}
         <tr><td>Nominees</td><td><code>{{data/electionMeta/nominees}}</code></td></tr>
         <tr><td>Winners</td><td><pre>{{data/electionMeta/winners}}</code></td></tr>
     </table>
 </div>
 
-<footer>
-    <p>I am <strong><a href="https://github.com/samliew/se-electionbot">ElectionBot</a></strong>, a chatbot to handle queries for commonly-asked questions in an election chat room.</p>
-    <p>I also greet users with the election status after certain levels of room inactivity.</p>
-    <p>Please direct any queries &amp; feedback to <a href="https://github.com/samliew/se-electionbot/graphs/contributors">my developers</a> in the <a href="https://chat.stackoverflow.com/rooms/190503/electionbot-development">development chatroom</a> or <a href="https://github.com/samliew/se-electionbot/issues">create an issue on Github</a>.</p>
-</footer>
+<div>
+    <h2>Bot Config</h2>
+    <table>
+        {{#with data/botconfig}}
+        <tr><td>throttleSecs</td><td>{{throttleSecs}}</td></tr>
+        <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}}</td></tr>
+        <tr><td>duplicateResponseText</td><td>{{duplicateResponseText}}</td></tr>
+        <tr><td>isMuted</td><td>{{isMuted}}</td></tr>
+        <tr><td>maxMessageLength</td><td>{{maxMessageLength}}</td></tr>
+        <tr><td>maxMessageParts</td><td>{{maxMessageParts}}</td></tr>
+        <tr><td>funMode</td><td>{{funMode}}</td></tr>
+        <tr><td>debug</td><td>{{debug}}</td></tr>
+        <tr><td>verbose</td><td>{{verbose}}</td></tr>
+        {{#with data/flags}}
+        <tr><td>saidElectionEndingSoon</td><td>{{saidElectionEndingSoon}}</td></tr>
+        <tr><td>announcedWinners</td><td>{{announcedWinners}}</td></tr>
+        {{/with}}
+        {{/with}}
+    </table>
+
+    <h2>Room Activity</h2>
+    <table>
+        {{#with data/botconfig}}
+        <tr><td>isStackOverflow</td><td>{{isStackOverflow}}</td></tr>
+        <tr><td>roomLongIdleDuration</td><td>{{roomLongIdleDuration}}</td></tr>
+        <tr><td>lastActivityTime</td><td>{{lastActivityTime}}</td></tr>
+        <tr><td>lastMessageTime</td><td>{{lastMessageTime}}</td></tr>
+        <tr><td>lastMessageContent</td><td>{{lastMessageContent}}</td></tr>
+        <tr><td>activityCount</td><td>{{activityCount}}</td></tr>
+        <tr><td>lowActivityCountThreshold</td><td>{{lowActivityCountThreshold}}</td></tr>
+        <tr><td>roomReachedMinimumActivityCount</td><td>{{roomReachedMinimumActivityCount}}</td></tr>
+        <tr><td>roomBecameIdleAShortWhileAgo</td><td>{{roomBecameIdleAShortWhileAgo}}</td></tr>
+        <tr><td>roomBecameIdleAFewHoursAgo</td><td>{{roomBecameIdleAFewHoursAgo}}</td></tr>
+        <tr><td>botHasBeenQuiet</td><td>{{botHasBeenQuiet}}</td></tr>
+        <tr><td>lastMessageIsPostedByBot</td><td>{{lastMessageIsPostedByBot}}</td></tr>
+        {{/with}}
+    </table>
+</div>

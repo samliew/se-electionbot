@@ -11,6 +11,10 @@ h1 {
     font-size: 1.3rem;
     color: #000;
 }
+h2 {
+    font-size: 1.15rem;
+    color: #333;
+}
 div, p, span {
     font-size: 1.05rem;
 }
@@ -20,8 +24,14 @@ a {
 a:visited {
     color: rgb(0, 0, 0);
 }
+blockquote {
+    margin: 2em 0;
+}
 table {
     margin: 2em 0;
+}
+h2 + table {
+    margin-top: 0;
 }
 table, th, td {
     padding: 8px 10px;

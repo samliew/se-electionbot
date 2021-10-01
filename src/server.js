@@ -10,6 +10,11 @@ const app = express().set('port', process.env.PORT || 5000);
 
 const handlebarsConfig = {
     helpers: {
+        url: function (url, text = "") {
+            if (!/^https?:\/\//.test(url)) return "";
+            text = text || url;
+            return `<a href="${url}">${text}</a>`;
+        },
         utcTimestamp: function (date) {
             const validateDate = (input) => {
                 let output = input;
@@ -19,8 +24,8 @@ const handlebarsConfig = {
                 return output instanceof Date ? output : new Date();
             };
             return validateDate(date).toISOString().replace('T', ' ').replace(/\.\d+/, '');;
-        }
-    }
+        },
+    },
 };
 
 app.engine('handlebars', Handlebars(handlebarsConfig));
@@ -106,18 +111,51 @@ app.route('/')
         try {
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
+            const isStackOverflow = (ELECTION && ELECTION.siteHostname && ELECTION.siteHostname.includes('stackoverflow.com')) || false;
+            const roomLongIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
+            const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = BOT_CONFIG;
+            const roomBecameIdleAShortWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
+            const roomBecameIdleAFewHoursAgo = lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
+            const botHasBeenQuiet = lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
+            const lastMessageIsPostedByBot = lastActivityTime === lastMessageTime;
+
             res.render('index', {
                 page: {
                     title: "Home"
                 },
                 heading: `Chatbot up and running.`,
                 data: {
-                    election: ELECTION,
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
+                    election: ELECTION,
                     electionMeta: {
                         cancelled: JSON.stringify(typeof ELECTION?.cancelledText === "string"),
                         nominees: JSON.stringify(ELECTION?.arrNominees),
                         winners: JSON.stringify(ELECTION?.arrWinners)
+                    },
+                    botconfig: {
+                        throttleSecs: BOT_CONFIG.throttleSecs,
+                        scrapeIntervalMins: BOT_CONFIG.scrapeIntervalMins,
+                        duplicateResponseText: BOT_CONFIG.duplicateResponseText,
+                        isMuted: BOT_CONFIG.isMuted,
+                        maxMessageLength: BOT_CONFIG.maxMessageLength,
+                        maxMessageParts: BOT_CONFIG.maxMessageParts,
+                        funMode: BOT_CONFIG.funMode,
+                        debug: BOT_CONFIG.debug,
+                        verbose: BOT_CONFIG.verbose,
+                        flags: BOT_CONFIG.flags,
+                        // Activity stuff
+                        isStackOverflow: isStackOverflow,
+                        roomLongIdleDuration: roomLongIdleDuration,
+                        lastActivityTime: lastActivityTime,
+                        lastMessageTime: lastMessageTime,
+                        lastMessageContent: BOT_CONFIG.lastMessageContent,
+                        activityCount: BOT_CONFIG.activityCount,
+                        lowActivityCountThreshold: BOT_CONFIG.lowActivityCountThreshold,
+                        roomReachedMinimumActivityCount: roomReachedMinimumActivityCount,
+                        roomBecameIdleAShortWhileAgo: roomBecameIdleAShortWhileAgo,
+                        roomBecameIdleAFewHoursAgo: roomBecameIdleAFewHoursAgo,
+                        botHasBeenQuiet: botHasBeenQuiet,
+                        lastMessageIsPostedByBot: lastMessageIsPostedByBot,
                     }
                 }
             });

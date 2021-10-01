@@ -63,6 +63,8 @@ export default class Rescraper {
         try {
             await election.scrapeElection(config);
 
+            this.isStackOverflow = (election.siteHostname && election.siteHostname.includes('stackoverflow.com')) || false;
+
             const roomLongIdleDuration = this.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
             const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = config;
             const roomBecameIdleAShortWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
