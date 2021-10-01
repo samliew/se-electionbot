@@ -11,11 +11,10 @@
         {{#with data/election}}
         <tr><td>Last Updated</td><td>{{utcTimestamp updated}}</td></tr>
         <tr><td>Site Name</td><td>{{sitename}}</td></tr>
-        <tr><td>Election Title</td><td>{{title}}</td></tr>
-        <tr><td>Election #</td><td>{{electionNum}}</td></tr>
         <tr><td>Host Name</td><td>{{siteHostname}}</td></tr>
-        <tr><td>Election URL</td><td>{{url electionUrl electionUrl}}</td></tr>
-        <tr><td>Chat URL</td><td>{{url chatUrl chatUrl}}</td></tr>
+        <tr><td>Election Title</td><td>{{{url electionUrl title}}}</td></tr>
+        <tr><td>Election #</td><td>{{electionNum}}</td></tr>
+        <tr><td>Chat URL</td><td>{{{url chatUrl chatUrl}}}</td></tr>
         <tr><td>Positions</td><td>{{numPositions}}</td></tr>
         <tr><td>Rep. Vote</td><td>{{repVote}}</td></tr>
         <tr><td>Rep. Nominate</td><td>{{repNominate}}</td></tr>
@@ -26,8 +25,8 @@
         <tr><td>Election End Date</td><td>{{utcTimestamp dateEnded}}</td></tr>
         <tr><td>Voter Stats</td><td>{{statVoters}}</td></tr>
         {{/with}}
-        <tr><td>Nominees</td><td><code>{{json data/electionMeta/nominees}}</code></td></tr>
-        <tr><td>Winners</td><td><pre>{{json data/electionMeta/winners}}</code></td></tr>
+        <tr><td>Nominees</td><td><pre>{{json data/electionMeta/nominees}}</pre></td></tr>
+        <tr><td>Winners</td><td><pre>{{json data/electionMeta/winners}}</pre></td></tr>
     </table>
 </div>
 

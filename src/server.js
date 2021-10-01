@@ -25,7 +25,7 @@ const handlebarsConfig = {
             return validateDate(date).toISOString().replace('T', ' ').replace(/\.\d+/, '');
         },
         json: function (data) {
-            return data.replace(/},\s*/g, "},\n").replace(/\[/g, "[\n").replace(/\]/g, "\n]");
+            return data.replace(/},\s*/g, "},\n").replace(/(^\[|\]$)/g, "").replace(/\[/g, "[\n").replace(/\]/g, "\n]");
         }
     },
 };
