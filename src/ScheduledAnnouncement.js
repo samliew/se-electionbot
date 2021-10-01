@@ -103,8 +103,14 @@ export default class ScheduledAnnouncement {
     async announceWinners(room, election) {
         const { config } = this;
 
-        // Exit early if no election, or winners already announced
-        if (!election || config.flags.announcedWinners) return false;
+        // No election
+        if (!election) return false;
+
+        // Winners have been already announced
+        if (config.flags.announcedWinners) {
+            console.log("announceWinners - Winners have already been announced.");
+            return false;
+        }
 
         const { arrWinners, phase, resultsUrl, siteUrl } = election;
 
@@ -113,7 +119,10 @@ export default class ScheduledAnnouncement {
         if (config.debug) console.log('announceWinners() called: ', arrWinners);
 
         // Needs to have ended and have winners
-        if (phase != 'ended' || length === 0) return false;
+        if (phase != 'ended' || length === 0) {
+            console.log("announceWinners - called but no winners to announce?", election);
+            return false;
+        }
 
         this.stopAll();
         this.rescraper.stop();
@@ -130,7 +139,9 @@ export default class ScheduledAnnouncement {
         // Announce
         await room.sendMessage(msg);
 
+        config.flags.saidElectionEndingSoon = true;
         config.flags.announcedWinners = true;
+        config.scrapeIntervalMins = 10;
 
         return true;
     }

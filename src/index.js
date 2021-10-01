@@ -275,22 +275,28 @@ import {
         // Join the election chat room
         const room = await client.joinRoom(config.chatRoomId);
 
+        // Start rescraper utility, and initialise announcement cron jobs
+        const rescraper = new Rescraper(config, room, election);
+        const announcement = new Announcement(config, room, election, rescraper);
+        announcement.setRescraper(rescraper);
+        announcement.initAll();
+        rescraper.setAnnouncement(announcement);
+        rescraper.start();
+
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
         if (election.phase === 'ended' && election.chatRoomId) {
-            const winnersAnnounced = config.flags.announcedWinners || transcriptMessages?.some(item => item.message && /^The winners? (are|is) /.test(item.message));
+            const winnersAnnounced = config.flags.announcedWinners || transcriptMessages?.some(item => item.message && /^The winners? (are|is) /i.test(item.message));
 
             if (config.debug) {
                 console.log(
                     "INIT - winnersAnnounced:", winnersAnnounced,
-                    "\n" + transcriptMessages.map(item => `${/^The winners? (are|is) /.test(item.message)} - ${item.message}`).join("\n")
+                    "\n" + transcriptMessages.map(item => `${/^The winners? (are|is) /i.test(item.message)} - ${item.message}`).join("\n")
                 );
             }
 
             if (!winnersAnnounced && election.arrWinners) {
-                await sendMessage(config, room, sayCurrentWinners(election), null, true);
-                config.flags.saidElectionEndingSoon = true;
-                config.flags.announcedWinners = true;
+                announcement.announceWinners(room, election);
             }
         }
         // Announce join room if in debug mode
@@ -312,14 +318,6 @@ import {
 
         // Ignore ignored event types
         room.ignore(...ignoredEventTypes);
-
-        // Start rescraper utility, and initialise announcement cron jobs
-        const rescraper = new Rescraper(config, room, election);
-        const announcement = new Announcement(config, room, election, rescraper);
-        announcement.setRescraper(rescraper);
-        announcement.initAll();
-        rescraper.setAnnouncement(announcement);
-        rescraper.start();
 
 
         // Main event listener
@@ -472,9 +470,6 @@ import {
                 commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
 
                 commander.add("announce winners", "makes the bot fetch and announce winners immediately", async () => {
-                    // Already announced
-                    if (config.flags.announcedWinners) return;
-
                     await election.scrapeElection(config);
                     return await announcement.announceWinners(room, election) ? null : "There are no winners yet.";
                 }, AccessLevel.privileged);
