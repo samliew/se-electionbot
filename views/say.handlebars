@@ -1,8 +1,8 @@
 <h1>{{{heading}}}</h1>
-{{{data/statusText}}}
 
 <form method="post">
-    <input type="text" name="message" placeholder="message" maxlength="500" value="" />
+    {{{data/statusText}}}
+    <textarea type="text" name="message" placeholder="message" maxlength="500"></textarea>
     <input type="hidden" name="password" value="{{data/password}}" />
     <button>Send</button>
 </form>

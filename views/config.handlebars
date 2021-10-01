@@ -1,8 +1,13 @@
 <h1>{{{heading}}}</h1>
-{{{data/statusText}}}
 
 <form method="post">
-    {{{data/configFieldsHtml}}}
+
+    {{{data/statusText}}}
+
+    {{#each data/configObject}}
+    <div><label>{{@key}} <input type="text" name="{{@key}}" value="{{this}}" /></label></div>
+    {{/each}}
+
     <input type="hidden" name="password" value="{{data/password}}" />
     <button>Save</button>
 </form>

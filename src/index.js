@@ -870,7 +870,7 @@ import {
         }, 5 * 60000);
 
         // Start server
-        await start(room, config);
+        await start(room, config, election);
 
         // Catch all handler to swallow non-crashing rejections
         process.on("unhandledRejection", (reason) => {
