@@ -55,8 +55,8 @@
         {{#with data/botconfig}}
         <tr><td>isStackOverflow</td><td>{{isStackOverflow}}</td></tr>
         <tr><td>roomLongIdleDuration</td><td>{{roomLongIdleDuration}}</td></tr>
-        <tr><td>lastActivityTime</td><td>{{lastActivityTime}}</td></tr>
-        <tr><td>lastMessageTime</td><td>{{lastMessageTime}}</td></tr>
+        <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}}</td></tr>
+        <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}}</td></tr>
         <tr><td>lastMessageContent</td><td>{{lastMessageContent}}</td></tr>
         <tr><td>activityCount</td><td>{{activityCount}}</td></tr>
         <tr><td>lowActivityCountThreshold</td><td>{{lowActivityCountThreshold}}</td></tr>
