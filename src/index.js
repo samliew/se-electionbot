@@ -287,12 +287,12 @@ import {
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
         if (election.phase === 'ended' && election.chatRoomId) {
             const winnersAnnounced = config.flags.announcedWinners ||
-                transcriptMessages?.some(item => item.message && /^(?:The winners? (?:are|is):|\*\*Congratulations to the winners?)/.test(item.message));
+                transcriptMessages?.some(item => item.message && /^(?:The winners? (?:are|is):|Congratulations to the winners?)/.test(item.message));
 
             if (config.debug) {
                 console.log(
                     "INIT - winnersAnnounced:", winnersAnnounced,
-                    "\n" + transcriptMessages.map(item => `${/^(?:The winners? (?:are|is):|\*\*Congratulations to the winners?)/.test(item.message)} - ${item.message}`).join("\n")
+                    "\n" + transcriptMessages.map(item => `${/^(?:The winners? (?:are|is):|Congratulations to the winners?)/.test(item.message)} - ${item.message}`).join("\n")
                 );
             }
 

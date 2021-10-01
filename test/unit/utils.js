@@ -79,6 +79,8 @@ describe('String-related utils', async function () {
             expect(chatMessages[5].date).to.equal(1553052485000);
 
             expect(chatMessages[6].date).to.equal(1553053320000);
+            expect(chatMessages[6].message).to.equal("how do I vote? This is a test link");
+            expect(chatMessages[6].messageMarkup).to.equal("**how do *I* vote?**  [This is a test link](https://stackoverflow.com/election)");
         });
 
     });
