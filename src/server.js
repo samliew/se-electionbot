@@ -107,13 +107,18 @@ app.route('/')
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
             res.render('index', {
-                "page": {
-                    "title": "Home"
+                page: {
+                    title: "Home"
                 },
-                "heading": `Chatbot up and running.`,
-                "data": {
-                    "election": ELECTION,
-                    "chatRoomUrl": `https://chat.${chatDomain}/rooms/${chatRoomId}`
+                heading: `Chatbot up and running.`,
+                data: {
+                    election: ELECTION,
+                    chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
+                    electionMeta: {
+                        cancelled: JSON.stringify(typeof ELECTION?.cancelledText === "string"),
+                        nominees: JSON.stringify(ELECTION?.arrNominees),
+                        winners: JSON.stringify(ELECTION?.arrWinners)
+                    }
                 }
             });
         } catch (error) {
@@ -142,13 +147,13 @@ app.route('/say')
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
             res.render('say', {
-                "page": {
-                    "title": "Privileged Say"
+                page: {
+                    title: "Privileged Say"
                 },
-                "heading": `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
-                "data": {
-                    "password": password,
-                    "statusText": statusMap[success]
+                heading: `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+                data: {
+                    password: password,
+                    statusText: statusMap[success]
                 }
             });
         } catch (error) {
@@ -202,14 +207,14 @@ app.route('/config')
             const envVars = await heroku.fetchConfigVars();
 
             res.render('config', {
-                "page": {
-                    "title": "Config"
+                page: {
+                    title: "Config"
                 },
-                "heading": `Update ElectionBot environment variables`,
-                "data": {
-                    "configObject": envVars,
-                    "password": password,
-                    "statusText": statusMap[success]
+                heading: `Update ElectionBot environment variables`,
+                data: {
+                    configObject: envVars,
+                    password: password,
+                    statusText: statusMap[success]
                 }
             });
         } catch (error) {

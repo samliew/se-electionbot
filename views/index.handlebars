@@ -6,25 +6,27 @@
 
 <div>
     <table>
-        <tr><td>Last Updated</td><td>{{data/ELECTION.updated}}</td></tr>
-        <tr><td>Election URL</td><td>{{data/ELECTION.electionUrl}}</td></tr>
-        <tr><td>Election Title</td><td>{{data/ELECTION.title}}</td></tr>
-        <tr><td>Election #</td><td>{{data/ELECTION.electionNum}}</td></tr>
-        <tr><td>Cancelled?</td><td>{{data/ELECTION.phase === "cancelled" ? "yes" : "no"}}</td></tr>
-        <tr><td>Site Name</td><td>{{data/ELECTION.sitename}}</td></tr>
-        <tr><td>Host Name</td><td>{{data/ELECTION.siteHostname}}</td></tr>
-        <tr><td>Chat URL</td><td>{{data/ELECTION.chatUrl}}</td></tr>
-        <tr><td>Current Phase</td><td>{{data/ELECTION.phase}}</td></tr>
-        <tr><td>Nomination Start Date</td><td>{{utcTimestamp data/ELECTION.dateNomination}}</td></tr>
-        <tr><td>Primary Start Date</td><td>{{utcTimestamp data/ELECTION.datePrimary}}</td></tr>
-        <tr><td>Election Start Date</td><td>{{utcTimestamp data/ELECTION.dateElection}}</td></tr>
-        <tr><td>Election End Date</td><td>{{utcTimestamp data/ELECTION.dateEnded}}</td></tr>
-        <tr><td>Positions</td><td>{{data/ELECTION.numPositions}}</td></tr>
-        <tr><td>Rep. Vote</td><td>{{data/ELECTION.repVote}}</td></tr>
-        <tr><td>Rep. Nominate</td><td>{{data/ELECTION.repNominate}}</td></tr>
-        <tr><td>Nominees</td><td>{{JSON.stringify(data/ELECTION.arrNominees)}}</td></tr>
-        <tr><td>Winners</td><td>{{JSON.stringify(data/ELECTION.arrWinners)}}</td></tr>
-        <tr><td>Voter Stats</td><td>{{data/ELECTION.statVoters}}</td></tr>
+        {{#with data/ELECTION}}
+        <tr><td>Last Updated</td><td>{{updated}}</td></tr>
+        <tr><td>Election URL</td><td>{{electionUrl}}</td></tr>
+        <tr><td>Election Title</td><td>{{title}}</td></tr>
+        <tr><td>Election #</td><td>{{electionNum}}</td></tr>
+        <tr><td>Site Name</td><td>{{sitename}}</td></tr>
+        <tr><td>Host Name</td><td>{{siteHostname}}</td></tr>
+        <tr><td>Chat URL</td><td>{{chatUrl}}</td></tr>
+        <tr><td>Current Phase</td><td>{{phase}}</td></tr>
+        <tr><td>Nomination Start Date</td><td>{{utcTimestamp dateNomination}}</td></tr>
+        <tr><td>Primary Start Date</td><td>{{utcTimestamp datePrimary}}</td></tr>
+        <tr><td>Election Start Date</td><td>{{utcTimestamp dateElection}}</td></tr>
+        <tr><td>Election End Date</td><td>{{utcTimestamp dateEnded}}</td></tr>
+        <tr><td>Positions</td><td>{{numPositions}}</td></tr>
+        <tr><td>Rep. Vote</td><td>{{repVote}}</td></tr>
+        <tr><td>Rep. Nominate</td><td>{{repNominate}}</td></tr>
+        <tr><td>Voter Stats</td><td>{{statVoters}}</td></tr>
+        {{/with}}
+        <tr><td>Nominees</td><td>{{data/electionMeta/nominees}}</td></tr>
+        <tr><td>Winners</td><td>{{data/electionMeta/winners}}</td></tr>
+        <tr><td>Cancelled?</td><td>{{data/electionMeta/cancelled}}</td></tr>
     </table>
 </div>
 
