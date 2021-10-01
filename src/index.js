@@ -505,7 +505,7 @@ import {
                     ["unmute", /unmute|clear timeout/, config],
                     ["announce winners", /^(announce )?winners/, room, election],
                     ["coffee", /(?:brew|make).+coffee/, user],
-                    ["timetravel", /88 miles|delorean|timetravel/, election, content],
+                    ["timetravel", /88 miles|delorean|timetravel/, config, election, content],
                     ["fun", /fun/, config, content],
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
