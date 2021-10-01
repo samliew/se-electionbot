@@ -153,8 +153,8 @@ export default class Rescraper {
                 }
             }
 
-            // Election is over but we do not have winners yet
-            else if (election.phase === 'ended' && !election.hasNewWinners) {
+            // Election is over but there are no winners
+            else if (election.phase === 'ended' && election.arrWinners.length === 0) {
 
                 // Reduce scrape interval further
                 config.scrapeIntervalMins = 0.5;
@@ -191,6 +191,17 @@ export default class Rescraper {
 
                 // Reset last activity count
                 config.activityCount = 0;
+            }
+
+            // The election is over
+            if (election.phase === 'ended' || election.phase === 'cancelled' && config.scrapeIntervalMins !== 10) {
+
+                // Increase scrape interval since we don't need to scrape often
+                config.scrapeIntervalMins = 10;
+
+                if (config.debugOrVerbose) {
+                    console.log(`RESCRAPER - Scrape interval increased to ${config.scrapeIntervalMins}.`);
+                }
             }
 
             this.start();
