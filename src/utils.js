@@ -117,7 +117,7 @@ export const fetchChatTranscript = async (config, url) => {
         const userlink = $this.parent().siblings('.signature').find('a');
         const messageElem = $this.find('.content');
         const messageText = messageElem.text().trim();
-        const messageMarkup = messageElem.html()?.replace(/<\/?b>/g, '**').replace(/<\/?i>/g, '**').replace(/<a href="([^"]+)">([^<]+)<\/a>/g, `[$2]($1)`).replace(/(^\s+|\s+$)/g, '');
+        const messageMarkup = messageElem.html()?.replace(/<\/?b>/g, '**').replace(/<\/?i>/g, '*').replace(/<a href="([^"]+)">([^<]+)<\/a>/g, `[$2]($1)`).replace(/(^\s+|\s+$)/g, '');
 
         const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [, null, null, null];
         const hour = h && apm ? (
