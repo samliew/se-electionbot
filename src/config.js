@@ -87,7 +87,8 @@ export class BotConfig {
     /* Flags and bot-specific utility functions */
 
     flags = {
-        saidElectionEndingSoon: false
+        saidElectionEndingSoon: false,
+        announcedWinners: false,
     };
 
     updateLastMessageTime(lastMessageTime = Date.now()) {

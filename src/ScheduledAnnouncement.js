@@ -103,8 +103,8 @@ export default class ScheduledAnnouncement {
     async announceWinners(room, election) {
         const { config } = this;
 
-        //exit early if no election
-        if (!election) return false;
+        // Exit early if no election, or winners already announced
+        if (!election || config.flags.announcedWinners) return false;
 
         const { arrWinners, phase, resultsUrl, siteUrl } = election;
 
@@ -116,7 +116,6 @@ export default class ScheduledAnnouncement {
         if (phase != 'ended' || length === 0) return false;
 
         this.stopAll();
-
         this.rescraper.stop();
 
         const winnerList = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
@@ -130,6 +129,8 @@ export default class ScheduledAnnouncement {
 
         // Announce
         await room.sendMessage(msg);
+
+        config.flags.announcedWinners = true;
 
         return true;
     }

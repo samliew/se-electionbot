@@ -278,7 +278,7 @@ import {
         // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
         if (election.phase === 'ended' && election.chatRoomId) {
-            const winnersAnnounced = transcriptMessages?.some(item => item.message && /^The winners? (are|is) /.test(item.message));
+            const winnersAnnounced = config.flags.announcedWinners || transcriptMessages?.some(item => item.message && /^The winners? (are|is) /.test(item.message));
 
             if (config.debug) {
                 console.log(
@@ -290,6 +290,7 @@ import {
             if (!winnersAnnounced && election.arrWinners) {
                 await sendMessage(config, room, sayCurrentWinners(election), null, true);
                 config.flags.saidElectionEndingSoon = true;
+                config.flags.announcedWinners = true;
             }
         }
         // Announce join room if in debug mode
@@ -470,6 +471,14 @@ import {
 
                 commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
 
+                commander.add("announce winners", "makes the bot fetch and announce winners immediately", async () => {
+                    // Already announced
+                    if (config.flags.announcedWinners) return;
+
+                    await election.scrapeElection(config);
+                    return await announcement.announceWinners(room, election) ? null : "There are no winners yet.";
+                }, AccessLevel.privileged);
+
                 commander.aliases({
                     timetravel: ["delorean", "88 miles"],
                     mute: ["timeout", "sleep"],
@@ -494,6 +503,7 @@ import {
                     ["leave room", /leave room/, content, client],
                     ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
+                    ["announce winners", /^(announce )?winners/, room, election],
                     ["coffee", /(?:brew|make).+coffee/, user],
                     ["timetravel", /88 miles|delorean|timetravel/, election, content],
                     ["fun", /fun/, config, content],
