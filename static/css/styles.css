@@ -20,6 +20,14 @@ a {
 a:visited {
     color: rgb(0, 0, 0);
 }
+table {
+    margin: 2em 0;
+}
+table, th, td {
+    padding: 8px 10px;
+    border: 1px solid #888;
+    border-collapse: collapse;
+}
 form {
     max-width: 800px;
 }

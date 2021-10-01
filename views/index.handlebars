@@ -1,12 +1,12 @@
 <h1>{{{heading}}}</h1>
 
 <div>
-    <a href="{{data/ELECTION.electionUrl}}">election</a> | <a href="{{data/chatRoomUrl}}">chatroom</a>
+    <a href="{{data/election.electionUrl}}">election</a> | <a href="{{data/chatRoomUrl}}">chatroom</a>
 </div>
 
 <div>
     <table>
-        {{#with data/ELECTION}}
+        {{#with data/election}}
         <tr><td>Last Updated</td><td>{{updated}}</td></tr>
         <tr><td>Election URL</td><td>{{electionUrl}}</td></tr>
         <tr><td>Election Title</td><td>{{title}}</td></tr>
@@ -15,6 +15,7 @@
         <tr><td>Host Name</td><td>{{siteHostname}}</td></tr>
         <tr><td>Chat URL</td><td>{{chatUrl}}</td></tr>
         <tr><td>Current Phase</td><td>{{phase}}</td></tr>
+        <tr><td>Cancelled?</td><td>{{data/electionMeta/cancelled}}</td></tr>
         <tr><td>Nomination Start Date</td><td>{{utcTimestamp dateNomination}}</td></tr>
         <tr><td>Primary Start Date</td><td>{{utcTimestamp datePrimary}}</td></tr>
         <tr><td>Election Start Date</td><td>{{utcTimestamp dateElection}}</td></tr>
@@ -24,9 +25,8 @@
         <tr><td>Rep. Nominate</td><td>{{repNominate}}</td></tr>
         <tr><td>Voter Stats</td><td>{{statVoters}}</td></tr>
         {{/with}}
-        <tr><td>Nominees</td><td>{{data/electionMeta/nominees}}</td></tr>
-        <tr><td>Winners</td><td>{{data/electionMeta/winners}}</td></tr>
-        <tr><td>Cancelled?</td><td>{{data/electionMeta/cancelled}}</td></tr>
+        <tr><td>Nominees</td><td><code>{{data/electionMeta/nominees}}</code></td></tr>
+        <tr><td>Winners</td><td><pre>{{data/electionMeta/winners}}</code></td></tr>
     </table>
 </div>
 
