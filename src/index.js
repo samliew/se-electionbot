@@ -493,7 +493,7 @@ import {
                     ["alive", /alive|awake|ping/, scriptHostname, scriptInitDate, config],
                     ["say", /say/, originalMessage],
                     ["greet", /^(greet|welcome)/, election],
-                    ["get time", /get time|time/, election],
+                    ["get time", /(get time|time)$/, election],
                     ["get cron", /get cron/, announcement],
                     ["test cron", /test cron/, announcement],
                     ["get throttle", /get throttle/, config.throttleSecs],
