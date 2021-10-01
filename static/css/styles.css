@@ -28,6 +28,7 @@ blockquote {
     margin: 2em 0;
 }
 table {
+    max-width: 800px;
     margin: 2em 0;
 }
 h2 + table {
@@ -37,6 +38,9 @@ table, th, td {
     padding: 8px 10px;
     border: 1px solid #888;
     border-collapse: collapse;
+}
+th, td {
+    min-width: 120px;
 }
 form {
     max-width: 800px;

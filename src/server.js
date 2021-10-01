@@ -10,9 +10,8 @@ const app = express().set('port', process.env.PORT || 5000);
 
 const handlebarsConfig = {
     helpers: {
-        url: function (url, text = "") {
+        url: function (url, text) {
             if (!/^https?:\/\//.test(url)) return "";
-            text = text || url;
             return `<a href="${url}">${text}</a>`;
         },
         utcTimestamp: function (date) {
@@ -23,8 +22,11 @@ const handlebarsConfig = {
                 }
                 return output instanceof Date ? output : new Date();
             };
-            return validateDate(date).toISOString().replace('T', ' ').replace(/\.\d+/, '');;
+            return validateDate(date).toISOString().replace('T', ' ').replace(/\.\d+/, '');
         },
+        json: function (data) {
+            return data.replace(/},\s*/g, "},\n").replace(/\[/g, "[\n").replace(/\]/g, "\n]");
+        }
     },
 };
 

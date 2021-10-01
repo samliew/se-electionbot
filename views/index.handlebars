@@ -14,20 +14,20 @@
         <tr><td>Election Title</td><td>{{title}}</td></tr>
         <tr><td>Election #</td><td>{{electionNum}}</td></tr>
         <tr><td>Host Name</td><td>{{siteHostname}}</td></tr>
-        <tr><td>Election URL</td><td>{{url electionUrl}}</td></tr>
-        <tr><td>Chat URL</td><td>{{url chatUrl}}</td></tr>
+        <tr><td>Election URL</td><td>{{url electionUrl electionUrl}}</td></tr>
+        <tr><td>Chat URL</td><td>{{url chatUrl chatUrl}}</td></tr>
         <tr><td>Positions</td><td>{{numPositions}}</td></tr>
         <tr><td>Rep. Vote</td><td>{{repVote}}</td></tr>
         <tr><td>Rep. Nominate</td><td>{{repNominate}}</td></tr>
-        <tr><td>Voter Stats</td><td>{{statVoters}}</td></tr>
         <tr><td>Current Phase</td><td>{{phase}}</td></tr>
         <tr><td>Nomination Start Date</td><td>{{utcTimestamp dateNomination}}</td></tr>
         <tr><td>Primary Start Date</td><td>{{utcTimestamp datePrimary}}</td></tr>
         <tr><td>Election Start Date</td><td>{{utcTimestamp dateElection}}</td></tr>
         <tr><td>Election End Date</td><td>{{utcTimestamp dateEnded}}</td></tr>
+        <tr><td>Voter Stats</td><td>{{statVoters}}</td></tr>
         {{/with}}
-        <tr><td>Nominees</td><td><code>{{data/electionMeta/nominees}}</code></td></tr>
-        <tr><td>Winners</td><td><pre>{{data/electionMeta/winners}}</code></td></tr>
+        <tr><td>Nominees</td><td><code>{{json data/electionMeta/nominees}}</code></td></tr>
+        <tr><td>Winners</td><td><pre>{{json data/electionMeta/winners}}</code></td></tr>
     </table>
 </div>
 
