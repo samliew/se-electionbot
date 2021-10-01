@@ -16,10 +16,10 @@
         <tr><td>Host Name</td><td>{{data/ELECTION.siteHostname}}</td></tr>
         <tr><td>Chat URL</td><td>{{data/ELECTION.chatUrl}}</td></tr>
         <tr><td>Current Phase</td><td>{{data/ELECTION.phase}}</td></tr>
-        <tr><td>Nomination Start Date</td><td>{{new Date(data/ELECTION.dateNomination).toISOString()}}</td></tr>
-        <tr><td>Primary Start Date</td><td>{{new Date(data/ELECTION.datePrimary).toISOString()}}</td></tr>
-        <tr><td>Election Start Date</td><td>{{new Date(data/ELECTION.dateElection).toISOString()}}</td></tr>
-        <tr><td>Election End Date</td><td>{{new Date(data/ELECTION.dateEnded).toISOString()}}</td></tr>
+        <tr><td>Nomination Start Date</td><td>{{utcTimestamp data/ELECTION.dateNomination}}</td></tr>
+        <tr><td>Primary Start Date</td><td>{{utcTimestamp data/ELECTION.datePrimary}}</td></tr>
+        <tr><td>Election Start Date</td><td>{{utcTimestamp data/ELECTION.dateElection}}</td></tr>
+        <tr><td>Election End Date</td><td>{{utcTimestamp data/ELECTION.dateEnded}}</td></tr>
         <tr><td>Positions</td><td>{{data/ELECTION.numPositions}}</td></tr>
         <tr><td>Rep. Vote</td><td>{{data/ELECTION.repVote}}</td></tr>
         <tr><td>Rep. Nominate</td><td>{{data/ELECTION.repNominate}}</td></tr>

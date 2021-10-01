@@ -8,7 +8,22 @@ const __dirname = new URL(".", import.meta.url).pathname;
 
 const app = express().set('port', process.env.PORT || 5000);
 
-app.engine('handlebars', Handlebars());
+const handlebarsConfig = {
+    helpers: {
+        utcTimestamp: function (date) {
+            const validateDate = (input) => {
+                let output = input;
+                if (typeof input === 'string' || typeof input === 'number') {
+                    output = new Date(input);
+                }
+                return output instanceof Date ? output : new Date();
+            };
+            return validateDate(date).toISOString().replace('T', ' ').replace(/\.\d+/, '');;
+        }
+    }
+};
+
+app.engine('handlebars', Handlebars(handlebarsConfig));
 app.set('view engine', 'handlebars');
 app.set('view cache', 'false');
 
