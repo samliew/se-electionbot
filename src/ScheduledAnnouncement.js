@@ -106,12 +106,6 @@ export default class ScheduledAnnouncement {
         // No election
         if (!election) return false;
 
-        // Winners have been already announced
-        if (config.flags.announcedWinners) {
-            console.log("announceWinners - Winners have already been announced.");
-            return false;
-        }
-
         const { arrWinners, phase, resultsUrl, siteUrl } = election;
 
         const { length } = arrWinners;
@@ -124,8 +118,19 @@ export default class ScheduledAnnouncement {
             return false;
         }
 
+        // There are winners, stop and reset everything
         this.stopAll();
         this.rescraper.stop();
+
+        config.flags.saidElectionEndingSoon = true;
+        config.flags.announcedWinners = true;
+        config.scrapeIntervalMins = 10;
+
+        // Winners have been already announced
+        if (config.flags.announcedWinners) {
+            console.log("announceWinners - Winners have already been announced");
+            return false;
+        }
 
         const winnerList = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
 
@@ -139,9 +144,7 @@ export default class ScheduledAnnouncement {
         // Announce
         await room.sendMessage(msg);
 
-        config.flags.saidElectionEndingSoon = true;
-        config.flags.announcedWinners = true;
-        config.scrapeIntervalMins = 10;
+        console.log("announceWinners - announced winners");
 
         return true;
     }
