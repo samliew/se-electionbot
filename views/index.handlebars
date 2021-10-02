@@ -16,7 +16,7 @@
 <div>
     <h2>Election Info</h2>
     <table>
-        <tr><td>Last updated</td><td>{{utcTimestamp election/updated}} (<span class="relativetime" title="{{utcTimestamp election/updated}}"></span>)</td></tr>
+        <tr><td>Last updated</td><td>{{utcTimestamp election/updated}} <span class="relativetime" title="{{utcTimestamp election/updated}}"></span></td></tr>
         <tr><td>Site name</td><td>{{election/siteName}}</td></tr>
         <tr><td>Host name</td><td>{{{url siteUrl siteHostname}}}</td></tr>
         <tr><td>API slug</td><td>{{apiSlug}}</td></tr>
@@ -27,10 +27,10 @@
         <tr><td>Rep. to vote</td><td>{{election/repVote}}</td></tr>
         <tr><td>Rep. to nominate</td><td>{{election/repNominate}}</td></tr>
         <tr><td>Current phase</td><td>{{election/phase}}</td></tr>
-        <tr><td>Nomination date</td><td>{{utcTimestamp election/dateNomination}}</td></tr>
-        <tr><td>Primary date</td><td>{{utcTimestamp election/datePrimary}}</td></tr>
-        <tr><td>Election date</td><td>{{utcTimestamp election/dateElection}}</td></tr>
-        <tr><td>End date</td><td>{{utcTimestamp election/dateEnded}}</td></tr>
+        <tr><td>Nomination date</td><td>{{utcTimestamp election/dateNomination}} <span class="relativetime" title="{{utcTimestamp election/dateNomination}}"></span></td></tr>
+        <tr><td>Primary date</td><td>{{utcTimestamp election/datePrimary}} <span class="relativetime" title="{{utcTimestamp election/datePrimary}}"></span></td></tr>
+        <tr><td>Election date</td><td>{{utcTimestamp election/dateElection}} <span class="relativetime" title="{{utcTimestamp election/dateElection}}"></span></td></tr>
+        <tr><td>End date</td><td>{{utcTimestamp election/dateEnded}} <span class="relativetime" title="{{utcTimestamp election/dateEnded}}"></span></td></tr>
         <tr><td>Opavote URL</td><td>{{{url election/opavoteUrl election/opavoteUrl}}}</td></tr>
         <tr><td>Voter stats</td><td>{{election/statVoters}}</td></tr>
         <tr><td>Candidates</td><td>
@@ -80,8 +80,8 @@
     <h2>Room Activity</h2>
     {{#with botconfig}}
     <table>
-        <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} (<span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span>)</td></tr>
-        <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} (<span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span>)</td></tr>
+        <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} <span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
+        <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} <span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td></tr>
         <tr><td>lastMessageContent</td><td>{{lastMessageContent}}</td></tr>
         <tr><td>activityCount</td><td>{{activityCount}}</td></tr>
         <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>

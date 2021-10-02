@@ -123,6 +123,14 @@ form button {
 .relativetime {
     font-style: italic;
 }
+.relativetime:not(:empty)::before {
+    content: "(";
+    font-style: normal;
+}
+.relativetime:not(:empty)::after {
+    content: ")";
+    font-style: normal;
+}
 
 @media (max-width: 767px) {
     body {

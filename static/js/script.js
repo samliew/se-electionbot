@@ -1,39 +1,55 @@
 // @ts-nocheck
 
-function prettyDate(rawTitle) {
-    if (!rawTitle) return;
+const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') => {
 
-    // Extract the date and time from the front of the string.
-    var match = rawTitle.match(/^(\d{4}-\d\d-\d\d) (\d\d:\d\d:\d\dZ)/);
-    if (!match) return;
+    const validateDate = (input) => {
+        let output = input;
 
-    // firefox requires ISO 8601 formatted dates
-    var time = match[1] + "T" + match[2];
+        if (typeof input === 'string' || typeof input === 'number') {
+            output = new Date(input);
+        };
 
-    var date = new Date(time),
-        diff = (((new Date()).getTime() - date.getTime()) / 1000),
-        day_diff = Math.floor(diff / 86400);
+        // use instanceof, as normal objects will pass `typeof !== "object"` validation
+        return output instanceof Date ? output : new Date();
+    };
 
-    if (isNaN(day_diff) || day_diff < 0 || day_diff >= 31)
-        return;
+    date = validateDate(date);
 
-    return day_diff === 0 && (
-        diff < 5 && "just now" ||
-        diff < 60 && (function (n) { return n.seconds === 1 ? n.seconds + " sec ago" : n.seconds + " secs ago" })({ seconds: Math.floor(diff) }) ||
-        diff < 120 && "1 min ago" ||
-        diff < 3600 && (function (n) { return n.minutes === 1 ? n.minutes + " min ago" : n.minutes + " mins ago" })({ minutes: Math.floor(diff / 60) }) ||
-        diff < 7200 && "1 hour ago" ||
-        diff < 86400 && (function (n) { return n.hours === 1 ? n.hours + " hour ago" : n.hours + " hours ago" })({ hours: Math.floor(diff / 3600) }) ||
-        diff < 172800 && "1 day ago" ||
-        (function (n) { return n.days === 1 ? n.days + " day ago" : n.days + " days ago" })({ days: Math.floor(diff / 86400) })
+    if (date === null) return soonText;
+
+    // Try future date
+    let diff = (date.getTime() - Date.now()) / 1000;
+    let dayDiff = Math.floor(diff / 86400);
+
+    // In the future
+    if (diff > 0) {
+        return dayDiff > 31 ? "" : (
+            diff < 5 && soonText ||
+            diff < 60 && (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}` })(Math.floor(diff)) ||
+            diff < 3600 && (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}` })(Math.floor(diff / 60)) ||
+            diff < 86400 && (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}` })(Math.floor(diff / 3600)) ||
+            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}` })(Math.floor(diff / 86400))
+        );
+    }
+
+    // In the past
+    diff = (Date.now() - date.getTime()) / 1000;
+    dayDiff = Math.floor(diff / 86400);
+
+    return dayDiff > 31 ? "" : (
+        diff < 5 && justNowText ||
+        diff < 60 && (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago` })(Math.floor(diff)) ||
+        diff < 3600 && (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago` })(Math.floor(diff / 60)) ||
+        diff < 86400 && (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago` })(Math.floor(diff / 3600)) ||
+        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago` })(Math.floor(diff / 86400))
     );
-}
+};
 
-function updateRelativeDates() {
+const updateRelativeDates = () => {
     var spans = document.querySelectorAll('span.relativetime');
     spans.forEach(el => {
         if (el.title) {
-            var date = prettyDate(el.title);
+            var date = dateToRelativetime(el.title);
             if (date)
                 el.innerHTML = date;
         }

@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { asyncCacheable, fetchChatTranscript, getSiteDefaultChatroom, listify, parseIds, pluralize } from "../../src/utils.js";
+import { asyncCacheable, dateToRelativetime, fetchChatTranscript, getSiteDefaultChatroom, listify, parseIds, pluralize } from "../../src/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('String-related utils', async function () {
@@ -77,6 +77,61 @@ describe('String-related utils', async function () {
             expect(chatMessages[6].date).to.equal(1553053320000);
             expect(chatMessages[6].message).to.equal("how do I vote?  This is a test link");
             expect(chatMessages[6].messageMarkup).to.equal("**how do *I* vote?**  [This is a test link](https://stackoverflow.com/election)");
+        });
+    });
+
+    describe('dateToRelativetime', () => {
+
+        it('should be able to convert a date in the future correctly', () => {
+            let date, result;
+
+            date = new Date();
+            result = dateToRelativetime(date.setSeconds(date.getSeconds() + 1));
+            expect(result).to.equal("soon");
+
+            result = dateToRelativetime(date.setSeconds(date.getSeconds() + 30));
+            expect(result).to.match(/^in 3[01] secs$/); // +/- 1 sec
+
+            result = dateToRelativetime(date.setMinutes(date.getMinutes() + 30));
+            expect(result).to.equal("in 30 mins");
+
+            result = dateToRelativetime(date.setMinutes(date.getMinutes() + 30));
+            expect(result).to.equal("in 1 hour");
+
+            result = dateToRelativetime(date.setHours(date.getHours() + 1));
+            expect(result).to.equal("in 2 hours");
+
+            result = dateToRelativetime(date.setDate(date.getDate() + 1));
+            expect(result).to.equal("in 1 day");
+
+            result = dateToRelativetime(date.setDate(date.getDate() + 1));
+            expect(result).to.equal("in 2 days");
+        });
+
+        it('should be able to convert a date in the past correctly', () => {
+            let date, result;
+
+            date = new Date();
+            result = dateToRelativetime(date.setSeconds(date.getSeconds() - 1));
+            expect(result).to.equal("just now");
+
+            result = dateToRelativetime(date.setSeconds(date.getSeconds() - 30));
+            expect(result).to.match(/^3[01] secs ago$/); // +/- 1 sec
+
+            result = dateToRelativetime(date.setMinutes(date.getMinutes() - 30));
+            expect(result).to.equal("30 mins ago");
+
+            result = dateToRelativetime(date.setMinutes(date.getMinutes() - 30));
+            expect(result).to.equal("1 hour ago");
+
+            result = dateToRelativetime(date.setHours(date.getHours() - 1));
+            expect(result).to.equal("2 hours ago");
+
+            result = dateToRelativetime(date.setDate(date.getDate() - 1));
+            expect(result).to.equal("1 day ago");
+
+            result = dateToRelativetime(date.setDate(date.getDate() - 1));
+            expect(result).to.equal("2 days ago");
         });
     });
 

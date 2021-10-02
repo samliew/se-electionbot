@@ -200,7 +200,7 @@ export const validateDate = (input) => {
         output = new Date(input);
     };
 
-    //instanceof as normal objects will pass `typeof !== "object"` validation
+    // use instanceof, as normal objects will pass `typeof !== "object"` validation
     return output instanceof Date ? output : new Date();
 };
 
@@ -235,21 +235,38 @@ export const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
  * @param {string} [soonText]
  * @returns {string}
  */
-export const dateToRelativetime = (date, soonText = 'soon') => {
+export const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') => {
 
     date = validateDate(date);
 
-    const diff = new Date(date).valueOf() - Date.now();
-    const daysTo = Math.floor(diff / (864e5));
-    const hoursTo = Math.floor(diff / (36e5));
+    if (date === null) return soonText;
 
-    if (daysTo < 1 && hoursTo < 1) return soonText;
+    // Try future date
+    let diff = (date.getTime() - Date.now()) / 1000;
+    let dayDiff = Math.floor(diff / 86400);
 
-    if (daysTo >= 1) return `in ${daysTo} day${pluralize(daysTo)}`;
+    // In the future
+    if (diff > 0) {
+        return dayDiff > 31 ? "" : (
+            diff < 5 && soonText ||
+            diff < 60 && (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}` })(Math.floor(diff)) ||
+            diff < 3600 && (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}` })(Math.floor(diff / 60)) ||
+            diff < 86400 && (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}` })(Math.floor(diff / 3600)) ||
+            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}` })(Math.floor(diff / 86400))
+        );
+    }
 
-    if (hoursTo >= 1) return `in ${hoursTo} hour${pluralize(hoursTo)}`;
+    // In the past
+    diff = (Date.now() - date.getTime()) / 1000;
+    dayDiff = Math.floor(diff / 86400);
 
-    return soonText;
+    return dayDiff > 31 ? "" : (
+        diff < 5 && justNowText ||
+        diff < 60 && (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago` })(Math.floor(diff)) ||
+        diff < 3600 && (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago` })(Math.floor(diff / 60)) ||
+        diff < 86400 && (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago` })(Math.floor(diff / 3600)) ||
+        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago` })(Math.floor(diff / 86400))
+    );
 };
 
 /**
