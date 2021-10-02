@@ -10,7 +10,7 @@ import { dateToUtcTimestamp, fetchUrl } from './utils.js';
  *  userId: number,
  *  userName: string,
  *  userYears: string,
- *  userScore: string,
+ *  userScore: number,
  *  nominationDate: Date,
  *  nominationLink: string,
  *  permalink: string
@@ -319,7 +319,7 @@ export default class Election {
             userYears: $(el).find('.user-details').contents().map((_i, { data, type }) =>
                 type === 'text' ? data?.trim() : ""
             ).get().join(' ').trim(),
-            userScore: $(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)?.[0] || "",
+            userScore: +($(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)?.[0] || 0),
             nominationDate: new Date($(el).find('.relativetime').attr('title') || ""),
             nominationLink: `${electionPageUrl}#${$(el).attr('id')}`,
             permalink: `${electionSiteUrl}/users/${userId}`,
@@ -385,7 +385,8 @@ export default class Election {
 
             const candidateElems = $('#mainbar .candidate-row');
 
-            const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl, this.siteUrl)).get();
+            const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl, this.siteUrl)).get()
+                .sort((a, b) => a.nominationDate < b.nominationDate ? -1 : 1);
 
             // Clear an array before rescraping
             this.arrNominees.length = 0;
