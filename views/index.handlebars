@@ -1,19 +1,24 @@
 <h1>{{{heading}}}</h1>
 
+{{#with data}}
+
 <blockquote>
     <p>I am <strong><a href="https://github.com/samliew/se-electionbot">ElectionBot</a></strong>, a chatbot to handle queries for commonly-asked questions in an election chat room.</p>
-    <p>I am currently in room {{{url data/chatRoomUrl data/chatRoomUrl}}}.</p>
-    <p>Please direct any queries &amp; feedback to <a href="https://github.com/samliew/se-electionbot/graphs/contributors">my developers</a> in the <a href="https://chat.stackoverflow.com/rooms/190503/electionbot-development">development chatroom</a> or <a href="https://github.com/samliew/se-electionbot/issues">create an issue on Github</a>.</p>
+    <p>I am currently in room {{{url chatRoomUrl chatRoomUrl}}}.</p>
+    <p>
+        Please direct any queries &amp; feedback to <a href="https://github.com/samliew/se-electionbot/graphs/contributors">my developers</a> in the
+        <a href="https://chat.stackoverflow.com/rooms/190503/electionbot-development">development chatroom</a> or <a href="https://github.com/samliew/se-electionbot/issues">create an issue on Github</a>.
+    </p>
 </blockquote>
 
 <div>
     <h2>Election Info</h2>
+    {{#with election}}
     <table>
-        {{#with data/election}}
         <tr><td>Last updated</td><td>{{utcTimestamp updated}} (<span class="relativetime" title="{{utcTimestamp updated}}"></span>)</td></tr>
-        <tr><td>Site name</td><td>{{{url sitename (get data/election siteUrl)}}}</td></tr>
-        <tr><td>Host name</td><td>{{get data/election siteHostname}}</td></tr>
-        <tr><td>API slug</td><td>{{get data/election apiSlug}}</td></tr>
+        <tr><td>Site name</td><td>{{{url sitename electionMeta/siteUrl)}}}</td></tr>
+        <tr><td>Host name</td><td>{{electionMeta/siteHostname}}</td></tr>
+        <tr><td>API slug</td><td>{{electionMeta/apiSlug}}</td></tr>
         <tr><td>Title</td><td>{{{url electionUrl title}}}</td></tr>
         <tr><td>Number</td><td>{{electionNum}}</td></tr>
         <tr><td>Chat room</td><td>{{{url chatUrl chatUrl}}}</td></tr>
@@ -27,17 +32,17 @@
         <tr><td>End date</td><td>{{utcTimestamp dateEnded}}</td></tr>
         <tr><td>Opavote URL</td><td>{{{url opavoteUrl opavoteUrl}}}</td></tr>
         <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
-        {{/with}}
-        <tr><td>Candidates</td><td>{{get data/election numNominees}} candidates:<pre>{{json data/electionMeta/nominees}}</pre></td></tr>
-        <tr><td>Winners</td><td>{{get data/election numWinners}} winners:<pre>{{json data/electionMeta/winners}}</pre></td></tr>
-        <tr><td>Badges</td><td><pre>{{{data/electionMeta/electionBadges}}}</pre></td></tr>
+        <tr><td>Candidates</td><td>{{electionMeta/numNominees}} candidates:<pre>{{json electionMeta/nominees}}</pre></td></tr>
+        <tr><td>Winners</td><td>{{electionMeta/numWinners}} winners:<pre>{{json electionMeta/winners}}</pre></td></tr>
+        <tr><td>Badges</td><td><pre>{{{electionMeta/electionBadges}}}</pre></td></tr>
     </table>
+    {{/with}}
 </div>
 
 <div>
     <h2>Bot Config</h2>
+    {{#with botconfig}}
     <table>
-        {{#with data/botconfig}}
         <tr><td>isMuted</td><td>{{{boolean isMuted}}}</td></tr>
         <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
         <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
@@ -47,16 +52,16 @@
         <tr><td>funMode</td><td>{{{boolean funMode}}}</td></tr>
         <tr><td>debug</td><td>{{{boolean debug}}}</td></tr>
         <tr><td>verbose</td><td>{{{boolean verbose}}}</td></tr>
-        {{/with}}
-        {{#with data/botconfig/flags}}
+        {{#with flags}}
         <tr><td>flags.saidElectionEndingSoon</td><td>{{{boolean saidElectionEndingSoon}}}</td></tr>
         <tr><td>flags.announcedWinners</td><td>{{{boolean announcedWinners}}}</td></tr>
         {{/with}}
     </table>
+    {{/with}}
 
     <h2>Room Activity</h2>
+    {{#with botconfig}}
     <table>
-        {{#with data/botconfig}}
         <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} (<span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span>)</td></tr>
         <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} (<span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span>)</td></tr>
         <tr><td>lastMessageContent</td><td>{{lastMessageContent}}</td></tr>
@@ -68,6 +73,8 @@
         <tr><td>roomBecameIdleHoursAgo</td><td>{{{boolean roomBecameIdleHoursAgo}}}</td></tr>
         <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}</td></tr>
         <tr><td>lastMessageIsPostedByBot</td><td>{{{boolean lastMessageIsPostedByBot}}}</td></tr>
-        {{/with}}
     </table>
+    {{/with}}
 </div>
+
+{{/with}}

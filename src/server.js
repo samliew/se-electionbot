@@ -144,6 +144,9 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     election: ELECTION,
                     electionMeta: {
+                        siteUrl: ELECTION.siteUrl,
+                        siteHostname: ELECTION.siteHostname,
+                        apiSlug: ELECTION.apiSlug,
                         cancelled: JSON.stringify(typeof ELECTION.cancelledText === "string"),
                         nominees: JSON.stringify(ELECTION.arrNominees),
                         winners: JSON.stringify(ELECTION.arrWinners),
