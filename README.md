@@ -83,8 +83,8 @@ Default values in square brackets.
 > `LOW_ACTIVITY_CHECK_MINS` - [`15`]  interval (minutes) for bot to check room for inactivity<br>
 > `MIN_ACTIVITY_COUNT_THRESHOLD` - [`30`]  bot can classify room as inactive only after these amount of messages have been sent<br>
 > `SCRAPE_INTERVAL_MINS` - [`5`]  interval (minutes) for bot to scrape election page for updates<br>
-> `THROTTLE_SECS` - [`3`]  seconds before bot can send another response
-> `KEEP_ALIVE` - whether bot will ping itself
+> `THROTTLE_SECS` - [`3`]  seconds before bot can send another response<br>
+> `KEEP_ALIVE` - whether bot will ping itself occasionally
 
 > `DEBUG` - [`false`] whether bot is in debug mode<br>
 > `FUN_MODE` - [`true`] a debug variable<br>
