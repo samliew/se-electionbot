@@ -26,12 +26,13 @@ const handlebarsConfig = {
                 if (typeof input === 'string' || typeof input === 'number') {
                     output = new Date(input);
                 }
-                return output instanceof Date ? output : new Date();
+                return output instanceof Date ? output : null;
             };
             date = validateDate(date);
             return date?.toISOString().replace('T', ' ').replace(/\.\d+/, '') || "";
         },
         json: function (data) {
+            if (typeof data !== "string") data = JSON.stringify(data);
             return data.replace(/},\s*/g, "},\n").replace(/,"/g, `, "`).replace(/(^\[|\]$)/g, "").replace(/\[/g, "[\n").replace(/\]/g, "\n]");
         },
         boolean: function (data) {
