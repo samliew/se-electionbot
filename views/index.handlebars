@@ -11,9 +11,9 @@
     <table>
         {{#with data/election}}
         <tr><td>Last updated</td><td>{{utcTimestamp updated}} (<span class="relativetime" title="{{utcTimestamp updated}}"></span>)</td></tr>
-        <tr><td>Site name</td><td>{{{url sitename (get this siteUrl)}}}</td></tr>
-        <tr><td>Host name</td><td>{{get this siteHostname}}</td></tr>
-        <tr><td>API slug</td><td>{{get this apiSlug}}</td></tr>
+        <tr><td>Site name</td><td>{{{url sitename (get data/election siteUrl)}}}</td></tr>
+        <tr><td>Host name</td><td>{{get data/election siteHostname}}</td></tr>
+        <tr><td>API slug</td><td>{{get data/election apiSlug}}</td></tr>
         <tr><td>Title</td><td>{{{url electionUrl title}}}</td></tr>
         <tr><td>Number</td><td>{{electionNum}}</td></tr>
         <tr><td>Chat room</td><td>{{{url chatUrl chatUrl}}}</td></tr>
