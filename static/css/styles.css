@@ -14,6 +14,7 @@ body {
     padding: 30px;
     font-size: 1em;
     background-color: rgb(242, 232, 222);
+    overflow-x: hidden;
 }
 h1, h2, h3, h4, h5, h6 {
     margin: 2em 0 0.5em;
@@ -63,6 +64,7 @@ td:empty:before,
 pre:empty:before {
     content: "(none)";
     font-style: italic;
+    font-size: 0.9rem;
     color: var(--border-color);
 }
 form {
