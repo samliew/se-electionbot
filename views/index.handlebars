@@ -13,30 +13,28 @@
 
 <div>
     <h2>Election Info</h2>
-    {{#with election}}
     <table>
-        <tr><td>Last updated</td><td>{{utcTimestamp updated}} (<span class="relativetime" title="{{utcTimestamp updated}}"></span>)</td></tr>
-        <tr><td>Site name</td><td>{{{url sitename data/electionMeta/siteUrl}}}</td></tr>
-        <tr><td>Host name</td><td>{{data/electionMeta/siteHostname}}</td></tr>
-        <tr><td>API slug</td><td>{{data/electionMeta/apiSlug}}</td></tr>
-        <tr><td>Title</td><td>{{{url electionUrl title}}}</td></tr>
-        <tr><td>Number</td><td>{{electionNum}}</td></tr>
-        <tr><td>Chat room</td><td>{{{url chatUrl chatUrl}}}</td></tr>
-        <tr><td>Positions</td><td>{{numPositions}}</td></tr>
-        <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
-        <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
-        <tr><td>Current phase</td><td>{{phase}}</td></tr>
-        <tr><td>Nomination date</td><td>{{utcTimestamp dateNomination}}</td></tr>
-        <tr><td>Primary date</td><td>{{utcTimestamp datePrimary}}</td></tr>
-        <tr><td>Election date</td><td>{{utcTimestamp dateElection}}</td></tr>
-        <tr><td>End date</td><td>{{utcTimestamp dateEnded}}</td></tr>
-        <tr><td>Opavote URL</td><td>{{{url opavoteUrl opavoteUrl}}}</td></tr>
-        <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
-        <tr><td>Candidates</td><td>{{data/electionMeta/numNominees}} candidates:<pre>{{json data/electionMeta/nominees}}</pre></td></tr>
-        <tr><td>Winners</td><td>{{data/electionMeta/numWinners}} winners:<pre>{{json data/electionMeta/winners}}</pre></td></tr>
-        <tr><td>Badges</td><td><pre>{{{data/electionMeta/electionBadges}}}</pre></td></tr>
+        <tr><td>Last updated</td><td>{{utcTimestamp election/updated}} (<span class="relativetime" title="{{utcTimestamp election/updated}}"></span>)</td></tr>
+        <tr><td>Site name</td><td>{{{url election/sitename electionMeta/siteUrl}}}</td></tr>
+        <tr><td>Host name</td><td>{{electionMeta/siteHostname}}</td></tr>
+        <tr><td>API slug</td><td>{{electionMeta/apiSlug}}</td></tr>
+        <tr><td>Title</td><td>{{{url election/electionUrl election/title}}}</td></tr>
+        <tr><td>Number</td><td>{{election/electionNum}}</td></tr>
+        <tr><td>Chat room</td><td>{{{url election/chatUrl election/chatUrl}}}</td></tr>
+        <tr><td>Positions</td><td>{{election/numPositions}}</td></tr>
+        <tr><td>Rep. to vote</td><td>{{election/repVote}}</td></tr>
+        <tr><td>Rep. to nominate</td><td>{{election/repNominate}}</td></tr>
+        <tr><td>Current phase</td><td>{{election/phase}}</td></tr>
+        <tr><td>Nomination date</td><td>{{utcTimestamp election/dateNomination}}</td></tr>
+        <tr><td>Primary date</td><td>{{utcTimestamp election/datePrimary}}</td></tr>
+        <tr><td>Election date</td><td>{{utcTimestamp election/dateElection}}</td></tr>
+        <tr><td>End date</td><td>{{utcTimestamp election/dateEnded}}</td></tr>
+        <tr><td>Opavote URL</td><td>{{{url election/opavoteUrl election/opavoteUrl}}}</td></tr>
+        <tr><td>Voter stats</td><td>{{election/statVoters}}</td></tr>
+        <tr><td>Candidates</td><td>{{electionMeta/numNominees}} candidates:<pre>{{json electionMeta/nominees}}</pre></td></tr>
+        <tr><td>Winners</td><td>{{electionMeta/numWinners}} winners:<pre>{{json electionMeta/winners}}</pre></td></tr>
+        <tr><td>Badges</td><td>{{{electionMeta/electionBadges}}}</td></tr>
     </table>
-    {{/with}}
 </div>
 
 <div>
