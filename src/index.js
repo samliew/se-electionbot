@@ -216,7 +216,7 @@ import {
                 }
             }
 
-            console.log(`App is in production with active election - redirected to live room:
+            console.log(`INIT - App is in production with active election - redirected to live room:
             DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
             ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
         }
@@ -242,32 +242,6 @@ import {
         // Join the election chat room
         const room = await client.joinRoom(config.chatRoomId);
 
-        // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
-        if (election.phase === 'ended' && election.chatRoomId) {
-            const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
-            const winnersAnnounced = transcriptMessages?.some(item => item.message && /^The winners? (are|is) /.test(item.message));
-
-            if (config.debug) {
-                console.log("winnersAnnounced:", winnersAnnounced);
-                console.log(
-                    "Transcript messages:",
-                    transcriptMessages.map(item => `${/^The winners? (are|is) /.test(item.message)} - ${item.message}`).join("\n")
-                );
-            }
-
-            if (!winnersAnnounced && election.arrWinners) {
-                await sendMessage(config, room, sayCurrentWinners(election), null, true);
-                config.flags.saidElectionEndingSoon = true;
-            }
-        }
-        // Announce join room if in debug mode
-        else if (config.debug) {
-            await sendMessage(config, room, getRandomPlop(), null, true);
-        }
-
-        // Ignore ignored event types
-        room.ignore(...ignoredEventTypes);
-
         // Start rescraper utility, and initialise announcement cron jobs
         const rescraper = new Rescraper(config, room, election);
         const announcement = new Announcement(config, room, election, rescraper);
@@ -275,6 +249,43 @@ import {
         announcement.initAll();
         rescraper.setAnnouncement(announcement);
         rescraper.start();
+
+        // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
+        const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
+        if (election.phase === 'ended' && election.chatRoomId) {
+            const winnersAnnounced = config.flags.announcedWinners ||
+                transcriptMessages?.some(item => item.message && /^(?:The winners? (?:are|is):|Congratulations to the winners?)/.test(item.message));
+
+            if (config.debug) {
+                console.log(
+                    "INIT - winnersAnnounced:", winnersAnnounced,
+                    "\n" + transcriptMessages.map(item => `${/^(?:The winners? (?:are|is):|Congratulations to the winners?)/.test(item.message)} - ${item.message}`).join("\n")
+                );
+            }
+
+            if (!winnersAnnounced && election.arrWinners) {
+                announcement.announceWinners(room, election);
+            }
+        }
+        // Announce join room if in debug mode
+        else if (config.debug) {
+            await sendMessage(config, room, getRandomPlop(), null, true);
+        }
+        // Not in debug mode, if bot sent last message in room, sync on startup
+        // Don't need to do this in debug mode because we're sending join room message
+        else if (transcriptMessages) {
+            const lastMessage = transcriptMessages[transcriptMessages.length - 1];
+            const lastMessageByBot = lastMessage.message && (lastMessage.username === me.name || lastMessage.chatUserId === me.id);
+
+            if (lastMessageByBot) {
+                config.updateLastMessage(lastMessage.message, lastMessage.date);
+
+                console.log(`INIT - Previous message in room was by bot at ${lastMessage.date}:`, lastMessage.message);
+            }
+        }
+
+        // Ignore ignored event types
+        room.ignore(...ignoredEventTypes);
 
 
         // Main event listener
@@ -426,6 +437,11 @@ import {
 
                 commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
 
+                commander.add("announce winners", "makes the bot fetch and announce winners immediately", async () => {
+                    await election.scrapeElection(config);
+                    return await announcement.announceWinners(room, election) ? null : "There are no winners yet.";
+                }, AccessLevel.privileged);
+
                 commander.aliases({
                     timetravel: ["delorean", "88 miles"],
                     mute: ["timeout", "sleep"],
@@ -440,7 +456,7 @@ import {
                     ["alive", /alive|awake|ping/, scriptHostname, scriptInitDate, config],
                     ["say", /say/, originalMessage],
                     ["greet", /^(greet|welcome)/, election],
-                    ["get time", /get time|time/, election],
+                    ["get time", /(get time|time)$/, election],
                     ["get cron", /get cron/, announcement],
                     ["test cron", /test cron/, announcement],
                     ["get throttle", /get throttle/, config.throttleSecs],
@@ -450,8 +466,9 @@ import {
                     ["leave room", /leave room/, content, client],
                     ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
+                    ["announce winners", /^(announce )?winners/, room, election],
                     ["coffee", /(?:brew|make).+coffee/, user],
-                    ["timetravel", /88 miles|delorean|timetravel/, election, content],
+                    ["timetravel", /88 miles|delorean|timetravel/, config, election, content],
                     ["fun", /fun/, config, content],
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
@@ -849,7 +866,7 @@ import {
         }, 5 * 60000);
 
         // Start server
-        await start(room, config);
+        await start(room, config, election);
 
         // Catch all handler to swallow non-crashing rejections
         process.on("unhandledRejection", (reason) => {

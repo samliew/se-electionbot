@@ -80,12 +80,14 @@ Default values in square brackets.
 > `IGNORED_USERIDS` - user chat IDs that the bot will ignore (pipe-delimited)<br>
 > `ADMIN_IDS` - user chat IDs to grant manage bot privileges (pipe-delimited)<br>
 > `DEV_IDS` - user chat IDs to grant dev bot privileges (pipe-delimited)<br>
-> `LOW_ACTIVITY_CHECK_MINS` - [`15`] interval (minutes) for bot to check room for inactivity<br>
-> `LOW_ACTIVITY_COUNT_THRESHOLD` - [`30`] bot can classify room as inactive only after these amount of messages have been sent<br>
-> `SCRAPE_INTERVAL_MINS` - [`5`] interval (minutes) for bot to scrape election page for updates<br>
-> `THROTTLE_SECS` - [`3`] seconds before bot can send another response
+> `LOW_ACTIVITY_CHECK_MINS` - [`15`]  interval (minutes) for bot to check room for inactivity<br>
+> `MIN_ACTIVITY_COUNT_THRESHOLD` - [`30`]  bot can classify room as inactive only after these amount of messages have been sent<br>
+> `SCRAPE_INTERVAL_MINS` - [`5`]  interval (minutes) for bot to scrape election page for updates<br>
+> `THROTTLE_SECS` - [`3`]  seconds before bot can send another response
 
-> `DEBUG` - [`false`] whether bot is in debug mode<br> > `FUN_MODE` - [`true`] a debug variable<br> > `VERBOSE` - [`false`] a debug variable
+> `DEBUG` - [`false`] whether bot is in debug mode<br>
+> `FUN_MODE` - [`true`] a debug variable<br>
+> `VERBOSE` - [`false`] a debug variable
 
 > `SCRIPT_HOSTNAME` - bot identifier, base hostname for web pages / dashboard<br>
 > `HEROKU_API_TOKEN` - to be used only when hosted on Heroku for bot dashboard<br>

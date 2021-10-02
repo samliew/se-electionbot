@@ -1,24 +1,71 @@
+:root {
+    --heading-colour: #000;
+    --text-colour: #000;
+    --link-colour: rgb(0, 0, 139);
+    --border-color: #999;
+}
 * {
     font-family: Arial, sans-serif;
-    color: #000;
+    line-height: 1.3;
+    color: var(--text-colour);
 }
 body {
     margin: 0;
-    padding: 20px;
-    background-color: rgb(240, 225, 210);
+    padding: 30px;
+    font-size: 1em;
+    background-color: rgb(242, 232, 222);
+    overflow-x: hidden;
+}
+h1, h2, h3, h4, h5, h6 {
+    margin: 2em 0 0.5em;
 }
 h1 {
-    font-size: 1.3rem;
-    color: #000;
+    font-size: 1.4em;
+    color: var(--heading-colour);
 }
-div, p, span {
-    font-size: 1.05rem;
+h1:first-child {
+    margin-top: 10px;
+}
+h2 {
+    font-size: 1.2em;
+    color: var(--heading-colour);
 }
 a {
-    color: rgb(0, 0, 139);
+    color: var(--link-colour);
 }
 a:visited {
-    color: rgb(0, 0, 0);
+    color: var(--text-colour);
+}
+blockquote {
+    margin: 2em 0;
+}
+table {
+    max-width: 800px;
+    margin: 2em 0;
+}
+h2 + table {
+    margin-top: 0;
+}
+table, th, td {
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-collapse: collapse;
+}
+th, td {
+    min-width: 140px;
+}
+pre {
+    max-width: calc(100vw - 250px);
+    margin: 0;
+    overflow: auto;
+    font-size: 0.8em;
+}
+td:empty:before,
+pre:empty:before {
+    content: "(none)";
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--border-color);
 }
 form {
     max-width: 800px;
@@ -26,16 +73,20 @@ form {
 form * {
     font-size: 0.9rem;
 }
-form input {
+form label {
+    font-weight: bold;
+}
+form input,
+form textarea {
     display: block;
     width: 100%;
     margin-bottom: 1em;
     padding: 8px 12px;
     border-radius: 5px;
-    border: 1px solid #999;
+    border: 1px solid var(--border-color);
 }
-form label {
-    font-weight: bold;
+form textarea {
+    min-height: 130px;
 }
 form button {
     padding: 8px 20px;
@@ -52,4 +103,59 @@ form button {
 .result.error {
     color: indianred;
     background-color: rgb(255, 238, 238);
+}
+.truthy {
+    font-weight: bold;
+    color: green;
+}
+.falsy {
+    font-weight: bold;
+    color: indianred;
+}
+.relativetime {
+    font-style: italic;
+}
+
+@media (max-width: 767px) {
+    body {
+        padding: 20px 20px;
+        font-size: 0.9em;
+        word-break: break-word;
+    }
+    blockquote {
+        margin: 1.5em 0;
+    }
+    table {
+        max-width: none;
+        width: 100%;
+        border: none;
+        border-left: 1px solid var(--border-color);
+    }
+    tr {
+        display: flex;
+        align-content: stretch;
+        align-items: stretch;
+        flex-direction: column;
+        margin: 15px 0;
+    }
+    th, td {
+        border: none;
+        padding: 2px 15px;
+        padding-right: 0;
+    }
+    tr:first-child {
+        margin-top: 0;
+    }
+    tr:last-child {
+        margin-bottom: 0;
+    }
+    th:first-child,
+    td:first-child {
+        font-weight: bold;
+    }
+    pre {
+        max-width: none;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
 }

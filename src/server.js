@@ -1,13 +1,43 @@
 import express from 'express';
 import Handlebars from 'express-handlebars';
 import { join } from 'path';
+import Election from './election.js';
 import { HerokuClient } from "./herokuClient.js";
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
 const app = express().set('port', process.env.PORT || 5000);
 
-app.engine('handlebars', Handlebars());
+const handlebarsConfig = {
+    helpers: {
+        ifEquals: function (arg1, arg2, options) {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+        },
+        url: function (url, text) {
+            if (!/^https?:\/\//.test(url)) return "";
+            return `<a href="${url}">${text}</a>`;
+        },
+        utcTimestamp: function (date) {
+            const validateDate = (input) => {
+                let output = input;
+                if (typeof input === 'string' || typeof input === 'number') {
+                    output = new Date(input);
+                }
+                return output instanceof Date ? output : new Date();
+            };
+            date = validateDate(date);
+            return date?.toISOString().replace('T', ' ').replace(/\.\d+/, '') || "";
+        },
+        json: function (data) {
+            return data.replace(/},\s*/g, "},\n").replace(/,"/g, `, "`).replace(/(^\[|\]$)/g, "").replace(/\[/g, "[\n").replace(/\]/g, "\n]");
+        },
+        boolean: function (data) {
+            return `<span class="${data || data === 'true' ? 'truthy' : 'falsy'}">${data}</span>`;
+        }
+    },
+};
+
+app.engine('handlebars', Handlebars(handlebarsConfig));
 app.set('view engine', 'handlebars');
 app.set('view cache', 'false');
 
@@ -31,6 +61,14 @@ let BOT_CONFIG;
  * @type {Room | undefined}
  */
 let BOT_ROOM;
+
+/**
+ * @private
+ *
+ * @summary internal election reference
+ * @type {Election | undefined}
+ */
+let ELECTION;
 
 const staticPath = join(__dirname, '../static');
 app.use(express.static(staticPath));
@@ -58,7 +96,7 @@ app.use((req, res, next) => {
     const validPwd = password === process.env.PASSWORD;
 
     if (!publicPaths.includes(path) && !validPwd) {
-        console.log(`Unauthorised connect - "${path}"
+        console.log(`SERVER - Unauthorised connect "${path}"
             IP:   ${ip}
             Host: ${hostname}
             Pass: ${password}
@@ -75,24 +113,62 @@ app.route('/')
     .get((_req, res) => {
 
         if (!BOT_CONFIG) {
-            console.error("Bot configuration missing");
+            console.error("SERVER - bot config missing");
             return res.sendStatus(500);
         }
 
         try {
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
+            const isStackOverflow = (ELECTION && ELECTION.siteHostname && ELECTION.siteHostname.includes('stackoverflow.com')) || false;
+            const longIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
+            const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = BOT_CONFIG;
+            const roomBecameIdleAWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
+            const roomBecameIdleHoursAgo = lastActivityTime + (longIdleDuration * 60 * 6e4) < Date.now();
+            const botHasBeenQuiet = lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
+            const lastMessageIsPostedByBot = lastActivityTime === lastMessageTime;
+
             res.render('index', {
-                "page": {
-                    "title": "ElectionBot"
+                page: {
+                    title: "Home"
                 },
-                "heading": `Chatbot up and running.`,
-                "data": {
-                    "content": `<a href="https://chat.${chatDomain}/rooms/${chatRoomId}">${chatDomain}; room ${chatRoomId}</a>`
+                heading: `Chatbot up and running.`,
+                data: {
+                    chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
+                    election: ELECTION,
+                    electionMeta: {
+                        cancelled: JSON.stringify(typeof ELECTION?.cancelledText === "string"),
+                        nominees: JSON.stringify(ELECTION?.arrNominees),
+                        winners: JSON.stringify(ELECTION?.arrWinners)
+                    },
+                    botconfig: {
+                        throttleSecs: BOT_CONFIG.throttleSecs,
+                        scrapeIntervalMins: BOT_CONFIG.scrapeIntervalMins,
+                        duplicateResponseText: BOT_CONFIG.duplicateResponseText,
+                        isMuted: BOT_CONFIG.isMuted,
+                        maxMessageLength: BOT_CONFIG.maxMessageLength,
+                        maxMessageParts: BOT_CONFIG.maxMessageParts,
+                        funMode: BOT_CONFIG.funMode,
+                        debug: BOT_CONFIG.debug,
+                        verbose: BOT_CONFIG.verbose,
+                        flags: BOT_CONFIG.flags,
+                        // Activity stuff
+                        longIdleDuration: longIdleDuration,
+                        lastActivityTime: lastActivityTime,
+                        lastMessageTime: lastMessageTime,
+                        lastMessageContent: BOT_CONFIG.lastMessageContent,
+                        activityCount: BOT_CONFIG.activityCount,
+                        minActivityCountThreshold: BOT_CONFIG.minActivityCountThreshold,
+                        roomReachedMinimumActivityCount: roomReachedMinimumActivityCount,
+                        roomBecameIdleAWhileAgo: roomBecameIdleAWhileAgo,
+                        roomBecameIdleHoursAgo: roomBecameIdleHoursAgo,
+                        botHasBeenQuiet: botHasBeenQuiet,
+                        lastMessageIsPostedByBot: lastMessageIsPostedByBot,
+                    }
                 }
             });
         } catch (error) {
-            console.error(`failed to render home route:`, error);
+            console.error(`SERVER - failed to render home route:`, error);
             res.sendStatus(500);
         }
     });
@@ -103,13 +179,13 @@ app.route('/say')
         const { success, password = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
         if (!BOT_CONFIG) {
-            console.error("Bot configuration missing");
+            console.error("SERVER - Bot config missing");
             return res.sendStatus(500);
         }
 
         try {
             const statusMap = {
-                true: `<div class="result success">Success!</div>`,
+                true: `<div class="result success">Message sent to room.</div>`,
                 false: `<div class="result error">Error. Could not send message.</div>`,
                 undefined: ""
             };
@@ -117,17 +193,17 @@ app.route('/say')
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
             res.render('say', {
-                "page": {
-                    "title": "ElectionBot | Privileged Say"
+                page: {
+                    title: "Privileged Say"
                 },
-                "heading": `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
-                "data": {
-                    "password": password,
-                    "statusText": statusMap[success]
+                heading: `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+                data: {
+                    password: password,
+                    statusText: statusMap[success]
                 }
             });
         } catch (error) {
-            console.error(`failed to display message dashboard:`, error);
+            console.error(`SERVER - failed to display message dashboard:`, error);
             res.sendStatus(500);
         }
     })
@@ -135,7 +211,7 @@ app.route('/say')
         const { password, message = "" } = /** @type {{ password:string, message?:string }} */(body);
 
         if (!BOT_CONFIG) {
-            console.error("bot configuration missing");
+            console.error("SERVER - bot config missing");
             return res.sendStatus(500);
         }
 
@@ -150,7 +226,7 @@ app.route('/say')
             res.redirect(`/say?password=${password}&success=true`);
 
         } catch (error) {
-            console.error(`message submit error:`, error);
+            console.error(`SERVER - message submit error:`, error);
             res.redirect(`/say?password=${password}&success=false`);
         }
     });
@@ -161,14 +237,14 @@ app.route('/config')
         const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
 
         if (!BOT_CONFIG) {
-            console.error("bot configuration missing");
+            console.error("SERVER - bot config missing");
             return res.sendStatus(500);
         }
 
         try {
             const statusMap = {
                 true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
-                false: `<div class="result error">Error. Could not perform action.</div>`,
+                false: `<div class="result error">Error. Could not save new values.</div>`,
                 undefined: ""
             };
 
@@ -176,21 +252,19 @@ app.route('/config')
             const heroku = new HerokuClient(BOT_CONFIG);
             const envVars = await heroku.fetchConfigVars();
 
-            const kvpHtml = Object.keys(envVars).map(key => `<div><label>${key} <input type="text" name="${key}" value="${envVars[key]}" /></label></div>`).join("");
-
             res.render('config', {
-                "page": {
-                    "title": "ElectionBot | Config"
+                page: {
+                    title: "Config"
                 },
-                "heading": `Update ElectionBot environment variables`,
-                "data": {
-                    "configFieldsHtml": kvpHtml,
-                    "password": password,
-                    "statusText": statusMap[success]
+                heading: `Update ElectionBot environment variables`,
+                data: {
+                    configObject: envVars,
+                    password: password,
+                    statusText: statusMap[success]
                 }
             });
         } catch (error) {
-            console.error(`failed to display config dashboard:`, error);
+            console.error(`SERVER - failed to display config dashboard:`, error);
             res.sendStatus(500);
         }
     })
@@ -199,18 +273,18 @@ app.route('/config')
         const { password, ...fields } = body;
 
         if (!BOT_CONFIG) {
-            console.error("bot configuration missing");
+            console.error("SERVER - bot config missing");
             return res.sendStatus(500);
         }
 
         try {
             if (BOT_CONFIG.verbose) {
-                console.log(`submitted body:\n"${JSON.stringify(body)}"`);
+                console.log(`SERVER - submitted body:\n"${JSON.stringify(body)}"`);
             }
 
             // Validation
             if (Object.keys(fields).length === 0) {
-                console.error(`Invalid request`);
+                console.error(`SERVER - invalid request`);
                 return res.redirect(`/config?password=${password}&success=false`);
             }
 
@@ -220,12 +294,12 @@ app.route('/config')
 
             if (status && BOT_ROOM) {
                 const status = await BOT_ROOM.leave();
-                console.log(`left room ${BOT_ROOM.id} after update: ${status}`);
+                console.log(`SERVER - left room ${BOT_ROOM.id} after update: ${status}`);
             }
 
             res.redirect(`/config?password=${password}&success=true`);
         } catch (error) {
-            console.error(`Config submit error:`, error);
+            console.error(`SERVER - config submit error:`, error);
             res.redirect(`/config?password=${password}&success=false`);
         }
     });
@@ -248,30 +322,39 @@ export const setRoom = (room) => {
 };
 
 /**
+ * @summary sets the server's room
+ * @param {Election} election current election
+ */
+export const setElection = (election) => {
+    ELECTION = election;
+};
+
+/**
  * @summary starts the bot server
  * @param {Room} room current room the bot is in
  * @param {import("./config.js").BotConfig} config  bot configuration
  * @returns {Promise<import("express").Application>}
  */
-export const start = async (room, config) => {
+export const start = async (room, config, election) => {
 
     setBot(config);
     setRoom(room);
+    setElection(election);
 
     const server = app.listen(app.get('port'), () => {
-        console.log(`INIT - Node app ${staticPath} is listening on port ${app.get('port')}.`);
+        console.log(`SERVER - Node app ${staticPath} is listening on port ${app.get('port')}.`);
     });
 
     const farewell = async () => {
         if (config.debug) {
-            await room.sendMessage("have to go now, will be back soon");
+            await room.sendMessage("have to go now, will be back soon...");
         }
         terminate(server);
     };
 
     /** @param {import("http").Server} server */
     const terminate = (server) => server.close(() => {
-        console.log('gracefully shutting down');
+        console.log('SERVER - gracefully shutting down');
         process.exit(0);
     });
 

@@ -297,7 +297,7 @@ export default class Election {
 
         try {
             // Save prev values so we can compare changes after
-            this._prevObj = Object.assign({}, this); // fast way of cloning an object
+            this._prevObj = JSON.parse(JSON.stringify(this));
             this._prevObj._prevObj = null;
 
             const electionPageUrl = `${this.electionUrl}?tab=nomination`;

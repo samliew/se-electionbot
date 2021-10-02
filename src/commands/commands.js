@@ -42,11 +42,12 @@ export const setAccessCommand = (config, user, content) => {
 
 /**
  * @summary changes internal bot clock to a given day
+ * @param {BotConfig} config bot config
  * @param {Election} election current election instance
  * @param {string} content incoming message content
  * @returns {string}
  */
-export const timetravelCommand = (election, content) => {
+export const timetravelCommand = (config, election, content) => {
     const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
 
     if (!today && (!yyyy || !MM || !dd)) return "Sorry, Doc! Invalid coordinates";
@@ -56,6 +57,9 @@ export const timetravelCommand = (election, content) => {
     const phase = Election.getPhase(election, destination);
 
     election.phase = phase;
+
+    config.flags.announcedWinners = false;
+    config.flags.saidElectionEndingSoon = false;
 
     const intl = new Intl.DateTimeFormat("en-US", {
         year: "numeric",
