@@ -117,11 +117,15 @@ app.route('/')
             return res.sendStatus(500);
         }
 
+        if (!ELECTION) {
+            console.error("SERVER - election data missing");
+            return res.sendStatus(500);
+        }
+
         try {
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
-            const isStackOverflow = (ELECTION && ELECTION.siteHostname && ELECTION.siteHostname.includes('stackoverflow.com')) || false;
-            const longIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
+            const longIdleDuration = ELECTION.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
             const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = BOT_CONFIG;
             const roomBecameIdleAWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
             const roomBecameIdleHoursAgo = lastActivityTime + (longIdleDuration * 60 * 6e4) < Date.now();
@@ -137,9 +141,9 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     election: ELECTION,
                     electionMeta: {
-                        cancelled: JSON.stringify(typeof ELECTION?.cancelledText === "string"),
-                        nominees: JSON.stringify(ELECTION?.arrNominees),
-                        winners: JSON.stringify(ELECTION?.arrWinners)
+                        cancelled: JSON.stringify(typeof ELECTION.cancelledText === "string"),
+                        nominees: JSON.stringify(ELECTION.arrNominees),
+                        winners: JSON.stringify(ELECTION.arrWinners)
                     },
                     botconfig: {
                         throttleSecs: BOT_CONFIG.throttleSecs,

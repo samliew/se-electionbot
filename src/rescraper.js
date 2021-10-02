@@ -27,8 +27,6 @@ export default class Rescraper {
      */
     announcement;
 
-    isStackOverflow = false;
-
     /**
      * @param {BotConfig} config bot config
      * @param {Room} room chatroom the bot is connected to
@@ -63,9 +61,7 @@ export default class Rescraper {
         try {
             await election.scrapeElection(config);
 
-            this.isStackOverflow = (election.siteHostname && election.siteHostname.includes('stackoverflow.com')) || false;
-
-            const longIdleDuration = this.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
+            const longIdleDuration = election.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
             const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = config;
             const roomBecameIdleAWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
             const roomBecameIdleHoursAgo = lastActivityTime + (longIdleDuration * 60 * 6e4) < Date.now();

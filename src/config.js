@@ -2,6 +2,8 @@ import { parseIds } from "./utils.js";
 
 export class BotConfig {
 
+    scriptInitDate = new Date();
+
     /**
      * @param {import("chatexchange/dist/Client").Host} host chat host server
      * @param {number} roomId room id this configuration is for

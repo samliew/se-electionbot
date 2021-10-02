@@ -67,13 +67,11 @@ export const sayHowToNominate = (election, electionBadges, mentionsAnother = fal
 
     const { siteHostname } = election;
 
-    const isStackOverflow = siteHostname === "stackoverflow.com";
-
     // Markup to bold additional text if talking about nominating others
     const mentionsAnotherBold = mentionsAnother ? '**' : '';
 
     let requirements = [`at least ${election.repNominate} reputation`];
-    if (isStackOverflow) requirements.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
+    if (election.isStackOverflow) requirements.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
     if (siteHostname && /askubuntu\.com$/.test(siteHostname)) requirements.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
     requirements.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
 
@@ -460,9 +458,9 @@ export const sayNumberOfPositions = (_config, election, _text) => {
 export const sayUserEligibility = async (config, election, text) => {
     const userId = +text.replace(/\D/g, "");
 
-    const { chatDomain, apiKeyPool } = config;
+    const { apiKeyPool } = config;
 
-    const apiSlug = chatDomain.split(".").slice(0, -1).join(".");
+    const { apiSlug } = election;
 
     const userBadges = await getBadges(config, userId, apiSlug, getStackApiKey(apiKeyPool));
 

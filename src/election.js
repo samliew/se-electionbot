@@ -73,6 +73,24 @@ export default class Election {
     }
 
     /**
+     * @summary gets api slug from site hostname
+     * @returns {string}
+     */
+    get siteHostname() {
+        const { electionUrl } = this;
+        return electionUrl.split('/')[2] || ""; // hostname only, exclude trailing slash;
+    }
+
+    /**
+     * @summary gets api slug from site hostname
+     * @returns {string}
+     */
+    get apiSlug() {
+        const { siteHostname } = this;
+        return siteHostname?.replace(/\.stackexchange/i, '').replace(/\.(?:com|org|net)/i, '') || "";
+    }
+
+    /**
      * @summary gets current number of Nominees
      * @returns {number}
      */
@@ -166,7 +184,7 @@ export default class Election {
      * @returns {boolean}
      */
     validElectionUrl(electionUrl) {
-        return /^https:\/\/([^\/]+\.)+(com|net|org)\/election(\/\d+)?$/.test(electionUrl);
+        return /^https:\/\/(?:[^\/]+\.)+(?:com|net|org)\/election(?:\/\d+)?$/.test(electionUrl);
     }
 
     /**
@@ -334,7 +352,7 @@ export default class Election {
 
             this.updated = Date.now();
             this.sitename = $('meta[property="og:site_name"]').attr('content')?.replace('Stack Exchange', '').trim();
-            this.siteHostname = this.electionUrl.split('/')[2]; // hostname only, exclude trailing slash
+            this.isStackOverflow = this.siteHostname === 'stackoverflow.com';
             this.siteUrl = 'https://' + this.siteHostname;
             this.title = $('#content h1').first().text().trim();
             this.dateNomination = nominationDate;

@@ -59,23 +59,19 @@ import {
         dotenv.config({ debug: process.env.DEBUG === 'true' });
     }
 
-    // Environment variables
-    const { CHAT_ROOM_ID } = process.env;
+    // Required environment variables
+    const electionUrl = process.env.ELECTION_URL?.trim();
+    const accountEmail = process.env.ACCOUNT_EMAIL?.trim();
+    const accountPassword = process.env.ACCOUNT_PASSWORD?.trim();
 
-    const accountEmail = process.env.ACCOUNT_EMAIL;
-    const accountPassword = process.env.ACCOUNT_PASSWORD;
-    const electionUrl = process.env.ELECTION_URL;
-
-    // TODO: in future, CHAT_ROOM_ID may not be required if it's in prod mode
-    if (!electionUrl || !CHAT_ROOM_ID || !accountEmail || !accountPassword) {
+    if (!electionUrl || !accountEmail || !accountPassword) {
         console.error('FATAL - missing required environment variables.');
         return;
     }
 
-    const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN);
-    const defaultChatRoomId = +CHAT_ROOM_ID;
-    const electionSiteHostname = electionUrl.split('/')[2];
-    const electionSiteApiSlug = electionSiteHostname.replace(/\.stackexchange/i, '').replace(/\.(?:com|org|net)/i, '');
+    // Other environment variables
+    const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN || "stackexchange.com");
+    const defaultChatRoomId = +(process.env.CHAT_ROOM_ID || 92073);
     const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
     const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
@@ -85,7 +81,6 @@ import {
     const { ChatEventType } = WE;
 
     // Other app constants
-    const isStackOverflow = electionSiteHostname.includes('stackoverflow.com');
     const ignoredEventTypes = [
         ChatEventType.MESSAGE_EDITED,
         ChatEventType.USER_JOINED,
@@ -111,9 +106,8 @@ import {
         34, // UserNameOrAvatarChanged
         7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
     ];
-    const scriptInitDate = new Date();
 
-    // Rarely changed until there's a Stack Overflow election
+    // Rarely changed until a Stack Overflow election, so we cache it here
     const soPastAndPresentModIds = [
         34397, 50049, 102937, 267, 419, 106224, 396458, 50776, 105971, 2598,
         298479, 19679, 16587, 246246, 707111, 168175, 208809, 59303, 237838, 426671, 716216, 256196,
@@ -121,8 +115,6 @@ import {
         541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
     ];
 
-    // Init bot config with defaults
-    const config = new BotConfig(defaultChatDomain, defaultChatRoomId);
 
     // Overrides console.log/error to insert newlines
     (function () {
@@ -132,13 +124,14 @@ import {
         console.error = (...args) => _origErr.call(console, ...args, '\n');
     })();
 
-    // App setup
+
+    // Init bot config with defaults
+    const config = new BotConfig(defaultChatDomain, defaultChatRoomId);
+
+    // Debug mode is on, warn and log initial BotConfig
     if (config.debug) {
-        console.error('WARNING - Debug mode is on.');
-
+        console.error('WARNING - Debug mode is on!');
         console.log('electionUrl:', electionUrl);
-        console.log('electionSiteHostname:', electionSiteHostname);
-
         Object.entries(config).forEach(([key, val]) => typeof val !== 'function' ? console.log(key, val) : 0);
     }
 
@@ -170,8 +163,8 @@ import {
         const { electionBadges } = election;
 
         // Get current site named badges (i.e.: non-tag badges)
-        if (!isStackOverflow) {
-            const allNamedBadges = await getAllNamedBadges(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
+        if (!election.isStackOverflow) {
+            const allNamedBadges = await getAllNamedBadges(config, election.apiSlug, getStackApiKey(apiKeyPool));
 
             electionBadges.forEach((electionBadge) => {
                 const { name: badgeName } = electionBadge;
@@ -185,7 +178,7 @@ import {
         }
 
         // Get current site mods via API
-        const currentSiteMods = await getModerators(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
+        const currentSiteMods = await getModerators(config, election.apiSlug, getStackApiKey(apiKeyPool));
 
         // TODO: Also add room owners to list of admins (privileged users)
         // Then maybe we can do away with ADMIN_IDs env var
@@ -208,7 +201,6 @@ import {
             }
             // Default to site's default chat room
             else {
-                // @ts-expect-error FIXME
                 const defaultRoom = await getSiteDefaultChatroom(config, election.siteHostname);
                 if (defaultRoom) {
                     config.chatRoomId = defaultRoom.chatRoomId;
@@ -453,7 +445,7 @@ import {
                 // TODO: Do not show dev-only commands to mods, split to separate dev menu?
                 const outputs = [
                     ["commands", /commands|usage/],
-                    ["alive", /alive|awake|ping/, scriptHostname, scriptInitDate, config],
+                    ["alive", /alive|awake|ping/, scriptHostname, config],
                     ["say", /say/, originalMessage],
                     ["greet", /^(greet|welcome)/, election],
                     ["get time", /(get time|time)$/, election],
@@ -653,22 +645,22 @@ import {
 
                 // Moderation badges
                 if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
-                    responseText = sayBadgesByType(electionBadges, "moderation", isStackOverflow);
+                    responseText = sayBadgesByType(electionBadges, "moderation", election.isStackOverflow);
                 }
 
                 // Participation badges
                 else if (['what', 'participation', 'badges'].every(x => content.includes(x))) {
-                    responseText = sayBadgesByType(electionBadges, "participation", isStackOverflow);
+                    responseText = sayBadgesByType(electionBadges, "participation", election.isStackOverflow);
                 }
 
                 // Editing badges
                 else if (['what', 'editing', 'badges'].every(x => content.includes(x))) {
-                    responseText = sayBadgesByType(electionBadges, "editing", isStackOverflow);
+                    responseText = sayBadgesByType(electionBadges, "editing", election.isStackOverflow);
                 }
 
                 // SO required badges
                 else if (['what', 'required', 'badges'].every(x => content.includes(x))) {
-                    responseText = sayRequiredBadges(election, electionBadges, isStackOverflow);
+                    responseText = sayRequiredBadges(election, electionBadges, election.isStackOverflow);
                 }
 
                 // What are the benefits of mods
@@ -682,11 +674,11 @@ import {
 
                     // TODO: use config object pattern instead, 6 parameters is way too much
                     const calcCandidateScore = makeCandidateScoreCalc(config,
-                        electionSiteHostname, config.chatDomain, electionSiteApiSlug,
+                        election.siteHostname, config.chatDomain, election.apiSlug,
                         getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
                     );
 
-                    responseText = await calcCandidateScore(election, user, { userId, content }, isStackOverflow);
+                    responseText = await calcCandidateScore(election, user, { userId, content }, election.isStackOverflow);
 
                     // TODO: msg.id is not guaranteed to be defined
                     await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
@@ -701,7 +693,7 @@ import {
 
                 // Who has the highest candidate score
                 else if (isAskedForScoreLeaderboard(content)) {
-                    responseText = sayCandidateScoreLeaderboard(electionSiteApiSlug);
+                    responseText = sayCandidateScoreLeaderboard(election.apiSlug);
                 }
 
                 // Current candidates
