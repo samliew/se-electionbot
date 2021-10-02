@@ -184,7 +184,8 @@ export default class Election {
      * @returns {boolean}
      */
     validElectionUrl(electionUrl) {
-        return /^https:\/\/(?:[^\/]+\.)+(?:com|net|org)\/election(?:\/\d+)?$/.test(electionUrl);
+        // see https://regex101.com/r/qWqAbz/2/
+        return /^https:\/\/(?:\w+\.){1,2}(?:com|net)\/election(?:\/\d+)$/.test(electionUrl);
     }
 
     /**
