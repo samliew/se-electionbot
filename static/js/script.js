@@ -13,7 +13,7 @@ function prettyDate(rawTitle) {
     var time = match[1] + "T" + match[2];
 
     var date = new Date(time),
-        diff = (((new Date()).getTime() - date.getTime()) / 1000) + StackExchange.options.serverTimeOffsetSec,
+        diff = (((new Date()).getTime() - date.getTime()) / 1000),
         day_diff = Math.floor(diff / 86400);
 
     if (isNaN(day_diff) || day_diff < 0 || day_diff >= 31)

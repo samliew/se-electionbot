@@ -35,8 +35,8 @@
     <table>
         {{#with data/botconfig}}
         <tr><td>isMuted</td><td>{{{boolean isMuted}}}</td></tr>
-        <tr><td>throttleSecs</td><td>{{throttleSecs}}</td></tr>
-        <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}}</td></tr>
+        <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
+        <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
         <tr><td>duplicateResponseText</td><td>{{duplicateResponseText}}</td></tr>
         <tr><td>maxMessageLength</td><td>{{maxMessageLength}}</td></tr>
         <tr><td>maxMessageParts</td><td>{{maxMessageParts}}</td></tr>
@@ -54,9 +54,9 @@
     <table>
         {{#with data/botconfig}}
         <tr><td>isStackOverflow</td><td>{{{boolean isStackOverflow}}}</td></tr>
-        <tr><td>roomLongIdleDuration</td><td>{{roomLongIdleDuration}}</td></tr>
-        <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} (<span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
-        <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} (<span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td></tr>
+        <tr><td>roomLongIdleDuration</td><td>{{roomLongIdleDuration}} hours</td></tr>
+        <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} (<span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span>)</td></tr>
+        <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} (<span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span>)</td></tr>
         <tr><td>lastMessageContent</td><td>{{lastMessageContent}}</td></tr>
         <tr><td>activityCount</td><td>{{activityCount}}</td></tr>
         <tr><td>lowActivityCountThreshold</td><td>{{lowActivityCountThreshold}}</td></tr>

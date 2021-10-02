@@ -85,6 +85,9 @@ form button {
     color: indianred;
     background-color: rgb(255, 238, 238);
 }
+.relativetime {
+    font-style: italic;
+}
 
 @media screen and (max-width: 600px) {
     table {
