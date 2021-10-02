@@ -49,7 +49,7 @@ export const fetchUrl = async (config, url, json = false) => {
 
     // Delay SE API query if backoff still active
     const backoffMillis = _apiBackoff - Date.now();
-    if (url.includes(apiBase) && backoffMillis > 0) {
+    if (url.startsWith(apiBase) && backoffMillis > 0) {
         await new Promise(resolve => setTimeout(resolve, backoffMillis));
     }
 
@@ -63,7 +63,7 @@ export const fetchUrl = async (config, url, json = false) => {
         });
 
         // Store backoff if SE API
-        if (url.includes(apiBase) && data.backoff) {
+        if (url.startsWith(apiBase) && data.backoff) {
             _apiBackoff = Date.now() + data.backoff * 1e4 + 50; // 50ms buffer
         }
 

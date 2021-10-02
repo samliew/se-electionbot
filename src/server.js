@@ -339,7 +339,7 @@ export const setElection = (election) => {
  * @param {import("./config.js").BotConfig} config  bot configuration
  * @returns {Promise<import("express").Application>}
  */
-export const start = async (room, config, election) => {
+export const startServer = async (room, config, election) => {
 
     setBot(config);
     setRoom(room);

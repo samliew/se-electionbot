@@ -25,7 +25,7 @@ import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecret,
 import Rescraper from "./rescraper.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
-import { start } from "./server.js";
+import { startServer } from "./server.js";
 import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, getSiteDefaultChatroom, keepAlive,
@@ -848,17 +848,14 @@ import {
         console.log(`INIT - Joined and listening in room https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`);
 
 
-        // Interval to keep-alive
+        // Stay connected to room by rejoining regularly
         setInterval(async function () {
-
-            // Try to stay-alive by rejoining room
             await client.joinRoom(config.chatRoomId);
             if (config.verbose) console.log('KEEP ALIVE - rejoin room:', config.chatDomain, config.chatRoomId);
-
         }, 5 * 60000);
 
-        // Start server
-        await start(room, config, election);
+        // Start web server
+        await startServer(room, config, election);
 
         // Catch all handler to swallow non-crashing rejections
         process.on("unhandledRejection", (reason) => {
@@ -870,7 +867,7 @@ import {
 
 
     // If running on Heroku
-    if (scriptHostname.includes('herokuapp.com')) {
+    if (/^https?:\/\/herokuapp.com/.test(scriptHostname) || process.env.KEEP_ALIVE === "true") {
 
         // Heroku free dyno will shutdown when idle for 30 mins, so keep-alive is necessary
         keepAlive(scriptHostname);

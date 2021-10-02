@@ -398,8 +398,8 @@ export default class Election {
 
                 this.resultsUrl = resultsURL;
 
-                // incorrect/not available immediately
-                if (!resultsURL.includes('opavote.com')) this.resultsUrl = '';
+                // Validate opavote URL
+                if (!/^https:\/\/www.opavote.com\/results\/\d+$/.test(resultsURL)) this.resultsUrl = '';
 
                 // Check if election was cancelled?
                 if ($(statusElem).text().includes('cancelled')) {
