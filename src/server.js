@@ -22,10 +22,14 @@ const handlebarsConfig = {
                 }
                 return output instanceof Date ? output : new Date();
             };
-            return validateDate(date).toISOString().replace('T', ' ').replace(/\.\d+/, '');
+            date = validateDate(date);
+            return date?.toISOString().replace('T', ' ').replace(/\.\d+/, '') || "";
         },
         json: function (data) {
-            return data.replace(/},\s*/g, "},\n").replace(/(^\[|\]$)/g, "").replace(/\[/g, "[\n").replace(/\]/g, "\n]");
+            return data.replace(/},\s*/g, "},\n").replace(/,"/g, `, "`).replace(/(^\[|\]$)/g, "").replace(/\[/g, "[\n").replace(/\]/g, "\n]");
+        },
+        boolean: function (data) {
+            return `<span class="${data || data === 'true' ? 'truthy' : 'falsy'}">${data}</span>`;
         }
     },
 };

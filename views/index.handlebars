@@ -9,7 +9,7 @@
     <h2>Election Info</h2>
     <table>
         {{#with data/election}}
-        <tr><td>Last Updated</td><td>{{utcTimestamp updated}}</td></tr>
+        <tr><td>Last Updated</td><td>{{utcTimestamp updated}} (<span class="relativetime" title="{{utcTimestamp updated}}"></span>)</td></tr>
         <tr><td>Site Name</td><td>{{sitename}}</td></tr>
         <tr><td>Host Name</td><td>{{siteHostname}}</td></tr>
         <tr><td>Election Title</td><td>{{{url electionUrl title}}}</td></tr>
@@ -34,37 +34,37 @@
     <h2>Bot Config</h2>
     <table>
         {{#with data/botconfig}}
+        <tr><td>isMuted</td><td>{{{boolean isMuted}}}</td></tr>
         <tr><td>throttleSecs</td><td>{{throttleSecs}}</td></tr>
         <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}}</td></tr>
         <tr><td>duplicateResponseText</td><td>{{duplicateResponseText}}</td></tr>
-        <tr><td>isMuted</td><td>{{isMuted}}</td></tr>
         <tr><td>maxMessageLength</td><td>{{maxMessageLength}}</td></tr>
         <tr><td>maxMessageParts</td><td>{{maxMessageParts}}</td></tr>
-        <tr><td>funMode</td><td>{{funMode}}</td></tr>
-        <tr><td>debug</td><td>{{debug}}</td></tr>
-        <tr><td>verbose</td><td>{{verbose}}</td></tr>
-        {{#with data/flags}}
-        <tr><td>saidElectionEndingSoon</td><td>{{saidElectionEndingSoon}}</td></tr>
-        <tr><td>announcedWinners</td><td>{{announcedWinners}}</td></tr>
+        <tr><td>funMode</td><td>{{{boolean funMode}}}</td></tr>
+        <tr><td>debug</td><td>{{{boolean debug}}}</td></tr>
+        <tr><td>verbose</td><td>{{{boolean verbose}}}</td></tr>
         {{/with}}
+        {{#with data/botconfig/flags}}
+        <tr><td>flags.saidElectionEndingSoon</td><td>{{{boolean saidElectionEndingSoon}}}</td></tr>
+        <tr><td>flags.announcedWinners</td><td>{{{boolean announcedWinners}}}</td></tr>
         {{/with}}
     </table>
 
     <h2>Room Activity</h2>
     <table>
         {{#with data/botconfig}}
-        <tr><td>isStackOverflow</td><td>{{isStackOverflow}}</td></tr>
+        <tr><td>isStackOverflow</td><td>{{{boolean isStackOverflow}}}</td></tr>
         <tr><td>roomLongIdleDuration</td><td>{{roomLongIdleDuration}}</td></tr>
-        <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}}</td></tr>
-        <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}}</td></tr>
+        <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} (<span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
+        <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} (<span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td></tr>
         <tr><td>lastMessageContent</td><td>{{lastMessageContent}}</td></tr>
         <tr><td>activityCount</td><td>{{activityCount}}</td></tr>
         <tr><td>lowActivityCountThreshold</td><td>{{lowActivityCountThreshold}}</td></tr>
-        <tr><td>roomReachedMinimumActivityCount</td><td>{{roomReachedMinimumActivityCount}}</td></tr>
-        <tr><td>roomBecameIdleAShortWhileAgo</td><td>{{roomBecameIdleAShortWhileAgo}}</td></tr>
-        <tr><td>roomBecameIdleAFewHoursAgo</td><td>{{roomBecameIdleAFewHoursAgo}}</td></tr>
-        <tr><td>botHasBeenQuiet</td><td>{{botHasBeenQuiet}}</td></tr>
-        <tr><td>lastMessageIsPostedByBot</td><td>{{lastMessageIsPostedByBot}}</td></tr>
+        <tr><td>roomReachedMinimumActivityCount</td><td>{{{boolean roomReachedMinimumActivityCount}}}</td></tr>
+        <tr><td>roomBecameIdleAShortWhileAgo</td><td>{{{boolean roomBecameIdleAShortWhileAgo}}}</td></tr>
+        <tr><td>roomBecameIdleAFewHoursAgo</td><td>{{{boolean roomBecameIdleAFewHoursAgo}}}</td></tr>
+        <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}</td></tr>
+        <tr><td>lastMessageIsPostedByBot</td><td>{{{boolean lastMessageIsPostedByBot}}}</td></tr>
         {{/with}}
     </table>
 </div>
