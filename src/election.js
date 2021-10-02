@@ -319,7 +319,7 @@ export default class Election {
             userYears: $(el).find('.user-details').contents().map((_i, { data, type }) =>
                 type === 'text' ? data?.trim() : ""
             ).get().join(' ').trim(),
-            userScore: +($(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)?.[0] || 0),
+            userScore: +($(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)?.[1] || 0),
             nominationDate: new Date($(el).find('.relativetime').attr('title') || ""),
             nominationLink: `${electionPageUrl}#${$(el).attr('id')}`,
             permalink: `${electionSiteUrl}/users/${userId}`,
