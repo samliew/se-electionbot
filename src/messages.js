@@ -266,11 +266,11 @@ export const sayCurrentWinners = (election) => {
   * @returns {string}
   */
 export const sayElectionSchedule = (election) => {
-    const { dateElection, dateNomination, datePrimary, dateEnded, phase, sitename, electionNum } = election;
+    const { dateElection, dateNomination, datePrimary, dateEnded, phase, siteName, electionNum } = election;
 
     const arrow = ' <-- current phase';
 
-    const prefix = `    ${sitename} Election ${electionNum} Schedule`;
+    const prefix = `    ${siteName} Election ${electionNum} Schedule`;
 
     const dateMap = [
         ["nomination", dateNomination],

@@ -370,7 +370,7 @@ export default class Election {
             const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get();
 
             this.updated = Date.now();
-            this.sitename = $('meta[property="og:site_name"]').attr('content')?.replace('Stack Exchange', '').trim();
+            this.siteName = $('meta[property="og:site_name"]').attr('content')?.replace('Stack Exchange', '').trim();
             this.isStackOverflow = this.siteHostname === 'stackoverflow.com';
             this.siteUrl = 'https://' + this.siteHostname;
             this.title = $('#content h1').first().text().trim();

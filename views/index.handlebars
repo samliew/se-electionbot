@@ -15,7 +15,7 @@
     <h2>Election Info</h2>
     <table>
         <tr><td>Last updated</td><td>{{utcTimestamp election/updated}} (<span class="relativetime" title="{{utcTimestamp election/updated}}"></span>)</td></tr>
-        <tr><td>Site name</td><td>{{{url election/sitename siteUrl}}}</td></tr>
+        <tr><td>Site name</td><td>{{{url election/siteName siteUrl}}}</td></tr>
         <tr><td>Host name</td><td>{{siteHostname}}</td></tr>
         <tr><td>API slug</td><td>{{apiSlug}}</td></tr>
         <tr><td>Title</td><td>{{{url election/electionUrl election/title}}}</td></tr>
@@ -34,21 +34,21 @@
         <tr><td>Candidates</td><td>
             <ul class="list">
                 {{#each election/arrNominees}}
-                <li class="item"><a href="{{ELECTION?.siteUrl}}/users/{{this.userId}}">{{this.userName}}</a></li>
+                <li class="item"><a href="{{siteUrl}}/users/{{this.userId}}">{{this.userName}}</a></li>
                 {{/each}}
             </ul>
         </td></tr>
         <tr><td>Winners</td><td>
             <ul class="list">
                 {{#each election/arrWinners}}
-                <li class="item"><a href="{{ELECTION?.siteUrl}}/users/{{this.userId}}">{{this.userName}}</a></li>
+                <li class="item"><a href="{{siteUrl}}/users/{{this.userId}}">{{this.userName}}</a></li>
                 {{/each}}
             </ul>
         </td></tr>
         <tr><td>Badges</td><td>
             <ul class="list">
                 {{#each election/electionBadges}}
-                <li class="item"><a href="{{ELECTION?.siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}} [{{this.badge_id}}]</a></li>
+                <li class="item"><a href="{{siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}} [{{this.badge_id}}]</a></li>
                 {{/each}}
             </ul>
         </td></tr>

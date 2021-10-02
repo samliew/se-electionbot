@@ -11,7 +11,7 @@ describe("Messages module", () => {
             const date = new Date().toLocaleString("en-US");
 
             const election = new Election("stackoverflow.com", 1);
-            election.sitename = "Stack Overflow";
+            election.siteName = "Stack Overflow";
             election.dateElection = date;
             election.dateEnded = date;
             election.dateNomination = date;
