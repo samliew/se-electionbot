@@ -7,6 +7,57 @@ describe('Election', () => {
 
     describe('getters', () => {
 
+        describe('siteHostname', () => {
+
+            it('should correctly get site hostname', () => {
+                const election = new Election("https://stackoverflow.com/election/12");
+
+                const { siteHostname } = election;
+                expect(siteHostname).to.equal("stackoverflow.com");
+            });
+        });
+
+        describe('apiSlug', () => {
+
+            it('should correctly get site api slug', () => {
+                const election = new Election("https://stackoverflow.com/election/12");
+                expect(election.apiSlug).to.equal("stackoverflow");
+
+                const election2 = new Election("https://bricks.stackexchange.com/election/1");
+                expect(election2.apiSlug).to.equal("bricks");
+            });
+        });
+
+        describe('numNominees', () => {
+
+            it('should correctly return number of Nominees', () => {
+                const nominee1 = getMockNominee({ userId: 1 });
+                const nominee2 = getMockNominee({ userId: 2 });
+
+                const election = new Election("https://stackoverflow.com/election/12");
+                election.arrNominees.push(nominee1);
+                election.arrNominees.push(nominee2);
+
+                const { numNominees } = election;
+                expect(numNominees).to.equal(2);
+            });
+        });
+
+        describe('numWinners', () => {
+
+            it('should correctly return number of Winners', () => {
+                const nominee1 = getMockNominee({ userId: 1 });
+                const nominee2 = getMockNominee({ userId: 2 });
+
+                const election = new Election("https://stackoverflow.com/election/12");
+                election.arrWinners.push(nominee1);
+                election.arrWinners.push(nominee2);
+
+                const { numWinners } = election;
+                expect(numWinners).to.equal(2);
+            });
+        });
+
         describe('newNominees', () => {
 
             it('should correctly return only new Nominees', () => {
@@ -23,10 +74,9 @@ describe('Election', () => {
                 const [nominee] = newNominees;
                 expect(nominee.userId).to.equal(2);
             });
-
         });
 
-        describe('New winners', () => {
+        describe('newWinners', () => {
 
             it('should correctly return only new Winners', () => {
                 const newWinner = getMockNominee({ userId: 2 });
@@ -65,7 +115,37 @@ describe('Election', () => {
             });
         });
 
-    });
+        describe('electionChatRoomChanged', () => {
+
+            it('should correctly detect if chat room has changed', () => {
+                const election = new Election("https://stackoverflow.com/election/12");
+                election._prevObj = { chatUrl: "https://old.url" };
+                election.chatUrl = "https://new.url";
+
+                expect(election.electionChatRoomChanged).to.be.true;
+
+                // Set both urls to be same, but change chat room id
+                election._prevObj = { chatUrl: "https://new.url", chatRoomId: 1 };
+                election.chatUrl = "https://new.url";
+                election.chatRoomId = 2;
+
+                expect(election.electionChatRoomChanged).to.be.true;
+            });
+        });
+
+        describe('electionDatesChanged', () => {
+
+            it('should correctly detect if dates has changed', () => {
+                const date = new Date();
+
+                const election = new Election("https://stackoverflow.com/election/12");
+                election._prevObj = { dateEnded: date };
+                election.dateEnded = date.setHours(date.getHours() + 1);
+
+                expect(election.electionDatesChanged).to.be.true;
+            });
+        });
+    }); // end getters
 
     describe('getPhase', () => {
 
@@ -107,7 +187,6 @@ describe('Election', () => {
             expect(status).to.be.true;
             expect(errors).to.be.empty;
         });
-
     });
 
     describe('isNominee', () => {
@@ -131,13 +210,28 @@ describe('Election', () => {
 
             expect(election.isNominee(user));
         });
+    });
 
+    describe('isNotStartedYet', () => {
+
+        it('should correctly check if election is only upcoming', () => {
+            const election = new Election("https://stackoverflow.com/election/13");
+
+            expect(election.isNotStartedYet()).to.be.true;
+
+            election.dateNomination = Date.now() - 864e5;
+            election.phase = "nomination";
+            expect(election.isNotStartedYet()).to.be.false;
+
+            // TODO: investigate if we can eliminate type hopping
+            election.phase = null;
+            expect(election.isNotStartedYet()).to.be.true;
+        });
     });
 
     describe('isActive', () => {
 
         it('should correctly determine active state', () => {
-
             const election = new Election("https://stackoverflow.com/election/12");
 
             const inactivePhases = [null, "ended", "cancelled"];
@@ -156,26 +250,10 @@ describe('Election', () => {
             expect(allActive).to.be.true;
             expect(allInactive).to.be.true;
         });
-
-    });
-
-    describe('isNotEvenStarted', () => {
-        it('should correctly check if election is only upcoming', () => {
-            const election = new Election("https://stackoverflow.com/election/13");
-
-            expect(election.isNotStartedYet()).to.be.true;
-
-            election.dateNomination = Date.now() - 864e5;
-            election.phase = "nomination";
-            expect(election.isNotStartedYet()).to.be.false;
-
-            // TODO: investigate if we can eliminate type hopping
-            election.phase = null;
-            expect(election.isNotStartedYet()).to.be.true;
-        });
     });
 
     describe('isEnded', () => {
+
         it('should corrrectly check if election has ended', () => {
             const election = new Election("https://stackoverflow.com/election/12");
 
@@ -212,7 +290,6 @@ describe('Election', () => {
             const isEndedInNomination = election.isEnding(offset);
             expect(isEndedInNomination).to.be.false;
         });
-
     });
 
     describe('isNewPhase', () => {

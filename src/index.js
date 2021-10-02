@@ -169,11 +169,14 @@ import {
             electionBadges.forEach((electionBadge) => {
                 const { name: badgeName } = electionBadge;
                 const matchedBadge = allNamedBadges.find(({ name }) => badgeName === name);
+
+                // Replace the badge id for badges with the same badge names
+                // TODO: Hardcode list of badges where this will not work properly (non-english sites?)
                 if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
             });
 
             if (config.debug || config.verbose) {
-                console.log('API - Site election badges\n', electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join('\n'));
+                console.log('API - Site election badges\n', electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n"));
             }
         }
 
@@ -701,9 +704,9 @@ import {
                     if (election.phase === null) {
                         responseText = sayNotStartedYet(election);
                     }
-                    else if (election.arrNominees.length > 0) {
+                    else if (election.numNominees > 0) {
                         // Don't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
-                        responseText = `Currently there ${election.arrNominees.length == 1 ? 'is' : 'are'} [${election.arrNominees.length} candidate${pluralize(election.arrNominees.length)}](${election.electionUrl}): ` +
+                        responseText = `Currently there ${election.numNominees === 1 ? 'is' : 'are'} [${election.numNominees} candidate${pluralize(election.numNominees)}](${election.electionUrl}): ` +
                             election.arrNominees.map(v => v.userName).join(', ');
                     }
                     else {
@@ -783,7 +786,7 @@ import {
                     }
                     // Nomination or primary phase
                     else {
-                        responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.arrNominees.length} candidates.`;
+                        responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.numNominees} candidates.`;
 
                         if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${linkToRelativeTimestamp(election.dateElection)} to vote in the final election voting phase.`;
                     }

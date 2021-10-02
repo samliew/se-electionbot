@@ -15,7 +15,6 @@ describe('String-related utils', async function () {
             const list = listify("alpha", "beta", "gamma");
             expect(list).to.equal("alpha, beta, and gamma");
         });
-
     });
 
     describe('pluralize', () => {
@@ -29,7 +28,6 @@ describe('String-related utils', async function () {
             const plural = pluralize(10, "es");
             expect(plural).to.equal("es");
         });
-
     });
 
     describe('parseIds', () => {
@@ -38,7 +36,6 @@ describe('String-related utils', async function () {
             const parsed = parseIds("1234|56789|101010");
             expect(parsed).to.deep.equal([1234, 56789, 101010]);
         });
-
     });
 
     describe('getSiteDefaultChatroom', async () => {
@@ -54,7 +51,6 @@ describe('String-related utils', async function () {
             expect(chatroom2.chatRoomId).to.equal(118);
             expect(chatroom2.chatDomain).to.equal("stackexchange.com");
         });
-
     });
 
     this.timeout(10e3); // fetching transcript can be slow
@@ -82,7 +78,6 @@ describe('String-related utils', async function () {
             expect(chatMessages[6].message).to.equal("how do I vote?  This is a test link");
             expect(chatMessages[6].messageMarkup).to.equal("**how do *I* vote?**  [This is a test link](https://stackoverflow.com/election)");
         });
-
     });
 
     describe('cacheable', () => {
@@ -103,7 +98,6 @@ describe('String-related utils', async function () {
             expect(await cached(obj)).to.equal(1);
             expect(obj.curr).to.equal(1);
         });
-
     });
 
 });

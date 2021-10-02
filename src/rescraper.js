@@ -133,7 +133,7 @@ export default class Rescraper {
             }
 
             // New nominations
-            else if (election.phase == 'nomination' && election.newNominees.length) {
+            else if (election.phase == 'nomination' && election.hasNewNominees) {
                 await announcement?.announceNewNominees();
 
                 if (config.debugOrVerbose) {
@@ -152,7 +152,7 @@ export default class Rescraper {
             }
 
             // Election is over but there are no winners
-            else if (election.phase === 'ended' && election.arrWinners.length === 0) {
+            else if (election.phase === 'ended' && election.numWinners === 0) {
 
                 // Reduce scrape interval further
                 config.scrapeIntervalMins = 0.5;

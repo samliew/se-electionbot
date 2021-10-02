@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { parsePackage, parsePerson } from "../../src/utils/package.js";
 
 describe('Package Parsing', () => {
+
     describe('parsePerson', () => {
 
         it('should correctly parse person strings', () => {
@@ -16,7 +17,6 @@ describe('Package Parsing', () => {
             const parsed = parsePerson(info);
             expect(info).to.deep.equal(parsed);
         });
-
     });
 
     describe('parsePackage', () => {
@@ -35,6 +35,6 @@ describe('Package Parsing', () => {
             const invalid = await parsePackage("");
             expect(invalid).to.be.null;
         });
-
     });
+
 });

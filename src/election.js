@@ -73,12 +73,12 @@ export default class Election {
     }
 
     /**
-     * @summary gets api slug from site hostname
+     * @summary gets site hostname, excluding trailing slash
      * @returns {string}
      */
     get siteHostname() {
         const { electionUrl } = this;
-        return electionUrl.split('/')[2] || ""; // hostname only, exclude trailing slash;
+        return electionUrl.split('/')[2] || "";
     }
 
     /**
@@ -94,9 +94,18 @@ export default class Election {
      * @summary gets current number of Nominees
      * @returns {number}
      */
-    get numCandidates() {
+    get numNominees() {
         const { arrNominees } = this;
         return arrNominees.length;
+    }
+
+    /**
+     * @summary gets current number of Winners
+     * @returns {number}
+     */
+    get numWinners() {
+        const { arrWinners } = this;
+        return arrWinners.length;
     }
 
     /**
@@ -117,6 +126,15 @@ export default class Election {
         const { prev, arrWinners } = this;
         const prevIds = prev.arrWinners.map(({ userId }) => userId);
         return arrWinners.filter(({ userId }) => !prevIds.includes(userId));
+    }
+
+    /**
+     * @summary checks if election has new winners
+     * @returns {boolean}
+     */
+    get hasNewNominees() {
+        const { newNominees } = this;
+        return !!newNominees.length;
     }
 
     /**
@@ -162,7 +180,7 @@ export default class Election {
             [this.validElectionUrl(this.electionUrl), "invalid election URL"],
             [typeof this.electionNum === "number", "invalid election number"],
             [typeof this.repNominate === "number", "invalid rep to nominate"],
-            [typeof this.numCandidates === "number", "num candidates is not a number"],
+            [typeof this.numNominees === "number", "num candidates is not a number"],
             [(this.electionNum || 0) > 0, "missing election number"],
             [(this.numPositions || 0) > 0, "missing number of positions"],
             [this.dateNomination, "missing nomination date"],
@@ -189,6 +207,15 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election is only pending
+     * @returns {boolean}
+     */
+    isNotStartedYet() {
+        const { phase, dateNomination } = this;
+        return !phase || dateNomination > Date.now();
+    }
+
+    /**
      * @summary checks if the election is in an active phase
      * @returns {boolean}
      */
@@ -207,15 +234,6 @@ export default class Election {
             phase === "ended",
             dateEnded < Date.now()
         ].some(Boolean);
-    }
-
-    /**
-     * @summary checks if the election is only pending
-     * @returns {boolean}
-     */
-    isNotStartedYet() {
-        const { phase, dateNomination } = this;
-        return !phase || dateNomination > Date.now();
     }
 
     /**
@@ -425,7 +443,7 @@ export default class Election {
 
             console.log(
                 `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.\n` +
-                `-------- PHASE ${this.phase};  CANDIDATES ${this.arrNominees.length};  WINNERS ${this.arrWinners.length}\n` +
+                `-------- PHASE ${this.phase};  CANDIDATES ${this.numNominees};  WINNERS ${this.numWinners}\n` +
                 `-------- CHAT ${this.chatUrl}`
             );
         }

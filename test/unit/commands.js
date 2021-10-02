@@ -50,7 +50,6 @@ describe('Commander', () => {
         });
     });
 
-
     describe('help', () => {
 
         it('should only list available commands', () => {
@@ -83,7 +82,6 @@ describe('Commander', () => {
             const help = commander.help();
             expect(help).to.equal(`Commands\n- [bark] (say) barks, what else?`);
         });
-
     });
 
     describe('AccessLevel', () => {
@@ -111,7 +109,6 @@ describe('Commander', () => {
             const restart = commander.run("restart");
             expect(restart).to.be.undefined;
         });
-
     });
 
 });

@@ -143,7 +143,8 @@ app.route('/')
                     electionMeta: {
                         cancelled: JSON.stringify(typeof ELECTION.cancelledText === "string"),
                         nominees: JSON.stringify(ELECTION.arrNominees),
-                        winners: JSON.stringify(ELECTION.arrWinners)
+                        winners: JSON.stringify(ELECTION.arrWinners),
+                        electionBadges: ELECTION.electionBadges.map(({ name, badge_id }) => `<a href="${ELECTION?.siteUrl}/help/badges/${badge_id}">${name}</a> (${badge_id})`).join("\n"),
                     },
                     botconfig: {
                         throttleSecs: BOT_CONFIG.throttleSecs,

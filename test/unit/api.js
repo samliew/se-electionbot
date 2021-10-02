@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { getStackApiKey } from "../../src/api.js";
 
 describe('SE API', () => {
+
     describe('getStackApiKey', () => {
 
         it('should return empty string on empty pool', () => {
@@ -16,7 +17,6 @@ describe('SE API', () => {
             expect(pool[pool.length - 1]).to.equal("alpha");
             expect(pool[0]).to.equal("beta");
         });
-
     });
-});
 
+});

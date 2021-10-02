@@ -26,9 +26,7 @@ describe("Messages module", () => {
                 expect(currElectionLine.includes("<-- current phase")).to.be.true;
                 expect(currElectionLine.includes(capitalize(phase))).to.be.true;
             });
-
         });
-
     });
 
     describe('sayBadgesByType', () => {
@@ -88,7 +86,6 @@ describe("Messages module", () => {
             const greeting = sayHI(election);
             expect(greeting).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
         });
-
     });
 
     describe('sayDiamondAlready', () => {
@@ -102,7 +99,6 @@ describe("Messages module", () => {
             expect(wasModMessage).to.match(/want to be a moderator again/);
             expect(shroedingerModMessage).to.match(/already have a diamond/);
         });
-
     });
 
 });
