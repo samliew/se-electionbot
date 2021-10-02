@@ -17,11 +17,11 @@ export class BotConfig {
     // Variable to trigger an action only after this time of inactivity
     lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 15);
     // Variable to trigger an action only after this amount of minimum messages
-    lowActivityCountThreshold = +(process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 30);
+    minActivityCountThreshold = +(process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 30);
 
     get roomReachedMinimumActivityCount() {
-        const { activityCount, lowActivityCountThreshold } = this;
-        return activityCount >= lowActivityCountThreshold;
+        const { activityCount, minActivityCountThreshold: minActivityCountThreshold } = this;
+        return activityCount >= minActivityCountThreshold;
     }
 
     /* Bot variables */
@@ -43,7 +43,7 @@ export class BotConfig {
     lastMessageTime = -1;
     // Variable to store last message to detect duplicate responses within a short time
     lastMessageContent = "";
-    // Variable to track activity count in the room, to see if it reached lowActivityCountThreshold
+    // Variable to track activity count in the room, to see if it reached minActivityCountThreshold
     activityCount = 0;
     // Variable of rescrape interval of election page
     scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS || 5);

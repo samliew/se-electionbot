@@ -75,7 +75,7 @@ Default values in square brackets.
 > `ADMIN_IDS` - user chat IDs to grant manage bot privileges (pipe-delimited)<br>
 > `DEV_IDS` - user chat IDs to grant dev bot privileges (pipe-delimited)<br>
 > `LOW_ACTIVITY_CHECK_MINS` - [`15`]  interval (minutes) for bot to check room for inactivity<br>
-> `LOW_ACTIVITY_COUNT_THRESHOLD` - [`30`]  bot can classify room as inactive only after these amount of messages have been sent<br>
+> `MIN_ACTIVITY_COUNT_THRESHOLD` - [`30`]  bot can classify room as inactive only after these amount of messages have been sent<br>
 > `SCRAPE_INTERVAL_MINS` - [`5`]  interval (minutes) for bot to scrape election page for updates<br>
 > `THROTTLE_SECS` - [`3`]  seconds before bot can send another response
 

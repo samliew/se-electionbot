@@ -158,7 +158,7 @@ app.route('/')
                         lastMessageTime: lastMessageTime,
                         lastMessageContent: BOT_CONFIG.lastMessageContent,
                         activityCount: BOT_CONFIG.activityCount,
-                        lowActivityCountThreshold: BOT_CONFIG.lowActivityCountThreshold,
+                        minActivityCountThreshold: BOT_CONFIG.minActivityCountThreshold,
                         roomReachedMinimumActivityCount: roomReachedMinimumActivityCount,
                         roomBecameIdleAShortWhileAgo: roomBecameIdleAShortWhileAgo,
                         roomBecameIdleAFewHoursAgo: roomBecameIdleAFewHoursAgo,
