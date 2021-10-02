@@ -16,9 +16,9 @@
     {{#with election}}
     <table>
         <tr><td>Last updated</td><td>{{utcTimestamp updated}} (<span class="relativetime" title="{{utcTimestamp updated}}"></span>)</td></tr>
-        <tr><td>Site name</td><td>{{{url sitename electionMeta/siteUrl}}}</td></tr>
-        <tr><td>Host name</td><td>{{electionMeta/siteHostname}}</td></tr>
-        <tr><td>API slug</td><td>{{electionMeta/apiSlug}}</td></tr>
+        <tr><td>Site name</td><td>{{{url sitename data/electionMeta/siteUrl}}}</td></tr>
+        <tr><td>Host name</td><td>{{data/electionMeta/siteHostname}}</td></tr>
+        <tr><td>API slug</td><td>{{data/electionMeta/apiSlug}}</td></tr>
         <tr><td>Title</td><td>{{{url electionUrl title}}}</td></tr>
         <tr><td>Number</td><td>{{electionNum}}</td></tr>
         <tr><td>Chat room</td><td>{{{url chatUrl chatUrl}}}</td></tr>
@@ -32,9 +32,9 @@
         <tr><td>End date</td><td>{{utcTimestamp dateEnded}}</td></tr>
         <tr><td>Opavote URL</td><td>{{{url opavoteUrl opavoteUrl}}}</td></tr>
         <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
-        <tr><td>Candidates</td><td>{{electionMeta/numNominees}} candidates:<pre>{{json electionMeta/nominees}}</pre></td></tr>
-        <tr><td>Winners</td><td>{{electionMeta/numWinners}} winners:<pre>{{json electionMeta/winners}}</pre></td></tr>
-        <tr><td>Badges</td><td><pre>{{{electionMeta/electionBadges}}}</pre></td></tr>
+        <tr><td>Candidates</td><td>{{data/electionMeta/numNominees}} candidates:<pre>{{json data/electionMeta/nominees}}</pre></td></tr>
+        <tr><td>Winners</td><td>{{data/electionMeta/numWinners}} winners:<pre>{{json data/electionMeta/winners}}</pre></td></tr>
+        <tr><td>Badges</td><td><pre>{{{data/electionMeta/electionBadges}}}</pre></td></tr>
     </table>
     {{/with}}
 </div>
