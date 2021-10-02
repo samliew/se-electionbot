@@ -15,9 +15,9 @@
     <h2>Election Info</h2>
     <table>
         <tr><td>Last updated</td><td>{{utcTimestamp election/updated}} (<span class="relativetime" title="{{utcTimestamp election/updated}}"></span>)</td></tr>
-        <tr><td>Site name</td><td>{{{url election/sitename electionMeta/siteUrl}}}</td></tr>
-        <tr><td>Host name</td><td>{{electionMeta/siteHostname}}</td></tr>
-        <tr><td>API slug</td><td>{{electionMeta/apiSlug}}</td></tr>
+        <tr><td>Site name</td><td>{{{url election/sitename siteUrl}}}</td></tr>
+        <tr><td>Host name</td><td>{{siteHostname}}</td></tr>
+        <tr><td>API slug</td><td>{{apiSlug}}</td></tr>
         <tr><td>Title</td><td>{{{url election/electionUrl election/title}}}</td></tr>
         <tr><td>Number</td><td>{{election/electionNum}}</td></tr>
         <tr><td>Chat room</td><td>{{{url election/chatUrl election/chatUrl}}}</td></tr>
@@ -31,9 +31,27 @@
         <tr><td>End date</td><td>{{utcTimestamp election/dateEnded}}</td></tr>
         <tr><td>Opavote URL</td><td>{{{url election/opavoteUrl election/opavoteUrl}}}</td></tr>
         <tr><td>Voter stats</td><td>{{election/statVoters}}</td></tr>
-        <tr><td>Candidates</td><td><pre>{{json electionMeta/nominees}}</pre></td></tr>
-        <tr><td>Winners</td><td><pre>{{json electionMeta/winners}}</pre></td></tr>
-        <tr><td>Badges</td><td>{{{electionMeta/electionBadges}}}</td></tr>
+        <tr><td>Candidates</td><td>
+            <ul class="list">
+                {{#each election/arrNominees}}
+                <li class="item"><a href="{{ELECTION?.siteUrl}}/users/{{this.userId}}">{{this.userName}}</a></li>
+                {{/each}}
+            </ul>
+        </td></tr>
+        <tr><td>Winners</td><td>
+            <ul class="list">
+                {{#each election/arrWinners}}
+                <li class="item"><a href="{{ELECTION?.siteUrl}}/users/{{this.userId}}">{{this.userName}}</a></li>
+                {{/each}}
+            </ul>
+        </td></tr>
+        <tr><td>Badges</td><td>
+            <ul class="list">
+                {{#each election/electionBadges}}
+                <li class="item"><a href="{{ELECTION?.siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}} [{{this.badge_id}}]</a></li>
+                {{/each}}
+            </ul>
+        </td></tr>
     </table>
 </div>
 

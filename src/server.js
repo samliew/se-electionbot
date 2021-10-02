@@ -147,16 +147,10 @@ app.route('/')
                 heading: `Chatbot up and running.`,
                 data: {
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
+                    siteUrl: ELECTION.siteUrl,
+                    siteHostname: ELECTION.siteHostname,
+                    apiSlug: ELECTION.apiSlug,
                     election: ELECTION,
-                    electionMeta: {
-                        siteUrl: ELECTION.siteUrl,
-                        siteHostname: ELECTION.siteHostname,
-                        apiSlug: ELECTION.apiSlug,
-                        cancelled: JSON.stringify(typeof ELECTION.cancelledText === "string"),
-                        nominees: JSON.stringify(ELECTION.arrNominees),
-                        winners: JSON.stringify(ELECTION.arrWinners),
-                        electionBadges: ELECTION.electionBadges.map(({ name, badge_id }) => `<a href="${ELECTION?.siteUrl}/help/badges/${badge_id}">${name}</a> (${badge_id})`).join("<br>"),
-                    },
                     botconfig: {
                         throttleSecs: BOT_CONFIG.throttleSecs,
                         scrapeIntervalMins: BOT_CONFIG.scrapeIntervalMins,
