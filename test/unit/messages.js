@@ -33,15 +33,15 @@ describe("Messages module", () => {
 
     describe('sayBadgesByType', () => {
 
-        /** @type {import("../../src/index").Badge[]} */
+        /** @type {import("../../src/index").ElectionBadge[]} */
         const badges = [{
-            id: "1", name: "Badge1", type: "moderation"
+            badge_id: 1, name: "Badge1", type: "moderation"
         },
         {
-            id: "11", name: "Badge11", type: "moderation"
+            badge_id: 11, name: "Badge11", type: "moderation"
         },
-        { id: "2", name: "Badge2", type: "participation" },
-        { id: "3", name: "Badge3", type: "editing" }
+        { badge_id: 2, name: "Badge2", type: "participation" },
+        { badge_id: 3, name: "Badge3", type: "editing" }
         ];
 
         it('should correctly list moderation badges', () => {

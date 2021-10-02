@@ -159,6 +159,37 @@ describe('Election', () => {
 
     });
 
+    describe('isNotEvenStarted', () => {
+        it('should correctly check if election is only upcoming', () => {
+            const election = new Election("https://stackoverflow.com/election/13");
+
+            expect(election.isNotStartedYet()).to.be.true;
+
+            election.dateNomination = Date.now() - 864e5;
+            election.phase = "nomination";
+            expect(election.isNotStartedYet()).to.be.false;
+
+            // TODO: investigate if we can eliminate type hopping
+            election.phase = null;
+            expect(election.isNotStartedYet()).to.be.true;
+        });
+    });
+
+    describe('isEnded', () => {
+        it('should corrrectly check if election has ended', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+
+            election.dateEnded = Date.now() - 100 * 864e5;
+            expect(election.isEnded()).to.be.true;
+
+            election.dateEnded = Date.now() + 2 * 64e5;
+            expect(election.isEnded()).to.be.false;
+
+            election.phase = "cancelled";
+            expect(election.isEnded()).to.be.false;
+        });
+    });
+
     describe('isEnding', () => {
 
         it('should correctly check if election is ending', () => {
@@ -186,7 +217,7 @@ describe('Election', () => {
 
     describe('isNewPhase', () => {
 
-        it('should ', () => {
+        it('should correctly determine new phase', () => {
 
             const election = new Election("https://stackoverflow.com/election/12");
             election._prevObj = { phase: "nomination" };

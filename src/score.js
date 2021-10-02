@@ -2,13 +2,15 @@ import { getBadges, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
 import { sayDiamondAlready, sayMissingBadges } from "./messages.js";
-import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapToRequired, NO_ACCOUNT_ID, pluralize } from "./utils.js";
+import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, NO_ACCOUNT_ID, pluralize } from "./utils.js";
 
 /**
  * @typedef {import("./index.js").User} User
+ * @typedef {import("@userscripters/stackexchange-api-types").default.User} ApiUser
  * @typedef {import("./config.js").BotConfig} BotConfig
- * @typedef {import("./utils").Badge} Badge
  * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
+ * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
+ * @typedef {import("./index").ElectionBadge} ElectionBadge
  */
 
 /**
@@ -20,29 +22,60 @@ import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, mapT
 export const getScoreText = (score, max) => `**${score}** (out of ${max})`;
 
 /**
- * @summary checks if the user is eligible for nomination
- * @param {number} requiredRep reputation required to nominate
- */
-export const makeIsEligible = (requiredRep) =>
-    /**
-     * @param {number} missingRequiredBadges
-     * @param {number} reputation
-     * @returns {boolean}
-     */
-    (reputation, missingRequiredBadges) => {
-        const conditions = [
-            reputation >= requiredRep,
-            missingRequiredBadges === 0
-        ];
-        return conditions.every(Boolean);
-    };
-
-/**
  * @summary internal builder for calc failure error message
  * @param {boolean} [isAskingForOtherUser] is asking for another user
  * @returns {string}
  */
 const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurred when calculating ${isAskingForOtherUser ? `the user's` : `your`} score.`;
+
+/**
+ * @summary calculates the score
+ * @param {ApiUser} user API user object
+ * @param {Badge[]} userBadges user badges
+ * @param {Election} election current election
+ * @param {boolean} [isSO] is Stack Overflow election
+ * @returns {{
+ *  score: number,
+ *  missing: {
+ *      badges: {
+ *          election: ElectionBadge[],
+ *          required: ElectionBadge[]
+ *      }
+ *  },
+ *  isEligible: boolean
+ * }}
+ */
+export const calculateScore = (user, userBadges, election, isSO = false) => {
+    const maxRepScore = 20;
+    const repRepScore = 1000;
+
+    const { electionBadges } = election;
+    const { reputation } = user;
+
+    const repScore = Math.min(Math.floor(reputation / repRepScore), maxRepScore);
+    const badgeScore = electionBadges.filter(({ badge_id }) => userBadges.some((v) => badge_id === v.badge_id)).length;
+
+    const missingBadges = electionBadges.filter(({ badge_id }) => !userBadges.some((v) => badge_id === v.badge_id));
+    const requiredBadges = electionBadges.filter(({ required }) => required);
+
+    const missingBadgeIds = missingBadges.map(mapToId);
+
+    const missingRequiredBadges = isSO ? requiredBadges.filter(({ badge_id }) => missingBadgeIds.includes(badge_id)) : [];
+
+    return {
+        score: repScore + badgeScore,
+        missing: {
+            badges: {
+                election: missingBadges,
+                required: missingRequiredBadges
+            }
+        },
+        get isEligible() {
+            const { repNominate = 0 } = election;
+            return !missingRequiredBadges.length && (repNominate <= reputation);
+        }
+    };
+};
 
 /**
  * @summary HOF with common parameters
@@ -51,7 +84,7 @@ const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurre
  * @param {string} chatDomain chat room domain name (i.e. stackexchange.com)
  * @param {string} apiSlug election site to pass to the API 'site' parameter
  * @param {string} apiKey current API key
- * @param {Badge[]} badges list of badges
+ * @param {ElectionBadge[]} badges list of election badges
  * @param {number[]} modIds ids of moderators of the network
  */
 export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
@@ -95,7 +128,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         // If privileged user asking candidate score of another user, get user site id from message
         // TODO: Allow Admins and Devs too, not just mods
-        if (isAskingForOtherUser && isModerator) {
+        if (isAskingForOtherUser && (isModerator || config.devIds.has(userId))) {
             // @ts-expect-error FIXME
             userId = content.includes(`${election.siteUrl}/users/`) ? +(content.match(/\/users\/(\d+).*(?:\?|$)/)[1]) : +(content.match(/(\d+)(?:\?|$)/)[1]);
         }
@@ -117,36 +150,33 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         }
 
         // TODO: Get a different API key here
-        const items = await getBadges(config, userId, apiSlug, apiKey);
+        const userBadges = await getBadges(config, userId, apiSlug, apiKey);
 
         // Validation
-        if (!items.length) {
+        if (!userBadges.length) {
             console.error('No data from API.');
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        const userBadgeIds = items.map(mapToId);
-
-        const [badge] = items;
+        const [badge] = userBadges;
 
         const { reputation } = badge.user;
 
         const hasNominated = election.isNominee(userId);
 
-        const repScore = Math.min(Math.floor(reputation / 1000), 20);
-        const badgeScore = userBadgeIds.filter(v => badges.some(({ id }) => id === v)).length;
-        const candidateScore = repScore + badgeScore;
+        const requestedUser = await getUserInfo(config, isAskingForOtherUser ? userId : user.id, apiSlug, apiKey);
 
-        const missingBadges = badges.filter(({ id }) => !userBadgeIds.includes(id));
+        if (!requestedUser) {
+            console.error(`failed to get user info to calculate`);
+            return sayCalcFailed(isAskingForOtherUser);
+        }
 
-        const requiredBadges = badges.filter(mapToRequired);
+        const { score, missing, isEligible } = calculateScore(requestedUser, userBadges, election);
 
-        const missingBadgeIds = missingBadges.map(({ id }) => id);
-
-        const missingRequiredBadges = isSO ? requiredBadges.filter(({ id }) => missingBadgeIds.includes(id)) : [];
+        const missingBadges = missing.badges.election;
+        const missingRequiredBadges = missing.badges.required;
 
         const { length: numMissingBadges } = missingBadges;
-
         const { length: numMissingRequiredBadges } = missingRequiredBadges;
 
         const missingRequiredBadgeNames = missingRequiredBadges.map(mapToName);
@@ -158,29 +188,22 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         let responseText = "";
 
-        // @ts-expect-error FIXME
-        const isEligible = makeIsEligible(repNominate);
-
-        if (config.debug) {
+        if (config.verbose) {
             console.log({
-                "User site badges": items,
-                isEligible,
+                "User site badges": userBadges,
                 badges,
                 missingBadges,
                 hasNominated,
-                repScore,
-                badgeScore
             });
         }
 
         // Privileged user asking for candidate score of another user
         if (isAskingForOtherUser) {
-
-            const { display_name } = await getUserInfo(config, userId, apiSlug, apiKey) || {};
+            const { display_name } = requestedUser || {};
 
             responseText = `The candidate score for user ${makeURL(display_name || userId.toString(),
                 `${siteUrl}/users/${userId}`)
-                } is ${getScoreText(candidateScore, currMaxScore)}.`;
+                } is ${getScoreText(score, currMaxScore)}.`;
 
             if (numMissingRequiredBadges > 0) {
                 responseText += sayMissingBadges(missingRequiredBadgeNames, numMissingRequiredBadges, false, true);
@@ -189,7 +212,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             }
         }
         // Does not meet minimum requirements
-        else if (!isEligible(reputation, numMissingRequiredBadges)) {
+        else if (!isEligible) {
             responseText = `You are not eligible to nominate yourself in the election`;
 
             // @ts-expect-error FIXME
@@ -206,8 +229,8 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                 responseText += ` missing the required badge${pluralize(numMissingRequiredBadges)}: ${missingRequiredBadgeNames.join(', ')}`;
             }
 
-            responseText += `. Your candidate score is ${getScoreText(candidateScore, currMaxScore)}.`;
-        } else if (candidateScore >= currMaxScore) {
+            responseText += `. Your candidate score is ${getScoreText(score, currMaxScore)}.`;
+        } else if (score >= currMaxScore) {
             responseText = `Wow! You have a maximum candidate score of **${currMaxScore}**!`;
 
             // Already nominated, and not ended/cancelled
@@ -231,13 +254,13 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                 responseText += ` Alas, ${phaseMap[phase]} Hope to see your candidature next election!`;
             } else {
                 console.error("this case??", {
-                    candidateScore, currMaxScore, hasNominated, phase
+                    score, currMaxScore, hasNominated, phase
                 });
             }
         }
         // All others
         else {
-            responseText = `Your candidate score is **${candidateScore}** (out of ${currMaxScore}).`;
+            responseText = `Your candidate score is **${score}** (out of ${currMaxScore}).`;
 
             if (numMissingBadges > 0) {
                 responseText += sayMissingBadges(missingBadgeNames, numMissingBadges, true);
@@ -252,7 +275,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
                 const perhapsNominateThreshold = 30;
 
-                responseText += candidateScore >= perhapsNominateThreshold ?
+                responseText += score >= perhapsNominateThreshold ?
                     ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
                     ` Having a high score is not a requirement - you can still nominate yourself!`;
             }

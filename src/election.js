@@ -2,6 +2,7 @@ import cheerio from 'cheerio';
 import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 
 /**
+ * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import('chatexchange/dist/Client').Host} Host
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./index").User} User
@@ -24,6 +25,33 @@ export default class Election {
 
     /** @type {Nominee[]} */
     arrWinners = [];
+
+    /**
+     * @description Site election badges, defaults to Stack Overflow's
+     * @type {ElectionBadge[]}
+     */
+    electionBadges = [
+        { name: 'Deputy', required: true, type: "moderation", badge_id: 1002 },
+        { name: 'Civic Duty', required: true, type: "moderation", badge_id: 32 },
+        { name: 'Cleanup', required: false, type: "moderation", badge_id: 4 },
+        { name: 'Electorate', required: false, type: "moderation", badge_id: 155 },
+        { name: 'Marshal', required: false, type: "moderation", badge_id: 1298 },
+        { name: 'Sportsmanship', required: false, type: "moderation", badge_id: 805 },
+        { name: 'Reviewer', required: false, type: "moderation", badge_id: 1478 },
+        { name: 'Steward', required: false, type: "moderation", badge_id: 2279 },
+        { name: 'Constituent', required: false, type: "participation", badge_id: 1974 },
+        { name: 'Convention', required: true, type: "participation", badge_id: 901 },
+        { name: 'Enthusiast', required: false, type: "participation", badge_id: 71 },
+        { name: 'Investor', required: false, type: "participation", badge_id: 219 },
+        { name: 'Quorum', required: false, type: "participation", badge_id: 900 },
+        { name: 'Yearling', required: false, type: "participation", badge_id: 13 },
+        { name: 'Organizer', required: false, type: "editing", badge_id: 5 },
+        { name: 'Copy Editor', required: false, type: "editing", badge_id: 223 },
+        { name: 'Explainer', required: false, type: "editing", badge_id: 4368 },
+        { name: 'Refiner', required: false, type: "editing", badge_id: 4369 },
+        { name: 'Tag Editor', required: false, type: "editing", badge_id: 254 },
+        { name: 'Strunk & White', required: true, type: "editing", badge_id: 12 },
+    ];
 
     /**
      * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
@@ -148,6 +176,27 @@ export default class Election {
     isActive() {
         const { phase } = this;
         return ![null, "ended", "cancelled"].includes(/** @type {string} */(phase));
+    }
+
+    /**
+     * @summary checks if the election has ended
+     * @returns {boolean}
+     */
+    isEnded() {
+        const { phase, dateEnded } = this;
+        return phase !== "cancelled" && [
+            phase === "ended",
+            dateEnded < Date.now()
+        ].some(Boolean);
+    }
+
+    /**
+     * @summary checks if the election is only pending
+     * @returns {boolean}
+     */
+    isNotStartedYet() {
+        const { phase, dateNomination } = this;
+        return !phase || dateNomination > Date.now();
     }
 
     /**

@@ -50,6 +50,9 @@ export class BotConfig {
     // Response when bot tries to post the exact same response again
     duplicateResponseText = "Please read my previous message...";
 
+    // pool of API keys
+    apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
+
     // Checks if the bot is currently muted
     get isMuted() {
         return Date.now() < this.lastMessageTime + this.throttleSecs * 1000;

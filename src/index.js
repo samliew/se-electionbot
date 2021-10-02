@@ -10,15 +10,15 @@ import Election from './election.js';
 import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
-    isAskedForCurrentNominees, isAskedForCurrentWinners, isAskedForElectionSchedule,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedIfModsArePaid, isAskedWhoMadeMe,
+    isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedIfModsArePaid, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
     isHatingTheBot,
     isLovingTheBot,
     isThankingTheBot
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayOffTopicMessage, sayRequiredBadges, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecret, RandomArray } from "./random.js";
@@ -34,19 +34,11 @@ import {
 } from './utils.js';
 
 /**
- * @typedef {{
- *  type: "moderation"|"participation"|"editing",
- *  name:string,
- *  id:string,
- *  required?: boolean
- * }} Badge
- *
+ * @typedef {(Pick<Badge, "name"|"badge_id"> & { required?: boolean, type: string })} ElectionBadge
+ * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} WebsocketEvent
- *
  * @typedef {typeof import("chatexchange/dist/WebsocketEvent").ChatEventType} EventType
- *
  * @typedef {import("chatexchange/dist/Client").Host} Host
- *
  * @typedef {import("./utils").APIListResponse} APIListResponse
  *
  * @typedef {{
@@ -121,33 +113,6 @@ import {
     ];
     const scriptInitDate = new Date();
 
-    /**
-     * @description Site election badges, defaults to Stack Overflow's
-     * @type {Badge[]}
-     */
-    const electionBadges = [
-        { name: 'Deputy', required: true, type: "moderation", id: "1002" },
-        { name: 'Civic Duty', required: true, type: "moderation", id: "32" },
-        { name: 'Cleanup', required: false, type: "moderation", id: "4" },
-        { name: 'Electorate', required: false, type: "moderation", id: "155" },
-        { name: 'Marshal', required: false, type: "moderation", id: "1298" },
-        { name: 'Sportsmanship', required: false, type: "moderation", id: "805" },
-        { name: 'Reviewer', required: false, type: "moderation", id: "1478" },
-        { name: 'Steward', required: false, type: "moderation", id: "2279" },
-        { name: 'Constituent', required: false, type: "participation", id: "1974" },
-        { name: 'Convention', required: true, type: "participation", id: "901" },
-        { name: 'Enthusiast', required: false, type: "participation", id: "71" },
-        { name: 'Investor', required: false, type: "participation", id: "219" },
-        { name: 'Quorum', required: false, type: "participation", id: "900" },
-        { name: 'Yearling', required: false, type: "participation", id: "13" },
-        { name: 'Organizer', required: false, type: "editing", id: "5" },
-        { name: 'Copy Editor', required: false, type: "editing", id: "223" },
-        { name: 'Explainer', required: false, type: "editing", id: "4368" },
-        { name: 'Refiner', required: false, type: "editing", id: "4369" },
-        { name: 'Tag Editor', required: false, type: "editing", id: "254" },
-        { name: 'Strunk & White', required: true, type: "editing", id: "12" },
-    ];
-
     // Rarely changed until there's a Stack Overflow election
     const soPastAndPresentModIds = [
         34397, 50049, 102937, 267, 419, 106224, 396458, 50776, 105971, 2598,
@@ -201,6 +166,9 @@ import {
      */
     const main = async () => {
 
+        const election = new Election(electionUrl);
+        const { electionBadges } = election;
+
         // Get current site named badges (i.e.: non-tag badges)
         if (!isStackOverflow) {
             const allNamedBadges = await getAllNamedBadges(config, electionSiteApiSlug, getStackApiKey(apiKeyPool));
@@ -208,11 +176,11 @@ import {
             electionBadges.forEach((electionBadge) => {
                 const { name: badgeName } = electionBadge;
                 const matchedBadge = allNamedBadges.find(({ name }) => badgeName === name);
-                if (matchedBadge) electionBadge.id = matchedBadge.badge_id.toString();
+                if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
             });
 
             if (config.debug || config.verbose) {
-                console.log('API - Site election badges\n', electionBadges.map(badge => `${badge.name}: ${badge.id}`).join('\n'));
+                console.log('API - Site election badges\n', electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join('\n'));
             }
         }
 
@@ -223,7 +191,6 @@ import {
         // Then maybe we can do away with ADMIN_IDs env var
 
         // Wait for election page to be scraped
-        const election = new Election(electionUrl);
         await election.scrapeElection(config);
         const { status, errors } = election.validate();
         if (!status) {
@@ -614,13 +581,21 @@ import {
                     responseText = getRandomNegative();
                 }
                 else if (['help', 'command', 'info'].some(x => content.includes(x))) {
-                    responseText = '\n' + ['Examples of election FAQs I can help with:',
-                        'what is an election', 'how to nominate myself',
-                        'how to vote', 'who should I vote for',
-                        'how is candidate score calculated', 'what is my candidate score',
+                    responseText = '\n' + [
+                        'Examples of election FAQs I can help with:',
+                        'what is an election',
+                        'how to nominate myself',
+                        'how to vote',
+                        'who should I vote for',
+                        'how is candidate score calculated',
+                        'what is my candidate score',
                         'what are the moderation/participation/editing badges',
-                        'what is the election status', 'when is the election starting/ending', 'when is the next phase',
-                        'who are the candidates', 'who are the current mods',
+                        'what is the election status',
+                        'when is the election starting/ending',
+                        'when is the next phase',
+                        "how many positions are elected",
+                        'who are the candidates',
+                        'who are the current mods',
                     ].join('\n- ');
                 }
                 // Fun mode only for testing purposes
@@ -655,8 +630,26 @@ import {
 
             // Any new message that does not reply-to or mention any user (1)
             else if (eventType === ChatEventType.MESSAGE_POSTED && !targetUserId) {
+
+                /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string) => string][]} */
+                const rules = [
+                    [isAskedForCurrentPositions, sayNumberOfPositions]
+                ];
+
+                const matched = rules.find(([expr]) => expr(content));
+
                 /** @type {string | null} */
                 let responseText = null;
+
+                // TODO: this is the next step in refactoring the main module
+                // the rest of the if...else...elseif are to be switched to reducer
+                // we also need to unify the parameters passed to each builder so as
+                // we can simply hook new builders up with little to no effort
+                if (matched) {
+                    const [matcher, builder] = matched;
+                    if (config.debug) console.log(`matched msg: ${matcher.name}`);
+                    responseText = builder(config, election, content);
+                }
 
                 // Moderation badges
                 if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
@@ -847,6 +840,9 @@ import {
                 }
                 else if (isHatingTheBot(content)) {
                     responseText = getRandomNegative();
+                } // TODO: allow privileged use after the election
+                else if (isAskedForUserEligibility(content) && (AccessLevel.dev & access)) {
+                    responseText = await sayUserEligibility(config, election, content);
                 }
 
 

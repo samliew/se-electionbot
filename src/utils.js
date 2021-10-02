@@ -26,13 +26,9 @@ let _apiBackoff = Date.now();
  *  account_id: number
  * }} ResItem
  *
- * @typedef {{
- *   user: { reputation: number },
- *   badge_id: number,
- *   link: string,
- *   name: string,
- *   rank: "bronze" | "silver" | "gold"
- * }} BadgeItem
+ * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
+ *
+ * @typedef {import("./index").ElectionBadge} ElectionBadge
  *
  * @typedef {{
  *  items: ResItem[] //TODO: split into API entities
@@ -385,26 +381,22 @@ export const getSiteDefaultChatroom = async (config, siteUrl) => {
 export const makeURL = (label, uri) => `[${label}](${uri})`;
 
 /**
- * @typedef {{ id:string, name: string, required?: boolean }} Badge
+ * @summary callback for mapping badge to id
+ * @param {Badge|ElectionBadge} badge
+ * @returns {number}
  */
+export const mapToId = ({ badge_id }) => badge_id;
 
 /**
  * @summary callback for mapping badge to name
- * @param {BadgeItem} badge
- * @returns {string}
- */
-export const mapToId = ({ badge_id }) => badge_id.toString();
-
-/**
- * @summary callback for mapping badge to name
- * @param {Badge} badge
+ * @param {Badge|ElectionBadge} badge
  * @returns {string}
  */
 export const mapToName = ({ name }) => name;
 
 /**
  * @summary callback for mapping badge to required
- * @param {Badge} badge
+ * @param {ElectionBadge} badge
  * @returns {boolean}
  */
 export const mapToRequired = ({ required }) => !!required;

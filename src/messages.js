@@ -1,5 +1,7 @@
+import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
-import { getRandomOops } from "./random.js";
+import { getRandomOops, RandomArray } from "./random.js";
+import { calculateScore } from "./score.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, pluralize, pluralizePhrase
@@ -7,7 +9,7 @@ import {
 import { parsePackage } from "./utils/package.js";
 
 /**
- * @typedef {import("./index").Badge} Badge
+ * @typedef {import("./index").ElectionBadge} Badge
  * @typedef {import("./config").BotConfig} BotConfig
  */
 
@@ -151,7 +153,7 @@ export const sayBadgesByType = (badges, type, isSO = true) => {
 
     return numBadgesPrefix + (
         isSO ?
-            filtered.map(({ id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${id}`)) :
+            filtered.map(({ badge_id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${badge_id}`)) :
             filtered.map(({ name }) => name)
     ).join(", ");
 };
@@ -176,7 +178,7 @@ export const sayRequiredBadges = (election, badges, isSO = true) => {
 
     const numBadgesPrefix = `The ${length} required badge${pluralize(length)} to nominate yourself ${pluralize(length, "are", "is")}: `;
 
-    const badgeList = required.map(({ id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${id}`)).join(", ");
+    const badgeList = required.map(({ badge_id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${badge_id}`)).join(", ");
 
     const repPostfix = ` You'll also need ${repNominate} reputation.`;
 
@@ -421,4 +423,58 @@ export const sayDiamondAlready = (isModerator, wasModerator) => {
 
     const [, message] = messageMap.find(([condition]) => condition) || [];
     return message || `diamonds are forever!`;
+};
+
+/**
+ * @summary builds a "number of positions" message
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @param {string} _text message content
+ * @returns {string}
+ */
+export const sayNumberOfPositions = (_config, election, _text) => {
+    const { numPositions = 0 } = election;
+
+    const suffix = pluralize(numPositions, "s", "");
+    const pastBe = pluralize(numPositions, "were", "was");
+    const currBe = pluralize(numPositions, "are", "is");
+    const future = pluralize(numPositions, "will be", "shall be");
+
+    const rules = [
+        [election.isActive(), currBe],
+        [election.isNotStartedYet(), future],
+        [election.isEnded(), pastBe]
+    ];
+
+    const [_rule, modal] = rules.find(([rule]) => rule) || [, `${currBe}/${pastBe}/${future}`];
+
+    return `${numPositions} mod${suffix} ${modal} elected`;
+};
+
+/**
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {string} text message content
+ * @returns {Promise<string>}
+ */
+export const sayUserEligibility = async (config, election, text) => {
+    const userId = +text.replace(/\D/g, "");
+
+    const { chatDomain, apiKeyPool } = config;
+
+    const apiSlug = chatDomain.split(".").slice(0, -1).join(".");
+
+    const userBadges = await getBadges(config, userId, apiSlug, getStackApiKey(apiKeyPool));
+
+    const requestedUser = await getUserInfo(config, userId, apiSlug, getStackApiKey(apiKeyPool));
+
+    if (!requestedUser) {
+        return `Can't answer now, please ask me about it later`;
+    };
+
+    const { isEligible } = calculateScore(requestedUser, userBadges, election);
+
+    const nlp = new RandomArray("nominate", "be elected", "become a mod");
+
+    return `User ${requestedUser.display_name} is${isEligible ? "" : " not"} eligible to ${nlp.getRandom()}`;
 };
