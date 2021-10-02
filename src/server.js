@@ -13,6 +13,9 @@ const handlebarsConfig = {
         ifEquals: function (arg1, arg2, options) {
             return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
         },
+        ifNotEmpty: function (value, options) {
+            return value > 0 || value.length ? options.fn(this) : options.inverse(this);
+        },
         get: function (model, attributeName) {
             return model.get(attributeName);
         },
