@@ -1,7 +1,5 @@
 // @ts-nocheck
 
-const formatShortDates = true;
-
 function prettyDate(rawTitle) {
     if (!rawTitle) return;
 
@@ -19,19 +17,16 @@ function prettyDate(rawTitle) {
     if (isNaN(day_diff) || day_diff < 0 || day_diff >= 31)
         return;
 
-    return day_diff == 0 && (
-        diff < 2 && "just now" ||
-        diff < 60 && (formatShortDates ?
-            (function (n) { return n.seconds == 1, n.seconds + "s ago" })({ seconds: Math.floor(diff) }) :
-            (function (n) { return n.seconds == 1 ? n.seconds + " sec ago" : n.seconds + " secs ago" })({ seconds: Math.floor(diff) })) ||
-        diff < 120 && (formatShortDates ? "1m ago" : "1 min ago") ||
-        diff < 3600 && (formatShortDates ?
-            (function (n) { return n.minutes == 1, n.minutes + "m ago" })({ minutes: Math.floor(diff / 60) }) :
-            (function (n) { return n.minutes == 1 ? n.minutes + " min ago" : n.minutes + " mins ago" })({ minutes: Math.floor(diff / 60) })) ||
-        diff < 7200 && (formatShortDates ? "1h ago" : "1 hour ago") ||
-        diff < 86400 && (formatShortDates ?
-            (function (n) { return n.hours == 1, n.hours + "h ago" })({ hours: Math.floor(diff / 3600) }) :
-            (function (n) { return n.hours == 1 ? n.hours + " hour ago" : n.hours + " hours ago" })({ hours: Math.floor(diff / 3600) })));
+    return day_diff === 0 && (
+        diff < 5 && "just now" ||
+        diff < 60 && (function (n) { return n.seconds === 1 ? n.seconds + " sec ago" : n.seconds + " secs ago" })({ seconds: Math.floor(diff) }) ||
+        diff < 120 && "1 min ago" ||
+        diff < 3600 && (function (n) { return n.minutes === 1 ? n.minutes + " min ago" : n.minutes + " mins ago" })({ minutes: Math.floor(diff / 60) }) ||
+        diff < 7200 && "1 hour ago" ||
+        diff < 86400 && (function (n) { return n.hours === 1 ? n.hours + " hour ago" : n.hours + " hours ago" })({ hours: Math.floor(diff / 3600) }) ||
+        diff < 172800 && "1 day ago" ||
+        (function (n) { return n.days === 1 ? n.days + " day ago" : n.days + " days ago" })({ days: Math.floor(diff / 86400) })
+    );
 }
 
 function updateRelativeDates() {

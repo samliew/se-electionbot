@@ -53,8 +53,6 @@
     <h2>Room Activity</h2>
     <table>
         {{#with data/botconfig}}
-        <tr><td>isStackOverflow</td><td>{{{boolean isStackOverflow}}}</td></tr>
-        <tr><td>roomLongIdleDuration</td><td>{{roomLongIdleDuration}} hours</td></tr>
         <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} (<span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span>)</td></tr>
         <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} (<span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span>)</td></tr>
         <tr><td>lastMessageContent</td><td>{{lastMessageContent}}</td></tr>
@@ -63,6 +61,7 @@
         <tr><td>roomReachedMinimumActivityCount</td><td>{{{boolean roomReachedMinimumActivityCount}}}</td></tr>
         <tr><td>roomBecameIdleAShortWhileAgo</td><td>{{{boolean roomBecameIdleAShortWhileAgo}}}</td></tr>
         <tr><td>roomBecameIdleAFewHoursAgo</td><td>{{{boolean roomBecameIdleAFewHoursAgo}}}</td></tr>
+        <tr><td>roomLongIdleDuration</td><td>{{roomLongIdleDuration}} hours</td></tr>
         <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}</td></tr>
         <tr><td>lastMessageIsPostedByBot</td><td>{{{boolean lastMessageIsPostedByBot}}}</td></tr>
         {{/with}}

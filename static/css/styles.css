@@ -45,8 +45,15 @@ th, td {
     min-width: 140px;
 }
 pre {
+    max-width: calc(100vw - 250px);
+    margin: 0;
+    overflow: auto;
     font-size: 0.8em;
-    font-family: monospace;
+}
+td:empty,
+pre:empty {
+    content: "(none)";
+    font-style: italic;
 }
 form {
     max-width: 800px;
@@ -84,6 +91,15 @@ form button {
 .result.error {
     color: indianred;
     background-color: rgb(255, 238, 238);
+}
+.truthy, .falsy {
+    font-weight: bold;
+}
+.truthy {
+    color: green;
+}
+.falsy {
+    color: indianred;
 }
 .relativetime {
     font-style: italic;

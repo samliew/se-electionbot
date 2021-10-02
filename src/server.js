@@ -10,6 +10,9 @@ const app = express().set('port', process.env.PORT || 5000);
 
 const handlebarsConfig = {
     helpers: {
+        ifEquals: function (arg1, arg2, options) {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+        },
         url: function (url, text) {
             if (!/^https?:\/\//.test(url)) return "";
             return `<a href="${url}">${text}</a>`;
@@ -150,7 +153,6 @@ app.route('/')
                         verbose: BOT_CONFIG.verbose,
                         flags: BOT_CONFIG.flags,
                         // Activity stuff
-                        isStackOverflow: isStackOverflow,
                         roomLongIdleDuration: roomLongIdleDuration,
                         lastActivityTime: lastActivityTime,
                         lastMessageTime: lastMessageTime,
