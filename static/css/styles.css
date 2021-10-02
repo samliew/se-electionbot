@@ -119,6 +119,8 @@ form button {
 @media (max-width: 767px) {
     body {
         padding: 20px 20px;
+        font-size: 0.9em;
+        word-break: break-word;
     }
     blockquote {
         margin: 1.5em 0;
@@ -126,7 +128,8 @@ form button {
     table {
         max-width: none;
         width: 100%;
-        font-size: 0.9em;
+        border: none;
+        border-left: 1px solid var(--border-color);
     }
     tr {
         display: flex;
@@ -138,6 +141,13 @@ form button {
     th, td {
         border: none;
         padding: 2px 15px;
+        padding-right: 0;
+    }
+    tr:first-child {
+        margin-top: 0;
+    }
+    tr:last-child {
+        margin-bottom: 0;
     }
     th:first-child,
     td:first-child {
