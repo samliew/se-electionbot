@@ -17,11 +17,11 @@
     <h2>Election Info</h2>
     <table>
         <tr><td>Last updated</td><td>{{utcTimestamp election/updated}} (<span class="relativetime" title="{{utcTimestamp election/updated}}"></span>)</td></tr>
-        <tr><td>Site name</td><td>{{{url election/siteName siteUrl}}}</td></tr>
-        <tr><td>Host name</td><td>{{siteHostname}}</td></tr>
+        <tr><td>Site name</td><td>{{election/siteName}}</td></tr>
+        <tr><td>Host name</td><td>{{{url siteUrl siteHostname}}}</td></tr>
         <tr><td>API slug</td><td>{{apiSlug}}</td></tr>
         <tr><td>Title</td><td>{{{url election/electionUrl election/title}}}</td></tr>
-        <tr><td>Number</td><td>{{election/electionNum}}</td></tr>
+        <tr><td>Election ID</td><td>{{election/electionNum}}</td></tr>
         <tr><td>Chat room</td><td>{{{url election/chatUrl election/chatUrl}}}</td></tr>
         <tr><td>Positions</td><td>{{election/numPositions}}</td></tr>
         <tr><td>Rep. to vote</td><td>{{election/repVote}}</td></tr>
