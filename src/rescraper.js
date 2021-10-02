@@ -65,15 +65,15 @@ export default class Rescraper {
 
             this.isStackOverflow = (election.siteHostname && election.siteHostname.includes('stackoverflow.com')) || false;
 
-            const roomLongIdleDuration = this.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
+            const longIdleDuration = this.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
             const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = config;
-            const roomBecameIdleAShortWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
-            const roomBecameIdleAFewHoursAgo = lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
+            const roomBecameIdleAWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
+            const roomBecameIdleHoursAgo = lastActivityTime + (longIdleDuration * 60 * 6e4) < Date.now();
             const botHasBeenQuiet = lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
             const lastMessageIsPostedByBot = lastActivityTime === lastMessageTime;
 
-            const idleDoSayHi = (roomBecameIdleAShortWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
-                (roomBecameIdleAFewHoursAgo && !lastMessageIsPostedByBot);
+            const idleDoSayHi = (roomBecameIdleAWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
+                (roomBecameIdleHoursAgo && !lastMessageIsPostedByBot);
 
             if (config.verbose) {
                 console.log('RESCRAPER -', election.updated, election);
@@ -90,7 +90,7 @@ export default class Rescraper {
 
                 console.log(`RESCRAPER - IDLE? idleDoSayHi: ${idleDoSayHi}
                     ----------- reachedMinActivity: ${roomReachedMinimumActivityCount};
-                    ----------- becameIdleAWhileAgo: ${roomBecameIdleAShortWhileAgo}; becameIdleAFewHoursAgo: ${roomBecameIdleAFewHoursAgo}
+                    ----------- roomBecameIdleAWhileAgo: ${roomBecameIdleAWhileAgo}; roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}
                     ----------- botHasBeenQuiet: ${botHasBeenQuiet}; lastMessageIsPostedByBot: ${lastMessageIsPostedByBot}`
                 );
             }

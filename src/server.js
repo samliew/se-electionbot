@@ -121,10 +121,10 @@ app.route('/')
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
             const isStackOverflow = (ELECTION && ELECTION.siteHostname && ELECTION.siteHostname.includes('stackoverflow.com')) || false;
-            const roomLongIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
+            const longIdleDuration = isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
             const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = BOT_CONFIG;
-            const roomBecameIdleAShortWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
-            const roomBecameIdleAFewHoursAgo = lastActivityTime + (roomLongIdleDuration * 60 * 6e4) < Date.now();
+            const roomBecameIdleAWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
+            const roomBecameIdleHoursAgo = lastActivityTime + (longIdleDuration * 60 * 6e4) < Date.now();
             const botHasBeenQuiet = lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
             const lastMessageIsPostedByBot = lastActivityTime === lastMessageTime;
 
@@ -153,15 +153,15 @@ app.route('/')
                         verbose: BOT_CONFIG.verbose,
                         flags: BOT_CONFIG.flags,
                         // Activity stuff
-                        roomLongIdleDuration: roomLongIdleDuration,
+                        longIdleDuration: longIdleDuration,
                         lastActivityTime: lastActivityTime,
                         lastMessageTime: lastMessageTime,
                         lastMessageContent: BOT_CONFIG.lastMessageContent,
                         activityCount: BOT_CONFIG.activityCount,
                         minActivityCountThreshold: BOT_CONFIG.minActivityCountThreshold,
                         roomReachedMinimumActivityCount: roomReachedMinimumActivityCount,
-                        roomBecameIdleAShortWhileAgo: roomBecameIdleAShortWhileAgo,
-                        roomBecameIdleAFewHoursAgo: roomBecameIdleAFewHoursAgo,
+                        roomBecameIdleAWhileAgo: roomBecameIdleAWhileAgo,
+                        roomBecameIdleHoursAgo: roomBecameIdleHoursAgo,
                         botHasBeenQuiet: botHasBeenQuiet,
                         lastMessageIsPostedByBot: lastMessageIsPostedByBot,
                     }
