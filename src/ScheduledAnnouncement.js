@@ -106,7 +106,7 @@ export default class ScheduledAnnouncement {
         // No election
         if (!election) return false;
 
-        const { arrWinners, phase, resultsUrl, siteUrl } = election;
+        const { arrWinners, phase, opavoteUrl, siteUrl } = election;
 
         const { length } = arrWinners;
 
@@ -137,8 +137,8 @@ export default class ScheduledAnnouncement {
         // Build the message
         let msg = `**Congratulations to the winner${pluralize(length)}** ${winnerList.join(', ')}!`;
 
-        if (resultsUrl) {
-            msg += ` You can ${makeURL("view the results online via OpaVote", resultsUrl)}.`;
+        if (opavoteUrl) {
+            msg += ` You can ${makeURL("view the results online via OpaVote", opavoteUrl)}.`;
         }
 
         // Announce

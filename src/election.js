@@ -412,12 +412,12 @@ export default class Election {
 
                 const [statusElem, resultsElem, statsElem] = resultsWrapper.find(".flex--item").get();
 
-                const resultsURL = $(resultsElem).find('a').first().attr('href') || "";
+                const resultsUrl = $(resultsElem).find('a').first().attr('href') || "";
 
-                this.resultsUrl = resultsURL;
+                this.opavoteUrl = resultsUrl;
 
                 // Validate opavote URL
-                if (!/^https:\/\/www\.opavote\.com\/results\/\d+$/.test(resultsURL)) this.resultsUrl = '';
+                if (!/^https:\/\/www\.opavote\.com\/results\/\d+$/.test(resultsUrl)) this.opavoteUrl = '';
 
                 // Check if election was cancelled?
                 if ($(statusElem).text().includes('cancelled')) {

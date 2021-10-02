@@ -13,6 +13,9 @@ const handlebarsConfig = {
         ifEquals: function (arg1, arg2, options) {
             return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
         },
+        get: function (model, attributeName) {
+            return model.get(attributeName);
+        },
         url: function (url, text) {
             if (!/^https?:\/\//.test(url)) return "";
             return `<a href="${url}">${text}</a>`;
