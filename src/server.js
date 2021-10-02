@@ -32,7 +32,8 @@ const handlebarsConfig = {
             return date?.toISOString().replace('T', ' ').replace(/\.\d+/, '') || "";
         },
         json: function (data) {
-            if (typeof data !== "string") data = JSON.stringify(data);
+            // JSON.stringify(undefined) === undefined
+            if (typeof data !== "string") data = JSON.stringify(data || []);
             return data.replace(/},\s*/g, "},\n").replace(/,"/g, `, "`).replace(/(^\[|\]$)/g, "").replace(/\[/g, "[\n").replace(/\]/g, "\n]");
         },
         boolean: function (data) {
