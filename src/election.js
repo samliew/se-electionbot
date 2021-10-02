@@ -399,7 +399,7 @@ export default class Election {
                 this.resultsUrl = resultsURL;
 
                 // Validate opavote URL
-                if (!/^https:\/\/www.opavote.com\/results\/\d+$/.test(resultsURL)) this.resultsUrl = '';
+                if (!/^https:\/\/www\.opavote\.com\/results\/\d+$/.test(resultsURL)) this.resultsUrl = '';
 
                 // Check if election was cancelled?
                 if ($(statusElem).text().includes('cancelled')) {

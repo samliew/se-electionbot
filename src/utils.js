@@ -40,30 +40,32 @@ let _apiBackoff = Date.now();
 /**
  * @summary fetches the endpoint
  * @param {import("./config").BotConfig} config
- * @param {string} url
- * @param {boolean} [json]
+ * @param {string} url the url to fetch
+ * @param {boolean} json whether to return the response as a json object
  * @returns {Promise<any>}
  */
 export const fetchUrl = async (config, url, json = false) => {
     const { SOURCE_VERSION, ACCOUNT_EMAIL } = process.env;
 
+    const isStackExchangeApi = /^https\:\/\/api\.stackexchange\.com/.test(url);
+
     // Delay SE API query if backoff still active
     const backoffMillis = _apiBackoff - Date.now();
-    if (url.startsWith(apiBase) && backoffMillis > 0) {
+    if (isStackExchangeApi && backoffMillis > 0) {
         await new Promise(resolve => setTimeout(resolve, backoffMillis));
     }
 
     try {
         const { data } = await axios({
             url,
-            responseType: url.includes('api') || json ? "json" : "text", //TODO: check if same as `url.includes('api') || json`
+            responseType: isStackExchangeApi || json ? "json" : "text",
             headers: {
                 'User-Agent': `Node.js/ElectionBot ver.${SOURCE_VERSION}; AccountEmail ${ACCOUNT_EMAIL}`,
             },
         });
 
         // Store backoff if SE API
-        if (url.startsWith(apiBase) && data.backoff) {
+        if (isStackExchangeApi && data.backoff) {
             _apiBackoff = Date.now() + data.backoff * 1e4 + 50; // 50ms buffer
         }
 
