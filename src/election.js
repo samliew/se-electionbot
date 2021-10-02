@@ -11,6 +11,8 @@ import { dateToUtcTimestamp, fetchUrl } from './utils.js';
  *  userName: string,
  *  userYears: string,
  *  userScore: string,
+ *  nominationDate: Date,
+ *  nominationLink: string,
  *  permalink: string
  * }} Nominee
  */
@@ -307,17 +309,20 @@ export default class Election {
      * @param {string} electionPageUrl election URL
      * @returns {Nominee}
      */
-    scrapeNominee($, el, electionPageUrl) {
+    scrapeNominee($, el, electionPageUrl, electionSiteUrl) {
         const userLink = $(el).find('.user-details a');
+        const userId = +(userLink.attr('href')?.split('/')[2] || "");
 
         return {
-            userId: +(userLink.attr('href')?.split('/')[2] || ""),
+            userId: userId,
             userName: userLink.text(),
             userYears: $(el).find('.user-details').contents().map((_i, { data, type }) =>
                 type === 'text' ? data?.trim() : ""
             ).get().join(' ').trim(),
             userScore: $(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)?.[0] || "",
-            permalink: `${electionPageUrl}#${$(el).attr('id')}`,
+            nominationDate: new Date($(el).find('.relativetime').attr('title') || ""),
+            nominationLink: `${electionPageUrl}#${$(el).attr('id')}`,
+            permalink: `${electionSiteUrl}/users/${userId}`,
         };
     }
 
@@ -365,10 +370,6 @@ export default class Election {
 
             const repToNominate = +minRep.replace(/\D/g, "");
 
-            const candidateElems = $('#mainbar .candidate-row');
-
-            const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get();
-
             this.updated = Date.now();
             this.siteName = $('meta[property="og:site_name"]').attr('content')?.replace('Stack Exchange', '').trim();
             this.isStackOverflow = this.siteHostname === 'stackoverflow.com';
@@ -381,6 +382,10 @@ export default class Election {
             this.numPositions = +numPositions;
             this.repVote = 150;
             this.repNominate = repToNominate;
+
+            const candidateElems = $('#mainbar .candidate-row');
+
+            const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl, this.siteUrl)).get();
 
             // Clear an array before rescraping
             this.arrNominees.length = 0;

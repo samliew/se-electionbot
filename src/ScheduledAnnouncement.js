@@ -86,9 +86,9 @@ export default class ScheduledAnnouncement {
 
         const nominationTab = `${electionUrl}?tab=nomination`;
 
-        newNominees.forEach(async ({ permalink, userName }, i) => {
+        newNominees.forEach(async ({ nominationLink, userName }, i) => {
             await sendMessage(config, _room, `**We have a new ${makeURL("nomination", nominationTab)
-                }!** Please welcome our latest candidate ${makeURL(userName, permalink)
+                }!** Please welcome our latest candidate ${makeURL(userName, nominationLink)
                 }!`);
             console.log(`NOMINATION`, newNominees[i]);
         });

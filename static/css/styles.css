@@ -30,6 +30,14 @@ h2 {
     font-size: 1.2em;
     color: var(--heading-colour);
 }
+ol, ul {
+    padding-inline-start: 20px;
+    padding-left: 20px;
+}
+td .list {
+    margin: 0;
+    font-size: 0.9em;
+}
 a {
     color: var(--link-colour);
 }
