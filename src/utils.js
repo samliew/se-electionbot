@@ -86,12 +86,15 @@ export const fetchUrl = async (config, url, json = false) => {
  *   username,
  *   chatUserId,
  *   message,
+ *   messageMarkup,
  *   date
  * }]
  *
  * INFO:
- * To get the rough datetime for a single message that doesn't have a timestamp, this function currently uses the UTC time of last message + 1 second.
- * If a more accurate solution is required, we'll need to take the amount of messages posted within known times and extrapolate an estimate.
+ * To get the rough datetime for a single message that doesn't have a timestamp,
+ *   this function currently uses the UTC time of last message + 1 second.
+ * If a more accurate solution is required, we'll need to take the amount of messages
+ *   posted within known times and extrapolate an estimate.
  */
 export const fetchChatTranscript = async (config, url) => {
 
@@ -114,7 +117,10 @@ export const fetchChatTranscript = async (config, url) => {
         const $this = $chat(el);
         const userlink = $this.parent().siblings('.signature').find('a');
         const messageElem = $this.find('.content');
-        const messageText = messageElem.text().trim();
+
+        if (!messageElem) return;
+
+        const messageText = messageElem.text().trim() || "";
         const messageMarkup = messageElem.html()?.replace(/<\/?b>/g, '**').replace(/<\/?i>/g, '*').replace(/<a href="([^"]+)">([^<]+)<\/a>/g, `[$2]($1)`).replace(/(^\s+|\s+$)/g, '');
 
         const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [, null, null, null];

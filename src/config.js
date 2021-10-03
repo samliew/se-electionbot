@@ -60,6 +60,11 @@ export class BotConfig {
         return Date.now() < this.lastMessageTime + this.throttleSecs * 1000;
     }
 
+    // Returns if the bot posted the last message in the room
+    get botSentLastMessage() {
+        return this.lastActivityTime === this.lastMessageTime;
+    }
+
     /**
      * Maximum length a single message can have
      */

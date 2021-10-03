@@ -134,11 +134,10 @@ app.route('/')
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
             const longIdleDuration = ELECTION.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
-            const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins } = BOT_CONFIG;
+            const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins, botSentLastMessage } = BOT_CONFIG;
             const roomBecameIdleAWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
             const roomBecameIdleHoursAgo = lastActivityTime + (longIdleDuration * 60 * 6e4) < Date.now();
             const botHasBeenQuiet = lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
-            const lastMessageIsPostedByBot = lastActivityTime === lastMessageTime;
 
             res.render('index', {
                 page: {
@@ -173,7 +172,7 @@ app.route('/')
                         roomBecameIdleAWhileAgo: roomBecameIdleAWhileAgo,
                         roomBecameIdleHoursAgo: roomBecameIdleHoursAgo,
                         botHasBeenQuiet: botHasBeenQuiet,
-                        lastMessageIsPostedByBot: lastMessageIsPostedByBot,
+                        botSentLastMessage: botSentLastMessage,
                     }
                 }
             });

@@ -217,6 +217,7 @@ import {
             ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
         }
 
+
         // "default" is a temp fix for ChatExchange being served as CJS module
         /** @type {Client} */
         const client = new Client["default"](config.chatDomain);
@@ -238,6 +239,9 @@ import {
         // Join the election chat room
         const room = await client.joinRoom(config.chatRoomId);
 
+        // Ignore ignored event types
+        room.ignore(...ignoredEventTypes);
+
         // Start rescraper utility, and initialise announcement cron jobs
         const rescraper = new Rescraper(config, room, election);
         const announcement = new Announcement(config, room, election, rescraper);
@@ -246,20 +250,44 @@ import {
         rescraper.setAnnouncement(announcement);
         rescraper.start();
 
-        // If election is over with winners, and bot has not announced winners yet, announce immediately upon startup
-        const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
-        if (election.phase === 'ended' && election.chatRoomId) {
-            const winnersAnnounced = config.flags.announcedWinners ||
-                transcriptMessages?.some(item => item.message && /^(?:The winners? (?:are|is):|Congratulations to the winners?)/.test(item.message));
 
-            if (config.debug) {
-                console.log(
-                    "INIT - winnersAnnounced:", winnersAnnounced,
-                    "\n" + transcriptMessages.map(item => `${/^(?:The winners? (?:are|is):|Congratulations to the winners?)/.test(item.message)} - ${item.message}`).join("\n")
-                );
+        /*
+         * Sync state from chat transcript on startup
+         * - activityCount, lastActivityTime, lastMessageTime, lastMessageContent, (botSentLastMessage)
+         */
+        const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
+        if (transcriptMessages) {
+
+            // Update lastActivityTime, lastMessageTime, lastMessageContent
+            const lastMessage = transcriptMessages[transcriptMessages.length - 1];
+            const lastMessageByBot = lastMessage.message && (lastMessage.username === me.name || lastMessage.chatUserId === me.id);
+
+            if (lastMessageByBot) {
+                config.updateLastMessage(lastMessage.messageMarkup, lastMessage.date);
+                console.log(`INIT - Previous message in room was by bot at ${lastMessage.date}:`, lastMessage.messageMarkup);
+            }
+            else {
+                config.lastActivityTime = lastMessage.date;
             }
 
-            if (!winnersAnnounced && election.arrWinners) {
+            // Count valid messages (after a "greet" message by bot), and update activityCount
+            let count = 0;
+            transcriptMessages.reverse();
+            for (count = 0; count < transcriptMessages.length; count++) {
+                let item = transcriptMessages[count];
+                if (!/^Welcome to the election chat room!/.test(item.message) && item.chatUserId === me.id) break;
+            }
+            config.activityCount = count;
+        }
+
+        // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
+        if (election.phase === 'ended' && Date.now() < new Date(election.dateEnded).getTime() + 36e5) {
+
+            const winnersAnnounced = transcriptMessages?.filter(item => /^(?:The winners? (?:are|is):|Congratulations to the winners?)/.test(item.message));
+
+            if (config.debug) console.log("INIT - winnersAnnounced on startup", winnersAnnounced.length);
+
+            if (!winnersAnnounced && election.numWinners > 0) {
                 announcement.announceWinners(room, election);
             }
         }
@@ -267,21 +295,6 @@ import {
         else if (config.debug) {
             await sendMessage(config, room, getRandomPlop(), null, true);
         }
-        // Not in debug mode, if bot sent last message in room, sync on startup
-        // Don't need to do this in debug mode because we're sending join room message
-        else if (transcriptMessages) {
-            const lastMessage = transcriptMessages[transcriptMessages.length - 1];
-            const lastMessageByBot = lastMessage.message && (lastMessage.username === me.name || lastMessage.chatUserId === me.id);
-
-            if (lastMessageByBot) {
-                config.updateLastMessage(lastMessage.message, lastMessage.date);
-
-                console.log(`INIT - Previous message in room was by bot at ${lastMessage.date}:`, lastMessage.message);
-            }
-        }
-
-        // Ignore ignored event types
-        room.ignore(...ignoredEventTypes);
 
 
         // Main event listener

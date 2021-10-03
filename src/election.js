@@ -98,7 +98,7 @@ export default class Election {
      */
     get numNominees() {
         const { arrNominees } = this;
-        return arrNominees.length;
+        return arrNominees.length || 0;
     }
 
     /**
@@ -107,7 +107,7 @@ export default class Election {
      */
     get numWinners() {
         const { arrWinners } = this;
-        return arrWinners.length;
+        return arrWinners.length || 0;
     }
 
     /**
