@@ -396,12 +396,12 @@ import {
                 commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
                     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
                     config.updateLastMessageTime(Date.now() + (+num * 6e4) - (throttle * 1e3));
-                    return `*silenced for ${num} minutes*`;
+                    return `*silenced for ${num} mins*`;
                 }, AccessLevel.privileged);
 
                 commander.add("unmute", "allows the bot to speak immediately", (config) => {
                     config.updateLastMessageTime(-1);
-                    return `*timeout cleared*`;
+                    return `I can speak freely again.`;
                 }, AccessLevel.privileged);
 
                 commander.add("get time", "gets current UTC time and the election phase time", ({ phase, dateElection }) => {
@@ -426,10 +426,10 @@ import {
                     return roomId ? `*left room ${roomId}*` : "*missing room ID*";
                 }, AccessLevel.dev);
 
-                commander.add("coffee", "brews some coffee for the requestor", ({ name }) => {
-                    //TODO: add for whom the coffee
+                commander.add("coffee", "brews some coffee for the requestor", (content, { name = "you" }) => {
+                    const [, otherUser = ""] = /for ((?:\w+\s?){1,2})/.exec(content) || [];
                     const coffee = new RandomArray("cappuccino", "espresso", "latte", "ristretto", "macchiato");
-                    return `Brewing some ${coffee.getRandom()} for ${name || "somebody"}`;
+                    return `Brewing some ${coffee.getRandom()} for ${otherUser || name}`;
                 }, AccessLevel.privileged);
 
                 commander.add("set access", "sets user's access level", setAccessCommand, AccessLevel.dev);
@@ -479,7 +479,7 @@ import {
                     ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
                     ["announce winners", /^(announce )?winners/, room, election],
-                    ["coffee", /(?:brew|make).+coffee/, user],
+                    ["coffee", /(?:brew|make).+coffee/, content, user],
                     ["timetravel", /88 miles|delorean|timetravel/, config, election, content],
                     ["fun", /fun/, config, content],
                     ["debug", /debug(?:ing)?/, config, content],
