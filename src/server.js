@@ -358,6 +358,7 @@ export const startServer = async (room, config, election) => {
         if (config.debug) {
             await room.sendMessage("have to go now, will be back soon...");
         }
+        await room.leave();
         terminate(server);
     };
 
