@@ -351,7 +351,13 @@ export default class Election {
             // No election number specified and page is NOT an active election,
             //   try to detect an upcoming election on election index page
             // Does not work on non-English sites!
-            if (!this.electionNum && !retry && pageTitle.includes("Community Moderator Elections")) {
+            if (!this.electionNum && pageTitle.includes("Community Moderator Elections")) {
+
+                // Only retry once
+                if (retry) {
+                    console.error("Invalid site or election page.");
+                    throw new Error("Invalid site or election page.");
+                }
 
                 // Set next election number and url
                 this.electionNum = $('a[href^="/election/"]').length + 1;
@@ -361,11 +367,6 @@ export default class Election {
 
                 // Try again with updated election number
                 return await this.scrapeElection(config, true);
-            }
-            // Only retry once
-            else if (retry) {
-                console.error("Invalid site or election page.");
-                throw new Error("Invalid site or election page.");
             }
 
             // Save prev values so we can compare changes after
