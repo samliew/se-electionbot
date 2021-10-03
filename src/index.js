@@ -332,15 +332,15 @@ import {
                 console.log(`EVENT - Ignoring due to message length ${content.length}: ${content}`);
                 return;
             }
-            
+
             // Not a new message event, do nothing (should not trigger,
             //   since we are now ignoring all event types except MESSAGE_POSTED)
             if (eventType !== ChatEventType.MESSAGE_POSTED) return;
 
             // Log all un-ignored events
             console.log('EVENT -', JSON.stringify({ content, msg, user }));
-            
-            /* 
+
+            /*
              * As multiple events are emitted when user is mentioned or message is replied-to,
              * we now only listen to the NEW_MESSAGE event and figure out whether bot is being mentioned using this method.
              * Potentially do not need "targetUserId === me.id" as that is only used by the USER_MENTIONED (8) or message reply (18) event.
@@ -348,8 +348,8 @@ import {
              */
             const botMentioned = /^\s*@ElectionBot /i.test(originalMessage) || targetUserId === me.id;
 
-            
-            /* 
+
+            /*
              * Privileged command guards -
              * Bot mentioned, by an admin or diamond moderator (no throttle to be applied)
              */
@@ -462,7 +462,7 @@ import {
                     greet: ["welcome"],
                 });
 
-                
+
                 const outputs = [
                     ["commands", /commands|usage/],
                     ["alive", /alive|awake|ping/, scriptHostname, config],
@@ -514,7 +514,7 @@ import {
                 }
             }
 
-            
+
             /* TODO:
              *   When message queue is implemented, this will need to go as well.
              *   In it's place to avoid bot abuse, we can implement auto user mutes/ignores
@@ -525,9 +525,9 @@ import {
                 console.log('THROTTLE - too close to previous message, or is muted');
                 return;
             }
-            
-            
-            /* 
+
+
+            /*
              *  Non-privileged response guards
              */
 
@@ -550,7 +550,7 @@ import {
                 if (config.debug) console.log(`Matched response: ${matcher.name}`);
                 responseText = builder(config, election, content);
             }
-            
+
 
             // Moderation badges
             else if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
@@ -737,16 +737,9 @@ import {
                 responseText = await sayUserEligibility(config, election, content);
             }
 
-            
-            // Log this point
-            if (config.debug) console.log("non-privileged guards", responseText);
-            
-            
+
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentioned && config.throttleSecs <= 10) {
-                
-                /** @type {string | null} */
-                let responseText = null;
 
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
@@ -820,14 +813,12 @@ import {
                     ].join('\n- ');
                 }
 
-                if(responseText) {
-                    if (config.debug) console.log("non-privileged bot mentioned guards", responseText);
-                    
+                if (responseText) {
                     // TODO: msg.id might be undefined
                     await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
                     return; // stop here since we are using a different default response method
                 }
-                
+
                 // Bot was mentioned and did not match any previous guards - return a random response
                 if (config.funMode || /[\?\!]+$/.test(content)) {
 
@@ -847,15 +838,14 @@ import {
                         `Time will tell. Sooner or later, time will tell...`,
                         `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
-                    
-                    if (config.debug) console.log("funMode response", responseText);
                 }
+
             } // End bot mentioned
-            
-            
+
+
             // Send the message
-            if(responseText) await sendMessage(config, room, responseText, null, false);
-            
+            if (responseText) await sendMessage(config, room, responseText, null, false);
+
         }); // End new message event listener
 
 
