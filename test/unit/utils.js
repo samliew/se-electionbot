@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { asyncCacheable, dateToRelativetime, fetchChatTranscript, getSiteDefaultChatroom, listify, parseIds, pluralize } from "../../src/utils.js";
+import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, parseIds, pluralize } from "../../src/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('String-related utils', async function () {
@@ -78,6 +78,18 @@ describe('String-related utils', async function () {
             expect(chatMessages[6].date).to.equal(1553053320000);
             expect(chatMessages[6].message).to.equal("how do I vote?  This is a test link");
             expect(chatMessages[6].messageMarkup).to.equal("**how do *I* vote?**  [This is a test link](https://stackoverflow.com/election)");
+        });
+    });
+
+    describe('fetchRoomOwners', async () => {
+
+        it('should fetch chat room owners correctly', async () => {
+            const owners = await fetchRoomOwners(getMockBotConfig());
+
+            expect(owners).length(2);
+
+            expect(owners[0].userId).to.equal(11407695);
+            expect(owners[1].userId).to.equal(584192);
         });
     });
 

@@ -30,7 +30,7 @@ import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, pluralize, wait
+    linkToUtcTimestamp, makeURL, pluralize, fetchRoomOwners, wait
 } from './utils.js';
 
 /**
@@ -184,9 +184,6 @@ import {
         // Get current site mods via API
         const currentSiteMods = await getModerators(config, election.apiSlug, getStackApiKey(apiKeyPool));
 
-        // TODO: Also add room owners to list of admins (privileged users)
-        // Then maybe we can do away with ADMIN_IDs env var
-
         // Wait for election page to be scraped
         await election.scrapeElection(config);
         const { status, errors } = election.validate();
@@ -216,6 +213,12 @@ import {
             DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
             ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
         }
+
+        // Add room owners to list of admins (privileged users)
+        const owners = await fetchRoomOwners(config);
+        owners.forEach(user => {
+            config.addAdmin(user.userId);
+        });
 
 
         // "default" is a temp fix for ChatExchange being served as CJS module

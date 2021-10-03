@@ -223,6 +223,50 @@ export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) =
 };
 
 /**
+ * @summary get room owners for the room bot is in
+ * @param {import("./config").BotConfig} config
+ * @param {string|null} chatDomain
+ * @param {string|number|null} chatRoomId
+ * @returns {Promise<any>} array of chat users
+ *
+ * {
+ *   userName,
+ *   userId,
+ *   userLink,
+ *   isModerator
+ * }
+ */
+export const fetchRoomOwners = async (config, chatDomain = null, chatRoomId = null) => {
+
+    // Default to values from config
+    if (!chatDomain || !chatRoomId || isNaN(Number(chatRoomId))) {
+        chatDomain = config.chatDomain;
+        chatRoomId = config.chatRoomId;
+    }
+
+    const url = `https://chat.${chatDomain}/rooms/info/${chatRoomId}/?tab=access`;
+
+    const html = await fetchUrl(config, url);
+    const $ = cheerio.load(/** @type {string} */(html));
+
+    const owners = [];
+
+    $("#access-section-owner .username").each(function (el) {
+        const id = $(this).attr('href')?.match(/\/(\d+)\//)?.pop();
+        owners.push({
+            userName: $(this).text().replace(' ♦', ''),
+            userId: +(id || -42),
+            userLink: $(this).attr('href'),
+            isModerator: $(this).text().includes('♦')
+        });
+    });
+
+    console.log(`Fetched room owners for ${url}`, owners);
+
+    return owners;
+};
+
+/**
  * @summary pings endpoint periodically to prevent idling
  * @param {string} url
  * @param {number} mins

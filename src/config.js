@@ -94,6 +94,15 @@ export class BotConfig {
     adminIds = new Set(parseIds(process.env.ADMIN_IDS || ''));
     ignoredUserIds = new Set(parseIds(process.env.IGNORED_USERIDS || ''));
 
+    addAdmin(chatUserId) {
+        this.adminIds.add(chatUserId);
+        console.log(`User ${chatUserId} added as admin`);
+    }
+    addIgnoredUser(chatUserId) {
+        this.ignoredUserIds.add(chatUserId);
+        console.log(`User ${chatUserId} ignored`);
+    }
+
     /* Flags and bot-specific utility functions */
 
     flags = {
