@@ -500,6 +500,8 @@ import {
                 last activity: ${config.lastActivityTime}
                 `);
                 }
+                
+                if (config.debug) console.log("privileged guards", responseText);
 
                 /* Note:
                  * Be careful if integrating this section with message queue,
@@ -546,7 +548,7 @@ import {
             // we can simply hook new builders up with little to no effort
             if (matched) {
                 const [matcher, builder] = matched;
-                if (config.debug) console.log(`matched msg: ${matcher.name}`);
+                if (config.debug) console.log(`Matched response: ${matcher.name}`);
                 if (responseText) responseText = builder(config, election, content);
             }
 
@@ -554,17 +556,14 @@ import {
             else if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
                 responseText = sayBadgesByType(electionBadges, "moderation", election.isStackOverflow);
             }
-
             // Participation badges
             else if (['what', 'participation', 'badges'].every(x => content.includes(x))) {
                 responseText = sayBadgesByType(electionBadges, "participation", election.isStackOverflow);
             }
-
             // Editing badges
             else if (['what', 'editing', 'badges'].every(x => content.includes(x))) {
                 responseText = sayBadgesByType(electionBadges, "editing", election.isStackOverflow);
             }
-
             // SO required badges
             else if (['what', 'required', 'badges'].every(x => content.includes(x))) {
                 responseText = sayRequiredBadges(election, electionBadges, election.isStackOverflow);
@@ -592,12 +591,10 @@ import {
 
                 return; // stop here since we are using a different default response method
             }
-
             // How is candidate score calculated
             else if (isAskedForScoreFormula(content)) {
                 responseText = sayCandidateScoreFormula(electionBadges);
             }
-
             // Who has the highest candidate score
             else if (isAskedForScoreLeaderboard(content)) {
                 responseText = sayCandidateScoreLeaderboard(election.apiSlug);
@@ -622,7 +619,6 @@ import {
             else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
                 responseText = election.phase == 'ended' ? (election.statVoters || null) : `We won't know until the election ends. Come back ${linkToRelativeTimestamp(election.dateEnded)}.`;
             }
-
             // How to choose/pick/decide/determine who to vote for
             else if ((content.startsWith('how') && ['choose', 'pick', 'decide', 'determine'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
                 if (election.phase == null) responseText = sayNotStartedYet(election);
@@ -641,7 +637,6 @@ import {
                     responseText = new RandomArray(...pool).getRandom();
                 }
             }
-
             // Current mods
             else if (isAskedForCurrentMods(content)) {
                 // Should we do this, or just link to the site's mod page since it's more useful than just usernames?
@@ -654,12 +649,10 @@ import {
                 const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x));
                 responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
             }
-
             // Why was the nomination removed
             else if (isAskedWhyNominationRemoved(content)) {
                 responseText = sayWhyNominationRemoved();
             }
-
             // Are moderators paid
             else if (isAskedIfModsArePaid(content)) {
                 responseText = sayAreModsPaid(election);
@@ -744,8 +737,10 @@ import {
                 responseText = await sayUserEligibility(config, election, content);
             }
 
+            
             // Log this point
             if (config.debug) console.log("non-privileged guards", responseText);
+            
             
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentioned && config.throttleSecs <= 10) {
@@ -825,8 +820,8 @@ import {
                     ].join('\n- ');
                 }
 
-                if(responseText && responseText.length) {
-                    if (config.debug) console.log("bot mentioned", responseText);
+                if(responseText) {
+                    if (config.debug) console.log("non-privileged bot mentioned guards", responseText);
                     
                     // TODO: msg.id might be undefined
                     await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
@@ -853,7 +848,7 @@ import {
                         `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
                     
-                    if (config.debug) console.log("funMode", responseText);
+                    if (config.debug) console.log("funMode response", responseText);
                 }
             } // End bot mentioned
             
