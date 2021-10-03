@@ -13,86 +13,96 @@
     </p>
 </blockquote>
 
-<div>
-    <h2>Election Info</h2>
-    <table>
-        <tr><td>Last updated</td><td>{{utcTimestamp election/updated}} <span class="relativetime" title="{{utcTimestamp election/updated}}"></span></td></tr>
-        <tr><td>Site name</td><td>{{election/siteName}}</td></tr>
-        <tr><td>Host name</td><td>{{{url siteUrl siteHostname}}}</td></tr>
-        <tr><td>API slug</td><td>{{apiSlug}}</td></tr>
-        <tr><td>Title</td><td>{{{url election/electionUrl election/title}}}</td></tr>
-        <tr><td>Election ID</td><td>{{election/electionNum}}</td></tr>
-        <tr><td>Chat room</td><td>{{{url election/chatUrl election/chatUrl}}}</td></tr>
-        <tr><td>Positions</td><td>{{election/numPositions}}</td></tr>
-        <tr><td>Rep. to vote</td><td>{{election/repVote}}</td></tr>
-        <tr><td>Rep. to nominate</td><td>{{election/repNominate}}</td></tr>
-        <tr><td>Current phase</td><td>{{election/phase}}</td></tr>
-        <tr><td>Nomination date</td><td>{{utcTimestamp election/dateNomination}} <span class="relativetime" title="{{utcTimestamp election/dateNomination}}"></span></td></tr>
-        <tr><td>Primary date</td><td>{{utcTimestamp election/datePrimary}} <span class="relativetime" title="{{utcTimestamp election/datePrimary}}"></span></td></tr>
-        <tr><td>Election date</td><td>{{utcTimestamp election/dateElection}} <span class="relativetime" title="{{utcTimestamp election/dateElection}}"></span></td></tr>
-        <tr><td>End date</td><td>{{utcTimestamp election/dateEnded}} <span class="relativetime" title="{{utcTimestamp election/dateEnded}}"></span></td></tr>
-        <tr><td>Opavote URL</td><td>{{{url election/opavoteUrl election/opavoteUrl}}}</td></tr>
-        <tr><td>Voter stats</td><td>{{election/statVoters}}</td></tr>
-        <tr><td>Candidates</td><td>
-            <ul class="list">
-                {{#each election/arrNominees}}
-                <li class="item"><a href="{{this.permalink}}">{{this.userName}}</a>; <a href="{{this.nominationLink}}">nomination</a>; score {{this.userScore}}; {{this.userYears}}</li>
-                {{/each}}
-            </ul>
-        </td></tr>
-        <tr><td>Winners</td><td>
-            <ul class="list">
-                {{#each election/arrWinners}}
-                <li class="item"><a href="{{this.permalink}}">{{this.userName}}</a></li>
-                {{/each}}
-            </ul>
-        </td></tr>
-        <tr><td>Badges</td><td>
-            <ul class="list">
-                {{#each election/electionBadges}}
-                <li class="item"><a href="{{siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}} [{{this.badge_id}}]</a></li>
-                {{/each}}
-            </ul>
-        </td></tr>
-    </table>
-</div>
+<main class="dashboard">
 
-<div>
-    <h2>Bot Config</h2>
-    {{#with botconfig}}
-    <table>
-        <tr><td>isMuted</td><td>{{{boolean isMuted}}}</td></tr>
-        <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
-        <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
-        <tr><td>duplicateResponseText</td><td>{{duplicateResponseText}}</td></tr>
-        <tr><td>maxMessageLength</td><td>{{maxMessageLength}}</td></tr>
-        <tr><td>maxMessageParts</td><td>{{maxMessageParts}}</td></tr>
-        <tr><td>funMode</td><td>{{{boolean funMode}}}</td></tr>
-        <tr><td>debug</td><td>{{{boolean debug}}}</td></tr>
-        <tr><td>verbose</td><td>{{{boolean verbose}}}</td></tr>
-        {{#with flags}}
-        <tr><td>flags.saidElectionEndingSoon</td><td>{{{boolean saidElectionEndingSoon}}}</td></tr>
-        <tr><td>flags.announcedWinners</td><td>{{{boolean announcedWinners}}}</td></tr>
-        {{/with}}
-    </table>
-    {{/with}}
+    <section>
+        <aside>
+            <h2>Election Info</h2>
+            <table>
+                <tr><td>Last updated</td><td>{{utcTimestamp election/updated}} <span class="relativetime" title="{{utcTimestamp election/updated}}"></span></td></tr>
+                <tr><td>Site name</td><td>{{election/siteName}}</td></tr>
+                <tr><td>Host name</td><td>{{{url siteUrl siteHostname}}}</td></tr>
+                <tr><td>API slug</td><td>{{apiSlug}}</td></tr>
+                <tr><td>Title</td><td>{{{url election/electionUrl election/title}}}</td></tr>
+                <tr><td>Election ID</td><td>{{election/electionNum}}</td></tr>
+                <tr><td>Chat room</td><td>{{{url election/chatUrl election/chatUrl}}}</td></tr>
+                <tr><td>Positions</td><td>{{election/numPositions}}</td></tr>
+                <tr><td>Rep. to vote</td><td>{{election/repVote}}</td></tr>
+                <tr><td>Rep. to nominate</td><td>{{election/repNominate}}</td></tr>
+                <tr><td>Current phase</td><td>{{election/phase}}</td></tr>
+                <tr><td>Nomination date</td><td>{{utcTimestamp election/dateNomination}} <span class="relativetime" title="{{utcTimestamp election/dateNomination}}"></span></td></tr>
+                <tr><td>Primary date</td><td>{{utcTimestamp election/datePrimary}} <span class="relativetime" title="{{utcTimestamp election/datePrimary}}"></span></td></tr>
+                <tr><td>Election date</td><td>{{utcTimestamp election/dateElection}} <span class="relativetime" title="{{utcTimestamp election/dateElection}}"></span></td></tr>
+                <tr><td>End date</td><td>{{utcTimestamp election/dateEnded}} <span class="relativetime" title="{{utcTimestamp election/dateEnded}}"></span></td></tr>
+                <tr><td>Opavote URL</td><td>{{{url election/opavoteUrl election/opavoteUrl}}}</td></tr>
+                <tr><td>Voter stats</td><td>{{election/statVoters}}</td></tr>
+                <tr><td>Candidates</td><td>
+                    <ul class="list">
+                        {{#each election/arrNominees}}
+                        <li class="item"><a href="{{this.permalink}}">{{this.userName}}</a>; <a href="{{this.nominationLink}}">nomination</a>; score {{this.userScore}}; {{this.userYears}}</li>
+                        {{/each}}
+                    </ul>
+                </td></tr>
+                <tr><td>Winners</td><td>
+                    <ul class="list">
+                        {{#each election/arrWinners}}
+                        <li class="item"><a href="{{this.permalink}}">{{this.userName}}</a></li>
+                        {{/each}}
+                    </ul>
+                </td></tr>
+                <tr><td>Badges</td><td>
+                    <ul class="list">
+                        {{#each election/electionBadges}}
+                        <li class="item"><a href="{{siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}} [{{this.badge_id}}]</a></li>
+                        {{/each}}
+                    </ul>
+                </td></tr>
+            </table>
+        </aside>
+    </section>
 
-    <h2>Room Activity</h2>
-    {{#with botconfig}}
-    <table>
-        <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} <span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
-        <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} <span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td></tr>
-        <tr><td>lastMessageContent</td><td>{{lastMessageContent}}</td></tr>
-        <tr><td>activityCount</td><td>{{activityCount}}</td></tr>
-        <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>
-        <tr><td>longIdleDuration</td><td>{{longIdleDuration}} hours</td></tr>
-        <tr><td>roomReachedMinimumActivityCount</td><td>{{{boolean roomReachedMinimumActivityCount}}}</td></tr>
-        <tr><td>roomBecameIdleAWhileAgo</td><td>{{{boolean roomBecameIdleAWhileAgo}}}</td></tr>
-        <tr><td>roomBecameIdleHoursAgo</td><td>{{{boolean roomBecameIdleHoursAgo}}}</td></tr>
-        <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}</td></tr>
-        <tr><td>lastMessageIsPostedByBot</td><td>{{{boolean lastMessageIsPostedByBot}}}</td></tr>
-    </table>
-    {{/with}}
-</div>
+    <section>
+        <aside>
+            <h2>Bot Config</h2>
+            {{#with botconfig}}
+            <table>
+                <tr><td>isMuted</td><td>{{{boolean isMuted}}}</td></tr>
+                <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
+                <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
+                <tr><td>duplicateResponseText</td><td>{{duplicateResponseText}}</td></tr>
+                <tr><td>maxMessageLength</td><td>{{maxMessageLength}}</td></tr>
+                <tr><td>maxMessageParts</td><td>{{maxMessageParts}}</td></tr>
+                <tr><td>funMode</td><td>{{{boolean funMode}}}</td></tr>
+                <tr><td>debug</td><td>{{{boolean debug}}}</td></tr>
+                <tr><td>verbose</td><td>{{{boolean verbose}}}</td></tr>
+                {{#with flags}}
+                <tr><td>flags.saidElectionEndingSoon</td><td>{{{boolean saidElectionEndingSoon}}}</td></tr>
+                <tr><td>flags.announcedWinners</td><td>{{{boolean announcedWinners}}}</td></tr>
+                {{/with}}
+            </table>
+            {{/with}}
+        </aside>
+        
+        <aside>
+            <h2>Room Activity</h2>
+            {{#with botconfig}}
+            <table>
+                <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} <span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
+                <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} <span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td></tr>
+                <tr><td>lastMessageContent</td><td>{{lastMessageContent}}</td></tr>
+                <tr><td>activityCount</td><td>{{activityCount}}</td></tr>
+                <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>
+                <tr><td>longIdleDuration</td><td>{{longIdleDuration}} hours</td></tr>
+                <tr><td>roomReachedMinimumActivityCount</td><td>{{{boolean roomReachedMinimumActivityCount}}}</td></tr>
+                <tr><td>roomBecameIdleAWhileAgo</td><td>{{{boolean roomBecameIdleAWhileAgo}}}</td></tr>
+                <tr><td>roomBecameIdleHoursAgo</td><td>{{{boolean roomBecameIdleHoursAgo}}}</td></tr>
+                <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}</td></tr>
+                <tr><td>lastMessageIsPostedByBot</td><td>{{{boolean lastMessageIsPostedByBot}}}</td></tr>
+            </table>
+            {{/with}}
+        </aside>
+    </section>
+
+</main>
 
 {{/with}}
