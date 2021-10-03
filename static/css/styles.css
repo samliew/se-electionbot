@@ -109,12 +109,12 @@ form button {
     flex-wrap: wrap;
     align-items: start;
 }
-.dashboard > div {
+.dashboard > * {
     flex: 1 1 calc(50% - 40px);
     max-width: 620px;
     margin-right: 40px;
 }
-.dashboard > div:last-child {
+.dashboard > *:last-child {
     margin-right: 0;
 }
 .result {
