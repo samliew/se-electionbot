@@ -62,7 +62,9 @@ export default class Election {
     constructor(electionUrl, electionNum = null) {
 
         // electionUrl at minimum, needs to end with /election/ before we can scrape it
-        if (!this.validElectionUrl(electionUrl)) electionUrl = `https://${electionUrl.split('/')[2]}/election/`;
+        if (!this.validElectionUrl(electionUrl)) {
+            electionUrl = `https://${electionUrl.split('/')[2]}/election/`;
+        }
 
         this.electionUrl = electionUrl;
 
@@ -336,16 +338,20 @@ export default class Election {
      */
     async scrapeElection(config, retry = false) {
 
-        // Validate electionUrl, since without it we cannot continue
-        if (!this.validElectionUrl(this.electionUrl)) {
-            console.error("Invalid electionUrl format.");
+        try {
+            const electionPageUrl = `${this.electionUrl}?tab=nomination`;
+            const pageHtml = await fetchUrl(config, electionPageUrl);
 
-            // No election number specific and page is NOT an election, try to see if there's an upcoming election
-            if (!this.electionNum && !retry) {
+            // Parse election page
+            const $ = cheerio.load(/** @type {string} */(pageHtml));
 
-                // Fetch and parse election index page
-                const pageHtml = await fetchUrl(config, this.electionUrl);
-                const $ = cheerio.load(/** @type {string}  */(pageHtml));
+            const content = $("#content");
+            const pageTitle = $('#content h1').first().text().trim();
+
+            // No election number specified and page is NOT an active election,
+            //   try to detect an upcoming election on election index page
+            // Does not work on non-English sites!
+            if (!this.electionNum && !retry && pageTitle.includes("Community Moderator Elections")) {
 
                 // Set next election number and url
                 this.electionNum = $('a[href^="/election/"]').length + 1;
@@ -356,23 +362,15 @@ export default class Election {
                 // Try again with updated election number
                 return await this.scrapeElection(config, true);
             }
+            // Only retry once
+            else if (retry) {
+                console.error("Invalid site or election page.");
+                throw new Error("Invalid site or election page.");
+            }
 
-            return;
-        }
-
-        try {
             // Save prev values so we can compare changes after
             this._prevObj = JSON.parse(JSON.stringify(this));
             this._prevObj._prevObj = null;
-
-            const electionPageUrl = `${this.electionUrl}?tab=nomination`;
-
-            const pageHtml = await fetchUrl(config, electionPageUrl);
-
-            // Parse election page
-            const $ = cheerio.load(/** @type {string} */(pageHtml));
-
-            const content = $("#content");
 
             const metaElems = content.find(".flex--item.mt4 .d-flex.gs4 .flex--item:nth-child(2)");
             const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
@@ -397,7 +395,7 @@ export default class Election {
             this.siteName = $('meta[property="og:site_name"]').attr('content')?.replace('Stack Exchange', '').trim();
             this.isStackOverflow = this.siteHostname === 'stackoverflow.com';
             this.siteUrl = 'https://' + this.siteHostname;
-            this.title = $('#content h1').first().text().trim();
+            this.title = pageTitle;
             this.dateNomination = nominationDate;
             this.datePrimary = primaryDate;
             this.dateElection = startDate;
