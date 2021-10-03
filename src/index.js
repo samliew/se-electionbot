@@ -82,6 +82,7 @@ import {
 
     // Other app constants
     const ignoredEventTypes = [
+        ChatEventType.USER_MENTIONED,
         ChatEventType.MESSAGE_EDITED,
         ChatEventType.USER_JOINED,
         ChatEventType.USER_LEFT,
@@ -325,18 +326,34 @@ import {
 
             const isPrivileged = user.isModerator || ((AccessLevel.privileged) & access);
 
-            // If message is too short or long, ignore (most likely FP, except if an admin sent the message)
+            // If message is too short or long, ignore (most likely FP, except if privileged user sent the message)
             const { length } = content;
-            if ((length < 4 || length > 69) && !isPrivileged) {
+            if ((length <= 3 || length >= 70) && !isPrivileged) {
                 console.log(`EVENT - Ignoring due to message length ${content.length}: ${content}`);
                 return;
             }
+            
+            // Not a new message event, do nothing (should not trigger,
+            //   since we are now ignoring all event types except MESSAGE_POSTED)
+            if (eventType !== ChatEventType.MESSAGE_POSTED) return;
 
             // Log all un-ignored events
             console.log('EVENT -', JSON.stringify({ content, msg, user }));
+            
+            /* 
+             * As multiple events are emitted when user is mentioned or message is replied-to,
+             * we now only listen to the NEW_MESSAGE event and figure out whether bot is being mentioned using this method.
+             * Potentially do not need "targetUserId === me.id" as that is only used by the USER_MENTIONED (8) or message reply (18) event.
+             * Test is done against "originalMessage", since "content" holds the normalised version for keyword/guard matching
+             */
+            const botMentioned = /^\s*@ElectionBot /i.test(originalMessage) || targetUserId === me.id;
 
-            // Mentioned bot (8), by an admin or diamond moderator (no throttle applied)
-            if (eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id) {
+            
+            /* 
+             * Privileged command guards -
+             * Bot mentioned, by an admin or diamond moderator (no throttle to be applied)
+             */
+            if (isPrivileged && botMentioned) {
                 let responseText = "";
 
                 const commander = new CommandManager(user);
@@ -445,7 +462,7 @@ import {
                     greet: ["welcome"],
                 });
 
-                // TODO: Do not show dev-only commands to mods, split to separate dev menu?
+                
                 const outputs = [
                     ["commands", /commands|usage/],
                     ["alive", /alive|awake|ping/, scriptHostname, config],
@@ -496,7 +513,7 @@ import {
                 }
             }
 
-
+            
             /* TODO:
              *   When message queue is implemented, this will need to go as well.
              *   In it's place to avoid bot abuse, we can implement auto user mutes/ignores
@@ -507,18 +524,236 @@ import {
                 console.log('THROTTLE - too close to previous message, or is muted');
                 return;
             }
+            
+            
+            /* 
+             *  Non-privileged response guards
+             */
 
+            /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string) => string][]} */
+            const rules = [
+                [isAskedForCurrentPositions, sayNumberOfPositions]
+            ];
 
-            // Mentioned bot (8)
-            if (config.throttleSecs <= 10 && eventType === ChatEventType.USER_MENTIONED && targetUserId === me.id) {
+            const matched = rules.find(([expr]) => expr(content));
+
+            /** @type {string | null} */
+            let responseText = null;
+
+            // TODO: this is the next step in refactoring the main module
+            // the rest of the if...else...elseif are to be switched to reducer
+            // we also need to unify the parameters passed to each builder so as
+            // we can simply hook new builders up with little to no effort
+            if (matched) {
+                const [matcher, builder] = matched;
+                if (config.debug) console.log(`matched msg: ${matcher.name}`);
+                responseText = builder(config, election, content);
+            }
+
+            // Moderation badges
+            if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
+                responseText = sayBadgesByType(electionBadges, "moderation", election.isStackOverflow);
+            }
+
+            // Participation badges
+            else if (['what', 'participation', 'badges'].every(x => content.includes(x))) {
+                responseText = sayBadgesByType(electionBadges, "participation", election.isStackOverflow);
+            }
+
+            // Editing badges
+            else if (['what', 'editing', 'badges'].every(x => content.includes(x))) {
+                responseText = sayBadgesByType(electionBadges, "editing", election.isStackOverflow);
+            }
+
+            // SO required badges
+            else if (['what', 'required', 'badges'].every(x => content.includes(x))) {
+                responseText = sayRequiredBadges(election, electionBadges, election.isStackOverflow);
+            }
+
+            // What are the benefits of mods
+            // Why should I be a moderator
+            else if (isAskedAboutModsOrModPowers(content)) {
+                responseText = sayWhatModsDo(election);
+            }
+
+            // Calculate own candidate score
+            else if (isAskedForOwnScore(content) || isAskedForOtherScore(content)) {
+
+                // TODO: use config object pattern instead, 6 parameters is way too much
+                const calcCandidateScore = makeCandidateScoreCalc(config,
+                    election.siteHostname, config.chatDomain, election.apiSlug,
+                    getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
+                );
+
+                responseText = await calcCandidateScore(election, user, { userId, content }, election.isStackOverflow);
+
+                // TODO: msg.id is not guaranteed to be defined
+                await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
+
+                return; // stop here since we are using a different default response method
+            }
+
+            // How is candidate score calculated
+            else if (isAskedForScoreFormula(content)) {
+                responseText = sayCandidateScoreFormula(electionBadges);
+            }
+
+            // Who has the highest candidate score
+            else if (isAskedForScoreLeaderboard(content)) {
+                responseText = sayCandidateScoreLeaderboard(election.apiSlug);
+            }
+
+            // Current candidates
+            else if (isAskedForCurrentNominees(content)) {
+                if (election.phase === null) {
+                    responseText = sayNotStartedYet(election);
+                }
+                else if (election.numNominees > 0) {
+                    // Don't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
+                    responseText = `Currently there ${election.numNominees === 1 ? 'is' : 'are'} [${election.numNominees} candidate${pluralize(election.numNominees)}](${election.electionUrl}): ` +
+                        election.arrNominees.map(v => v.userName).join(', ');
+                }
+                else {
+                    responseText = `No users have nominated themselves yet. Why not be the first?`;
+                }
+            }
+
+            // Election stats - How many voted/participants/participated
+            else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
+                responseText = election.phase == 'ended' ? (election.statVoters || null) : `We won't know until the election ends. Come back ${linkToRelativeTimestamp(election.dateEnded)}.`;
+            }
+
+            // How to choose/pick/decide/determine who to vote for
+            else if ((content.startsWith('how') && ['choose', 'pick', 'decide', 'determine'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
+                if (election.phase == null) responseText = sayNotStartedYet(election);
+                else responseText = sayInformedDecision();
+            }
+
+            // Who is the best mod
+            else if (['who', 'which'].some(x => content.startsWith(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
+                const currModNames = currentSiteMods.map(({ display_name }) => display_name);
+
+                if (user.isModerator && currModNames.includes(user.name)) {
+                    responseText = `${user.name} is the best mod!!!`;
+                }
+                else {
+                    const pool = currModNames.map(name => `${getRandomSecret()} ${name} is the best mod!`);
+                    responseText = new RandomArray(...pool).getRandom();
+                }
+            }
+
+            // Current mods
+            else if (isAskedForCurrentMods(content)) {
+                // Should we do this, or just link to the site's mod page since it's more useful than just usernames?
+                responseText = sayCurrentMods(election, currentSiteMods, entities.decode);
+            }
+
+            // How to nominate self/others
+            // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
+            else if (isAskedForNominatingInfo(content)) {
+                const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x));
+                responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
+            }
+
+            // Why was the nomination removed
+            else if (isAskedWhyNominationRemoved(content)) {
+                responseText = sayWhyNominationRemoved();
+            }
+
+            // Are moderators paid
+            else if (isAskedIfModsArePaid(content)) {
+                responseText = sayAreModsPaid(election);
+            }
+
+            // Status of the election
+            else if (content.includes('election') && ['status', 'progress'].some(x => content.includes(x))) {
+
+                if (election.phase === null) {
+                    responseText = sayNotStartedYet(election);
+                }
+                else if (election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
+                    responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}.`;
+
+                    if (election.opavoteUrl) {
+                        responseText += ` You can [view the results online via OpaVote](${election.opavoteUrl}).`;
+                    }
+                }
+                else if (election.phase === 'ended') {
+                    responseText = sayElectionIsOver(election);
+                }
+                else if (election.phase === 'cancelled') {
+                    responseText = election.statVoters || null;
+                }
+                else if (election.phase === 'election') {
+                    responseText = `The [election](${election.electionUrl}?tab=election) is in the final voting phase. `;
+                    responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
+                }
+                // Nomination or primary phase
+                else {
+                    responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.numNominees} candidates.`;
+
+                    if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${linkToRelativeTimestamp(election.dateElection)} to vote in the final election voting phase.`;
+                }
+            }
+
+            // Next phase/ When is the election starting
+            else if (content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
+                responseText = sayNextPhase(election);
+            }
+
+            // When is the election ending
+            else if (['when'].some(x => content.startsWith(x)) && (content.includes('election end') || content.includes('does it end') || content.includes('is it ending'))) {
+
+                if (election.phase == 'ended') {
+                    responseText = sayElectionIsOver(election);
+                }
+                else {
+                    const relativetime = dateToRelativetime(election.dateEnded);
+                    responseText = `The election ends at ${linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
+                }
+            }
+
+            // What is an election
+            else if (content.length <= 56 && (/^(?:what|what's)(?: is)? (?:a|an|the) election/.test(content) || /^how do(?:es)? (a|an|the) election work/.test(content))) {
+                responseText = sayWhatIsAnElection(election);
+            }
+            // How to vote
+            else if (isAskedAboutVoting(content)) {
+                responseText = sayAboutVoting(election);
+            }
+            // Who are the winners
+            else if (isAskedForCurrentWinners(content)) {
+                responseText = sayCurrentWinners(election);
+            }
+            // Election schedule
+            else if (isAskedForElectionSchedule(content)) {
+                responseText = sayElectionSchedule(election);
+            }
+            // Can't we just edit the diamond in our username
+            else if (isAskedAboutUsernameDiamond(content)) {
+                responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
+            }
+            else if (isLovingTheBot(content)) {
+                responseText = getRandomGoodThanks();
+            }
+            else if (isHatingTheBot(content)) {
+                responseText = getRandomNegative();
+            }
+            // TODO: allow privileged use after the election
+            else if (isAskedForUserEligibility(content) && (AccessLevel.dev & access)) {
+                responseText = await sayUserEligibility(config, election, content);
+            }
+
+            
+            // Did not match any previous guards, and bot was mentioned
+            else if (botMentioned && config.throttleSecs <= 10) {
+                
                 /** @type {string | null} */
                 let responseText = null;
 
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
-
                     await sendMessage(config, room, responseText, null, false);
-
                     return; // stop here since we are using a different default response method
                 }
                 else if (isAskedWhoMadeMe(content)) {
@@ -569,12 +804,6 @@ import {
                         "You are welcome",
                     ).getRandom();
                 }
-                else if (isLovingTheBot(content)) {
-                    responseText = getRandomGoodThanks();
-                }
-                else if (isHatingTheBot(content)) {
-                    responseText = getRandomNegative();
-                }
                 else if (['help', 'command', 'info'].some(x => content.includes(x))) {
                     responseText = '\n' + [
                         'Examples of election FAQs I can help with:',
@@ -593,8 +822,15 @@ import {
                         'who are the current mods',
                     ].join('\n- ');
                 }
-                // Fun mode only for testing purposes
-                else if (config.funMode || /[\?\!]+$/.test(content)) {
+
+                if(responseText) {
+                    // TODO: msg.id might be undefined
+                    await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
+                    return; // stop here since we are using a different default response method
+                }
+                
+                // Bot was mentioned and did not match any previous guards - return a random response
+                if (config.funMode || /[\?\!]+$/.test(content)) {
 
                     // Random response
                     responseText = new RandomArray(
@@ -612,238 +848,14 @@ import {
                         `Time will tell. Sooner or later, time will tell...`,
                         `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
-
-                    await sendMessage(config, room, responseText, null, false);
-
-                    return; // stop here since we are using a different default response method
                 }
-
-                // TODO: msg.id might be undefined
-                await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
-            }
-
-
-            // Any new message that does not reply-to or mention any user (1)
-            else if (eventType === ChatEventType.MESSAGE_POSTED && !targetUserId) {
-
-                /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string) => string][]} */
-                const rules = [
-                    [isAskedForCurrentPositions, sayNumberOfPositions]
-                ];
-
-                const matched = rules.find(([expr]) => expr(content));
-
-                /** @type {string | null} */
-                let responseText = null;
-
-                // TODO: this is the next step in refactoring the main module
-                // the rest of the if...else...elseif are to be switched to reducer
-                // we also need to unify the parameters passed to each builder so as
-                // we can simply hook new builders up with little to no effort
-                if (matched) {
-                    const [matcher, builder] = matched;
-                    if (config.debug) console.log(`matched msg: ${matcher.name}`);
-                    responseText = builder(config, election, content);
-                }
-
-                // Moderation badges
-                if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
-                    responseText = sayBadgesByType(electionBadges, "moderation", election.isStackOverflow);
-                }
-
-                // Participation badges
-                else if (['what', 'participation', 'badges'].every(x => content.includes(x))) {
-                    responseText = sayBadgesByType(electionBadges, "participation", election.isStackOverflow);
-                }
-
-                // Editing badges
-                else if (['what', 'editing', 'badges'].every(x => content.includes(x))) {
-                    responseText = sayBadgesByType(electionBadges, "editing", election.isStackOverflow);
-                }
-
-                // SO required badges
-                else if (['what', 'required', 'badges'].every(x => content.includes(x))) {
-                    responseText = sayRequiredBadges(election, electionBadges, election.isStackOverflow);
-                }
-
-                // What are the benefits of mods
-                // Why should I be a moderator
-                else if (isAskedAboutModsOrModPowers(content)) {
-                    responseText = sayWhatModsDo(election);
-                }
-
-                // Calculate own candidate score
-                else if (isAskedForOwnScore(content) || isAskedForOtherScore(content)) {
-
-                    // TODO: use config object pattern instead, 6 parameters is way too much
-                    const calcCandidateScore = makeCandidateScoreCalc(config,
-                        election.siteHostname, config.chatDomain, election.apiSlug,
-                        getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
-                    );
-
-                    responseText = await calcCandidateScore(election, user, { userId, content }, election.isStackOverflow);
-
-                    // TODO: msg.id is not guaranteed to be defined
-                    await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
-
-                    return; // stop here since we are using a different default response method
-                }
-
-                // How is candidate score calculated
-                else if (isAskedForScoreFormula(content)) {
-                    responseText = sayCandidateScoreFormula(electionBadges);
-                }
-
-                // Who has the highest candidate score
-                else if (isAskedForScoreLeaderboard(content)) {
-                    responseText = sayCandidateScoreLeaderboard(election.apiSlug);
-                }
-
-                // Current candidates
-                else if (isAskedForCurrentNominees(content)) {
-                    if (election.phase === null) {
-                        responseText = sayNotStartedYet(election);
-                    }
-                    else if (election.numNominees > 0) {
-                        // Don't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
-                        responseText = `Currently there ${election.numNominees === 1 ? 'is' : 'are'} [${election.numNominees} candidate${pluralize(election.numNominees)}](${election.electionUrl}): ` +
-                            election.arrNominees.map(v => v.userName).join(', ');
-                    }
-                    else {
-                        responseText = `No users have nominated themselves yet. Why not be the first?`;
-                    }
-                }
-
-                // Election stats - How many voted/participants/participated
-                else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
-                    responseText = election.phase == 'ended' ? (election.statVoters || null) : `We won't know until the election ends. Come back ${linkToRelativeTimestamp(election.dateEnded)}.`;
-                }
-
-                // How to choose/pick/decide/determine who to vote for
-                else if ((content.startsWith('how') && ['choose', 'pick', 'decide', 'determine'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
-                    if (election.phase == null) responseText = sayNotStartedYet(election);
-                    else responseText = sayInformedDecision();
-                }
-
-                // Who is the best mod
-                else if (['who', 'which'].some(x => content.startsWith(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
-                    const currModNames = currentSiteMods.map(({ display_name }) => display_name);
-
-                    if (user.isModerator && currModNames.includes(user.name)) {
-                        responseText = `${user.name} is the best mod!!!`;
-                    }
-                    else {
-                        const pool = currModNames.map(name => `${getRandomSecret()} ${name} is the best mod!`);
-                        responseText = new RandomArray(...pool).getRandom();
-                    }
-                }
-
-                // Current mods
-                else if (isAskedForCurrentMods(content)) {
-                    // Should we do this, or just link to the site's mod page since it's more useful than just usernames?
-                    responseText = sayCurrentMods(election, currentSiteMods, entities.decode);
-                }
-
-                // How to nominate self/others
-                // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
-                else if (isAskedForNominatingInfo(content)) {
-                    const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x));
-                    responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
-                }
-
-                // Why was the nomination removed
-                else if (isAskedWhyNominationRemoved(content)) {
-                    responseText = sayWhyNominationRemoved();
-                }
-
-                // Are moderators paid
-                else if (isAskedIfModsArePaid(content)) {
-                    responseText = sayAreModsPaid(election);
-                }
-
-                // Status of the election
-                else if (content.includes('election') && ['status', 'progress'].some(x => content.includes(x))) {
-
-                    if (election.phase === null) {
-                        responseText = sayNotStartedYet(election);
-                    }
-                    else if (election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                        responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}.`;
-
-                        if (election.opavoteUrl) {
-                            responseText += ` You can [view the results online via OpaVote](${election.opavoteUrl}).`;
-                        }
-                    }
-                    else if (election.phase === 'ended') {
-                        responseText = sayElectionIsOver(election);
-                    }
-                    else if (election.phase === 'cancelled') {
-                        responseText = election.statVoters || null;
-                    }
-                    else if (election.phase === 'election') {
-                        responseText = `The [election](${election.electionUrl}?tab=election) is in the final voting phase. `;
-                        responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
-                    }
-                    // Nomination or primary phase
-                    else {
-                        responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.numNominees} candidates.`;
-
-                        if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${linkToRelativeTimestamp(election.dateElection)} to vote in the final election voting phase.`;
-                    }
-                }
-
-                // Next phase/ When is the election starting
-                else if (content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
-                    responseText = sayNextPhase(election);
-                }
-
-                // When is the election ending
-                else if (['when'].some(x => content.startsWith(x)) && (content.includes('election end') || content.includes('does it end') || content.includes('is it ending'))) {
-
-                    if (election.phase == 'ended') {
-                        responseText = sayElectionIsOver(election);
-                    }
-                    else {
-                        const relativetime = dateToRelativetime(election.dateEnded);
-                        responseText = `The election ends at ${linkToUtcTimestamp(election.dateEnded)} (${relativetime}).`;
-                    }
-                }
-
-                // What is an election
-                else if (content.length <= 56 && (/^(?:what|what's)(?: is)? (?:a|an|the) election/.test(content) || /^how do(?:es)? (a|an|the) election work/.test(content))) {
-                    responseText = sayWhatIsAnElection(election);
-                }
-                // How to vote
-                else if (isAskedAboutVoting(content)) {
-                    responseText = sayAboutVoting(election);
-                }
-                // Who are the winners
-                else if (isAskedForCurrentWinners(content)) {
-                    responseText = sayCurrentWinners(election);
-                }
-                // Election schedule
-                else if (isAskedForElectionSchedule(content)) {
-                    responseText = sayElectionSchedule(election);
-                }
-                // Can't we just edit the diamond in our username
-                else if (isAskedAboutUsernameDiamond(content)) {
-                    responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
-                }
-
-                else if (isLovingTheBot(content)) {
-                    responseText = getRandomGoodThanks();
-                }
-                else if (isHatingTheBot(content)) {
-                    responseText = getRandomNegative();
-                } // TODO: allow privileged use after the election
-                else if (isAskedForUserEligibility(content) && (AccessLevel.dev & access)) {
-                    responseText = await sayUserEligibility(config, election, content);
-                }
-
-
-                await sendMessage(config, room, responseText, null, false);
-            }
-        });
+            } // End bot mentioned
+            
+            
+            // Send the message
+            if(responseText) await sendMessage(config, room, responseText, null, false);
+            
+        }); // End new message event listener
 
 
         // Connect to the room, and listen for new events
