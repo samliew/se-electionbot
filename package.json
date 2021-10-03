@@ -1,7 +1,7 @@
 {
   "name": "se-electionbot",
-  "version": "0.1.0",
-  "description": "Stack Exchange Election Bot",
+  "version": "1.0.0",
+  "description": "ElectionBot - a chatbot that answers commonly-asked questions in chat rooms about elections for sites on the Stack Exchange network.",
   "main": "src/index.js",
   "scripts": {
     "postinstall": "patch-package",

@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/samliew/se-electionbot/actions/workflows/nodejs.yml/badge.svg)](https://github.com/samliew/se-electionbot/actions/workflows/nodejs.yml)
 
-ElectionBot is a chatbot to handle queries for commonly-asked questions in an election chat room for a site on the Stack Exchange network.
+ElectionBot is a chatbot that answers commonly-asked questions in chat rooms about elections for sites on the Stack Exchange network.
 
 The bot also sends a greeting with the election status after certain levels of room inactivity.
 

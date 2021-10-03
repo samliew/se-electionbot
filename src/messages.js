@@ -41,7 +41,7 @@ export const sayHI = (election) => {
     const phaseText = phaseMap[phase] || "";
     const helpCommand = `@ElectionBot help`;
 
-    return `${greeting}${phaseText} I can answer frequently-asked questions about elections (type *${helpCommand}* for more info).`;
+    return `${greeting}${phaseText} I can answer commonly-asked questions about elections (type *${helpCommand}* for more info).`;
 };
 
 /**
