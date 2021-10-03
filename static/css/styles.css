@@ -62,8 +62,12 @@ table, th, td {
 th, td {
     min-width: 140px;
 }
+th:last-child,
+td:last-child {
+    min-width: 300px;
+}
 pre {
-    max-width: calc(100vw - 250px);
+    max-width: 550px;
     margin: 0;
     overflow: auto;
     font-size: 0.8em;
@@ -98,6 +102,20 @@ form textarea {
 }
 form button {
     padding: 8px 20px;
+}
+.dashboard {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: start;
+}
+.dashboard > div {
+    flex: 1 1 calc(50% - 40px);
+    max-width: 620px;
+    margin-right: 40px;
+}
+.dashboard > div:last-child {
+    margin-right: 0;
 }
 .result {
     margin: 30px 0px;
