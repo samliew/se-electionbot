@@ -1,6 +1,7 @@
 import axios from "axios";
 import cheerio from 'cheerio';
 import { get } from 'https';
+import entities from 'html-entities';
 import Cache from "node-cache";
 import { URL } from "url";
 
@@ -37,8 +38,24 @@ let _apiBackoff = Date.now();
  */
 
 
+const htmlToChatMarkup = (content) => {
+    return content ? entities.decode(content
+        .replace(/<\/?b>/g, '**')
+        .replace(/<\/?i>/g, '*')
+        .replace(/<\/?strike>/g, '---')
+        .replace(/<a href="([^"]+)">([^<]+)<\/a>/g, `[$2]($1)`)
+        .replace(/(^\s+|\s+$)/g, '')
+        .replace(/<pre(?: class='full')?(.+)(?:\r|\n)+>/g, "    $1")
+        .replace(/<[^>]+>/g, "")
+    ) : "";
+};
+const htmlToPlainText = (content) => {
+    return content ? entities.decode(content.replace(/<[^>]+>/g, "")) : "";
+};
+
+
 /**
- * @summary fetches the endpoint
+ * @summary Sends a GET request. This wrapper handles Stack Exchange's API backoff
  * @param {import("./config").BotConfig} config
  * @param {string} url the url to fetch
  * @param {boolean} json whether to return the response as a json object
@@ -80,21 +97,21 @@ export const fetchUrl = async (config, url, json = false) => {
 /**
  * @summary fetches the chat room transcript and retrieve messages
  * @param {import("./config").BotConfig} config
- * @param {string} url
+ * @param {string} url url of chat transcript
  * @returns {Promise<any>}
  * [{
  *   username,
  *   chatUserId,
  *   message,
  *   messageMarkup,
- *   date
+ *   date,
+ *   messageId
  * }]
  *
  * INFO:
  * To get the rough datetime for a single message that doesn't have a timestamp,
  *   this function currently uses the UTC time of last message + 1 second.
- * If a more accurate solution is required, we'll need to take the amount of messages
- *   posted within known times and extrapolate an estimate.
+ * If a exact timestamps are required, use fetchLatestChatEvents
  */
 export const fetchChatTranscript = async (config, url) => {
 
@@ -115,13 +132,15 @@ export const fetchChatTranscript = async (config, url) => {
 
     $chat('#transcript .message').each(function (i, el) {
         const $this = $chat(el);
+        const messageId = +($this.children('a').attr('name') || 0);
         const userlink = $this.parent().siblings('.signature').find('a');
         const messageElem = $this.find('.content');
 
         if (!messageElem) return;
 
-        const messageText = messageElem.text().trim() || "";
-        const messageMarkup = messageElem.html()?.replace(/<\/?b>/g, '**').replace(/<\/?i>/g, '*').replace(/<a href="([^"]+)">([^<]+)<\/a>/g, `[$2]($1)`).replace(/(^\s+|\s+$)/g, '');
+        const messageText = messageElem.text()?.trim();
+        // Strip HTML from chat message
+        const messageMarkup = htmlToChatMarkup(messageElem.html()?.trim());
 
         const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [, null, null, null];
         const hour = h && apm ? (
@@ -139,15 +158,68 @@ export const fetchChatTranscript = async (config, url) => {
             chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
             message: messageText,
             messageMarkup: messageMarkup,
-            date: lastKnownDatetime
+            date: lastKnownDatetime,
+            messageId: messageId
         });
     }).get();
 
     if (config.verbose) {
-        console.log('Transcript Messages:', messages);
+        console.log('Transcript messages fetched:', messages);
     }
 
-    return messages || [];
+    return messages;
+};
+
+/**
+ * @summary fetches latest chat room messages via a more reliable method, but requires an fkey
+ * @param {import("./config").BotConfig} config
+ * @param {string} url url of chat transcript
+ * @param {number} msgCount limit number of results
+ * @param {string} fkey required fkey
+ * @returns {Promise<any>}
+ * [{
+ *   username,
+ *   chatUserId,
+ *   message,
+ *   messageMarkup,
+ *   date,
+  *  messageId
+ * }]
+ */
+export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) => {
+
+    // Validate chat url and extract vars
+    const [, chatDomain = "", chatRoomId = ""] = /^https:\/\/chat\.(stack(?:exchange|overflow)\.com)\/(?:rooms|transcript|chats)\/(\d+)/.exec(url) || [];
+
+    if (!chatDomain || !chatRoomId) return;
+
+    console.log('Fetching chat transcript:', url);
+
+    const response = await axios.post(`https://chat.${chatDomain}/chats/${chatRoomId}/events`, {
+        since: 0,
+        mode: "Messages",
+        msgCount: msgCount,
+        fkey: fkey,
+    });
+
+    const messages = [];
+
+    response.data.forEach(item => {
+        messages.push({
+            username: item.user_name,
+            chatUserId: item.user_id,
+            message: htmlToPlainText(item.content),
+            messageMarkup: htmlToChatMarkup(item.content),
+            date: item.time_stamp,
+            messageId: item.message_id
+        });
+    }).get();
+
+    if (config.verbose) {
+        console.log('Room events fetched:', messages);
+    }
+
+    return messages;
 };
 
 /**

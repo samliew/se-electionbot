@@ -67,6 +67,7 @@ describe('String-related utils', async function () {
             expect(chatMessages[0].chatUserId).to.equal(584192);
             expect(chatMessages[0].message).to.equal("how do I vote?");
             expect(chatMessages[0].date).to.equal(1553052480000);
+            expect(chatMessages[0].messageId).to.equal(45689273);
 
             expect(chatMessages[1].date).to.equal(1553052481000);
             expect(chatMessages[2].date).to.equal(1553052482000);
