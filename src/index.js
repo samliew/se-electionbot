@@ -493,6 +493,7 @@ import {
 
                 if (config.debug) {
                     console.log(`Response info -
+                response text: ${responseText}
                 response chars: ${responseText.length}
                 content: ${content}
                 original: ${originalMessage}
@@ -500,8 +501,6 @@ import {
                 last activity: ${config.lastActivityTime}
                 `);
                 }
-                
-                if (config.debug) console.log("privileged guards", responseText);
 
                 /* Note:
                  * Be careful if integrating this section with message queue,
@@ -509,7 +508,7 @@ import {
                  * We should also avoid long responses for normal users and continue to contain them within a single message,
                  *   so we could possibly leave this block as it is
                  */
-                if (responseText && responseText.length) {
+                if (responseText) {
                     await sendMultipartMessage(config, room, responseText, msg);
                     return; // no further action
                 }
@@ -549,8 +548,9 @@ import {
             if (matched) {
                 const [matcher, builder] = matched;
                 if (config.debug) console.log(`Matched response: ${matcher.name}`);
-                if (responseText) responseText = builder(config, election, content);
+                responseText = builder(config, election, content);
             }
+            
 
             // Moderation badges
             else if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
