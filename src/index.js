@@ -507,7 +507,7 @@ import {
                  * We should also avoid long responses for normal users and continue to contain them within a single message,
                  *   so we could possibly leave this block as it is
                  */
-                if (responseText) {
+                if (responseText && responseText.length) {
                     await sendMultipartMessage(config, room, responseText, msg);
                     return; // no further action
                 }
@@ -744,9 +744,11 @@ import {
                 responseText = await sayUserEligibility(config, election, content);
             }
 
+            // Log this point
+            if (config.debug) console.log("non-privileged guards", responseText);
             
             // Did not match any previous guards, and bot was mentioned
-            else if (botMentioned && config.throttleSecs <= 10) {
+            if (!responseText && botMentioned && config.throttleSecs <= 10) {
                 
                 /** @type {string | null} */
                 let responseText = null;
@@ -784,7 +786,7 @@ import {
                 }
                 else if (/^what are you\??$/.test(content)) {
                     responseText = new RandomArray(
-                        `Bot. James Bot.`,
+                        `I'm Bot. James Bot.`,
                         `I'm a robot. Beep boop.`,
                         `I'm a crystal ball; I already know the winners.`,
                         `I'm a teapot, short and stout. Here is my handle, here is my spout.`,
@@ -823,7 +825,9 @@ import {
                     ].join('\n- ');
                 }
 
-                if(responseText) {
+                if(responseText && responseText.length) {
+                    if (config.debug) console.log("bot mentioned", responseText);
+                    
                     // TODO: msg.id might be undefined
                     await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
                     return; // stop here since we are using a different default response method
@@ -848,6 +852,8 @@ import {
                         `Time will tell. Sooner or later, time will tell...`,
                         `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
+                    
+                    if (config.debug) console.log("funMode", responseText);
                 }
             } // End bot mentioned
             
