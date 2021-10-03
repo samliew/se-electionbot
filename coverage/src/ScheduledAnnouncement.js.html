@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/291</span>
+                <span class='fraction'>0/306</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/291</span>
+                <span class='fraction'>0/306</span>
             </div>
         
             
@@ -348,7 +348,37 @@
 <a name='L289'></a><a href='#L289'>289</a>
 <a name='L290'></a><a href='#L290'>290</a>
 <a name='L291'></a><a href='#L291'>291</a>
-<a name='L292'></a><a href='#L292'>292</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L292'></a><a href='#L292'>292</a>
+<a name='L293'></a><a href='#L293'>293</a>
+<a name='L294'></a><a href='#L294'>294</a>
+<a name='L295'></a><a href='#L295'>295</a>
+<a name='L296'></a><a href='#L296'>296</a>
+<a name='L297'></a><a href='#L297'>297</a>
+<a name='L298'></a><a href='#L298'>298</a>
+<a name='L299'></a><a href='#L299'>299</a>
+<a name='L300'></a><a href='#L300'>300</a>
+<a name='L301'></a><a href='#L301'>301</a>
+<a name='L302'></a><a href='#L302'>302</a>
+<a name='L303'></a><a href='#L303'>303</a>
+<a name='L304'></a><a href='#L304'>304</a>
+<a name='L305'></a><a href='#L305'>305</a>
+<a name='L306'></a><a href='#L306'>306</a>
+<a name='L307'></a><a href='#L307'>307</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -727,9 +757,9 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        const nominationTab = `${electionUrl}?tab=nomination`;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        newNominees.forEach(async ({ permalink, userName }, i) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        newNominees.forEach(async ({ nominationLink, userName }, i) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >            await sendMessage(config, _room, `**We have a new ${makeURL("nomination", nominationTab)</span>
-<span class="cstat-no" title="statement not covered" >                }!** Please welcome our latest candidate ${makeURL(userName, permalink)</span>
+<span class="cstat-no" title="statement not covered" >                }!** Please welcome our latest candidate ${makeURL(userName, nominationLink)</span>
 <span class="cstat-no" title="statement not covered" >                }!`);</span>
 <span class="cstat-no" title="statement not covered" >            console.log(`NOMINATION`, newNominees[i]);</span>
 <span class="cstat-no" title="statement not covered" >        });</span>
@@ -744,33 +774,48 @@
 <span class="cstat-no" title="statement not covered" >    async announceWinners(room, election) {</span>
 <span class="cstat-no" title="statement not covered" >        const { config } = this;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        //exit early if no election</span>
+<span class="cstat-no" title="statement not covered" >        // No election</span>
 <span class="cstat-no" title="statement not covered" >        if (!election) return false;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        const { arrWinners, phase, resultsUrl, siteUrl } = election;</span>
+<span class="cstat-no" title="statement not covered" >        const { arrWinners, phase, opavoteUrl, siteUrl } = election;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        const { length } = arrWinners;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        if (config.debug) console.log('announceWinners() called: ', arrWinners);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        // Needs to have ended and have winners</span>
-<span class="cstat-no" title="statement not covered" >        if (phase != 'ended' || length === 0) return false;</span>
+<span class="cstat-no" title="statement not covered" >        if (phase != 'ended' || length === 0) {</span>
+<span class="cstat-no" title="statement not covered" >            console.log("announceWinners - called but no winners to announce?", election);</span>
+<span class="cstat-no" title="statement not covered" >            return false;</span>
+<span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        // There are winners, stop and reset everything</span>
 <span class="cstat-no" title="statement not covered" >        this.stopAll();</span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        this.rescraper.stop();</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        config.flags.saidElectionEndingSoon = true;</span>
+<span class="cstat-no" title="statement not covered" >        config.flags.announcedWinners = true;</span>
+<span class="cstat-no" title="statement not covered" >        config.scrapeIntervalMins = 10;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        // Winners have been already announced</span>
+<span class="cstat-no" title="statement not covered" >        if (config.flags.announcedWinners) {</span>
+<span class="cstat-no" title="statement not covered" >            console.log("announceWinners - Winners have already been announced");</span>
+<span class="cstat-no" title="statement not covered" >            return false;</span>
+<span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        const winnerList = arrWinners.map(({ userName, userId }) =&gt; makeURL(userName, `${siteUrl}/users/${userId}`));</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        // Build the message</span>
 <span class="cstat-no" title="statement not covered" >        let msg = `**Congratulations to the winner${pluralize(length)}** ${winnerList.join(', ')}!`;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        if (resultsUrl) {</span>
-<span class="cstat-no" title="statement not covered" >            msg += ` You can ${makeURL("view the results online via OpaVote", resultsUrl)}.`;</span>
+<span class="cstat-no" title="statement not covered" >        if (opavoteUrl) {</span>
+<span class="cstat-no" title="statement not covered" >            msg += ` You can ${makeURL("view the results online via OpaVote", opavoteUrl)}.`;</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        // Announce</span>
 <span class="cstat-no" title="statement not covered" >        await room.sendMessage(msg);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        console.log("announceWinners - announced winners");</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        return true;</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
@@ -937,7 +982,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Fri Sep 24 2021 10:47:39 GMT+0800 (Australian Western Standard Time)
+                at Sun Oct 03 2021 22:33:47 GMT+0800 (Australian Western Standard Time)
             </div>
         </div>
         <script src="../prettify.js"></script>

@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/111</span>
+                <span class='fraction'>0/116</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/111</span>
+                <span class='fraction'>0/116</span>
             </div>
         
             
@@ -167,7 +167,17 @@
 <a name='L108'></a><a href='#L108'>108</a>
 <a name='L109'></a><a href='#L109'>109</a>
 <a name='L110'></a><a href='#L110'>110</a>
-<a name='L111'></a><a href='#L111'>111</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -321,11 +331,12 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >/**</span>
 <span class="cstat-no" title="statement not covered" > * @summary changes internal bot clock to a given day</span>
+<span class="cstat-no" title="statement not covered" > * @param {BotConfig} config bot config</span>
 <span class="cstat-no" title="statement not covered" > * @param {Election} election current election instance</span>
 <span class="cstat-no" title="statement not covered" > * @param {string} content incoming message content</span>
 <span class="cstat-no" title="statement not covered" > * @returns {string}</span>
 <span class="cstat-no" title="statement not covered" > */</span>
-<span class="cstat-no" title="statement not covered" >export const timetravelCommand = (election, content) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >export const timetravelCommand = (config, election, content) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    if (!today &amp;&amp; (!yyyy || !MM || !dd)) return "Sorry, Doc! Invalid coordinates";</span>
@@ -335,6 +346,9 @@
 <span class="cstat-no" title="statement not covered" >    const phase = Election.getPhase(election, destination);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    election.phase = phase;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    config.flags.announcedWinners = false;</span>
+<span class="cstat-no" title="statement not covered" >    config.flags.saidElectionEndingSoon = false;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    const intl = new Intl.DateTimeFormat("en-US", {</span>
 <span class="cstat-no" title="statement not covered" >        year: "numeric",</span>
@@ -376,17 +390,18 @@
 <span class="cstat-no" title="statement not covered" >/**</span>
 <span class="cstat-no" title="statement not covered" > * @summary pings the bot for uptime</span>
 <span class="cstat-no" title="statement not covered" > * @param {string} host bot host name</span>
-<span class="cstat-no" title="statement not covered" > * @param {Date} start election start date</span>
 <span class="cstat-no" title="statement not covered" > * @param {BotConfig} config bot config</span>
 <span class="cstat-no" title="statement not covered" > * @returns {string}</span>
 <span class="cstat-no" title="statement not covered" > */</span>
-<span class="cstat-no" title="statement not covered" >export const isAliveCommand = (host, start, config) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >export const isAliveCommand = (host, config) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    const { debug, scriptInitDate } = config;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    const hosted = `I'm alive on ${host || "planet Earth"}`;</span>
-<span class="cstat-no" title="statement not covered" >    const started = `started on ${dateToUtcTimestamp(start)}`;</span>
-<span class="cstat-no" title="statement not covered" >    const uptime = `uptime of ${Math.floor((Date.now() - start.getTime()) / 1e3)} seconds`;</span>
+<span class="cstat-no" title="statement not covered" >    const started = `started on ${dateToUtcTimestamp(scriptInitDate)}`;</span>
+<span class="cstat-no" title="statement not covered" >    const uptime = `uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1e3)} seconds`;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    return `${hosted}, ${started} with an ${uptime}.${config.debug ? ' I am in debug mode.' : ''}`;</span>
+<span class="cstat-no" title="statement not covered" >    return `${hosted}, ${started} with an ${uptime}.${debug ? ' I am in debug mode.' : ''}`;</span>
 <span class="cstat-no" title="statement not covered" >};</span></pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -394,7 +409,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Fri Sep 24 2021 10:47:39 GMT+0800 (Australian Western Standard Time)
+                at Sun Oct 03 2021 22:33:47 GMT+0800 (Australian Western Standard Time)
             </div>
         </div>
         <script src="../../prettify.js"></script>

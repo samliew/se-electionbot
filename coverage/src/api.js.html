@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">52.96% </span>
+                <span class="strong">52.15% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>125/236</span>
+                <span class='fraction'>121/232</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">52.96% </span>
+                <span class="strong">52.15% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>125/236</span>
+                <span class='fraction'>121/232</span>
             </div>
         
             
@@ -288,11 +288,8 @@
 <a name='L229'></a><a href='#L229'>229</a>
 <a name='L230'></a><a href='#L230'>230</a>
 <a name='L231'></a><a href='#L231'>231</a>
-<a name='L232'></a><a href='#L232'>232</a>
-<a name='L233'></a><a href='#L233'>233</a>
-<a name='L234'></a><a href='#L234'>234</a>
-<a name='L235'></a><a href='#L235'>235</a>
-<a name='L236'></a><a href='#L236'>236</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L232'></a><a href='#L232'>232</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -431,11 +428,6 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -536,7 +528,8 @@
 export let allNetworkSites = [];
 &nbsp;
 /**
- * @typedef {import("./utils.js").BadgeItem} BadgeItem
+ * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
+ * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
  * @typedef {import("./config.js").BotConfig} BotConfig
  */
 &nbsp;
@@ -558,7 +551,7 @@ export const getStackApiKey = (keyPool) =&gt; {
  * @param {string} site election site slug
  * @param {string} key api key
  * @param {number} [page] API response page
- * @returns {Promise&lt;BadgeItem[]&gt;}
+ * @returns {Promise&lt;Badge[]&gt;}
  */
 export const getAllNamedBadges = <span class="fstat-no" title="function not covered" >async (config, site, key, page = 1) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    // https://api.stackexchange.com/2.3/badges/name?pagesize=100&amp;order=desc&amp;sort=rank&amp;site=academia</span>
@@ -572,7 +565,7 @@ export const getAllNamedBadges = <span class="fstat-no" title="function not cove
 <span class="cstat-no" title="statement not covered" >        key</span>
 <span class="cstat-no" title="statement not covered" >    }).toString();</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const { items = [], has_more } = /**@type {{ items: BadgeItem[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};</span>
+<span class="cstat-no" title="statement not covered" >    const { items = [], has_more } = /**@type {{ items: Badge[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    if (has_more) {</span>
 <span class="cstat-no" title="statement not covered" >        const otherItems = await getAllNamedBadges(config, site, key, page + 1);</span>
@@ -591,7 +584,7 @@ export const getAllNamedBadges = <span class="fstat-no" title="function not cove
  * @param {string} site election site slug
  * @param {string} key api key
  * @param {number} [page] API response page
- * @returns {Promise&lt;BadgeItem[]&gt;}
+ * @returns {Promise&lt;Badge[]&gt;}
  */
 export const getBadges = <span class="fstat-no" title="function not covered" >async (config, userId, site, key, page = 1) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -605,7 +598,7 @@ export const getBadges = <span class="fstat-no" title="function not covered" >as
 <span class="cstat-no" title="statement not covered" >        key</span>
 <span class="cstat-no" title="statement not covered" >    }).toString();</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const { items = [], has_more } = /**@type {{ items: BadgeItem[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};</span>
+<span class="cstat-no" title="statement not covered" >    const { items = [], has_more } = /**@type {{ items: Badge[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    if (has_more) {</span>
 <span class="cstat-no" title="statement not covered" >        const otherItems = await getBadges(config, userId, site, key, page + 1);</span>
@@ -658,17 +651,12 @@ export const getModerators = <span class="fstat-no" title="function not covered"
 };
 &nbsp;
 /**
- * @typedef {{
- *  user_id: number,
- *  display_name: string
- * }} UserInfo
- *
  * @summary gets the user info from the API
  * @param {BotConfig} config
  * @param {number} userId userId to request info for
  * @param {string} site election site slug
  * @param {string} key api key
- * @returns {Promise&lt;UserInfo|null&gt;}
+ * @returns {Promise&lt;User|null&gt;}
  */
 export const getUserInfo = <span class="fstat-no" title="function not covered" >async (config, userId, site, key) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -679,7 +667,7 @@ export const getUserInfo = <span class="fstat-no" title="function not covered" >
 <span class="cstat-no" title="statement not covered" >        key</span>
 <span class="cstat-no" title="statement not covered" >    }).toString();</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const { items = [] } = /** @type {{ items: UserInfo[] }} */(await fetchUrl(config, userURL.toString(), true)) || {};</span>
+<span class="cstat-no" title="statement not covered" >    const { items = [] } = /** @type {{ items: User[] }} */(await fetchUrl(config, userURL.toString(), true)) || {};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    const [userInfo] = items;</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -769,7 +757,7 @@ export const getAllMainNetworkSites = <span class="fstat-no" title="function not
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Fri Sep 24 2021 10:47:39 GMT+0800 (Australian Western Standard Time)
+                at Sun Oct 03 2021 22:33:47 GMT+0800 (Australian Western Standard Time)
             </div>
         </div>
         <script src="../prettify.js"></script>

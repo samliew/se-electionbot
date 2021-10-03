@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">68.75% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>33/48</span>
+                <span class='fraction'>38/57</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">37.5% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/8</span>
+                <span class='fraction'>3/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">68.75% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>33/48</span>
+                <span class='fraction'>38/57</span>
             </div>
         
             
@@ -104,7 +104,19 @@
 <a name='L45'></a><a href='#L45'>45</a>
 <a name='L46'></a><a href='#L46'>46</a>
 <a name='L47'></a><a href='#L47'>47</a>
-<a name='L48'></a><a href='#L48'>48</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -149,11 +161,20 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">export class RandomArray extends Array {
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * @template {unknown} T
+ */
+export class RandomArray extends Array {
     /**
-     * @param {...any} init
+     * @param {...T} init
      */
     constructor(...init) {
         super(...init);
@@ -161,7 +182,7 @@
 &nbsp;
     /**
      * @summary gets a random element
-     * @returns {any}
+     * @returns {T}
      */
     getRandom() {
         const rnd = Math.floor(Math.random() * this.length);
@@ -170,7 +191,7 @@
 &nbsp;
     /**
      * @summary sorts in random order
-     * @returns {RandomArray}
+     * @returns {RandomArray&lt;T&gt;}
      */
 <span class="fstat-no" title="function not covered" >    sortByRandom() {</span>
 <span class="cstat-no" title="statement not covered" >        // https://stackoverflow.com/a/46545530</span>
@@ -184,7 +205,13 @@
 &nbsp;
 export const getRandomModal = <span class="fstat-no" title="function not covered" >() =&gt; new RandomArray(`want to`, `have to`, `ought to`, `gotta`, `must`).getRandom();</span>
 export const getRandomPlop = <span class="fstat-no" title="function not covered" >() =&gt; new RandomArray(`I'm back.`, `*plop*`, `I am reborn`, `Hello world!`, `mic check`, `testing 1, 2, 3`).getRandom();</span>
-export const getRandomOops = () =&gt; new RandomArray(`very funny,`, `oops!`, `hmm...`, `hey,`, `sorry,`).getRandom() + ` `;
+export const getRandomOops = () =&gt; new RandomArray(`very funny,`, `oops!`, `hmm...`, `hey,`, `sorry,`).getRandom();
+export const getRandomSecret = <span class="fstat-no" title="function not covered" >() =&gt; new RandomArray(</span>
+<span class="cstat-no" title="statement not covered" >    `don't tell anyone I said this, but`,</span>
+<span class="cstat-no" title="statement not covered" >    `I'm not supposed to say this, but`,</span>
+<span class="cstat-no" title="statement not covered" >    `*shhh...*`,</span>
+<span class="cstat-no" title="statement not covered" >    `*whispers* I think...`,</span>
+).getRandom();
 export const getRandomGoodThanks = <span class="fstat-no" title="function not covered" >() =&gt; new RandomArray(</span>
 <span class="cstat-no" title="statement not covered" >    `I know, right?`,</span>
 <span class="cstat-no" title="statement not covered" >    `You're welcome.`,</span>
@@ -205,7 +232,7 @@ export const getRandomNegative = <span class="fstat-no" title="function not cove
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Fri Sep 24 2021 10:47:39 GMT+0800 (Australian Western Standard Time)
+                at Sun Oct 03 2021 22:33:47 GMT+0800 (Australian Western Standard Time)
             </div>
         </div>
         <script src="../prettify.js"></script>

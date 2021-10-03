@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">92.77% </span>
+                <span class="strong">93.43% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>167/180</span>
+                <span class='fraction'>185/198</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.44% </span>
+                <span class="strong">95% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>17/18</span>
+                <span class='fraction'>19/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">70% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>12/18</span>
+                <span class='fraction'>14/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">92.77% </span>
+                <span class="strong">93.43% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>167/180</span>
+                <span class='fraction'>185/198</span>
             </div>
         
             
@@ -236,7 +236,25 @@
 <a name='L177'></a><a href='#L177'>177</a>
 <a name='L178'></a><a href='#L178'>178</a>
 <a name='L179'></a><a href='#L179'>179</a>
-<a name='L180'></a><a href='#L180'>180</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a>
+<a name='L195'></a><a href='#L195'>195</a>
+<a name='L196'></a><a href='#L196'>196</a>
+<a name='L197'></a><a href='#L197'>197</a>
+<a name='L198'></a><a href='#L198'>198</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -307,6 +325,15 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -390,7 +417,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -415,6 +442,15 @@
 <span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * @summary checks if the message asked how or where to nominate
  * @param {string} text
@@ -485,7 +521,16 @@ export const isAskedForCurrentMods = <span class="fstat-no" title="function not 
  * @returns {boolean}
  */
 export const isAskedForCurrentWinners = <span class="fstat-no" title="function not covered" >(text) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    return /^who/.test(text) &amp;&amp; /winners|new mod|will win|future mod/.test(text);</span>
+<span class="cstat-no" title="statement not covered" >    return /^who/.test(text) &amp;&amp; /winners|new mod|will win|future mod/i.test(text);</span>
+};
+&nbsp;
+/**
+ * @summary checks if the message asked to tell how many positions are due
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedForCurrentPositions = (text) =&gt; {
+    return /^how many (?:positions|mod(?:erator)?s) (?:are|were|will be)(?: being)? elected/i.test(text);
 };
 &nbsp;
 /**
@@ -494,7 +539,7 @@ export const isAskedForCurrentWinners = <span class="fstat-no" title="function n
  * @returns {boolean}
  */
 export const isAskedForCurrentNominees = (text) =&gt; {
-    return /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/.test(text);
+    return /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/i.test(text);
 };
 &nbsp;
 /**
@@ -503,7 +548,7 @@ export const isAskedForCurrentNominees = (text) =&gt; {
  * @returns {boolean}
  */
 export const isAskedForElectionSchedule = (text) =&gt; {
-    return /(?:when|how) is the election(?: scheduled)?|election schedule/.test(text);
+    return /(?:when|how) is the election(?: scheduled)?|election schedule/i.test(text);
 };
 &nbsp;
 /**
@@ -512,7 +557,7 @@ export const isAskedForElectionSchedule = (text) =&gt; {
  * @returns {boolean}
  */
 export const isAskedAboutUsernameDiamond = (text) =&gt; {
-    return /(?:edit|insert|add).+?(?:\u2666|diamond).+?(?:user)?name/.test(text);
+    return /(?:edit|insert|add).+?(?:\u2666|diamond).+?(?:user)?name/i.test(text);
 };
 &nbsp;
 /**
@@ -521,7 +566,7 @@ export const isAskedAboutUsernameDiamond = (text) =&gt; {
  * @returns {boolean}
  */
 export const isAskedWhoMadeMe = (text) =&gt; {
-    return /who(?:\s+(?:are|is) your)?\s+(?:made|created|own(?:s|ers?)|develop(?:s|ed|ers?)|maintain(?:s|ers?))(?:\s+you)?/.test(text);
+    return /who(?:\s+(?:are|is) your)?\s+(?:made|created|own(?:s|ers?)|develop(?:s|ed|ers?)|maintain(?:s|ers?))(?:\s+you)?/i.test(text);
 };
 &nbsp;
 /**
@@ -540,7 +585,7 @@ export const isAskedForOwnScore = (text) =&gt; {
  * @returns {boolean}
  */
 export const isAskedForOtherScore = (text) =&gt; {
-    return /what(?: i|')s(?: the)? candidate score (?:for|of)\s+(?:\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/.test(text);
+    return /what(?: i|')s(?: the)? candidate score (?:for|of)\s+(?:\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/i.test(text);
 };
 &nbsp;
 /**
@@ -569,7 +614,7 @@ export const isAskedForScoreLeaderboard = <span class="fstat-no" title="function
  * @returns {boolean}
  */
 export const isThankingTheBot = (text) =&gt; {
-    return /(?:thank you|thanks)/.test(text);
+    return /thanks?(?= you|,? bot|[!?]|$)/.test(text);
 };
 &nbsp;
 /**
@@ -594,6 +639,15 @@ export const isHatingTheBot = (text) =&gt; {
         /(?:^the|^this)?.*(?:bad|terrible|horrible|broken|buggy)/.test(text) ||
         /^i (?:dislike|hate|detest) (?:the|this|electionbot)/.test(text)
     );
+};
+&nbsp;
+/**
+ * @summary checks if the message is asking about user eligibility
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedForUserEligibility = (text) =&gt; {
+    return /^(?:can|is) user \d+(?: be)? (?:eligible|(?:nominate|electe)d?)/i.test(text);
 };</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -601,7 +655,7 @@ export const isHatingTheBot = (text) =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Fri Sep 24 2021 10:47:39 GMT+0800 (Australian Western Standard Time)
+                at Sun Oct 03 2021 22:33:47 GMT+0800 (Australian Western Standard Time)
             </div>
         </div>
         <script src="../prettify.js"></script>
