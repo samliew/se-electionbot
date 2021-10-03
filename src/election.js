@@ -60,6 +60,10 @@ export default class Election {
      * @param {string|number|null} [electionNum] number of election, can be a numeric string
      */
     constructor(electionUrl, electionNum = null) {
+
+        // electionUrl at minimum, needs to end with /election/ before we can scrape it
+        if (!this.validElectionUrl(electionUrl)) electionUrl = `https://${electionUrl.split('/')[2]}/election/`;
+
         this.electionUrl = electionUrl;
 
         const idFromURL = /** @type {string} */(electionUrl.split('/').pop());
@@ -328,12 +332,31 @@ export default class Election {
 
     /**
      * @param {BotConfig} config
+     * @param {boolean} retry whether we are retrying the scrape
      */
-    async scrapeElection(config) {
+    async scrapeElection(config, retry = false) {
 
         // Validate electionUrl, since without it we cannot continue
         if (!this.validElectionUrl(this.electionUrl)) {
             console.error("Invalid electionUrl format.");
+
+            // No election number specific and page is NOT an election, try to see if there's an upcoming election
+            if (!this.electionNum && !retry) {
+
+                // Fetch and parse election index page
+                const pageHtml = await fetchUrl(config, this.electionUrl);
+                const $ = cheerio.load(/** @type {string}  */(pageHtml));
+
+                // Set next election number and url
+                this.electionNum = $('a[href^="/election/"]').length + 1;
+                this.electionUrl = this.electionUrl + this.electionNum;
+
+                console.log(`Retrying with election number ${this.electionNum} - ${this.electionUrl}`);
+
+                // Try again with updated election number
+                return await this.scrapeElection(config, true);
+            }
+
             return;
         }
 
@@ -401,14 +424,14 @@ export default class Election {
             this.phase = Election.getPhase(this);
 
             // Detect active election number if not specified
-            if (this.isActive() && this.electionNum === null) {
+            if (this.isActive() && !this.electionNum) {
                 // @ts-expect-error FIXME
                 this.electionNum = +metaPhaseElems.attr('href').match(/\d+/)?.pop() || null;
 
                 // Append to electionUrl
-                this.electionUrl += `/${this.electionNum}`;
+                this.electionUrl += this.electionNum;
 
-                if (config.verbose) console.log('INFO  - Election number was auto-detected', this.electionNum);
+                if (config.verbose) console.log('INFO  - Election is active and number was auto-detected:', this.electionNum);
             }
 
             // If election has ended (or cancelled)
