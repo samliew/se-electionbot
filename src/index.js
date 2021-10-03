@@ -547,11 +547,11 @@ import {
             if (matched) {
                 const [matcher, builder] = matched;
                 if (config.debug) console.log(`matched msg: ${matcher.name}`);
-                responseText = builder(config, election, content);
+                if (responseText) responseText = builder(config, election, content);
             }
 
             // Moderation badges
-            if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
+            else if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
                 responseText = sayBadgesByType(electionBadges, "moderation", election.isStackOverflow);
             }
 
