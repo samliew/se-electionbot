@@ -254,7 +254,7 @@ export const fetchRoomOwners = async (config, chatDomain = null, chatRoomId = nu
     $("#access-section-owner .username").each(function (el) {
         const id = $(this).attr('href')?.match(/\/(\d+)\//)?.pop();
         owners.push({
-            userName: $(this).text().replace(' ♦', ''),
+            userName: $(this).text().replace(/\s\u2666$/, ''),
             userId: +(id || -42),
             userLink: $(this).attr('href'),
             isModerator: $(this).text().includes('♦')
