@@ -275,7 +275,7 @@ import {
             transcriptMessages.reverse();
             for (count = 0; count < transcriptMessages.length; count++) {
                 let item = transcriptMessages[count];
-                if (!/^Welcome to the election chat room!/.test(item.message) && item.chatUserId === me.id) break;
+                if (/^Welcome to the election chat room!/.test(item.message) && item.chatUserId === me.id) break;
             }
             config.activityCount = count;
         }
@@ -283,7 +283,7 @@ import {
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended' && Date.now() < new Date(election.dateEnded).getTime() + 36e5) {
 
-            const winnersAnnounced = transcriptMessages?.filter(item => /^(?:The winners? (?:are|is):|Congratulations to the winners?)/.test(item.message));
+            const winnersAnnounced = transcriptMessages?.filter(item => /^(?:The winners? (?:are|is):|Congratulations to the winners?)/.test(item.message) && item.chatUserId === me.id);
 
             if (config.debug) console.log("INIT - winnersAnnounced on startup", winnersAnnounced.length);
 
