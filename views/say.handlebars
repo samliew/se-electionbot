@@ -1,8 +1,14 @@
 <h1>{{{heading}}}</h1>
 
 <form method="post">
+
     {{{data/statusText}}}
-    <textarea type="text" name="message" placeholder="message" maxlength="500"></textarea>
+
+    <textarea type="text" name="message" aria-label="message" placeholder="message" maxlength="500"></textarea>
+
     <input type="hidden" name="password" value="{{data/password}}" />
-    <button>Send</button>
+
+    <div class="form-controls mt20">
+        <button>Send</button>
+    </div>
 </form>

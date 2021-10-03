@@ -5,9 +5,12 @@
     {{{data/statusText}}}
 
     {{#each data/configObject}}
-    <div><label>{{@key}} <input type="text" name="{{@key}}" value="{{this}}" /></label></div>
+    <div><label>{{@key}} <input type="text" name="{{@key}}" aria-label="{{@key}}" value="{{this}}" placeholder="(empty)" /></label></div>
     {{/each}}
 
     <input type="hidden" name="password" value="{{data/password}}" />
-    <button>Save</button>
+
+    <div class="form-controls mt20">
+        <button>Save</button>
+    </div>
 </form>
