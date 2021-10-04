@@ -16,14 +16,31 @@ export class BotConfig {
 
     /* Low activity count variables */
 
-    // Variable to trigger an action only after this time of inactivity
-    lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 15);
     // Variable to trigger an action only after this amount of minimum messages
     minActivityCountThreshold = +(process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 30);
 
     get roomReachedMinimumActivityCount() {
         const { activityCount, minActivityCountThreshold: minActivityCountThreshold } = this;
         return activityCount >= minActivityCountThreshold;
+    }
+
+    // Variable to determine how long the room needs to be quiet - used by roomBecameIdleAWhileAgo
+    shortIdleDurationMins = 4;
+    // Variable to determine how long the room needs to be quiet - used by roomBecameIdleHoursAgo
+    longIdleDurationHours = 12;
+    // Variable to trigger greeting only after this time of inactivity - used by botHasBeenQuiet
+    lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 15);
+
+    get roomBecameIdleAWhileAgo() {
+        return this.lastActivityTime + (this.shortIdleDurationMins * 6e4) < Date.now();
+    }
+
+    get roomBecameIdleHoursAgo() {
+        return this.lastActivityTime + (this.longIdleDurationHours * 60 * 6e4) < Date.now();
+    }
+
+    get botHasBeenQuiet() {
+        return this.lastMessageTime + (this.lowActivityCheckMins * 6e4) < Date.now();
     }
 
     /* Bot variables */
@@ -63,6 +80,14 @@ export class BotConfig {
     // Returns if the bot posted the last message in the room
     get botSentLastMessage() {
         return this.lastActivityTime === this.lastMessageTime;
+    }
+
+    // Can the bot send an idle greeting
+    get idleCanSayHi() {
+        const { roomBecameIdleAWhileAgo, roomReachedMinimumActivityCount, botHasBeenQuiet, roomBecameIdleHoursAgo, botSentLastMessage } = this;
+
+        return (roomBecameIdleAWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
+            (roomBecameIdleHoursAgo && !botSentLastMessage);
     }
 
     /**

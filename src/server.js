@@ -133,11 +133,14 @@ app.route('/')
         try {
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
-            const longIdleDuration = ELECTION.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
-            const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins, botSentLastMessage } = BOT_CONFIG;
-            const roomBecameIdleAWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
-            const roomBecameIdleHoursAgo = lastActivityTime + (longIdleDuration * 60 * 6e4) < Date.now();
-            const botHasBeenQuiet = lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
+            const {
+                minActivityCountThreshold, roomReachedMinimumActivityCount,
+                shortIdleDurationMins, roomBecameIdleAWhileAgo,
+                longIdleDurationHours, roomBecameIdleHoursAgo,
+                lowActivityCheckMins, botHasBeenQuiet,
+                lastActivityTime, lastMessageTime,
+                botSentLastMessage, idleCanSayHi
+            } = BOT_CONFIG;
 
             res.render('index', {
                 page: {
@@ -164,20 +167,22 @@ app.route('/')
                         verbose: BOT_CONFIG.verbose,
                         flags: BOT_CONFIG.flags,
                         // Activity stuff
-                        lowActivityCheckMins: lowActivityCheckMins,
-                        longIdleDuration: longIdleDuration,
-                        lastActivityTime: lastActivityTime,
-                        lastMessageTime: lastMessageTime,
                         lastMessageContent: BOT_CONFIG.lastMessageContent,
                         activityCount: BOT_CONFIG.activityCount,
-                        minActivityCountThreshold: BOT_CONFIG.minActivityCountThreshold,
+                        lowActivityCheckMins: lowActivityCheckMins,
+                        shortIdleDurationMins: shortIdleDurationMins,
+                        longIdleDurationHours: longIdleDurationHours,
+                        lastActivityTime: lastActivityTime,
+                        lastMessageTime: lastMessageTime,
+                        minActivityCountThreshold: minActivityCountThreshold,
                         roomReachedMinimumActivityCount: roomReachedMinimumActivityCount,
                         roomBecameIdleAWhileAgo: roomBecameIdleAWhileAgo,
-                        roomBecameIdleAWhileDate: new Date(lastActivityTime + (4 * 6e4)),
+                        roomBecameIdleAWhileDate: new Date(lastActivityTime + (shortIdleDurationMins * 6e4)),
                         roomBecameIdleHoursAgo: roomBecameIdleHoursAgo,
-                        roomBecameIdleHoursDate: new Date(lastActivityTime + (longIdleDuration * 60 * 6e4)),
+                        roomBecameIdleHoursDate: new Date(lastActivityTime + (longIdleDurationHours * 60 * 6e4)),
                         botHasBeenQuiet: botHasBeenQuiet,
                         botSentLastMessage: botSentLastMessage,
+                        idleCanSayHi: idleCanSayHi,
                     }
                 }
             });

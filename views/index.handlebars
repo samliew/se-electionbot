@@ -118,7 +118,8 @@
                 <tr><td>activityCount</td><td>{{activityCount}}</td></tr>
                 <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>
                 <tr><td>lowActivityCheckMins</td><td>{{lowActivityCheckMins}} mins</td></tr>
-                <tr><td>longIdleDuration</td><td>{{longIdleDuration}} hours</td></tr>
+                <tr><td>shortIdleDurationMins</td><td>{{shortIdleDurationMins}} hours</td></tr>
+                <tr><td>longIdleDurationHours</td><td>{{longIdleDuration}} hours</td></tr>
                 <tr><td>roomReachedMinimumActivityCount</td><td>{{{boolean roomReachedMinimumActivityCount}}}</td></tr>
                 <tr><td>roomBecameIdleAWhileAgo</td><td>{{{boolean roomBecameIdleAWhileAgo}}}
                     {{#unless roomBecameIdleAWhileAgo}}
@@ -132,6 +133,7 @@
                 </td></tr>
                 <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}</td></tr>
                 <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
+                <tr><td>idleCanSayHi</td><td>{{{boolean idleCanSayHi}}}</td></tr>
             </table>
             {{/with}}
         </aside>

@@ -61,15 +61,6 @@ export default class Rescraper {
         try {
             await election.scrapeElection(config);
 
-            const longIdleDuration = election.isStackOverflow ? 3 : 12; // short idle duration for SO, half a day on other sites
-            const { roomReachedMinimumActivityCount, lastActivityTime, lastMessageTime, lowActivityCheckMins, botSentLastMessage } = config;
-            const roomBecameIdleAWhileAgo = lastActivityTime + (4 * 6e4) < Date.now();
-            const roomBecameIdleHoursAgo = lastActivityTime + (longIdleDuration * 60 * 6e4) < Date.now();
-            const botHasBeenQuiet = lastMessageTime + (lowActivityCheckMins * 6e4) < Date.now();
-
-            const idleDoSayHi = (roomBecameIdleAWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
-                (roomBecameIdleHoursAgo && !botSentLastMessage);
-
             if (config.verbose) {
                 console.log('RESCRAPER -', election.updated, election);
             }
@@ -83,7 +74,13 @@ export default class Rescraper {
                     console.log(`RESCRAPER - Winners: ${arrWinners.map(x => x.userName).join(', ')}`);
                 }
 
-                console.log(`RESCRAPER - IDLE? idleDoSayHi: ${idleDoSayHi}
+                const {
+                    roomReachedMinimumActivityCount, roomBecameIdleAWhileAgo,
+                    roomBecameIdleHoursAgo, botHasBeenQuiet, botSentLastMessage,
+                    idleCanSayHi
+                } = config
+
+                console.log(`RESCRAPER - IDLE? idleCanSayHi: ${idleCanSayHi}
                     ----------- reachedMinActivity: ${roomReachedMinimumActivityCount};
                     ----------- roomBecameIdleAWhileAgo: ${roomBecameIdleAWhileAgo}; roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}
                     ----------- botHasBeenQuiet: ${botHasBeenQuiet}; botSentLastMessage: ${botSentLastMessage}`
@@ -179,7 +176,7 @@ export default class Rescraper {
             // Remind users that bot is around to help when:
             //    1. Room is idle, and there was at least some previous activity, and last message more than lowActivityCheckMins minutes ago
             // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
-            else if (idleDoSayHi) {
+            else if (config.idleCanSayHi) {
 
                 console.log(`RESCRAPER - Room is inactive with ${config.activityCount} messages posted so far (min ${config.minActivityCountThreshold}).`,
                     `----------- Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
