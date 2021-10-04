@@ -5,6 +5,7 @@ import Election from "../../src/election.js";
 import Rescraper from "../../src/rescraper.js";
 import ScheduledAnnouncement from "../../src/ScheduledAnnouncement.js";
 import { getMockBotConfig } from "../mocks/bot.js";
+import { getMockNominee } from "../mocks/nominee.js";
 
 /**
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} Message
@@ -20,10 +21,10 @@ describe('ScheduledAnnouncement', () => {
     const election = new Election("https://stackoverflow.com/election/12");
     const scraper = new Rescraper(config, room, election);
 
-    describe('announceCancelled', () => {
-        const oldSendMessage = Room["default"].prototype.sendMessage;
-        afterEach(() => Room["default"].prototype.sendMessage = oldSendMessage);
+    const oldSendMessage = Room["default"].prototype.sendMessage;
+    afterEach(() => Room["default"].prototype.sendMessage = oldSendMessage);
 
+    describe('announceCancelled', () => {
         it('should return false on no Electon', async () => {
             const ann = new ScheduledAnnouncement(config, room, election, scraper);
 
@@ -45,15 +46,45 @@ describe('ScheduledAnnouncement', () => {
             cancelled.phase = "cancelled";
             cancelled.cancelledText = mockReason;
 
+            const ann = new ScheduledAnnouncement(config, room, cancelled, scraper);
+
+            await new Promise(async (res, rej) => {
+                Room["default"].prototype.sendMessage = (text) => {
+                    try {
+                        expect(text).to.equal(mockReason);
+                    } catch (error) {
+                        rej(error);
+                    }
+                };
+
+                const status = await ann.announceCancelled(room, cancelled);
+
+                try {
+                    expect(status).to.be.true;
+                } catch (error) {
+                    rej(error);
+                }
+
+                res(void 0);
+            });
+        });
+    });
+
+    describe('announceNewNominees', () => {
+        it('should correctly announce new nominees', async () => {
+            const names = ["Jane", "John"];
+
+            const nominees = names.map((userName) => getMockNominee({ userName }));
+
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.arrNominees.push(...nominees);
+
             const ann = new ScheduledAnnouncement(config, room, election, scraper);
 
-            const mockMessage =/** @type {Message} */({ content: Promise.resolve(mockReason) });
+            // TODO: mock out sendMessage and check actual messages
 
-            Room["default"].prototype.sendMessage = () => Promise.resolve(mockMessage);
-
-            const status = await ann.announceCancelled(room, cancelled);
+            const status = await ann.announceNewNominees();
             expect(status).to.be.true;
-            expect(await mockMessage.content).to.equal(mockReason);
         });
     });
 });
