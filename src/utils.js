@@ -480,10 +480,16 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
 };
 
 /**
+ * @typedef {{
+ *  chatRoomUrl: string,
+ *  chatDomain: string,
+ *  chatRoomId?: number
+ * }} DefaultRoomInfo
+ *
  * @summary get a site's default chat room
  * @param {BotConfig} config bot configuration
  * @param {string} siteUrl
- * @returns {Promise<object|null>} chatUrl
+ * @returns {Promise<DefaultRoomInfo|null>} chatUrl
  */
 export const getSiteDefaultChatroom = async (config, siteUrl) => {
 
