@@ -164,6 +164,7 @@ app.route('/')
                         verbose: BOT_CONFIG.verbose,
                         flags: BOT_CONFIG.flags,
                         // Activity stuff
+                        lowActivityCheckMins: lowActivityCheckMins,
                         longIdleDuration: longIdleDuration,
                         lastActivityTime: lastActivityTime,
                         lastMessageTime: lastMessageTime,
@@ -172,7 +173,9 @@ app.route('/')
                         minActivityCountThreshold: BOT_CONFIG.minActivityCountThreshold,
                         roomReachedMinimumActivityCount: roomReachedMinimumActivityCount,
                         roomBecameIdleAWhileAgo: roomBecameIdleAWhileAgo,
+                        roomBecameIdleAWhileDate: new Date(lastActivityTime + (4 * 6e4)),
                         roomBecameIdleHoursAgo: roomBecameIdleHoursAgo,
+                        roomBecameIdleHoursDate: new Date(lastActivityTime + (longIdleDuration * 60 * 6e4)),
                         botHasBeenQuiet: botHasBeenQuiet,
                         botSentLastMessage: botSentLastMessage,
                     }
