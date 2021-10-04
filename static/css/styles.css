@@ -135,6 +135,7 @@ form button {
     margin: 30px 0px;
     padding: 12px 14px;
     border-radius: 5px;
+    font-size: 1.15em;
 }
 .result.success {
     color: darkgreen;

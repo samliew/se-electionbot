@@ -5,12 +5,8 @@
 {{#with data}}
 
 <blockquote>
-    <p>I am <strong><a href="https://github.com/samliew/se-electionbot">ElectionBot</a></strong>, a chatbot to handle queries for commonly-asked questions in an election chat room.</p>
-    <p>This instance is listening to {{{url chatRoomUrl chatRoomUrl}}}.</p>
-    <p>
-        Please direct any queries &amp; feedback to <a href="https://github.com/samliew/se-electionbot/graphs/contributors">my developers</a> in the
-        <a href="https://chat.stackoverflow.com/rooms/190503/electionbot-development">development chatroom</a> or <a href="https://github.com/samliew/se-electionbot/issues">create an issue on Github</a>.
-    </p>
+    <p>I am <strong><a href="https://github.com/samliew/se-electionbot">ElectionBot</a></strong>, a chatbot that can answer commonly-asked questions about elections for sites on the Stack Exchange network.</p>
+    <p>This instance is listening to <strong>{{{url chatRoomUrl}}}</strong>.</p>
 </blockquote>
 
 <main class="dashboard">
@@ -104,7 +100,7 @@
                 <tr><td>funMode</td><td>{{{boolean funMode}}}</td></tr>
                 <tr><td>debug</td><td>{{{boolean debug}}}</td></tr>
                 <tr><td>verbose</td><td>{{{boolean verbose}}}</td></tr>
-                <tr><td>keepAlive</td><td>{{keepAlive}}</td></tr>
+                <tr><td>keepAlive</td><td>{{boolean keepAlive}}</td></tr>
                 {{#with flags}}
                 <tr><td>flags.saidElectionEndingSoon</td><td>{{{boolean saidElectionEndingSoon}}}</td></tr>
                 <tr><td>flags.announcedWinners</td><td>{{{boolean announcedWinners}}}</td></tr>
