@@ -114,7 +114,7 @@ export default class ScheduledAnnouncement {
 
         // Needs to have ended and have winners
         if (phase != 'ended' || length === 0) {
-            console.log("announceWinners - called but no winners to announce?", election);
+            console.log("announceWinners - called but no winners to announce?", config.verbose ? election : "");
             return false;
         }
 

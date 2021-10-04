@@ -444,8 +444,8 @@ import {
                     return roomId ? `*left room ${roomId}*` : "*missing room ID*";
                 }, AccessLevel.dev);
 
-                commander.add("coffee", "brews some coffee for the requestor", (content, { name = "you" }) => {
-                    const [, otherUser = ""] = /for ((?:\w+\s?){1,2})/.exec(content) || [];
+                commander.add("coffee", "brews some coffee for the requestor", (originalMessage, { name = "you" }) => {
+                    const [, otherUser = ""] = / for ((?:\w+\s?){1,2})/i.exec(originalMessage) || [];
                     const coffee = new RandomArray("cappuccino", "espresso", "latte", "ristretto", "macchiato");
                     return `Brewing some ${coffee.getRandom()} for ${otherUser || name}`;
                 }, AccessLevel.privileged);
@@ -469,7 +469,8 @@ import {
 
                 commander.add("announce winners", "makes the bot fetch and announce winners immediately", async () => {
                     await election.scrapeElection(config);
-                    return await announcement.announceWinners(room, election) ? null : "There are no winners yet.";
+                    const success = await announcement.announceWinners(room, election);
+                    return success ? null : "There are no winners yet.";
                 }, AccessLevel.privileged);
 
                 commander.aliases({
@@ -497,7 +498,7 @@ import {
                     ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
                     ["announce winners", /^(announce )?winners/, room, election],
-                    ["coffee", /(?:brew|make).+coffee/, content, user],
+                    ["coffee", /(?:brew|make).+coffee/, originalMessage, user],
                     ["timetravel", /88 miles|delorean|timetravel/, config, election, content],
                     ["fun", /fun/, config, content],
                     ["debug", /debug(?:ing)?/, config, content],
