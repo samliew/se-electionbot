@@ -178,13 +178,13 @@ export default class Rescraper {
             // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
             else if (config.idleCanSayHi) {
 
-                console.log(`RESCRAPER - Room is inactive with ${config.activityCount} messages posted so far (min ${config.minActivityCountThreshold}).`,
+                console.log(`RESCRAPER - Room is inactive with ${config.activityCounter} messages posted so far (min ${config.minActivityCountThreshold}).`,
                     `----------- Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
 
                 await sendMessage(config, room, sayHI(election), null, true);
 
                 // Reset last activity count
-                config.activityCount = 0;
+                config.activityCounter = 0;
             }
 
             // The election is over

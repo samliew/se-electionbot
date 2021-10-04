@@ -21,6 +21,7 @@ const handlebarsConfig = {
         },
         url: function (url, text) {
             if (!/^https?:\/\//.test(url)) return "";
+            if (!text) text = url;
             return `<a href="${url}">${text}</a>`;
         },
         utcTimestamp: function (date) {
@@ -163,6 +164,7 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteUrl: ELECTION.siteUrl,
                     siteHostname: ELECTION.siteHostname,
+                    apiSlug: ELECTION.apiSlug,
                     election: ELECTION,
                     botconfig: {
                         scriptInitDate: BOT_CONFIG.scriptInitDate,
@@ -179,8 +181,8 @@ app.route('/')
                         verbose: BOT_CONFIG.verbose,
                         flags: BOT_CONFIG.flags,
                         // Activity stuff
-                        lastMessageContent: BOT_CONFIG.lastMessageContent,
-                        activityCount: BOT_CONFIG.activityCount,
+                        lastBotMessage: BOT_CONFIG.lastBotMessage,
+                        activityCounter: BOT_CONFIG.activityCounter,
                         lowActivityCheckMins: BOT_CONFIG.lowActivityCheckMins,
                         shortIdleDurationMins: shortIdleDurationMins,
                         longIdleDurationHours: longIdleDurationHours,

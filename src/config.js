@@ -29,8 +29,8 @@ export class BotConfig {
     minActivityCountThreshold = +(process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 30);
 
     get roomReachedMinimumActivityCount() {
-        const { activityCount, minActivityCountThreshold: minActivityCountThreshold } = this;
-        return activityCount >= minActivityCountThreshold;
+        const { activityCounter, minActivityCountThreshold: minActivityCountThreshold } = this;
+        return activityCounter >= minActivityCountThreshold;
     }
 
     // Variable to determine how long the room needs to be quiet - used by roomBecameIdleAWhileAgo
@@ -70,9 +70,9 @@ export class BotConfig {
     // Variable to store time of last bot sent message, for throttling and muting purposes
     lastMessageTime = -1;
     // Variable to store last message to detect duplicate responses within a short time
-    lastMessageContent = "";
+    lastBotMessage = "";
     // Variable to track activity count in the room, to see if it reached minActivityCountThreshold
-    activityCount = 0;
+    activityCounter = 0;
     // Variable of rescrape interval of election page
     scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS || 5);
     // Response when bot tries to post the exact same response again
@@ -151,12 +151,12 @@ export class BotConfig {
 
     updateLastMessage(content, lastMessageTime = Date.now()) {
         this.updateLastMessageTime(lastMessageTime);
-        this.lastMessageContent = content;
+        this.lastBotMessage = content;
     }
 
     checkSameResponseAsPrevious(newContent) {
         // Unable to repost same message within 30 seconds
-        return this.lastMessageContent === newContent && Date.now() - 30e4 < this.lastMessageTime;
+        return this.lastBotMessage === newContent && Date.now() - 30e4 < this.lastMessageTime;
     }
 };
 

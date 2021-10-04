@@ -22,8 +22,8 @@
             <table>
                 <tr><td>Last updated</td><td>{{utcTimestamp updated}} <span class="relativetime" title="{{utcTimestamp updated}}"></span></td></tr>
                 <tr><td>Site name</td><td>{{siteName}}</td></tr>
-                <tr><td>Host name</td><td>{{{url siteUrl siteHostname}}}</td></tr>
-                <tr><td>API slug</td><td>{{apiSlug}}</td></tr>
+                <tr><td>Host name</td><td>{{{url siteUrl @root/data/siteHostname}}}</td></tr>
+                <tr><td>API slug</td><td>{{@root/data/apiSlug}}</td></tr>
                 <tr><td>Title</td><td>{{{url electionUrl title}}}</td></tr>
                 <tr><td>Election ID</td><td>{{electionNum}}</td></tr>
                 <tr><td>Chat room</td>
@@ -88,7 +88,8 @@
             <h2>Bot Config</h2>
             {{#with botconfig}}
             <table>
-                <tr><td>scriptHostname</td><td>{{scriptHostname}}</td></tr>
+                <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
+                <tr><td>scriptInitDate</td><td>{{utcTimestamp scriptInitDate}} <span class="relativetime" title="{{utcTimestamp scriptInitDate}}"></span></td></tr>
                 <tr><td>isMuted</td><td>
                     {{{boolean isMuted}}}
                     {{#if isMuted}}
@@ -118,8 +119,8 @@
             <table>
                 <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} <span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
                 <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} <span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td></tr>
-                <tr><td>lastMessageContent</td><td>{{lastMessageContent}}</td></tr>
-                <tr><td>activityCount</td><td>{{activityCount}}</td></tr>
+                <tr><td>lastBotMessage</td><td>{{lastBotMessage}}</td></tr>
+                <tr><td>activityCounter</td><td>{{activityCounter}}</td></tr>
                 <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>
                 <tr><td>roomReachedMinimumActivityCount</td><td>{{{boolean roomReachedMinimumActivityCount}}}</td></tr>
                 <tr><td>shortIdleDurationMins</td><td>{{shortIdleDurationMins}} mins</td></tr>

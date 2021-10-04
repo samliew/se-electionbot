@@ -258,14 +258,14 @@ import {
 
         /*
          * Sync state from chat transcript on startup
-         * - activityCount, lastActivityTime, lastMessageTime, lastMessageContent, (botSentLastMessage)
+         * - activityCounter, lastActivityTime, lastMessageTime, lastBotMessage, (botSentLastMessage)
          *
          * NOTE: Not a very reliable method if there are few messages in the room, since transcript page only displays messages from the same day
          */
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
         if (transcriptMessages) {
 
-            // Update lastActivityTime, lastMessageTime, lastMessageContent
+            // Update lastActivityTime, lastMessageTime, lastBotMessage
             const lastMessage = transcriptMessages[transcriptMessages.length - 1];
             const lastMessageByBot = lastMessage.message && (lastMessage.username === me.name || lastMessage.chatUserId === me.id);
 
@@ -277,14 +277,14 @@ import {
                 config.lastActivityTime = lastMessage.date;
             }
 
-            // Count valid messages (after a "greet" message by bot), and update activityCount
+            // Count valid messages (after a "greet" message by bot), and update activityCounter
             let count = 0;
             transcriptMessages.reverse();
             for (count = 0; count < transcriptMessages.length; count++) {
                 let item = transcriptMessages[count];
                 if (/^Welcome to the election chat room!/.test(item.message) && item.chatUserId === me.id) break;
             }
-            config.activityCount = count;
+            config.activityCounter = count;
         }
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
@@ -322,7 +322,7 @@ import {
 
             // Record time of last new message/reply in room, and increment activity count
             config.lastActivityTime = Date.now();
-            config.activityCount++;
+            config.activityCounter++;
 
             // Ignore messages with oneboxes
             if (content.includes('onebox')) return;
