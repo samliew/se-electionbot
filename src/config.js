@@ -17,9 +17,9 @@ export class BotConfig {
     keepAlive = process.env.KEEP_ALIVE === 'true';
 
     // Bot instance identifier, base hostname for dashboard, also where keep-alive will ping
-    // Ensure url starts with http and ends with a forward slash, or keep it empty
+    // Ensure url starts with http and does not end with a slash, or keep it empty
     get scriptHostname() {
-        const url = process.env.SCRIPT_HOSTNAME?.replace(/(\/?$|$)/, '/') || '';
+        const url = process.env.SCRIPT_HOSTNAME?.trim().replace(/\/?$/, '') || '';
         return url.startsWith('http') ? url : '';
     }
 
