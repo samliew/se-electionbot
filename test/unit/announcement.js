@@ -12,17 +12,22 @@ import { getMockNominee } from "../mocks/nominee.js";
  */
 
 describe('ScheduledAnnouncement', () => {
-    const config = getMockBotConfig();
 
     /** @type {Client} */
     const client = new Client["default"]("stackoverflow.com");
     const room = new Room["default"](client, -1);
 
-    const election = new Election("https://stackoverflow.com/election/12");
-    const scraper = new Rescraper(config, room, election);
-
     const oldSendMessage = Room["default"].prototype.sendMessage;
     afterEach(() => Room["default"].prototype.sendMessage = oldSendMessage);
+
+    let config = getMockBotConfig();
+    afterEach(() => config = getMockBotConfig());
+
+    let election = new Election("https://stackoverflow.com/election/12");
+    afterEach(() => election = new Election("https://stackoverflow.com/election/12"));
+
+    let scraper = new Rescraper(config, room, election);
+    afterEach(() => scraper = new Rescraper(config, room, election));
 
     describe('announceCancelled', () => {
         it('should return false on no Electon', async () => {
