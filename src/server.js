@@ -164,7 +164,6 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteUrl: ELECTION.siteUrl,
                     siteHostname: ELECTION.siteHostname,
-                    apiSlug: ELECTION.apiSlug,
                     election: ELECTION,
                     botconfig: {
                         scriptInitDate: BOT_CONFIG.scriptInitDate,
