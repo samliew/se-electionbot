@@ -94,9 +94,10 @@ app.use((req, res, next) => {
     // Redirect to hostname specified in bot config
     const scriptHostname = BOT_CONFIG?.scriptHostname;
     if (scriptHostname && !req.hostname.includes(scriptHostname)) {
-
         if (BOT_CONFIG?.debug) console.log(`SERVER - Redirected ${req.hostname} to ${scriptHostname}`);
-        res.redirect(`${scriptHostname}${req.path}?${req.query}`);
+
+        let [, querystring] = req.url.split('?')[1];
+        res.redirect(`${scriptHostname}${req.path}${querystring ? '?' + querystring : ''}`);
         return;
     }
 
