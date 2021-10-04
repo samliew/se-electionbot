@@ -29,7 +29,7 @@ const _sendTheMessage = async function (config, room, responseText, inResponseTo
     // Log message
     console.log("RESPONSE - ", responseText);
 
-    // Notify same previous message if in debug mode
+    // Notify same previous message
     if (config.checkSameResponseAsPrevious(responseText)) {
         responseText = config.duplicateResponseText;
     }
