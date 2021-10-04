@@ -10,6 +10,9 @@
     "allowSyntheticDefaultImports": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
-    "module": "es2020"
+    "module": "es2020",
+    "paths": {
+      "@utils/*": ["./src/utils/*"]
+    }
   }
 }
