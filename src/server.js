@@ -181,6 +181,7 @@ app.route('/')
                         roomBecameIdleHoursAgo: roomBecameIdleHoursAgo,
                         roomBecameIdleHoursDate: new Date(lastActivityTime + (longIdleDurationHours * 60 * 6e4)),
                         botHasBeenQuiet: botHasBeenQuiet,
+                        botWillBeQuietDate: new Date(lastMessageTime + (lowActivityCheckMins * 6e4)),
                         botSentLastMessage: botSentLastMessage,
                         idleCanSayHi: idleCanSayHi,
                     }
