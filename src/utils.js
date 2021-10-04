@@ -4,6 +4,7 @@ import entities from 'html-entities';
 import { get } from 'https';
 import Cache from "node-cache";
 import { URL } from "url";
+import { matchNumber } from "./utils/expressions.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
@@ -505,10 +506,9 @@ export const getSiteDefaultChatroom = async (config, siteUrl) => {
     const $chat = cheerio.load(/** @type {string} */(siteChatIndex));
     const $roomList = $chat("#roomlist .roomcard a");
 
-    const firstRoomUrl = $roomList.first().attr("href");
+    const firstRoomUrl = $roomList.first().attr("href") || "";
 
-    // @ts-expect-error FIXME
-    const firstRoomId = +firstRoomUrl?.match(/\d+/)[0];
+    const firstRoomId = matchNumber(/(\d+)/, firstRoomUrl);
 
     return {
         chatRoomUrl: `https://chat.stackexchange.com/rooms/${firstRoomId}`,
