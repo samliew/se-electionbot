@@ -77,7 +77,7 @@ export default class ScheduledAnnouncement {
 
     /**
      * @summary announces new nominees arrival
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     async announceNewNominees() {
         const { _room, config, _election } = this;
@@ -92,6 +92,8 @@ export default class ScheduledAnnouncement {
                 }!`);
             console.log(`NOMINATION`, newNominees[i]);
         });
+
+        return true;
     }
 
     /**
