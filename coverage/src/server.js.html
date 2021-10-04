@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/385</span>
+                <span class='fraction'>0/390</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/385</span>
+                <span class='fraction'>0/390</span>
             </div>
         
             
@@ -442,7 +442,17 @@
 <a name='L383'></a><a href='#L383'>383</a>
 <a name='L384'></a><a href='#L384'>384</a>
 <a name='L385'></a><a href='#L385'>385</a>
-<a name='L386'></a><a href='#L386'>386</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L386'></a><a href='#L386'>386</a>
+<a name='L387'></a><a href='#L387'>387</a>
+<a name='L388'></a><a href='#L388'>388</a>
+<a name='L389'></a><a href='#L389'>389</a>
+<a name='L390'></a><a href='#L390'>390</a>
+<a name='L391'></a><a href='#L391'>391</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -970,10 +980,12 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >            res.render('index', {</span>
 <span class="cstat-no" title="statement not covered" >                page: {</span>
+<span class="cstat-no" title="statement not covered" >                    appName: process.env.HEROKU_APP_NAME,</span>
 <span class="cstat-no" title="statement not covered" >                    title: "Home"</span>
 <span class="cstat-no" title="statement not covered" >                },</span>
 <span class="cstat-no" title="statement not covered" >                heading: `Chatbot up and running.`,</span>
 <span class="cstat-no" title="statement not covered" >                data: {</span>
+<span class="cstat-no" title="statement not covered" >                    autoRefreshInterval: BOT_CONFIG.scrapeIntervalMins * 60,</span>
 <span class="cstat-no" title="statement not covered" >                    chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,</span>
 <span class="cstat-no" title="statement not covered" >                    siteUrl: ELECTION.siteUrl,</span>
 <span class="cstat-no" title="statement not covered" >                    siteHostname: ELECTION.siteHostname,</span>
@@ -1032,6 +1044,7 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >            res.render('say', {</span>
 <span class="cstat-no" title="statement not covered" >                page: {</span>
+<span class="cstat-no" title="statement not covered" >                    appName: process.env.HEROKU_APP_NAME,</span>
 <span class="cstat-no" title="statement not covered" >                    title: "Privileged Say"</span>
 <span class="cstat-no" title="statement not covered" >                },</span>
 <span class="cstat-no" title="statement not covered" >                heading: `ElectionBot say to &lt;a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank"&gt;${chatDomain}; room ${chatRoomId}&lt;/a&gt;`,</span>
@@ -1092,6 +1105,7 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >            res.render('config', {</span>
 <span class="cstat-no" title="statement not covered" >                page: {</span>
+<span class="cstat-no" title="statement not covered" >                    appName: process.env.HEROKU_APP_NAME,</span>
 <span class="cstat-no" title="statement not covered" >                    title: "Config"</span>
 <span class="cstat-no" title="statement not covered" >                },</span>
 <span class="cstat-no" title="statement not covered" >                heading: `Update ElectionBot environment variables`,</span>
@@ -1187,6 +1201,7 @@
 <span class="cstat-no" title="statement not covered" >        if (config.debug) {</span>
 <span class="cstat-no" title="statement not covered" >            await room.sendMessage("have to go now, will be back soon...");</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
+<span class="cstat-no" title="statement not covered" >        await room.leave();</span>
 <span class="cstat-no" title="statement not covered" >        terminate(server);</span>
 <span class="cstat-no" title="statement not covered" >    };</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -1219,7 +1234,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Sun Oct 03 2021 22:33:47 GMT+0800 (Australian Western Standard Time)
+                at Mon Oct 04 2021 09:42:16 GMT+0300 (Moscow Standard Time)
             </div>
         </div>
         <script src="../prettify.js"></script>

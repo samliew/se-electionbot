@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/62</span>
+                <span class='fraction'>0/69</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/62</span>
+                <span class='fraction'>0/69</span>
             </div>
         
             
@@ -118,7 +118,14 @@
 <a name='L59'></a><a href='#L59'>59</a>
 <a name='L60'></a><a href='#L60'>60</a>
 <a name='L61'></a><a href='#L61'>61</a>
-<a name='L62'></a><a href='#L62'>62</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -179,8 +186,20 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >// @ts-nocheck</span></span></span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >/**</span></span></span>
+<span class="cstat-no" title="statement not covered" > * @summary converts a given Date to relative datetime string</span>
+<span class="cstat-no" title="statement not covered" > * @param {Date|string|number} date date to format</span>
+<span class="cstat-no" title="statement not covered" > * @param {string} [soonText] text to display when the election starts soon</span>
+<span class="cstat-no" title="statement not covered" > * @param {string} [justNowText] text to display when the election just started</span>
+<span class="cstat-no" title="statement not covered" > * @returns {string}</span>
+<span class="cstat-no" title="statement not covered" > */</span>
 <span class="cstat-no" title="statement not covered" >const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') =&gt; {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    const validateDate = (input) =&gt; {</span>
@@ -206,10 +225,10 @@
 <span class="cstat-no" title="statement not covered" >    if (diff &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >        return dayDiff &gt; 31 ? "" : (</span>
 <span class="cstat-no" title="statement not covered" >            diff &lt; 5 &amp;&amp; soonText ||</span>
-<span class="cstat-no" title="statement not covered" >            diff &lt; 60 &amp;&amp; (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}` })(Math.floor(diff)) ||</span>
-<span class="cstat-no" title="statement not covered" >            diff &lt; 3600 &amp;&amp; (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}` })(Math.floor(diff / 60)) ||</span>
-<span class="cstat-no" title="statement not covered" >            diff &lt; 86400 &amp;&amp; (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}` })(Math.floor(diff / 3600)) ||</span>
-<span class="cstat-no" title="statement not covered" >            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}` })(Math.floor(diff / 86400))</span>
+<span class="cstat-no" title="statement not covered" >            diff &lt; 60 &amp;&amp; (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}`; })(Math.floor(diff)) ||</span>
+<span class="cstat-no" title="statement not covered" >            diff &lt; 3600 &amp;&amp; (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}`; })(Math.floor(diff / 60)) ||</span>
+<span class="cstat-no" title="statement not covered" >            diff &lt; 86400 &amp;&amp; (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}`; })(Math.floor(diff / 3600)) ||</span>
+<span class="cstat-no" title="statement not covered" >            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}`; })(Math.floor(diff / 86400))</span>
 <span class="cstat-no" title="statement not covered" >        );</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -219,23 +238,25 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    return dayDiff &gt; 31 ? "" : (</span>
 <span class="cstat-no" title="statement not covered" >        diff &lt; 5 &amp;&amp; justNowText ||</span>
-<span class="cstat-no" title="statement not covered" >        diff &lt; 60 &amp;&amp; (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago` })(Math.floor(diff)) ||</span>
-<span class="cstat-no" title="statement not covered" >        diff &lt; 3600 &amp;&amp; (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago` })(Math.floor(diff / 60)) ||</span>
-<span class="cstat-no" title="statement not covered" >        diff &lt; 86400 &amp;&amp; (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago` })(Math.floor(diff / 3600)) ||</span>
-<span class="cstat-no" title="statement not covered" >        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago` })(Math.floor(diff / 86400))</span>
+<span class="cstat-no" title="statement not covered" >        diff &lt; 60 &amp;&amp; (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago`; })(Math.floor(diff)) ||</span>
+<span class="cstat-no" title="statement not covered" >        diff &lt; 3600 &amp;&amp; (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago`; })(Math.floor(diff / 60)) ||</span>
+<span class="cstat-no" title="statement not covered" >        diff &lt; 86400 &amp;&amp; (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago`; })(Math.floor(diff / 3600)) ||</span>
+<span class="cstat-no" title="statement not covered" >        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago`; })(Math.floor(diff / 86400))</span>
 <span class="cstat-no" title="statement not covered" >    );</span>
 <span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const updateRelativeDates = () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    var spans = document.querySelectorAll('span.relativetime');</span>
+<span class="cstat-no" title="statement not covered" >    var spans = /** @type {NodeListOf&lt;HTMLElement&gt;} */(document.querySelectorAll('span.relativetime'));</span>
 <span class="cstat-no" title="statement not covered" >    spans.forEach(el =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        if (el.title) {</span>
+<span class="cstat-no" title="statement not covered" >            var prefix = el.dataset.prefix || "";</span>
+<span class="cstat-no" title="statement not covered" >            var suffix = el.dataset.suffix || "";</span>
 <span class="cstat-no" title="statement not covered" >            var date = dateToRelativetime(el.title);</span>
 <span class="cstat-no" title="statement not covered" >            if (date)</span>
-<span class="cstat-no" title="statement not covered" >                el.innerHTML = date;</span>
+<span class="cstat-no" title="statement not covered" >                el.innerHTML = prefix + date + suffix;</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" >    });</span>
-<span class="cstat-no" title="statement not covered" >}</span>
+<span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >(function () {</span>
 <span class="cstat-no" title="statement not covered" >    updateRelativeDates();</span>
@@ -247,7 +268,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Sun Oct 03 2021 22:33:47 GMT+0800 (Australian Western Standard Time)
+                at Mon Oct 04 2021 09:42:16 GMT+0300 (Moscow Standard Time)
             </div>
         </div>
         <script src="../../prettify.js"></script>

@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/900</span>
+                <span class='fraction'>0/902</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/900</span>
+                <span class='fraction'>0/902</span>
             </div>
         
             
@@ -957,7 +957,11 @@
 <a name='L898'></a><a href='#L898'>898</a>
 <a name='L899'></a><a href='#L899'>899</a>
 <a name='L900'></a><a href='#L900'>900</a>
-<a name='L901'></a><a href='#L901'>901</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L901'></a><a href='#L901'>901</a>
+<a name='L902'></a><a href='#L902'>902</a>
+<a name='L903'></a><a href='#L903'>903</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -2193,8 +2197,8 @@
 <span class="cstat-no" title="statement not covered" >            // TODO: make a part of User</span>
 <span class="cstat-no" title="statement not covered" >            /** @type {[Set&lt;number&gt;, number][]} */</span>
 <span class="cstat-no" title="statement not covered" >            const userLevels = [</span>
-<span class="cstat-no" title="statement not covered" >                [config.adminIds, AccessLevel.admin],</span>
-<span class="cstat-no" title="statement not covered" >                [config.devIds, AccessLevel.dev]</span>
+<span class="cstat-no" title="statement not covered" >                [config.devIds, AccessLevel.dev],</span>
+<span class="cstat-no" title="statement not covered" >                [config.adminIds, AccessLevel.admin]</span>
 <span class="cstat-no" title="statement not covered" >            ];</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >            const [, access] = userLevels.find(([ids]) =&gt; ids.has(user.id)) || [, AccessLevel.user];</span>
@@ -2272,13 +2276,15 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >                    const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];</span>
-<span class="cstat-no" title="statement not covered" >                    config.updateLastMessageTime(Date.now() + (+num * 6e4) - (throttle * 1e3));</span>
-<span class="cstat-no" title="statement not covered" >                    return `*silenced for ${num} mins*`;</span>
+<span class="cstat-no" title="statement not covered" >                    responseText = `*silenced for ${num} mins*`;</span>
+<span class="cstat-no" title="statement not covered" >                    config.updateLastMessage(responseText, Date.now() + (+num * 6e4) - (throttle * 1e3));</span>
+<span class="cstat-no" title="statement not covered" >                    return responseText;</span>
 <span class="cstat-no" title="statement not covered" >                }, AccessLevel.privileged);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                commander.add("unmute", "allows the bot to speak immediately", (config) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >                    config.updateLastMessageTime(-1);</span>
-<span class="cstat-no" title="statement not covered" >                    return `I can speak freely again.`;</span>
+<span class="cstat-no" title="statement not covered" >                    responseText = `I can speak freely again.`;</span>
+<span class="cstat-no" title="statement not covered" >                    config.updateLastMessage(responseText);</span>
+<span class="cstat-no" title="statement not covered" >                    return responseText;</span>
 <span class="cstat-no" title="statement not covered" >                }, AccessLevel.privileged);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                commander.add("get time", "gets current UTC time and the election phase time", ({ phase, dateElection }) =&gt; {</span>
@@ -2303,8 +2309,8 @@
 <span class="cstat-no" title="statement not covered" >                    return roomId ? `*left room ${roomId}*` : "*missing room ID*";</span>
 <span class="cstat-no" title="statement not covered" >                }, AccessLevel.dev);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                commander.add("coffee", "brews some coffee for the requestor", (content, { name = "you" }) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >                    const [, otherUser = ""] = /for ((?:\w+\s?){1,2})/.exec(content) || [];</span>
+<span class="cstat-no" title="statement not covered" >                commander.add("coffee", "brews some coffee for the requestor", (originalMessage, { name = "you" }) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >                    const [, otherUser = ""] = / for ((?:\w+\s?){1,2})/i.exec(originalMessage) || [];</span>
 <span class="cstat-no" title="statement not covered" >                    const coffee = new RandomArray("cappuccino", "espresso", "latte", "ristretto", "macchiato");</span>
 <span class="cstat-no" title="statement not covered" >                    return `Brewing some ${coffee.getRandom()} for ${otherUser || name}`;</span>
 <span class="cstat-no" title="statement not covered" >                }, AccessLevel.privileged);</span>
@@ -2328,7 +2334,8 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                commander.add("announce winners", "makes the bot fetch and announce winners immediately", async () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >                    await election.scrapeElection(config);</span>
-<span class="cstat-no" title="statement not covered" >                    return await announcement.announceWinners(room, election) ? null : "There are no winners yet.";</span>
+<span class="cstat-no" title="statement not covered" >                    const success = await announcement.announceWinners(room, election);</span>
+<span class="cstat-no" title="statement not covered" >                    return success ? null : "There are no winners yet.";</span>
 <span class="cstat-no" title="statement not covered" >                }, AccessLevel.privileged);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                commander.aliases({</span>
@@ -2356,7 +2363,7 @@
 <span class="cstat-no" title="statement not covered" >                    ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],</span>
 <span class="cstat-no" title="statement not covered" >                    ["unmute", /unmute|clear timeout/, config],</span>
 <span class="cstat-no" title="statement not covered" >                    ["announce winners", /^(announce )?winners/, room, election],</span>
-<span class="cstat-no" title="statement not covered" >                    ["coffee", /(?:brew|make).+coffee/, content, user],</span>
+<span class="cstat-no" title="statement not covered" >                    ["coffee", /(?:brew|make).+coffee/, originalMessage, user],</span>
 <span class="cstat-no" title="statement not covered" >                    ["timetravel", /88 miles|delorean|timetravel/, config, election, content],</span>
 <span class="cstat-no" title="statement not covered" >                    ["fun", /fun/, config, content],</span>
 <span class="cstat-no" title="statement not covered" >                    ["debug", /debug(?:ing)?/, config, content],</span>
@@ -2609,8 +2616,7 @@
 <span class="cstat-no" title="statement not covered" >            else if (isHatingTheBot(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                responseText = getRandomNegative();</span>
 <span class="cstat-no" title="statement not covered" >            }</span>
-<span class="cstat-no" title="statement not covered" >            // TODO: allow privileged use after the election</span>
-<span class="cstat-no" title="statement not covered" >            else if (isAskedForUserEligibility(content) &amp;&amp; (AccessLevel.dev &amp; access)) {</span>
+<span class="cstat-no" title="statement not covered" >            else if (isPrivileged &amp;&amp; isAskedForUserEligibility(content)) {</span>
 <span class="cstat-no" title="statement not covered" >                responseText = await sayUserEligibility(config, election, content);</span>
 <span class="cstat-no" title="statement not covered" >            }</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -2764,7 +2770,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Sun Oct 03 2021 22:33:47 GMT+0800 (Australian Western Standard Time)
+                at Mon Oct 04 2021 09:42:16 GMT+0300 (Moscow Standard Time)
             </div>
         </div>
         <script src="../prettify.js"></script>
