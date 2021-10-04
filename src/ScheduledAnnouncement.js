@@ -118,19 +118,19 @@ export default class ScheduledAnnouncement {
             return false;
         }
 
-        // There are winners, stop and reset everything
+        // Winners have been already announced
+        if (config.flags.announcedWinners) {
+            console.log("announceWinners - Winners have already been announced");
+            return false;
+        }
+
+        // When winners are announced, stop future announcements and rescraper
         this.stopAll();
         this.rescraper.stop();
 
         config.flags.saidElectionEndingSoon = true;
         config.flags.announcedWinners = true;
         config.scrapeIntervalMins = 10;
-
-        // Winners have been already announced
-        if (config.flags.announcedWinners) {
-            console.log("announceWinners - Winners have already been announced");
-            return false;
-        }
 
         const winnerList = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
 
