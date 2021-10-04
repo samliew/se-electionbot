@@ -28,22 +28,72 @@ describe('Rescraper', () => {
     let ann = new ScheduledAnnouncement(config, room, election, scraper);
     afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
 
-    beforeEach(() => sinon.restore());
+    describe('rescrape', function () {
+        this.timeout(5000);
 
-    describe('rescrape', () => {
+        beforeEach(() => sinon.stub(scraper, "start"));
+        afterEach(() => sinon.restore());
+
         it('should return early if no previous state', async () => {
-            const stub = sinon.stub(ann, "announceCancelled");
+            const announceStub = sinon.stub(ann, "announceCancelled");
+
+            scraper.setAnnouncement(ann);
+            sinon.stub(election, "scrapeElection");
             election.phase = "cancelled";
 
             await scraper.rescrape();
-            expect(stub.calledOnce).to.be.false;
+            expect(announceStub.calledOnce).to.be.false;
         });
 
-        it('should attempt to announce new nomination if has new', () => {
-            const stub = sinon.stub(ann, "announceNewNominees");
+        it('should attempt to announce new nomination if has new', async () => {
+            const announceStub = sinon.stub(ann, "announceNewNominees");
 
-            election.phase == 'nomination'
+            scraper.setAnnouncement(ann);
+            sinon.stub(election, "electionChatRoomChanged").get(() => false);
+            sinon.stub(election, "electionDatesChanged").get(() => false);
+            sinon.stub(election, "phase").get(() => "nomination").set(() => { });
+            sinon.stub(election, "hasNewNominees").get(() => true);
 
+            await scraper.rescrape();
+            expect(announceStub.calledOnce).to.be.true;
+        });
+
+        it('should attempt to announce cancellation if cancelled', async () => {
+            const cancelStub = sinon.stub(ann, "announceCancelled");
+
+            scraper.setAnnouncement(ann);
+            sinon.stub(election, "electionChatRoomChanged").get(() => false);
+            sinon.stub(election, "electionDatesChanged").get(() => false);
+            sinon.stub(election, "phase").get(() => "cancelled").set(() => { });
+            sinon.stub(election, "isNewPhase").returns(true);
+
+            await scraper.rescrape();
+            expect(cancelStub.calledOnce).to.be.true;
+        });
+
+        it('should attempt to announce winners if ended', async () => {
+            const winnerStub = sinon.stub(ann, "announceWinners");
+
+            scraper.setAnnouncement(ann);
+            sinon.stub(election, "electionChatRoomChanged").get(() => false);
+            sinon.stub(election, "electionDatesChanged").get(() => false);
+            sinon.stub(election, "phase").get(() => "ended").set(() => { });
+            sinon.stub(election, "hasNewWinners").get(() => true);
+
+            await scraper.rescrape();
+            expect(winnerStub.calledOnce).to.be.true;
+        });
+
+        it('should shorten scrape interval if election ends without winners', async () => {
+            scraper.setAnnouncement(ann);
+            sinon.stub(election, "electionChatRoomChanged").get(() => false);
+            sinon.stub(election, "electionDatesChanged").get(() => false);
+            sinon.stub(election, "phase").get(() => "ended").set(() => { });
+            sinon.stub(election, "hasNewWinners").get(() => false);
+            sinon.stub(election, "numWinners").get(() => 0);
+
+            await scraper.rescrape();
+            expect(config.scrapeIntervalMins).to.equal(0.5);
         });
     });
 });
