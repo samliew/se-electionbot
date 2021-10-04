@@ -1,5 +1,6 @@
 import cheerio from 'cheerio';
 import { dateToUtcTimestamp, fetchUrl } from './utils.js';
+import { matchNumber } from "./utils/expressions.js";
 
 /**
  * @typedef {import("./index").ElectionBadge} ElectionBadge
@@ -333,8 +334,10 @@ export default class Election {
     }
 
     /**
-     * @param {BotConfig} config
-     * @param {boolean} retry whether we are retrying the scrape
+     * @summary scrapes current election page
+     * @param {BotConfig} config bot configuration
+     * @param {boolean} [retry] whether we are retrying the scrape
+     * @returns {Promise<void>}
      */
     async scrapeElection(config, retry = false) {
 
@@ -416,16 +419,14 @@ export default class Election {
 
             // Empty string if not set as environment variable, or not found on election page
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/');
-            // @ts-expect-error FIXME
-            this.chatRoomId = +this.chatUrl?.match(/\d+$/) || null;
+            this.chatRoomId = matchNumber(/(\d+)$/, this.chatUrl) || null;
             this.chatDomain = /** @type {Host} */(this.chatUrl?.split('/')[2]?.replace('chat.', ''));
 
             this.phase = Election.getPhase(this);
 
             // Detect active election number if not specified
             if (this.isActive() && !this.electionNum) {
-                // @ts-expect-error FIXME
-                this.electionNum = +metaPhaseElems.attr('href').match(/\d+/)?.pop() || null;
+                this.electionNum = matchNumber(/(\d+)/, metaPhaseElems.attr('href') || "") || null;
 
                 // Append to electionUrl
                 this.electionUrl += this.electionNum;
