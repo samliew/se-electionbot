@@ -165,6 +165,9 @@ export default class Election {
      */
     get electionChatRoomChanged() {
         const { prev, chatUrl, chatDomain, chatRoomId } = this;
+
+        if (!prev) return false;
+
         const chatUrlChanged = prev.chatUrl !== chatUrl;
         const chatDomainChanged = prev.chatDomain !== chatDomain;
         const chatRoomIdChanged = prev.chatRoomId !== chatRoomId;
@@ -177,6 +180,9 @@ export default class Election {
      */
     get electionDatesChanged() {
         const { prev, dateNomination, dateElection, dateEnded } = this;
+
+        if (!prev) return false;
+
         return prev.dateNomination !== dateNomination ||
             prev.dateElection !== dateElection ||
             prev.dateEnded !== dateEnded;
