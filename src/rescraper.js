@@ -129,7 +129,7 @@ export default class Rescraper {
             }
 
             // New nominations
-            else if (election.phase == 'nomination' && election.hasNewNominees) {
+            else if (election.phase === 'nomination' && election.hasNewNominees) {
                 await announcement?.announceNewNominees();
 
                 if (config.debugOrVerbose) {
