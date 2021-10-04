@@ -90,7 +90,7 @@ Default values in square brackets.
 > `VERBOSE` - [`false`] a debug variable<br>
 > `FUN_MODE` - [`true`] enable fun random responses
 
-> `SCRIPT_HOSTNAME` - bot identifier, base hostname for web pages / dashboard<br>
+> `SCRIPT_HOSTNAME` - instance identifier, base hostname for dashboard, also where keep-alive will ping<br>
 > `HEROKU_API_TOKEN` - to be used only when hosted on Heroku for bot dashboard<br>
 > `PASSWORD` - password for bot dashboard<br>
 > `MAINTENANCE_PAGE_URL` - page to display for web pages when bot is offline on Heroku<br>

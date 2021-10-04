@@ -100,15 +100,14 @@ export const setThrottleCommand = (content, config) => {
 
 /**
  * @summary pings the bot for uptime
- * @param {string} host bot host name
  * @param {BotConfig} config bot config
  * @returns {string}
  */
-export const isAliveCommand = (host, config) => {
+export const isAliveCommand = (config) => {
 
-    const { debug, scriptInitDate } = config;
+    const { debug, scriptInitDate, scriptHostname } = config;
 
-    const hosted = `I'm alive on ${host || "planet Earth"}`;
+    const hosted = `I'm alive on ${scriptHostname || "planet Earth"}`;
     const started = `started on ${dateToUtcTimestamp(scriptInitDate)}`;
     const uptime = `uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1e3)} seconds`;
 

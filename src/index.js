@@ -73,7 +73,6 @@ import {
     const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN || "stackexchange.com");
     const defaultChatRoomId = +(process.env.CHAT_ROOM_ID || 92073);
     const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
-    const scriptHostname = process.env.SCRIPT_HOSTNAME || '';  // for keep-alive ping
 
 
     /** @type {{ ChatEventType: EventType }} */
@@ -489,7 +488,7 @@ import {
 
                 const outputs = [
                     ["commands", /commands|usage/],
-                    ["alive", /alive|awake|ping/, scriptHostname, config],
+                    ["alive", /alive|awake|ping/, config],
                     ["say", /say/, originalMessage],
                     ["greet", /^(greet|welcome)/, election],
                     ["get time", /(get time|time)$/, election],
@@ -896,10 +895,10 @@ import {
 
 
     // If running on Heroku
-    if (/^https?:\/\/herokuapp.com/.test(scriptHostname) || process.env.KEEP_ALIVE === "true") {
+    if (config.keepAlive || config.scriptHostname.includes('herokuapp')) {
 
         // Heroku free dyno will shutdown when idle for 30 mins, so keep-alive is necessary
-        keepAlive(scriptHostname);
+        keepAlive(config.scriptHostname);
     }
 
 })();

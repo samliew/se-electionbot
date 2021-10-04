@@ -2,8 +2,6 @@ import { parseIds } from "./utils.js";
 
 export class BotConfig {
 
-    scriptInitDate = new Date();
-
     /**
      * @param {import("chatexchange/dist/Client").Host} host chat host server
      * @param {number} roomId room id this configuration is for
@@ -12,6 +10,17 @@ export class BotConfig {
         // Bot to later join live chat room if not in debug mode
         this.chatRoomId = roomId;
         this.chatDomain = host;
+    }
+
+    scriptInitDate = new Date();
+
+    keepAlive = process.env.KEEP_ALIVE === 'true';
+
+    // Bot instance identifier, base hostname for dashboard, also where keep-alive will ping
+    // Ensure url starts with http and ends with a forward slash, or keep it empty
+    get scriptHostname() {
+        const url = process.env.SCRIPT_HOSTNAME?.replace(/(\/?$|$)/, '/') || '';
+        return url.startsWith('http') ? url : '';
     }
 
     /* Low activity count variables */

@@ -91,6 +91,14 @@ app.use((req, res, next) => {
 
     const { query, ip, hostname, path, body = {} } = req;
 
+    // Redirect to hostname specified in bot config
+    const scriptHostname = BOT_CONFIG?.scriptHostname;
+    if (scriptHostname && !req.hostname.includes(scriptHostname)) {
+        if (BOT_CONFIG?.debug) console.log(`SERVER - Redirected ${req.hostname} to ${scriptHostname}`);
+        res.redirect(`${scriptHostname}${req.path}?${req.params}`);
+        return;
+    }
+
     // Only these paths will be non-password protected
     const publicPaths = [
         "/"
@@ -134,12 +142,12 @@ app.route('/')
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
             const {
-                minActivityCountThreshold, roomReachedMinimumActivityCount,
+                roomReachedMinimumActivityCount,
                 shortIdleDurationMins, roomBecameIdleAWhileAgo,
                 longIdleDurationHours, roomBecameIdleHoursAgo,
                 lowActivityCheckMins, botHasBeenQuiet,
                 lastActivityTime, lastMessageTime,
-                botSentLastMessage, idleCanSayHi
+                botSentLastMessage
             } = BOT_CONFIG;
 
             res.render('index', {
@@ -153,9 +161,11 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteUrl: ELECTION.siteUrl,
                     siteHostname: ELECTION.siteHostname,
-                    apiSlug: ELECTION.apiSlug,
                     election: ELECTION,
                     botconfig: {
+                        scriptInitDate: BOT_CONFIG.scriptInitDate,
+                        keepAlive: BOT_CONFIG.keepAlive,
+                        scriptHostname: BOT_CONFIG.scriptHostname,
                         throttleSecs: BOT_CONFIG.throttleSecs,
                         scrapeIntervalMins: BOT_CONFIG.scrapeIntervalMins,
                         duplicateResponseText: BOT_CONFIG.duplicateResponseText,
@@ -169,12 +179,12 @@ app.route('/')
                         // Activity stuff
                         lastMessageContent: BOT_CONFIG.lastMessageContent,
                         activityCount: BOT_CONFIG.activityCount,
-                        lowActivityCheckMins: lowActivityCheckMins,
+                        lowActivityCheckMins: BOT_CONFIG.lowActivityCheckMins,
                         shortIdleDurationMins: shortIdleDurationMins,
                         longIdleDurationHours: longIdleDurationHours,
-                        lastActivityTime: lastActivityTime,
-                        lastMessageTime: lastMessageTime,
-                        minActivityCountThreshold: minActivityCountThreshold,
+                        lastActivityTime: BOT_CONFIG.lastActivityTime,
+                        lastMessageTime: BOT_CONFIG.lastMessageTime,
+                        minActivityCountThreshold: BOT_CONFIG.minActivityCountThreshold,
                         roomReachedMinimumActivityCount: roomReachedMinimumActivityCount,
                         roomBecameIdleAWhileAgo: roomBecameIdleAWhileAgo,
                         roomBecameIdleAWhileDate: new Date(lastActivityTime + (shortIdleDurationMins * 6e4)),
@@ -183,7 +193,6 @@ app.route('/')
                         botHasBeenQuiet: botHasBeenQuiet,
                         botWillBeQuietDate: new Date(lastMessageTime + (lowActivityCheckMins * 6e4)),
                         botSentLastMessage: botSentLastMessage,
-                        idleCanSayHi: idleCanSayHi,
                     }
                 }
             });
