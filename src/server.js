@@ -19,9 +19,9 @@ const handlebarsConfig = {
         get: function (model, attributeName) {
             return model.get(attributeName);
         },
-        url: function (url, text) {
+        url: function (url, text = "") {
             if (!/^https?:\/\//.test(url)) return "";
-            if (!text) text = url;
+            if (!text || typeof text !== 'string') text = url.replace(/^https?:\/\//, '');
             return `<a href="${url}">${text}</a>`;
         },
         utcTimestamp: function (date) {

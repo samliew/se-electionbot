@@ -28,7 +28,7 @@
                 <tr><td>Election ID</td><td>{{electionNum}}</td></tr>
                 <tr><td>Chat room</td>
                     {{#if chatUrl}}
-                    <td>{{{url chatUrl chatUrl}}}</td>
+                    <td>{{{url chatUrl}}}</td>
                     {{else}}
                     <td></td>
                     {{/if}}
@@ -47,13 +47,13 @@
                 </tr>
                 <tr><td>Election date</td><td>{{utcTimestamp dateElection}} <span class="relativetime" title="{{utcTimestamp dateElection}}"></span></td></tr>
                 <tr><td>End date</td><td>{{utcTimestamp dateEnded}} <span class="relativetime" title="{{utcTimestamp dateEnded}}"></span></td></tr>
-                <tr><td>Opavote URL</td><td>{{{url opavoteUrl opavoteUrl}}}</td></tr>
+                <tr><td>Opavote URL</td><td>{{{url opavoteUrl}}}</td></tr>
                 <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
                 <tr><td>Candidates</td>
                     {{#if arrNominees.length}}
                     <td><ul class="list">
                         {{#each arrNominees}}
-                        <li class="item"><a href="{{this.permalink}}">{{this.userName}}</a>; <a href="{{this.nominationLink}}">nomination</a>; score {{this.userScore}}; {{this.userYears}}</li>
+                        <li class="item"><a href="{{this.permalink}}">{{this.userName}}</a> (<em><a href="{{this.nominationLink}}">nomination</a></em>); score {{this.userScore}}, {{this.userYears}}</li>
                         {{/each}}
                     </ul></td>
                     {{else}}
@@ -74,7 +74,7 @@
                 <tr><td>Badges</td><td>
                     <ul class="list">
                         {{#each electionBadges}}
-                        <li class="item"><a href="{{@root/data/siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}} [{{this.badge_id}}]</a></li>
+                        <li class="item"><a href="{{@root/data/siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}}</a> [{{this.badge_id}}]</li>
                         {{/each}}
                     </ul>
                 </td></tr>
@@ -149,6 +149,6 @@
 
 </main>
 
- <meta http-equiv="refresh" content="{{autoRefreshInterval}}" />
+<meta http-equiv="refresh" content="{{autoRefreshInterval}}" />
 
 {{/with}}
