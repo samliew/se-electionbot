@@ -3,6 +3,7 @@ import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 import { matchNumber } from "./utils/expressions.js";
 
 /**
+ * @typedef {null|"ended"|"election"|"primary"|"nomination"|"cancelled"} ElectionPhase
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import('chatexchange/dist/Client').Host} Host
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -28,6 +29,9 @@ export default class Election {
 
     /** @type {Nominee[]} */
     arrWinners = [];
+
+    /** @type {ElectionPhase|null} */
+    phase = null;
 
     /**
      * @description Site election badges, defaults to Stack Overflow's
@@ -302,8 +306,6 @@ export default class Election {
     }
 
     /**
-     * @typedef {null|"ended"|"election"|"primary"|"nomination"} ElectionPhase
-     *
      * @static
      * @summary gets current phase given election dates
      * @param {Election} election
