@@ -189,6 +189,21 @@ export default class Election {
     }
 
     /**
+     * @summary forgets about previous states
+     * @param {number} [states] number of states to forget
+     * @returns {void}
+     */
+    forget(states = 1) {
+        // TODO: rework once moved away from _prevObj
+        let cleanups = 0;
+        while (this.prev) {
+            if (cleanups >= states) return;
+            this._prevObj = null;
+            cleanups += 1;
+        }
+    }
+
+    /**
      * @summary validates an instance of Election
      * @returns {{ status: boolean, errors: string[] }}
      */
