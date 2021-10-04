@@ -62,7 +62,7 @@ export default class ScheduledAnnouncement {
         const { cancelledText, phase } = election;
 
         // Needs to be cancelled
-        if (!cancelledText || phase == 'cancelled') return false;
+        if (!cancelledText || phase !== 'cancelled') return false;
 
         // Stop all cron jobs
         this.stopAll();
