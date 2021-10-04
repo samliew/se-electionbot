@@ -88,4 +88,67 @@ describe('ScheduledAnnouncement', () => {
             expect(status).to.be.true;
         });
     });
+
+    describe('announceWinners', () => {
+
+        let ann = new ScheduledAnnouncement(config, room, election, scraper);
+        afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
+
+        it('should return false on no election passed', async () => {
+            const status = await ann.announceWinners(room);
+            expect(status).to.be.false;
+        });
+
+        it('should return false if election is not ended', async () => {
+            election.phase = "cancelled";
+            const status = await ann.announceWinners(room, election);
+            expect(status).to.be.false;
+        });
+
+        it('should return false if election is ended without winners', async () => {
+            election.phase = "ended";
+            const status = await ann.announceWinners(room, election);
+            expect(status).to.be.false;
+        });
+
+        it('should return false if already announced', async () => {
+            ann.config = getMockBotConfig({
+                flags: {
+                    announcedWinners: true,
+                    saidElectionEndingSoon: true
+                }
+            });
+
+            election.arrWinners.push(getMockNominee());
+            election.phase = "ended";
+
+            const status = await ann.announceWinners(room, election);
+            expect(status).to.be.false;
+        });
+
+        it('should correctly announce winners', async () => {
+            election.arrWinners.push(getMockNominee({ userName: "Jeanne" }));
+            election.phase = "ended";
+
+            await new Promise(async (res, rej) => {
+                Room["default"].prototype.sendMessage = (text) => {
+                    try {
+                        expect(text).to.match(/to the winner\*\*.+Jeanne/);
+                    } catch (error) {
+                        rej(error);
+                    }
+                };
+
+                const status = await ann.announceWinners(room, election);
+
+                try {
+                    expect(status).to.be.true;
+                } catch (error) {
+                    rej(error);
+                }
+
+                res(void 0);
+            });
+        });
+    });
 });
