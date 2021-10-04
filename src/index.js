@@ -413,13 +413,15 @@ import {
 
                 commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
                     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
-                    config.updateLastMessageTime(Date.now() + (+num * 6e4) - (throttle * 1e3));
-                    return `*silenced for ${num} mins*`;
+                    responseText = `*silenced for ${num} mins*`;
+                    config.updateLastMessage(responseText, Date.now() + (+num * 6e4) - (throttle * 1e3));
+                    return responseText;
                 }, AccessLevel.privileged);
 
                 commander.add("unmute", "allows the bot to speak immediately", (config) => {
-                    config.updateLastMessageTime(-1);
-                    return `I can speak freely again.`;
+                    responseText = `I can speak freely again.`;
+                    config.updateLastMessage(responseText);
+                    return responseText;
                 }, AccessLevel.privileged);
 
                 commander.add("get time", "gets current UTC time and the election phase time", ({ phase, dateElection }) => {
