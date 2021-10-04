@@ -49,9 +49,11 @@ const updateRelativeDates = () => {
     var spans = document.querySelectorAll('span.relativetime');
     spans.forEach(el => {
         if (el.title) {
+            var prefix = el.dataset.prefix || "";
+            var suffix = el.dataset.suffix || "";
             var date = dateToRelativetime(el.title);
             if (date)
-                el.innerHTML = date;
+                el.innerHTML = prefix + date + suffix;
         }
     });
 }

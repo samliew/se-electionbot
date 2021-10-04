@@ -146,6 +146,7 @@ app.route('/')
                 },
                 heading: `Chatbot up and running.`,
                 data: {
+                    autoRefreshInterval: BOT_CONFIG.scrapeIntervalMins * 60,
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteUrl: ELECTION.siteUrl,
                     siteHostname: ELECTION.siteHostname,

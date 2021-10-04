@@ -86,7 +86,12 @@
             <h2>Bot Config</h2>
             {{#with botconfig}}
             <table>
-                <tr><td>isMuted</td><td>{{{boolean isMuted}}}</td></tr>
+                <tr><td>isMuted</td><td>
+                    {{{boolean isMuted}}}
+                    {{#if isMuted}}
+                    <span class="relativetime" title="{{utcTimestamp muteEndDate}}" data-prefix="ends "></span>
+                    {{/if}}
+                </td></tr>
                 <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
                 <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
                 <tr><td>duplicateResponseText</td><td>{{duplicateResponseText}}</td></tr>
@@ -126,3 +131,5 @@
 </main>
 
 {{/with}}
+
+ <meta http-equiv="refresh" content="{{data/autoRefreshInterval}}" />
