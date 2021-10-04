@@ -77,6 +77,10 @@ export default class Election {
         this._prevObj = null;
     }
 
+    /**
+     * @summary returns previous Election state
+     * @returns {{ [P in keyof Election as Election[P] extends Function ? never : P ]: Election[P]} | null}
+     */
     get prev() {
         return this._prevObj;
     }
@@ -123,7 +127,7 @@ export default class Election {
      */
     get newNominees() {
         const { prev, arrNominees } = this;
-        const prevIds = prev.arrNominees.map(({ userId }) => userId);
+        const prevIds = (prev?.arrNominees || []).map(({ userId }) => userId);
         return arrNominees.filter(({ userId }) => !prevIds.includes(userId));
     }
 
@@ -133,7 +137,7 @@ export default class Election {
      */
     get newWinners() {
         const { prev, arrWinners } = this;
-        const prevIds = prev.arrWinners.map(({ userId }) => userId);
+        const prevIds = (prev?.arrWinners || []).map(({ userId }) => userId);
         return arrWinners.filter(({ userId }) => !prevIds.includes(userId));
     }
 
