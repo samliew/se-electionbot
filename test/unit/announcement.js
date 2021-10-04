@@ -46,12 +46,10 @@ describe('ScheduledAnnouncement', () => {
 
         it('should send message and return true on all conditions matching', async () => {
             const mockReason = "for some reason";
+            election.phase = "cancelled";
+            election.cancelledText = mockReason;
 
-            const cancelled = new Election("https://stackoverflow.com/election/12");
-            cancelled.phase = "cancelled";
-            cancelled.cancelledText = mockReason;
-
-            const ann = new ScheduledAnnouncement(config, room, cancelled, scraper);
+            const ann = new ScheduledAnnouncement(config, room, election, scraper);
 
             await new Promise(async (res, rej) => {
                 Room["default"].prototype.sendMessage = (text) => {
@@ -62,7 +60,7 @@ describe('ScheduledAnnouncement', () => {
                     }
                 };
 
-                const status = await ann.announceCancelled(room, cancelled);
+                const status = await ann.announceCancelled(room, election);
 
                 try {
                     expect(status).to.be.true;
@@ -80,8 +78,6 @@ describe('ScheduledAnnouncement', () => {
             const names = ["Jane", "John"];
 
             const nominees = names.map((userName) => getMockNominee({ userName }));
-
-            const election = new Election("https://stackoverflow.com/election/12");
             election.arrNominees.push(...nominees);
 
             const ann = new ScheduledAnnouncement(config, room, election, scraper);
