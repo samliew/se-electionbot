@@ -334,8 +334,8 @@ import {
             // TODO: make a part of User
             /** @type {[Set<number>, number][]} */
             const userLevels = [
-                [config.adminIds, AccessLevel.admin],
-                [config.devIds, AccessLevel.dev]
+                [config.devIds, AccessLevel.dev],
+                [config.adminIds, AccessLevel.admin]
             ];
 
             const [, access] = userLevels.find(([ids]) => ids.has(user.id)) || [, AccessLevel.user];
