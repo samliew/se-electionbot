@@ -141,6 +141,7 @@ app.route('/')
 
             res.render('index', {
                 page: {
+                    appName: process.env.HEROKU_APP_NAME,
                     title: "Home"
                 },
                 heading: `Chatbot up and running.`,
@@ -203,6 +204,7 @@ app.route('/say')
 
             res.render('say', {
                 page: {
+                    appName: process.env.HEROKU_APP_NAME,
                     title: "Privileged Say"
                 },
                 heading: `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
@@ -263,6 +265,7 @@ app.route('/config')
 
             res.render('config', {
                 page: {
+                    appName: process.env.HEROKU_APP_NAME,
                     title: "Config"
                 },
                 heading: `Update ElectionBot environment variables`,
