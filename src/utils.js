@@ -3,6 +3,7 @@ import cheerio from 'cheerio';
 import entities from 'html-entities';
 import { get } from 'https';
 import Cache from "node-cache";
+import sanitize from "sanitize-html";
 import { URL } from "url";
 import { matchNumber } from "./utils/expressions.js";
 
@@ -40,7 +41,46 @@ let _apiBackoff = Date.now();
  * }} APIListResponse
  */
 
+/**
+ * @summary escapes text to HTML-encoded string
+ * @param {string} text unescaped text
+ * @returns {string}
+ */
+export const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+/**
+ * @summary unescapes HTML-encoded text
+ * @param {string} text escaped text
+ * @returns {string}
+ */
+export const unescape = (text) => text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+
+/**
+ * @summary converts HTML to plain text
+ * @param {string} html html to textify
+ * @returns {string}
+ */
+export const textify = (html) => html ? entities.decode(sanitize(html)) : "";
+
+/**
+ * @summary converts HTML tags to markdown
+ * @param {string} text text to convert
+ * @param {Record<string,string>} tags map of tag -> conversion
+ * @returns {string}
+ */
+export const markdownify = (text, tags = {}) => {
+    return Object.entries(tags)
+        .reduce(
+            (acc, [tag, replacement]) => acc.replace(new RegExp(`<\\/?${tag}>`, "g"), replacement),
+            text
+        );
+};
+
+/**
+ * @summary converts HTML to chat Markdown
+ * @param {string} content initial text
+ * @returns {string}
+ */
 export const htmlToChatMarkdown = (content) => {
     content = content.trim();
 
@@ -48,18 +88,20 @@ export const htmlToChatMarkdown = (content) => {
 
     // Has <pre> fixed-font blocks
     if (/^\s*&lt;pre class="full"&gt;/.test(content)) {
-        return content
-            .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+        return unescape(content)
             .replace(/($\s*<pre class="full">|<\/pre>$)/, '').replace(/(?:^|(?:\r\n))/gm, '    ');
     }
 
-    return entities.decode(content
-        .replace(/<\/?b>/g, '**')
-        .replace(/<\/?i>/g, '*')
-        .replace(/<\/?strike>/g, '---')
-        .replace(/<a href="([^"]+)">([^<]+)<\/a>/g, `[$2]($1)`)
-        .replace(/(^\s+|\s+$)/g, '')
-        .replace(/<[^>]+>/g, '')
+    return entities.decode(
+        markdownify(
+            sanitize(
+                content.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, makeURL("$2", "$1")).trim(),
+                { allowedTags: ["b", "i", "strike"] }
+            ), {
+            "b": "**",
+            "i": "*",
+            "strike": "---"
+        })
     );
 };
 export const chatMarkdownToHtml = (content) => {
@@ -74,7 +116,7 @@ export const chatMarkdownToHtml = (content) => {
 
     const markdownMini = function (content) {
         // Message is a full fixed-font block
-        if (content = content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"), /[\n\r]/.test(content)) {
+        if (content = escape(content), /[\n\r]/.test(content)) {
             const o = !/^ {0,3}[^ ]/m.test(content);
             return o ? "<pre class='full'>" + content.replace(/^    /gm, "") + "</pre>" : "<div>" + content.replace(/\r\n?|\n/g, "<br/>") + "</div>";
         }
@@ -86,9 +128,6 @@ export const chatMarkdownToHtml = (content) => {
     };
 
     return markdownMini(content);
-};
-export const htmlToPlainText = (content) => {
-    return content ? entities.decode(content.replace(/<[^>]+>/g, "")) : "";
 };
 
 
@@ -178,7 +217,7 @@ export const fetchChatTranscript = async (config, url) => {
 
         const messageText = messageElem.text()?.trim();
         // Strip HTML from chat message
-        const messageMarkup = htmlToChatMarkdown(messageElem.html()?.trim());
+        const messageMarkup = htmlToChatMarkdown(messageElem.html()?.trim() || "");
 
         const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [, null, null, null];
         const hour = h && apm ? (
@@ -246,7 +285,7 @@ export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) =
         messages.push({
             username: item.user_name,
             chatUserId: item.user_id,
-            message: htmlToPlainText(item.content),
+            message: textify(item.content),
             messageMarkup: htmlToChatMarkdown(item.content),
             date: item.time_stamp,
             messageId: item.message_id
