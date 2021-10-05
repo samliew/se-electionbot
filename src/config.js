@@ -65,6 +65,9 @@ export class BotConfig {
         this._throttleSecs = newValue > this.minThrottleSecs ? newValue : this.minThrottleSecs;
     }
 
+    // determines if the bot will listen to messages from self
+    ignoreSelf = JSON.parse(process.env.IGNORE_SELF?.toLowerCase() || "true");
+
     // Variable to store time of last message in the room (by anyone, including bot), for idle checking purposes
     lastActivityTime = Date.now();
     // Variable to store time of last bot sent message, for throttling and muting purposes

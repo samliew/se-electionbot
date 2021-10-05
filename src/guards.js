@@ -196,3 +196,13 @@ export const isHatingTheBot = (text) => {
 export const isAskedForUserEligibility = (text) => {
     return /^(?:can|is) user \d+(?: be)? (?:eligible|(?:nominate|electe)d?)/i.test(text);
 };
+
+/**
+ * @fun
+ * @summary checks if a message is asking how many mods it takes to change a lightbulb
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutLightbulb = (text) => {
+    return /how m(?:any|uch) mods(?: does)? it takes? to fix(?: a| the)? lightbulb/i.test(text);
+};
