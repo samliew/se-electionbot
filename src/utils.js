@@ -40,7 +40,18 @@ let _apiBackoff = Date.now();
  * }} APIListResponse
  */
 
+/**
+ * @summary unescaped HTML-encoded text
+ * @param {string} text escaped text
+ * @returns {string}
+ */
+export const unescape = (text) => text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 
+/**
+ * @summary converts HTML to chat Markdown
+ * @param {string} content initial text
+ * @returns {string}
+ */
 export const htmlToChatMarkdown = (content) => {
     content = content.trim();
 
@@ -48,8 +59,7 @@ export const htmlToChatMarkdown = (content) => {
 
     // Has <pre> fixed-font blocks
     if (/^\s*&lt;pre class="full"&gt;/.test(content)) {
-        return content
-            .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+        return unescape(content)
             .replace(/($\s*<pre class="full">|<\/pre>$)/, '').replace(/(?:^|(?:\r\n))/gm, '    ');
     }
 
@@ -178,7 +188,7 @@ export const fetchChatTranscript = async (config, url) => {
 
         const messageText = messageElem.text()?.trim();
         // Strip HTML from chat message
-        const messageMarkup = htmlToChatMarkdown(messageElem.html()?.trim());
+        const messageMarkup = htmlToChatMarkdown(messageElem.html()?.trim() || "");
 
         const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [, null, null, null];
         const hour = h && apm ? (
