@@ -4,7 +4,7 @@ import entities from 'html-entities';
 import { get } from 'https';
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
-import { URL } from "url";
+import { getUserAssociatedAccounts } from "./api.js";
 import { matchNumber } from "./utils/expressions.js";
 import { numericNullable } from "./utils/objects.js";
 
@@ -532,22 +532,18 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         const networkUserId = matchNumber(/(\d+)/, networkUserUrl);
         console.log(`Network user url: ${networkUserUrl}`, networkUserId);
 
-        const url = new URL(`${apiBase}/${apiVer}/users/${networkUserId}/associated`);
-        url.search = new URLSearchParams({
-            pagesize: "100",
-            types: "main_site",
-            filter: "!myEHnzbmE0",
-            key: apiKey
-        }).toString();
+        // do not event attempt to fetch network accounts for nobody
+        if (networkUserId === void 0) {
+            return null;
+        }
 
-        // Fetch network accounts via API to get the account of the site we want
-        const { items = [] } = /** @type {APIListResponse} */(await fetchUrl(config, url.toString())) || {};
+        const networkAccounts = await getUserAssociatedAccounts(config, networkUserId, config.apiKeyPool);
 
-        const siteAccount = items.find(({ site_url }) => site_url.includes(hostname));
+        const siteAccount = networkAccounts.find(({ site_url }) => site_url.includes(hostname));
         console.log(`Site account: ${JSON.stringify(siteAccount || {})}`);
 
         //successful response from the API, but no associated account found
-        if (!siteAccount && items.length) return NO_ACCOUNT_ID;
+        if (!siteAccount && networkAccounts.length) return NO_ACCOUNT_ID;
 
         return numericNullable(siteAccount, "user_id");
     }
