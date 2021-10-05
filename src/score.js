@@ -220,10 +220,9 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             }
         }
         // Does not meet minimum requirements
-        else if (!isEligible) {
+        else if (!isEligible && repNominate !== void 0) {
             responseText = `You are not eligible to nominate yourself in the election`;
 
-            // @ts-expect-error FIXME
             const isUnderRep = reputation < repNominate;
 
             // Not enough rep
