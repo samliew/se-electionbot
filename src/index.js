@@ -314,8 +314,11 @@ import {
 
             const { eventType, userId, targetUserId } = msg;
 
-            // Ignore events from self, Community or Feeds users
-            if (me.id === userId || userId <= 0) return;
+            // Ignore events from self
+            if (config.ignoreSelf && me.id === userId) return;
+
+            // Ignore events Community or Feeds users
+            if (userId <= 0) return;
 
             // Ignore events from ignored users
             if (config.ignoredUserIds.has(userId)) return;
