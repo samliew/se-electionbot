@@ -74,7 +74,7 @@ const handlebarsConfig = {
             return `<span class="${data || data === 'yes' ? 'yes' : 'no'}">${data || data === 'yes' ? 'yes' : 'no'}</span>`;
         },
         required: function (data) {
-            return `<span class="${data || data === 'yes' ? 'required' : ''}">${data || data === 'required' ? 'required' : ''}</span>`;
+            return `<span class="${data || data === 'required' ? 'required' : ''}">${data || data === 'required' ? 'required' : ''}</span>`;
         }
     },
 };

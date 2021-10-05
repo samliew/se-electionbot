@@ -49,7 +49,7 @@ ul {
 }
 
 li {
-  margin: 0.5em 0;
+  margin: 0.2em 0;
 }
 
 td .list {
@@ -89,7 +89,7 @@ td {
 
 th,
 td {
-  min-width: 140px;
+  min-width: 120px;
   vertical-align: top;
 }
 

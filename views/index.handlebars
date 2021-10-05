@@ -73,6 +73,45 @@
                     {{/if}}
                 </tr>
             </table>
+
+            <table>
+                <tr><td>Current Mods</td>
+                    {{#if currentSiteMods.length}}
+                    <td><ul class="list">
+                        {{#each currentSiteMods}}
+                        <li class="item"><a href="{{this.link}}">{{this.display_name}}</a></li>
+                        {{/each}}
+                    </ul></td>
+                    {{else}}
+                    <td></td>
+                    {{/if}}
+                </tr>
+                <tr>
+                    <td>Badges</td>
+                    <td>
+                        <table class="nested">
+                            <thead>
+                                <tr>
+                                    <th>Link</th>
+                                    <th>Id</th>
+                                    <th>Type</th>
+                                    {{#if isStackOverflow}}<th>Required</th>{{/if}}
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {{#each electionBadges}}
+                            <tr>
+                                <td><a href="{{@root/data/siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
+                                <td>{{this.badge_id}}</td>
+                                <td>{{this.type}}</td>
+                                {{#if ../isStackOverflow}}<td>{{{required this.required}}}</td>{{/if}}
+                            </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
             {{/with}}
         </aside>
     </section>
@@ -139,52 +178,6 @@
                     {{/unless}}
                 </td></tr>
                 <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
-            </table>
-            {{/with}}
-        </aside>
-    </section>
-
-    <section>
-        <aside>
-            <h2>Additional Site Info</h2>
-            {{#with election}}
-            <table>
-                <tr><td>Current Mods</td>
-                    {{#if currentSiteMods.length}}
-                    <td><ul class="list">
-                        {{#each currentSiteMods}}
-                        <li class="item"><a href="{{this.link}}">{{this.display_name}}</a></li>
-                        {{/each}}
-                    </ul></td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
-                <tr>
-                    <td>Badges</td>
-                    <td>
-                        <table class="nested">
-                            <thead>
-                                <tr>
-                                    <th>Link</th>
-                                    <th>Id</th>
-                                    <th>Type</th>
-                                    {{#if isStackOverflow}}<th>Required</th>{{/if}}
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {{#each electionBadges}}
-                            <tr>
-                                <td><a href="{{@root/data/siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
-                                <td>{{this.badge_id}}</td>
-                                <td>{{this.type}}</td>
-                                {{#if isStackOverflow}}<td>{{{required this.required}}}</td>{{/if}}
-                            </tr>
-                            {{/each}}
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
             </table>
             {{/with}}
         </aside>
