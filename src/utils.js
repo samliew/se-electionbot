@@ -6,6 +6,7 @@ import Cache from "node-cache";
 import sanitize from "sanitize-html";
 import { URL } from "url";
 import { matchNumber } from "./utils/expressions.js";
+import { numericNullable } from "./utils/objects.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
@@ -506,12 +507,13 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         if (!linkedHref) return null;
 
         // ensure the parse won't break if SE stops using protocol-relative URLs
-        const linkedUserUrl = linkedHref.replace(/^\/\//, "https://");
+        const linkedUserUrl = linkedHref.replace(/^\/\//, "https://") || "";
         console.log(`Linked site user url: ${linkedUserUrl}`);
 
         // Linked site is the one we wanted, return site userid
-        // @ts-expect-error FIXME
-        if (linkedUserUrl.includes(hostname)) return +((linkedUserUrl.match(/\d+/))[0]);
+        if (linkedUserUrl.includes(hostname)) {
+            return matchNumber(/(\d+)/, linkedUserUrl) || null;
+        }
 
         // Linked site is not the one we wanted
         // Fetch linked site profile page to get network link
@@ -520,9 +522,8 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
 
         const $profile = cheerio.load(/** @type {string} */(linkedUserProfilePage));
 
-        const networkUserUrl = $profile('#profiles-menu a[href^="https://stackexchange.com/users/"]').attr("href");
-        // @ts-expect-error FIXME
-        const networkUserId = +(networkUserUrl.match(/\d+/));
+        const networkUserUrl = $profile('#profiles-menu a[href^="https://stackexchange.com/users/"]').attr("href") || "";
+        const networkUserId = matchNumber(/(\d+)/, networkUserUrl);
         console.log(`Network user url: ${networkUserUrl}`, networkUserId);
 
         const url = new URL(`${apiBase}/${apiVer}/users/${networkUserId}/associated`);
@@ -543,8 +544,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         //successful response from the API, but no associated account found
         if (!siteAccount && items.length) return NO_ACCOUNT_ID;
 
-        // @ts-expect-error FIXME
-        return +siteAccount?.user_id || null;
+        return numericNullable(siteAccount, "user_id");
     }
     catch (e) {
         console.error(e);
