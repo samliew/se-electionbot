@@ -5,7 +5,6 @@
     "main": "src/index.js",
     "scripts": {
         "typecheck": "tsc --noEmit -p ./tsconfig.json",
-        "postinstall": "patch-package",
         "build": "rimraf dist/ && babel src/ --out-dir dist/",
         "start": "node dist/index.js",
         "dev": "babel-node src/index.js",
