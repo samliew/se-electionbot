@@ -77,7 +77,7 @@ export const isAskedForCurrentWinners = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCurrentPositions = (text) => {
-    return /^how many (?:positions|mod(?:erator)?s) (?:are|were|will be)(?: being)? elected/i.test(text);
+    return /^how many (?:positions|mod(?:erator)?s) (?:are|were|will be)(?: being)? (?:elected|there)/i.test(text);
 };
 
 /**

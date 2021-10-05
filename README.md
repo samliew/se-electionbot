@@ -31,7 +31,7 @@ Current election info:
 - when is the election ending
 - who are the candidates/nominees
 - who are the winners/new moderators
-- how many positions are elected
+- how many positions are there
 - how many users voted/participated
 - why was a nomination removed
 

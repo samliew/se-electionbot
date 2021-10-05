@@ -173,13 +173,10 @@ export default class Rescraper {
                 }
             }
 
-            // Remind users that bot is around to help when:
-            //    1. Room is idle, and there was at least some previous activity, and last message more than lowActivityCheckMins minutes ago
-            // or 2. If on SO-only, and no activity for a few hours, and last message was not posted by the bot
+            // If room is idle, remind users that bot is around to help
             else if (config.idleCanSayHi) {
 
-                console.log(`RESCRAPER - Room is inactive with ${config.activityCounter} messages posted so far (min ${config.minActivityCountThreshold}).`,
-                    `----------- Last activity ${config.lastActivityTime}; Last bot message ${config.lastMessageTime}`);
+                console.log(`RESCRAPER - Room is inactive with ${config.activityCounter} messages posted so far (min ${config.minActivityCountThreshold}).`);
 
                 await sendMessage(config, room, sayHI(election), null, true);
 

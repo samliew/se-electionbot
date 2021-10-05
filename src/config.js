@@ -33,9 +33,9 @@ export class BotConfig {
         return activityCounter >= minActivityCountThreshold;
     }
 
-    // Variable to determine how long the room needs to be quiet - used by roomBecameIdleAWhileAgo
+    // Variable to determine how long the room needs to be quiet to be idle - used by roomBecameIdleAWhileAgo
     shortIdleDurationMins = 4;
-    // Variable to determine how long the room needs to be quiet - used by roomBecameIdleHoursAgo
+    // Variable to determine how long the room needs to be quiet to be idle - used by roomBecameIdleHoursAgo
     longIdleDurationHours = 12;
     // Variable to trigger greeting only after this time of inactivity - used by botHasBeenQuiet
     lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 15);
@@ -92,6 +92,8 @@ export class BotConfig {
     }
 
     // Can the bot send an idle greeting
+    //    1. Room is idle, and there was at least some previous activity, and last bot message more than lowActivityCheckMins minutes ago
+    // or 2. If no activity for a few hours, and last message was not posted by the bot
     get idleCanSayHi() {
         const { roomBecameIdleAWhileAgo, roomReachedMinimumActivityCount, botHasBeenQuiet, roomBecameIdleHoursAgo, botSentLastMessage } = this;
 

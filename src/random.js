@@ -35,7 +35,7 @@ export class RandomArray extends Array {
 export const getRandomModal = () => new RandomArray(`want to`, `have to`, `ought to`, `gotta`, `must`).getRandom();
 export const getRandomPlop = () => new RandomArray(`I'm back.`, `*plop*`, `I am reborn`, `Hello world!`, `mic check`, `testing 1, 2, 3`).getRandom();
 export const getRandomOops = () => new RandomArray(`very funny,`, `oops!`, `hmm...`, `hey,`, `sorry,`).getRandom();
-export const getRandomSecret = () => new RandomArray(
+export const getRandomSecretPrefix = () => new RandomArray(
     `don't tell anyone I said this, but`,
     `I'm not supposed to say this, but`,
     `*shhh...*`,
@@ -52,6 +52,8 @@ export const getRandomNegative = () => new RandomArray(
     `I want to be alone.`,
     `Well, nobody's perfect.`,
     `You can't handle the truth!`,
+    `So you want to play this game?`,
+    `Am I supposed to feel bad about that?`,
     `Frankly, my dear, I don't give a damn.`,
     `What we've got here is a small misunderstanding.`,
 ).getRandom();

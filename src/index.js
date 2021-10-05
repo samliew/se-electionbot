@@ -21,7 +21,7 @@ import {
     sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
-import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecret, RandomArray } from "./random.js";
+import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import Announcement from './ScheduledAnnouncement.js';
 import { makeCandidateScoreCalc } from "./score.js";
@@ -363,10 +363,10 @@ import {
             /*
              * As multiple events are emitted when user is mentioned or message is replied-to,
              * we now only listen to the NEW_MESSAGE event and figure out whether bot is being mentioned using this method.
-             * Potentially do not need "targetUserId === me.id" as that is only used by the USER_MENTIONED (8) or message reply (18) event.
+             * * Potentially do not need "targetUserId === me.id" as that is only used by the USER_MENTIONED (8) or message reply (18) event.
              * Test is done against "originalMessage", since "content" holds the normalised version for keyword/guard matching
              */
-            const botMentioned = /^\s*@ElectionBot /i.test(originalMessage) || targetUserId === me.id;
+            const botMentioned = new RegExp(`^\\s*@(?:${me.name}|ElectionBot) `).test(originalMessage) || targetUserId === me.id;
 
 
             /*
@@ -656,7 +656,7 @@ import {
                     responseText = `${user.name} is the best mod!!!`;
                 }
                 else {
-                    const pool = currModNames.map(name => `${getRandomSecret()} ${name} is the best mod!`);
+                    const pool = currModNames.map(name => `${getRandomSecretPrefix()} ${name} is the best mod!`);
                     responseText = new RandomArray(...pool).getRandom();
                 }
             }

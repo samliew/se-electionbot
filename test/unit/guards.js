@@ -155,7 +155,9 @@ describe('Message Guards', () => {
             allMatch(isAskedForCurrentPositions, [
                 // https://chat.stackoverflow.com/transcript/message/53095011#53095011
                 "How many mods are being elected this time around?",
+                "how many positions are there",
                 "how many positions are elected",
+                "how many positions will be elected",
                 "how many mods are elected today?",
                 "how many moderators are elected",
                 "how many mods will be elected?",
@@ -163,7 +165,13 @@ describe('Message Guards', () => {
             ]);
 
             allMatch(isAskedForCurrentPositions, [
-                "who moderators are?"
+                "who moderators are?",
+                "who are the mods",
+                "who are the moderators",
+                "where can i find the mods",
+                "how do i find the mods",
+                "where to contact the mods",
+                "how to contact the mods",
             ], false);
         });
     });
