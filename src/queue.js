@@ -1,7 +1,7 @@
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
- * @typedef {import("chatexchange/dist/WebSocketEvent").WebsocketEvent} WebsocketEvent
+ * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} WebsocketEvent
  */
 
 import { wait } from "./utils.js";
