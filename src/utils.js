@@ -75,7 +75,7 @@ export const htmlToChatMarkdown = (content) => {
             .replace(/<\/?b>/g, '**')
             .replace(/<\/?i>/g, '*')
             .replace(/<\/?strike>/g, '---')
-            .replace(/<a href="([^"]+)">([^<]+)<\/a>/g, `[$2]($1)`)
+            .replace(/<a href="([^"]+)">([^<]+)<\/a>/g, makeURL("$2", "$1"))
             .trim()
             .replace(/<[^>]+>/g, '')
     );
