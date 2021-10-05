@@ -71,7 +71,7 @@ const handlebarsConfig = {
             return `<span class="${data || data === 'true' ? 'truthy' : 'falsy'}">${data}</span>`;
         },
         yesno: function (data) {
-            return `<span class="${data || data === 'yes' ? 'yes' : 'no'}">${data === 'yes' ? 'yes' : 'no'}</span>`;
+            return `<span class="${data || data === 'yes' ? 'yes' : 'no'}">${data || data === 'yes' ? 'yes' : 'no'}</span>`;
         }
     },
 };
