@@ -42,8 +42,10 @@ export const htmlToChatMarkdown = (content) => {
     if (!content) return "";
 
     // Has <pre> fixed-font blocks
-    if (content.trim().startsWith('<pre ')) {
-        return content.replace(/($<pre(?: class="full")>|<\/pre>$)/, '').replace(/(?:^|(?:\r\n))/gm, '    ');
+    if (content.trim().test(/^\s*&lt;pre class="full"&gt;/)) {
+        return content
+            .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+            .replace(/($\s*<pre class="full">|<\/pre>$)/, '').replace(/(?:^|(?:\r\n))/gm, '    ');
     }
 
     return entities.decode(content
