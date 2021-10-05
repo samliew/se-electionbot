@@ -183,6 +183,7 @@ import {
 
         // Get current site mods via API
         const currentSiteMods = await getModerators(config, election.apiSlug, getStackApiKey(apiKeyPool));
+        election.currentSiteMods = currentSiteMods;
 
         // Wait for election page to be scraped
         await election.scrapeElection(config);
@@ -658,10 +659,11 @@ import {
                 const currModNames = currentSiteMods.map(({ display_name }) => display_name);
 
                 if (user.isModerator && currModNames.includes(user.name)) {
-                    responseText = `${user.name} is the best mod!!!`;
+                    responseText = `${entities.decode(user.name)} is the best mod!!!`;
                 }
                 else {
-                    const pool = currModNames.map(name => `${getRandomSecretPrefix()} ${name} is the best mod!`);
+                    const activeMods = currentSiteMods.filter(({ last_access_date }) => new Date(last_access_date).getTime() + 86400000 > Date.now());
+                    const pool = activeMods.map(({ display_name }) => `${getRandomSecretPrefix()} ${display_name} is the best mod!`);
                     responseText = new RandomArray(...pool).getRandom();
                 }
             }

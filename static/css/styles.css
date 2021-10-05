@@ -185,7 +185,7 @@ form button {
 }
 
 .dashboard section {
-  flex: 1 1 calc(45% - var(--margin-size));
+  flex: 1 1 calc(33% - var(--margin-size));
   max-width: 620px;
   margin-right: var(--margin-size);
 }

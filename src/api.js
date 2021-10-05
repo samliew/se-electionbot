@@ -92,8 +92,13 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
 
 /**
  * @typedef {{
- *  is_employee: boolean,
  *  account_id: number,
+ *  user_id: number,
+ *  is_employee: boolean,
+ *  last_access_date: Date,
+ *  creation_date: Date,
+ *  reputation: number,
+ *  link: string,
  *  display_name: string
  * }} ModeratorInfo
  *
