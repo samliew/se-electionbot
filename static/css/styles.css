@@ -76,6 +76,11 @@ pre {
     margin: 0;
     overflow: auto;
     font-size: 0.8em;
+    background: #e6e6e6;
+    padding: 3px 6px;
+
+    white-space: pre-line;
+    word-break: break-word;
 }
 td:empty:before,
 pre:empty:before {

@@ -38,18 +38,49 @@ let _apiBackoff = Date.now();
  */
 
 
-const htmlToChatMarkup = (content) => {
-    return content ? entities.decode(content
+export const htmlToChatMarkdown = (content) => {
+    if (!content) return "";
+
+    // Has <pre> fixed-font blocks
+    if (content.trim().startsWith('<pre ')) {
+        return content.replace(/($<pre(?: class="full")>|<\/pre>$)/, '').replace(/(?:^|(?:\r\n))/gm, '    ');
+    }
+
+    return entities.decode(content
         .replace(/<\/?b>/g, '**')
         .replace(/<\/?i>/g, '*')
         .replace(/<\/?strike>/g, '---')
         .replace(/<a href="([^"]+)">([^<]+)<\/a>/g, `[$2]($1)`)
         .replace(/(^\s+|\s+$)/g, '')
-        .replace(/<pre(?: class='full')?(.+)(?:\r|\n)+>/g, "    $1")
-        .replace(/<[^>]+>/g, "")
-    ) : "";
+        .replace(/<[^>]+>/g, '')
+    );
 };
-const htmlToPlainText = (content) => {
+export const chatMarkdownToHtml = (content) => {
+    if (!content) return "";
+
+    // from https://cdn-chat.sstatic.net/chat/Js/master-chat.js
+    const e = /(^|.(?=\*)|[\s,('"[{-])(?:\*\*|__)(?=\S)(.+?\S)(?:\*\*|__(?=[\s,?!.;:)\]}-]|$))/g,
+        t = /(^|.(?=\*)|[\s,('">[{-])(?:\*|_)(?=\S)(.+?\S)(?:\*|_(?=[\s,?!.;:)<\]}-]|$))/g,
+        s = /(^|[\s,('">[{-])---(?=\S)(.+?\S)---(?=[\s,?!.;:)<\]}-]|$)/g,
+        a = /(^|\W|_)(`+)(?!\s)(.*?[^`])\2(?!`)/g,
+        i = /(^|\s)\[([^\]]+)\]\(((?:https?|ftp):\/\/(?:\([^()\s]*\)|[^)\s])+?)(?:\s(?:"|&quot;)([^"]+?)(?:"|&quot;))?\)/g;
+
+    const markdownMini = function (content) {
+        // Message is a full fixed-font block
+        if (content = content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"), /[\n\r]/.test(content)) {
+            const o = !/^ {0,3}[^ ]/m.test(content);
+            return o ? "<pre class='full'>" + content.replace(/^    /gm, "") + "</pre>" : "<div>" + content.replace(/\r\n?|\n/g, "<br/>") + "</div>";
+        }
+        // Markdown mini to HTML
+        return content = content.replace(/\\`/g, "&#96;"), content = content.replace(/\\\*/g, "&#42;"), content = content.replace(/\\_/g, "&#95;"),
+            content = content.replace(/\\\[/g, "&#91;"), content = content.replace(/\\\]/g, "&#93;"), content = content.replace(/\\\(/g, "&#40;"),
+            content = content.replace(/\\\)/g, "&#41;"), content = content.replace(a, "$1<code>$3</code>"), content = content.replace(e, "$1<b>$2</b>"),
+            content = content.replace(t, "$1<i>$2</i>"), content = content.replace(s, "$1<strike>$2</strike>"), content = content.replace(i, '$1<a href="$3" title="$4">$2</a>');
+    };
+
+    return markdownMini(content);
+};
+export const htmlToPlainText = (content) => {
     return content ? entities.decode(content.replace(/<[^>]+>/g, "")) : "";
 };
 
@@ -140,7 +171,7 @@ export const fetchChatTranscript = async (config, url) => {
 
         const messageText = messageElem.text()?.trim();
         // Strip HTML from chat message
-        const messageMarkup = htmlToChatMarkup(messageElem.html()?.trim());
+        const messageMarkup = htmlToChatMarkdown(messageElem.html()?.trim());
 
         const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [, null, null, null];
         const hour = h && apm ? (
@@ -209,7 +240,7 @@ export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) =
             username: item.user_name,
             chatUserId: item.user_id,
             message: htmlToPlainText(item.content),
-            messageMarkup: htmlToChatMarkup(item.content),
+            messageMarkup: htmlToChatMarkdown(item.content),
             date: item.time_stamp,
             messageId: item.message_id
         });

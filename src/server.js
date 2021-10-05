@@ -3,6 +3,7 @@ import Handlebars from 'express-handlebars';
 import { join } from 'path';
 import Election from './election.js';
 import { HerokuClient } from "./herokuClient.js";
+import { chatMarkdownToHtml } from './utils.js';
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
@@ -16,6 +17,32 @@ const handlebarsConfig = {
         ifNotEmpty: function (value, options) {
             return value > 0 || value.length ? options.fn(this) : options.inverse(this);
         },
+        ifCond: function (v1, operator, v2, options) {
+            switch (operator) {
+                case '==':
+                    return (v1 == v2) ? options.fn(this) : options.inverse(this);
+                case '===':
+                    return (v1 === v2) ? options.fn(this) : options.inverse(this);
+                case '!=':
+                    return (v1 != v2) ? options.fn(this) : options.inverse(this);
+                case '!==':
+                    return (v1 !== v2) ? options.fn(this) : options.inverse(this);
+                case '<':
+                    return (v1 < v2) ? options.fn(this) : options.inverse(this);
+                case '<=':
+                    return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+                case '>':
+                    return (v1 > v2) ? options.fn(this) : options.inverse(this);
+                case '>=':
+                    return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+                case '&&':
+                    return (v1 && v2) ? options.fn(this) : options.inverse(this);
+                case '||':
+                    return (v1 || v2) ? options.fn(this) : options.inverse(this);
+                default:
+                    return options.inverse(this);
+            }
+        },
         get: function (model, attributeName) {
             return model.get(attributeName);
         },
@@ -23,9 +50,6 @@ const handlebarsConfig = {
             if (!/^(https?:\/\/|\/)/.test(url)) return "";
             if (!text || typeof text !== 'string') text = url.replace(/^https?:\/\//, '');
             return `<a href="${url}">${text}</a>`;
-        },
-        utcNow: function () {
-            return new Date().toISOString().replace('T', ' ').replace(/\.\d+/, '') || "";
         },
         utcTimestamp: function (date) {
             const validateDate = (input) => {
@@ -163,6 +187,7 @@ app.route('/')
                 },
                 heading: `Chatbot up and running.`,
                 data: {
+                    utcNow: new Date().toISOString().replace('T', ' ').replace(/\.\d+/, ''),
                     autoRefreshInterval: BOT_CONFIG.scrapeIntervalMins * 60,
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteUrl: ELECTION.siteUrl,
@@ -184,6 +209,7 @@ app.route('/')
                         flags: BOT_CONFIG.flags,
                         // Activity stuff
                         lastBotMessage: BOT_CONFIG.lastBotMessage,
+                        lastBotMessageHtml: chatMarkdownToHtml(BOT_CONFIG.lastBotMessage),
                         activityCounter: BOT_CONFIG.activityCounter,
                         lowActivityCheckMins: BOT_CONFIG.lowActivityCheckMins,
                         shortIdleDurationMins: shortIdleDurationMins,
