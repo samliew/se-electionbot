@@ -4,11 +4,12 @@
   "description": "ElectionBot - a chatbot that answers commonly-asked questions in chat rooms about elections for sites on the Stack Exchange network.",
   "main": "src/index.js",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "postinstall": "patch-package",
     "build": "rimraf dist/ && babel src/ --out-dir dist/",
     "start": "node dist/index.js",
     "dev": "babel-node src/index.js",
-    "test": "mocha",
+    "test": "npm run typecheck && mocha",
     "coverage": "c8 mocha"
   },
   "author": {
