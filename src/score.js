@@ -99,7 +99,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
      */
     async (election, user, message, isSO = false) => {
         //TODO: decide how to avoid mutation
-        /** @type {{ userId: number|undefined, content: string }} */
+        /** @type {{ userId: number|null|undefined, content: string }} */
         let { userId, content } = message;
 
         if (isNaN(userId) || userId <= 0) {
@@ -137,7 +137,6 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
         else if (!isSO) {
-            // @ts-expect-error FIXME
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);
 
             // Unable to get user id on election site
