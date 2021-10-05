@@ -52,7 +52,7 @@ export const unescape = (text) => text.replace(/&lt;/g, "<").replace(/&gt;/g, ">
  * @param {string} text unsanitized text
  * @returns {string}
  */
-export const sanitize = (text) => text.replace(/<\/?script>/g, "").replace(/<[^>]+>|<script/g, '');
+export const sanitize = (text) => text.replace(/<\/?script>/g, "").replace(/<[^>]+>|<+(?:script)+/g, '');
 
 /**
  * @summary converts HTML to chat Markdown
