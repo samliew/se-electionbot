@@ -31,7 +31,7 @@ let _apiBackoff = Date.now();
  * }} ResItem
  *
  * @typedef {import("./config.js").BotConfig} BotConfig
- *
+ * @typedef {import("chatexchange/dist/Client").Host} Host
  * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
  *
  * @typedef {import("./index").ElectionBadge} ElectionBadge
@@ -301,20 +301,20 @@ export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) =
 };
 
 /**
+ * @typedef {{
+ *  userName: string,
+ *  userId: number,
+ *  userLink?: string,
+ *  isModerator: boolean
+ * }} RoomOwner
+ *
  * @summary get room owners for the room bot is in
  * @param {BotConfig} config bot configuration
- * @param {string|null} chatDomain
- * @param {string|number|null} chatRoomId
- * @returns {Promise<any>} array of chat users
- *
- * {
- *   userName,
- *   userId,
- *   userLink,
- *   isModerator
- * }
+ * @param {Host} [chatDomain]
+ * @param {string|number|null} [chatRoomId]
+ * @returns {Promise<RoomOwner[]>} array of chat users
  */
-export const fetchRoomOwners = async (config, chatDomain = null, chatRoomId = null) => {
+export const fetchRoomOwners = async (config, chatDomain, chatRoomId) => {
 
     // Default to values from config
     if (!chatDomain || !chatRoomId || isNaN(Number(chatRoomId))) {
@@ -557,7 +557,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
 /**
  * @typedef {{
  *  chatRoomUrl: string,
- *  chatDomain: string,
+ *  chatDomain: Host,
  *  chatRoomId?: number
  * }} DefaultRoomInfo
  *
