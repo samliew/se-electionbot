@@ -55,7 +55,7 @@ export class BotConfig {
     /* Bot variables */
 
     // To stop bot from replying to too many messages in a short time, maintain a throttle with minimum
-    minThrottleSecs = 1.5;
+    minThrottleSecs = 1;
     _throttleSecs = +(process.env.THROTTLE_SECS || this.minThrottleSecs);
 
     get throttleSecs() {
@@ -131,10 +131,6 @@ export class BotConfig {
     addAdmin(chatUserId) {
         this.adminIds.add(chatUserId);
         console.log(`User ${chatUserId} added as admin`);
-    }
-    addIgnoredUser(chatUserId) {
-        this.ignoredUserIds.add(chatUserId);
-        console.log(`User ${chatUserId} ignored`);
     }
 
     /* Flags and bot-specific utility functions */

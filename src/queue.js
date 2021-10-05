@@ -17,21 +17,30 @@ import { wait } from "./utils.js";
  */
 const _sendTheMessage = async function (config, room, responseText, inResponseTo = null, isPrivileged = false) {
 
+    const { debugOrVerbose } = config;
+
     const messageLength = responseText?.length || 0;
     const isInvalid = messageLength <= 0 || messageLength > 500;
 
     // Validate response
     if (isInvalid) {
-        if (config.verbose) console.log("RESPONSE (INVALID) - ", responseText);
+        if (debugOrVerbose) console.log("RESPONSE (INVALID) - ", responseText);
         return;
     }
 
-    // Log message
+    // Validate bot mute
+    if (!isPrivileged && config.isMuted) {
+        if (debugOrVerbose) console.log("RESPONSE (MUTED) - ", responseText);
+        return;
+    }
+
+    // Always log valid message
     console.log("RESPONSE - ", responseText);
 
     // Notify same previous message
     if (config.checkSameResponseAsPrevious(responseText)) {
         responseText = config.duplicateResponseText;
+        if (debugOrVerbose) console.log("RESPONSE (DUPE) - ", responseText);
     }
 
     // Send the message

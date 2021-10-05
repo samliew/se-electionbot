@@ -216,10 +216,10 @@ import {
             ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
         }
 
-        // Add room owners to list of admins (privileged users)
+        // Add non-mod room owners to list of admins (privileged users)
         const owners = await fetchRoomOwners(config);
         owners.forEach(user => {
-            config.addAdmin(user.userId);
+            if (!user.isModerator) config.addAdmin(user.userId);
         });
 
 

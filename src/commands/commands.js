@@ -88,9 +88,9 @@ export const setThrottleCommand = (content, config) => {
     const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
     const newThrottle = +match;
 
-    const isValidThrottle = !isNaN(newThrottle) && newThrottle >= 0;
+    const isValid = !isNaN(newThrottle) && newThrottle >= config.minThrottleSecs;
 
-    if (isValidThrottle) {
+    if (isValid) {
         config.throttleSecs = newThrottle;
         return `*throttle set to ${newThrottle} seconds*`;
     }

@@ -7,6 +7,7 @@
 <blockquote>
     <p>I am <strong><a href="https://github.com/samliew/se-electionbot">ElectionBot</a></strong>, a chatbot that can answer commonly-asked questions about elections for sites on the Stack Exchange network.</p>
     <p>This instance is listening to <strong>{{{url chatRoomUrl}}}</strong>.</p>
+    <p>Current time {{utcTimestamp utcNow}}; Last updated {{utcTimestamp election/updated}} <span class="relativetime" title="{{utcTimestamp election/updated}}"></span></p>
 </blockquote>
 
 <main class="dashboard">
@@ -17,11 +18,11 @@
             {{#with election}}
             <table>
                 <tr><td>Last updated</td><td>{{utcTimestamp updated}} <span class="relativetime" title="{{utcTimestamp updated}}"></span></td></tr>
-                <tr><td>Site name</td><td>{{siteName}}</td></tr>
-                <tr><td>Host name</td><td>{{{url siteUrl @root/data/siteHostname}}}</td></tr>
-                <tr><td>Title</td><td>{{{url electionUrl title}}}</td></tr>
-                <tr><td>Election ID</td><td>{{electionNum}}</td></tr>
-                <tr><td>Chat room</td>
+                <tr><td>Site</td><td>{{siteName}}</td></tr>
+                <tr><td>Hostname</td><td>{{{url siteUrl @root/data/siteHostname}}}</td></tr>
+                <tr><td>Election Title</td><td>{{title}}</td></tr>
+                <tr><td>Election URL</td><td>{{{url electionUrl electionUrl}}}</td></tr>
+                <tr><td>Election Chat</td>
                     {{#if chatUrl}}
                     <td>{{{url chatUrl}}}</td>
                     {{else}}

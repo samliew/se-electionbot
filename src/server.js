@@ -24,6 +24,9 @@ const handlebarsConfig = {
             if (!text || typeof text !== 'string') text = url.replace(/^https?:\/\//, '');
             return `<a href="${url}">${text}</a>`;
         },
+        utcNow: function () {
+            return new Date().toISOString().replace('T', ' ').replace(/\.\d+/, '') || "";
+        },
         utcTimestamp: function (date) {
             const validateDate = (input) => {
                 let output = input;
