@@ -103,7 +103,8 @@ th {
 
 /* Nested tables */
 table table {
-  margin: -7px ​-11px;
+  width: calc(100% + 22px);
+  margin: -7px -11px;
   font-size: 0.9em;
 }
 
@@ -273,6 +274,11 @@ form button {
     align-items: stretch;
     flex-direction: column;
     margin: 15px 0;
+  }
+
+  table table {
+    width: auto;
+    margin: 0;
   }
 
   table table tr {
