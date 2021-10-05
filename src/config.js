@@ -41,7 +41,7 @@ export class BotConfig {
     /* Low activity count variables */
 
     // Variable to trigger an action only after this amount of minimum messages
-    minActivityCountThreshold = +(process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 30);
+    minActivityCountThreshold = +(process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 20);
 
     get roomReachedMinimumActivityCount() {
         const { activityCounter, minActivityCountThreshold: minActivityCountThreshold } = this;
@@ -53,7 +53,7 @@ export class BotConfig {
     // Variable to determine how long the room needs to be quiet to be idle - used by roomBecameIdleHoursAgo
     longIdleDurationHours = 12;
     // Variable to trigger greeting only after this time of inactivity - used by botHasBeenQuiet
-    lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 15);
+    lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 10);
 
     get roomBecameIdleAWhileAgo() {
         return this.lastActivityTime + (this.shortIdleDurationMins * 6e4) < Date.now();
@@ -92,7 +92,7 @@ export class BotConfig {
     // Variable to track activity count in the room, to see if it reached minActivityCountThreshold
     activityCounter = 0;
     // Variable of rescrape interval of election page
-    scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS || 5);
+    scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS || 2);
     // Response when bot tries to post the exact same response again
     duplicateResponseText = "Please read my previous message...";
 
