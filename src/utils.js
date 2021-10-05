@@ -3,6 +3,7 @@ import cheerio from 'cheerio';
 import entities from 'html-entities';
 import { get } from 'https';
 import Cache from "node-cache";
+import sanitize from "sanitize-html";
 import { URL } from "url";
 import { matchNumber } from "./utils/expressions.js";
 
@@ -48,11 +49,18 @@ let _apiBackoff = Date.now();
 export const unescape = (text) => text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 
 /**
- * @summary performs rudimentary sanitation of input
- * @param {string} text unsanitized text
+ * @summary converts HTML tags to markdown
+ * @param {string} text text to convert
+ * @param {Record<string,string>} tags map of tag -> conversion
  * @returns {string}
  */
-export const sanitize = (text) => text.replace(/<\/?script>/g, "").replace(/<[^>]+>|<+(?:script)+/g, '');
+export const markdownify = (text, tags = {}) => {
+    return Object.entries(tags)
+        .reduce(
+            (acc, [tag, replacement]) => acc.replace(new RegExp(`<\\/?${tag}>`, "g"), replacement),
+            text
+        );
+};
 
 /**
  * @summary converts HTML to chat Markdown
@@ -71,14 +79,15 @@ export const htmlToChatMarkdown = (content) => {
     }
 
     return entities.decode(
-        sanitize(
-            content
-                .replace(/<\/?b>/g, '**')
-                .replace(/<\/?i>/g, '*')
-                .replace(/<\/?strike>/g, '---')
-                .replace(/<a href="([^"]+)">([^<]+)<\/a>/g, makeURL("$2", "$1"))
-                .trim()
-        )
+        markdownify(
+            sanitize(
+                content.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, makeURL("$2", "$1")).trim(),
+                { allowedTags: ["b", "i", "strike"] }
+            ), {
+            "b": "**",
+            "i": "*",
+            "strike": "---"
+        })
     );
 };
 export const chatMarkdownToHtml = (content) => {
