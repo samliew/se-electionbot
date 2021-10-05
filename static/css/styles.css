@@ -282,7 +282,7 @@ form button {
   }
 
   table table tr {
-    display: initial;
+    display: table-row;
     margin: initial;
   }
 
