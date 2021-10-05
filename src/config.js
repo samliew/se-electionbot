@@ -23,9 +23,8 @@ export class BotConfig {
      * @param {number} roomId room id this configuration is for
      */
     constructor(host, roomId) {
-        // Bot to later join live chat room if not in debug mode
-        this.chatRoomId = roomId;
         this.chatDomain = host;
+        this.chatRoomId = roomId;
     }
 
     scriptInitDate = new Date();

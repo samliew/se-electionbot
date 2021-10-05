@@ -206,7 +206,7 @@ import {
             // Default to site's default chat room
             else {
                 const defaultRoom = await getSiteDefaultChatroom(config, election.siteHostname);
-                if (defaultRoom && defaultRoom.chatRoomId) {
+                if (defaultRoom && defaultRoom.chatRoomId && defaultRoom.chatDomain) {
                     config.chatRoomId = defaultRoom.chatRoomId;
                     config.chatDomain = defaultRoom.chatDomain;
                 }
@@ -899,8 +899,8 @@ import {
     main();
 
 
-    // If running on Heroku
-    if (config.keepAlive || config.scriptHostname.includes('herokuapp')) {
+    // If keep alive or running on Heroku, and scriptHostname is defined
+    if (config.scriptHostname && (config.keepAlive || config.scriptHostname.includes('herokuapp'))) {
 
         // Heroku free dyno will shutdown when idle for 30 mins, so keep-alive is necessary
         keepAlive(config.scriptHostname);
