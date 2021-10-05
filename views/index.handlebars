@@ -74,7 +74,8 @@
                                 <tr>
                                     <th>Link</th>
                                     <th>Id</th>
-                                    <th>Required</th>
+                                    <th>Type</th>
+                                    {{#if @root/data/election/isStackOverflow}}<th>Required</th>{{/if}}
                                 </tr>
                             </thead>
                             <tbody>
@@ -82,7 +83,8 @@
                             <tr>
                                 <td><a href="{{@root/data/siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
                                 <td>{{this.badge_id}}</td>
-                                <td>{{{boolean this.required}}}</td>
+                                <th>{{this.type}}</th>
+                                {{#if @root/data/election/isStackOverflow}}<td>{{{yesno this.required}}}</td>{{/if}}
                             </tr>
                             {{/each}}
                             </tbody>

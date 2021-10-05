@@ -110,13 +110,13 @@ table table {
 
 table table th,
 table table td {
-  min-width: 120px;
+  min-width: 0;
   padding: 3px 8px;
 }
 
 table table th:last-child,
 table table td:last-child {
-  min-width: 80px;
+  min-width: 0;
 }
 
 pre {
@@ -295,7 +295,7 @@ form button {
 
   table table th:first-child,
   table table td:first-child {
-    min-width: 120px;
+    min-width: 0;
   }
 
   tr:first-child {

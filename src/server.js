@@ -69,6 +69,9 @@ const handlebarsConfig = {
         },
         boolean: function (data) {
             return `<span class="${data || data === 'true' ? 'truthy' : 'falsy'}">${data}</span>`;
+        },
+        yesno: function (data) {
+            return `<span class="${data || data === 'true' ? 'truthy' : 'falsy'}">${data === 'true' ? 'yes' : 'no'}</span>`;
         }
     },
 };
