@@ -81,25 +81,43 @@ h2 + table {
 table,
 th,
 td {
-  padding: 8px 10px;
+  padding: 6px 10px;
   border: 1px solid var(--border-color);
   border-collapse: collapse;
-}
-
-/* nested tables */
-table table {
-  margin: 0;
 }
 
 th,
 td {
   min-width: 140px;
+  vertical-align: top;
 }
 
 th:last-child,
 td:last-child {
   min-width: 300px;
 }
+
+th {
+  text-align: left;
+}
+
+/* Nested tables */
+table table {
+  margin: -7px ​-11px;
+  font-size: 0.9em;
+}
+
+table table th,
+table table td {
+  min-width: 120px;
+  padding: 3px 8px;
+}
+
+table table th:last-child,
+table table td:last-child {
+  min-width: 80px;
+}
+
 pre {
   max-width: 550px;
   margin: 0;
@@ -219,6 +237,10 @@ form button {
   font-style: normal;
 }
 
+.mt10 {
+  margin-top: 10px;
+}
+
 .mt20 {
   margin-top: 20px;
 }
@@ -253,11 +275,21 @@ form button {
     margin: 15px 0;
   }
 
+  table table tr {
+    display: initial;
+    margin: initial;
+  }
+
   th,
   td {
     border: none;
     padding: 2px 15px;
     padding-right: 0;
+  }
+
+  table table th:first-child,
+  table table td:first-child {
+    min-width: 120px;
   }
 
   tr:first-child {
@@ -275,7 +307,7 @@ form button {
 
   th:last-child,
   td:last-child {
-    min-width: 220px;
+    min-width: 0;
   }
 
   pre {

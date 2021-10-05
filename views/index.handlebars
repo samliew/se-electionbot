@@ -31,7 +31,7 @@
                 <tr><td>Positions</td><td>{{numPositions}}</td></tr>
                 <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
                 <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
-                <tr><td>Current phase</td><td>{{phase}}</td></tr>
+                <tr><td>Current phase</td><td><strong>{{phase}}</strong></td></tr>
                 <tr><td>Nomination date</td><td>{{utcTimestamp dateNomination}} <span class="relativetime" title="{{utcTimestamp dateNomination}}"></span></td></tr>
                 <tr><td>Primary date</td>
                     {{#if datePrimary}}
@@ -132,7 +132,7 @@
                 <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} <span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td></tr>
                 <tr><td>lastBotMessage</td><td>
                     <pre>{{lastBotMessage}}</pre>
-                    <div class="mt20">{{{lastBotMessageHtml}}}</div>
+                    <div class="mt10">{{{lastBotMessageHtml}}}</div>
                 </td></tr>
                 <tr><td>activityCounter</td><td>{{activityCounter}}</td></tr>
                 <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>
