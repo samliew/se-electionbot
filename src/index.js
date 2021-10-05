@@ -659,7 +659,7 @@ import {
                 const currModNames = currentSiteMods.map(({ display_name }) => display_name);
 
                 if (user.isModerator && currModNames.includes(user.name)) {
-                    responseText = `${entities.decode(user.name)} is the best mod!!!`;
+                    responseText = `${user.name} is the best mod!!!`;
                 }
                 else {
                     const activeMods = currentSiteMods.filter(({ last_access_date }) => new Date(last_access_date).getTime() + 86400000 > Date.now());

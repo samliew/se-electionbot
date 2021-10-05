@@ -54,7 +54,7 @@
                     {{#if arrNominees.length}}
                     <td><ul class="list">
                         {{#each arrNominees}}
-                        <li class="item"><a href="{{this.permalink}}">{{this.userName}}</a> (<em><a href="{{this.nominationLink}}">nomination</a></em>); score {{this.userScore}}, {{this.userYears}}</li>
+                        <li class="item"><a href="{{this.permalink}}">{{{this.userName}}}</a> (<em><a href="{{this.nominationLink}}">nomination</a></em>); score {{this.userScore}}, {{this.userYears}}</li>
                         {{/each}}
                     </ul></td>
                     {{else}}
@@ -65,7 +65,7 @@
                     {{#if arrWinners.length}}
                     <td><ul class="list">
                         {{#each arrWinners}}
-                        <li class="item"><a href="{{this.permalink}}">{{this.userName}}</a></li>
+                        <li class="item"><a href="{{this.permalink}}">{{{this.userName}}}</a></li>
                         {{/each}}
                     </ul></td>
                     {{else}}
@@ -79,7 +79,7 @@
                     {{#if currentSiteMods.length}}
                     <td><ul class="list">
                         {{#each currentSiteMods}}
-                        <li class="item"><a href="{{this.link}}">{{this.display_name}}</a></li>
+                        <li class="item"><a href="{{this.link}}">{{{this.display_name}}}</a></li>
                         {{/each}}
                     </ul></td>
                     {{else}}
