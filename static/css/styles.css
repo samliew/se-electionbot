@@ -71,6 +71,7 @@ blockquote {
 
 table {
   max-width: 800px;
+  min-width: 280px;
   margin: 2em 0;
 }
 
@@ -102,20 +103,20 @@ th {
 }
 
 /* Nested tables */
-table table {
+table.nested {
   width: calc(100% + 22px);
   margin: -7px -11px;
   font-size: 0.9em;
 }
 
-table table th,
-table table td {
+table.nested th,
+table.nested td {
   min-width: 0;
   padding: 3px 8px;
 }
 
-table table th:last-child,
-table table td:last-child {
+table.nested th:last-child,
+table.nested td:last-child {
   min-width: 0;
 }
 
@@ -131,8 +132,8 @@ pre {
   word-break: break-word;
 }
 
-td:empty:before,
-pre:empty:before {
+td:empty::before,
+pre:empty::before {
   content: "(none)";
   font-style: italic;
   font-size: 0.9rem;
@@ -276,26 +277,11 @@ form button {
     margin: 15px 0;
   }
 
-  table table {
-    width: auto;
-    margin: 0;
-  }
-
-  table table tr {
-    display: table-row;
-    margin: initial;
-  }
-
   th,
   td {
     border: none;
     padding: 2px 15px;
     padding-right: 0;
-  }
-
-  table table th:first-child,
-  table table td:first-child {
-    min-width: 0;
   }
 
   tr:first-child {
@@ -304,6 +290,51 @@ form button {
 
   tr:last-child {
     margin-bottom: 0;
+  }
+
+  table.nested {
+    margin: 0;
+  }
+
+  table.nested thead {
+    display: none;
+  }
+
+  table.nested tr {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    margin: initial;
+  }
+
+  table.nested th,
+  table.nested td {
+    flex: 0 1 auto;
+    padding-left: 0;
+    padding-right: 3px;
+  }
+
+  table.nested th::after,
+  table.nested td::after {
+    content: ',';
+  }
+
+  table.nested th:first-child::after,
+  table.nested td:first-child::after,
+  table.nested th:last-child::after,
+  table.nested td:last-child::after {
+    content: '';
+  }
+
+  table.nested th:nth-child(-n+2),
+  table.nested td:nth-child(-n+2) {
+    padding-left: 10px;
+  }
+
+  table.nested th:first-child,
+  table.nested td:first-child {
+    flex: 0 0 100%;
+    min-width: 0;
   }
 
   th:first-child,
@@ -320,5 +351,10 @@ form button {
     max-width: none;
     white-space: pre-wrap;
     word-break: break-word;
+  }
+
+  .dashboard section {
+    flex-basis: 100%;
+    margin-right: 0;
   }
 }
