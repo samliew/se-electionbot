@@ -14,5 +14,7 @@
     "paths": {
       "@utils/*": ["./src/utils/*"]
     }
-  }
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
 }
