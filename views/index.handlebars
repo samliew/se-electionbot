@@ -71,7 +71,7 @@
                         {{#each electionBadges}}
                         <li class="item">
                             <a href="{{@root/data/siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}}</a> [{{this.badge_id}}]
-                            {{#ifCond @root/data/election/isStackOverflow '&&' this.required}}<em>(required)</em>{{/if}}
+                            {{#ifCond @root/data/election/isStackOverflow '&&' this.required}}<em>(required)</em>{{/ifCond}}
                         </li>
                         {{/each}}
                     </ul>
