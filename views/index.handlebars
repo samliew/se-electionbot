@@ -66,16 +66,29 @@
                     <td></td>
                     {{/if}}
                 </tr>
-                <tr><td>Badges</td><td>
-                    <ul class="list">
-                        {{#each electionBadges}}
-                        <li class="item">
-                            <a href="{{@root/data/siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}}</a> [{{this.badge_id}}]
-                            {{#ifCond @root/data/election/isStackOverflow '&&' this.required}}<em>(required)</em>{{/ifCond}}
-                        </li>
-                        {{/each}}
-                    </ul>
-                </td></tr>
+                <tr>
+                    <td>Badges</td>
+                    <td>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Link</th>
+                                    <th>Id</th>
+                                    <th>Required</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {{#each electionBadges}}
+                            <tr>
+                                <td><a href="{{@root/data/siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
+                                <td>{{this.badge_id}}</td>
+                                <td>{{{boolean this.required}}}</td>
+                            </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
             </table>
             {{/with}}
         </aside>

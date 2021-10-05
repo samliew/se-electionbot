@@ -1,5 +1,10 @@
-// @ts-nocheck
-
+/**
+ * @summary converts a given Date to relative datetime string
+ * @param {Date|string|number} date date to format
+ * @param {string} [soonText] text to display when the election starts soon
+ * @param {string} [justNowText] text to display when the election just started
+ * @returns {string}
+ */
 const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') => {
 
     const validateDate = (input) => {
@@ -25,10 +30,10 @@ const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') =
     if (diff > 0) {
         return dayDiff > 31 ? "" : (
             diff < 5 && soonText ||
-            diff < 60 && (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}` })(Math.floor(diff)) ||
-            diff < 3600 && (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}` })(Math.floor(diff / 60)) ||
-            diff < 86400 && (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}` })(Math.floor(diff / 3600)) ||
-            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}` })(Math.floor(diff / 86400))
+            diff < 60 && (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}`; })(Math.floor(diff)) ||
+            diff < 3600 && (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}`; })(Math.floor(diff / 60)) ||
+            diff < 86400 && (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}`; })(Math.floor(diff / 3600)) ||
+            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}`; })(Math.floor(diff / 86400))
         );
     }
 
@@ -38,15 +43,15 @@ const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') =
 
     return dayDiff > 31 ? "" : (
         diff < 5 && justNowText ||
-        diff < 60 && (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago` })(Math.floor(diff)) ||
-        diff < 3600 && (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago` })(Math.floor(diff / 60)) ||
-        diff < 86400 && (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago` })(Math.floor(diff / 3600)) ||
-        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago` })(Math.floor(diff / 86400))
+        diff < 60 && (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago`; })(Math.floor(diff)) ||
+        diff < 3600 && (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago`; })(Math.floor(diff / 60)) ||
+        diff < 86400 && (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago`; })(Math.floor(diff / 3600)) ||
+        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago`; })(Math.floor(diff / 86400))
     );
 };
 
 const updateRelativeDates = () => {
-    var spans = document.querySelectorAll('span.relativetime');
+    var spans = /** @type {NodeListOf<HTMLElement>} */(document.querySelectorAll('span.relativetime'));
     spans.forEach(el => {
         if (el.title) {
             var prefix = el.dataset.prefix || "";
@@ -56,7 +61,7 @@ const updateRelativeDates = () => {
                 el.innerHTML = prefix + date + suffix;
         }
     });
-}
+};
 
 (function () {
     updateRelativeDates();
