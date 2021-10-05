@@ -1,9 +1,25 @@
 import { parseIds } from "./utils.js";
 
+/**
+ * @typedef {import("chatexchange/dist/Client").Host} Host
+ */
+
 export class BotConfig {
 
     /**
-     * @param {import("chatexchange/dist/Client").Host} host chat host server
+     * @summary bot chat room id
+     * @type {number}
+     */
+    chatRoomId;
+
+    /**
+     * @summary chat server (Host)
+     * @type {Host}
+     */
+    chatDomain;
+
+    /**
+     * @param {Host} host chat host server
      * @param {number} roomId room id this configuration is for
      */
     constructor(host, roomId) {

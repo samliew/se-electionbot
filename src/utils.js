@@ -4,8 +4,9 @@ import entities from 'html-entities';
 import { get } from 'https';
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
-import { URL } from "url";
+import { getUserAssociatedAccounts } from "./api.js";
 import { matchNumber } from "./utils/expressions.js";
+import { numericNullable } from "./utils/objects.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
@@ -30,7 +31,7 @@ let _apiBackoff = Date.now();
  * }} ResItem
  *
  * @typedef {import("./config.js").BotConfig} BotConfig
- *
+ * @typedef {import("chatexchange/dist/Client").Host} Host
  * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
  *
  * @typedef {import("./index").ElectionBadge} ElectionBadge
@@ -300,20 +301,20 @@ export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) =
 };
 
 /**
+ * @typedef {{
+ *  userName: string,
+ *  userId: number,
+ *  userLink?: string,
+ *  isModerator: boolean
+ * }} RoomOwner
+ *
  * @summary get room owners for the room bot is in
  * @param {BotConfig} config bot configuration
- * @param {string|null} chatDomain
- * @param {string|number|null} chatRoomId
- * @returns {Promise<any>} array of chat users
- *
- * {
- *   userName,
- *   userId,
- *   userLink,
- *   isModerator
- * }
+ * @param {Host} [chatDomain]
+ * @param {string|number|null} [chatRoomId]
+ * @returns {Promise<RoomOwner[]>} array of chat users
  */
-export const fetchRoomOwners = async (config, chatDomain = null, chatRoomId = null) => {
+export const fetchRoomOwners = async (config, chatDomain, chatRoomId) => {
 
     // Default to values from config
     if (!chatDomain || !chatRoomId || isNaN(Number(chatRoomId))) {
@@ -506,45 +507,45 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         if (!linkedHref) return null;
 
         // ensure the parse won't break if SE stops using protocol-relative URLs
-        const linkedUserUrl = linkedHref.replace(/^\/\//, "https://");
+        const linkedUserUrl = linkedHref.replace(/^\/\//, "https://") || "";
         console.log(`Linked site user url: ${linkedUserUrl}`);
 
         // Linked site is the one we wanted, return site userid
-        // @ts-expect-error FIXME
-        if (linkedUserUrl.includes(hostname)) return +((linkedUserUrl.match(/\d+/))[0]);
+        if (linkedUserUrl.includes(hostname)) {
+            return matchNumber(/(\d+)/, linkedUserUrl) || null;
+        }
 
         // Linked site is not the one we wanted
         // Fetch linked site profile page to get network link
         const linkedUserProfilePage = await fetchUrl(config, `${linkedUserUrl}?tab=profile`);
         if (!linkedUserProfilePage) return null;
 
+        // do not even attempt to fetch the API without an API key
+        if (!apiKey) {
+            console.log(`${getSiteUserIdFromChatStackExchangeId.name} - cannot fetch SE API without an API key`);
+            return null;
+        }
+
         const $profile = cheerio.load(/** @type {string} */(linkedUserProfilePage));
 
-        const networkUserUrl = $profile('#profiles-menu a[href^="https://stackexchange.com/users/"]').attr("href");
-        // @ts-expect-error FIXME
-        const networkUserId = +(networkUserUrl.match(/\d+/));
+        const networkUserUrl = $profile('#profiles-menu a[href^="https://stackexchange.com/users/"]').attr("href") || "";
+        const networkUserId = matchNumber(/(\d+)/, networkUserUrl);
         console.log(`Network user url: ${networkUserUrl}`, networkUserId);
 
-        const url = new URL(`${apiBase}/${apiVer}/users/${networkUserId}/associated`);
-        // @ts-expect-error FIXME
-        url.search = new URLSearchParams({
-            pagesize: "100",
-            types: "main_site",
-            filter: "!myEHnzbmE0",
-            key: apiKey
-        }).toString();
+        // do not event attempt to fetch network accounts for nobody
+        if (networkUserId === void 0) {
+            return null;
+        }
 
-        // Fetch network accounts via API to get the account of the site we want
-        const { items = [] } = /** @type {APIListResponse} */(await fetchUrl(config, url.toString())) || {};
+        const networkAccounts = await getUserAssociatedAccounts(config, networkUserId, config.apiKeyPool);
 
-        const siteAccount = items.find(({ site_url }) => site_url.includes(hostname));
+        const siteAccount = networkAccounts.find(({ site_url }) => site_url.includes(hostname));
         console.log(`Site account: ${JSON.stringify(siteAccount || {})}`);
 
         //successful response from the API, but no associated account found
-        if (!siteAccount && items.length) return NO_ACCOUNT_ID;
+        if (!siteAccount && networkAccounts.length) return NO_ACCOUNT_ID;
 
-        // @ts-expect-error FIXME
-        return +siteAccount?.user_id || null;
+        return numericNullable(siteAccount, "user_id");
     }
     catch (e) {
         console.error(e);
@@ -556,7 +557,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
 /**
  * @typedef {{
  *  chatRoomUrl: string,
- *  chatDomain: string,
+ *  chatDomain: Host,
  *  chatRoomId?: number
  * }} DefaultRoomInfo
  *

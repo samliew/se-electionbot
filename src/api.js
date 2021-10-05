@@ -7,6 +7,7 @@ import { apiBase, apiVer, fetchUrl } from "./utils.js";
 export let allNetworkSites = [];
 
 /**
+ * @typedef {import("@userscripters/stackexchange-api-types").default.NetworkUser} NetworkUser
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
  * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -218,7 +219,7 @@ export const getAllNetworkSites = async (config, keyPool, page = 1) => {
  * @description
  * fetches all network sites recursively, then filters out non-main sites
  *
- * @param {BotConfig} config
+ * @param {BotConfig} config bot configuration
  * @param {string[]} keyPool pool of API keys to rotate through
  */
 export const getAllMainNetworkSites = async (config, keyPool) => {
@@ -229,4 +230,26 @@ export const getAllMainNetworkSites = async (config, keyPool) => {
     if (config.verbose) console.log(`API - ${getAllMainNetworkSites.name}\n`, mainSites);
 
     return mainSites;
+};
+
+/**
+ * @summary gets a list of associated user accounts from the API
+ * @param {BotConfig} config bot configuration
+ * @param {number} networkId network user id (not the per-site id)
+ * @param {string[]} keyPool pool of API keys to rotate through
+ * @returns {Promise<NetworkUser[]>}
+ */
+export const getUserAssociatedAccounts = async (config, networkId, keyPool) => {
+    const url = new URL(`${apiBase}/${apiVer}/users/${networkId}/associated`);
+    url.search = new URLSearchParams({
+        pagesize: "100",
+        types: "main_site",
+        filter: "!myEHnzbmE0",
+        key: getStackApiKey(keyPool)
+    }).toString();
+
+    // Fetch network accounts via API to get the account of the site we want
+    const { items = [] } = /** @type {{ items: NetworkUser[] }} */(await fetchUrl(config, url.toString())) || {};
+
+    return items;
 };

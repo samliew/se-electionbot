@@ -3,6 +3,7 @@ import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
 import { sayDiamondAlready, sayMissingBadges } from "./messages.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, NO_ACCOUNT_ID, pluralize } from "./utils.js";
+import { matchNumber } from "./utils/expressions.js";
 
 /**
  * @typedef {import("./index.js").User} User
@@ -98,6 +99,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
      */
     async (election, user, message, isSO = false) => {
         //TODO: decide how to avoid mutation
+        /** @type {{ userId: number|null|undefined, content: string }} */
         let { userId, content } = message;
 
         if (isNaN(userId) || userId <= 0) {
@@ -129,12 +131,12 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         // If privileged user asking candidate score of another user, get user site id from message
         // TODO: Allow Admins and Devs too, not just mods
         if (isAskingForOtherUser && (isModerator || config.devIds.has(userId))) {
-            // @ts-expect-error FIXME
-            userId = content.includes(`${election.siteUrl}/users/`) ? +(content.match(/\/users\/(\d+).*(?:\?|$)/)[1]) : +(content.match(/(\d+)(?:\?|$)/)[1]);
+            userId = content.includes(`${election.siteUrl}/users/`) ?
+                matchNumber(/\/users\/(\d+).*(?:\?|$)/, content) :
+                matchNumber(/(\d+)(?:\?|$)/, content);
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
         else if (!isSO) {
-            // @ts-expect-error FIXME
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);
 
             // Unable to get user id on election site
@@ -147,6 +149,12 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             if (userId === NO_ACCOUNT_ID) {
                 return `Sorry, ${isAskingForOtherUser ? "the user" : "you"} must have an account on the site to get the score!`;
             }
+        }
+
+        // do not attempt to get badges for invalid users
+        if (!userId) {
+            console.error(`Invalid user id: ${userId}`);
+            return sayCalcFailed(isAskingForOtherUser);
         }
 
         // TODO: Get a different API key here
@@ -212,10 +220,9 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             }
         }
         // Does not meet minimum requirements
-        else if (!isEligible) {
+        else if (!isEligible && repNominate !== void 0) {
             responseText = `You are not eligible to nominate yourself in the election`;
 
-            // @ts-expect-error FIXME
             const isUnderRep = reputation < repNominate;
 
             // Not enough rep

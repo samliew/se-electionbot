@@ -206,7 +206,7 @@ import {
             // Default to site's default chat room
             else {
                 const defaultRoom = await getSiteDefaultChatroom(config, election.siteHostname);
-                if (defaultRoom) {
+                if (defaultRoom && defaultRoom.chatRoomId) {
                     config.chatRoomId = defaultRoom.chatRoomId;
                     config.chatDomain = defaultRoom.chatDomain;
                 }
