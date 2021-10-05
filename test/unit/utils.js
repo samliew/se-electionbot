@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, parseIds, pluralize } from "../../src/utils.js";
 import { matchNumber } from "../../src/utils/expressions.js";
+import { numericNullable } from "../../src/utils/objects.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('RegExp-related utils', () => {
@@ -13,6 +14,20 @@ describe('RegExp-related utils', () => {
         it('should return undefined if no number matched', () => {
             const nothing = matchNumber(/capture \d+,?/, "forgot to capture 1984, sorry");
             expect(nothing).to.be.undefined;
+        });
+    });
+});
+
+describe('Object-related utils', () => {
+    describe('numericOptional', () => {
+        it('should correctly parse nullable objects', () => {
+            const ans = numericNullable({ answer: "42" }, "answer");
+
+            const nullable = /** @type {{ question: string }|null|undefined} */(null);
+            const que = numericNullable(nullable, "question");
+
+            expect(ans).to.equal(42);
+            expect(que).to.equal(null);
         });
     });
 });
@@ -58,13 +73,13 @@ describe('String-related utils', async function () {
         it('should fetch a site\'s default chat room correctly', async () => {
             const chatroom = await getSiteDefaultChatroom(getMockBotConfig(), "https://stackoverflow.com");
 
-            expect(chatroom.chatRoomId).to.equal(197438);
-            expect(chatroom.chatDomain).to.equal("stackoverflow.com");
+            expect(chatroom?.chatRoomId).to.equal(197438);
+            expect(chatroom?.chatDomain).to.equal("stackoverflow.com");
 
             const chatroom2 = await getSiteDefaultChatroom(getMockBotConfig(), "https://superuser.com");
 
-            expect(chatroom2.chatRoomId).to.equal(118);
-            expect(chatroom2.chatDomain).to.equal("stackexchange.com");
+            expect(chatroom2?.chatRoomId).to.equal(118);
+            expect(chatroom2?.chatDomain).to.equal("stackexchange.com");
         });
     });
 
