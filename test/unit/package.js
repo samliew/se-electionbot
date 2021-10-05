@@ -22,8 +22,7 @@ describe('Package Parsing', () => {
     describe('parsePackage', () => {
 
         it('should correctly parse package.json info', async () => {
-            // @ts-expect-error FIXME
-            const { author, contributors } = await parsePackage("./package.json");
+            const { author, contributors } = await parsePackage("./package.json") || {};
             expect(author).to.deep.equal({
                 name: "Samuel Liew",
                 url: "https://so-user.com/584192?tab=profile",
