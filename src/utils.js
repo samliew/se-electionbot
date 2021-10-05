@@ -48,6 +48,13 @@ let _apiBackoff = Date.now();
 export const unescape = (text) => text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 
 /**
+ * @summary performs rudimentary sanitation of input
+ * @param {string} text unsanitized text
+ * @returns {string}
+ */
+export const sanitize = (text) => text.replace(/<\/?script>/g, "");
+
+/**
  * @summary converts HTML to chat Markdown
  * @param {string} content initial text
  * @returns {string}
@@ -63,13 +70,14 @@ export const htmlToChatMarkdown = (content) => {
             .replace(/($\s*<pre class="full">|<\/pre>$)/, '').replace(/(?:^|(?:\r\n))/gm, '    ');
     }
 
-    return entities.decode(content
-        .replace(/<\/?b>/g, '**')
-        .replace(/<\/?i>/g, '*')
-        .replace(/<\/?strike>/g, '---')
-        .replace(/<a href="([^"]+)">([^<]+)<\/a>/g, `[$2]($1)`)
-        .replace(/(^\s+|\s+$)/g, '')
-        .replace(/<[^>]+>/g, '')
+    return entities.decode(
+        sanitize(content)
+            .replace(/<\/?b>/g, '**')
+            .replace(/<\/?i>/g, '*')
+            .replace(/<\/?strike>/g, '---')
+            .replace(/<a href="([^"]+)">([^<]+)<\/a>/g, `[$2]($1)`)
+            .trim()
+            .replace(/<[^>]+>/g, '')
     );
 };
 export const chatMarkdownToHtml = (content) => {
