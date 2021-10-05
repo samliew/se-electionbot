@@ -520,6 +520,12 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         const linkedUserProfilePage = await fetchUrl(config, `${linkedUserUrl}?tab=profile`);
         if (!linkedUserProfilePage) return null;
 
+        // do not even attempt to fetch the API without an API key
+        if (!apiKey) {
+            console.log(`${getSiteUserIdFromChatStackExchangeId.name} - cannot fetch SE API without an API key`);
+            return null;
+        }
+
         const $profile = cheerio.load(/** @type {string} */(linkedUserProfilePage));
 
         const networkUserUrl = $profile('#profiles-menu a[href^="https://stackexchange.com/users/"]').attr("href") || "";
@@ -527,7 +533,6 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         console.log(`Network user url: ${networkUserUrl}`, networkUserId);
 
         const url = new URL(`${apiBase}/${apiVer}/users/${networkUserId}/associated`);
-        // @ts-expect-error FIXME
         url.search = new URLSearchParams({
             pagesize: "100",
             types: "main_site",
