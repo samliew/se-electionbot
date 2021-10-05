@@ -1,7 +1,9 @@
 import cheerio from 'cheerio';
 import { dateToUtcTimestamp, fetchUrl } from './utils.js';
+import { matchNumber } from "./utils/expressions.js";
 
 /**
+ * @typedef {null|"ended"|"election"|"primary"|"nomination"|"cancelled"} ElectionPhase
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import('chatexchange/dist/Client').Host} Host
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -27,6 +29,9 @@ export default class Election {
 
     /** @type {Nominee[]} */
     arrWinners = [];
+
+    /** @type {ElectionPhase|null} */
+    phase = null;
 
     /**
      * @description Site election badges, defaults to Stack Overflow's
@@ -76,6 +81,10 @@ export default class Election {
         this._prevObj = null;
     }
 
+    /**
+     * @summary returns previous Election state
+     * @returns {{ [P in keyof Election as Election[P] extends Function ? never : P ]: Election[P]} | null}
+     */
     get prev() {
         return this._prevObj;
     }
@@ -122,7 +131,7 @@ export default class Election {
      */
     get newNominees() {
         const { prev, arrNominees } = this;
-        const prevIds = prev.arrNominees.map(({ userId }) => userId);
+        const prevIds = (prev?.arrNominees || []).map(({ userId }) => userId);
         return arrNominees.filter(({ userId }) => !prevIds.includes(userId));
     }
 
@@ -132,7 +141,7 @@ export default class Election {
      */
     get newWinners() {
         const { prev, arrWinners } = this;
-        const prevIds = prev.arrWinners.map(({ userId }) => userId);
+        const prevIds = (prev?.arrWinners || []).map(({ userId }) => userId);
         return arrWinners.filter(({ userId }) => !prevIds.includes(userId));
     }
 
@@ -160,6 +169,9 @@ export default class Election {
      */
     get electionChatRoomChanged() {
         const { prev, chatUrl, chatDomain, chatRoomId } = this;
+
+        if (!prev) return false;
+
         const chatUrlChanged = prev.chatUrl !== chatUrl;
         const chatDomainChanged = prev.chatDomain !== chatDomain;
         const chatRoomIdChanged = prev.chatRoomId !== chatRoomId;
@@ -172,9 +184,27 @@ export default class Election {
      */
     get electionDatesChanged() {
         const { prev, dateNomination, dateElection, dateEnded } = this;
+
+        if (!prev) return false;
+
         return prev.dateNomination !== dateNomination ||
             prev.dateElection !== dateElection ||
             prev.dateEnded !== dateEnded;
+    }
+
+    /**
+     * @summary forgets about previous states
+     * @param {number} [states] number of states to forget
+     * @returns {void}
+     */
+    forget(states = 1) {
+        // TODO: rework once moved away from _prevObj
+        let cleanups = 0;
+        while (this.prev) {
+            if (cleanups >= states) return;
+            this._prevObj = null;
+            cleanups += 1;
+        }
     }
 
     /**
@@ -276,8 +306,6 @@ export default class Election {
     }
 
     /**
-     * @typedef {null|"ended"|"election"|"primary"|"nomination"} ElectionPhase
-     *
      * @static
      * @summary gets current phase given election dates
      * @param {Election} election
@@ -333,8 +361,10 @@ export default class Election {
     }
 
     /**
-     * @param {BotConfig} config
-     * @param {boolean} retry whether we are retrying the scrape
+     * @summary scrapes current election page
+     * @param {BotConfig} config bot configuration
+     * @param {boolean} [retry] whether we are retrying the scrape
+     * @returns {Promise<void>}
      */
     async scrapeElection(config, retry = false) {
 
@@ -416,16 +446,14 @@ export default class Election {
 
             // Empty string if not set as environment variable, or not found on election page
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/');
-            // @ts-expect-error FIXME
-            this.chatRoomId = +this.chatUrl?.match(/\d+$/) || null;
+            this.chatRoomId = matchNumber(/(\d+)$/, this.chatUrl) || null;
             this.chatDomain = /** @type {Host} */(this.chatUrl?.split('/')[2]?.replace('chat.', ''));
 
             this.phase = Election.getPhase(this);
 
             // Detect active election number if not specified
             if (this.isActive() && !this.electionNum) {
-                // @ts-expect-error FIXME
-                this.electionNum = +metaPhaseElems.attr('href').match(/\d+/)?.pop() || null;
+                this.electionNum = matchNumber(/(\d+)/, metaPhaseElems.attr('href') || "") || null;
 
                 // Append to electionUrl
                 this.electionUrl += this.electionNum;

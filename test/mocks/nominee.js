@@ -4,12 +4,15 @@
  * @returns {Nominee}
  */
 export const getMockNominee = (overrides = {}) => {
+    /** @type {Nominee} */
     const defaults = {
         userId: 42,
         userName: "Answer",
-        userYears: Infinity,
+        userYears: "42",
         userScore: 42,
-        permalink: ""
+        permalink: "",
+        nominationDate: new Date(),
+        nominationLink: ""
     };
     return Object.assign(defaults, overrides);
 };

@@ -1,6 +1,21 @@
 import { expect } from "chai";
 import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, parseIds, pluralize } from "../../src/utils.js";
+import { matchNumber } from "../../src/utils/expressions.js";
 import { getMockBotConfig } from "../mocks/bot.js";
+
+describe('RegExp-related utils', () => {
+    describe('matchNumber', () => {
+        it('should correctly match and parse a number', () => {
+            const ans = matchNumber(/^(\d+) is/, "42 is the answer");
+            expect(ans).to.equal(42);
+        });
+
+        it('should return undefined if no number matched', () => {
+            const nothing = matchNumber(/capture \d+,?/, "forgot to capture 1984, sorry");
+            expect(nothing).to.be.undefined;
+        });
+    });
+});
 
 describe('String-related utils', async function () {
 

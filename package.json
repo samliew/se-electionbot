@@ -60,12 +60,14 @@
     "@types/express": "^4.17.13",
     "@types/express-handlebars": "^5.3.1",
     "@types/mocha": "^9.0.0",
+    "@types/sinon": "^10.0.4",
     "@userscripters/stackexchange-api-types": "^0.3.0",
     "c8": "^7.9.0",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
     "mocha": "^9.0.3",
     "rimraf": "^3.0.2",
+    "sinon": "^11.1.2",
     "typescript": "^4.3.5"
   },
   "type": "module"

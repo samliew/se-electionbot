@@ -1,9 +1,10 @@
 import axios from "axios";
 import cheerio from 'cheerio';
-import { get } from 'https';
 import entities from 'html-entities';
+import { get } from 'https';
 import Cache from "node-cache";
 import { URL } from "url";
+import { matchNumber } from "./utils/expressions.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
@@ -26,6 +27,8 @@ let _apiBackoff = Date.now();
  *  display_name: string,
  *  account_id: number
  * }} ResItem
+ *
+ * @typedef {import("./config.js").BotConfig} BotConfig
  *
  * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
  *
@@ -259,7 +262,7 @@ export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) =
 
 /**
  * @summary get room owners for the room bot is in
- * @param {import("./config").BotConfig} config
+ * @param {BotConfig} config bot configuration
  * @param {string|null} chatDomain
  * @param {string|number|null} chatRoomId
  * @returns {Promise<any>} array of chat users
@@ -406,10 +409,10 @@ export const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just 
     if (diff > 0) {
         return dayDiff > 31 ? "" : (
             diff < 5 && soonText ||
-            diff < 60 && (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}` })(Math.floor(diff)) ||
-            diff < 3600 && (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}` })(Math.floor(diff / 60)) ||
-            diff < 86400 && (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}` })(Math.floor(diff / 3600)) ||
-            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}` })(Math.floor(diff / 86400))
+            diff < 60 && (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}`; })(Math.floor(diff)) ||
+            diff < 3600 && (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}`; })(Math.floor(diff / 60)) ||
+            diff < 86400 && (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}`; })(Math.floor(diff / 3600)) ||
+            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}`; })(Math.floor(diff / 86400))
         );
     }
 
@@ -419,10 +422,10 @@ export const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just 
 
     return dayDiff > 31 ? "" : (
         diff < 5 && justNowText ||
-        diff < 60 && (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago` })(Math.floor(diff)) ||
-        diff < 3600 && (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago` })(Math.floor(diff / 60)) ||
-        diff < 86400 && (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago` })(Math.floor(diff / 3600)) ||
-        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago` })(Math.floor(diff / 86400))
+        diff < 60 && (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago`; })(Math.floor(diff)) ||
+        diff < 3600 && (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago`; })(Math.floor(diff / 60)) ||
+        diff < 86400 && (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago`; })(Math.floor(diff / 3600)) ||
+        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago`; })(Math.floor(diff / 86400))
     );
 };
 
@@ -446,7 +449,7 @@ export const NO_ACCOUNT_ID = -42;
 
 /**
  * @description Expensive, up to three requests. Only one, if the linked account is the site we want.
- * @param {import("./config").BotConfig} config
+ * @param {BotConfig} config bot configuration
  * @param {number} chatUserId user id
  * @param {string} chatdomain chat server domain
  * @param {string} hostname election site hostname
@@ -512,9 +515,16 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
 };
 
 /**
+ * @typedef {{
+ *  chatRoomUrl: string,
+ *  chatDomain: string,
+ *  chatRoomId?: number
+ * }} DefaultRoomInfo
+ *
  * @summary get a site's default chat room
+ * @param {BotConfig} config bot configuration
  * @param {string} siteUrl
- * @returns {Promise<object|null>} chatUrl
+ * @returns {Promise<DefaultRoomInfo|null>} chatUrl
  */
 export const getSiteDefaultChatroom = async (config, siteUrl) => {
 
@@ -537,10 +547,9 @@ export const getSiteDefaultChatroom = async (config, siteUrl) => {
     const $chat = cheerio.load(/** @type {string} */(siteChatIndex));
     const $roomList = $chat("#roomlist .roomcard a");
 
-    const firstRoomUrl = $roomList.first().attr("href");
+    const firstRoomUrl = $roomList.first().attr("href") || "";
 
-    // @ts-expect-error FIXME
-    const firstRoomId = +firstRoomUrl?.match(/\d+/)[0];
+    const firstRoomId = matchNumber(/(\d+)/, firstRoomUrl);
 
     return {
         chatRoomUrl: `https://chat.stackexchange.com/rooms/${firstRoomId}`,

@@ -62,7 +62,7 @@ export default class ScheduledAnnouncement {
         const { cancelledText, phase } = election;
 
         // Needs to be cancelled
-        if (!cancelledText || phase == 'cancelled') return false;
+        if (!cancelledText || phase !== 'cancelled') return false;
 
         // Stop all cron jobs
         this.stopAll();
@@ -77,7 +77,7 @@ export default class ScheduledAnnouncement {
 
     /**
      * @summary announces new nominees arrival
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     async announceNewNominees() {
         const { _room, config, _election } = this;
@@ -92,6 +92,8 @@ export default class ScheduledAnnouncement {
                 }!`);
             console.log(`NOMINATION`, newNominees[i]);
         });
+
+        return true;
     }
 
     /**
@@ -113,7 +115,7 @@ export default class ScheduledAnnouncement {
         if (config.debug) console.log('announceWinners() called: ', arrWinners);
 
         // Needs to have ended and have winners
-        if (phase != 'ended' || length === 0) {
+        if (phase !== 'ended' || length === 0) {
             console.log("announceWinners - called but no winners to announce?", config.verbose ? election : "");
             return false;
         }
