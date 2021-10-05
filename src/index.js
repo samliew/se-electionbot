@@ -8,6 +8,7 @@ import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import Election from './election.js';
 import {
+    isAskedAboutLightbulb,
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
@@ -18,7 +19,7 @@ import {
     isThankingTheBot
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecret, RandomArray } from "./random.js";
@@ -28,9 +29,9 @@ import { makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
 import {
     dateToRelativetime,
-    dateToUtcTimestamp, fetchChatTranscript, getSiteDefaultChatroom, keepAlive,
+    dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, pluralize, fetchRoomOwners, wait
+    linkToUtcTimestamp, makeURL, pluralize, wait
 } from './utils.js';
 
 /**
@@ -576,8 +577,9 @@ import {
                 if (config.debug) console.log(`Matched response: ${matcher.name}`);
                 responseText = builder(config, election, content);
             }
-
-
+            else if (isAskedAboutLightbulb(content) && config.funMode) {
+                responseText = sayHowManyModsItTakesToFixLightbulb(currentSiteMods);
+            }
             // Moderation badges
             else if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
                 responseText = sayBadgesByType(electionBadges, "moderation", election.isStackOverflow);

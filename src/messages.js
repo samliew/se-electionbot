@@ -11,6 +11,7 @@ import { parsePackage } from "./utils/package.js";
 /**
  * @typedef {import("./index").ElectionBadge} Badge
  * @typedef {import("./config").BotConfig} BotConfig
+ * @typedef {import("./api").ModeratorInfo} ModeratorInfo
  */
 
 /**
@@ -475,4 +476,21 @@ export const sayUserEligibility = async (config, election, text) => {
     const nlp = new RandomArray("nominate", "be elected", "become a mod");
 
     return `User ${requestedUser.display_name} is${isEligible ? "" : " not"} eligible to ${nlp.getRandom()}`;
+};
+
+/**
+ * @fun
+ * @summary builds a "how many mods it takes" response message
+ * @param {ModeratorInfo[]} moderators current moderators
+ * @returns {string}
+ */
+export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {
+    const names = moderators.map(({ display_name }) => display_name);
+
+    const requires = new RandomArray(...names);
+
+    const times = Math.floor(Math.random() * requires.length);
+    if (!times) return `Sorry, mods do not fix lightbulbs`;
+
+    return `It only takes ${times} mod${pluralize(times, "s")}! Just ask ${requires.getRandom()}`;
 };
