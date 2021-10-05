@@ -49,6 +49,13 @@ let _apiBackoff = Date.now();
 export const unescape = (text) => text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 
 /**
+ * @summary converts HTML to plain text
+ * @param {string} html html to textify
+ * @returns {string}
+ */
+export const textify = (html) => html ? entities.decode(sanitize(html)) : "";
+
+/**
  * @summary converts HTML tags to markdown
  * @param {string} text text to convert
  * @param {Record<string,string>} tags map of tag -> conversion
@@ -114,9 +121,6 @@ export const chatMarkdownToHtml = (content) => {
     };
 
     return markdownMini(content);
-};
-export const htmlToPlainText = (content) => {
-    return content ? entities.decode(content.replace(/<[^>]+>/g, "")) : "";
 };
 
 
@@ -274,7 +278,7 @@ export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) =
         messages.push({
             username: item.user_name,
             chatUserId: item.user_id,
-            message: htmlToPlainText(item.content),
+            message: textify(item.content),
             messageMarkup: htmlToChatMarkdown(item.content),
             date: item.time_stamp,
             messageId: item.message_id
