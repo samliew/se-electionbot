@@ -39,10 +39,12 @@ let _apiBackoff = Date.now();
 
 
 export const htmlToChatMarkdown = (content) => {
-    if (!content) return "";
+    content = content.trim();
+
+    if (!content || typeof content !== 'string') return "";
 
     // Has <pre> fixed-font blocks
-    if (content.trim().test(/^\s*&lt;pre class="full"&gt;/)) {
+    if (/^\s*&lt;pre class="full"&gt;/.test(content)) {
         return content
             .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
             .replace(/($\s*<pre class="full">|<\/pre>$)/, '').replace(/(?:^|(?:\r\n))/gm, '    ');
