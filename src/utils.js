@@ -52,7 +52,7 @@ export const unescape = (text) => text.replace(/&lt;/g, "<").replace(/&gt;/g, ">
  * @param {string} text unsanitized text
  * @returns {string}
  */
-export const sanitize = (text) => text.replace(/<\/?script>/g, "");
+export const sanitize = (text) => text.replace(/<\/?script>/g, "").replace(/<[^>]+>|<script/g, '');
 
 /**
  * @summary converts HTML to chat Markdown
@@ -71,13 +71,14 @@ export const htmlToChatMarkdown = (content) => {
     }
 
     return entities.decode(
-        sanitize(content)
-            .replace(/<\/?b>/g, '**')
-            .replace(/<\/?i>/g, '*')
-            .replace(/<\/?strike>/g, '---')
-            .replace(/<a href="([^"]+)">([^<]+)<\/a>/g, makeURL("$2", "$1"))
-            .trim()
-            .replace(/<[^>]+>/g, '')
+        sanitize(
+            content
+                .replace(/<\/?b>/g, '**')
+                .replace(/<\/?i>/g, '*')
+                .replace(/<\/?strike>/g, '---')
+                .replace(/<a href="([^"]+)">([^<]+)<\/a>/g, makeURL("$2", "$1"))
+                .trim()
+        )
     );
 };
 export const chatMarkdownToHtml = (content) => {
