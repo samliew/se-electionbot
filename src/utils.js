@@ -42,7 +42,14 @@ let _apiBackoff = Date.now();
  */
 
 /**
- * @summary unescaped HTML-encoded text
+ * @summary escapes text to HTML-encoded string
+ * @param {string} text unescaped text
+ * @returns {string}
+ */
+export const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/**
+ * @summary unescapes HTML-encoded text
  * @param {string} text escaped text
  * @returns {string}
  */
@@ -109,7 +116,7 @@ export const chatMarkdownToHtml = (content) => {
 
     const markdownMini = function (content) {
         // Message is a full fixed-font block
-        if (content = content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"), /[\n\r]/.test(content)) {
+        if (content = escape(content), /[\n\r]/.test(content)) {
             const o = !/^ {0,3}[^ ]/m.test(content);
             return o ? "<pre class='full'>" + content.replace(/^    /gm, "") + "</pre>" : "<div>" + content.replace(/\r\n?|\n/g, "<br/>") + "</div>";
         }
