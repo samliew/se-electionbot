@@ -124,7 +124,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             });
         }
 
-        if (!isAskingForOtherUser && isSO && (isModerator || wasModerator)) {
+        if (!isAskingForOtherUser && isSO && (isModerator || wasModerator) && !content.startsWith('sudo ')) {
             return sayDiamondAlready(isModerator, wasModerator);
         }
 
@@ -151,7 +151,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             }
         }
 
-        // do not attempt to get badges for invalid users
+        // Do not attempt to get badges for invalid users
         if (!userId) {
             console.error(`Invalid user id: ${userId}`);
             return sayCalcFailed(isAskingForOtherUser);
@@ -237,7 +237,8 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             }
 
             responseText += `. Your candidate score is ${getScoreText(score, currMaxScore)}.`;
-        } else if (score >= currMaxScore) {
+        }
+        else if (score === currMaxScore) {
             responseText = `Wow! You have a maximum candidate score of **${currMaxScore}**!`;
 
             // Already nominated, and not ended/cancelled
@@ -259,10 +260,6 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                 };
 
                 responseText += ` Alas, ${phaseMap[phase]} Hope to see your candidature next election!`;
-            } else {
-                console.error("this case??", {
-                    score, currMaxScore, hasNominated, phase
-                });
             }
         }
         // All others
@@ -280,7 +277,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             // If have not begun, or nomination phase, ask user to nominate themselves
             else if (['null', 'nomination'].includes(/** @type {string} */(phase))) {
 
-                const perhapsNominateThreshold = 30;
+                const perhapsNominateThreshold = currMaxScore / 2;
 
                 responseText += score >= perhapsNominateThreshold ?
                     ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
