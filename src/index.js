@@ -484,14 +484,19 @@ import {
 
                 commander.add("whois", "retrieve mods from another site", async (content) => {
                     const [, otherSiteApiSlug] = /^whois (\w+) mod(?:erator)?s$/.exec(content) || [];
+                    console.log("whois", otherSiteApiSlug, content);
+
+                    if (!otherSiteApiSlug) return;
+
                     const otherSiteMods = await getModerators(config, otherSiteApiSlug, getStackApiKey(apiKeyPool));
 
                     if (otherSiteMods.length === 0) {
-                        return "error or invalid site";
+                        console.error("error or invalid site", content, otherSiteApiSlug, otherSiteMods);
+                        return "error or invalid request";
                     }
 
                     const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
-                    return sayOtherSiteMods(otherSiteUrl, otherSiteMods, entities.decode);
+                    return await sayOtherSiteMods(otherSiteUrl, otherSiteMods, entities.decode);
                 }, AccessLevel.privileged);
 
                 commander.aliases({
@@ -681,7 +686,7 @@ import {
                 }
             }
             // Current mods
-            else if (isAskedForCurrentMods(content)) {
+            else if (isAskedForCurrentMods(content, election.apiSlug)) {
                 responseText = sayCurrentMods(election, currentSiteMods, entities.decode);
             }
 
