@@ -19,7 +19,7 @@ import {
     isThankingTheBot
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayOtherSiteMods, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
@@ -482,6 +482,18 @@ import {
                     return success ? null : "There are no winners yet.";
                 }, AccessLevel.privileged);
 
+                commander.add("whois", "retrieve mods from another site", async (content) => {
+                    const [, otherSiteApiSlug] = /^whois (\w+) mod(?:erator)?s$/.exec(content) || [];
+                    const otherSiteMods = await getModerators(config, otherSiteApiSlug, getStackApiKey(apiKeyPool));
+
+                    if (otherSiteMods.length === 0) {
+                        return "error or invalid site";
+                    }
+
+                    const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
+                    return sayOtherSiteMods(otherSiteUrl, otherSiteMods, entities.decode);
+                }, AccessLevel.privileged);
+
                 commander.aliases({
                     timetravel: ["delorean", "88 miles"],
                     mute: ["timeout", "sleep"],
@@ -512,7 +524,8 @@ import {
                     ["fun", /fun/, config, content],
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
-                    ["set access", /set (?:access|level)/, config, user, content]
+                    ["set access", /set (?:access|level)/, config, user, content],
+                    ["whois", /^whois \w+ mod(?:erator)s/, content]
                 ];
 
                 responseText = outputs.reduce(
@@ -669,7 +682,6 @@ import {
             }
             // Current mods
             else if (isAskedForCurrentMods(content)) {
-                // Should we do this, or just link to the site's mod page since it's more useful than just usernames?
                 responseText = sayCurrentMods(election, currentSiteMods, entities.decode);
             }
 

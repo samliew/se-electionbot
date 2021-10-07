@@ -103,7 +103,7 @@ describe('Message Guards', () => {
         it('should correctly match my score', () => {
             allMatch(isAskedForOwnScore, [
                 "what is my candidate score?",
-                "What's my candidate score?",
+                "what's my candidate score?",
                 "what is my score?",
                 "can i nominate myself",
             ]);
@@ -154,7 +154,7 @@ describe('Message Guards', () => {
         it('should correctly match content', () => {
             allMatch(isAskedForCurrentPositions, [
                 // https://chat.stackoverflow.com/transcript/message/53095011#53095011
-                "How many mods are being elected this time around?",
+                "how many mods are being elected this time around?",
                 "how many positions are there",
                 "how many positions are elected",
                 "how many positions will be elected",

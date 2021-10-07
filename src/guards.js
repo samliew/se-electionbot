@@ -52,14 +52,17 @@ export const isAskedAboutVoting = (text) => {
         /\b(?:voting|vote|elect)\b/.test(text);
 };
 
-
 /**
  * @summary checks if the message asked to tell who the current mods are
  * @param {string} text
+ * @param {string|null} apiSlug current site's apiSlug
  * @returns {boolean}
  */
-export const isAskedForCurrentMods = (text) => {
-    return ['who', 'current', 'mod'].every((t) => text.includes(t));
+export const isAskedForCurrentMods = (text, apiSlug = null) => {
+    return new RegExp(`^whois ${apiSlug} mod(?:erator)?s$`).test(text) ||
+        /^who(?: are| is|'s) the current mod(?:erator)?s?/.test(text) ||
+        /^how many mod(?:erator)?s? (are there|do we have)/.test(text) ||
+        /^how.*\bcontact\b.*mod(?:erator)?s?/.test(text);
 };
 
 /**
@@ -68,7 +71,7 @@ export const isAskedForCurrentMods = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCurrentWinners = (text) => {
-    return /^who/.test(text) && /winners|new mod|will win|future mod/i.test(text);
+    return /^(?:who|how many)/.test(text) && /winners|new mod|will win|future mod/.test(text);
 };
 
 /**
@@ -77,7 +80,7 @@ export const isAskedForCurrentWinners = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCurrentPositions = (text) => {
-    return /^how many (?:positions|mod(?:erator)?s) (?:are|were|will be)(?: being)? (?:elected|there)/i.test(text);
+    return /^how many (?:positions|mod(?:erator)?s) (?:are|were|will be)(?: being)? (?:elected|there)/.test(text);
 };
 
 /**
@@ -86,7 +89,8 @@ export const isAskedForCurrentPositions = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCurrentNominees = (text) => {
-    return /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/i.test(text);
+    return /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/.test(text) ||
+        /how many (?:nomin(?:ee|ation|ated)|participant|candidate)s?(?!\s+score)/.test(text);
 };
 
 /**
@@ -95,7 +99,7 @@ export const isAskedForCurrentNominees = (text) => {
  * @returns {boolean}
  */
 export const isAskedForElectionSchedule = (text) => {
-    return /(?:when|how) is the election(?: scheduled)?|election schedule/i.test(text);
+    return /(?:when|how)(?: is|'s) the election(?: scheduled)?|election schedule/.test(text);
 };
 
 /**
@@ -104,7 +108,7 @@ export const isAskedForElectionSchedule = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutUsernameDiamond = (text) => {
-    return /(?:edit|insert|add).+?(?:\u2666|diamond).+?(?:user)?name/i.test(text);
+    return /(?:edit|insert|add).+?(?:\u2666|diamond).+?(?:user)?name/.test(text);
 };
 
 /**
@@ -113,7 +117,7 @@ export const isAskedAboutUsernameDiamond = (text) => {
  * @returns {boolean}
  */
 export const isAskedWhoMadeMe = (text) => {
-    return /who(?:\s+(?:are|is) your)?\s+(?:made|created|own(?:s|ers?)|develop(?:s|ed|ers?)|maintain(?:s|ers?))(?:\s+you)?/i.test(text);
+    return /who(?: (?:are|is) your)?\s+(?:made|created|own(?:s|ers?)|develop(?:s|ed|ers?)|maintain(?:s|ers?))(?:\s+you)?/.test(text);
 };
 
 /**
@@ -123,7 +127,7 @@ export const isAskedWhoMadeMe = (text) => {
  */
 export const isAskedForOwnScore = (text) => {
     return /can i nominate myself/.test(text) ||
-        /what(?: i|')s\s+my(?:\s+candidate)?\s+score(?:$|\?)/i.test(text);
+        /what(?: is|'s)\b.*\bmy(?: candidate)? score(?:$|\?)/.test(text);
 };
 
 /**
@@ -132,7 +136,7 @@ export const isAskedForOwnScore = (text) => {
  * @returns {boolean}
  */
 export const isAskedForOtherScore = (text) => {
-    return /what(?: i|')s(?: the)? candidate score (?:for|of)\s+(?:\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/i.test(text);
+    return /what(?: is|'s)(?: the)? candidate score (?:for|of)\s+(?:\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/.test(text);
 };
 
 /**
@@ -194,7 +198,7 @@ export const isHatingTheBot = (text) => {
  * @returns {boolean}
  */
 export const isAskedForUserEligibility = (text) => {
-    return /^(?:can|is) user \d+(?: be)? (?:eligible|(?:nominate|electe)d?)/i.test(text);
+    return /^(?:can|is) user \d+(?: be)? (?:eligible|(?:nominate|electe)d?)/.test(text);
 };
 
 /**
@@ -204,5 +208,5 @@ export const isAskedForUserEligibility = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutLightbulb = (text) => {
-    return /how m(?:any|uch) mods(?: does)? it takes? to fix(?: a| the)? lightbulb/i.test(text);
+    return /how m(?:any|uch) mods(?: does)? it takes? to fix(?: a| the)? lightbulb/.test(text);
 };

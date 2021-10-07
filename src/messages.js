@@ -216,6 +216,25 @@ export const sayCurrentMods = (election, currMods, decodeEntities) => {
 };
 
 /**
+ * @summary builds another site's mods list response message
+ * @param {string} otherSiteUrl
+ * @param {import("./api.js").ModeratorInfo[]} currMods
+ * @param {import("html-entities")["decode"]} decodeEntities
+ * @returns {string}
+ */
+export const sayOtherSiteMods = (otherSiteUrl, currMods, decodeEntities) => {
+    const { length: numCurrMods } = currMods;
+
+    const currModNames = currMods.map(({ display_name }) => display_name);
+
+    const toBe = numCurrMods > 1 ? "are" : "is";
+
+    return "The current " + (numCurrMods > 0 ?
+        `${numCurrMods} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${otherSiteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(currModNames.join(', '))}`
+        : `moderators can be found on ${makeURL("this page", `${otherSiteUrl}/users?tab=moderators`)}`);
+};
+
+/**
  * @summary builds next phase response message
  * @param {Election} election
  * @returns {string}
