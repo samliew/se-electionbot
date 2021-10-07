@@ -124,9 +124,9 @@ export class CommandManager {
      * @param {string} name
      * @param {...any} args
      */
-    run(name, ...args) {
+    async run(name, ...args) {
         const command = this.commands[name];
-        return this.canRun(command) ? command.run(...args) : void 0;
+        return this.canRun(command) ? await command.run(...args) : void 0;
     }
 
     /**
