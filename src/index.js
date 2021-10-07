@@ -506,7 +506,7 @@ import {
                     }
 
                     const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
-                    return await sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
+                    return sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
                 }, AccessLevel.privileged);
 
                 commander.aliases({
