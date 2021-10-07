@@ -579,7 +579,7 @@ import {
                         }
 
                         const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
-                        return sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
+                        responseText = sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
                     }
                 }
 

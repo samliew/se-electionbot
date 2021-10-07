@@ -233,8 +233,6 @@ export const sayOtherSiteMods = (otherSiteText, otherSiteUrl, currMods, decodeEn
         `${numCurrMods} ${otherSiteText} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${otherSiteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(currModNames.join(', '))}`
         : `${otherSiteText} moderators can be found on ${makeURL("this page", `${otherSiteUrl}/users?tab=moderators`)}`);
 
-    console.log("sayOtherSiteMods", otherSiteText, otherSiteUrl, currModNames, toBe, responseText);
-
     return responseText;
 };
 
