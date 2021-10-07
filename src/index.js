@@ -477,37 +477,11 @@ import {
                 commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
 
                 commander.add("announce winners", "makes the bot fetch and announce winners immediately", async () => {
-                    await election.scrapeElection(config);
-                    const success = await announcement.announceWinners(room, election);
-                    return success ? null : "There are no winners yet.";
+                    // TODO
                 }, AccessLevel.privileged);
 
                 commander.add("whois", "retrieve mods from another site", async (content) => {
-                    const [, siteText] = /whois (\w+) mod(?:erator)?s/.exec(content) || [];
-
-                    const apiSlugAliases = {
-                        stackexchange: ["mse"],
-                        stackoverflow: ["so"],
-                        superuser: ["su"],
-                    };
-
-                    const matches = Object.entries(apiSlugAliases).filter(([k, aliases]) => siteText === k || aliases.some(a => a === siteText));
-                    const siteApiSlug = matches && matches.length ? matches[0][0] : siteText;
-
-                    if (!siteApiSlug) return;
-
-                    const otherSiteMods = await getModerators(config, siteApiSlug, getStackApiKey(apiKeyPool));
-
-                    if (!otherSiteMods.length) {
-                        console.error("error or invalid site", content, siteApiSlug, otherSiteMods);
-                        return "error or invalid request";
-                    }
-
-                    console.log("whois", siteText, matches, siteApiSlug);
-                    console.log("moderators", siteApiSlug, otherSiteMods);
-
-                    const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
-                    return sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
+                    // TODO
                 }, AccessLevel.privileged);
 
                 commander.aliases({
@@ -534,19 +508,81 @@ import {
                     ["leave room", /leave room/, content, client],
                     ["mute", /(^mute|timeout|sleep)/, config, content, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
-                    ["announce winners", /^(announce )?winners/, room, election],
                     ["coffee", /(?:brew|make).+coffee/, originalMessage, user],
                     ["timetravel", /88 miles|delorean|timetravel/, config, election, content],
                     ["fun", /fun/, config, content],
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
                     ["set access", /set (?:access|level)/, config, user, content],
-                    ["whois", /^whois/, content]
                 ];
 
                 responseText = outputs.reduce(
                     (a, args) => a || commander.runIfMatches.call(commander, content, ...args) || ""
                     , "");
+
+
+                // TODO: Refactor into commands
+                // No responses yet, try run commands that require use of async functions
+                if (responseText === "") {
+
+                    // Announce winners manually
+                    if (/^announce winners/.test(content)) {
+                        await election.scrapeElection(config);
+                        const success = await announcement.announceWinners(room, election);
+                        responseText = success ? "" : "There are no winners yet.";
+                    }
+
+                    // Whois other sites mods
+                    else if (/^whois/.test(content)) {
+                        const [, siteText] = /whois (\w+) mod(?:erator)?s/.exec(content) || [];
+
+                        // Compile list of aliases and common misspellings here
+                        const apiSlugAliases = {
+                            stackexchange: ["mse"],
+                            stackoverflow: ["so"],
+                            superuser: ["su"],
+                            serverfault: ["sf"],
+                            softwareengineering: ["se"],
+                            english: ["elu"],
+                            math: ["maths"],
+                            skeptics: ["sceptics"],
+                            movies: ["movie"],
+                            interpersonal: ["ips"],
+                            scifi: ["sff", "fantasy"],
+                            crafts: ["arts"],
+                            es: ["es.so", "so.es"],
+                            ru: ["ru.so", "so.ru"],
+                            pt: ["pt.so", "so.pt"],
+                            rus: ["rus.so", "so.rus"],
+                            ja: ["ja.so", "so.ja"]
+                        };
+
+                        const matches = Object.entries(apiSlugAliases).filter(([k, aliases]) => siteText === k || aliases.some(a => a === siteText));
+                        const siteApiSlug = matches && matches.length ? matches[0][0] : siteText;
+
+                        if (!siteApiSlug) return;
+
+                        // TODO: possible to add cm: [team, staff] ?
+
+                        const otherSiteMods = await getModerators(config, siteApiSlug, getStackApiKey(apiKeyPool));
+
+                        if (!otherSiteMods.length) {
+                            console.error("error or invalid site", content, siteApiSlug, otherSiteMods);
+                            return `Unknown site "${siteText}". Don't blame me, I'm just a bot.`;
+                        }
+
+                        if (config.debug) {
+                            console.log("whois", siteText, matches, siteApiSlug);
+                        }
+                        if (config.verbose) {
+                            console.log("moderators", siteApiSlug, otherSiteMods);
+                        }
+
+                        const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
+                        return sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
+                    }
+                }
+
 
                 if (config.debug) {
                     console.log(`Response info -
