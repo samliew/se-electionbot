@@ -494,8 +494,6 @@ import {
                     const matches = Object.entries(apiSlugAliases).filter(([k, aliases]) => siteText === k || aliases.some(a => a === siteText));
                     const siteApiSlug = matches && matches.length ? matches[0][0] : siteText;
 
-                    console.log("whois", siteText, matches, siteApiSlug);
-
                     if (!siteApiSlug) return;
 
                     const otherSiteMods = await getModerators(config, siteApiSlug, getStackApiKey(apiKeyPool));
@@ -504,6 +502,9 @@ import {
                         console.error("error or invalid site", content, siteApiSlug, otherSiteMods);
                         return "error or invalid request";
                     }
+
+                    console.log("whois", siteText, matches, siteApiSlug);
+                    console.log("moderators", siteApiSlug, otherSiteMods);
 
                     const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
                     return sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
