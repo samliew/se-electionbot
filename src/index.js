@@ -540,7 +540,7 @@ import {
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
                     ["set access", /set (?:access|level)/, config, user, content],
-                    ["whois", /^whois \w+ mod(?:erator)s/, content]
+                    ["whois", /^whois/, content]
                 ];
 
                 responseText = outputs.reduce(

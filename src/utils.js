@@ -221,14 +221,22 @@ export const fetchChatTranscript = async (config, url) => {
         const messageMarkup = htmlToChatMarkdown(messageElem.html()?.trim() || "");
 
         const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [, null, null, null];
-        const hour = h && apm ? (
+
+        const hour = h && apm ? +(
             apm === 'A' ? (
-                h === '12' ? +h - 12 : +h
+                h === '12' ? 0 : h
             ) : +h + 12
         ) : null;
 
         // Increment by 1s if no timestamp, otherwise new UTC timestamp
-        lastKnownDatetime = year && month && date && hour && min ? Date.UTC(+year, month, +date, hour, +min, 0) : lastKnownDatetime + 1000;
+        if (year && month && date && hour && min) {
+            lastKnownDatetime = Date.UTC(+year, +month, +date, +hour, +min, 0);
+
+            if (config.verbose) console.log("lastKnownDatetime", messageId, lastKnownDatetime);
+        }
+        else {
+            lastKnownDatetime += 1000;
+        }
 
         messages.push({
             username: userlink.text(),
