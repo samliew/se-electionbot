@@ -109,13 +109,13 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
  * @param {number} [page] API response page
  * @returns {Promise<ModeratorInfo[]>}
  */
-export const getModerators = async (config, site, key, page = 1) => {
+export const getModerators = async (config, site, key, sort = "name", order = "asc", page = 1) => {
     // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
     const modURL = new URL(`${apiBase}/${apiVer}/users/moderators`);
     modURL.search = new URLSearchParams({
         pagesize: "100",
-        order: "desc",
-        sort: "reputation",
+        order: "asc",
+        sort: "name",
         site,
         filter: "!LnNkvq0d-S*rS_0sMTDFRm",
         key
@@ -124,7 +124,7 @@ export const getModerators = async (config, site, key, page = 1) => {
     const { items = [], has_more } = /** @type {{ items: ModeratorInfo[], has_more: boolean }} */(await fetchUrl(config, modURL.toString(), true)) || {};
 
     if (has_more) {
-        const otherItems = await getModerators(config, site, key, page + 1);
+        const otherItems = await getModerators(config, site, key, sort, order, page + 1);
         return [...items, ...otherItems];
     }
 

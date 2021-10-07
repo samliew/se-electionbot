@@ -220,9 +220,9 @@ export const sayCurrentMods = (election, currMods, decodeEntities) => {
  * @param {string} otherSiteUrl
  * @param {import("./api.js").ModeratorInfo[]} currMods
  * @param {import("html-entities")["decode"]} decodeEntities
- * @returns {string}
+ * @returns {Promise<string>}
  */
-export const sayOtherSiteMods = (otherSiteText, otherSiteUrl, currMods, decodeEntities) => {
+export const sayOtherSiteMods = async (otherSiteText, otherSiteUrl, currMods, decodeEntities) => {
     const { length: numCurrMods } = currMods;
 
     const currModNames = currMods.map(({ display_name }) => display_name);
