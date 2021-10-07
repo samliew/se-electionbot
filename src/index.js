@@ -538,7 +538,7 @@ import {
 
                         // Compile list of aliases and common misspellings here
                         const apiSlugAliases = {
-                            stackexchange: ["mse"],
+                            meta: ["mse", "meta", "meta.stackexchange"],
                             stackoverflow: ["so"],
                             superuser: ["su"],
                             serverfault: ["sf"],
