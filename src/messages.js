@@ -229,9 +229,13 @@ export const sayOtherSiteMods = (otherSiteText, otherSiteUrl, currMods, decodeEn
 
     const toBe = numCurrMods > 1 ? "are" : "is";
 
-    return "The current " + (numCurrMods > 0 ?
+    const responseText = "The current " + (numCurrMods > 0 ?
         `${numCurrMods} ${otherSiteText} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${otherSiteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(currModNames.join(', '))}`
         : `${otherSiteText} moderators can be found on ${makeURL("this page", `${otherSiteUrl}/users?tab=moderators`)}`);
+
+    console.log("sayOtherSiteMods", otherSiteText, otherSiteUrl, currModNames, toBe, responseText);
+
+    return responseText;
 };
 
 /**
