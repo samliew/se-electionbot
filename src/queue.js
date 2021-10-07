@@ -119,7 +119,8 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
 
     console.log(`RESPONSE (${length}/${numParts})`, responseText);
 
-    const completionDate = Date.now() + numParts * minThrottleSecs;
+    const waitSecs = minThrottleSecs * 1.5;
+    const completionDate = Date.now() + numParts * waitSecs;
 
     // If bot isn't already muted, temporarily mute for the minimum required duration to get the message parts out
     // Future-dated so poem wouldn't be interrupted by another response elsewhere
@@ -133,11 +134,11 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
 
     if (numParts > maxMessageParts) {
         await msg.reply(`I wrote a poem of ${numParts} messages for you!`);
-        await wait(minThrottleSecs);
+        await wait(waitSecs);
     }
 
     for (const message of messages) {
         await room.sendMessage(message);
-        await wait(minThrottleSecs);
+        await wait(waitSecs);
     }
 };

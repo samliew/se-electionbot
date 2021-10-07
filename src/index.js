@@ -483,20 +483,30 @@ import {
                 }, AccessLevel.privileged);
 
                 commander.add("whois", "retrieve mods from another site", async (content) => {
-                    const [, otherSiteApiSlug] = /^whois (\w+) mod(?:erator)?s$/.exec(content) || [];
-                    console.log("whois", otherSiteApiSlug, content);
+                    const [, siteText] = /whois (\w+) mod(?:erator)?s/.exec(content) || [];
 
-                    if (!otherSiteApiSlug) return;
+                    const apiSlugAliases = {
+                        stackexchange: ["mse"],
+                        stackoverflow: ["so"],
+                        superuser: ["su"],
+                    };
 
-                    const otherSiteMods = await getModerators(config, otherSiteApiSlug, getStackApiKey(apiKeyPool));
+                    const matches = Object.entries(apiSlugAliases).filter(([k, aliases]) => siteText === k || aliases.some(a => a === siteText));
+                    const siteApiSlug = matches && matches.length ? matches[0][0] : siteText;
 
-                    if (otherSiteMods.length === 0) {
-                        console.error("error or invalid site", content, otherSiteApiSlug, otherSiteMods);
+                    console.log("whois", siteText, matches, siteApiSlug);
+
+                    if (!siteApiSlug) return;
+
+                    const otherSiteMods = await getModerators(config, siteApiSlug, getStackApiKey(apiKeyPool));
+
+                    if (!otherSiteMods.length) {
+                        console.error("error or invalid site", content, siteApiSlug, otherSiteMods);
                         return "error or invalid request";
                     }
 
                     const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
-                    return await sayOtherSiteMods(otherSiteUrl, otherSiteMods, entities.decode);
+                    return await sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
                 }, AccessLevel.privileged);
 
                 commander.aliases({

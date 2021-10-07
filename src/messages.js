@@ -222,7 +222,7 @@ export const sayCurrentMods = (election, currMods, decodeEntities) => {
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
-export const sayOtherSiteMods = (otherSiteUrl, currMods, decodeEntities) => {
+export const sayOtherSiteMods = (otherSiteText, otherSiteUrl, currMods, decodeEntities) => {
     const { length: numCurrMods } = currMods;
 
     const currModNames = currMods.map(({ display_name }) => display_name);
@@ -230,8 +230,8 @@ export const sayOtherSiteMods = (otherSiteUrl, currMods, decodeEntities) => {
     const toBe = numCurrMods > 1 ? "are" : "is";
 
     return "The current " + (numCurrMods > 0 ?
-        `${numCurrMods} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${otherSiteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(currModNames.join(', '))}`
-        : `moderators can be found on ${makeURL("this page", `${otherSiteUrl}/users?tab=moderators`)}`);
+        `${numCurrMods} ${otherSiteText} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${otherSiteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(currModNames.join(', '))}`
+        : `${otherSiteText} moderators can be found on ${makeURL("this page", `${otherSiteUrl}/users?tab=moderators`)}`);
 };
 
 /**
