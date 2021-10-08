@@ -1,4 +1,6 @@
+import { getModerators } from "../api.js";
 import Election from "../election.js";
+import { sayOtherSiteMods } from "../messages.js";
 import { dateToUtcTimestamp } from "../utils.js";
 
 /**
@@ -128,4 +130,60 @@ export const announceWinners = async (config, election, room, announcement) => {
     await election.scrapeElection(config);
     const status = await announcement.announceWinners(room, election);
     return status ? "" : "There are no winners yet.";
+};
+
+/**
+ * @summary lists site moderators
+ * @param {BotConfig} config bot config
+ * @param {string} content incoming message content
+ * @param {import("html-entities")} entities
+ * @returns {Promise<string>}
+ */
+export const listSiteModerators = async (config, content, entities) => {
+    const [, siteText] = /whois (\w+) mod(?:erator)?s/.exec(content) || [];
+
+    // Compile list of aliases and common misspellings here
+    const apiSlugAliases = {
+        meta: ["mse", "meta", "meta.stackexchange"],
+        stackoverflow: ["so"],
+        superuser: ["su"],
+        serverfault: ["sf"],
+        softwareengineering: ["se"],
+        english: ["elu"],
+        math: ["maths"],
+        skeptics: ["sceptics"],
+        movies: ["movie"],
+        interpersonal: ["ips"],
+        scifi: ["sff", "fantasy"],
+        crafts: ["arts"],
+        es: ["es.so", "so.es"],
+        ru: ["ru.so", "so.ru"],
+        pt: ["pt.so", "so.pt"],
+        rus: ["rus.so", "so.rus"],
+        ja: ["ja.so", "so.ja"]
+    };
+
+    const matches = Object.entries(apiSlugAliases).filter(([k, aliases]) => siteText === k || aliases.some(a => a === siteText));
+    const siteApiSlug = matches && matches.length ? matches[0][0] : siteText;
+
+    if (!siteApiSlug) return "";
+
+    // TODO: possible to add cm: [team, staff] ?
+
+    const otherSiteMods = await getModerators(config, siteApiSlug, config.apiKeyPool);
+
+    if (!otherSiteMods.length) {
+        console.error("error or invalid site", content, siteApiSlug, otherSiteMods);
+        return `Unknown site "${siteText}". Don't blame me, I'm just a bot.`;
+    }
+
+    if (config.debug) {
+        console.log("whois", siteText, matches, siteApiSlug);
+    }
+    if (config.verbose) {
+        console.log("moderators", siteApiSlug, otherSiteMods);
+    }
+
+    const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
+    return sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
 };
