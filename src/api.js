@@ -170,18 +170,17 @@ export const getUserInfo = async (config, userId, site, key) => {
  * - favicon_url
  *
  * @param {BotConfig} config
- * @param {string[]} keyPool pool of API keys to rotate through
  * @param {number} [page=1] current page
  * @returns {Promise<Site[]>}
  */
-export const getAllNetworkSites = async (config, keyPool, page = 1) => {
+export const getAllNetworkSites = async (config, page = 1) => {
 
     if (allNetworkSites.length > 0) return allNetworkSites;
 
     const siteURL = new URL(`${apiBase}/${apiVer}/sites`);
     siteURL.search = new URLSearchParams({
         filter: "!3ynpeVzDR6qiwv1BQ",
-        key: getStackApiKey(keyPool)
+        key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
     const { items = [], has_more = false } = /** @type {{ items: Site[], has_more: boolean }} */(
@@ -189,7 +188,7 @@ export const getAllNetworkSites = async (config, keyPool, page = 1) => {
     ) || {};
 
     if (has_more) {
-        const otherItems = await getAllNetworkSites(config, keyPool, page + 1);
+        const otherItems = await getAllNetworkSites(config, page + 1);
         return [...items, ...otherItems];
     }
     else {
@@ -208,11 +207,11 @@ export const getAllNetworkSites = async (config, keyPool, page = 1) => {
  * fetches all network sites recursively, then filters out non-main sites
  *
  * @param {BotConfig} config bot configuration
- * @param {string[]} keyPool pool of API keys to rotate through
+ * @returns {Promise<Site[]>}
  */
-export const getAllMainNetworkSites = async (config, keyPool) => {
+export const getAllMainNetworkSites = async (config) => {
 
-    const allSites = await getAllNetworkSites(config, keyPool);
+    const allSites = await getAllNetworkSites(config);
     const mainSites = allSites.filter(site => site.site_type === "main_site");
 
     if (config.verbose) console.log(`API - ${getAllMainNetworkSites.name}\n`, mainSites);
