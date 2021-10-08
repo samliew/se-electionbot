@@ -144,23 +144,23 @@ export const listSiteModerators = async (config, content, entities) => {
 
     // Compile list of aliases and common misspellings here
     const apiSlugAliases = {
+        crafts: ["arts"],
+        english: ["elu"],
+        interpersonal: ["ips"],
+        math: ["maths"],
         meta: ["mse", "meta", "meta.stackexchange"],
+        movies: ["movie"],
+        rus: ["russian"],
+        scifi: ["sff", "fantasy"],
+        serverfault: ["sf"],
+        skeptics: ["sceptics"],
+        softwareengineering: ["se"],
         stackoverflow: ["so"],
         superuser: ["su"],
-        serverfault: ["sf"],
-        softwareengineering: ["se"],
-        english: ["elu"],
-        math: ["maths"],
-        skeptics: ["sceptics"],
-        movies: ["movie"],
-        interpersonal: ["ips"],
-        scifi: ["sff", "fantasy"],
-        crafts: ["arts"],
-        es: ["es.so", "so.es"],
-        ru: ["ru.so", "so.ru"],
-        pt: ["pt.so", "so.pt"],
-        rus: ["rus.so", "so.rus"],
-        ja: ["ja.so", "so.ja"]
+        "es.stackoverflow": ["es", "es.so", "so.es"],
+        "ja.stackoverflow": ["ja", "ja.so", "so.ja"],
+        "pt.stackoverflow": ["pt", "pt.so", "so.pt"],
+        "ru.stackoverflow": ["ru", "ru.so", "so.ru"],
     };
 
     const matches = Object.entries(apiSlugAliases).filter(([k, aliases]) => siteText === k || aliases.some(a => a === siteText)) || [];
@@ -174,22 +174,22 @@ export const listSiteModerators = async (config, content, entities) => {
         });
     }
 
-    if (!siteApiSlug) return "sure, but which site?";
-
     // TODO: possible to add cm: [team, staff] ?
 
-    const otherSiteMods = await getModerators(config, siteApiSlug);
+    if (!siteApiSlug) return "sure, but which site?";
 
-    if (!otherSiteMods.length) {
-        console.error("error or invalid site", content, siteApiSlug, otherSiteMods);
+    // Get site mods from API
+    let siteMods = await getModerators(config, siteApiSlug);
+
+    if (!siteMods.length) {
+        console.error("Error or invalid site", content, siteApiSlug, siteMods);
         return `Unknown site "${siteText}". Don't blame me, I'm just a bot.`;
     }
 
-
     if (config.verbose) {
-        console.log("moderators", siteApiSlug, otherSiteMods);
+        console.log("moderators", siteApiSlug, siteMods);
     }
 
-    const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
-    return sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
+    const siteUrl = 'https://' + siteMods[0].link.split('/')[2];
+    return sayOtherSiteMods(siteText, siteUrl, siteMods, entities.decode);
 };
