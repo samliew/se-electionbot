@@ -197,44 +197,41 @@ export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = 
 /**
  * @summary builds current mods list response message
  * @param {Election} election
- * @param {User[]} currMods
+ * @param {User[]} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
-export const sayCurrentMods = (election, currMods, decodeEntities) => {
-    const { length: numCurrMods } = currMods;
+export const sayCurrentMods = (election, moderators, decodeEntities) => {
+    const { length: numMods } = moderators;
 
     const { siteUrl } = election;
+    const modNames = moderators.map(({ display_name }) => display_name);
+    const toBe = numMods > 1 ? "are" : "is";
 
-    const currModNames = currMods.map(({ display_name }) => display_name);
-
-    const toBe = numCurrMods > 1 ? "are" : "is";
-
-    return "The current " + (numCurrMods > 0 ?
-        `${numCurrMods} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${siteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(currModNames.join(', '))}`
-        : `moderators can be found on ${makeURL("this page", `${siteUrl}/users?tab=moderators`)}`);
+    return (numMods > 0 ?
+        `The current ${numMods} ${makeURL(`moderator${pluralize(numMods)}`, `${siteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(modNames.join(', '))}` :
+        `The current moderators can be found on ${makeURL("this page", `${siteUrl}/users?tab=moderators`)}`
+    );
 };
 
 /**
  * @summary builds another site's mods list response message
- * @param {string} otherSiteText
- * @param {string} otherSiteUrl
- * @param {User[]} currMods
+ * @param {string} siteHostname
+ * @param {User[]} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
-export const sayOtherSiteMods = (otherSiteText, otherSiteUrl, currMods, decodeEntities) => {
-    const { length: numCurrMods } = currMods;
+export const sayOtherSiteMods = (siteHostname, moderators, decodeEntities) => {
+    const { length: numMods } = moderators;
 
-    const currModNames = currMods.map(({ display_name }) => display_name);
+    const siteUrl = 'https://' + siteHostname;
+    const modNames = moderators.map(({ display_name }) => display_name);
+    const toBe = numMods > 1 ? "are" : "is";
 
-    const toBe = numCurrMods > 1 ? "are" : "is";
-
-    const responseText = "The current " + (numCurrMods > 0 ?
-        `${numCurrMods} ${otherSiteText} ${makeURL(`moderator${pluralize(numCurrMods)}`, `${otherSiteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(currModNames.join(', '))}`
-        : `${otherSiteText} moderators can be found on ${makeURL("this page", `${otherSiteUrl}/users?tab=moderators`)}`);
-
-    return responseText;
+    return (numMods > 0 ?
+        `The ${numMods} ${siteHostname} ${makeURL(`moderator${pluralize(numMods)}`, `${siteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(modNames.join(', '))}` :
+        `The ${siteHostname} moderators can be found on ${makeURL("this page", `${siteUrl}/users?tab=moderators`)}`
+    );
 };
 
 /**

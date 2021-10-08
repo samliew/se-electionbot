@@ -174,7 +174,7 @@ export const listSiteModerators = async (config, content, entities) => {
         });
     }
 
-    // TODO: possible to add cm: [team, staff] ?
+    // TODO: possible to add "community managers": [cm, team, staff] ?
 
     if (!siteApiSlug) return "sure, but which site?";
 
@@ -190,6 +190,6 @@ export const listSiteModerators = async (config, content, entities) => {
         console.log("moderators", siteApiSlug, siteMods);
     }
 
-    const siteUrl = 'https://' + siteMods[0].link.split('/')[2];
-    return sayOtherSiteMods(siteText, siteUrl, siteMods, entities.decode);
+    const siteHostname = siteMods[0].link.split('/')[2];
+    return sayOtherSiteMods(siteHostname, siteMods, entities.decode);
 };
