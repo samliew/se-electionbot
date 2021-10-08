@@ -8,7 +8,6 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import('chatexchange/dist/Client').Host} Host
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./index").User} User
- * @typedef {import("./api").ModeratorInfo} ModeratorInfo
  * @typedef {{
  *  userId: number,
  *  userName: string,
@@ -31,7 +30,7 @@ export default class Election {
     /** @type {Nominee[]} */
     arrWinners = [];
 
-    /** @type {ModeratorInfo[]} */
+    /** @type {User[]} */
     currentSiteMods = [];
 
     /** @type {ElectionPhase|null} */
