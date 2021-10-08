@@ -510,7 +510,7 @@ import {
                     ["die", /die|shutdown|turn off/],
                     ["set access", /set (?:access|level)/, config, user, content],
                     ["announce winners", /^announce winners/, config, election, room, announcement],
-                    ["list moderators", /^whois/, config, content]
+                    ["list moderators", /^whois/, config, content, entities]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, content);
