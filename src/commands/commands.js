@@ -140,7 +140,7 @@ export const announceWinners = async (config, election, room, announcement) => {
  * @returns {Promise<string>}
  */
 export const listSiteModerators = async (config, content, entities) => {
-    const [, siteText] = /whois (\w+) mod(?:erator)?s/.exec(content) || [];
+    const [, siteText] = /whois ([\w.-]+) mod(?:erator)?s/.exec(content) || [];
 
     // Compile list of aliases and common misspellings here
     const apiSlugAliases = {
