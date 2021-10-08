@@ -11,7 +11,7 @@ import { parsePackage } from "./utils/package.js";
 /**
  * @typedef {import("./index").ElectionBadge} Badge
  * @typedef {import("./config").BotConfig} BotConfig
- * @typedef {import("./api").ModeratorInfo} ModeratorInfo
+ * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
  */
 
 /**
@@ -197,7 +197,7 @@ export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = 
 /**
  * @summary builds current mods list response message
  * @param {Election} election
- * @param {import("./api.js").ModeratorInfo[]} currMods
+ * @param {User[]} currMods
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
@@ -217,8 +217,9 @@ export const sayCurrentMods = (election, currMods, decodeEntities) => {
 
 /**
  * @summary builds another site's mods list response message
+ * @param {string} otherSiteText
  * @param {string} otherSiteUrl
- * @param {import("./api.js").ModeratorInfo[]} currMods
+ * @param {User[]} currMods
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
@@ -502,7 +503,7 @@ export const sayUserEligibility = async (config, election, text) => {
 /**
  * @fun
  * @summary builds a "how many mods it takes" response message
- * @param {ModeratorInfo[]} moderators current moderators
+ * @param {User[]} moderators current moderators
  * @returns {string}
  */
 export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {

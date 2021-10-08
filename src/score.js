@@ -6,7 +6,7 @@ import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, NO_A
 import { matchNumber } from "./utils/expressions.js";
 
 /**
- * @typedef {import("./index.js").User} User
+ * @typedef {import("./index.js").UserProfile} UserProfile
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} ApiUser
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
@@ -92,7 +92,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
     /**
      * @summary calculates candidate score
      * @param {Election} election
-     * @param {User} user
+     * @param {UserProfile} user
      * @param {Pick<ResolvedMessage, "userId"|"content">} message
      * @param {boolean} [isSO]
      * @returns {Promise<string>}

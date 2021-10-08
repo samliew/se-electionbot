@@ -2,11 +2,12 @@ import { apiBase, apiVer, fetchUrl } from "./utils.js";
 
 /**
  * @description A simple in-memory cached list of network sites
- * @type {SiteInfo[]}
+ * @type {Site[]}
  */
 export let allNetworkSites = [];
 
 /**
+ * @typedef {import("@userscripters/stackexchange-api-types").default.Site} Site
  * @typedef {import("@userscripters/stackexchange-api-types").default.NetworkUser} NetworkUser
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
  * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
@@ -91,25 +92,13 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
 };
 
 /**
- * @typedef {{
- *  account_id: number,
- *  user_id: number,
- *  is_employee: boolean,
- *  last_access_date: Date,
- *  creation_date: Date,
- *  reputation: number,
- *  link: string,
- *  display_name: string
- * }} ModeratorInfo
- *
  * @summary gets the network mods from the API
  * @param {BotConfig} config
  * @param {string} site election site slug
- * @param {string} key api key
  * @param {number} [page] API response page
- * @returns {Promise<ModeratorInfo[]>}
+ * @returns {Promise<User[]>}
  */
-export const getModerators = async (config, site, key, sort = "name", order = "asc", page = 1) => {
+export const getModerators = async (config, site, sort = "name", order = "asc", page = 1) => {
     // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
     const modURL = new URL(`${apiBase}/${apiVer}/users/moderators`);
     modURL.search = new URLSearchParams({
@@ -118,13 +107,13 @@ export const getModerators = async (config, site, key, sort = "name", order = "a
         sort: "name",
         site,
         filter: "!LnNkvq0d-S*rS_0sMTDFRm",
-        key
+        key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
-    const { items = [], has_more } = /** @type {{ items: ModeratorInfo[], has_more: boolean }} */(await fetchUrl(config, modURL.toString(), true)) || {};
+    const { items = [], has_more } = /** @type {{ items: User[], has_more: boolean }} */(await fetchUrl(config, modURL.toString(), true)) || {};
 
     if (has_more) {
-        const otherItems = await getModerators(config, site, key, sort, order, page + 1);
+        const otherItems = await getModerators(config, site, sort, order, page + 1);
         return [...items, ...otherItems];
     }
 
@@ -162,14 +151,6 @@ export const getUserInfo = async (config, userId, site, key) => {
 };
 
 /**
- * @typedef {{
- *     site_url: string,
- *     api_site_parameter: string,
- *     name: string,
- *     site_type: string,
- *     site_state: string
- * }} SiteInfo
- *
  * @see https://api.stackexchange.com/docs/sites
  *
  * @summary get all StackExchange network sites from the API
@@ -188,25 +169,25 @@ export const getUserInfo = async (config, userId, site, key) => {
  * - favicon_url
  *
  * @param {BotConfig} config
- * @param {string[]} keyPool pool of API keys to rotate through
  * @param {number} [page=1] current page
+ * @returns {Promise<Site[]>}
  */
-export const getAllNetworkSites = async (config, keyPool, page = 1) => {
+export const getAllNetworkSites = async (config, page = 1) => {
 
     if (allNetworkSites.length > 0) return allNetworkSites;
 
     const siteURL = new URL(`${apiBase}/${apiVer}/sites`);
     siteURL.search = new URLSearchParams({
         filter: "!3ynpeVzDR6qiwv1BQ",
-        key: getStackApiKey(keyPool)
+        key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
-    const { items = [], has_more = false } = /** @type {{ items: SiteInfo[], has_more: boolean }} */(
+    const { items = [], has_more = false } = /** @type {{ items: Site[], has_more: boolean }} */(
         await fetchUrl(config, siteURL.toString(), true)
     ) || {};
 
     if (has_more) {
-        const otherItems = await getAllNetworkSites(config, keyPool, page + 1);
+        const otherItems = await getAllNetworkSites(config, page + 1);
         return [...items, ...otherItems];
     }
     else {
@@ -225,11 +206,11 @@ export const getAllNetworkSites = async (config, keyPool, page = 1) => {
  * fetches all network sites recursively, then filters out non-main sites
  *
  * @param {BotConfig} config bot configuration
- * @param {string[]} keyPool pool of API keys to rotate through
+ * @returns {Promise<Site[]>}
  */
-export const getAllMainNetworkSites = async (config, keyPool) => {
+export const getAllMainNetworkSites = async (config) => {
 
-    const allSites = await getAllNetworkSites(config, keyPool);
+    const allSites = await getAllNetworkSites(config);
     const mainSites = allSites.filter(site => site.site_type === "main_site");
 
     if (config.verbose) console.log(`API - ${getAllMainNetworkSites.name}\n`, mainSites);

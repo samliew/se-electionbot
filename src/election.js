@@ -7,8 +7,9 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import('chatexchange/dist/Client').Host} Host
  * @typedef {import("./config.js").BotConfig} BotConfig
- * @typedef {import("./index").User} User
- * @typedef {import("./api").ModeratorInfo} ModeratorInfo
+ *
+ * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
+ * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {{
  *  userId: number,
  *  userName: string,
@@ -31,7 +32,7 @@ export default class Election {
     /** @type {Nominee[]} */
     arrWinners = [];
 
-    /** @type {ModeratorInfo[]} */
+    /** @type {User[]} */
     currentSiteMods = [];
 
     /** @type {ElectionPhase|null} */
@@ -300,7 +301,7 @@ export default class Election {
 
     /**
      * @summary checks if a user (or their id) is amongst the nominees
-     * @param {number|User} target userId or user to check
+     * @param {number|UserProfile} target userId or user to check
      * @returns {boolean}
      */
     isNominee(target) {

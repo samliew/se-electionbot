@@ -1,5 +1,5 @@
 /**
- * @typedef {import("../index").User} User
+ * @typedef {import("../index").UserProfile} UserProfile
  */
 
 export const AccessLevel = {
@@ -16,12 +16,15 @@ export const AccessLevel = {
     }
 };
 
+/**
+ * @template {(...args:any[]) => any} T
+ */
 export class Command {
 
-    /** @type {Command|null} */
+    /** @type {Command<T>|null} */
     aliasFor = null;
 
-    /** @type {Command[]} */
+    /** @type {Command<T>[]} */
     aliases = [];
 
     access = AccessLevel.user;
@@ -29,7 +32,7 @@ export class Command {
     /**
      * @param {string} name command primary name
      * @param {string} description command description
-     * @param {(...args:any[]) => unknown} handler command handler to invoke
+     * @param {T} handler command handler to invoke
      * @param {number} [access] required privilege level
      */
     constructor(name, description, handler, access = AccessLevel.user) {
@@ -41,7 +44,8 @@ export class Command {
 
     /**
      * @summary runs the command
-     * @param {...any[]} args
+     * @param {...Parameters<T>} args
+     * @returns {ReturnType<T>}
      */
     run(...args) {
         return this.handler.apply(this, args);
@@ -63,11 +67,11 @@ export class CommandManager {
     /**@type {{ [name:string]: Command }} */
     commands = {};
 
-    /** @type {User} */
+    /** @type {UserProfile} */
     user;
 
     /**
-     * @param {User} user user for whom to manage commands
+     * @param {UserProfile} user user for whom to manage commands
      */
     constructor(user) {
         this.user = user;
