@@ -493,7 +493,7 @@ import {
                 });
 
 
-                const outputs = [
+                const matches = [
                     ["commands", /commands|usage/],
                     ["alive", /alive|awake|ping/, config],
                     ["say", /say/, originalMessage],
@@ -516,10 +516,12 @@ import {
                     ["set access", /set (?:access|level)/, config, user, content],
                 ];
 
-                responseText = outputs.reduce(
-                    (a, args) => a || commander.runIfMatches.call(commander, content, ...args) || ""
-                    , "");
+                const boundRunIf = commander.runIfMatches.bind(commander, content);
 
+                for (const [name, regex, ...args] of matches) {
+                    // TODO: switch to &&= on Node.js 15+
+                    responseText = (await boundRunIf(name, regex, ...args)) || responseText;
+                }
 
                 // TODO: Refactor into commands
                 // No responses yet, try run commands that require use of async functions
