@@ -170,7 +170,7 @@ export const listSiteModerators = async (config, content, entities) => {
 
     // TODO: possible to add cm: [team, staff] ?
 
-    const otherSiteMods = await getModerators(config, siteApiSlug, config.apiKeyPool);
+    const otherSiteMods = await getModerators(config, siteApiSlug);
 
     if (!otherSiteMods.length) {
         console.error("error or invalid site", content, siteApiSlug, otherSiteMods);

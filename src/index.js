@@ -182,7 +182,7 @@ import {
         }
 
         // Get current site mods via API
-        const currentSiteMods = await getModerators(config, election.apiSlug, config.apiKeyPool);
+        const currentSiteMods = await getModerators(config, election.apiSlug);
         election.currentSiteMods = currentSiteMods;
 
         // Wait for election page to be scraped

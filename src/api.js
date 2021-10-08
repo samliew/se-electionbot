@@ -95,11 +95,10 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
  * @summary gets the network mods from the API
  * @param {BotConfig} config
  * @param {string} site election site slug
- * @param {string[]} keyPool pool of API keys to rotate through
  * @param {number} [page] API response page
  * @returns {Promise<User[]>}
  */
-export const getModerators = async (config, site, keyPool, sort = "name", order = "asc", page = 1) => {
+export const getModerators = async (config, site, sort = "name", order = "asc", page = 1) => {
     // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
     const modURL = new URL(`${apiBase}/${apiVer}/users/moderators`);
     modURL.search = new URLSearchParams({
@@ -108,13 +107,13 @@ export const getModerators = async (config, site, keyPool, sort = "name", order 
         sort: "name",
         site,
         filter: "!LnNkvq0d-S*rS_0sMTDFRm",
-        key: getStackApiKey(keyPool)
+        key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
     const { items = [], has_more } = /** @type {{ items: User[], has_more: boolean }} */(await fetchUrl(config, modURL.toString(), true)) || {};
 
     if (has_more) {
-        const otherItems = await getModerators(config, site, keyPool, sort, order, page + 1);
+        const otherItems = await getModerators(config, site, sort, order, page + 1);
         return [...items, ...otherItems];
     }
 
