@@ -2,11 +2,12 @@ import { apiBase, apiVer, fetchUrl } from "./utils.js";
 
 /**
  * @description A simple in-memory cached list of network sites
- * @type {SiteInfo[]}
+ * @type {Site[]}
  */
 export let allNetworkSites = [];
 
 /**
+ * @typedef {import("@userscripters/stackexchange-api-types").default.Site} Site
  * @typedef {import("@userscripters/stackexchange-api-types").default.NetworkUser} NetworkUser
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
  * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
@@ -151,14 +152,6 @@ export const getUserInfo = async (config, userId, site, key) => {
 };
 
 /**
- * @typedef {{
- *     site_url: string,
- *     api_site_parameter: string,
- *     name: string,
- *     site_type: string,
- *     site_state: string
- * }} SiteInfo
- *
  * @see https://api.stackexchange.com/docs/sites
  *
  * @summary get all StackExchange network sites from the API
@@ -179,6 +172,7 @@ export const getUserInfo = async (config, userId, site, key) => {
  * @param {BotConfig} config
  * @param {string[]} keyPool pool of API keys to rotate through
  * @param {number} [page=1] current page
+ * @returns {Promise<Site[]>}
  */
 export const getAllNetworkSites = async (config, keyPool, page = 1) => {
 
@@ -190,7 +184,7 @@ export const getAllNetworkSites = async (config, keyPool, page = 1) => {
         key: getStackApiKey(keyPool)
     }).toString();
 
-    const { items = [], has_more = false } = /** @type {{ items: SiteInfo[], has_more: boolean }} */(
+    const { items = [], has_more = false } = /** @type {{ items: Site[], has_more: boolean }} */(
         await fetchUrl(config, siteURL.toString(), true)
     ) || {};
 
