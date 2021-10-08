@@ -2,7 +2,9 @@ import Election from "../election.js";
 import { dateToUtcTimestamp } from "../utils.js";
 
 /**
+ * @typedef {import("../ScheduledAnnouncement").default} Announcement
  * @typedef {import("../config").BotConfig} BotConfig
+ * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../index").User} User
  */
 
@@ -112,4 +114,18 @@ export const isAliveCommand = (config) => {
     const uptime = `uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1e3)} seconds`;
 
     return `${hosted}, ${started} with an ${uptime}.${debug ? ' I am in debug mode.' : ''}`;
+};
+
+/**
+ * @summary manually announces winners
+ * @param {BotConfig} config bot config
+ * @param {Election} election current election instance
+ * @param {Room} room room to announce in
+ * @param {Announcement} announcement instance of ScheduledAnnouncement
+ * @returns {Promise<string>}
+ */
+export const announceWinners = async (config, election, room, announcement) => {
+    await election.scrapeElection(config);
+    const status = await announcement.announceWinners(room, election);
+    return status ? "" : "There are no winners yet.";
 };
