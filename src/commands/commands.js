@@ -7,13 +7,13 @@ import { dateToUtcTimestamp } from "../utils.js";
  * @typedef {import("../ScheduledAnnouncement").default} Announcement
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
- * @typedef {import("../index").User} User
+ * @typedef {import("../index").UserProfile} UserProfile
  */
 
 /**
  * @summary changes user access level (can only de-elevate)
  * @param {BotConfig} config bot config
- * @param {User} user message author
+ * @param {UserProfile} user message author
  * @param {string} content incoming message content
  * @returns {string}
  */

@@ -3,7 +3,7 @@ import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
-import { announceWinners, isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
+import { announceWinners, isAliveCommand, listSiteModerators, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import Election from './election.js';
@@ -19,7 +19,7 @@ import {
     isThankingTheBot
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayOtherSiteMods, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
@@ -50,7 +50,7 @@ import {
  *  content: string,
  * }} ResolvedMessage
  *
- * @typedef {import("chatexchange/dist/Browser").IProfileData & { access: number }} User
+ * @typedef {import("chatexchange/dist/Browser").IProfileData & { access: number }} UserProfile
  */
 
 (async () => {
@@ -140,7 +140,7 @@ import {
      * @summary gets a User given a resolved message from them
      * @param {Client} client ChatExchange client
      * @param {number} userId chat user id
-     * @returns {Promise<User|null>}
+     * @returns {Promise<UserProfile|null>}
      */
     const getUser = async (client, userId) => {
         try {
@@ -478,9 +478,7 @@ import {
 
                 commander.add("announce winners", "makes the bot fetch and announce winners immediately", announceWinners, AccessLevel.privileged);
 
-                commander.add("whois", "retrieve mods from another site", async (content) => {
-                    // TODO
-                }, AccessLevel.privileged);
+                commander.add("whois", "retrieve mods from another site", listSiteModerators, AccessLevel.privileged);
 
                 commander.aliases({
                     timetravel: ["delorean", "88 miles"],
@@ -511,7 +509,8 @@ import {
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
                     ["set access", /set (?:access|level)/, config, user, content],
-                    ["announce winners", /^announce winners/, config, election, room, announcement]
+                    ["announce winners", /^announce winners/, config, election, room, announcement],
+                    ["list moderators", /^whois/, config, content]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, content);
@@ -520,62 +519,6 @@ import {
                     // TODO: switch to &&= on Node.js 15+
                     responseText = (await boundRunIf(name, regex, ...args)) || responseText;
                 }
-
-                // TODO: Refactor into commands
-                // No responses yet, try run commands that require use of async functions
-                if (responseText === "") {
-
-                    // Whois other sites mods
-                    if (/^whois/.test(content)) {
-                        const [, siteText] = /whois (\w+) mod(?:erator)?s/.exec(content) || [];
-
-                        // Compile list of aliases and common misspellings here
-                        const apiSlugAliases = {
-                            meta: ["mse", "meta", "meta.stackexchange"],
-                            stackoverflow: ["so"],
-                            superuser: ["su"],
-                            serverfault: ["sf"],
-                            softwareengineering: ["se"],
-                            english: ["elu"],
-                            math: ["maths"],
-                            skeptics: ["sceptics"],
-                            movies: ["movie"],
-                            interpersonal: ["ips"],
-                            scifi: ["sff", "fantasy"],
-                            crafts: ["arts"],
-                            es: ["es.so", "so.es"],
-                            ru: ["ru.so", "so.ru"],
-                            pt: ["pt.so", "so.pt"],
-                            rus: ["rus.so", "so.rus"],
-                            ja: ["ja.so", "so.ja"]
-                        };
-
-                        const matches = Object.entries(apiSlugAliases).filter(([k, aliases]) => siteText === k || aliases.some(a => a === siteText));
-                        const siteApiSlug = matches && matches.length ? matches[0][0] : siteText;
-
-                        if (!siteApiSlug) return;
-
-                        // TODO: possible to add cm: [team, staff] ?
-
-                        const otherSiteMods = await getModerators(config, siteApiSlug, getStackApiKey(apiKeyPool));
-
-                        if (!otherSiteMods.length) {
-                            console.error("error or invalid site", content, siteApiSlug, otherSiteMods);
-                            return `Unknown site "${siteText}". Don't blame me, I'm just a bot.`;
-                        }
-
-                        if (config.debug) {
-                            console.log("whois", siteText, matches, siteApiSlug);
-                        }
-                        if (config.verbose) {
-                            console.log("moderators", siteApiSlug, otherSiteMods);
-                        }
-
-                        const otherSiteUrl = 'https://' + otherSiteMods[0].link.split('/')[2];
-                        responseText = sayOtherSiteMods(siteText, otherSiteUrl, otherSiteMods, entities.decode);
-                    }
-                }
-
 
                 if (config.debug) {
                     console.log(`Response info -

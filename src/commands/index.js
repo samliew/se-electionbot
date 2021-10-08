@@ -1,5 +1,5 @@
 /**
- * @typedef {import("../index").User} User
+ * @typedef {import("../index").UserProfile} UserProfile
  */
 
 export const AccessLevel = {
@@ -67,11 +67,11 @@ export class CommandManager {
     /**@type {{ [name:string]: Command }} */
     commands = {};
 
-    /** @type {User} */
+    /** @type {UserProfile} */
     user;
 
     /**
-     * @param {User} user user for whom to manage commands
+     * @param {UserProfile} user user for whom to manage commands
      */
     constructor(user) {
         this.user = user;
