@@ -163,10 +163,18 @@ export const listSiteModerators = async (config, content, entities) => {
         ja: ["ja.so", "so.ja"]
     };
 
-    const matches = Object.entries(apiSlugAliases).filter(([k, aliases]) => siteText === k || aliases.some(a => a === siteText));
-    const siteApiSlug = matches && matches.length ? matches[0][0] : siteText;
+    const matches = Object.entries(apiSlugAliases).filter(([k, aliases]) => siteText === k || aliases.some(a => a === siteText)) || [];
+    const siteApiSlug = matches.length ? matches[0][0] : siteText;
 
-    if (!siteApiSlug) return "";
+    if (config.debug) {
+        console.log("whois", {
+            siteText,
+            matches,
+            siteApiSlug
+        });
+    }
+
+    if (!siteApiSlug) return "sure, but which site?";
 
     // TODO: possible to add cm: [team, staff] ?
 
@@ -177,9 +185,7 @@ export const listSiteModerators = async (config, content, entities) => {
         return `Unknown site "${siteText}". Don't blame me, I'm just a bot.`;
     }
 
-    if (config.debug) {
-        console.log("whois", siteText, matches, siteApiSlug);
-    }
+
     if (config.verbose) {
         console.log("moderators", siteApiSlug, otherSiteMods);
     }
