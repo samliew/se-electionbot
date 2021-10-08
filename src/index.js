@@ -3,7 +3,7 @@ import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
-import { isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
+import { announceWinners, isAliveCommand, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import Election from './election.js';
@@ -476,9 +476,7 @@ import {
 
                 commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
 
-                commander.add("announce winners", "makes the bot fetch and announce winners immediately", async () => {
-                    // TODO
-                }, AccessLevel.privileged);
+                commander.add("announce winners", "makes the bot fetch and announce winners immediately", announceWinners, AccessLevel.privileged);
 
                 commander.add("whois", "retrieve mods from another site", async (content) => {
                     // TODO
@@ -491,7 +489,6 @@ import {
                     die: ["shutdown"],
                     greet: ["welcome"],
                 });
-
 
                 const matches = [
                     ["commands", /commands|usage/],
@@ -514,6 +511,7 @@ import {
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
                     ["set access", /set (?:access|level)/, config, user, content],
+                    ["announce winners", /^announce winners/, config, election, room, announcement]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, content);
@@ -527,15 +525,8 @@ import {
                 // No responses yet, try run commands that require use of async functions
                 if (responseText === "") {
 
-                    // Announce winners manually
-                    if (/^announce winners/.test(content)) {
-                        await election.scrapeElection(config);
-                        const success = await announcement.announceWinners(room, election);
-                        responseText = success ? "" : "There are no winners yet.";
-                    }
-
                     // Whois other sites mods
-                    else if (/^whois/.test(content)) {
+                    if (/^whois/.test(content)) {
                         const [, siteText] = /whois (\w+) mod(?:erator)?s/.exec(content) || [];
 
                         // Compile list of aliases and common misspellings here
