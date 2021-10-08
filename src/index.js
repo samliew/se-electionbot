@@ -486,6 +486,11 @@ import {
                     commands: ["usage"],
                     die: ["shutdown"],
                     greet: ["welcome"],
+                    whois: [
+                        "list moderators",
+                        "list mods",
+                        "get mods"
+                    ]
                 });
 
                 const matches = [
