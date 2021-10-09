@@ -29,7 +29,7 @@
         {{#each data/transcriptMessages}}
         <tr>
             <td>{{utcTimestamp this.date}}</td>
-            <td><a href="https://chat.{{@root/data/chatDomain}}/users/{{this.chatUserId}}">{{this.username}}</a></td>
+            <td><a href="https://chat.{{@root/data/chatDomain}}/users/{{this.chatUserId}}" target="_blank">{{this.username}}</a></td>
             <td>{{{this.messageHtml}}}</td>
         </tr>
         {{/each}}
