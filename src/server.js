@@ -3,7 +3,7 @@ import Handlebars from 'express-handlebars';
 import { join } from 'path';
 import Election from './election.js';
 import { HerokuClient } from "./herokuClient.js";
-import { chatMarkdownToHtml } from './utils.js';
+import { chatMarkdownToHtml, fetchChatTranscript } from './utils.js';
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
@@ -242,7 +242,7 @@ app.route('/')
 
 
 app.route('/say')
-    .get(({ query }, res) => {
+    .get(async ({ query }, res) => {
         const { success, password = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
         if (!BOT_CONFIG) {
@@ -259,6 +259,8 @@ app.route('/say')
 
             const { chatDomain, chatRoomId } = BOT_CONFIG;
 
+            const transcriptMessages = await fetchChatTranscript(BOT_CONFIG, `https://chat.${chatDomain}/transcript/${chatRoomId}`);
+
             res.render('say', {
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
@@ -266,8 +268,11 @@ app.route('/say')
                 },
                 heading: `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
                 data: {
+                    chatDomain: BOT_CONFIG.chatDomain,
+                    chatRoomId: BOT_CONFIG.chatRoomId,
                     password: password,
-                    statusText: statusMap[success]
+                    statusText: statusMap[success],
+                    transcriptMessages: transcriptMessages.slice(-10),
                 }
             });
         } catch (error) {
@@ -329,7 +334,7 @@ app.route('/config')
                 data: {
                     configObject: envVars,
                     password: password,
-                    statusText: statusMap[success]
+                    statusText: statusMap[success],
                 }
             });
         } catch (error) {

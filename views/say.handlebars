@@ -14,3 +14,25 @@
         <button>Send</button>
     </div>
 </form>
+
+<div class="chat-transcript">
+    <h3>Recent Chat Messages</h3>
+    <table class="nested">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Username</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{#each transcriptMessages}}
+        <tr>
+            <td><a href="https://chat.{{@root/data/chatDomain}}/users/{{this.chatUserId}}">{{this.username}}</a></td>
+            <td>{{utcTimestamp this.date}}</td>
+            <td>{{{this.message}}}</td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</div>
