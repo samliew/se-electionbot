@@ -17,7 +17,7 @@
 
 <div class="chat-transcript">
     <h3>Recent Chat Messages</h3>
-    <table class="smaller">
+    <table class="smaller-table">
         <thead>
             <tr>
                 <th>Date</th>
@@ -28,8 +28,8 @@
         <tbody>
         {{#each data/transcriptMessages}}
         <tr>
-            <td><a href="https://chat.{{@root/data/chatDomain}}/users/{{this.chatUserId}}">{{this.username}}</a></td>
             <td>{{utcTimestamp this.date}}</td>
+            <td><a href="https://chat.{{@root/data/chatDomain}}/users/{{this.chatUserId}}">{{this.username}}</a></td>
             <td>{{{this.message}}}</td>
         </tr>
         {{/each}}
