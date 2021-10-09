@@ -119,7 +119,7 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
 
     console.log(`RESPONSE (${length}/${numParts})`, responseText);
 
-    const waitSecs = minThrottleSecs * 1.5;
+    const waitSecs = Math.max(minThrottleSecs, 2.5);
     const completionDate = Date.now() + numParts * waitSecs;
 
     // If bot isn't already muted, temporarily mute for the minimum required duration to get the message parts out
