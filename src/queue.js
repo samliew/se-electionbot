@@ -128,7 +128,7 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
         config.lastMessageTime = completionDate;
     }
 
-    // Record last activity time only (for room idle checks) so this doesn't override the mute
+    // Record last activity time (for room idle checks)
     config.lastActivityTime = completionDate;
 
     if (numParts > maxMessageParts) {

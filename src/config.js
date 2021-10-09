@@ -164,6 +164,8 @@ export class BotConfig {
         announcedWinners: false,
     };
 
+    // If called without params, resets active mutes (future-dated lastMessageTime)
+    // If called with a future-dated time, is considered a mute until then
     updateLastMessageTime(lastMessageTime = Date.now()) {
         this.lastMessageTime = lastMessageTime;
         this.lastActivityTime = lastMessageTime;
