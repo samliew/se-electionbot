@@ -67,6 +67,10 @@ table {
   min-width: 280px;
   margin: 2em 0;
 }
+table.smaller-table {
+  margin: 1em 0;
+  font-size: 0.9em;
+}
 
 h2 + table {
   margin-top: 0;
