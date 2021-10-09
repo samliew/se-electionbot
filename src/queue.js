@@ -127,10 +127,9 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
     if (!config.isMuted) {
         config.lastMessageTime = completionDate;
     }
+
     // Record last activity time only (for room idle checks) so this doesn't override the mute
-    else {
-        config.lastActivityTime = completionDate;
-    }
+    config.lastActivityTime = completionDate;
 
     if (numParts > maxMessageParts) {
         await msg.reply(`I wrote a poem of ${numParts} messages for you!`);
