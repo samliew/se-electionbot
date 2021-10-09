@@ -28,9 +28,6 @@
                     <td></td>
                     {{/if}}
                 </tr>
-                <tr><td>Positions</td><td>{{numPositions}}</td></tr>
-                <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
-                <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
                 <tr><td>Current phase</td>
                     {{#if phase}}
                     <td><strong>{{phase}}</strong></td>
@@ -48,9 +45,10 @@
                 </tr>
                 <tr><td>Election date</td><td>{{utcTimestamp dateElection}} <span class="relativetime" title="{{utcTimestamp dateElection}}"></span></td></tr>
                 <tr><td>End date</td><td>{{utcTimestamp dateEnded}} <span class="relativetime" title="{{utcTimestamp dateEnded}}"></span></td></tr>
-                <tr><td>Opavote URL</td><td>{{{url opavoteUrl}}}</td></tr>
-                <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
-                <tr><td>Candidates</td>
+                <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
+                <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
+                <tr><td>Positions</td><td>{{numPositions}}</td></tr>
+                <tr><td>Candidates <span class="small-count" data-prefix="(" data-suffix=")">({{arrNominees.length}}</span></td>
                     {{#if arrNominees.length}}
                     <td><ul class="list">
                         {{#each arrNominees}}
@@ -61,7 +59,7 @@
                     <td></td>
                     {{/if}}
                 </tr>
-                <tr><td>Winners</td>
+                <tr><td>Winners <span class="small-count" data-prefix="(" data-suffix=")">({{arrWinners.length}}</span></td>
                     {{#if arrWinners.length}}
                     <td><ul class="list">
                         {{#each arrWinners}}
@@ -72,10 +70,12 @@
                     <td></td>
                     {{/if}}
                 </tr>
+                <tr><td>Opavote URL</td><td>{{{url opavoteUrl}}}</td></tr>
+                <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
             </table>
 
             <table>
-                <tr><td>Current Mods</td>
+                <tr><td>Current Mods <span class="small-count" data-prefix="(" data-suffix=")">({{currentSiteMods.length}}</span></td>
                     {{#if currentSiteMods.length}}
                     <td><ul class="list">
                         {{#each currentSiteMods}}

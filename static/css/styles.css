@@ -239,6 +239,18 @@ form button {
   font-style: normal;
 }
 
+.small-count {
+  font-size: 0.9em;
+  display: block;
+  font-style: italic;
+}
+[data-prefix]:before {
+  content: attr(data-prefix);
+}
+[data-suffix]:after {
+  content: attr(data-suffix);
+}
+
 .mt10 {
   margin-top: 10px;
 }
