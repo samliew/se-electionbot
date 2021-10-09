@@ -218,7 +218,8 @@ export const fetchChatTranscript = async (config, url) => {
 
         const messageText = messageElem.text()?.trim();
         // Strip HTML from chat message
-        const messageMarkup = htmlToChatMarkdown(messageElem.html()?.trim() || "");
+        const messageHtml = messageElem.html()?.trim() || "";
+        const messageMarkup = htmlToChatMarkdown(messageHtml);
 
         const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [, null, null, null];
 
@@ -244,6 +245,7 @@ export const fetchChatTranscript = async (config, url) => {
             chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
             message: messageText,
             messageMarkup: messageMarkup,
+            messageHtml: messageHtml,
             date: lastKnownDatetime,
             messageId: messageId
         });

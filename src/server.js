@@ -215,7 +215,7 @@ app.route('/')
                         flags: BOT_CONFIG.flags,
                         // Activity stuff
                         lastBotMessage: BOT_CONFIG.lastBotMessage,
-                        lastBotMessageHtml: chatMarkdownToHtml(BOT_CONFIG.lastBotMessage),
+                        lastBotMessageHtml: BOT_CONFIG.lastBotMessageHtml,
                         activityCounter: BOT_CONFIG.activityCounter,
                         lowActivityCheckMins: BOT_CONFIG.lowActivityCheckMins,
                         shortIdleDurationMins: shortIdleDurationMins,

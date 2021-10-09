@@ -1,4 +1,4 @@
-import { parseIds } from "./utils.js";
+import { chatMarkdownToHtml, parseIds } from "./utils.js";
 
 /**
  * @typedef {import("chatexchange/dist/Client").Host} Host
@@ -95,6 +95,10 @@ export class BotConfig {
     scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS || 2);
     // Response when bot tries to post the exact same response again
     duplicateResponseText = "Please read my previous message...";
+
+    get lastBotMessageHtml() {
+        return chatMarkdownToHtml(this.lastBotMessage);
+    }
 
     // pool of API keys
     apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
