@@ -55,15 +55,19 @@ ElectionBot info _(requires mention)_:
 
 Moderators can also make use of these commands _(requires mention)_ to help moderate the chat room:
 
-- commands
 - say _message_
 - alive
-- get time
-- chatroom
-- coffee
+- fun on/off
+- get throttle
+- set throttle _X_
 - mute _X_
 - unmute
+- time
+- coffee
+- commands
 - greet
+- announce winners
+- whois _sitename_ mods
 - **what is the candidate score for _X_** _(calculates candidate score of userId "X")_
 
 ## Environment variables

@@ -62,13 +62,11 @@ export const getRandomJoke = () => new RandomArray(
     `Why did the programmer quit his job? Because he didn't get arrays.`,
     `To understand what recursion is, you must first understand recursion.`,
     `If the GC in Java worked correctly, most Java programs would disappear.`,
-    `Why doesn't C++ have a garbage collector? Because there would be nothing left!`,
     `A SQL query goes into a bar, walks up to two tables and asks, "Can I join you?"`,
     `A good programmer is someone who looks both ways before crossing a one-way street.`,
     `Why do programmers always mix up Halloween and Christmas? Because Oct 31 == Dec 25!`,
     `How many testers does it take to change a lightbulb? None, they just report "it's dark"`,
     `How many programmers does it take to change a light bulb? None, that's a hardware problem.`,
-    `How many programmers does it take to change a light bulb? None, they just change the standard to "Dark".`,
     `Some people, when confronted with a problem, think "I know, I'll use regular expressions". Now they have two problems.`,
     getRandomJonSkeetJoke(),
 ).getRandom();
