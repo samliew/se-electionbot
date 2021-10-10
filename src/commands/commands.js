@@ -145,6 +145,7 @@ export const listSiteModerators = async (config, content, entities) => {
     // Compile list of aliases and common misspellings here
     const apiSlugAliases = {
         crafts: ["arts"],
+        crypto: ["cryptography"],
         dba: ["db", "database"],
         english: ["elu"],
         interpersonal: ["ips"],
@@ -152,7 +153,8 @@ export const listSiteModerators = async (config, content, entities) => {
         meta: ["mse", "meta", "meta.stackexchange"],
         movies: ["movie"],
         rus: ["russian"],
-        scifi: ["sff", "fantasy"],
+        scifi: ["sff", "fantasy", "sciencefiction"],
+        security: ["infosec"],
         serverfault: ["sf"],
         skeptics: ["sceptics"],
         softwareengineering: ["se"],
