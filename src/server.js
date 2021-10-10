@@ -3,7 +3,7 @@ import Handlebars from 'express-handlebars';
 import { join } from 'path';
 import Election from './election.js';
 import { HerokuClient } from "./herokuClient.js";
-import { chatMarkdownToHtml, fetchChatTranscript } from './utils.js';
+import { fetchChatTranscript } from './utils.js';
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
