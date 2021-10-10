@@ -208,5 +208,5 @@ export const isAskedForUserEligibility = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutLightbulb = (text) => {
-    return /how m(?:any|uch) mods(?: does)? it takes? to fix(?: a| the)? lightbulb/.test(text);
+    return /how m(?:any|uch) mod(?:erator)s(?: does)? it takes? to (?:change|fix|replace)(?: a| the)? light\s?bulb/.test(text);
 };
