@@ -520,6 +520,7 @@ export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {
  * @returns {string}
  */
 export const sayAJoke = () => {
-    const joke = new RandomArray(...getRandomJoke(), ...getRandomJonSkeetJoke()).getRandom();
+    // Equal chance of being either
+    const joke = new RandomArray(getRandomJoke(), getRandomJonSkeetJoke()).getRandom();
     return joke;
 };
