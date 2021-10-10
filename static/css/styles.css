@@ -246,6 +246,10 @@ form .form-controls {
   font-style: italic;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 [data-prefix]:before {
   content: attr(data-prefix);
 }
@@ -259,7 +263,6 @@ form .form-controls {
 .mt20 {
   margin-top: 20px;
 }
-
 .mt40 {
   margin-top: 40px;
 }

@@ -6,7 +6,7 @@
 
     {{{data/statusText}}}
 
-    <textarea type="text" name="message" aria-label="message" placeholder="message" maxlength="500"></textarea>
+    <textarea type="text" name="message" id="message" aria-label="message" placeholder="message" maxlength="500"></textarea>
 
     <input type="hidden" name="password" value="{{data/password}}" />
 
@@ -23,6 +23,7 @@
                 <th>Date</th>
                 <th>Username</th>
                 <th>Message</th>
+                <th>Message ID</th>
             </tr>
         </thead>
         <tbody>
@@ -31,8 +32,21 @@
             <td>{{utcTimestamp this.date}}</td>
             <td><a href="https://chat.{{@root/data/chatDomain}}/users/{{this.chatUserId}}" target="_blank">{{this.username}}</a></td>
             <td>{{{this.messageHtml}}}</td>
+            <td data-message-id="{{this.messageId}}" class="cursor-pointer">{{this.messageId}}</td>
         </tr>
         {{/each}}
         </tbody>
     </table>
 </div>
+
+<script>
+(function() {
+    const msgField = document.getElementById('message');
+    document.body.addEventListener('click', function (evt) {
+        const el = evt.target;
+        if (el.dataset.messageId && el.dataset.messageId.length) {
+            msgField.value = `:${el.dataset.messageId} ` + msgField.value.replace(/^:\d+\s*/, '');
+        }
+    }, false);
+}();
+</script>
