@@ -41,6 +41,7 @@
 
 <script>
 (function() {
+
     const msgField = document.getElementById('message');
     document.body.addEventListener('click', function (evt) {
         const el = evt.target;
@@ -48,5 +49,6 @@
             msgField.value = `:${el.dataset.messageId} ` + msgField.value.replace(/^:\d+\s*/, '');
         }
     }, false);
-}();
+
+})();
 </script>
