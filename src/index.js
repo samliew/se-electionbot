@@ -588,9 +588,6 @@ import {
             else if (isAskedAboutLightbulb(content) && config.funMode) {
                 responseText = sayHowManyModsItTakesToFixLightbulb(currentSiteMods);
             }
-            else if (isAskedAboutJokes(content) && config.funMode) {
-                responseText = sayAJoke();
-            }
             // Moderation badges
             else if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
                 responseText = sayBadgesByType(electionBadges, "moderation", election.isStackOverflow);
@@ -831,6 +828,9 @@ import {
                         "My pleasure",
                         "You are welcome",
                     ).getRandom();
+                }
+                else if (isAskedAboutJokes(content) && config.funMode) {
+                    responseText = sayAJoke();
                 }
                 else if (['help', 'command', 'info'].some(x => content.includes(x))) {
                     responseText = '\n' + [
