@@ -1,6 +1,6 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
-import { getRandomJoke, getRandomOops, RandomArray } from "./random.js";
+import { getRandomJoke, getRandomJonSkeetJoke, getRandomOops, RandomArray } from "./random.js";
 import { calculateScore } from "./score.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
@@ -520,6 +520,6 @@ export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {
  * @returns {string}
  */
 export const sayAJoke = () => {
-    const joke = getRandomJoke();
+    const joke = new RandomArray(...getRandomJoke(), ...getRandomJonSkeetJoke()).getRandom();
     return joke;
 };

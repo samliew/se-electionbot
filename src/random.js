@@ -68,7 +68,6 @@ export const getRandomJoke = () => new RandomArray(
     `How many testers does it take to change a lightbulb? None, they just report "it's dark"`,
     `How many programmers does it take to change a light bulb? None, that's a hardware problem.`,
     `Some people, when confronted with a problem, think "I know, I'll use regular expressions". Now they have two problems.`,
-    getRandomJonSkeetJoke(),
 ).getRandom();
 export const getRandomJonSkeetJoke = () => new RandomArray(
     `Jon Skeet's threads do not sleep. They wait.`,
