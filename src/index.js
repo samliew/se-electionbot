@@ -8,6 +8,7 @@ import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import Election from './election.js';
 import {
+    isAskedAboutJokes,
     isAskedAboutLightbulb,
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
@@ -19,7 +20,7 @@ import {
     isThankingTheBot
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAJoke, sayAreModsPaid, sayBadgesByType, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
@@ -396,7 +397,7 @@ import {
                 commander.add("fun", "switches fun mode on/off", (config, content) => {
                     const [, state = "on"] = /(on|off)/.exec(content) || [];
                     config.funMode = state === "on";
-                    return config.funMode ? "I am having fun." : "I'm no longer funny.";
+                    return config.funMode ? "I am having fun." : "We hate fun.";
                 }, AccessLevel.privileged);
 
                 commander.add("test cron", "sets up a test cron job", (announcement) => {
@@ -567,7 +568,7 @@ import {
 
             /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string) => string][]} */
             const rules = [
-                [isAskedForCurrentPositions, sayNumberOfPositions]
+                [isAskedForCurrentPositions, sayNumberOfPositions],
             ];
 
             const matched = rules.find(([expr]) => expr(content));
@@ -586,6 +587,9 @@ import {
             }
             else if (isAskedAboutLightbulb(content) && config.funMode) {
                 responseText = sayHowManyModsItTakesToFixLightbulb(currentSiteMods);
+            }
+            else if (isAskedAboutJokes(content) && config.funMode) {
+                responseText = sayAJoke();
             }
             // Moderation badges
             else if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {

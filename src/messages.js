@@ -1,6 +1,6 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
-import { getRandomOops, RandomArray } from "./random.js";
+import { getRandomJoke, getRandomOops, RandomArray } from "./random.js";
 import { calculateScore } from "./score.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
@@ -509,7 +509,17 @@ export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {
     const requires = new RandomArray(...names);
 
     const times = Math.floor(Math.random() * requires.length);
-    if (!times) return `Sorry, mods do not fix lightbulbs`;
+    if (!times) return `Sorry, mods do not fix lightbulbs.`;
 
-    return `It only takes ${times} mod${pluralize(times, "s")}! Just ask ${requires.getRandom()}`;
+    return `It only takes ${times} mod${pluralize(times, "s")}! Just ask ${requires.getRandom()}.`;
+};
+
+/**
+ * @fun
+ * @summary returns a joke
+ * @returns {string}
+ */
+export const sayAJoke = () => {
+    const joke = getRandomJoke();
+    return joke;
 };

@@ -210,3 +210,13 @@ export const isAskedForUserEligibility = (text) => {
 export const isAskedAboutLightbulb = (text) => {
     return /how (?:many|much) mod(?:erator)?s(?: does)? it takes? to (?:change|fix|replace)(?: a| the)? light\s?bulb/.test(text);
 };
+
+/**
+ * @fun
+ * @summary checks if a message is asking for a joke
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutJokes = (text) => {
+    return /tell\b.*\bjoke$/.test(text);
+};
