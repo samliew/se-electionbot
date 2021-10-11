@@ -467,13 +467,13 @@ import {
                 // to reserve the keyword 'help' for normal users
                 commander.add("commands", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
 
-                commander.add("die", "shuts down the bot in case of emergency", () => {
+                commander.add("die", "stops the bot in case of emergency", () => {
                     wait(3).then(() => {
                         room.leave();
                         process.exit(0);
                     });
                     return "initiating shutdown sequence";
-                }, AccessLevel.dev);
+                }, AccessLevel.privileged);
 
                 commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
 
