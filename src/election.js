@@ -463,7 +463,7 @@ export default class Election {
                 // Append to electionUrl
                 this.electionUrl += this.electionNum;
 
-                if (config.verbose) console.log('INFO  - Election is active and number was auto-detected:', this.electionNum);
+                if (config.debugOrVerbose) console.log('INFO  - Election is active and number was auto-detected:', this.electionNum);
             }
 
             // If election has ended (or cancelled)
@@ -503,9 +503,8 @@ export default class Election {
             }
 
             console.log(
-                `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.\n` +
-                `-------- PHASE ${this.phase};  CANDIDATES ${this.numNominees};  WINNERS ${this.numWinners}\n` +
-                `-------- CHAT ${this.chatUrl}`
+                `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.` +
+                (config.debugOrVerbose ? `\n-------- PHASE ${this.phase};  CANDIDATES ${this.numNominees};  WINNERS ${this.numWinners}; CHAT ${this.chatUrl}` : "")
             );
         }
         catch (err) {
