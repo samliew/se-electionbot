@@ -127,7 +127,7 @@ export const isAskedWhoMadeMe = (text) => {
  */
 export const isAskedForOwnScore = (text) => {
     return /can i nominate myself/.test(text) ||
-        /what(?: is|'s)\b.*\bmy(?: candidate)? score(?:$|\?)/.test(text);
+        /what(?: is|'s)\b.*\bm[ye](?: candidate)? score(?:$|\?)/.test(text);
 };
 
 /**
