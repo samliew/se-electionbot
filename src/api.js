@@ -43,6 +43,7 @@ export const getAllNamedBadges = async (config, site, key, page = 1) => {
         sort: "name",
         pagesize: "100",
         filter: ")j(RnCyiVMe7YpW4a2x",
+        page: page.toString(),
         key
     }).toString();
 
@@ -76,7 +77,8 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
         sort: "type",
         pagesize: "100",
         filter: "7W_5Hvzzo",
-        key
+        page: page.toString(),
+        key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
     const { items = [], has_more } = /**@type {{ items: Badge[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
@@ -107,6 +109,7 @@ export const getModerators = async (config, site, sort = "name", order = "asc", 
         sort: "name",
         site,
         filter: "!LnNkvq0d-S*rS_0sMTDFRm",
+        page: page.toString(),
         key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
@@ -130,13 +133,15 @@ export const getModerators = async (config, site, sort = "name", order = "asc", 
  * @param {number} userId userId to request info for
  * @param {string} site election site slug
  * @param {string} key api key
+ * @param {number} [page]
  * @returns {Promise<User|null>}
  */
-export const getUserInfo = async (config, userId, site, key) => {
+export const getUserInfo = async (config, userId, site, key, page = 1) => {
 
     const userURL = new URL(`${apiBase}/${apiVer}/users/${userId}`);
     userURL.search = new URLSearchParams({
         site,
+        page: page.toString(),
         filter: "sAR)YG", // unsafe
         key
     }).toString();
@@ -179,7 +184,8 @@ export const getAllNetworkSites = async (config, page = 1) => {
     const siteURL = new URL(`${apiBase}/${apiVer}/sites`);
     siteURL.search = new URLSearchParams({
         filter: "!3ynpeVzDR6qiwv1BQ",
-        key: getStackApiKey(config.apiKeyPool)
+        key: getStackApiKey(config.apiKeyPool),
+        page: page.toString(),
     }).toString();
 
     const { items = [], has_more = false } = /** @type {{ items: Site[], has_more: boolean }} */(
@@ -225,13 +231,14 @@ export const getAllMainNetworkSites = async (config) => {
  * @param {string[]} keyPool pool of API keys to rotate through
  * @returns {Promise<NetworkUser[]>}
  */
-export const getUserAssociatedAccounts = async (config, networkId, keyPool) => {
+export const getUserAssociatedAccounts = async (config, networkId, keyPool, page = 1) => {
     const url = new URL(`${apiBase}/${apiVer}/users/${networkId}/associated`);
     url.search = new URLSearchParams({
         pagesize: "100",
         types: "main_site",
         filter: "!myEHnzbmE0",
-        key: getStackApiKey(keyPool)
+        key: getStackApiKey(keyPool),
+        page: page.toString(),
     }).toString();
 
     // Fetch network accounts via API to get the account of the site we want
