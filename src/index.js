@@ -473,7 +473,7 @@ import {
                         process.exit(0);
                     });
                     return "initiating shutdown sequence";
-                }, AccessLevel.admin);
+                }, AccessLevel.privileged);
 
                 commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
 
