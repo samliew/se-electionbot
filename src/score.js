@@ -179,7 +179,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        const { score, missing, isEligible } = calculateScore(requestedUser, userBadges, election);
+        const { score, missing, isEligible } = calculateScore(requestedUser, userBadges, election, isSO);
 
         const missingBadges = missing.badges.election;
         const missingRequiredBadges = missing.badges.required;
