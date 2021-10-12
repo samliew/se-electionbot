@@ -1,4 +1,4 @@
-import { chatMarkdownToHtml, parseIds } from "./utils.js";
+import { chatMarkdownToHtml, parseIds, parseNumEnv } from "./utils.js";
 
 /**
  * @typedef {import("chatexchange/dist/Client").Host} Host
@@ -163,6 +163,13 @@ export class BotConfig {
         saidElectionEndingSoon: false,
         announcedWinners: false,
     };
+
+    /* dashboard variables */
+
+    /**
+     * @summary controls how many transcript messages will be shown in the dashboard
+     */
+    showTranscriptMessages = parseNumEnv("transcript_size", 20);
 
     // If called without params, resets active mutes (future-dated lastMessageTime)
     // If called with a future-dated time, is considered a mute until then
