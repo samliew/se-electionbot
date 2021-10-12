@@ -186,7 +186,7 @@ app.route('/')
             } = BOT_CONFIG;
 
             const safeBotData = {
-                ...BOT_CONFIG,
+                ...JSON.parse(JSON.stringify(BOT_CONFIG)),
                 apiKeyPool: []
             };
 
