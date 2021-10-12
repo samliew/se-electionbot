@@ -272,7 +272,7 @@ app.route('/say')
                     chatRoomId: BOT_CONFIG.chatRoomId,
                     password: password,
                     statusText: statusMap[success],
-                    transcriptMessages: transcriptMessages.slice(-10),
+                    transcriptMessages: transcriptMessages.slice(-20),
                 }
             });
         } catch (error) {
