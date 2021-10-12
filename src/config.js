@@ -1,4 +1,4 @@
-import { chatMarkdownToHtml, parseIds, parseNumEnv } from "./utils.js";
+import { chatMarkdownToHtml, parseBoolEnv, parseIds, parseNumEnv } from "./utils.js";
 
 /**
  * @typedef {import("chatexchange/dist/Client").Host} Host
@@ -92,10 +92,14 @@ export class BotConfig {
     // Variable to track activity count in the room, to see if it reached minActivityCountThreshold
     activityCounter = 0;
     // Variable of rescrape interval of election page
-    scrapeIntervalMins = +(process.env.SCRAPE_INTERVAL_MINS || 2);
+    scrapeIntervalMins = parseNumEnv("scrape_interval_mins", 2);
     // Response when bot tries to post the exact same response again
     duplicateResponseText = "Please read my previous message...";
 
+    /**
+     * @summary gets last bot message HTML string
+     * @returns {string}
+     */
     get lastBotMessageHtml() {
         return chatMarkdownToHtml(this.lastBotMessage);
     }
@@ -136,12 +140,15 @@ export class BotConfig {
     /* Debug variables */
 
     // Fun mode
-    funMode = JSON.parse(process.env.FUN_MODE?.toLowerCase() || "true");
+    funMode = parseBoolEnv("fun_mode", true);
     // Debug mode
-    debug = JSON.parse(process.env.DEBUG?.toLowerCase() || "false");
+    debug = parseBoolEnv("debug", false);
     // Verbose logging
-    verbose = JSON.parse(process.env.VERBOSE?.toLowerCase() || "false");
+    verbose = parseBoolEnv("verbose", false);
 
+    /**
+     * @summary returns whether the bot is in increased logging mode
+     */
     get debugOrVerbose() {
         return this.debug || this.verbose;
     }
@@ -151,11 +158,6 @@ export class BotConfig {
     devIds = new Set(parseIds(process.env.DEV_IDS || ""));
     adminIds = new Set(parseIds(process.env.ADMIN_IDS || ''));
     ignoredUserIds = new Set(parseIds(process.env.IGNORED_USERIDS || ''));
-
-    addAdmin(chatUserId) {
-        this.adminIds.add(chatUserId);
-        console.log(`User ${chatUserId} added as admin`);
-    }
 
     /* Flags and bot-specific utility functions */
 
@@ -170,6 +172,15 @@ export class BotConfig {
      * @summary controls how many transcript messages will be shown in the dashboard
      */
     showTranscriptMessages = parseNumEnv("transcript_size", 20);
+
+    /**
+     * @summary adds a user as a bot administrator
+     * @param {number} chatUserId chat id of the user
+     */
+    addAdmin(chatUserId) {
+        this.adminIds.add(chatUserId);
+        console.log(`User ${chatUserId} added as admin`);
+    }
 
     // If called without params, resets active mutes (future-dated lastMessageTime)
     // If called with a future-dated time, is considered a mute until then
