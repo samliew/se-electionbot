@@ -187,6 +187,17 @@ export class BotConfig {
         // Unable to repost same message within 30 seconds
         return this.lastBotMessage === newContent && Date.now() - 30e4 < this.lastMessageTime;
     }
+
+    toJSON() {
+        const proto = Object.getPrototypeOf(this);
+        const json = { ...this };
+
+        Object.entries(Object.getOwnPropertyDescriptors(proto))
+            .filter(([_key, { get }]) => typeof get === "function")
+            .forEach(([key]) => (json[key] = this[key]));
+
+        return json;
+    }
 };
 
 export default BotConfig;
