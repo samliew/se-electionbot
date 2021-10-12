@@ -7,6 +7,16 @@ describe('Election', () => {
 
     describe('getters', () => {
 
+        describe('requiredBadges', () => {
+
+            it('should correctly return the list of required badges', () => {
+                const election = new Election("https://stackoverflow.com/election/12");
+                const { requiredBadges } = election;
+                expect(requiredBadges.length).to.equal(4);
+            });
+
+        });
+
         describe('siteHostname', () => {
 
             it('should correctly get site hostname', () => {

@@ -87,6 +87,15 @@ export default class Election {
     }
 
     /**
+     * @summary returns a list of required badges
+     * @returns {ElectionBadge[]}
+     */
+    get requiredBadges() {
+        const { electionBadges } = this;
+        return electionBadges.filter(({ required }) => required);
+    }
+
+    /**
      * @summary returns previous Election state
      * @returns {{ [P in keyof Election as Election[P] extends Function ? never : P ]: Election[P]} | null}
      */
