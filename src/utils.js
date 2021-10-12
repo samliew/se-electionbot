@@ -78,6 +78,12 @@ export const markdownify = (text, tags = {}) => {
 };
 
 /**
+ * @summary strips all markdown from the text
+ * @param {string} text text to strip
+ */
+export const stripMarkdown = (text) => text.replace(/([_*]{1,2})(.+?)(?<![ _])\1(?!\1)/gm, "$2");
+
+/**
  * @summary converts HTML to chat Markdown
  * @param {string} content initial text
  * @returns {string}

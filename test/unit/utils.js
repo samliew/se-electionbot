@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, parseIds, pluralize } from "../../src/utils.js";
+import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, parseIds, pluralize, stripMarkdown } from "../../src/utils.js";
 import { matchNumber } from "../../src/utils/expressions.js";
 import { numericNullable } from "../../src/utils/objects.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -14,6 +14,19 @@ describe('RegExp-related utils', () => {
         it('should return undefined if no number matched', () => {
             const nothing = matchNumber(/capture \d+,?/, "forgot to capture 1984, sorry");
             expect(nothing).to.be.undefined;
+        });
+    });
+
+    describe('stripMarkdown', () => {
+        it('should correctly strip markdown', () => {
+            const stripped = stripMarkdown("testing _some_ smart **messages** from some __pesky__ users :)");
+            expect(stripped).to.equal("testing some smart messages from some pesky users :)");
+        });
+
+        it('should not strip unclosed markdown', () => {
+            const clothed = "_this should print **verbatim__";
+            const stripped = stripMarkdown(clothed);
+            expect(stripped).to.equal(clothed);
         });
     });
 });
