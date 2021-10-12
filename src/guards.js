@@ -229,3 +229,12 @@ export const isAskedAboutJokes = (text) => {
 export const isAskedIfResponsesAreCanned = (text) => {
     return /bot\b.+?says?\b.+?canned/i.test(text);
 };
+
+/**
+ * @summary checks if a message is asking to list badges of a certain type
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutBadgesOfType = (text) => {
+    return /^(?:what|list)(?: are)?(?: the)?.+?\b(participation|editing|moderation)\s+badges/i.test(text);
+};

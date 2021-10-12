@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import {
+    isAskedAboutBadgesOfType,
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedIfResponsesAreCanned, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
 } from "../../src/guards.js";
 
@@ -140,7 +141,7 @@ describe('Message Guards', () => {
     });
 
     describe('isAskedIfResponsesAreCanned', () => {
-        it('isAskedIfResponsesAreCanned', () => {
+        it('should correctly match content', () => {
             allMatch(isAskedIfResponsesAreCanned, [
                 "hey, bot, say something canned!",
                 "Everything the bot says is canned.what do you expect from a tin box?"
@@ -151,6 +152,16 @@ describe('Message Guards', () => {
                 "That sounds like a canned comment with the list dynamically generated. Am I right?",
                 "That sounds awfully canned"
             ], false);
+        });
+    });
+
+    describe('isAskedAboutBadgesOfType', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutBadgesOfType, [
+                "what are the participation badges?",
+                "list the moderation badges?",
+                "what are editing badges?"
+            ]);
         });
     });
 
