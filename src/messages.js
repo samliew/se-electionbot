@@ -160,12 +160,11 @@ export const sayBadgesByType = (badges, type, isSO = true) => {
 /**
  * @summary builds a response to the required badges query
  * @param {Election} election election to check required badges for
- * @param {boolean} [isSO] is on Stack Overflow or not
  * @returns {string}
  */
-export const sayRequiredBadges = (election, isSO = true) => {
+export const sayRequiredBadges = (election) => {
 
-    if (!isSO) {
+    if (!election.isStackOverflow) {
         return "There are no required badges for elections on this site.";
     }
 

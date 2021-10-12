@@ -597,7 +597,7 @@ import {
             }
             // SO required badges
             else if (['what', 'required', 'badges'].every(x => content.includes(x))) {
-                responseText = sayRequiredBadges(election, election.isStackOverflow);
+                responseText = sayRequiredBadges(election);
             }
 
             // What are the benefits of mods
