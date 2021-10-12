@@ -1,6 +1,7 @@
 import { HerokuClient } from "./herokuClient.js";
 import { sayElectionSchedule, sayHI } from "./messages.js";
 import { sendMessage } from "./queue.js";
+import { RandomArray } from "./random.js";
 import { makeURL, wait } from "./utils.js";
 
 /**
@@ -78,7 +79,7 @@ export default class Rescraper {
                     roomReachedMinimumActivityCount, roomBecameIdleAWhileAgo,
                     roomBecameIdleHoursAgo, botHasBeenQuiet, botSentLastMessage,
                     idleCanSayHi
-                } = config
+                } = config;
 
                 console.log(`RESCRAPER - IDLE? idleCanSayHi: ${idleCanSayHi}
                     ----------- reachedMinActivity: ${roomReachedMinimumActivityCount};
@@ -178,7 +179,13 @@ export default class Rescraper {
 
                 console.log(`RESCRAPER - Room is inactive with ${config.activityCounter} messages posted so far (min ${config.minActivityCountThreshold}).`);
 
-                await sendMessage(config, room, sayHI(election), null, true);
+                const greetings = new RandomArray(...[
+                    "And now for something completely different. ",
+                    "BBC would like to announce that: ",
+                    ""
+                ]);
+
+                await sendMessage(config, room, sayHI(election, greetings.getRandom()), null, true);
 
                 // Reset last activity count
                 config.activityCounter = 0;
