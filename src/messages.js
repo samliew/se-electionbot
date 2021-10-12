@@ -160,25 +160,22 @@ export const sayBadgesByType = (badges, type, isSO = true) => {
 /**
  * @summary builds a response to the required badges query
  * @param {Election} election election to check required badges for
- * @param {Badge[]} badges list of election badges
  * @param {boolean} [isSO] is on Stack Overflow or not
  * @returns {string}
  */
-export const sayRequiredBadges = (election, badges, isSO = true) => {
+export const sayRequiredBadges = (election, isSO = true) => {
 
     if (!isSO) {
         return "There are no required badges for elections on this site.";
     }
 
-    const { repNominate } = election;
+    const { repNominate, requiredBadges } = election;
 
-    const required = badges.filter(({ required }) => required);
-
-    const { length } = required;
+    const { length } = requiredBadges;
 
     const numBadgesPrefix = `The ${length} required badge${pluralize(length)} to nominate yourself ${pluralize(length, "are", "is")}: `;
 
-    const badgeList = required.map(({ badge_id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${badge_id}`)).join(", ");
+    const badgeList = requiredBadges.map(({ badge_id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${badge_id}`)).join(", ");
 
     const repPostfix = repNominate ? ` You'll also need ${repNominate} reputation.` : "";
 
