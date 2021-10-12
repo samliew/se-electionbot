@@ -49,11 +49,11 @@ export class BotConfig {
     }
 
     // Variable to determine how long the room needs to be quiet to be idle - used by roomBecameIdleAWhileAgo
-    shortIdleDurationMins = 4;
+    shortIdleDurationMins = +(process.env.SHORT_IDLE_DURATION_MINS || 3);
     // Variable to determine how long the room needs to be quiet to be idle - used by roomBecameIdleHoursAgo
-    longIdleDurationHours = 12;
+    longIdleDurationHours = +(process.env.LONG_IDLE_DURATION_HOURS || 12);
     // Variable to trigger greeting only after this time of inactivity - used by botHasBeenQuiet
-    lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 10);
+    lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 5);
 
     get roomBecameIdleAWhileAgo() {
         return this.lastActivityTime + (this.shortIdleDurationMins * 6e4) < Date.now();
