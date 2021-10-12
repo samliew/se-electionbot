@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, parseIds, pluralize, stripMarkdown } from "../../src/utils.js";
+import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/utils.js";
 import { matchNumber } from "../../src/utils/expressions.js";
 import { numericNullable } from "../../src/utils/objects.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -41,6 +41,27 @@ describe('Object-related utils', () => {
 
             expect(ans).to.equal(42);
             expect(que).to.equal(null);
+        });
+    });
+});
+
+describe('Number-related utils', () => {
+    describe('parseNumEnv', () => {
+
+        before(() => process.env.ANSWER = 42);
+        after(() => delete process.env.ANSWER);
+
+        it('should correctly parse variables', () => {
+            const existing = parseNumEnv("answer");
+            const empty = parseNumEnv("void");
+
+            expect(existing).to.equal(42);
+            expect(empty).to.equal(void 0);
+        });
+
+        it('should default to provided default value if no key found', () => {
+            const empty = parseNumEnv("defaulted", 42);
+            expect(empty).to.equal(42);
         });
     });
 });
