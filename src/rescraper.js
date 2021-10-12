@@ -182,6 +182,8 @@ export default class Rescraper {
                 const greetings = new RandomArray(...[
                     "And now for something completely different. ",
                     "BBC would like to announce that: ",
+                    "The bot would like to apologize for the next announcement: ",
+                    "Hello and welcome to the election night special! ",
                     ""
                 ]);
 
