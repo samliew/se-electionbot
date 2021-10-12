@@ -20,19 +20,19 @@
     <table class="smaller-table">
         <thead>
             <tr>
+                <th>Message ID</th>
                 <th>Date</th>
                 <th>Username</th>
                 <th>Message</th>
-                <th>Message ID</th>
             </tr>
         </thead>
         <tbody>
         {{#each data/transcriptMessages}}
         <tr>
+            <td data-message-id="{{this.messageId}}" class="cursor-pointer" title="click to reply to this message">{{this.messageId}}</td>
             <td>{{utcTimestamp this.date}}</td>
             <td><a href="https://chat.{{@root/data/chatDomain}}/users/{{this.chatUserId}}" target="_blank">{{this.username}}</a></td>
             <td>{{{this.messageHtml}}}</td>
-            <td data-message-id="{{this.messageId}}" class="cursor-pointer">{{this.messageId}}</td>
         </tr>
         {{/each}}
         </tbody>
