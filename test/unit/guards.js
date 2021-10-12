@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import {
     isAskedAboutBadgesOfType,
-    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedIfResponsesAreCanned, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
+    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
 } from "../../src/guards.js";
 
 /**
@@ -137,6 +137,19 @@ describe('Message Guards', () => {
                 "what is the candidate score formula?",
                 "what is the formula for candidate score?",
             ]);
+        });
+    });
+
+    describe('isAskedHowOrWhoToVote', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowOrWhoToVote, [
+                "who to vote for?",
+                "how to choose who to vote for?"
+            ]);
+
+            allMatch(isAskedHowOrWhoToVote, [
+                "We want new blood, people who are excited about moderating and have enough time available in their lives for whatever reason to devote to the site."
+            ], false);
         });
     });
 

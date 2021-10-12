@@ -238,3 +238,12 @@ export const isAskedIfResponsesAreCanned = (text) => {
 export const isAskedAboutBadgesOfType = (text) => {
     return /^(?:what|list)(?: are)?(?: the)?.+?\b(participation|editing|moderation)\s+badges/i.test(text);
 };
+
+/**
+ * @summary checks if a message is asking how to vote or who to vote for
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedHowOrWhoToVote = (text) => {
+    return /^(?:how|who) to (?:(?:choose|pick|decide|determine).+?\bvote\b|vote)/.test(text);
+};

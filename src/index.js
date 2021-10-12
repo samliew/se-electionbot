@@ -15,7 +15,7 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
     isHatingTheBot,
     isLovingTheBot,
@@ -650,8 +650,7 @@ import {
             else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
                 responseText = election.phase == 'ended' ? (election.statVoters || null) : `We won't know until the election ends. Come back ${linkToRelativeTimestamp(election.dateEnded)}.`;
             }
-            // How to choose/pick/decide/determine who to vote for
-            else if ((content.startsWith('how') && ['choose', 'pick', 'decide', 'determine'].some(x => content.includes(x))) || (content.includes('who') && ['vote', 'for'].every(x => content.includes(x)))) {
+            else if (isAskedHowOrWhoToVote(content)) {
                 if (election.phase == null) responseText = sayNotStartedYet(election);
                 else responseText = sayInformedDecision();
             }
