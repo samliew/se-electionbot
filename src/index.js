@@ -2,6 +2,7 @@ import Client from "chatexchange";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
+import sanitize from "sanitize-html";
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { announceWinners, isAliveCommand, listSiteModerators, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
@@ -313,7 +314,7 @@ import {
 
             // Decode HTML entities in messages, create lowercase copy for guard matching
             const originalMessage = entities.decode(encodedMessage);
-            const content = originalMessage.toLowerCase().replace(/^@\S+\s+/, '');
+            const content = sanitize(originalMessage.toLowerCase().replace(/^@\S+\s+/, ''), { allowedTags: [] });
 
             const { eventType, userId, targetUserId } = msg;
 
