@@ -80,7 +80,10 @@ export class HerokuClient {
         // Do not update sensitive keys
         if (this._sensitiveKeys.includes(key)) return false;
 
-        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: { key: value } }) && true;
+        const obj = {};
+        obj[key] = value;
+
+        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: { obj } }) && true;
     };
 
     /**
