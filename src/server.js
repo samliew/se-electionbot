@@ -175,16 +175,20 @@ app.route('/')
         }
 
         try {
-            const { chatDomain, chatRoomId } = BOT_CONFIG;
-
             const {
-                roomReachedMinimumActivityCount,
-                shortIdleDurationMins, roomBecameIdleAWhileAgo,
-                longIdleDurationHours, roomBecameIdleHoursAgo,
-                lowActivityCheckMins, botHasBeenQuiet,
-                lastActivityTime, lastMessageTime,
-                botSentLastMessage
+                chatDomain,
+                chatRoomId,
+                shortIdleDurationMins,
+                longIdleDurationHours,
+                lowActivityCheckMins,
+                lastActivityTime,
+                lastMessageTime,
             } = BOT_CONFIG;
+
+            const safeBotData = {
+                ...BOT_CONFIG,
+                apiKeyPool: []
+            };
 
             res.render('index', {
                 page: {
@@ -200,37 +204,11 @@ app.route('/')
                     siteHostname: ELECTION.siteHostname,
                     election: ELECTION,
                     botconfig: {
-                        scriptInitDate: BOT_CONFIG.scriptInitDate,
-                        keepAlive: BOT_CONFIG.keepAlive,
-                        scriptHostname: BOT_CONFIG.scriptHostname,
-                        throttleSecs: BOT_CONFIG.throttleSecs,
-                        scrapeIntervalMins: BOT_CONFIG.scrapeIntervalMins,
-                        duplicateResponseText: BOT_CONFIG.duplicateResponseText,
-                        isMuted: BOT_CONFIG.isMuted,
-                        maxMessageLength: BOT_CONFIG.maxMessageLength,
-                        maxMessageParts: BOT_CONFIG.maxMessageParts,
-                        funMode: BOT_CONFIG.funMode,
-                        debug: BOT_CONFIG.debug,
-                        verbose: BOT_CONFIG.verbose,
-                        flags: BOT_CONFIG.flags,
-                        // Activity stuff
-                        lastBotMessage: BOT_CONFIG.lastBotMessage,
-                        lastBotMessageHtml: BOT_CONFIG.lastBotMessageHtml,
-                        activityCounter: BOT_CONFIG.activityCounter,
-                        lowActivityCheckMins: BOT_CONFIG.lowActivityCheckMins,
-                        shortIdleDurationMins: shortIdleDurationMins,
-                        longIdleDurationHours: longIdleDurationHours,
-                        lastActivityTime: BOT_CONFIG.lastActivityTime,
-                        lastMessageTime: BOT_CONFIG.lastMessageTime,
-                        minActivityCountThreshold: BOT_CONFIG.minActivityCountThreshold,
-                        roomReachedMinimumActivityCount: roomReachedMinimumActivityCount,
-                        roomBecameIdleAWhileAgo: roomBecameIdleAWhileAgo,
+                        // overrides should come after the object spread
+                        ...safeBotData,
                         roomBecameIdleAWhileDate: new Date(lastActivityTime + (shortIdleDurationMins * 6e4)),
-                        roomBecameIdleHoursAgo: roomBecameIdleHoursAgo,
                         roomBecameIdleHoursDate: new Date(lastActivityTime + (longIdleDurationHours * 60 * 6e4)),
-                        botHasBeenQuiet: botHasBeenQuiet,
                         botWillBeQuietDate: new Date(lastMessageTime + (lowActivityCheckMins * 6e4)),
-                        botSentLastMessage: botSentLastMessage,
                     }
                 }
             });
