@@ -52,6 +52,8 @@ const handlebarsConfig = {
             return `<a href="${url}">${text}</a>`;
         },
         utcTimestamp: function (date) {
+            if (typeof date === 'number' && date < 0) return "";
+
             const validateDate = (input) => {
                 let output = input;
                 if (typeof input === 'string' || typeof input === 'number') {
