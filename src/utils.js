@@ -691,3 +691,14 @@ export const parseNumEnv = (key, def) => {
     // @ts-expect-error
     return fetched !== void 0 ? +fetched : fetched;
 };
+
+/**
+ * @summary parses a boolean environment variable
+ * @param {string} key process.env key to get
+ * @param {boolean} [def] default value if missing
+ * @returns {boolean}
+ */
+export const parseBoolEnv = (key, def = false) => {
+    const fetched = process.env[key.toUpperCase()]?.toLowerCase();
+    return fetched !== void 0 ? JSON.parse(fetched) : def;
+};

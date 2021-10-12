@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/utils.js";
+import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/utils.js";
 import { matchNumber } from "../../src/utils/expressions.js";
 import { numericNullable } from "../../src/utils/objects.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -41,6 +41,27 @@ describe('Object-related utils', () => {
 
             expect(ans).to.equal(42);
             expect(que).to.equal(null);
+        });
+    });
+});
+
+describe('Boolean-related utils', () => {
+    describe('parseBoolEnv', () => {
+
+        before(() => process.env.RESISTANCE_IS_FUTILE = true);
+        after(() => delete process.env.RESISTANCE_IS_FUTILE);
+
+        it('should correctly parse variables', () => {
+            const isFutile = parseBoolEnv("resistance_is_futile");
+            const missing = parseBoolEnv("question");
+
+            expect(isFutile).to.be.true;
+            expect(missing).to.be.false;
+        });
+
+        it('should default to provided default value if key is not found', () => {
+            const missing = parseBoolEnv("defaulted", true);
+            expect(missing).to.be.true;
         });
     });
 });
