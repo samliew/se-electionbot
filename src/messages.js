@@ -159,8 +159,9 @@ export const sayBadgesByType = (badges, type, isSO = true) => {
 
 /**
  * @summary builds a response to the required badges query
- * @param {Election} election
- * @param {Badge[]} badges
+ * @param {Election} election election to check required badges for
+ * @param {Badge[]} badges list of election badges
+ * @param {boolean} [isSO] is on Stack Overflow or not
  * @returns {string}
  */
 export const sayRequiredBadges = (election, badges, isSO = true) => {
@@ -179,9 +180,9 @@ export const sayRequiredBadges = (election, badges, isSO = true) => {
 
     const badgeList = required.map(({ badge_id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${badge_id}`)).join(", ");
 
-    const repPostfix = ` You'll also need ${repNominate} reputation.`;
+    const repPostfix = repNominate ? ` You'll also need ${repNominate} reputation.` : "";
 
-    return numBadgesPrefix + badgeList + repPostfix;
+    return `${numBadgesPrefix}${badgeList}.${repPostfix}`;
 };
 
 /**
