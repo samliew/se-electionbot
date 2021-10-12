@@ -9,6 +9,7 @@ import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import Election from './election.js';
 import {
+    isAskedAboutBadgesOfType,
     isAskedAboutJokes,
     isAskedAboutLightbulb,
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
@@ -590,17 +591,9 @@ import {
             else if (isAskedAboutLightbulb(content) && config.funMode) {
                 responseText = sayHowManyModsItTakesToFixLightbulb(currentSiteMods);
             }
-            // Moderation badges
-            else if (['what', 'moderation', 'badges'].every(x => content.includes(x))) {
-                responseText = sayBadgesByType(electionBadges, "moderation", election.isStackOverflow);
-            }
-            // Participation badges
-            else if (['what', 'participation', 'badges'].every(x => content.includes(x))) {
-                responseText = sayBadgesByType(electionBadges, "participation", election.isStackOverflow);
-            }
-            // Editing badges
-            else if (['what', 'editing', 'badges'].every(x => content.includes(x))) {
-                responseText = sayBadgesByType(electionBadges, "editing", election.isStackOverflow);
+            else if (isAskedAboutBadgesOfType(content)) {
+                const [, type] = /(participation|editing|moderation)/.exec(content) || [];
+                responseText = sayBadgesByType(electionBadges, type, election.isStackOverflow);
             }
             // SO required badges
             else if (['what', 'required', 'badges'].every(x => content.includes(x))) {
