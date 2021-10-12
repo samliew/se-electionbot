@@ -16,7 +16,7 @@ export const isAskedForNominatingInfo = (text) => {
 export const isAskedWhyNominationRemoved = (text) => {
     return /^(?:why|what)\b/.test(text) &&
         /\b(?:nomination|nominee|candidate)s?\b/.test(text) &&
-        /\b(?:removed|withdraw|fewer|lesser|resign)\b/.test(text);
+        /\b(?:deleted?|vanish(?:ed)?|erased?|removed?|unpublish(?:ed)?|cancel(?:led)?|withdrawn?|fewer|less(?:er)?|resign)\b/.test(text);
 };
 
 /**
