@@ -1,9 +1,8 @@
 import { expect } from "chai";
 import {
-    isAskedAboutBadgesOfType, isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
+    isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned,
-    isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot, isAskedAboutJokes,
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
 } from "../../src/guards.js";
 
 /**
@@ -139,6 +138,21 @@ describe('Message Guards', () => {
                 "what is the candidate score formula?",
                 "what is the formula for candidate score?",
             ]);
+        });
+    });
+
+    describe('isAskedWhoIsTheBestCandidate', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhoIsTheBestCandidate, [
+                "who is the best candidate?",
+                "who are the best candidates?",
+                "who were the bestest candidates ever?",
+                "what is the best nomination?"
+            ]);
+
+            allMatch(isAskedWhoIsTheBestCandidate, [
+                "who are the candidates?",
+            ], false);
         });
     });
 

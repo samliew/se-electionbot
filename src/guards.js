@@ -247,3 +247,12 @@ export const isAskedAboutBadgesOfType = (text) => {
 export const isAskedHowOrWhoToVote = (text) => {
     return /^(?:how|whom?) (?:should i|to) (?:(?:choose|pick|decide|determine)?.+?\bvote\b|vote)/.test(text);
 };
+
+/**
+ * @summary checks if a message is asking who is the best candidate
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedWhoIsTheBestCandidate = (text) => {
+    return /^wh(?:o|at)(?: (?:was|were|are|is))(?: (?:a|the))?.+?\bbest(?:est)? (?:candidate|nomination)s?/i.test(text);
+};
