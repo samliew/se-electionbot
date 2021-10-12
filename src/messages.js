@@ -524,3 +524,17 @@ export const sayAJoke = () => {
     const joke = new RandomArray(getRandomJoke(), getRandomJonSkeetJoke()).getRandom();
     return joke;
 };
+
+/**
+ * @summary builds a response to accusations that responses are canned
+ * @returns {string}
+ */
+export const sayCannedResponses = () => {
+    const responses = new RandomArray(...[
+        "I am a bot, what did you expect?",
+        "Some only deserve canned responses",
+        "Sometimes all you have is a can",
+        "How do I know your message is not canned?"
+    ]);
+    return responses.getRandom();
+};
