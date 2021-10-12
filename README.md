@@ -72,26 +72,28 @@ Moderators can also make use of these commands _(requires mention)_ to help mode
 
 ## Environment variables
 
-> `ACCOUNT_EMAIL` - **(required)** email of bot account<br>
-> `ACCOUNT_PASSWORD` - **(required)** password of bot account<br>
-> `ELECTION_URL` - **(required)** URL of election page (with ID) that the bot will scrape<br>
-> `STACK_API_KEYS` - **(recommended)** Stack Exchange API key(s) (pipe-delimited)
+All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 
-> `CHAT_DOMAIN` - default chat domain (stackexchange.com | stackoverflow.com)<br>
-> `CHAT_ROOM_ID` - default chat room ID that the bot will join<br>
-> `ADMIN_IDS` - user chatIds to grant admin privileges (pipe-delimited) (mods and ROs are already privileged)<br>
-> `DEV_IDS` - user chatIds to grant dev privileges (pipe-delimited)<br>
-> `LOW_ACTIVITY_CHECK_MINS` - [`10`] interval (minutes) before bot can check room for inactivity<br>
-> `LOW_ACTIVITY_COUNT_THRESHOLD` - [`20`] bot can classify room as inactive only after these amount of messages have been sent<br>
-> `SCRAPE_INTERVAL_MINS` - [`2`] interval (minutes) to check election page for updates<br>
-> `THROTTLE_SECS` - [`1`] seconds before bot can send another response<br>
-> `KEEP_ALIVE` - [`false`] whether bot will ping itself occasionally
-
-> `DEBUG` - [`false`] whether bot is in debug mode<br>
-> `VERBOSE` - [`false`] a debug variable<br>
-> `FUN_MODE` - [`true`] enable fun random responses
-
-> `SCRIPT_HOSTNAME` - instance identifier, hostname for dashboard, also where keep-alive will ping<br>
-> `HEROKU_API_TOKEN` - to be used only when hosted on Heroku for bot config updates<br>
-> `PASSWORD` - password to access bot dashboard<br>
-> `NODE_ENV` - [`production`] whether bot is in Node debug mode
+| Variable                       | Type     | Required? | Default      | Description                                                                                   |
+| ------------------------------ | -------- | --------- | ------------ | --------------------------------------------------------------------------------------------- |
+| `ACCOUNT_EMAIL`                | string   | yes       | -            | email of bot account                                                                          |
+| `ACCOUNT_PASSWORD`             | string   | yes       | -            | password of bot account                                                                       |
+| `ELECTION_URL`                 | string   | yes       | -            | URL of election page (with ID) that the bot will scrape                                       |
+| `STACK_API_KEYS`               | string[] | no        | -            | **recommended** Stack Exchange API key(s) (pipe-delimited)                                    |
+| `CHAT_DOMAIN`                  | string   | no        | -            | default chat domain (stackexchange.com \| stackoverflow.com)                                  |
+| `CHAT_ROOM_ID`                 | number   | no        | -            | default chat room ID that the bot will join                                                   |
+| `ADMIN_IDS`                    | number[] | no        | -            | user chatIds to grant admin privileges (pipe-delimited) (mods and ROs are already privileged) |
+| `DEV_IDS`                      | number[] | no        | -            | user chatIds to grant dev privileges (pipe-delimited)                                         |
+| `LOW_ACTIVITY_CHECK_MINS`      | number   | no        | `10`         | interval (minutes) before bot can check room for inactivity                                   |
+| `LOW_ACTIVITY_COUNT_THRESHOLD` | number   | no        | `20`         | bot can classify room as inactive only after these amount of messages have been sent          |
+| `SCRAPE_INTERVAL_MINS`         | number   | no        | `2`          | interval (minutes) to check election page for updates                                         |
+| `THROTTLE_SECS`                | number   | no        | `1`          | seconds before bot can send another response                                                  |
+| `KEEP_ALIVE`                   | boolean  | no        | `false`      | whether bot will ping itself occasionally                                                     |
+| `DEBUG`                        | boolean  | no        | `false`      | whether bot is in debug mode                                                                  |
+| `VERBOSE`                      | boolean  | no        | `false`      | a debug variable                                                                              |
+| `FUN_MODE`                     | boolean  | no        | `true`       | enable fun random responses                                                                   |
+| `SCRIPT_HOSTNAME`              | string   | no        | -            | instance identifier, hostname for dashboard, also where keep-alive will ping                  |
+| `HEROKU_API_TOKEN`             | string   | no        | -            | to be used only when hosted on Heroku for bot config updates                                  |
+| `NODE_ENV`                     | string   | no        | `production` | whether bot is in Node debug mode                                                             |
+| `PASSWORD`                     | string   | no        | -            | password to access bot dashboard                                                              |
+| `TRANSCRIPT_SIZE`              | number   | no        | `20`         | number of latest messages to show in the dashboard                                            |
