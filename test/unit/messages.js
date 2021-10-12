@@ -86,6 +86,15 @@ describe("Messages module", () => {
             const greeting = sayHI(election);
             expect(greeting).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
         });
+
+        it('should override greeting if provided', () => {
+            const override = "Hi all!";
+
+            const election = new Election("https://pt.stackoverflow.com/election");
+            const greeting = sayHI(election, override);
+
+            expect(greeting).to.match(new RegExp(`^${override}`));
+        });
     });
 
     describe('sayDiamondAlready', () => {

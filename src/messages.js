@@ -16,10 +16,11 @@ import { parsePackage } from "./utils/package.js";
 
 /**
  * @summary makes bot remind users that they are here
- * @param {Election} election
+ * @param {Election} election current election
+ * @param {string} [greeting] greeting prefix
  * @returns {string}
  */
-export const sayHI = (election) => {
+export const sayHI = (election, greeting = 'Welcome to the election chat room! ') => {
     const { arrNominees, electionUrl, phase } = election;
 
     const { length } = arrNominees;
@@ -38,7 +39,6 @@ export const sayHI = (election) => {
         "primary": `${phasePrefix}, and currently there ${pluralCandidates}.`,
     };
 
-    const greeting = 'Welcome to the election chat room! ';
     const phaseText = phaseMap[phase] || "";
     const helpCommand = `@ElectionBot help`;
 
