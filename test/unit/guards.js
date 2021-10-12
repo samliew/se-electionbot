@@ -144,6 +144,7 @@ describe('Message Guards', () => {
         it('should correctly match content', () => {
             allMatch(isAskedHowOrWhoToVote, [
                 "who to vote for?",
+                "who should i vote for",
                 "how to choose who to vote for?"
             ]);
 

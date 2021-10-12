@@ -245,5 +245,5 @@ export const isAskedAboutBadgesOfType = (text) => {
  * @returns {boolean}
  */
 export const isAskedHowOrWhoToVote = (text) => {
-    return /^(?:how|who) to (?:(?:choose|pick|decide|determine).+?\bvote\b|vote)/.test(text);
+    return /^(?:how|whom?) (?:should i|to) (?:(?:choose|pick|decide|determine)?.+?\bvote\b|vote)/.test(text);
 };
