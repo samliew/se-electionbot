@@ -371,10 +371,11 @@ import {
             /*
              * As multiple events are emitted when user is mentioned or message is replied-to,
              * we now only listen to the NEW_MESSAGE event and figure out whether bot is being mentioned using this method.
-             * * Potentially do not need "targetUserId === me.id" as that is only used by the USER_MENTIONED (8) or message reply (18) event.
-             * Test is done against "originalMessage", since "content" holds the normalised version for keyword/guard matching
+             * ** Potentially do not need "targetUserId === me.id" as that is only used by the USER_MENTIONED (8) or message reply (18) event.
+             * Test is done against "originalMessage", since "content" holds the normalised version for keyword/guard matching without username in front
              */
-            const botMentioned = new RegExp(`^\\s*@(?:${me.name}|ElectionBot) `).test(originalMessage) || targetUserId === me.id;
+            const botMentioned = new RegExp(`^\\s*@(?:ElectionBot|${me.name}):? `, "i").test(originalMessage) || targetUserId === me.id;
+            const botMentionedCasually = botMentioned || new RegExp(`\\b(?:ElectionBot|${me.name})\\b`, "i").test(originalMessage);
 
 
             /*
@@ -768,7 +769,7 @@ import {
 
 
             // Did not match any previous guards, and bot was mentioned
-            if (!responseText && botMentioned && config.throttleSecs <= 10) {
+            if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
 
                 if (content.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, content);
@@ -778,13 +779,13 @@ import {
                 else if (isAskedWhoMadeMe(content)) {
                     responseText = await sayWhoMadeMe(config);
                 }
-                else if (/^(who are you\??|about)$/.test(content)) {
+                else if (/^(who are you\??|about)\b/.test(content)) {
                     responseText = `I'm ${me.name} and ${me.about}`;
                 }
                 else if (content.startsWith(`i love you`)) {
                     responseText = `I love you 3000`;
                 }
-                else if (/^how are you\??$/.test(content)) {
+                else if (/^how are you\b/.test(content)) {
                     responseText = new RandomArray(
                         `good, and you?`,
                         `I'm fine, thank you.`,
@@ -793,7 +794,7 @@ import {
                         `Today, I consider myself the luckiest bot on the face of the earth.`,
                     ).getRandom();
                 }
-                else if (/^(where are you\??|alive|ping)$/.test(content)) {
+                else if (/^(where are you|alive|ping)$/.test(content)) {
                     responseText = new RandomArray(
                         `No. I'm not here.`,
                         `I'm here, aren't I?`,
@@ -810,7 +811,7 @@ import {
                         `I could've been somebody, instead of a lame bot, which is what I am.`,
                     ).getRandom();
                 }
-                else if (/^why are you\??$/.test(content)) {
+                else if (/^why are you\?*$/.test(content)) {
                     responseText = new RandomArray(
                         `because.`,
                         `why what???`,

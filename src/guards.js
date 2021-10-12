@@ -218,7 +218,7 @@ export const isAskedAboutLightbulb = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutJokes = (text) => {
-    return /tell\b.*\bjoke$/.test(text);
+    return /(tell\b.*\bjoke|make\b.*\blaugh)$/.test(text);
 };
 
 /**

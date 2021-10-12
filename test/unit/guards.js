@@ -1,7 +1,9 @@
 import { expect } from "chai";
 import {
-    isAskedAboutBadgesOfType,
-    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
+    isAskedAboutBadgesOfType, isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
+    isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore,
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned,
+    isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot, isAskedAboutJokes,
 } from "../../src/guards.js";
 
 /**
@@ -277,6 +279,17 @@ describe('Message Guards', () => {
                 "i dislike this bot!",
                 "i hate this bot already",
                 "i hate electionbot",
+            ]);
+        });
+    });
+
+    describe('isAskedAboutJokes', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutJokes, [
+                "tell me a joke",
+                "tell us a joke",
+                "make us laugh",
+                "make me laugh",
             ]);
         });
     });
