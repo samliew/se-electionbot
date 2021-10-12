@@ -220,3 +220,12 @@ export const isAskedAboutLightbulb = (text) => {
 export const isAskedAboutJokes = (text) => {
     return /tell\b.*\bjoke$/.test(text);
 };
+
+/**
+ * @summary checks if a message is asking if bot's responses are canned
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedIfResponsesAreCanned = (text) => {
+    return /bot\b.+?says?\b.+?canned/i.test(text);
+};

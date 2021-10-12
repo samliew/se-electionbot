@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import {
-    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
+    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedIfResponsesAreCanned, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
 } from "../../src/guards.js";
 
 /**
@@ -136,6 +136,21 @@ describe('Message Guards', () => {
                 "what is the candidate score formula?",
                 "what is the formula for candidate score?",
             ]);
+        });
+    });
+
+    describe('isAskedIfResponsesAreCanned', () => {
+        it('isAskedIfResponsesAreCanned', () => {
+            allMatch(isAskedIfResponsesAreCanned, [
+                "hey, bot, say something canned!",
+                "Everything the bot says is canned.what do you expect from a tin box?"
+            ]);
+
+            allMatch(isAskedIfResponsesAreCanned, [
+                "I forgot, everything's canned",
+                "That sounds like a canned comment with the list dynamically generated. Am I right?",
+                "That sounds awfully canned"
+            ], false);
         });
     });
 
