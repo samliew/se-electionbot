@@ -679,12 +679,15 @@ export const asyncCacheable = (key, func) => {
 export const wait = (seconds = 1) => new Promise((r) => setTimeout(r, seconds * 1e3));
 
 /**
+ * @template {number | undefined} T
+ *
  * @summary parses a numeric environment variable
  * @param {string} key process.env key to get
- * @param {number} [def] default value if missing
- * @returns {number | undefined}
+ * @param {T} [def] default value if missing
+ * @returns {T extends number ? number : undefined}
  */
 export const parseNumEnv = (key, def) => {
     const fetched = process.env[key.toUpperCase()] || def;
+    // @ts-expect-error
     return fetched !== void 0 ? +fetched : fetched;
 };
