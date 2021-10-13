@@ -127,13 +127,24 @@ describe('Individual commands', () => {
 
         it('should deelevate privileges correctly', () => {
             const user = getMockUserProfile();
-            const config = getMockBotConfig({
-                adminIds: new Set([user.id])
-            });
+            const config = getMockBotConfig({ adminIds: new Set([user.id]) });
 
             const response = setAccessCommand(config, user, `set access ${user.id} user`);
             expect(response).to.match(/changed access/i);
             expect(config.adminIds).to.be.empty;
+        });
+
+        it('should allow special value "me"', () => {
+            const user = getMockUserProfile();
+            const config = getMockBotConfig();
+            config.adminIds.clear();
+            config.devIds.clear();
+            config.devIds.add(user.id);
+
+            const response = setAccessCommand(config, user, `set access me admin`);
+            expect(response).to.match(/changed access/i);
+            expect(config.devIds).to.be.empty;
+            expect(config.adminIds).to.include(user.id);
         });
 
     });
