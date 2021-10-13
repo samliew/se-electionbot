@@ -287,7 +287,7 @@ import {
             transcriptMessages.reverse();
             for (count = 0; count < transcriptMessages.length; count++) {
                 let item = transcriptMessages[count];
-                if (/^Welcome to the election chat room!/.test(item.message) && item.chatUserId === me.id) break;
+                if (/I can answer commonly-asked questions about elections/.test(item.message) && item.chatUserId === me.id) break;
             }
             config.activityCounter = count;
         }

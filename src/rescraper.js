@@ -183,7 +183,7 @@ export default class Rescraper {
                     "Breaking news!!! ",
                     "I'm sorry to say this, but... ",
                     "A quick message from my sponsors: ",
-                    "Welcome to the election chat room. ",
+                    "Welcome to the election chat room! ",
                     "And now for something completely different - ",
                     "Hello and welcome to the election night special! ",
                     "Interrupting to bring you this important message: ",
