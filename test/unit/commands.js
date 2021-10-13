@@ -136,6 +136,14 @@ describe('Individual commands', () => {
             const started = isAliveCommand(config);
             expect(started).to.contain(dateToUtcTimestamp(mockStart));
             expect(started).to.match(/uptime.+?\b\d+ seconds/);
+
+            config.debug = true;
+            const debug = isAliveCommand(config);
+            expect(debug).to.contain("debug mode");
+
+            config.debug = false;
+            const noDebug = isAliveCommand(config);
+            expect(noDebug).to.not.contain("debug mode");
         });
 
     });
