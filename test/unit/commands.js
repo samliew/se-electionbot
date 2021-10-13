@@ -1,5 +1,14 @@
 import { expect } from "chai";
+import { resetElection } from "../../src/commands/commands.js";
 import { AccessLevel, CommandManager } from "../../src/commands/index.js";
+import Election from "../../src/election.js";
+import { getMockBotConfig } from "../mocks/bot.js";
+import { getMockNominee } from "../mocks/nominee.js";
+
+/**
+ * @typedef {import("@userscripters/stackexchange-api-types/lib/types").User} User
+ */
+
 
 describe('Commander', () => {
 
@@ -109,6 +118,40 @@ describe('Commander', () => {
             const restart = commander.run("restart");
             expect(restart).to.be.undefined;
         });
+    });
+
+});
+
+describe('Individual commands', () => {
+
+    describe('resetElection', () => {
+
+        it('should make current election forget the last state', () => {
+            const election = new Election("https://stackoverflow.com/election/13");
+
+            // TODO: remove access of a "private" property once added a setter
+            election._prevObj = JSON.parse(JSON.stringify(election));
+
+            resetElection(getMockBotConfig(), election);
+
+            expect(election.prev).to.be.null;
+        });
+
+        it('should reset current election state', () => {
+            const election = new Election("https://stackoverflow.com/election/13");
+            election.arrNominees.push(getMockNominee());
+            election.arrWinners.push(getMockNominee());
+            election.currentSiteMods.push( /** @type {User} */({}));
+            election.phase = "primary";
+
+            resetElection(getMockBotConfig(), election);
+
+            expect(election.numNominees).to.equal(0);
+            expect(election.numWinners).to.equal(0);
+            expect(election.numMods).to.equal(0);
+            expect(election.phase).to.be.null;
+        });
+
     });
 
 });
