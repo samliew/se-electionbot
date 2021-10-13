@@ -1,7 +1,9 @@
 import { expect } from "chai";
-import { resetElection } from "../../src/commands/commands.js";
+import sinon from "sinon";
+import { isAliveCommand, resetElection } from "../../src/commands/commands.js";
 import { AccessLevel, CommandManager } from "../../src/commands/index.js";
 import Election from "../../src/election.js";
+import { dateToUtcTimestamp } from "../../src/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 import { getMockUserProfile } from "../mocks/user.js";
@@ -108,6 +110,35 @@ describe('Commander', () => {
 });
 
 describe('Individual commands', () => {
+
+    beforeEach(() => sinon.restore());
+
+    describe('isAliveCommand', () => {
+
+        it('should correctly build responses', () => {
+            const config = getMockBotConfig();
+            const mockHost = "hosting.com";
+            const mockStart = new Date();
+
+            const hostStub = sinon.stub(config, "scriptHostname");
+
+            hostStub.get(sinon.stub().onFirstCall().returns(void 0).onSecondCall().returns(mockHost));
+
+            const notHosted = isAliveCommand(config);
+            expect(notHosted).to.contain("planet Earth");
+
+            const hosted = isAliveCommand(config);
+            expect(hosted).to.contain(mockHost);
+
+            const dateStub = sinon.stub(config, "scriptInitDate");
+            dateStub.get(() => mockStart);
+
+            const started = isAliveCommand(config);
+            expect(started).to.contain(dateToUtcTimestamp(mockStart));
+            expect(started).to.match(/uptime.+?\b\d+ seconds/);
+        });
+
+    });
 
     describe('resetElection', () => {
 
