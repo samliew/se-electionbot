@@ -128,9 +128,9 @@ export const sayAboutVoting = (
     const phaseMap = {
         cancelled: statVoters,
         ended: `The ${makeURL("election", electionUrl)} has ended. You can no longer vote.`,
-        election: `If you have at least ${repVote} reputation, you can cast your ballot in order of preference on up to three candidates in [the election](${electionUrl}?tab=election). ${sayInformedDecision()}`,
+        election: `If you have at least ${repVote} reputation, you can rank the candidates in your preferred order in [the election](${electionUrl}?tab=election). ${sayInformedDecision()}`,
         nomination: `You cannot vote yet. In the meantime you can read and comment on the [candidates' nominations](${electionUrl}?tab=nomination) as well as their answers to the questionnaire to find out more about their moderation style.${comeBackFinalPhaseText}`,
-        primary: `If you have at least ${repVote} reputation, you can freely [vote on the candidates](${electionUrl}?tab=primary). ${sayInformedDecision()}${comeBackFinalPhaseText}`
+        primary: `If you have at least ${repVote} reputation, you can freely [vote for the candidates](${electionUrl}?tab=primary). ${sayInformedDecision()}${comeBackFinalPhaseText}`
     };
 
     return phaseMap[phase] || sayNotStartedYet(election);

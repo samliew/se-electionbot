@@ -180,11 +180,13 @@ export default class Rescraper {
                 console.log(`RESCRAPER - Room is inactive with ${config.activityCounter} messages posted so far (min ${config.minActivityCountThreshold}).`);
 
                 const greetings = new RandomArray(...[
-                    "And now for something completely different. ",
-                    "BBC would like to announce that: ",
-                    "The bot would like to apologize for the next announcement: ",
+                    "Breaking news!!! ",
+                    "I'm sorry to say this, but... ",
+                    "A quick message from my sponsors: ",
+                    "Welcome to the election chat room. ",
+                    "And now for something completely different - ",
                     "Hello and welcome to the election night special! ",
-                    ""
+                    "Interrupting to bring you this important message: ",
                 ]);
 
                 await sendMessage(config, room, sayHI(election, greetings.getRandom()), null, true);

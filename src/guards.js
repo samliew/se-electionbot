@@ -136,7 +136,7 @@ export const isAskedForOwnScore = (text) => {
  * @returns {boolean}
  */
 export const isAskedForOtherScore = (text) => {
-    return /what(?: is|'s)(?: the)? candidate score (?:for|of)\s+(?:\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/.test(text);
+    return /(?:what)?(?: is|'s)(?: the)? candidate score (?:for|of) (?:user )?(?:\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/.test(text);
 };
 
 /**
@@ -245,7 +245,8 @@ export const isAskedAboutBadgesOfType = (text) => {
  * @returns {boolean}
  */
 export const isAskedHowOrWhoToVote = (text) => {
-    return /^(?:how|whom?) (?:should i|to) (?:(?:choose|pick|decide|determine)?.+?\bvote\b|vote)/.test(text);
+    return /^(?:how|whom?) (?:should i|to) (?:(?:choose|pick|decide|determine)?.+?\bvote\b|vote)/.test(text) ||
+        /^how do(?:es)? (?:the )?voting (?:process)?work/.test(text);
 };
 
 /**

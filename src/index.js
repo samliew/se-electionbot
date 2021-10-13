@@ -856,6 +856,9 @@ import {
                             `why what???`,
                         ).getRandom();
                     }
+                    else if (/^what(?:'s| is| are) your pronouns\?*$/.test(content)) {
+                        responseText = `naturally, my pronouns are it/its/itself.`;
+                    }
                     else if (isAskedAboutJokes(content)) {
                         responseText = sayAJoke();
                     }
