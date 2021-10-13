@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">21.75% </span>
+                <span class="strong">21.79% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>62/285</span>
+                <span class='fraction'>63/289</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">21.75% </span>
+                <span class="strong">21.79% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>62/285</span>
+                <span class='fraction'>63/289</span>
             </div>
         
             
@@ -341,7 +341,12 @@
 <a name='L282'></a><a href='#L282'>282</a>
 <a name='L283'></a><a href='#L283'>283</a>
 <a name='L284'></a><a href='#L284'>284</a>
-<a name='L285'></a><a href='#L285'>285</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L285'></a><a href='#L285'>285</a>
+<a name='L286'></a><a href='#L286'>286</a>
+<a name='L287'></a><a href='#L287'>287</a>
+<a name='L288'></a><a href='#L288'>288</a>
+<a name='L289'></a><a href='#L289'>289</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -431,6 +436,9 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -630,9 +638,10 @@ import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
 import { sayDiamondAlready, sayMissingBadges } from "./messages.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, NO_ACCOUNT_ID, pluralize } from "./utils.js";
+import { matchNumber } from "./utils/expressions.js";
 &nbsp;
 /**
- * @typedef {import("./index.js").User} User
+ * @typedef {import("./index.js").UserProfile} UserProfile
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} ApiUser
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
@@ -718,13 +727,14 @@ export const makeCandidateScoreCalc = <span class="fstat-no" title="function not
 <span class="cstat-no" title="statement not covered" >    /**</span>
 <span class="cstat-no" title="statement not covered" >     * @summary calculates candidate score</span>
 <span class="cstat-no" title="statement not covered" >     * @param {Election} election</span>
-<span class="cstat-no" title="statement not covered" >     * @param {User} user</span>
+<span class="cstat-no" title="statement not covered" >     * @param {UserProfile} user</span>
 <span class="cstat-no" title="statement not covered" >     * @param {Pick&lt;ResolvedMessage, "userId"|"content"&gt;} message</span>
 <span class="cstat-no" title="statement not covered" >     * @param {boolean} [isSO]</span>
 <span class="cstat-no" title="statement not covered" >     * @returns {Promise&lt;string&gt;}</span>
 <span class="cstat-no" title="statement not covered" >     */</span>
 <span class="cstat-no" title="statement not covered" >    async (election, user, message, isSO = false) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        //TODO: decide how to avoid mutation</span>
+<span class="cstat-no" title="statement not covered" >        /** @type {{ userId: number|null|undefined, content: string }} */</span>
 <span class="cstat-no" title="statement not covered" >        let { userId, content } = message;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        if (isNaN(userId) || userId &lt;= 0) {</span>
@@ -749,19 +759,19 @@ export const makeCandidateScoreCalc = <span class="fstat-no" title="function not
 <span class="cstat-no" title="statement not covered" >            });</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        if (!isAskingForOtherUser &amp;&amp; isSO &amp;&amp; (isModerator || wasModerator)) {</span>
+<span class="cstat-no" title="statement not covered" >        if (!isAskingForOtherUser &amp;&amp; isSO &amp;&amp; (isModerator || wasModerator) &amp;&amp; !content.startsWith('sudo ')) {</span>
 <span class="cstat-no" title="statement not covered" >            return sayDiamondAlready(isModerator, wasModerator);</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        // If privileged user asking candidate score of another user, get user site id from message</span>
 <span class="cstat-no" title="statement not covered" >        // TODO: Allow Admins and Devs too, not just mods</span>
 <span class="cstat-no" title="statement not covered" >        if (isAskingForOtherUser &amp;&amp; (isModerator || config.devIds.has(userId))) {</span>
-<span class="cstat-no" title="statement not covered" >            // @ts-expect-error FIXME</span>
-<span class="cstat-no" title="statement not covered" >            userId = content.includes(`${election.siteUrl}/users/`) ? +(content.match(/\/users\/(\d+).*(?:\?|$)/)[1]) : +(content.match(/(\d+)(?:\?|$)/)[1]);</span>
+<span class="cstat-no" title="statement not covered" >            userId = content.includes(`${election.siteUrl}/users/`) ?</span>
+<span class="cstat-no" title="statement not covered" >                matchNumber(/\/users\/(\d+).*(?:\?|$)/, content) :</span>
+<span class="cstat-no" title="statement not covered" >                matchNumber(/(\d+)(?:\?|$)/, content);</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" >        // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)</span>
 <span class="cstat-no" title="statement not covered" >        else if (!isSO) {</span>
-<span class="cstat-no" title="statement not covered" >            // @ts-expect-error FIXME</span>
 <span class="cstat-no" title="statement not covered" >            userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >            // Unable to get user id on election site</span>
@@ -774,6 +784,12 @@ export const makeCandidateScoreCalc = <span class="fstat-no" title="function not
 <span class="cstat-no" title="statement not covered" >            if (userId === NO_ACCOUNT_ID) {</span>
 <span class="cstat-no" title="statement not covered" >                return `Sorry, ${isAskingForOtherUser ? "the user" : "you"} must have an account on the site to get the score!`;</span>
 <span class="cstat-no" title="statement not covered" >            }</span>
+<span class="cstat-no" title="statement not covered" >        }</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        // Do not attempt to get badges for invalid users</span>
+<span class="cstat-no" title="statement not covered" >        if (!userId) {</span>
+<span class="cstat-no" title="statement not covered" >            console.error(`Invalid user id: ${userId}`);</span>
+<span class="cstat-no" title="statement not covered" >            return sayCalcFailed(isAskingForOtherUser);</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        // TODO: Get a different API key here</span>
@@ -798,7 +814,7 @@ export const makeCandidateScoreCalc = <span class="fstat-no" title="function not
 <span class="cstat-no" title="statement not covered" >            return sayCalcFailed(isAskingForOtherUser);</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        const { score, missing, isEligible } = calculateScore(requestedUser, userBadges, election);</span>
+<span class="cstat-no" title="statement not covered" >        const { score, missing, isEligible } = calculateScore(requestedUser, userBadges, election, isSO);</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        const missingBadges = missing.badges.election;</span>
 <span class="cstat-no" title="statement not covered" >        const missingRequiredBadges = missing.badges.required;</span>
@@ -839,10 +855,9 @@ export const makeCandidateScoreCalc = <span class="fstat-no" title="function not
 <span class="cstat-no" title="statement not covered" >            }</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" >        // Does not meet minimum requirements</span>
-<span class="cstat-no" title="statement not covered" >        else if (!isEligible) {</span>
+<span class="cstat-no" title="statement not covered" >        else if (!isEligible &amp;&amp; repNominate !== void 0) {</span>
 <span class="cstat-no" title="statement not covered" >            responseText = `You are not eligible to nominate yourself in the election`;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >            // @ts-expect-error FIXME</span>
 <span class="cstat-no" title="statement not covered" >            const isUnderRep = reputation &lt; repNominate;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >            // Not enough rep</span>
@@ -857,7 +872,8 @@ export const makeCandidateScoreCalc = <span class="fstat-no" title="function not
 <span class="cstat-no" title="statement not covered" >            }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >            responseText += `. Your candidate score is ${getScoreText(score, currMaxScore)}.`;</span>
-<span class="cstat-no" title="statement not covered" >        } else if (score &gt;= currMaxScore) {</span>
+<span class="cstat-no" title="statement not covered" >        }</span>
+<span class="cstat-no" title="statement not covered" >        else if (score === currMaxScore) {</span>
 <span class="cstat-no" title="statement not covered" >            responseText = `Wow! You have a maximum candidate score of **${currMaxScore}**!`;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >            // Already nominated, and not ended/cancelled</span>
@@ -879,10 +895,6 @@ export const makeCandidateScoreCalc = <span class="fstat-no" title="function not
 <span class="cstat-no" title="statement not covered" >                };</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                responseText += ` Alas, ${phaseMap[phase]} Hope to see your candidature next election!`;</span>
-<span class="cstat-no" title="statement not covered" >            } else {</span>
-<span class="cstat-no" title="statement not covered" >                console.error("this case??", {</span>
-<span class="cstat-no" title="statement not covered" >                    score, currMaxScore, hasNominated, phase</span>
-<span class="cstat-no" title="statement not covered" >                });</span>
 <span class="cstat-no" title="statement not covered" >            }</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" >        // All others</span>
@@ -900,7 +912,7 @@ export const makeCandidateScoreCalc = <span class="fstat-no" title="function not
 <span class="cstat-no" title="statement not covered" >            // If have not begun, or nomination phase, ask user to nominate themselves</span>
 <span class="cstat-no" title="statement not covered" >            else if (['null', 'nomination'].includes(/** @type {string} */(phase))) {</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                const perhapsNominateThreshold = 30;</span>
+<span class="cstat-no" title="statement not covered" >                const perhapsNominateThreshold = currMaxScore / 2;</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                responseText += score &gt;= perhapsNominateThreshold ?</span>
 <span class="cstat-no" title="statement not covered" >                    ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :</span>
@@ -916,7 +928,7 @@ export const makeCandidateScoreCalc = <span class="fstat-no" title="function not
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Mon Oct 04 2021 18:50:58 GMT+0300 (Moscow Standard Time)
+                at Wed Oct 13 2021 21:36:11 GMT+0300 (Moscow Standard Time)
             </div>
         </div>
         <script src="../prettify.js"></script>
