@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import sinon from "sinon";
-import { isAliveCommand, resetElection } from "../../src/commands/commands.js";
+import { isAliveCommand, resetElection, setThrottleCommand } from "../../src/commands/commands.js";
 import { AccessLevel, CommandManager } from "../../src/commands/index.js";
 import Election from "../../src/election.js";
 import { dateToUtcTimestamp } from "../../src/utils.js";
@@ -112,6 +112,32 @@ describe('Commander', () => {
 describe('Individual commands', () => {
 
     beforeEach(() => sinon.restore());
+
+    describe('setThrottleCommand', () => {
+
+        it('should do nothing if new throttle is invalid', () => {
+            const throttleSecs = 5;
+
+            const config = getMockBotConfig({ throttleSecs });
+
+            const status = setThrottleCommand("oupsy-daisy, forgot the throttle", config);
+
+            expect(status).to.contain("invalid");
+            expect(config.throttleSecs).to.equal(5);
+        });
+
+        it('should correctly update throttle value', () => {
+            const throttleSecs = 5;
+
+            const config = getMockBotConfig({ throttleSecs });
+
+            const status = setThrottleCommand("set throttle to 10", config);
+
+            expect(status).to.contain("throttle set");
+            expect(config.throttleSecs).to.equal(10);
+        });
+
+    });
 
     describe('isAliveCommand', () => {
 
