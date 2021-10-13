@@ -212,6 +212,7 @@ export const fetchChatTranscript = async (config, url) => {
     const [, year, m, date] = $chat('head title').text().match(/(\d+)-(\d+)-(\d+)/) || [, null, null, null];
     const month = m ? +m - 1 : null;
 
+    const now = Date.now();
     let lastKnownDatetime = null;
 
     $chat('#transcript .message').each(function (i, el) {
@@ -252,7 +253,7 @@ export const fetchChatTranscript = async (config, url) => {
             message: messageText,
             messageMarkup: messageMarkup,
             messageHtml: messageHtml,
-            date: lastKnownDatetime,
+            date: lastKnownDatetime <= now ? lastKnownDatetime : now, // can never be in the future
             messageId: messageId
         });
     }).get();
