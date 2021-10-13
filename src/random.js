@@ -32,6 +32,7 @@ export class RandomArray extends Array {
 
 }
 
+export const getCandidateOrNominee = () => new RandomArray(`candidate`, `nominee`).getRandom();
 export const getRandomModal = () => new RandomArray(`want to`, `have to`, `ought to`, `gotta`, `must`).getRandom();
 export const getRandomPlop = () => new RandomArray(`I'm back.`, `*plop*`, `I am reborn`, `Hello world!`, `mic check`, `testing 1, 2, 3`).getRandom();
 export const getRandomOops = () => new RandomArray(`very funny,`, `oops!`, `hmm...`, `hey,`, `sorry,`).getRandom();

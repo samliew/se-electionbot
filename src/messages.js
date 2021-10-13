@@ -1,6 +1,6 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
-import { getRandomJoke, getRandomJonSkeetJoke, getRandomOops, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomJoke, getRandomJonSkeetJoke, getRandomOops, RandomArray } from "./random.js";
 import { calculateScore } from "./score.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
@@ -542,28 +542,29 @@ export const sayCannedResponses = () => {
  * @param {Election} election current election
  */
 export const sayBestCandidate = (_config, election) => {
-    const everyoneIsGreat = "All candidates are great!";
+    const { numNominees } = election;
+
+    const candidateOrNominee = getCandidateOrNominee();
+
+    const everyoneIsGreat = `All ${candidateOrNominee}s are great!`;
 
     const responses = new RandomArray(...[
-        "I do not meddle in elections!",
-        "The best candidate hasn't nominated yet! Or have they?",
+        `I do not meddle in elections!`,
+        `The best candidate hasn't nominated yet! Or have they?`,
         everyoneIsGreat,
-        "Define \"best\"",
+        `Define "best"`,
         ""
     ]);
 
     const random = responses.getRandom();
 
-    if (random) return random;
-
-
-    const { numNominees } = election;
+    if (numNominees > 0 && random) return random;
 
     /** @type {[number, string][]} */
     const nominationCountSpecificResponses = [
-        [0, "How can I tell if there are no candidates?"],
-        [1, "Well, there is only one candidate..."],
-        [2, "Pick one"]
+        [0, `How can I tell if there are no ${candidateOrNominee}s?`],
+        [1, `Well, there is only one ${candidateOrNominee}...`],
+        [2, `There are two. Toss your own coin!`]
     ];
 
     const [, response = "No idea"] = nominationCountSpecificResponses.find(

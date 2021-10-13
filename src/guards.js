@@ -255,5 +255,5 @@ export const isAskedHowOrWhoToVote = (text) => {
  * @returns {boolean}
  */
 export const isAskedWhoIsTheBestCandidate = (text) => {
-    return /^wh(?:o|at)(?: (?:was|were|are|is))(?: (?:a|the))?.+?\bbest(?:est)? (?:candidate|nomination)s?/i.test(text);
+    return /^(?:who('s)?|what('s)?|which) (?:was |were |are |is )(?:a |the )?.*\bbest(?:est)? (?:candidate|nomination|nominee)s?/i.test(text);
 };
