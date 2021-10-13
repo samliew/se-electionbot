@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import sinon from "sinon";
-import { isAliveCommand, resetElection, setAccessCommand, setThrottleCommand } from "../../src/commands/commands.js";
+import { isAliveCommand, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "../../src/commands/commands.js";
 import { AccessLevel, CommandManager } from "../../src/commands/index.js";
 import Election from "../../src/election.js";
 import { dateToUtcTimestamp } from "../../src/utils.js";
@@ -112,6 +112,50 @@ describe('Commander', () => {
 describe('Individual commands', () => {
 
     beforeEach(() => sinon.restore());
+
+    describe('timetravelCommand', () => {
+
+        it('should fail if date is not valid', () => {
+            const config = getMockBotConfig();
+            const election = new Election("https://stackoverflow.com/election/12");
+
+            const response = timetravelCommand(config, election, "take me to the moon");
+            expect(response).to.match(/invalid/i);
+        });
+
+        it('should correctly update election state', () => {
+            const endingDate = new Date();
+            endingDate.setDate(endingDate.getDate() + 1);
+
+            const futureDate = new Date();
+            futureDate.setDate(endingDate.getDate() + 365);
+
+            const config = getMockBotConfig({
+                flags: {
+                    announcedWinners: true,
+                    saidElectionEndingSoon: true
+                }
+            });
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.phase = "nomination";
+            election.dateEnded = endingDate;
+
+            const isoDate = futureDate.toISOString().slice(0, 10);
+
+            const response = timetravelCommand(config, election, `timetravel to ${isoDate}`);
+            expect(response).to.match(/phase.+?ended/);
+
+            expect(election.phase).to.equal("ended");
+            expect(config.flags.announcedWinners).to.be.false;
+            expect(config.flags.saidElectionEndingSoon).to.be.false;
+
+            election.dateEnded = null;
+
+            const noDate = timetravelCommand(config, election, `timetravel to ${isoDate}`);
+            expect(noDate).to.contain("no phase");
+        });
+
+    });
 
     describe('setAccessCommand', () => {
 
