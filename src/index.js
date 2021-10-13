@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import sanitize from "sanitize-html";
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
-import { announceWinners, isAliveCommand, listSiteModerators, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
+import { announceWinners, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import Election from './election.js';
@@ -484,6 +484,8 @@ import {
 
                 commander.add("whois", "retrieve mods from another site", listSiteModerators, AccessLevel.privileged);
 
+                commander.add("rm_election", "resets the current election", resetElection, AccessLevel.dev);
+
                 commander.aliases({
                     timetravel: ["delorean", "88 miles"],
                     mute: ["timeout", "sleep"],
@@ -494,7 +496,8 @@ import {
                         "list moderators",
                         "list mods",
                         "get mods"
-                    ]
+                    ],
+                    rm_election: ["reset election"]
                 });
 
                 const matches = [
@@ -519,7 +522,8 @@ import {
                     ["die", /die|shutdown|turn off/],
                     ["set access", /set (?:access|level)/, config, user, content],
                     ["announce winners", /^announce winners/, config, election, room, announcement],
-                    ["list moderators", /^whois/, config, content, entities]
+                    ["list moderators", /^whois/, config, content, entities],
+                    ["reset election", /^reset election/, config, election]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, content);

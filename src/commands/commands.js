@@ -196,3 +196,23 @@ export const listSiteModerators = async (config, content, entities) => {
     const siteHostname = siteMods[0].link.split('/')[2];
     return sayOtherSiteMods(siteHostname, siteMods, entities.decode);
 };
+
+/**
+ * @summary soft-resets the current election
+ * @param {BotConfig} _config bot config
+ * @param {Election} election current election instance
+ * @returns {string}
+ */
+export const resetElection = (_config, election) => {
+
+    // TODO: expand
+    election.arrNominees.length = 0;
+    election.arrWinners.length = 0;
+    election.currentSiteMods.length = 0;
+    election.phase = null;
+    election.updated = Date.now();
+
+    election.forget();
+
+    return "Successfully reset the election";
+};
