@@ -6,6 +6,7 @@ import { capitalize } from "../../src/utils.js";
 
 /**
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} ApiUser
+ * @typedef { import("../../src/election").ElectionPhase} ElectionPhase
  */
 
 describe("Messages module", () => {
@@ -22,6 +23,7 @@ describe("Messages module", () => {
             election.dateNomination = date;
             election.datePrimary = date;
 
+            /** @type {Exclude<ElectionPhase, null>[]} */
             const phases = ["nomination", "primary", "election", "ended"];
 
             phases.forEach((phase, i) => {
