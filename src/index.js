@@ -776,63 +776,8 @@ import {
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
 
-                if (content.startsWith('offtopic')) {
-                    responseText = sayOffTopicMessage(election, content);
-                    await sendMessage(config, room, responseText, null, false);
-                    return; // stop here since we are using a different default response method
-                }
-                else if (isAskedWhoMadeMe(content)) {
-                    responseText = await sayWhoMadeMe(config);
-                }
-                else if (/^(who are you\??|about)\b/.test(content)) {
-                    responseText = `I'm ${me.name} and ${me.about}`;
-                }
-                else if (content.startsWith(`i love you`)) {
-                    responseText = `I love you 3000`;
-                }
-                else if (/^how are you\b/.test(content)) {
-                    responseText = new RandomArray(
-                        `good, and you?`,
-                        `I'm fine, thank you.`,
-                        `I'm bored. Amuse me.`,
-                        `Why don't you come up sometime and see me?`,
-                        `Today, I consider myself the luckiest bot on the face of the earth.`,
-                    ).getRandom();
-                }
-                else if (/^(where are you|alive|ping)$/.test(content)) {
-                    responseText = new RandomArray(
-                        `No. I'm not here.`,
-                        `I'm here, aren't I?`,
-                        `I'm on the interwebs`,
-                        `I'm here and everywhere`,
-                    ).getRandom();
-                }
-                else if (/^what are you\??$/.test(content)) {
-                    responseText = new RandomArray(
-                        `I'm Bot. James Bot.`,
-                        `I'm a robot. Beep boop.`,
-                        `I'm a crystal ball; I already know the winners.`,
-                        `I'm a teapot, short and stout. Here is my handle, here is my spout.`,
-                        `I could've been somebody, instead of a lame bot, which is what I am.`,
-                    ).getRandom();
-                }
-                else if (/^why are you\?*$/.test(content)) {
-                    responseText = new RandomArray(
-                        `because.`,
-                        `why what???`,
-                    ).getRandom();
-                }
-                else if (isThankingTheBot(content)) {
-                    responseText = new RandomArray(
-                        "Not at all",
-                        "My pleasure",
-                        "You are welcome",
-                    ).getRandom();
-                }
-                else if (isAskedAboutJokes(content) && config.funMode) {
-                    responseText = sayAJoke();
-                }
-                else if (['help', 'command', 'info'].some(x => content.includes(x))) {
+                // Help
+                if (/^(help|info)$/.test(content)) {
                     responseText = '\n' + [
                         'Examples of election FAQs I can help with:',
                         'what is an election',
@@ -850,6 +795,71 @@ import {
                         'who are the current mods',
                     ].join('\n- ');
                 }
+                // About
+                else if (/^(who are you\??|about)\b/.test(content)) {
+                    responseText = `I'm ${me.name} and ${me.about}`;
+                }
+                // Alive
+                else if (/^(where are you|alive|ping)$/.test(content)) {
+                    responseText = new RandomArray(
+                        `No. I'm not here.`,
+                        `I'm here, aren't I?`,
+                        `I'm on the interwebs`,
+                        `I'm here and everywhere`,
+                    ).getRandom();
+                }
+                // Who made you
+                else if (isAskedWhoMadeMe(content)) {
+                    responseText = await sayWhoMadeMe(config);
+                }
+                // Thanks
+                else if (isThankingTheBot(content)) {
+                    responseText = new RandomArray(
+                        "Not at all",
+                        "My pleasure",
+                        "You are welcome",
+                    ).getRandom();
+                }
+                // Offtopic
+                else if (content.startsWith('offtopic')) {
+                    responseText = sayOffTopicMessage(election, content);
+                    await sendMessage(config, room, responseText, null, false);
+                    return; // stop here since we are using a different default response method
+                }
+                // The rest below are fun mode only
+                else if (config.funMode) {
+
+                    if (content.startsWith(`i love you`)) {
+                        responseText = `I love you 3000`;
+                    }
+                    else if (/^how are you\b/.test(content)) {
+                        responseText = new RandomArray(
+                            `good, and you?`,
+                            `I'm fine, thank you.`,
+                            `I'm bored. Amuse me.`,
+                            `Why don't you come up sometime and see me?`,
+                            `Today, I consider myself the luckiest bot on the face of the earth.`,
+                        ).getRandom();
+                    }
+                    else if (/^what are you\??$/.test(content)) {
+                        responseText = new RandomArray(
+                            `I'm Bot. James Bot.`,
+                            `I'm a robot. Beep boop.`,
+                            `I'm a crystal ball; I already know the winners.`,
+                            `I'm a teapot, short and stout. Here is my handle, here is my spout.`,
+                            `I could've been somebody, instead of a lame bot, which is what I am.`,
+                        ).getRandom();
+                    }
+                    else if (/^why are you\?*$/.test(content)) {
+                        responseText = new RandomArray(
+                            `because.`,
+                            `why what???`,
+                        ).getRandom();
+                    }
+                    else if (isAskedAboutJokes(content)) {
+                        responseText = sayAJoke();
+                    }
+                } // End fun mode
 
                 if (responseText) {
                     // TODO: msg.id might be undefined
@@ -858,9 +868,7 @@ import {
                 }
 
                 // Bot was mentioned and did not match any previous guards - return a random response
-                if (config.funMode || /[\?\!]+$/.test(content)) {
-
-                    // Random response
+                if (config.funMode) {
                     responseText = new RandomArray(
                         `You talking to me?`,
                         `I know your thoughts.`,
@@ -876,7 +884,7 @@ import {
                         `Time will tell. Sooner or later, time will tell...`,
                         `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
-                }
+                } // End random response
 
             } // End bot mentioned
 
