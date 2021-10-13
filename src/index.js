@@ -356,7 +356,7 @@ import {
 
             // Ignore if message is too short or long, unless a mod was trying to use say command
             const { length } = content;
-            if ((length <= 3 || length >= 70) && !(isPrivileged && content.startsWith('say'))) {
+            if ((length <= 3 || length >= 70) && !(isPrivileged && (content.startsWith('say') || content.includes('candidate score')))) {
                 console.log(`EVENT - Ignoring due to message length ${content.length}: ${content}`);
                 return;
             }
