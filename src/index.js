@@ -742,10 +742,6 @@ import {
                 }
             }
 
-            // What is an election
-            else if (content.length <= 56 && (/^(?:what|what's)(?: is)? (?:a|an|the) election/.test(content) || /^how do(?:es)? (a|an|the) election work/.test(content))) {
-                responseText = sayWhatIsAnElection(election);
-            }
             // How to vote
             else if (isAskedAboutVoting(content)) {
                 responseText = sayAboutVoting(election);
@@ -757,6 +753,10 @@ import {
             // Election schedule
             else if (isAskedForElectionSchedule(content)) {
                 responseText = sayElectionSchedule(election);
+            }
+            // What is an election
+            else if (content.length <= 56 && (/^(?:what|what's) (?:is )?(?:a |an |the )?election/.test(content) || /^how do(?:es)? (?:a |an |the )?election work/.test(content))) {
+                responseText = sayWhatIsAnElection(election);
             }
             // Can't we just edit the diamond in our username
             else if (isAskedAboutUsernameDiamond(content)) {
