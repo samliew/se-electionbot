@@ -535,3 +535,40 @@ export const sayCannedResponses = () => {
     ]);
     return responses.getRandom();
 };
+
+/**
+ * @summary builds a response to asking who is the best candidate
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ */
+export const sayBestCandidate = (_config, election) => {
+    const everyoneIsGreat = "All candidates are great!";
+
+    const responses = new RandomArray(...[
+        "I do not meddle in elections!",
+        "The best candidate hasn't nominated yet! Or have they?",
+        everyoneIsGreat,
+        "Define \"best\"",
+        ""
+    ]);
+
+    const random = responses.getRandom();
+
+    if (random) return random;
+
+
+    const { numNominees } = election;
+
+    /** @type {[number, string][]} */
+    const nominationCountSpecificResponses = [
+        [0, "How can I tell if there are no candidates?"],
+        [1, "Well, there is only one candidate..."],
+        [2, "Pick one"]
+    ];
+
+    const [, response = "No idea"] = nominationCountSpecificResponses.find(
+        ([count]) => count >= numNominees
+    ) || [, everyoneIsGreat];
+
+    return response;
+};
