@@ -258,7 +258,7 @@ export const fetchChatTranscript = async (config, url) => {
     }).get();
 
     if (config.verbose) {
-        console.log('Transcript messages fetched:', messages);
+        console.log('Transcript messages fetched:', messages.slice(-30));
     }
 
     return messages;
