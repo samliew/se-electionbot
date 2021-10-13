@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import sinon from "sinon";
-import { isAliveCommand, resetElection, setThrottleCommand } from "../../src/commands/commands.js";
+import { isAliveCommand, resetElection, setAccessCommand, setThrottleCommand } from "../../src/commands/commands.js";
 import { AccessLevel, CommandManager } from "../../src/commands/index.js";
 import Election from "../../src/election.js";
 import { dateToUtcTimestamp } from "../../src/utils.js";
@@ -112,6 +112,31 @@ describe('Commander', () => {
 describe('Individual commands', () => {
 
     beforeEach(() => sinon.restore());
+
+    describe('setAccessCommand', () => {
+
+        it('should fail if access level is not valid', () => {
+            const user = getMockUserProfile();
+            const config = getMockBotConfig();
+            config.adminIds.clear();
+
+            const response = setAccessCommand(config, user, "make me the Emperor of Bots");
+            expect(response).to.contain("provide access");
+            expect(config.adminIds).to.be.empty;
+        });
+
+        it('should deelevate privileges correctly', () => {
+            const user = getMockUserProfile();
+            const config = getMockBotConfig({
+                adminIds: new Set([user.id])
+            });
+
+            const response = setAccessCommand(config, user, `set access ${user.id} user`);
+            expect(response).to.match(/changed access/i);
+            expect(config.adminIds).to.be.empty;
+        });
+
+    });
 
     describe('setThrottleCommand', () => {
 
