@@ -191,7 +191,7 @@ export default class Rescraper {
 
                 await sendMessage(config, room, sayHI(election, greetings.getRandom()), null, true);
 
-                // Reset last activity count
+                // Reset activity counter
                 config.activityCounter = 0;
             }
 

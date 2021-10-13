@@ -412,30 +412,30 @@ import {
                     return 'Currently scheduled announcements: `' + JSON.stringify(schedules) + '`';
                 }, AccessLevel.dev);
 
-                commander.add("get throttle", "gets current throttle (in seconds)", (throttle) => {
+                commander.add("get throttle", "get throttle value (secs)", (throttle) => {
                     return `Reply throttle is currently ${throttle} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
                 }, AccessLevel.privileged);
 
-                commander.add("set throttle", "sets throttle to N (in seconds)", setThrottleCommand, AccessLevel.privileged);
+                commander.add("set throttle", "set throttle value (secs)", setThrottleCommand, AccessLevel.privileged);
 
                 commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
                 }, AccessLevel.dev);
 
-                commander.add("mute", "prevents the bot from posting for N minutes", (config, content, throttle) => {
+                commander.add("mute", "stop bot from responding for N mins", (config, content, throttle) => {
                     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
                     responseText = `*silenced for ${num} mins*`;
                     config.updateLastMessage(responseText, Date.now() + (+num * 6e4) - (throttle * 1e3));
                     return responseText;
                 }, AccessLevel.privileged);
 
-                commander.add("unmute", "allows the bot to speak immediately", (config) => {
+                commander.add("unmute", "allows the bot to respond", (config) => {
                     responseText = `I can speak freely again.`;
                     config.updateLastMessage(responseText);
                     return responseText;
                 }, AccessLevel.privileged);
 
-                commander.add("get time", "gets current UTC time and the election phase time", ({ phase, dateElection }) => {
+                commander.add("get time", "gets current UTC time", ({ phase, dateElection }) => {
                     const current = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
                     if (!['election', 'ended', 'cancelled'].includes(phase)) {
                         return `${current} (election phase starts ${linkToRelativeTimestamp(dateElection)})`;
@@ -457,7 +457,7 @@ import {
                     return roomId ? `*left room ${roomId}*` : "*missing room ID*";
                 }, AccessLevel.dev);
 
-                commander.add("coffee", "brews some coffee for the requestor", (originalMessage, { name = "you" }) => {
+                commander.add("coffee", "brews some coffee", (originalMessage, { name = "you" }) => {
                     const [, otherUser = ""] = / for ((?:\w+\s?){1,2})/i.exec(originalMessage) || [];
                     const coffee = new RandomArray("cappuccino", "espresso", "latte", "ristretto", "macchiato");
                     return `Brewing some ${coffee.getRandom()} for ${otherUser || name}`;
@@ -478,9 +478,14 @@ import {
                     return "initiating shutdown sequence";
                 }, AccessLevel.privileged);
 
-                commander.add("greet", "makes the bot welcome everyone", sayHI, AccessLevel.privileged);
+                commander.add("greet", "makes the bot welcome everyone", async (election) => {
+                    await sayHI(election);
 
-                commander.add("announce winners", "makes the bot fetch and announce winners immediately", announceWinners, AccessLevel.privileged);
+                    // Reset activity counter
+                    config.activityCounter = 0;
+                }, AccessLevel.privileged);
+
+                commander.add("announce winners", "makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged);
 
                 commander.add("whois", "retrieve mods from another site", listSiteModerators, AccessLevel.privileged);
 
