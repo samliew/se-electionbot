@@ -4,6 +4,7 @@ import { AccessLevel, CommandManager } from "../../src/commands/index.js";
 import Election from "../../src/election.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
+import { getMockUserProfile } from "../mocks/user.js";
 
 /**
  * @typedef {import("@userscripters/stackexchange-api-types/lib/types").User} User
@@ -12,25 +13,9 @@ import { getMockNominee } from "../mocks/nominee.js";
 
 describe('Commander', () => {
 
-    const getMockUser = (overrides = {}) => {
-        const defaults = {
-            access: AccessLevel.dev,
-            id: 42,
-            name: "Answer",
-            isModerator: false,
-            about: "",
-            roomCount: 1,
-            messageCount: 0,
-            reputation: 42,
-            lastSeen: Date.now(),
-            lastMessage: Date.now()
-        };
-        return Object.assign(defaults, overrides);
-    };
-
     describe('aliasing', () => {
         it('"alias" should correctly add aliases', () => {
-            const commander = new CommandManager(getMockUser());
+            const commander = new CommandManager(getMockUserProfile());
             commander.add("bark", "barks, what else?", () => "bark!", AccessLevel.all);
             commander.alias("bark", ["say"]);
 
@@ -40,7 +25,7 @@ describe('Commander', () => {
 
         it('"aliases" method should correct set aliases', () => {
 
-            const commander = new CommandManager(getMockUser());
+            const commander = new CommandManager(getMockUserProfile());
             commander.add("♦", "gets a diamond", () => "♦");
             commander.add("gold", "gets some gold", () => "#FFD700");
 
@@ -63,7 +48,7 @@ describe('Commander', () => {
 
         it('should only list available commands', () => {
 
-            const commander = new CommandManager(getMockUser({
+            const commander = new CommandManager(getMockUserProfile({
                 access: AccessLevel.user
             }));
             commander.add("alive", "pings the bot", () => "I am alive", AccessLevel.all);
@@ -84,7 +69,7 @@ describe('Commander', () => {
         });
 
         it('should correctly list aliases', () => {
-            const commander = new CommandManager(getMockUser());
+            const commander = new CommandManager(getMockUserProfile());
             commander.add("bark", "barks, what else?", () => "bark!", AccessLevel.all);
             commander.alias("bark", ["say"]);
 
@@ -94,7 +79,7 @@ describe('Commander', () => {
     });
 
     describe('AccessLevel', () => {
-        const commander = new CommandManager(getMockUser());
+        const commander = new CommandManager(getMockUserProfile());
         commander.add("destroy", "Destroys the universe", () => "💥", AccessLevel.dev);
         commander.add("restart", "Restarts the bot", () => true, AccessLevel.privileged);
         commander.add("pet", "Pets the bot", () => "good bot! Who's a good bot?", AccessLevel.all);
@@ -111,7 +96,7 @@ describe('Commander', () => {
         });
 
         it('should disallow privileged commands for underprivileged users', () => {
-            commander.user = getMockUser({ access: AccessLevel.user });
+            commander.user = getMockUserProfile({ access: AccessLevel.user });
             const poof = commander.run("destroy");
             expect(poof).to.be.undefined;
 
