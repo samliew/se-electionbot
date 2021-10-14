@@ -66,4 +66,8 @@ const updateRelativeDates = () => {
 (function () {
     updateRelativeDates();
     setInterval(updateRelativeDates, 15000);
+
+    // Meta refresh fallback
+    const metaRefresh = document.querySelector('meta[http-equiv="refresh"]');
+    if (metaRefresh && +metaRefresh.content > 0) setTimeout(() => location.reload(true), +metaRefresh.content * 1000);
 })();
