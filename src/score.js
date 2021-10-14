@@ -30,12 +30,7 @@ export const getScoreText = (score, max) => `**${score}** (out of ${max})`;
 const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurred when calculating ${isAskingForOtherUser ? `the user's` : `your`} score.`;
 
 /**
- * @summary calculates the score
- * @param {ApiUser} user API user object
- * @param {Badge[]} userBadges user badges
- * @param {Election} election current election
- * @param {boolean} [isSO] is Stack Overflow election
- * @returns {{
+ * @typedef {{
  *  score: number,
  *  missing: {
  *      badges: {
@@ -43,14 +38,27 @@ const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurre
  *          required: ElectionBadge[]
  *      }
  *  },
- *  isEligible: boolean
- * }}
+ *  isEligible: boolean,
+ *  isMissingReputation: boolean,
+ *  isMissingRequiredBadges: boolean,
+ *  numMissingRequiredBadges: number,
+ *  numMissingBadges: number,
+ *  maxScore: number,
+ *  missingRequiredBadgeNames: string[]
+ * }} CandidateScore
+ *
+ * @summary calculates the score
+ * @param {ApiUser} user API user object
+ * @param {Badge[]} userBadges user badges
+ * @param {Election} election current election
+ * @param {boolean} [isSO] is Stack Overflow election
+ * @returns {CandidateScore}
  */
 export const calculateScore = (user, userBadges, election, isSO = false) => {
     const maxRepScore = 20;
     const repRepScore = 1000;
 
-    const { electionBadges } = election;
+    const { electionBadges, repNominate = 0 } = election;
     const { reputation } = user;
 
     const repScore = Math.min(Math.floor(reputation / repRepScore), maxRepScore);
@@ -74,6 +82,24 @@ export const calculateScore = (user, userBadges, election, isSO = false) => {
         get isEligible() {
             const { repNominate = 0 } = election;
             return !missingRequiredBadges.length && (repNominate <= reputation);
+        },
+        get isMissingReputation() {
+            return reputation < repNominate;
+        },
+        get isMissingRequiredBadges() {
+            return !!missingRequiredBadges.length;
+        },
+        get numMissingRequiredBadges() {
+            return missingRequiredBadges.length;
+        },
+        get numMissingBadges() {
+            return missingBadges.length;
+        },
+        get maxScore() {
+            return maxRepScore + electionBadges.length;
+        },
+        get missingRequiredBadgeNames() {
+            return missingRequiredBadges.map(mapToName);
         }
     };
 };
