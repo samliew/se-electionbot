@@ -621,12 +621,9 @@ import {
             else if (isAskedForOwnScore(content) || isAskedForOtherScore(content)) {
 
                 // TODO: use config object pattern instead, 6 parameters is way too much
-                const calcCandidateScore = makeCandidateScoreCalc(config,
-                    election.siteHostname, config.chatDomain, election.apiSlug,
-                    getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
-                );
+                const calcCandidateScore = makeCandidateScoreCalc(config, soPastAndPresentModIds);
 
-                responseText = await calcCandidateScore(election, user, { userId, content }, election.isStackOverflow);
+                responseText = await calcCandidateScore(election, user, { userId, content });
 
                 // TODO: msg.id is not guaranteed to be defined
                 await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
