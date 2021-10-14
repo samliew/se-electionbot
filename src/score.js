@@ -1,8 +1,8 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
-import { sayDiamondAlready, sayMissingBadges } from "./messages.js";
-import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, NO_ACCOUNT_ID, pluralize } from "./utils.js";
+import { sayDiamondAlready, sayDoesNotMeetRequirements, sayMissingBadges } from "./messages.js";
+import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, NO_ACCOUNT_ID } from "./utils.js";
 import { matchNumber } from "./utils/expressions.js";
 
 /**
@@ -189,10 +189,6 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        const [badge] = userBadges;
-
-        const { reputation } = badge.user;
-
         const hasNominated = election.isNominee(userId);
 
         const requestedUser = await getUserInfo(config, isAskingForOtherUser ? userId : user.id, apiSlug, getStackApiKey(config.apiKeyPool));
@@ -202,7 +198,9 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        const { score, missing, isEligible } = calculateScore(requestedUser, userBadges, election, isStackOverflow);
+        const candidateScore = calculateScore(requestedUser, userBadges, election, isStackOverflow);
+
+        const { score, missing, isEligible } = candidateScore;
 
         const missingBadges = missing.badges.election;
         const missingRequiredBadges = missing.badges.required;
@@ -243,22 +241,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         }
         // Does not meet minimum requirements
         else if (!isEligible && repNominate !== void 0) {
-            responseText = `You are not eligible to nominate yourself in the election`;
-
-            const isUnderRep = reputation < repNominate;
-
-            // Not enough rep
-            if (isUnderRep) {
-                responseText += ` as you do not have at least ${repNominate} reputation`;
-            }
-
-            // Don't have required badges (SO-only)
-            if (numMissingRequiredBadges > 0) {
-                responseText += isUnderRep ? '. You are also' : ' as you are';
-                responseText += ` missing the required badge${pluralize(numMissingRequiredBadges)}: ${missingRequiredBadgeNames.join(', ')}`;
-            }
-
-            responseText += `. Your candidate score is ${getScoreText(score, currMaxScore)}.`;
+            responseText = sayDoesNotMeetRequirements(config, election, candidateScore);
         }
         else if (score === currMaxScore) {
             responseText = `Wow! You have a maximum candidate score of **${currMaxScore}**!`;
