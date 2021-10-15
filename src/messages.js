@@ -595,3 +595,14 @@ export const sayDoesNotMeetRequirements = (_config, election, candidateScore) =>
 
     return `${prefix}${underRep}${missing}. Your candidate score is ${getScoreText(score, maxScore)}.`;
 };
+
+/**
+ * @summary builds a response to a user attempting to perform a sensitive action without permission
+ * @param {string} action action user attempted to perform
+ * @param {string} [alternative] alternative to suggest
+ * @returns {string}
+ */
+export const sayLacksPrivilege = (action, alternative) => {
+    const suggestion = alternative ? ` I can ${alternative} if you want` : "";
+    return `You can only ${action || "perform sensitive actions"} as a privileged user, sorry.${suggestion}`;
+};
