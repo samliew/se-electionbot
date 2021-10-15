@@ -97,6 +97,12 @@ export class BotConfig {
     duplicateResponseText = "Please read my previous message...";
 
     /**
+     * @summary <userId, handler> map of actions awaiting user confirmation
+     * @type {Map<number, () => Promise<string>>}
+     */
+    awaitingConfirmation = new Map();
+
+    /**
      * @summary gets last bot message HTML string
      * @returns {string}
      */
