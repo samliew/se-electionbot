@@ -1,7 +1,7 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
-import { getCandidateOrNominee, getRandomJoke, getRandomJonSkeetJoke, getRandomOops, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJonSkeetJoke, getRandomOops, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
@@ -643,18 +643,8 @@ export const sayIdleGreeting = async (config, election, room) => {
 
     console.log(`RESCRAPER - Room is inactive with ${activityCounter} messages posted so far (min ${minActivityCountThreshold})`);
 
-    const greetings = new RandomArray(
-        "Public service announcement: ",
-        "I'm sorry to say this, but... ",
-        "A quick message from my sponsors: ",
-        "Welcome to the election chat room! ",
-        "And now for something completely different - ",
-        "Hello and welcome to the election night special! ",
-        "Interrupting to bring you this important message: ",
-    );
-
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, sayHI(election, greetings.getRandom()), null, true);
+    return sendMessage(config, room, sayHI(election, getRandomAnnouncement()), null, true);
 };
