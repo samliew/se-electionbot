@@ -828,6 +828,10 @@ import {
                     await sendMessage(config, room, responseText, null, false);
                     return; // stop here since we are using a different default response method
                 }
+                else if (config.awaitingConfirmation.has(userId)) {
+                    responseText = await config.awaitingConfirmation.get(userId)?.() || "";
+                    config.awaitingConfirmation.delete(userId);
+                }
                 // The rest below are fun mode only
                 else if (config.funMode) {
 
