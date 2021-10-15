@@ -173,6 +173,11 @@ export class BotConfig {
     adminIds = new Set(parseIds(process.env.ADMIN_IDS || ''));
     ignoredUserIds = new Set(parseIds(process.env.IGNORED_USERIDS || ''));
 
+    /**
+     * @type {Set<number>}
+     */
+    modIds = new Set();
+
     /* Flags and bot-specific utility functions */
 
     flags = {

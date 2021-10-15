@@ -349,6 +349,10 @@ import {
                 [config.adminIds, AccessLevel.admin]
             ];
 
+            if (user.isModerator) {
+                config.modIds.add(user.id);
+            }
+
             const [, access] = userLevels.find(([ids]) => ids.has(user.id)) || [, AccessLevel.user];
 
             user.access = access;
