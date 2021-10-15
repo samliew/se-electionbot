@@ -653,8 +653,8 @@ export const sayIdleGreeting = async (config, election, room) => {
         "Interrupting to bring you this important message: ",
     );
 
-    // Reset activity counter
     config.activityCounter = 0;
+    config.funResponseCounter = 0;
 
     return sendMessage(config, room, sayHI(election, greetings.getRandom()), null, true);
 };
