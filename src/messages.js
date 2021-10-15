@@ -1,5 +1,6 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
+import { sendMessage } from "./queue.js";
 import { getCandidateOrNominee, getRandomJoke, getRandomJonSkeetJoke, getRandomOops, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
@@ -11,6 +12,7 @@ import { parsePackage } from "./utils/package.js";
 /**
  * @typedef {import("./index").ElectionBadge} Badge
  * @typedef {import("./config").BotConfig} BotConfig
+ * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
  * @typedef {import("./score").CandidateScore} CandidateScore
  */
@@ -627,4 +629,32 @@ export const sayDoesNotMeetRequirements = (_config, election, candidateScore) =>
 export const sayLacksPrivilege = (action, alternative) => {
     const suggestion = alternative ? ` I can ${alternative} if you want` : "";
     return `You can only ${action || "perform sensitive actions"} as a privileged user, sorry.${suggestion}`;
+};
+
+/**
+ * @summary builds a message that sends a greeting message in an idle room
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {Room} room current chat room
+ * @returns {Promise<void>}
+ */
+export const sayIdleGreeting = async (config, election, room) => {
+    const { activityCounter, minActivityCountThreshold } = config;
+
+    console.log(`RESCRAPER - Room is inactive with ${activityCounter} messages posted so far (min ${minActivityCountThreshold})`);
+
+    const greetings = new RandomArray(...[
+        "Breaking news! ",
+        "I'm sorry to say this, but... ",
+        "A quick message from my sponsors: ",
+        "Welcome to the election chat room! ",
+        "And now for something completely different - ",
+        "Hello and welcome to the election night special! ",
+        "Interrupting to bring you this important message: ",
+    ]);
+
+    // Reset activity counter
+    config.activityCounter = 0;
+
+    return sendMessage(config, room, sayHI(election, greetings.getRandom()), null, true);
 };
