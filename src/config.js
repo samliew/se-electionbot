@@ -40,11 +40,14 @@ export class BotConfig {
 
     /* Low activity count variables */
 
-    // Variable to trigger an action only after this amount of minimum messages
-    minActivityCountThreshold = +(process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 20);
+    /**
+     * @summary lower bound of activity (only after this amount of minimum messages)
+     * @type {number}
+     */
+    minActivityCountThreshold = parseNumEnv("low_activity_count_threshold", 20);
 
     /**
-     * @summary upper bound of activity threshold
+     * @summary upper bound of activity
      * @type {number}
      */
     maxActivityCountThreshold = parseNumEnv("high_activity_count_threshold", 300);
