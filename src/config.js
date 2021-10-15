@@ -216,6 +216,20 @@ export class BotConfig {
     }
 
     /**
+     * @summary checks if a bot can busy-greet
+     * @returns {boolean}
+     */
+    get canBusyGreet() {
+        const { roomTooBusyForMinutes, roomTooBusyForHours, botSentLastMessage } = this;
+        return [
+            // room is busy, and everyone is ignoring the bot
+            (roomTooBusyForMinutes),
+            // room is busy, and bot is not the last sender
+            (roomTooBusyForHours && !botSentLastMessage)
+        ].some(Boolean);
+    }
+
+    /**
      * Maximum length a single message can have
      */
     maxMessageLength = 500;
