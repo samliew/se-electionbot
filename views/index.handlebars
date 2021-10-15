@@ -153,7 +153,13 @@
             {{#with botconfig}}
             <table>
                 <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} <span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
-                <tr><td>lastMessageTime</td><td>{{utcTimestamp lastMessageTime}} <span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td></tr>
+                <tr><td>lastMessageTime</td>
+                    {{#if lastMessageTime}}
+                    <td>{{utcTimestamp lastMessageTime}} <span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td>
+                    {{else}}
+                    <td></td>
+                    {{/if}}
+                </tr>
                 <tr><td>lastBotMessage</td><td>
                     <pre>{{lastBotMessage}}</pre>
                     <div class="mt10">{{{lastBotMessageHtml}}}</div>
