@@ -97,7 +97,11 @@ export class BotConfig {
      */
     shortBusyDurationMinutes = parseNumEnv("short_busy_duration_mins", 5);
 
-
+    /**
+     * @summary upper bound of busy room status
+     * @type {number}
+     */
+    longBusyDurationHours = parseNumEnv("long_busy_duration_hours", 1);
 
     get roomBecameIdleAWhileAgo() {
         return this.lastActivityTime + (this.shortIdleDurationMins * 6e4) < Date.now();
