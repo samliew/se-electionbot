@@ -638,10 +638,30 @@ export const sayLacksPrivilege = (action, alternative) => {
  * @param {Room} room current chat room
  * @returns {Promise<void>}
  */
-export const sayIdleGreeting = async (config, election, room) => {
+export const sayIdleGreeting = (config, election, room) => {
     const { activityCounter, minActivityCountThreshold } = config;
 
     console.log(`RESCRAPER - Room is inactive with ${activityCounter} messages posted so far (min ${minActivityCountThreshold})`);
+
+    config.activityCounter = 0;
+    config.funResponseCounter = 0;
+
+    return sendMessage(config, room, sayHI(election, getRandomAnnouncement()), null, true);
+};
+
+/**
+ * @summary builds a message that sends a greeting message in a busy room
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {Room} room current chat room
+ * @returns {Promise<void>}
+ */
+export const sayBusyGreeting = (config, election, room) => {
+    const { activityCounter, maxActivityCountThreshold } = config;
+
+    console.log(`Busy room:
+    messages  ${activityCounter}
+    threshold ${maxActivityCountThreshold}`);
 
     config.activityCounter = 0;
     config.funResponseCounter = 0;
