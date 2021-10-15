@@ -2,6 +2,7 @@ import { getModerators } from "../api.js";
 import Election from "../election.js";
 import { sayOtherSiteMods } from "../messages.js";
 import { dateToUtcTimestamp } from "../utils.js";
+import { matchNumber } from "../utils/expressions.js";
 
 /**
  * @typedef {import("../ScheduledAnnouncement").default} Announcement
@@ -215,4 +216,19 @@ export const resetElection = (_config, election) => {
     election.forget();
 
     return "Successfully reset the election";
+};
+
+/**
+ * @summary ignores messages from a user
+ * @param {BotConfig} _config bot config
+ * @param {Room} room current room
+ * @param {string} content message content
+ */
+export const ignoreUser = (_config, room, content) => {
+    const userId = matchNumber(/\s+(\d+)$/, content);
+    if (!userId) return;
+
+    room.block(userId);
+
+    return `*ignoring user ${userId}*`;
 };
