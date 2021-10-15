@@ -93,7 +93,7 @@ describe('Rescraper', () => {
             sinon.stub(election, "numWinners").get(() => 0);
 
             await scraper.rescrape();
-            expect(config.scrapeIntervalMins).to.equal(0.5);
+            expect(config.scrapeIntervalMins).to.equal(0.25);
         });
     });
 });

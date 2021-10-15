@@ -146,6 +146,14 @@ export class BotConfig {
     // Verbose logging
     verbose = parseBoolEnv("verbose", false);
 
+    // Keep track of fun responses so we can impose a limit
+    funResponseCounter = 0;
+    maxFunResponses = parseNumEnv("max_fun_responses", 2);
+
+    get canSendFunResponse() {
+        return this.funResponseCounter < this.maxFunResponses;
+    }
+
     /**
      * @summary returns whether the bot is in increased logging mode
      */
@@ -179,7 +187,16 @@ export class BotConfig {
      */
     addAdmin(chatUserId) {
         this.adminIds.add(chatUserId);
-        console.log(`User ${chatUserId} added as admin`);
+        console.log(`User ${chatUserId} temporarily added as admin`);
+    }
+
+    /**
+     * @summary adds an ignored user
+     * @param {number} chatUserId chat id of the user
+     */
+    addIgnoredUser(chatUserId) {
+        this.adminIds.add(chatUserId);
+        console.log(`User ${chatUserId} temporarily ignored`);
     }
 
     // If called without params, resets active mutes (future-dated lastMessageTime)

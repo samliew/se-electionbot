@@ -54,9 +54,11 @@ export const getRandomNegative = () => new RandomArray(
     `Well, nobody's perfect.`,
     `You can't handle the truth!`,
     `So you want to play this game?`,
+    `Am I more than you bargained for yet?`,
     `Am I supposed to feel bad about that?`,
     `Frankly, my dear, I don't give a damn.`,
     `What we've got here is a small misunderstanding.`,
+    `Love me or hate me, I swear it won't make or break me.`,
 ).getRandom();
 export const getRandomJoke = () => new RandomArray(
     `What's the object-oriented way to become wealthy? Inheritance.`,

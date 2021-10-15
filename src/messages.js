@@ -513,14 +513,22 @@ export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {
 
 /**
  * @fun
+ * @summary returns a Jon Skeet joke
+ * @returns {string}
+ */
+export const sayAJonSkeetJoke = () => {
+    return getRandomJonSkeetJoke();
+};
+
+/**
+ * @fun
  * @summary returns a joke
  * @returns {string}
  */
 export const sayAJoke = () => {
-    // Equal chance of being either
-    const joke = new RandomArray(getRandomJoke(), getRandomJonSkeetJoke()).getRandom();
-    return joke;
+    return getRandomJoke();
 };
+
 
 /**
  * @summary builds a response to accusations that responses are canned

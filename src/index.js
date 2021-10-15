@@ -11,6 +11,7 @@ import Election from './election.js';
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutJokes,
+    isAskedAboutJonSkeetJokes,
     isAskedAboutLightbulb,
     isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
@@ -22,7 +23,7 @@ import {
     isThankingTheBot
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAJoke, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
@@ -375,7 +376,7 @@ import {
              * Test is done against "originalMessage", since "content" holds the normalised version for keyword/guard matching without username in front
              */
             const botMentioned = new RegExp(`^\\s*@(?:ElectionBot|${me.name})[:,-]? `, "i").test(originalMessage) || targetUserId === me.id;
-            const botMentionedCasually = botMentioned || new RegExp(`\\b(?:ElectionBot|${me.name})\\b`, "i").test(originalMessage);
+            const botMentionedCasually = botMentioned || new RegExp(`\\b(?:ElectionBo[tx]|${me.name})\\b`, "i").test(originalMessage);
 
 
             /*
@@ -426,6 +427,15 @@ import {
                     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
                     responseText = `*silenced for ${num} mins*`;
                     config.updateLastMessage(responseText, Date.now() + (+num * 6e4) - (throttle * 1e3));
+                    return responseText;
+                }, AccessLevel.privileged);
+
+                commander.add("ignore", "stop bot from responding to a user", (config, content) => {
+                    const [, userId = null] = /\s+(\d+)$/.exec(content) || [];
+                    if (!userId) return;
+
+                    config.addIgnoredUser(userId);
+                    responseText = `*ignoring user ${userId}*`;
                     return responseText;
                 }, AccessLevel.privileged);
 
@@ -767,6 +777,9 @@ import {
             else if (isAskedAboutUsernameDiamond(content)) {
                 responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
             }
+            else if (/^happy birthday .*!*$/.test(content)) {
+                responseText = `Happy birthday!`;
+            }
             else if (isLovingTheBot(content)) {
                 responseText = getRandomGoodThanks();
             }
@@ -807,6 +820,7 @@ import {
                 // Alive
                 else if (/^(where are you|alive|ping)$/.test(content)) {
                     responseText = new RandomArray(
+                        `Hello, it's me.`,
                         `No. I'm not here.`,
                         `I'm here, aren't I?`,
                         `I'm on the interwebs`,
@@ -864,6 +878,14 @@ import {
                     else if (/^what(?:'s| is| are) your pronouns\?*$/.test(content)) {
                         responseText = `naturally, my pronouns are it/its/itself.`;
                     }
+                    else if (/^what(?:'s| is) the (?:answer|meaning|reason) (?:of|to|for) life\?*$/.test(content)) {
+                        responseText = new RandomArray(
+                            `42. The answer is always 42.`,
+                        ).getRandom();
+                    }
+                    else if (isAskedAboutJonSkeetJokes(content)) {
+                        responseText = sayAJonSkeetJoke();
+                    }
                     else if (isAskedAboutJokes(content)) {
                         responseText = sayAJoke();
                     }
@@ -876,22 +898,26 @@ import {
                 }
 
                 // Bot was mentioned and did not match any previous guards - return a random response
-                if (config.funMode) {
+                if (config.funMode && config.canSendFunResponse) {
                     responseText = new RandomArray(
                         `You talking to me?`,
                         `I know your thoughts.`,
                         `*reticulating splines*`,
                         `Tell that to the aliens.`,
+                        `What do you want from me?`,
+                        `*error* - AI not installed`,
                         `May the Force be with you.`,
                         `Houston, we have a problem.`,
                         `Keep talking and nobody explodes.`,
-                        `The stuff that dreams are made of.`,
+                        `It's not my job to please you, no.`,
                         `Frankly, my dear, I don't give a damn.`,
                         `What we've got here is failure to communicate.`,
                         `There will be no more free will, only my will.`,
                         `Time will tell. Sooner or later, time will tell...`,
                         `Well, here's another nice mess you've gotten me into!`,
                     ).getRandom();
+
+                    config.funResponseCounter++;
                 } // End random response
 
             } // End bot mentioned

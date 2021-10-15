@@ -213,12 +213,22 @@ export const isAskedAboutLightbulb = (text) => {
 
 /**
  * @fun
+ * @summary checks if a message is asking for a Jon Skeet joke
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutJonSkeetJokes = (text) => {
+    return /tell\b.*\bjon\s?skeet joke$/.test(text);
+};
+
+/**
+ * @fun
  * @summary checks if a message is asking for a joke
  * @param {string} text message text
  * @returns {boolean}
  */
 export const isAskedAboutJokes = (text) => {
-    return /(tell\b.*\bjoke|make\b.*\blaugh)$/.test(text);
+    return /(?:tell\b.*\bjoke|make\b.*\blaugh)$/.test(text);
 };
 
 /**

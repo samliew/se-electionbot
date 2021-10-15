@@ -152,10 +152,10 @@ export default class Rescraper {
             else if (election.phase === 'ended' && election.numWinners === 0) {
 
                 // Reduce scrape interval further
-                config.scrapeIntervalMins = 0.5;
+                config.scrapeIntervalMins = 0.25;
 
                 if (config.debugOrVerbose) {
-                    console.log(`RESCRAPER - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
+                    console.log(`RESCRAPER - Election ended with no results - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
                 }
             }
 
@@ -163,14 +163,14 @@ export default class Rescraper {
             else if (election.isEnding() && !config.flags.saidElectionEndingSoon) {
 
                 // Reduce scrape interval
-                config.scrapeIntervalMins = 2;
+                config.scrapeIntervalMins = 1;
 
                 // Announce election ending soon
                 await sendMessage(config, room, `The ${makeURL('election', election.electionUrl)} is ending soon. This is the final chance to cast your votes!`);
                 config.flags.saidElectionEndingSoon = true;
 
                 if (config.debugOrVerbose) {
-                    console.log(`RESCRAPER - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
+                    console.log(`RESCRAPER - Election ending - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
                 }
             }
 
@@ -193,6 +193,9 @@ export default class Rescraper {
 
                 // Reset activity counter
                 config.activityCounter = 0;
+
+                // Reset fun counter
+                config.funResponseCounter = 0;
             }
 
             // The election is over
