@@ -43,6 +43,12 @@ export class BotConfig {
     // Variable to trigger an action only after this amount of minimum messages
     minActivityCountThreshold = +(process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 20);
 
+    /**
+     * @summary upper bound of activity threshold
+     * @type {number}
+     */
+    maxActivityCountThreshold = parseNumEnv("high_activity_count_threshold", 300);
+
     get roomReachedMinimumActivityCount() {
         const { activityCounter, minActivityCountThreshold: minActivityCountThreshold } = this;
         return activityCounter >= minActivityCountThreshold;
