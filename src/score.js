@@ -1,8 +1,8 @@
-import { getBadges, getUserInfo } from "./api.js";
+import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
-import { sayDiamondAlready, sayMissingBadges } from "./messages.js";
-import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, NO_ACCOUNT_ID, pluralize } from "./utils.js";
+import { sayDiamondAlready, sayDoesNotMeetRequirements, sayLacksPrivilege, sayMissingBadges } from "./messages.js";
+import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, NO_ACCOUNT_ID } from "./utils.js";
 import { matchNumber } from "./utils/expressions.js";
 
 /**
@@ -30,12 +30,7 @@ export const getScoreText = (score, max) => `**${score}** (out of ${max})`;
 const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurred when calculating ${isAskingForOtherUser ? `the user's` : `your`} score.`;
 
 /**
- * @summary calculates the score
- * @param {ApiUser} user API user object
- * @param {Badge[]} userBadges user badges
- * @param {Election} election current election
- * @param {boolean} [isSO] is Stack Overflow election
- * @returns {{
+ * @typedef {{
  *  score: number,
  *  missing: {
  *      badges: {
@@ -43,14 +38,27 @@ const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurre
  *          required: ElectionBadge[]
  *      }
  *  },
- *  isEligible: boolean
- * }}
+ *  isEligible: boolean,
+ *  isMissingReputation: boolean,
+ *  isMissingRequiredBadges: boolean,
+ *  numMissingRequiredBadges: number,
+ *  numMissingBadges: number,
+ *  maxScore: number,
+ *  missingRequiredBadgeNames: string[]
+ * }} CandidateScore
+ *
+ * @summary calculates the score
+ * @param {ApiUser} user API user object
+ * @param {Badge[]} userBadges user badges
+ * @param {Election} election current election
+ * @param {boolean} [isSO] is Stack Overflow election
+ * @returns {CandidateScore}
  */
 export const calculateScore = (user, userBadges, election, isSO = false) => {
     const maxRepScore = 20;
     const repRepScore = 1000;
 
-    const { electionBadges } = election;
+    const { electionBadges, repNominate = 0 } = election;
     const { reputation } = user;
 
     const repScore = Math.min(Math.floor(reputation / repRepScore), maxRepScore);
@@ -74,21 +82,34 @@ export const calculateScore = (user, userBadges, election, isSO = false) => {
         get isEligible() {
             const { repNominate = 0 } = election;
             return !missingRequiredBadges.length && (repNominate <= reputation);
+        },
+        get isMissingReputation() {
+            return reputation < repNominate;
+        },
+        get isMissingRequiredBadges() {
+            return !!missingRequiredBadges.length;
+        },
+        get numMissingRequiredBadges() {
+            return missingRequiredBadges.length;
+        },
+        get numMissingBadges() {
+            return missingBadges.length;
+        },
+        get maxScore() {
+            return maxRepScore + electionBadges.length;
+        },
+        get missingRequiredBadgeNames() {
+            return missingRequiredBadges.map(mapToName);
         }
     };
 };
 
 /**
  * @summary HOF with common parameters
- * @param {BotConfig} config
- * @param {string} hostname
- * @param {string} chatDomain chat room domain name (i.e. stackexchange.com)
- * @param {string} apiSlug election site to pass to the API 'site' parameter
- * @param {string} apiKey current API key
- * @param {ElectionBadge[]} badges list of election badges
+ * @param {BotConfig} config bot configuration
  * @param {number[]} modIds ids of moderators of the network
  */
-export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, apiKey, badges, modIds) =>
+export const makeCandidateScoreCalc = (config, modIds) =>
     /**
      * @summary calculates candidate score
      * @param {Election} election
@@ -97,7 +118,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
      * @param {boolean} [isSO]
      * @returns {Promise<string>}
      */
-    async (election, user, message, isSO = false) => {
+    async (election, user, message) => {
         //TODO: decide how to avoid mutation
         /** @type {{ userId: number|null|undefined, content: string }} */
         let { userId, content } = message;
@@ -107,7 +128,9 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             return sayCalcFailed(false);
         }
 
-        const { electionUrl, phase, repNominate, siteUrl } = election;
+        const { chatDomain } = config;
+
+        const { electionUrl, phase, repNominate, siteUrl, siteHostname, apiSlug, isStackOverflow = false } = election;
 
         const { isModerator } = user;
 
@@ -117,15 +140,20 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
 
         if (config.debug) {
             console.log({
-                isSO,
+                isStackOverflow,
                 isAskingForOtherUser,
                 isModerator,
                 wasModerator
             });
         }
 
-        if (!isAskingForOtherUser && isSO && (isModerator || wasModerator) && !content.startsWith('sudo ')) {
+        if (!isAskingForOtherUser && isStackOverflow && (isModerator || wasModerator) && !content.startsWith('sudo ')) {
             return sayDiamondAlready(isModerator, wasModerator);
+        }
+
+        if (isAskingForOtherUser && [isModerator, config.devIds.has(userId)].every((condition) => !condition)) {
+            config.awaitingConfirmation.set(userId, () => makeCandidateScoreCalc(config, modIds)(election, user, { ...message, content: "" }));
+            return sayLacksPrivilege("request candidate score of others", "tell you your own score");
         }
 
         // If privileged user asking candidate score of another user, get user site id from message
@@ -136,8 +164,8 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
                 matchNumber(/(\d+)(?:\?|$)/, content);
         }
         // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
-        else if (!isSO) {
-            userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, hostname, apiKey);
+        else if (!isStackOverflow) {
+            userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, siteHostname, getStackApiKey(config.apiKeyPool));
 
             // Unable to get user id on election site
             if (userId === null) {
@@ -158,7 +186,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         }
 
         // TODO: Get a different API key here
-        const userBadges = await getBadges(config, userId, apiSlug, apiKey);
+        const userBadges = await getBadges(config, userId, apiSlug, getStackApiKey(config.apiKeyPool));
 
         // Validation
         if (!userBadges.length) {
@@ -166,20 +194,18 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        const [badge] = userBadges;
-
-        const { reputation } = badge.user;
-
         const hasNominated = election.isNominee(userId);
 
-        const requestedUser = await getUserInfo(config, isAskingForOtherUser ? userId : user.id, apiSlug, apiKey);
+        const requestedUser = await getUserInfo(config, isAskingForOtherUser ? userId : user.id, apiSlug, getStackApiKey(config.apiKeyPool));
 
         if (!requestedUser) {
             console.error(`failed to get user info to calculate`);
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        const { score, missing, isEligible } = calculateScore(requestedUser, userBadges, election, isSO);
+        const candidateScore = calculateScore(requestedUser, userBadges, election, isStackOverflow);
+
+        const { score, missing, isEligible } = candidateScore;
 
         const missingBadges = missing.badges.election;
         const missingRequiredBadges = missing.badges.required;
@@ -199,7 +225,6 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         if (config.verbose) {
             console.log({
                 "User site badges": userBadges,
-                badges,
                 missingBadges,
                 hasNominated,
             });
@@ -221,22 +246,7 @@ export const makeCandidateScoreCalc = (config, hostname, chatDomain, apiSlug, ap
         }
         // Does not meet minimum requirements
         else if (!isEligible && repNominate !== void 0) {
-            responseText = `You are not eligible to nominate yourself in the election`;
-
-            const isUnderRep = reputation < repNominate;
-
-            // Not enough rep
-            if (isUnderRep) {
-                responseText += ` as you do not have at least ${repNominate} reputation`;
-            }
-
-            // Don't have required badges (SO-only)
-            if (numMissingRequiredBadges > 0) {
-                responseText += isUnderRep ? '. You are also' : ' as you are';
-                responseText += ` missing the required badge${pluralize(numMissingRequiredBadges)}: ${missingRequiredBadgeNames.join(', ')}`;
-            }
-
-            responseText += `. Your candidate score is ${getScoreText(score, currMaxScore)}.`;
+            responseText = sayDoesNotMeetRequirements(config, election, candidateScore);
         }
         else if (score === currMaxScore) {
             responseText = `Wow! You have a maximum candidate score of **${currMaxScore}**!`;

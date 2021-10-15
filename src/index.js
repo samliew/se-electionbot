@@ -631,12 +631,9 @@ import {
             else if (isAskedForOwnScore(content) || isAskedForOtherScore(content)) {
 
                 // TODO: use config object pattern instead, 6 parameters is way too much
-                const calcCandidateScore = makeCandidateScoreCalc(config,
-                    election.siteHostname, config.chatDomain, election.apiSlug,
-                    getStackApiKey(apiKeyPool), electionBadges, soPastAndPresentModIds
-                );
+                const calcCandidateScore = makeCandidateScoreCalc(config, soPastAndPresentModIds);
 
-                responseText = await calcCandidateScore(election, user, { userId, content }, election.isStackOverflow);
+                responseText = await calcCandidateScore(election, user, { userId, content });
 
                 // TODO: msg.id is not guaranteed to be defined
                 await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
@@ -844,6 +841,10 @@ import {
                     responseText = sayOffTopicMessage(election, content);
                     await sendMessage(config, room, responseText, null, false);
                     return; // stop here since we are using a different default response method
+                }
+                else if (config.awaitingConfirmation.has(userId)) {
+                    responseText = await config.awaitingConfirmation.get(userId)?.() || "";
+                    config.awaitingConfirmation.delete(userId);
                 }
                 // The rest below are fun mode only
                 else if (config.funMode) {

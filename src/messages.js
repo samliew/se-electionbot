@@ -1,7 +1,7 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { getCandidateOrNominee, getRandomJoke, getRandomJonSkeetJoke, getRandomOops, RandomArray } from "./random.js";
-import { calculateScore } from "./score.js";
+import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, pluralize, pluralizePhrase
@@ -12,6 +12,7 @@ import { parsePackage } from "./utils/package.js";
  * @typedef {import("./index").ElectionBadge} Badge
  * @typedef {import("./config").BotConfig} BotConfig
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
+ * @typedef {import("./score").CandidateScore} CandidateScore
  */
 
 /**
@@ -580,4 +581,36 @@ export const sayBestCandidate = (_config, election) => {
     ) || [, everyoneIsGreat];
 
     return response;
+};
+
+/**
+ * @summary builds a response to whether a user does not meet requirements to be a candidate
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @param {CandidateScore} candidateScore candidate score instance
+ * @returns {string}
+ */
+export const sayDoesNotMeetRequirements = (_config, election, candidateScore) => {
+    const { repNominate = 0 } = election;
+
+    const { isMissingReputation, isMissingRequiredBadges, score, numMissingRequiredBadges, maxScore, missingRequiredBadgeNames } = candidateScore;
+
+    const prefix = `You are not eligible to nominate yourself in the election`;
+
+    const underRep = isMissingReputation ? ` as you do not have at least ${repNominate} reputation` : "";
+
+    const missing = isMissingRequiredBadges ? `${isMissingReputation ? '. You are also' : ' as you are'} missing the required badge${pluralize(numMissingRequiredBadges)}: ${missingRequiredBadgeNames.join(', ')}` : "";
+
+    return `${prefix}${underRep}${missing}. Your candidate score is ${getScoreText(score, maxScore)}.`;
+};
+
+/**
+ * @summary builds a response to a user attempting to perform a sensitive action without permission
+ * @param {string} action action user attempted to perform
+ * @param {string} [alternative] alternative to suggest
+ * @returns {string}
+ */
+export const sayLacksPrivilege = (action, alternative) => {
+    const suggestion = alternative ? ` I can ${alternative} if you want` : "";
+    return `You can only ${action || "perform sensitive actions"} as a privileged user, sorry.${suggestion}`;
 };
