@@ -103,14 +103,26 @@ export class BotConfig {
      */
     longBusyDurationHours = parseNumEnv("long_busy_duration_hours", 1);
 
+    /**
+     * @summary checks if the room became idle minutes ago
+     * @returns {boolean}
+     */
     get roomBecameIdleAWhileAgo() {
         return this.lastActivityTime + (this.shortIdleDurationMins * 6e4) < Date.now();
     }
 
+    /**
+     * @summary checks if the room became idle hours ago
+     * @returns {boolean}
+     */
     get roomBecameIdleHoursAgo() {
         return this.lastActivityTime + (this.longIdleDurationHours * 60 * 6e4) < Date.now();
     }
 
+    /**
+     * @summary checks if the bot has been quiet for a while according to lower bound
+     * @returns {boolean}
+     */
     get botHasBeenQuiet() {
         return this.lastMessageTime + (this.lowActivityCheckMins * 6e4) < Date.now();
     }
