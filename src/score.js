@@ -1,7 +1,7 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
-import { sayDiamondAlready, sayDoesNotMeetRequirements, sayMissingBadges } from "./messages.js";
+import { sayDiamondAlready, sayDoesNotMeetRequirements, sayLacksPrivilege, sayMissingBadges } from "./messages.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, NO_ACCOUNT_ID } from "./utils.js";
 import { matchNumber } from "./utils/expressions.js";
 
@@ -149,6 +149,11 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         if (!isAskingForOtherUser && isStackOverflow && (isModerator || wasModerator) && !content.startsWith('sudo ')) {
             return sayDiamondAlready(isModerator, wasModerator);
+        }
+
+        if (isAskingForOtherUser && [isModerator, config.devIds.has(userId)].every((condition) => !condition)) {
+            config.awaitingConfirmation.set(userId, () => makeCandidateScoreCalc(config, modIds)(election, user, { ...message, content: "" }));
+            return sayLacksPrivilege("request candidate score of others", "tell you your own score");
         }
 
         // If privileged user asking candidate score of another user, get user site id from message
