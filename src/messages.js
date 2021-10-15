@@ -643,15 +643,15 @@ export const sayIdleGreeting = async (config, election, room) => {
 
     console.log(`RESCRAPER - Room is inactive with ${activityCounter} messages posted so far (min ${minActivityCountThreshold})`);
 
-    const greetings = new RandomArray(...[
-        "Breaking news! ",
+    const greetings = new RandomArray(
+        "Public service announcement: ",
         "I'm sorry to say this, but... ",
         "A quick message from my sponsors: ",
         "Welcome to the election chat room! ",
         "And now for something completely different - ",
         "Hello and welcome to the election night special! ",
         "Interrupting to bring you this important message: ",
-    ]);
+    );
 
     // Reset activity counter
     config.activityCounter = 0;
