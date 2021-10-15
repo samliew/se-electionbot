@@ -1,5 +1,5 @@
 import { HerokuClient } from "./herokuClient.js";
-import { sayElectionSchedule, sayIdleGreeting } from "./messages.js";
+import { sayBusyGreeting, sayElectionSchedule, sayIdleGreeting } from "./messages.js";
 import { sendMessage } from "./queue.js";
 import { makeURL, wait } from "./utils.js";
 
@@ -177,7 +177,9 @@ export default class Rescraper {
             else if (config.idleCanSayHi) {
                 await sayIdleGreeting(config, election, room);
             }
-
+            else if (config.canBusyGreet) {
+                await sayBusyGreeting(config, election, room);
+            }
             // The election is over
             else if (election.phase === 'ended' || election.phase === 'cancelled' && config.scrapeIntervalMins !== 10) {
 
