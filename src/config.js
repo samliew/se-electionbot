@@ -70,12 +70,26 @@ export class BotConfig {
         return activityCounter >= maxActivityCountThreshold;
     }
 
-    // Variable to determine how long the room needs to be quiet to be idle - used by roomBecameIdleAWhileAgo
-    shortIdleDurationMins = +(process.env.SHORT_IDLE_DURATION_MINS || 3);
-    // Variable to determine how long the room needs to be quiet to be idle - used by roomBecameIdleHoursAgo
-    longIdleDurationHours = +(process.env.LONG_IDLE_DURATION_HOURS || 12);
-    // Variable to trigger greeting only after this time of inactivity - used by botHasBeenQuiet
-    lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 5);
+    /**
+     * @summary Variable to determine how long the room needs to be quiet to be idle
+     * @type {number}
+     * {@link BotConfg#roomBecameIdleAWhileAgo}
+     */
+    shortIdleDurationMins = parseNumEnv("short_idle_duration_mins", 3);
+
+    /**
+     * @summary Variable to determine how long the room needs to be quiet to be idle
+     * @type {number}
+     * {@link BotConfg#roomBecameIdleHoursAgo}
+     */
+    longIdleDurationHours = parseNumEnv("long_idle_duration_hours", 12);
+
+    /**
+     * @summary Variable to trigger greeting only after this time of inactivity
+     * @type {number}
+     * {@link BotConfig#botHasBeenQuiet}
+     */
+    lowActivityCheckMins = parseNumEnv("low_activity_check_mins", 5);
 
     get roomBecameIdleAWhileAgo() {
         return this.lastActivityTime + (this.shortIdleDurationMins * 6e4) < Date.now();
