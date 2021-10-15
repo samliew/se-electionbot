@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import sanitize from "sanitize-html";
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
-import { announceWinners, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
+import { announceWinners, ignoreUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import Election from './election.js';
@@ -430,14 +430,7 @@ import {
                     return responseText;
                 }, AccessLevel.privileged);
 
-                commander.add("ignore", "stop bot from responding to a user", (config, content) => {
-                    const [, userId = null] = /\s+(\d+)$/.exec(content) || [];
-                    if (!userId) return;
-
-                    config.addIgnoredUser(userId);
-                    responseText = `*ignoring user ${userId}*`;
-                    return responseText;
-                }, AccessLevel.privileged);
+                commander.add("ignore", "stop bot from responding to a user", ignoreUser, AccessLevel.privileged);
 
                 commander.add("unmute", "allows the bot to respond", (config) => {
                     responseText = `I can speak freely again.`;
@@ -538,7 +531,8 @@ import {
                     ["set access", /set (?:access|level)/, config, user, content],
                     ["announce winners", /^announce winners/, config, election, room, announcement],
                     ["list moderators", /^whois/, config, content, entities],
-                    ["reset election", /^reset election/, config, election]
+                    ["reset election", /^reset election/, config, election],
+                    ["ignore", /^ignore \d+/, config, room, content]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, content);
