@@ -49,9 +49,22 @@ export class BotConfig {
      */
     maxActivityCountThreshold = parseNumEnv("high_activity_count_threshold", 300);
 
+    /**
+     * @summary checks if room has reached minimum activity count
+     * @returns {boolean}
+     */
     get roomReachedMinimumActivityCount() {
-        const { activityCounter, minActivityCountThreshold: minActivityCountThreshold } = this;
+        const { activityCounter, minActivityCountThreshold } = this;
         return activityCounter >= minActivityCountThreshold;
+    }
+
+    /**
+     * @summary checks if room has reached maximum activity count
+     * @returns {boolean}
+     */
+    get roomReachedMaximumActivityCount() {
+        const { activityCounter, maxActivityCountThreshold } = this;
+        return activityCounter >= maxActivityCountThreshold;
     }
 
     // Variable to determine how long the room needs to be quiet to be idle - used by roomBecameIdleAWhileAgo
