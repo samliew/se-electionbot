@@ -1,5 +1,9 @@
 import { chatMarkdownToHtml, parseBoolEnv, parseIds, parseNumEnv } from "./utils.js";
 
+const MS_IN_SECOND = 1e3;
+const MS_IN_MINUTE = 60 * MS_IN_SECOND;
+const MS_IN_HOUR = 60 * MS_IN_MINUTE;
+
 /**
  * @typedef {import("chatexchange/dist/Client").Host} Host
  */
@@ -117,6 +121,24 @@ export class BotConfig {
      */
     get roomBecameIdleHoursAgo() {
         return this.lastActivityTime + (this.longIdleDurationHours * 60 * 6e4) < Date.now();
+    }
+
+    /**
+     * @summary checks if the room has been busy for minutes
+     * @returns {boolean}
+     */
+    get roomTooBusyForMinutes() {
+        const { lastMessageTime, shortBusyDurationMinutes, roomReachedMaximumActivityCount } = this;
+        return roomReachedMaximumActivityCount && Date.now() >= lastMessageTime + shortBusyDurationMinutes * MS_IN_MINUTE;
+    }
+
+    /**
+     * @summary checks if the room has been busy for hours on end
+     * @returns {boolean}
+     */
+    get roomTooBusyForHours() {
+        const { lastMessageTime, longBusyDurationHours, roomReachedMaximumActivityCount } = this;
+        return roomReachedMaximumActivityCount && Date.now() >= lastMessageTime + longBusyDurationHours * MS_IN_HOUR;
     }
 
     /**
