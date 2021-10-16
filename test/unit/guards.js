@@ -2,7 +2,7 @@ import { expect } from "chai";
 import {
     isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 
 /**
@@ -279,6 +279,21 @@ describe('Message Guards', () => {
                 "i love this bot already",
                 "i love electionbot",
             ]);
+        });
+    });
+
+    describe('isSayingBotIsInsane', () => {
+        it('should correctly match content', () => {
+            allMatch(isSayingBotIsInsane, [
+                "The Bot is insane. Don't worry.",
+                "ElectionBot is just a crazy old bot.",
+                "Insane the bot definitely is"
+            ]);
+
+            allMatch(isSayingBotIsInsane, [
+                "their body is insane!",
+                "the bot received an insanse amount of praise"
+            ], false);
         });
     });
 

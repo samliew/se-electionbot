@@ -183,6 +183,17 @@ export const isLovingTheBot = (text) => {
 };
 
 /**
+ * @summary detects if someone is saying the bot is insane
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isSayingBotIsInsane = (text) => {
+    return [
+        /(?<=(\bbot\b).+?|)(?:insane|crazy)(?:(?!\1)|.+?\bbot\b)/i
+    ].some((expression) => expression.test(text));
+};
+
+/**
  * @summary detects if someone hates the bot
  * @param {string} text
  * @returns {boolean}
