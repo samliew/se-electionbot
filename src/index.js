@@ -346,6 +346,7 @@ import {
             /** @type {[Set<number>, number][]} */
             const userLevels = [
                 [config.devIds, AccessLevel.dev],
+                [config.modIds, AccessLevel.admin],
                 [config.adminIds, AccessLevel.admin]
             ];
 
