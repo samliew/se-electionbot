@@ -487,9 +487,7 @@ import {
                 }, AccessLevel.privileged);
 
                 commander.add("greet", "makes the bot welcome everyone", async (election) => {
-                    await sayHI(election);
-
-                    // Reset activity counter
+                    await sendMessage(config, room, sayHI(election), null, true);
                     config.activityCounter = 0;
                 }, AccessLevel.privileged);
 
