@@ -87,6 +87,12 @@ export default class ScheduledAnnouncement {
         const nominationTab = `${electionUrl}?tab=nomination`;
 
         newNominees.forEach(async ({ nominationLink, userName }, i) => {
+            if (!userName) {
+                // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
+                console.log(`missing username: ${nominationLink}`);
+                return;
+            }
+
             await sendMessage(config, _room, `**We have a new ${makeURL("nomination", nominationTab)
                 }!** Please welcome our latest candidate ${makeURL(userName, nominationLink)
                 }!`);
