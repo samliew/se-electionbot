@@ -123,6 +123,19 @@ export const isAliveCommand = (config) => {
  * @summary manually announces winners
  * @param {BotConfig} config bot config
  * @param {Election} election current election instance
+ * @param {Announcement} announcement instance of ScheduledAnnouncement
+ * @returns {Promise<string>}
+ */
+export const announceNominees = async (config, election, announcement) => {
+    await election.scrapeElection(config);
+    const status = await announcement.announceNewNominees();
+    return status ? "" : "There are no nominees yet.";
+};
+
+/**
+ * @summary manually announces winners
+ * @param {BotConfig} config bot config
+ * @param {Election} election current election instance
  * @param {Room} room room to announce in
  * @param {Announcement} announcement instance of ScheduledAnnouncement
  * @returns {Promise<string>}

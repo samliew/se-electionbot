@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import sanitize from "sanitize-html";
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
-import { announceWinners, ignoreUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, ignoreUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import Election from './election.js';
@@ -492,6 +492,8 @@ import {
                     config.activityCounter = 0;
                 }, AccessLevel.privileged);
 
+                commander.add("announce nominees", "makes the bot announce nominees", announceNominees, AccessLevel.privileged);
+
                 commander.add("announce winners", "makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged);
 
                 commander.add("whois", "retrieve mods from another site", listSiteModerators, AccessLevel.privileged);
@@ -533,6 +535,7 @@ import {
                     ["debug", /debug(?:ing)?/, config, content],
                     ["die", /die|shutdown|turn off/],
                     ["set access", /set (?:access|level)/, config, user, content],
+                    ["announce nominees", /^announce nominees/, config, election, announcement],
                     ["announce winners", /^announce winners/, config, election, room, announcement],
                     ["list moderators", /^whois/, config, content, entities],
                     ["reset election", /^reset election/, config, election],
