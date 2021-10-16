@@ -242,6 +242,10 @@ describe('Message Guards', () => {
                 "how can i be mod",
                 "can i nominate another user",
             ]);
+
+            allMatch(isAskedForNominatingInfo, [
+                "How doesn't it apply to your post?"
+            ], false);
         });
     });
 
