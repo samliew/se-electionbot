@@ -5,7 +5,7 @@ import { dateToUtcTimestamp } from "../utils.js";
 import { matchNumber } from "../utils/expressions.js";
 
 /**
- * @typedef {import("../ScheduledAnnouncement").default} Announcement
+ * @typedef {import("../announcement").default} Announcement
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../index").UserProfile} UserProfile

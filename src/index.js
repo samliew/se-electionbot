@@ -29,7 +29,7 @@ import {
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
-import Announcement from './ScheduledAnnouncement.js';
+import Announcement from './announcement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
 import {

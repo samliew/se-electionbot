@@ -8,7 +8,7 @@ import { makeURL, wait } from "./utils.js";
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./election.js").default} Election
  * @typedef {import("chatexchange/dist/Room").default} Room
- * @typedef {import("./ScheduledAnnouncement.js").default} Announcement
+ * @typedef {import("./announcement.js").default} Announcement
  */
 
 /**
