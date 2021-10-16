@@ -375,6 +375,18 @@ export default class Election {
     }
 
     /**
+     * TODO: make an abstract History class
+     * @summary pushes an election state to history
+     * @returns {Election}
+     */
+    pushHistory() {
+        // Save prev values so we can compare changes after
+        this._prevObj = JSON.parse(JSON.stringify(this));
+        this._prevObj._prevObj = null;
+        return this;
+    }
+
+    /**
      * @summary scrapes current election page
      * @param {BotConfig} config bot configuration
      * @param {boolean} [retry] whether we are retrying the scrape
@@ -413,9 +425,7 @@ export default class Election {
                 return await this.scrapeElection(config, true);
             }
 
-            // Save prev values so we can compare changes after
-            this._prevObj = JSON.parse(JSON.stringify(this));
-            this._prevObj._prevObj = null;
+            this.pushHistory();
 
             const metaElems = content.find(".flex--item.mt4 .d-flex.gs4 .flex--item:nth-child(2)");
             const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
