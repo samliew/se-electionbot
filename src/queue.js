@@ -141,3 +141,20 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
         await wait(waitSecs);
     }
 };
+
+/**
+ * @summary sends multiple throttled messages
+ * @param {BotConfig} config bot configuration
+ * @param {Room} room room to send messages to
+ * @param {...string} messages message text list
+ */
+export const sendMessageList = async (config, room, ...messages) => {
+    const { throttleSecs } = config;
+
+    let sent = 1;
+    for (const message of messages) {
+        await room.sendMessage(message);
+        await wait(throttleSecs * sent);
+        sent += 1;
+    }
+};
