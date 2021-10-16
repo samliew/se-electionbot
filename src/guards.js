@@ -6,7 +6,7 @@
 export const isAskedForNominatingInfo = (text) => {
     return [
         /^(?:how|where|can I)(?:\s+can I)?(?:\s+to)?\s+(?:nominate|submit|register|enter|apply|elect)/i,
-        /^^(?:how|where|can I)\s+(?:to |can I )?be(?:come)?(?:\s+a)?\s+mod(?:erator)?/i
+        /^(?:how|where|can I)\s+(?:to |can I )?be(?:come)?(?:\s+a)?\s+mod(?:erator)?/i
     ].some((expression) => expression.test(text));
 };
 
