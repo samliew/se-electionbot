@@ -900,12 +900,11 @@ import {
                 if (config.funMode && config.canSendFunResponse) {
                     responseText = new RandomArray(
                         `You talking to me?`,
-                        `I know your thoughts.`,
+                        `I want to play a game.`,
                         `*reticulating splines*`,
                         `Tell that to the aliens.`,
                         `What do you want from me?`,
                         `*error* - AI not installed`,
-                        `May the Force be with you.`,
                         `Houston, we have a problem.`,
                         `Keep talking and nobody explodes.`,
                         `It's not my job to please you, no.`,
