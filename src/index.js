@@ -20,10 +20,11 @@ import {
     isAskedWhyNominationRemoved,
     isHatingTheBot,
     isLovingTheBot,
+    isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
 import {
-    sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
+    sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
 } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
@@ -589,7 +590,8 @@ import {
             const rules = [
                 [isAskedForCurrentPositions, sayNumberOfPositions],
                 [isAskedIfResponsesAreCanned, sayCannedResponses],
-                [isAskedWhoIsTheBestCandidate, sayBestCandidate]
+                [isAskedWhoIsTheBestCandidate, sayBestCandidate],
+                [isSayingBotIsInsane, sayInsaneComeback]
             ];
 
             const matched = rules.find(([expr]) => expr(content));

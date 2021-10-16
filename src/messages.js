@@ -546,6 +546,12 @@ export const sayCannedResponses = () => {
 };
 
 /**
+ * @summary builds a response to accusations that bot is insane
+ * @returns {string}
+ */
+export const sayInsaneComeback = () => new RandomArray("What did you just call me?", "Who isn't insanse these days?", "Sanity is overrated").getRandom();
+
+/**
  * @summary builds a response to asking who is the best candidate
  * @param {BotConfig} _config bot configuration
  * @param {Election} election current election
