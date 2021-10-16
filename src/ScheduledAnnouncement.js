@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { sendMessage } from "./queue.js";
+import { sendMessageList } from "./queue.js";
 import { dateToUtcTimestamp, makeURL, pluralize } from "./utils.js";
 
 /**
@@ -86,18 +86,21 @@ export default class ScheduledAnnouncement {
 
         const nominationTab = `${electionUrl}?tab=nomination`;
 
-        newNominees.forEach(async ({ nominationLink, userName }, i) => {
-            if (!userName) {
-                // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
-                console.log(`missing username: ${nominationLink}`);
-                return;
-            }
+        const messages = newNominees
+            .filter(({ userName, nominationLink }) => {
+                if (!userName) {
+                    // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
+                    console.log(`missing username: ${nominationLink}`);
+                }
+                return !!userName;
+            })
+            .map(({ nominationLink, userName }) => {
+                const prefix = `**We have a new ${makeURL("nomination", nominationTab)}!**`;
+                const link = `Please welcome our latest candidate ${makeURL(userName, nominationLink)}!`;
+                return `${prefix} ${link}`;
+            });
 
-            await sendMessage(config, _room, `**We have a new ${makeURL("nomination", nominationTab)
-                }!** Please welcome our latest candidate ${makeURL(userName, nominationLink)
-                }!`);
-            console.log(`NOMINATION`, newNominees[i]);
-        });
+        await sendMessageList(config, _room, ...messages);
 
         return true;
     }
