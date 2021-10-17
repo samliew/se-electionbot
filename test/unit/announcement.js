@@ -84,7 +84,7 @@ describe('ScheduledAnnouncement', () => {
         beforeEach(() => sinon.restore());
 
         it('should correctly announce new nominees', async function () {
-            this.timeout(5000);
+            this.timeout(1e4);
 
             const names = ["Jane", "John"];
 
