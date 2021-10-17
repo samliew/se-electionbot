@@ -124,7 +124,13 @@ describe('Message Guards', () => {
                 "what's the candidate score of 9000",
                 "what is candidate score for 65536", // account for a common mistake
                 "what's the candidate score of 404?",
+                "candidate score for 65535"
             ]);
+
+            allMatch(isAskedForOtherScore, [
+                "how is candidate score calculated",
+                "what is candidate score?",
+            ], false);
         });
     });
 
