@@ -2,9 +2,9 @@ import { expect } from "chai";
 import Client from "chatexchange";
 import Room from "chatexchange/dist/Room.js";
 import sinon from "sinon";
+import ScheduledAnnouncement from "../../src/announcement.js";
 import Election from "../../src/election.js";
 import Rescraper from "../../src/rescraper.js";
-import ScheduledAnnouncement from "../../src/ScheduledAnnouncement.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('Rescraper', () => {
