@@ -75,18 +75,35 @@ describe('ScheduledAnnouncement', () => {
     });
 
     describe('announceNewNominees', () => {
-        it('should correctly announce new nominees', async () => {
+
+        /** @type {import("sinon").SinonFakeTimers} */
+        let clock;
+        before(() => clock = sinon.useFakeTimers());
+        after(() => clock.restore());
+
+        beforeEach(() => sinon.restore());
+
+        it('should correctly announce new nominees', async function () {
+            this.timeout(5000);
+
             const names = ["Jane", "John"];
+
+            const messageStub = sinon.stub(room, "sendMessage");
 
             const nominees = names.map((userName) => getMockNominee({ userName }));
             election.arrNominees.push(...nominees);
 
             const ann = new ScheduledAnnouncement(config, room, election, scraper);
 
-            // TODO: mock out sendMessage and check actual messages
+            const promise = ann.announceNewNominees();
 
-            const status = await ann.announceNewNominees();
-            expect(status).to.be.true;
+            clock.runAll();
+
+            expect(await promise).to.be.true;
+
+            messageStub.args.forEach(([msg], i) => {
+                expect(msg.includes(names[i])).to.be.true;
+            });
         });
     });
 
