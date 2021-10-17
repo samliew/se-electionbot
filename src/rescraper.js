@@ -180,7 +180,7 @@ export default class Rescraper {
                 console.log(`RESCRAPER - Room is inactive with ${config.activityCounter} messages posted so far (min ${config.minActivityCountThreshold}).`);
 
                 const greetings = new RandomArray(...[
-                    "Breaking news!!! ",
+                    "Public service announcement: ",
                     "I'm sorry to say this, but... ",
                     "A quick message from my sponsors: ",
                     "Welcome to the election chat room! ",

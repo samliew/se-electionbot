@@ -29,7 +29,8 @@ describe('getSiteUserIdFromChatStackExchangeId', function () {
             getMockBotConfig(),
             -9000,
             "stackoverflow.com",
-            "stackoverflow"
+            "stackoverflow",
+            getStackApiKey(apiKeyPool)
         );
 
         expect(userId).to.be.null;

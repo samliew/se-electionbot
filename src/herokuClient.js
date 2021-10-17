@@ -83,7 +83,7 @@ export class HerokuClient {
         const obj = {};
         obj[key] = value;
 
-        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: { obj } }) && true;
+        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: obj }) && true;
     };
 
     /**
