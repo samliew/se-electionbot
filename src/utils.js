@@ -406,6 +406,31 @@ export const pluralizePhrase = (amount, pluralText = "", singularText = "") => a
 export const listify = (...items) => items.length > 2 ? `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}` : items.join(", ");
 
 /**
+ * @summary turns a number into text representation
+ * @param {number} num a number
+ * @returns {string}
+ */
+export const numToString = (num) => {
+    if (num === null || typeof num === 'undefined' || isNaN(Number(num)) || num < 0 || num > 100) return num?.toString() || "";
+
+    const smallMap = [
+        'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+        'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen',
+    ];
+
+    const bigMap = [
+        '', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'one-hundred',
+    ];
+
+    const bigNum = num => {
+        if (num % 10 === 0) return bigMap[num / 10];
+        return `${bigMap[Math.floor(num / 10)]}-${smallMap[num % 10]}`;
+    };
+
+    return num < 20 ? smallMap[num] : bigNum(num);
+};
+
+/**
  * @summary validates and normalizes the Date
  * @param {Date|number|string} input
  * @returns {Date}

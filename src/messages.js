@@ -5,7 +5,7 @@ import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJ
 import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
-    linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, pluralize, pluralizePhrase
+    linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase
 } from "./utils.js";
 import { parsePackage } from "./utils/package.js";
 
@@ -255,18 +255,18 @@ export const sayNextPhase = (config, election) => {
 
     const { showPrimaryCountdownAfter } = config;
 
-    const needsMoreForPrimary = phase === "nomination" && numNominees >= showPrimaryCountdownAfter ? ` unless ${nomineesLeft} more candidate${pluralize(nomineesLeft, "s")
-        } show${pluralize(nomineesLeft, "", "s")} up for **primary**` : "";
+    const needsMoreForPrimary = phase === "nomination" && numNominees >= showPrimaryCountdownAfter ?
+        ` unless ${numToString(nomineesLeft)} more candidate${pluralize(nomineesLeft)} show${pluralize(nomineesLeft, "", "s")} up for **primary**` : "";
 
     const phaseMap = {
         "cancelled": statVoters,
         "election": sayElectionIsRunning(election),
         "ended": sayElectionIsOver(election),
         "null": sayNotStartedYet(election),
-        "nomination": `The next phase is ${datePrimary && reachedPrimaryThreshold ?
+        "nomination": `The next phase is the ${datePrimary && reachedPrimaryThreshold ?
             `**primary** at ${linkToUtcTimestamp(datePrimary)} (${dateToRelativetime(datePrimary)}).` :
             `**election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativetime(dateElection)})${needsMoreForPrimary}.`}`,
-        "primary": `The next phase is **election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativetime(dateElection)}).`
+        "primary": `The next phase is the **election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativetime(dateElection)}).`
     };
 
     return phaseMap[phase];

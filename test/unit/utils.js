@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/utils.js";
+import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/utils.js";
 import { matchNumber } from "../../src/utils/expressions.js";
 import { numericNullable } from "../../src/utils/objects.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -83,6 +83,37 @@ describe('Number-related utils', () => {
         it('should default to provided default value if no key found', () => {
             const empty = parseNumEnv("defaulted", 42);
             expect(empty).to.equal(42);
+        });
+    });
+
+    describe('numToString', () => {
+
+        it('should correctly output number as text', () => {
+
+            expect(numToString(null)).to.equal('');
+
+            expect(numToString(-1)).to.equal('-1');
+
+            expect(numToString(0)).to.equal('zero');
+            expect(numToString(1)).to.equal('one');
+            expect(numToString(10)).to.equal('ten');
+            expect(numToString(11)).to.equal('eleven');
+            expect(numToString(12)).to.equal('twelve');
+            expect(numToString(13)).to.equal('thirteen');
+            expect(numToString(14)).to.equal('fourteen');
+            expect(numToString(15)).to.equal('fifteen');
+            expect(numToString(16)).to.equal('sixteen');
+            expect(numToString(17)).to.equal('seventeen');
+            expect(numToString(18)).to.equal('eighteen');
+            expect(numToString(19)).to.equal('nineteen');
+            expect(numToString(20)).to.equal('twenty');
+
+            expect(numToString(42)).to.equal('forty-two');
+            expect(numToString(69)).to.equal('sixty-nine');
+
+            expect(numToString(100)).to.equal('one-hundred');
+
+            expect(numToString(101)).to.equal('101');
         });
     });
 });
