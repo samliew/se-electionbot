@@ -93,7 +93,7 @@ describe('Number-related utils', () => {
             // Non-numeric values
             expect(numToString(null)).to.equal('');
             expect(numToString('abc')).to.equal('abc');
-            expect(numToString('["abc"]')).to.equal('abc');
+            expect(numToString(["abc"])).to.equal('abc');
             expect(numToString({ 'key': 'value' })).to.equal('[object Object]');
 
             expect(numToString(-1)).to.equal('-1');
