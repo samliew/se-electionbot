@@ -1,6 +1,7 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
-import { getCandidateOrNominee, getRandomJoke, getRandomJonSkeetJoke, getRandomOops, RandomArray } from "./random.js";
+import { sendMessage } from "./queue.js";
+import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJonSkeetJoke, getRandomOops, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
@@ -11,6 +12,7 @@ import { parsePackage } from "./utils/package.js";
 /**
  * @typedef {import("./index").ElectionBadge} Badge
  * @typedef {import("./config").BotConfig} BotConfig
+ * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
  * @typedef {import("./score").CandidateScore} CandidateScore
  */
@@ -627,4 +629,42 @@ export const sayDoesNotMeetRequirements = (_config, election, candidateScore) =>
 export const sayLacksPrivilege = (action, alternative) => {
     const suggestion = alternative ? ` I can ${alternative} if you want` : "";
     return `You can only ${action || "perform sensitive actions"} as a privileged user, sorry.${suggestion}`;
+};
+
+/**
+ * @summary builds a message that sends a greeting message in an idle room
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {Room} room current chat room
+ * @returns {Promise<void>}
+ */
+export const sayIdleGreeting = (config, election, room) => {
+    const { activityCounter, minActivityCountThreshold } = config;
+
+    console.log(`RESCRAPER - Room is inactive with ${activityCounter} messages posted so far (min ${minActivityCountThreshold})`);
+
+    config.activityCounter = 0;
+    config.funResponseCounter = 0;
+
+    return sendMessage(config, room, sayHI(election, getRandomAnnouncement()), null, true);
+};
+
+/**
+ * @summary builds a message that sends a greeting message in a busy room
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {Room} room current chat room
+ * @returns {Promise<void>}
+ */
+export const sayBusyGreeting = (config, election, room) => {
+    const { activityCounter, maxActivityCountThreshold } = config;
+
+    console.log(`Busy room:
+    messages  ${activityCounter}
+    threshold ${maxActivityCountThreshold}`);
+
+    config.activityCounter = 0;
+    config.funResponseCounter = 0;
+
+    return sendMessage(config, room, sayHI(election, getRandomAnnouncement()), null, true);
 };

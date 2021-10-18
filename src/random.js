@@ -42,12 +42,14 @@ export const getRandomSecretPrefix = () => new RandomArray(
     `*shhh...*`,
     `*whispers* I think...`,
 ).getRandom();
+
 export const getRandomGoodThanks = () => new RandomArray(
     `I know, right?`,
     `You're welcome.`,
     `Thanks! You're awesome!`,
     `I'm only as good as the one who made me.`,
 ).getRandom();
+
 export const getRandomNegative = () => new RandomArray(
     `Why so serious?`,
     `I want to be alone.`,
@@ -60,6 +62,7 @@ export const getRandomNegative = () => new RandomArray(
     `What we've got here is a small misunderstanding.`,
     `Love me or hate me, I swear it won't make or break me.`,
 ).getRandom();
+
 export const getRandomJoke = () => new RandomArray(
     `What's the object-oriented way to become wealthy? Inheritance.`,
     `Why did the programmer quit his job? Because he didn't get arrays.`,
@@ -72,6 +75,7 @@ export const getRandomJoke = () => new RandomArray(
     `How many programmers does it take to change a light bulb? None, that's a hardware problem.`,
     `Some people, when confronted with a problem, think "I know, I'll use regular expressions". Now they have two problems.`,
 ).getRandom();
+
 export const getRandomJonSkeetJoke = () => new RandomArray(
     `Jon Skeet's threads do not sleep. They wait.`,
     `When Jon Skeet points to null, null quakes in fear.`,
@@ -106,4 +110,14 @@ export const getRandomJonSkeetJoke = () => new RandomArray(
     `Jon Skeet is immutable. If something's going to change, it's going to have to be the rest of the universe.`,
     `If Jon Skeet posts a duplicate question on Stack Overflow, the original question will be closed as a duplicate.`,
     `Users don't mark Jon Skeet's answers as accepted. The universe accepts them out of a sense of truth and justice.`,
+).getRandom();
+
+export const getRandomAnnouncement = () => new RandomArray(
+    "Public service announcement: ",
+    "I'm sorry to say this, but... ",
+    "A quick message from my sponsors: ",
+    "Welcome to the election chat room! ",
+    "And now for something completely different - ",
+    "Hello and welcome to the election night special! ",
+    "Interrupting to bring you this important message: ",
 ).getRandom();

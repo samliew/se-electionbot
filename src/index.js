@@ -373,7 +373,11 @@ import {
             if (eventType !== ChatEventType.MESSAGE_POSTED) return;
 
             // Log all un-ignored events
-            console.log('EVENT -', JSON.stringify({ content, msg, user }));
+            console.log(`EVENT ${new Date().toLocaleDateString()}
+current activity: ${config.activityCounter}
+reached minimum:  ${config.roomReachedMinimumActivityCount}
+reached maximum:  ${config.roomReachedMaximumActivityCount}
+${JSON.stringify({ content, msg, user }, void 0, " ")}`);
 
             /*
              * As multiple events are emitted when user is mentioned or message is replied-to,

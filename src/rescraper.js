@@ -1,7 +1,6 @@
 import { HerokuClient } from "./herokuClient.js";
-import { sayElectionSchedule, sayHI } from "./messages.js";
+import { sayBusyGreeting, sayElectionSchedule, sayIdleGreeting } from "./messages.js";
 import { sendMessage } from "./queue.js";
-import { RandomArray } from "./random.js";
 import { makeURL, wait } from "./utils.js";
 
 /**
@@ -176,28 +175,11 @@ export default class Rescraper {
 
             // If room is idle, remind users that bot is around to help
             else if (config.idleCanSayHi) {
-
-                console.log(`RESCRAPER - Room is inactive with ${config.activityCounter} messages posted so far (min ${config.minActivityCountThreshold}).`);
-
-                const greetings = new RandomArray(...[
-                    "Public service announcement: ",
-                    "I'm sorry to say this, but... ",
-                    "A quick message from my sponsors: ",
-                    "Welcome to the election chat room! ",
-                    "And now for something completely different - ",
-                    "Hello and welcome to the election night special! ",
-                    "Interrupting to bring you this important message: ",
-                ]);
-
-                await sendMessage(config, room, sayHI(election, greetings.getRandom()), null, true);
-
-                // Reset activity counter
-                config.activityCounter = 0;
-
-                // Reset fun counter
-                config.funResponseCounter = 0;
+                await sayIdleGreeting(config, election, room);
             }
-
+            else if (config.canBusyGreet) {
+                await sayBusyGreeting(config, election, room);
+            }
             // The election is over
             else if (election.phase === 'ended' || election.phase === 'cancelled' && config.scrapeIntervalMins !== 10) {
 
