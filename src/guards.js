@@ -267,8 +267,11 @@ export const isAskedAboutBadgesOfType = (text) => {
  * @returns {boolean}
  */
 export const isAskedHowOrWhoToVote = (text) => {
-    return /^(?:how|whom?) (?:should i|to) (?:(?:choose|pick|decide|determine)?.+?\bvote\b|vote)/.test(text) ||
-        /^how do(?:es)? (?:the )?voting (?:process)?work/.test(text);
+    return text.length > 14 && // temp fix - prevents matching "how to vote?"
+        (
+            /^(?:how|whom?) (?:should i|to) (?:(?:choose|pick|decide|determine)?.+?\bvote\b|vote)/.test(text) ||
+            /^how do(?:es)? (?:the )?voting (?:process)?work/.test(text)
+        );
 };
 
 /**

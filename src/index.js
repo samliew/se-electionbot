@@ -673,6 +673,7 @@ ${JSON.stringify({ content, msg, user }, void 0, " ")}`);
             else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
                 responseText = election.phase == 'ended' ? (election.statVoters || null) : `We won't know until the election ends. Come back ${linkToRelativeTimestamp(election.dateEnded)}.`;
             }
+            // Conflicts with isAskedAboutVoting below - should not match "how to vote"
             else if (isAskedHowOrWhoToVote(content)) {
                 if (election.phase == null) responseText = sayNotStartedYet(election);
                 else responseText = sayInformedDecision();
