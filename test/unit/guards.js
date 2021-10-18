@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import {
-    isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
+    isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
@@ -329,6 +329,19 @@ describe('Message Guards', () => {
                 "tell us a joke",
                 "make us laugh",
                 "make me laugh",
+            ]);
+        });
+    });
+
+    describe('isAskedAboutSTV', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutSTV, [
+                "what is Single Transferable Vote?",
+                "what is STV?",
+                "what is Meek STV?",
+                "how does STV work?",
+                "how STV works?",
+                "How many votes will we have in the Meek STV system?"
             ]);
         });
     });

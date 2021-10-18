@@ -3,6 +3,7 @@ import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import sanitize from "sanitize-html";
+import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { announceNominees, announceWinners, ignoreUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
@@ -13,7 +14,7 @@ import {
     isAskedAboutJokes,
     isAskedAboutJonSkeetJokes,
     isAskedAboutLightbulb,
-    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedAboutVoting,
+    isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
     isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe,
@@ -23,13 +24,10 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import {
-    sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved
-} from "./messages.js";
+import { sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
-import Announcement from './announcement.js';
 import { makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
 import {
@@ -598,7 +596,8 @@ ${JSON.stringify({ content, msg, user }, void 0, " ")}`);
                 [isAskedForCurrentPositions, sayNumberOfPositions],
                 [isAskedIfResponsesAreCanned, sayCannedResponses],
                 [isAskedWhoIsTheBestCandidate, sayBestCandidate],
-                [isSayingBotIsInsane, sayInsaneComeback]
+                [isSayingBotIsInsane, sayInsaneComeback],
+                [isAskedAboutSTV, sayAboutSTV]
             ];
 
             const matched = rules.find(([expr]) => expr(content));
@@ -814,6 +813,8 @@ ${JSON.stringify({ content, msg, user }, void 0, " ")}`);
                         "how many positions are elected",
                         'who are the candidates',
                         'who are the current mods',
+                        "what is Single Transferable Vote?",
+                        "what is Meek STV?"
                     ].join('\n- ');
                 }
                 // About

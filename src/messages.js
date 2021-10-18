@@ -673,3 +673,42 @@ export const sayBusyGreeting = (config, election, room) => {
 
     return sendMessage(config, room, sayHI(election, getRandomAnnouncement()), null, true);
 };
+
+/**
+ * @summary builds a response to asking what is STV
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} _election current election
+ * @param {string} text message content
+ * @returns {string}
+ */
+export const sayAboutSTV = (_config, _election, text) => {
+    const provider = "OpaVote";
+    const providerSite = "https://www.opavote.com";
+
+    const stvLink = `${providerSite}/methods/single-transferable-vote`;
+    const meekStvLink = "https://blog.opavote.com/2017/04/meek-stv-explained.html";
+
+    const [, type = "", ...stv] = /(meek)?\s+(s)(?:ingle\s+)?(t)(?:ransferable\s+)?(v)(?:ote)?/i.exec(text) || [];
+    const normalizedType = type && capitalize(type.toLowerCase());
+    const normalizedSTV = stv.join("").toUpperCase();
+
+    if (text.startsWith("what")) {
+        const meekGuide = makeURL("in-depth explanation", meekStvLink);
+        const generalSTV = makeURL(`guide on ${normalizedSTV}`, stvLink);
+
+        // TODO: scrape election tab to get provider and method
+        const prefixMap = {
+            "Meek": `Meek ${makeURL(normalizedSTV, stvLink)} is a version of ${normalizedSTV} with a more fine-tuned transfer of surplus (excess) votes`,
+            "": `Single Transferable Vote (${normalizedSTV}) is a rank-based voting method where votes are transferred to best accomodate voters' choices`
+        };
+
+        const typeMap = {
+            "Meek": `Please see ${provider}'s ${meekGuide} of Meek ${normalizedSTV} for more info.`,
+            "": `For more info, see ${provider}'s ${generalSTV}.`
+        };
+
+        return `${prefixMap[normalizedType]}. ${typeMap[normalizedType]}`;
+    }
+
+    return `Visit the ${provider}'s ${makeURL("website", providerSite)} for detailed info on the voting system used.`;
+};

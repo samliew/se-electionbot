@@ -44,6 +44,11 @@ About moderators/moderating:
 - who is the best moderator
 - could we just insert a diamond into our username
 
+About the voting system:
+
+- what is Single Transferable Vote?
+- what is Meek STV?
+
 ElectionBot info _(requires mention)_:
 
 - help
