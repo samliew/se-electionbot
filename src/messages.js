@@ -688,12 +688,11 @@ export const sayAboutSTV = (_config, _election, text) => {
     const stvLink = `${providerSite}/methods/single-transferable-vote`;
     const meekStvLink = "https://blog.opavote.com/2017/04/meek-stv-explained.html";
 
+    const [, type = "", ...stv] = /(meek)?\s+(s)(?:ingle\s+)?(t)(?:ransferable\s+)?(v)(?:ote)?/i.exec(text) || [];
+    const normalizedType = type && capitalize(type.toLowerCase());
+    const normalizedSTV = stv.join("").toUpperCase();
+
     if (text.startsWith("what")) {
-        const [, type = "", ...stv] = /(meek)?\s+(s)(?:ingle\s+)?(t)(?:ransferable\s+)?(v)(?:ote)?/i.exec(text) || [];
-
-        const normalizedType = type && capitalize(type.toLowerCase());
-        const normalizedSTV = stv.join("").toUpperCase();
-
         const meekGuide = makeURL("in-depth explanation", meekStvLink);
         const generalSTV = makeURL(`guide on ${normalizedSTV}`, stvLink);
 
