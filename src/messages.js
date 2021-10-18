@@ -115,6 +115,16 @@ export const sayElectionIsOver = ({ electionUrl }) => `The ${makeURL("election",
 export const sayInformedDecision = () => `If you want to make an informed decision on who to vote for, you should read the candidates' answers to the questionnaire, and also look at examples of their participation on Meta and how they conduct themselves.`;
 
 /**
+ * @summary builds an election is currently underway response
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayElectionIsRunning = (election) => {
+    const { electionUrl, dateEnded, } = election;
+    return `The ${makeURL("election", `${electionUrl}?tab=election`)} is currently in the final voting phase, ending at ${linkToUtcTimestamp(dateEnded)} (${dateToRelativetime(dateEnded)}).`;
+};
+
+/**
  * @summary builds a response to voting info query
  * @param {Election} election
  * @returns {string}
