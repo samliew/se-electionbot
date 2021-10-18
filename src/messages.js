@@ -250,7 +250,10 @@ export const sayOtherSiteMods = (siteHostname, moderators, decodeEntities) => {
  * @returns {string}
  */
 export const sayNextPhase = (election) => {
-    const { phase, datePrimary, dateElection, statVoters, reachedPrimaryThreshold, nomineesLeftToReachPrimaryThreshold: nomineesLeft } = election;
+    const { phase, datePrimary, dateElection, statVoters, reachedPrimaryThreshold, numNominees, nomineesLeftToReachPrimaryThreshold: nomineesLeft } = election;
+
+    const needsMoreForPrimary = phase === "nomination" && numNominees >= 8 ? ` unless ${nomineesLeft} more candidate${pluralize(nomineesLeft, "s")
+        } show${pluralize(nomineesLeft, "", "s")} up for **primary**` : "";
 
     const phaseMap = {
         "cancelled": statVoters,
@@ -259,8 +262,7 @@ export const sayNextPhase = (election) => {
         "null": sayNotStartedYet(election),
         "nomination": `The next phase is ${datePrimary && reachedPrimaryThreshold ?
             `**primary** at ${linkToUtcTimestamp(datePrimary)} (${dateToRelativetime(datePrimary)}).` :
-            `**election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativetime(dateElection)}) unless ${nomineesLeft} more candidate${pluralize(nomineesLeft, "s")
-            } show${pluralize(nomineesLeft, "", "s")} up for **primary**.`}`,
+            `**election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativetime(dateElection)})${needsMoreForPrimary}.`}`,
         "primary": `The next phase is **election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativetime(dateElection)}).`
     };
 
