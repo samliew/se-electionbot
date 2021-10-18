@@ -102,6 +102,15 @@ export default class Election {
     }
 
     /**
+     * @summary returns the number of nominees left to reach the primary threshold
+     * @returns {number}
+     */
+    get nomineesLeftToReachPrimaryThreshold() {
+        const { primaryThreshold, numNominees, reachedPrimaryThreshold } = this;
+        return reachedPrimaryThreshold ? 0 : primaryThreshold - numNominees;
+    }
+
+    /**
      * @summary returns a list of required badges
      * @returns {ElectionBadge[]}
      */
