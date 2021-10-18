@@ -813,6 +813,8 @@ ${JSON.stringify({ content, msg, user }, void 0, " ")}`);
                         "how many positions are elected",
                         'who are the candidates',
                         'who are the current mods',
+                        "what is Single Transferable Vote?",
+                        "what is Meek STV?"
                     ].join('\n- ');
                 }
                 // About
