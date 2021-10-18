@@ -75,6 +75,12 @@ export class BotConfig {
     }
 
     /**
+     * @summary determines when to start showing the primary phase countdown
+     * @type {number}
+     */
+    showPrimaryCountdownAfter = parseNumEnv("show_primary_countdown_after", 8);
+
+    /**
      * @summary Variable to determine how long the room needs to be quiet to be idle
      * @type {number}
      * {@link BotConfg#roomBecameIdleAWhileAgo}
