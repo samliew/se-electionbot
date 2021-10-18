@@ -98,7 +98,7 @@ export default class Election {
      */
     get reachedPrimaryThreshold() {
         const { primaryThreshold, numNominees } = this;
-        return numNominees >= primaryThreshold;
+        return numNominees > primaryThreshold;
     }
 
     /**

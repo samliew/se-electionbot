@@ -11,7 +11,7 @@ describe('Election', () => {
 
             it('should correctly determine if threshold is reached', () => {
                 const election = new Election("https://stackoverflow.com/election/1");
-                election.arrNominees.push(getMockNominee());
+                election.arrNominees.push(getMockNominee(), getMockNominee());
 
                 expect(election.reachedPrimaryThreshold).to.be.false;
 
