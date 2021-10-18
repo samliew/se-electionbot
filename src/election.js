@@ -107,7 +107,7 @@ export default class Election {
      */
     get nomineesLeftToReachPrimaryThreshold() {
         const { primaryThreshold, numNominees, reachedPrimaryThreshold } = this;
-        return reachedPrimaryThreshold ? 0 : primaryThreshold - numNominees;
+        return reachedPrimaryThreshold ? 0 : primaryThreshold - numNominees + 1;
     }
 
     /**
