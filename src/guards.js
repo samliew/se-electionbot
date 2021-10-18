@@ -171,15 +171,14 @@ export const isThankingTheBot = (text) => {
 };
 
 /**
- * @summary detects if someone is thanking, praising, or loving the bot
+ * @summary detects if someone is praising or loving the bot
  * @param {string} text
  * @returns {boolean}
  */
 export const isLovingTheBot = (text) => {
-    return text.includes('bot') && (
-        /(?:^the|^this)?.*(?:nice|good|great|wonderful|awesome|excellent)/.test(text) ||
-        /^i (?:like|love) (?:the|this|electionbot)/.test(text)
-    );
+    return text.includes('bot')
+        && /\b(?:awesome|brilliant|clever|correct|excellent|good|great|impressive|like|love|legit|marvell?ous|nice|perfect|praise|right|smart|super|superb|swell|wise|wonderful)\b/.test(text)
+        && /\b(?:is|the|this|bot|electionbot|wow|pretty|very)\b/.test(text);
 };
 
 /**
