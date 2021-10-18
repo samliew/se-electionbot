@@ -39,6 +39,12 @@ export default class Election {
     phase = null;
 
     /**
+     * @summary threshold for having a primary phase
+     * @type {number}
+     */
+    primaryThreshold = 10;
+
+    /**
      * @description Site election badges, defaults to Stack Overflow's
      * @type {ElectionBadge[]}
      */
@@ -84,6 +90,15 @@ export default class Election {
 
         // private
         this._prevObj = null;
+    }
+
+    /**
+     * @summary checks if the election is over the primary threshold
+     * @returns {boolean}
+     */
+    get reachedPrimaryThreshold() {
+        const { primaryThreshold, numNominees } = this;
+        return numNominees >= primaryThreshold;
     }
 
     /**

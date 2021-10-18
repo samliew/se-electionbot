@@ -7,6 +7,21 @@ describe('Election', () => {
 
     describe('getters', () => {
 
+        describe('reachedPrimaryThreshold', () => {
+
+            it('should correctly determine if threshold is reached', () => {
+                const election = new Election("https://stackoverflow.com/election/1");
+                election.arrNominees.push(getMockNominee());
+
+                expect(election.reachedPrimaryThreshold).to.be.false;
+
+                election.primaryThreshold = 1;
+
+                expect(election.reachedPrimaryThreshold).to.be.true;
+            });
+
+        });
+
         describe('requiredBadges', () => {
 
             it('should correctly return the list of required badges', () => {
