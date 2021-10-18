@@ -1,5 +1,9 @@
 import { chatMarkdownToHtml, parseBoolEnv, parseIds, parseNumEnv } from "./utils.js";
 
+const MS_IN_SECOND = 1e3;
+const MS_IN_MINUTE = 60 * MS_IN_SECOND;
+const MS_IN_HOUR = 60 * MS_IN_MINUTE;
+
 /**
  * @typedef {import("chatexchange/dist/Client").Host} Host
  */
@@ -40,29 +44,107 @@ export class BotConfig {
 
     /* Low activity count variables */
 
-    // Variable to trigger an action only after this amount of minimum messages
-    minActivityCountThreshold = +(process.env.LOW_ACTIVITY_COUNT_THRESHOLD || 20);
+    /**
+     * @summary lower bound of activity (only after this amount of minimum messages)
+     * @type {number}
+     */
+    minActivityCountThreshold = parseNumEnv("low_activity_count_threshold", 20);
 
+    /**
+     * @summary upper bound of activity
+     * @type {number}
+     */
+    maxActivityCountThreshold = parseNumEnv("high_activity_count_threshold", 300);
+
+    /**
+     * @summary checks if room has reached minimum activity count
+     * @returns {boolean}
+     */
     get roomReachedMinimumActivityCount() {
-        const { activityCounter, minActivityCountThreshold: minActivityCountThreshold } = this;
+        const { activityCounter, minActivityCountThreshold } = this;
         return activityCounter >= minActivityCountThreshold;
     }
 
-    // Variable to determine how long the room needs to be quiet to be idle - used by roomBecameIdleAWhileAgo
-    shortIdleDurationMins = +(process.env.SHORT_IDLE_DURATION_MINS || 3);
-    // Variable to determine how long the room needs to be quiet to be idle - used by roomBecameIdleHoursAgo
-    longIdleDurationHours = +(process.env.LONG_IDLE_DURATION_HOURS || 12);
-    // Variable to trigger greeting only after this time of inactivity - used by botHasBeenQuiet
-    lowActivityCheckMins = +(process.env.LOW_ACTIVITY_CHECK_MINS || 5);
+    /**
+     * @summary checks if room has reached maximum activity count
+     * @returns {boolean}
+     */
+    get roomReachedMaximumActivityCount() {
+        const { activityCounter, maxActivityCountThreshold } = this;
+        return activityCounter >= maxActivityCountThreshold;
+    }
 
+    /**
+     * @summary Variable to determine how long the room needs to be quiet to be idle
+     * @type {number}
+     * {@link BotConfg#roomBecameIdleAWhileAgo}
+     */
+    shortIdleDurationMins = parseNumEnv("short_idle_duration_mins", 3);
+
+    /**
+     * @summary Variable to determine how long the room needs to be quiet to be idle
+     * @type {number}
+     * {@link BotConfg#roomBecameIdleHoursAgo}
+     */
+    longIdleDurationHours = parseNumEnv("long_idle_duration_hours", 12);
+
+    /**
+     * @summary Variable to trigger greeting only after this time of inactivity
+     * @type {number}
+     * {@link BotConfig#botHasBeenQuiet}
+     */
+    lowActivityCheckMins = parseNumEnv("low_activity_check_mins", 5);
+
+    /**
+     * @summary lower bound of busy room status
+     * @type {number}
+     */
+    shortBusyDurationMinutes = parseNumEnv("short_busy_duration_mins", 5);
+
+    /**
+     * @summary upper bound of busy room status
+     * @type {number}
+     */
+    longBusyDurationHours = parseNumEnv("long_busy_duration_hours", 1);
+
+    /**
+     * @summary checks if the room became idle minutes ago
+     * @returns {boolean}
+     */
     get roomBecameIdleAWhileAgo() {
         return this.lastActivityTime + (this.shortIdleDurationMins * 6e4) < Date.now();
     }
 
+    /**
+     * @summary checks if the room became idle hours ago
+     * @returns {boolean}
+     */
     get roomBecameIdleHoursAgo() {
         return this.lastActivityTime + (this.longIdleDurationHours * 60 * 6e4) < Date.now();
     }
 
+    /**
+     * @summary checks if the room has been busy for minutes
+     * @returns {boolean}
+     */
+    get roomTooBusyForMinutes() {
+        const { lastMessageTime, shortBusyDurationMinutes, roomReachedMaximumActivityCount } = this;
+        return roomReachedMaximumActivityCount && Date.now() >= lastMessageTime + shortBusyDurationMinutes * MS_IN_MINUTE;
+    }
+
+    /**
+     * @summary checks if the room has been busy for hours on end
+     * @returns {boolean}
+     */
+    get roomTooBusyForHours() {
+        const { lastMessageTime, longBusyDurationHours, roomReachedMaximumActivityCount } = this;
+        return roomReachedMaximumActivityCount && Date.now() >= lastMessageTime + longBusyDurationHours * MS_IN_HOUR;
+    }
+
+    /**
+     * @summary checks if the bot has been quiet for a while according to lower bound
+     * @returns {boolean}
+     */
     get botHasBeenQuiet() {
         return this.lastMessageTime + (this.lowActivityCheckMins * 6e4) < Date.now();
     }
@@ -131,6 +213,20 @@ export class BotConfig {
 
         return (roomBecameIdleAWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
             (roomBecameIdleHoursAgo && !botSentLastMessage);
+    }
+
+    /**
+     * @summary checks if a bot can busy-greet
+     * @returns {boolean}
+     */
+    get canBusyGreet() {
+        const { roomTooBusyForMinutes, roomTooBusyForHours, botSentLastMessage } = this;
+        return [
+            // room is busy, and everyone is ignoring the bot
+            (roomTooBusyForMinutes),
+            // room is busy, and bot is not the last sender
+            (roomTooBusyForHours && !botSentLastMessage)
+        ].some(Boolean);
     }
 
     /**
