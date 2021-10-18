@@ -745,7 +745,7 @@ ${JSON.stringify({ content, msg, user }, void 0, " ")}`);
 
             // Next phase/ When is the election starting
             else if (content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
-                responseText = sayNextPhase(election);
+                responseText = sayNextPhase(config, election);
             }
 
             // When is the election ending

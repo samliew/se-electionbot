@@ -246,13 +246,16 @@ export const sayOtherSiteMods = (siteHostname, moderators, decodeEntities) => {
 
 /**
  * @summary builds next phase response message
+ * @param {BotConfig} config bot configuration
  * @param {Election} election current election
  * @returns {string}
  */
-export const sayNextPhase = (election) => {
+export const sayNextPhase = (config, election) => {
     const { phase, datePrimary, dateElection, statVoters, reachedPrimaryThreshold, numNominees, nomineesLeftToReachPrimaryThreshold: nomineesLeft } = election;
 
-    const needsMoreForPrimary = phase === "nomination" && numNominees >= 8 ? ` unless ${nomineesLeft} more candidate${pluralize(nomineesLeft, "s")
+    const { showPrimaryCountdownAfter } = config;
+
+    const needsMoreForPrimary = phase === "nomination" && numNominees >= showPrimaryCountdownAfter ? ` unless ${nomineesLeft} more candidate${pluralize(nomineesLeft, "s")
         } show${pluralize(nomineesLeft, "", "s")} up for **primary**` : "";
 
     const phaseMap = {
