@@ -411,23 +411,22 @@ export const listify = (...items) => items.length > 2 ? `${items.slice(0, -1).jo
  * @returns {string}
  */
 export const numToString = (num, zeroText = 'zero') => {
-    if (num === null || typeof num === 'undefined' || isNaN(Number(num)) || num < 0 || num > 100) return num?.toString() || "";
+    if (typeof num !== 'number' || num < 0 || num > 100) return num?.toString() || "";
 
     const smallMap = [
         zeroText, 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
         'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen',
     ];
-
     const bigMap = [
         '', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'one-hundred',
     ];
 
-    const bigNum = num => {
+    const bigNumber = (/** @type {number} */ num) => {
         if (num % 10 === 0) return bigMap[num / 10];
         return `${bigMap[Math.floor(num / 10)]}-${smallMap[num % 10]}`;
     };
 
-    return num < 20 ? smallMap[num] : bigNum(num);
+    return num < 20 ? smallMap[num] : bigNumber(num);
 };
 
 /**

@@ -90,7 +90,11 @@ describe('Number-related utils', () => {
 
         it('should correctly output number as text', () => {
 
+            // Non-numeric values
             expect(numToString(null)).to.equal('');
+            expect(numToString('abc')).to.equal('abc');
+            expect(numToString('["abc"]')).to.equal('abc');
+            expect(numToString({ 'key': 'value' })).to.equal('[object Object]');
 
             expect(numToString(-1)).to.equal('-1');
 
@@ -107,10 +111,8 @@ describe('Number-related utils', () => {
             expect(numToString(18)).to.equal('eighteen');
             expect(numToString(19)).to.equal('nineteen');
             expect(numToString(20)).to.equal('twenty');
-
             expect(numToString(42)).to.equal('forty-two');
             expect(numToString(69)).to.equal('sixty-nine');
-
             expect(numToString(100)).to.equal('one-hundred');
 
             expect(numToString(101)).to.equal('101');
