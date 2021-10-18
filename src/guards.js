@@ -288,6 +288,6 @@ export const isAskedWhoIsTheBestCandidate = (text) => {
  */
 export const isAskedAboutSTV = (text) => {
     return [
-        /^(?:what|how).*?(?:\s+Meek)?\s+S(?:ingle\s+)?T(?:ransferable\s+)?V(?:ote)?/i
+        /^(?:what|how).*?(?:\s+meek)?\s+s(?:ingle\s+)?t(?:ransferable\s+)?v(?:ote)?/i
     ].some((expression) => expression.test(text));
 };
