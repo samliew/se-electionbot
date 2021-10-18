@@ -280,3 +280,14 @@ export const isAskedHowOrWhoToVote = (text) => {
 export const isAskedWhoIsTheBestCandidate = (text) => {
     return /^(?:who('s)?|what('s)?|which) (?:was |were |are |is )(?:a |the )?.*\bbest(?:est)? (?:candidate|nomination|nominee)s?/i.test(text);
 };
+
+/**
+ * @summary checks if a message is asking about STV ranked-choice voting
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutSTV = (text) => {
+    return [
+        /^(?:what|how).*?(?:\s+Meek)?\s+S(?:ingle\s+)?T(?:ransferable\s+)?V(?:ote)?/i
+    ].some((expression) => expression.test(text));
+};
