@@ -550,7 +550,15 @@ export default class Election {
 
             console.log(
                 `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.` +
-                (config.debugOrVerbose ? `\n-------- PHASE ${this.phase};  CANDIDATES ${this.numNominees};  WINNERS ${this.numWinners}; CHAT ${this.chatUrl}` : "")
+                (config.debugOrVerbose ? `\n--------
+phase             ${this.phase};
+primary date      ${this.datePrimary};
+election date     ${this.dateElection};
+ended date        ${this.dateEnded};
+candidates        ${this.numNominees};
+winners           ${this.numWinners};
+chat URL          ${this.chatUrl}
+primary threshold ${primaryThreshold}` : "")
             );
         }
         catch (err) {
