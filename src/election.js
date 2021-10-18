@@ -483,6 +483,9 @@ export default class Election {
             this.repVote = 150;
             this.repNominate = repToNominate;
 
+            const primaryThreshold = matchNumber(/(\d+)/, $("#mainbar ol li a[href*=primary] ~*").text());
+            if (primaryThreshold) this.primaryThreshold = primaryThreshold;
+
             const candidateElems = $('#mainbar .candidate-row');
 
             const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl, this.siteUrl)).get()
