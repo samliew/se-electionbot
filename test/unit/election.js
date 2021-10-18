@@ -29,13 +29,13 @@ describe('Election', () => {
                 election.primaryThreshold = 42;
                 election.arrNominees.push(getMockNominee(), getMockNominee());
 
-                expect(election.nomineesLeftToReachPrimaryThreshold).to.equal(40);
+                expect(election.nomineesLeftToReachPrimaryThreshold).to.equal(41);
             });
 
             it('should return 0 if the threshold is already reached', () => {
                 const election = new Election("https://stackoverflow.com/election/1");
                 election.primaryThreshold = 1;
-                election.arrNominees.push(getMockNominee());
+                election.arrNominees.push(getMockNominee(), getMockNominee());
 
                 expect(election.nomineesLeftToReachPrimaryThreshold).to.equal(0);
             });
