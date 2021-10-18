@@ -410,11 +410,11 @@ export const listify = (...items) => items.length > 2 ? `${items.slice(0, -1).jo
  * @param {number} num a number
  * @returns {string}
  */
-export const numToString = (num) => {
+export const numToString = (num, zeroText = 'zero') => {
     if (num === null || typeof num === 'undefined' || isNaN(Number(num)) || num < 0 || num > 100) return num?.toString() || "";
 
     const smallMap = [
-        'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+        zeroText, 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
         'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen',
     ];
 
