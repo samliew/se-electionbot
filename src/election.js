@@ -496,7 +496,8 @@ export default class Election {
             this.arrNominees.push(...nominees);
 
             // Empty string if not set as environment variable, or not found on election page
-            this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/');
+            this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/')
+                .replace(/(\d+)(\/[^\/](?:\w|-)+)$/, '$1'); // trim trailing slash and/or url slug - https://regex101.com/r/FsrgPg/1/
             this.chatRoomId = matchNumber(/(\d+)$/, this.chatUrl) || null;
             this.chatDomain = /** @type {Host} */(this.chatUrl?.split('/')[2]?.replace('chat.', ''));
 
