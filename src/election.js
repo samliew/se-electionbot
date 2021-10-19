@@ -146,6 +146,15 @@ export default class Election {
     }
 
     /**
+     * @summary gets number of current moderators
+     * @returns {number}
+     */
+    get numMods() {
+        const { currentSiteMods } = this;
+        return currentSiteMods.length || 0;
+    }
+
+    /**
      * @summary gets current number of Nominees
      * @returns {number}
      */

@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/utils/expressions.js</title>
+    <title>Code coverage report for src/utils/objects.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/utils</a> expressions.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/utils</a> objects.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>10/10</span>
+                <span class='fraction'>13/13</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>10/10</span>
+                <span class='fraction'>13/13</span>
             </div>
         
             
@@ -66,24 +66,33 @@
 <a name='L7'></a><a href='#L7'>7</a>
 <a name='L8'></a><a href='#L8'>8</a>
 <a name='L9'></a><a href='#L9'>9</a>
-<a name='L10'></a><a href='#L10'>10</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">9x</span>
-<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">/**
- * @summary matches and parses a number from a string
- * @param {RegExp} expression regular expression (must have a capturing group)
- * @param {string} text text to match the number in
- * @returns {number|undefined}
+ * @template {object} T
+ *
+ * @summary attempts to parse an object property as number
+ * @param {T | null | undefined} obj source object
+ * @param {keyof T} prop property name
+ * @returns {number | null}
  */
-export const matchNumber = (expression, text) =&gt; {
-    const [, matched] = expression.exec(text) <span class="branch-0 cbranch-no" title="branch not covered" >|| [];</span>
-    return matched !== void 0 ? +matched : matched;
+export const numericNullable = (obj, prop) =&gt; {
+    if (!obj) return null;
+    const value = obj[prop];
+    return value !== void 0 &amp;&amp; +value <span class="branch-0 cbranch-no" title="branch not covered" >|| null;</span>
 };</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->

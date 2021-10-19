@@ -3,6 +3,10 @@ import Election from "../../src/election.js";
 import { dateToUtcTimestamp } from "../../src/utils.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
+/**
+ * @typedef { import("../../src/election").ElectionPhase} ElectionPhase
+ */
+
 describe('Election', () => {
 
     describe('getters', () => {
@@ -247,7 +251,7 @@ describe('Election', () => {
         });
 
         it('should accept User instance instead of an id', () => {
-            const user = /** @type {import("../../src/index").User} */({ id: 42 });
+            const user = /** @type {import("../../src/index").UserProfile} */({ id: 42 });
 
             const election = new Election("https://stackoverflow.com/election/42");
             // @ts-expect-error
@@ -279,7 +283,10 @@ describe('Election', () => {
         it('should correctly determine active state', () => {
             const election = new Election("https://stackoverflow.com/election/12");
 
+            /** @type {ElectionPhase[]} */
             const inactivePhases = [null, "ended", "cancelled"];
+
+            /** @type {ElectionPhase[]} */
             const activePhases = ["election", "primary", "nomination"];
 
             const allInactive = inactivePhases.every((phase) => {

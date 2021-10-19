@@ -48,7 +48,7 @@ describe('Object-related utils', () => {
 describe('Boolean-related utils', () => {
     describe('parseBoolEnv', () => {
 
-        before(() => process.env.RESISTANCE_IS_FUTILE = true);
+        before(() => process.env.RESISTANCE_IS_FUTILE = "true");
         after(() => delete process.env.RESISTANCE_IS_FUTILE);
 
         it('should correctly parse variables', () => {
@@ -69,7 +69,7 @@ describe('Boolean-related utils', () => {
 describe('Number-related utils', () => {
     describe('parseNumEnv', () => {
 
-        before(() => process.env.ANSWER = 42);
+        before(() => process.env.ANSWER = "42");
         after(() => delete process.env.ANSWER);
 
         it('should correctly parse variables', () => {
