@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import {
     isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
-    isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore,
+    isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedAboutMissingComments, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 
@@ -247,6 +247,35 @@ describe('Message Guards', () => {
                 "how to be a mod",
                 "how can i be mod",
                 "can i nominate another user",
+            ]);
+
+            allMatch(isAskedForNominatingInfo, [
+                "How doesn't it apply to your post?"
+            ], false);
+        });
+    });
+
+    describe('isAskedAboutMissingComments', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutMissingComments, [
+                "why have all the comments disappeared from the nominations",
+                "where are the comments under the nominations",
+                "where are all the comments",
+                "where are the comments on the election",
+                "did someone delete all the comments",
+                "who removed the comments",
+                "is the comments missing",
+                "are the comments missing from the election page",
+                "why are all the comments deleted",
+                "is there a bug with the comments on the election page",
+                "is there bug with comments on election",
+                "election is missing comments",
+                "how to see the comments",
+                "how to view comments",
+                "how to view election comments",
+                "i can't find the comments",
+                "i can't find the election comments",
+                "are the comments hidden",
             ]);
 
             allMatch(isAskedForNominatingInfo, [

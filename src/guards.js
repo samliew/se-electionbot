@@ -275,6 +275,17 @@ export const isAskedHowOrWhoToVote = (text) => {
 };
 
 /**
+ * @summary checks if a message is asking where did the nomination comments go
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutMissingComments = (text) => {
+    return /^(where|why|are|were|did|who|how|i|is|election)\b/.test(text) &&
+        /\b(missing|hidden|cleared|deleted?|removed?|election|nominations?|all|view|find|bug|see)\b/.test(text) &&
+        /\bcomments?\b/.test(text);
+};
+
+/**
  * @summary checks if a message is asking who is the best candidate
  * @param {string} text message text
  * @returns {boolean}
