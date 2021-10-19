@@ -408,7 +408,7 @@ export const listify = (...items) => items.length > 2 ? `${items.slice(0, -1).jo
 
 /**
  * @summary turns a number into text representation
- * @param {number} num a number
+ * @param {number|null|string|object|string[]} num possibly a number
  * @returns {string}
  */
 export const numToString = (num, zeroText = 'zero') => {
