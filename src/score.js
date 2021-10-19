@@ -223,7 +223,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         const candidateScore = calculateScore(requestedUser, userBadges, election, isStackOverflow);
 
-        const { score, missing, isEligible } = candidateScore;
+        const { score, missing, isEligible, maxScore } = candidateScore;
 
         const missingBadges = missing.badges.election;
         const missingRequiredBadges = missing.badges.required;
@@ -235,8 +235,6 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         const missingBadgeNames = missingBadges.map(mapToName);
 
         if (numMissingBadges > 0) console.log('Missing Badges: ', missingBadgeNames.join(','));
-
-        const currMaxScore = 40;
 
         let responseText = "";
 
@@ -254,7 +252,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
             responseText = `The candidate score for user ${makeURL(display_name || userId.toString(),
                 `${siteUrl}/users/${userId}`)
-                } is ${getScoreText(score, currMaxScore)}.`;
+                } is ${getScoreText(score, maxScore)}.`;
 
             if (numMissingRequiredBadges > 0) {
                 responseText += sayMissingBadges(missingRequiredBadgeNames, numMissingRequiredBadges, false, true);
@@ -266,8 +264,8 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         else if (!isEligible && repNominate !== void 0) {
             responseText = sayDoesNotMeetRequirements(config, election, candidateScore);
         }
-        else if (score === currMaxScore) {
-            responseText = `Wow! You have a maximum candidate score of **${currMaxScore}**!`;
+        else if (score === maxScore) {
+            responseText = `Wow! You have a maximum candidate score of **${maxScore}**!`;
 
             // Already nominated, and not ended/cancelled
             if (hasNominated && ['nomination', 'primary', 'election'].includes(/** @type {string} */(phase))) {
@@ -292,7 +290,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         }
         // All others
         else {
-            responseText = `Your candidate score is **${score}** (out of ${currMaxScore}).`;
+            responseText = `Your candidate score is **${score}** (out of ${maxScore}).`;
 
             if (numMissingBadges > 0) {
                 responseText += sayMissingBadges(missingBadgeNames, numMissingBadges, true);
@@ -305,7 +303,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             // If have not begun, or nomination phase, ask user to nominate themselves
             else if (['null', 'nomination'].includes(/** @type {string} */(phase))) {
 
-                const perhapsNominateThreshold = currMaxScore / 2;
+                const perhapsNominateThreshold = maxScore / 2;
 
                 responseText += score >= perhapsNominateThreshold ?
                     ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
