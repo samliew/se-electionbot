@@ -530,6 +530,18 @@ export const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${lin
 export const NO_ACCOUNT_ID = -42;
 
 /**
+ * @summary checks if a string matches one of the chat hosts
+ * @param {string} text content to match
+ * @param {string} [path] optional path to match
+ * @returns {boolean}
+ */
+export const matchesOneOfChatHosts = (text, path) => {
+    /** @type {Host[]} */
+    const hosts = ["meta.stackexchange.com", "stackexchange.com", "stackoverflow.com"];
+    return hosts.some((host) => text.includes(host)) && (!path || text.includes(path));
+};
+
+/**
  * @description Expensive, up to three requests. Only one, if the linked account is the site we want.
  * @param {BotConfig} config bot configuration
  * @param {number} chatUserId user id
