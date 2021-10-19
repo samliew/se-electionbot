@@ -143,7 +143,7 @@ export const isAskedForOwnScore = (text) => {
  * @returns {boolean}
  */
 export const isAskedForOtherScore = (text) => {
-    return /(?:(?:what)?(?: is|'s)(?: the)? |^)candidate score (?:for |of )(?:the )?(?:(?:site |chat )?user )?(?:\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/.test(text) && !/\b(?:my|mine)\b/.test(text);
+    return /(?:(?:what)?(?: is|'s)(?: the)? |^)candidate score (?:for |of )(?:the )?(?:(?:site |chat )?user )?(?:-?\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/.test(text) && !/\b(?:my|mine)\b/.test(text);
 };
 
 /**
@@ -152,8 +152,12 @@ export const isAskedForOtherScore = (text) => {
  * @returns {boolean}
  */
 export const isAskedForScoreFormula = (text) => {
-    return /(?:what|how)\b.+\bcandidate score\b.*\b(?:calculated|formula)?(?:$|\?)/.test(text) ||
-        /what\b.+\bformula\b.+\bcandidate score(?:$|\?)/.test(text);
+    return someMatch(
+        [
+            /(?:what|how)\b.+\bcandidate score\b(?!\s+of).*\b(?:calculated|formula)?(?:$|\?)/,
+            /what\b.+\bformula\b.+\bcandidate score(?:$|\?)/
+        ], text
+    );
 };
 
 /**

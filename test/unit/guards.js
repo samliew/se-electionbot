@@ -125,7 +125,8 @@ describe('Message Guards', () => {
                 "what's the candidate score of 9000",
                 "what is candidate score for 65536", // account for a common mistake
                 "what's the candidate score of 404?",
-                "candidate score for 65535"
+                "candidate score for 65535",
+                "what is the candidate score of -1?"
             ]);
 
             allMatch(isAskedForOtherScore, [
@@ -145,6 +146,11 @@ describe('Message Guards', () => {
                 "what is the candidate score formula?",
                 "what is the formula for candidate score?",
             ]);
+
+            allMatch(isAskedForScoreFormula, [
+                // https://chat.stackoverflow.com/transcript/message/53271257#53271257
+                "what is the candidate score of -1?"
+            ], false);
         });
     });
 
