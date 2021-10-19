@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import {
-    isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
-    isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedAboutMissingComments, isAskedForNominatingInfo, isAskedForOtherScore,
+    isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
+    isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 
@@ -314,6 +314,11 @@ describe('Message Guards', () => {
                 "i love this bot already",
                 "i love electionbot",
             ]);
+
+            allMatch(isLovingTheBot, [
+                // https://chat.stackoverflow.com/transcript/message/53274725#53274725
+                "I'll not bother to edit that ... looks good as is"
+            ], false);
         });
     });
 

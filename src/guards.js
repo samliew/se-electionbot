@@ -176,9 +176,11 @@ export const isThankingTheBot = (text) => {
  * @returns {boolean}
  */
 export const isLovingTheBot = (text) => {
-    return text.includes('bot')
-        && /\b(?:awesome|brilliant|clever|correct|excellent|good|great|impressive|like|love|legit|marvell?ous|nice|perfect|praise|right|smart|super|superb|swell|wise|wonderful)\b/.test(text)
-        && /\b(?:is|the|this|bot|electionbot|wow|pretty|very)\b/.test(text);
+    return [
+        /\b(election)?bot\b/,
+        /\b(?:awesome|brilliant|clever|correct|excellent|good|great|impressive|like|love|legit|marvell?ous|nice|perfect|praise|right|smart|super|superb|swell|wise|wonderful)\b/,
+        /\b(?:is|the|this|bot|electionbot|wow|pretty|very)\b/
+    ].every((expression) => expression.test(text));
 };
 
 /**
