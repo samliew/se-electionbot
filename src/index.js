@@ -273,7 +273,7 @@ import {
             // Check for saidElectionEndingSoon
             config.flags.saidElectionEndingSoon = transcriptMessages.filter(function (item) {
                 return /is ending soon. This is the final chance to cast or change your votes!/.test(item.message) && item.chatUserId === me.id
-            }).length;
+            }).length > 0;
 
             // Loops through messages by latest first
             transcriptMessages.reverse();
@@ -752,7 +752,7 @@ import {
             }
 
             // Next phase/ When is the election starting
-            else if (content.includes('next phase') || content.includes('election start') || content.includes('does it start') || content.includes('is it starting')) {
+            else if (/^when('s| is| does) (the )?next phase/.test(content) || /^when('s| is| does) (the )?nomination (phase )?end(ing)?/.test(content) || /^when('s| is| does) (the )?election (phase )?start(ing)?/.test(content) || /is it starting\s?(soon|yet)?/.test(content)) {
                 responseText = sayNextPhase(config, election);
             }
 
