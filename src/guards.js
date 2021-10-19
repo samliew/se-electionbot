@@ -200,10 +200,10 @@ export const isSayingBotIsInsane = (text) => {
  * @returns {boolean}
  */
 export const isHatingTheBot = (text) => {
-    return text.includes('bot') && (
-        /(?:^the|^this)?.*(?:bad|terrible|horrible|broken|buggy)/.test(text) ||
-        /^i (?:dislike|hate|detest) (?:the|this|electionbot)/.test(text)
-    );
+    return [/\b(election)?bot\b/].every((expression) => expression.test(text)) && [
+        /(?:^the|^this)?.*(?:bad|terrible|horrible|broken|buggy|worst)/,
+        /^i (?:dislike|hate|detest) (?:the|this|electionbot)/
+    ].some((expression) => expression.test(text));
 };
 
 /**

@@ -353,7 +353,12 @@ describe('Message Guards', () => {
                 "i dislike this bot!",
                 "i hate this bot already",
                 "i hate electionbot",
+                "this is a terrible idea for a bot, I hate it"
             ]);
+
+            allMatch(isHatingTheBot, [
+                "The Botswana's climate is terrible"
+            ], false);
         });
     });
 
