@@ -1,3 +1,5 @@
+import { someMatch } from "./utils/expressions.js";
+
 /**
  * @summary checks if the message asked how or where to nominate
  * @param {string} text
@@ -91,8 +93,11 @@ export const isAskedForCurrentPositions = (text) => {
  * @returns {boolean}
  */
 export const isAskedForCurrentNominees = (text) => {
-    return /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/.test(text) ||
-        /how many (?:nomin(?:ee|ation|ated)|participant|candidate)s?(?!\s+score)/.test(text);
+    return someMatch([
+        /^(?:(?:are|is) there)?(?: ?any| a)?(?: new)? (?:nomination|nominee|candidate)s?(?: so far)?/,
+        /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/,
+        /how many (?:nomin(?:ee|ation|ated)|participant|candidate)s?(?!\s+score)/
+    ], text);
 };
 
 /**

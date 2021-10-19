@@ -41,10 +41,11 @@ describe('Message Guards', () => {
                 "what are the participants?",
                 "who is the participant?",
                 "what were the nominations",
+                "any new nominees?",
+                "is there a nomination",
+                "are there nominations?"
             ]);
-        });
 
-        it('should not match other guards', () => {
             allMatch(isAskedForCurrentNominees, [
                 "what is my candidate score",
                 "what is the candidate score for 245113",
