@@ -109,8 +109,7 @@ describe("Messages module", () => {
         it('should return correct version of the message based on mod status', () => {
             const election = new Election("https://pt.stackoverflow.com/election");
 
-            /** @type {ApiUser} */
-            const user = { reputation: 42 };
+            const user =/** @type {ApiUser} */({ reputation: 42 });
 
             const score = calculateScore(user, [], election, true);
 
