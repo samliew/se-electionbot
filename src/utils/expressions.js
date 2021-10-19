@@ -8,3 +8,11 @@ export const matchNumber = (expression, text) => {
     const [, matched] = expression.exec(text) || [];
     return matched !== void 0 ? +matched : matched;
 };
+
+/**
+ * @summary OR matches all expressions
+ * @param {RegExp[]} expressions regular expression list
+ * @param {string} text text to test
+ * @returns {boolean}
+ */
+export const someMatch = (expressions, text) => expressions.some((expression) => expression.test(text));
