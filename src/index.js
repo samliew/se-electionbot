@@ -5,7 +5,7 @@ import entities from 'html-entities';
 import sanitize from "sanitize-html";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
-import { announceNominees, announceWinners, ignoreUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import Election from './election.js';
@@ -273,7 +273,7 @@ import {
 
             // Check for saidElectionEndingSoon
             config.flags.saidElectionEndingSoon = transcriptMessages.filter(function (item) {
-                return /is ending soon. This is the final chance to cast or change your votes!/.test(item.message) && item.chatUserId === me.id
+                return /is ending soon. This is the final chance to cast or change your votes!/.test(item.message) && item.chatUserId === me.id;
             }).length > 0;
 
             // Loops through messages by latest first
@@ -329,7 +329,10 @@ import {
             const originalMessage = entities.decode(encodedMessage);
             const content = sanitize(originalMessage.toLowerCase().replace(/^@\S+\s+/, ''), { allowedTags: [] });
 
-            const { eventType, userId, targetUserId } = msg;
+            const { eventType, userId: originalUserId, targetUserId } = msg;
+
+            // allows the bot to get messages as if they were coming from another user
+            const userId = config.impersonatingUserId || originalUserId;
 
             // Ignore events from self
             if (config.ignoreSelf && me.id === userId) return;
@@ -511,6 +514,8 @@ import {
 
                 commander.add("rm_election", "resets the current election", resetElection, AccessLevel.dev);
 
+                commander.add("impersonate", "impersonates a user", impersonateUser, AccessLevel.dev);
+
                 commander.aliases({
                     timetravel: ["delorean", "88 miles"],
                     mute: ["timeout", "sleep"],
@@ -550,7 +555,8 @@ import {
                     ["announce winners", /^announce winners/, config, election, room, announcement],
                     ["list moderators", /^whois/, config, content, entities],
                     ["reset election", /^reset election/, config, election],
-                    ["ignore", /^ignore \d+/, config, room, content]
+                    ["ignore", /^ignore \d+/, config, room, content],
+                    ["impersonate", /^impersonate \d+/, config, content]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, content);

@@ -245,3 +245,15 @@ export const ignoreUser = (_config, room, content) => {
 
     return `*ignoring user ${userId}*`;
 };
+
+/**
+ * @summary impersonates a user
+ * @param {BotConfig} config bot config
+ * @param {string} content message content
+ * @returns {string}
+ */
+export const impersonateUser = (config, content) => {
+    const userId = matchNumber(/\s+(\d+)$/, content);
+    config.impersonatingUserId = userId;
+    return userId ? `messages are now considered to be from ${userId}` : "not impersonating anyone";
+};
