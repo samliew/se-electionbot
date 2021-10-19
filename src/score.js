@@ -2,6 +2,7 @@ import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
 import { sayDiamondAlready, sayDoesNotMeetRequirements, sayLacksPrivilege, sayMissingBadges } from "./messages.js";
+import { getRandomNominationSynonym } from "./random.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID } from "./utils.js";
 import { matchNumber } from "./utils/expressions.js";
 
@@ -286,7 +287,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
                     "primary": `nomination period is over`
                 };
 
-                responseText += ` Alas, the ${phaseMap[phase]}. Hope to see your candidature next election!`;
+                responseText += ` Alas, the ${phaseMap[phase]}. Hope to see your ${getRandomNominationSynonym()} next election!`;
             }
         }
         // All others

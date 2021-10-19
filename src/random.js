@@ -121,3 +121,9 @@ export const getRandomAnnouncement = () => new RandomArray(
     "Hello and welcome to the election night special! ",
     "Interrupting to bring you this important message: ",
 ).getRandom();
+
+export const getRandomNominationSynonym = () => new RandomArray(
+    "candidature",
+    "candidacy",
+    "nomination"
+).getRandom();
