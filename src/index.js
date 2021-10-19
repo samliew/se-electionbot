@@ -270,23 +270,34 @@ import {
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
         if (transcriptMessages) {
 
-            // Update lastActivityTime, lastMessageTime, lastBotMessage
-            const lastMessage = transcriptMessages[transcriptMessages.length - 1];
-            const lastMessageByBot = lastMessage.message && (lastMessage.username === me.name || lastMessage.chatUserId === me.id);
+            // Check for saidElectionEndingSoon
+            config.flags.saidElectionEndingSoon = transcriptMessages.filter(function (item) {
+                return /is ending soon. This is the final chance to cast or change your votes!/.test(item.message) && item.chatUserId === me.id
+            }).length;
 
-            if (lastMessageByBot) {
-                config.updateLastMessage(lastMessage.messageMarkup, lastMessage.date);
-                console.log(`INIT - Previous message in room was by bot at ${lastMessage.date}:`, lastMessage.messageMarkup);
-            }
-            else {
-                config.lastActivityTime = lastMessage.date;
-            }
+            // Loops through messages by latest first
+            transcriptMessages.reverse();
 
             // Count valid messages (after a "greet" message by bot), and update activityCounter
+            // Also updates lastActivityTime, lastMessageTime, lastBotMessage
+            let botMessageFound = false;
             let count = 0;
-            transcriptMessages.reverse();
             for (count = 0; count < transcriptMessages.length; count++) {
                 let item = transcriptMessages[count];
+
+                // Update lastActivityTime for last message in room
+                if (count === 0) {
+                    config.lastActivityTime = item.date;
+                }
+
+                // If last bot message not set yet, and is a message by bot
+                if (!botMessageFound && item.message && (item.username === me.name || item.chatUserId === me.id)) {
+                    botMessageFound = true;
+                    config.updateLastMessage(item.messageMarkup, item.date);
+                    console.log(`INIT - Previous message in room was by bot at ${item.date}:`, item.messageMarkup);
+                }
+
+                // Exit loop once greet message by bot
                 if (/I can answer commonly-asked questions about elections/.test(item.message) && item.chatUserId === me.id) break;
             }
             config.activityCounter = count;

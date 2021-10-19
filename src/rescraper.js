@@ -165,7 +165,8 @@ export default class Rescraper {
                 config.scrapeIntervalMins = 1;
 
                 // Announce election ending soon
-                await sendMessage(config, room, `The ${makeURL('election', election.electionUrl)} is ending soon. This is the final chance to cast your votes!`);
+                // Update index.js as well if message changes
+                await sendMessage(config, room, `The ${makeURL('election', election.electionUrl)} is ending soon. This is the final chance to cast or change your votes!`);
                 config.flags.saidElectionEndingSoon = true;
 
                 if (config.debugOrVerbose) {

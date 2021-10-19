@@ -45,6 +45,7 @@ export const sayHI = (election, greeting = 'Welcome to the election chat room! '
     const phaseText = phaseMap[phase] || "";
     const helpCommand = `@ElectionBot help`;
 
+    // Update index.js as well if this message changes
     return `${greeting}${phaseText} I can answer commonly-asked questions about elections (type *${helpCommand}* for more info).`;
 };
 
