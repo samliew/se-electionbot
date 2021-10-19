@@ -281,7 +281,7 @@ export const isAskedHowOrWhoToVote = (text) => {
  */
 export const isAskedAboutMissingComments = (text) => {
     return /^(where|why|are|were|did|who|how|i|is|election)\b/.test(text) &&
-        /\b(missing|hidden|cleared|deleted?|removed?|election|nominations?|all|view|find|bug|see)\b/.test(text) &&
+        /\b(missing|hidden|cleared|deleted?|removed?|go|election|nominations?|all|view|find|bug|see)\b/.test(text) &&
         /\bcomments?\b/.test(text);
 };
 
