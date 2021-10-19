@@ -134,18 +134,17 @@ export const getModerators = async (config, site, sort = "name", order = "asc", 
  * @param {BotConfig} config
  * @param {number} userId userId to request info for
  * @param {string} site election site slug
- * @param {string} key api key
  * @param {number} [page]
  * @returns {Promise<User|null>}
  */
-export const getUserInfo = async (config, userId, site, key, page = 1) => {
+export const getUserInfo = async (config, userId, site, page = 1) => {
 
     const userURL = new URL(`${apiBase}/${apiVer}/users/${userId}`);
     userURL.search = new URLSearchParams({
         site,
         page: page.toString(),
         filter: "sAR)YG", // unsafe
-        key
+        key: getStackApiKey(config.apiKeyPool),
     }).toString();
 
     if (config.debug) console.log(userURL.toString());

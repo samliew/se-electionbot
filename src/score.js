@@ -196,7 +196,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         const hasNominated = election.isNominee(userId);
 
-        const requestedUser = await getUserInfo(config, isAskingForOtherUser ? userId : user.id, apiSlug, getStackApiKey(config.apiKeyPool));
+        const requestedUser = await getUserInfo(config, isAskingForOtherUser ? userId : user.id, apiSlug);
 
         if (!requestedUser) {
             console.error(`failed to get user info to calculate`);
