@@ -185,6 +185,12 @@ export class BotConfig {
     duplicateResponseText = "Please read my previous message...";
 
     /**
+     * @summary user id to impersonate
+     * @type {number|undefined}
+     */
+    impersonatingUserId;
+
+    /**
      * @summary <userId, handler> map of actions awaiting user confirmation
      * @type {Map<number, () => Promise<string>>}
      */
