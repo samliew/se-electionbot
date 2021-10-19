@@ -2,7 +2,7 @@ import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
 import { sayDiamondAlready, sayDoesNotMeetRequirements, sayLacksPrivilege, sayMissingBadges } from "./messages.js";
-import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, NO_ACCOUNT_ID } from "./utils.js";
+import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID } from "./utils.js";
 import { matchNumber } from "./utils/expressions.js";
 
 /**
@@ -135,6 +135,8 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         const { isModerator } = user;
 
         const isAskingForOtherUser = isAskedForOtherScore(content);
+        const isUsingChatLink = matchesOneOfChatHosts(content, `/users/`);
+        const isUsingSiteId = /\bsite\s+(user\s+)?\d+/.test(content);
 
         const wasModerator = modIds.includes(userId);
 
@@ -142,6 +144,8 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             console.log({
                 isStackOverflow,
                 isAskingForOtherUser,
+                isUsingChatLink,
+                isUsingSiteId,
                 isModerator,
                 wasModerator
             });
@@ -156,15 +160,28 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             return sayLacksPrivilege("request candidate score of others", "tell you your own score");
         }
 
-        // If privileged user asking candidate score of another user, get user site id from message
-        // TODO: Allow Admins and Devs too, not just mods
-        if (isAskingForOtherUser && (isModerator || config.devIds.has(userId))) {
-            userId = content.includes(`${election.siteUrl}/users/`) ?
+        if (isAskingForOtherUser) {
+            userId = isUsingChatLink ?
                 matchNumber(/\/users\/(\d+).*(?:\?|$)/, content) :
                 matchNumber(/(\d+)(?:\?|$)/, content);
         }
-        // If not mod and not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
-        else if (!isStackOverflow) {
+
+        if (config.debug) {
+            console.log({
+                siteUrl,
+                userId,
+                content
+            });
+        }
+
+        // Do not attempt to get badges for invalid users
+        if (!userId) {
+            console.error(`Invalid user id: ${userId}`);
+            return sayCalcFailed(isAskingForOtherUser);
+        }
+
+        // If not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
+        if (!isStackOverflow && !isUsingChatLink && !isUsingSiteId) {
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, siteHostname, getStackApiKey(config.apiKeyPool));
 
             // Unable to get user id on election site
@@ -196,7 +213,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         const hasNominated = election.isNominee(userId);
 
-        const requestedUser = await getUserInfo(config, isAskingForOtherUser ? userId : user.id, apiSlug, getStackApiKey(config.apiKeyPool));
+        const requestedUser = await getUserInfo(config, userId, apiSlug);
 
         if (!requestedUser) {
             console.error(`failed to get user info to calculate`);
@@ -263,13 +280,13 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             else if (!hasNominated && election.phase && election.phase !== 'nomination') {
 
                 const phaseMap = {
-                    "ended": `the election has ended.`,
-                    "cancelled": `the election is cancelled.`,
-                    "election": `the nomination period is over`,
-                    "primary": `the nomination period is over`
+                    "ended": `election has ended`,
+                    "cancelled": `election is cancelled`,
+                    "election": `nomination period is over`,
+                    "primary": `nomination period is over`
                 };
 
-                responseText += ` Alas, ${phaseMap[phase]} Hope to see your candidature next election!`;
+                responseText += ` Alas, the ${phaseMap[phase]}. Hope to see your candidature next election!`;
             }
         }
         // All others

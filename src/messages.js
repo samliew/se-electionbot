@@ -501,7 +501,7 @@ export const sayUserEligibility = async (config, election, text) => {
 
     const userBadges = await getBadges(config, userId, apiSlug, getStackApiKey(apiKeyPool));
 
-    const requestedUser = await getUserInfo(config, userId, apiSlug, getStackApiKey(apiKeyPool));
+    const requestedUser = await getUserInfo(config, userId, apiSlug);
 
     if (!requestedUser) {
         return `Can't answer now, please ask me about it later`;
