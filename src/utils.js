@@ -2,6 +2,7 @@ import axios from "axios";
 import cheerio from 'cheerio';
 import entities from 'html-entities';
 import { get } from 'https';
+import { JSDOM } from "jsdom";
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
 import { getUserAssociatedAccounts } from "./api.js";
@@ -567,11 +568,23 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
             return null;
         }
 
-        const $profile = cheerio.load(/** @type {string} */(linkedUserProfilePage));
+        const { window: { document } } = new JSDOM(linkedUserProfilePage);
 
-        const networkUserUrl = $profile('#profiles-menu a[href^="https://stackexchange.com/users/"]').attr("href") || "";
+        const networkProfileSelectors = [
+            `#profiles-menu a[href^="https://stackexchange.com/users/"]`,
+            `#mainbar-full [role="menuitem"] a[href^="https://stackexchange.com/users/"]`
+        ];
+
+        const networkUserUrl = /** @type {HTMLAnchorElement|null} */(document.querySelector(networkProfileSelectors.join(", ")))?.href;
+        console.log(`Network user URL: ${networkUserUrl}`);
+
+        // do not attempt to parse network id if the URL is missing
+        if (networkUserUrl === void 0) {
+            return null;
+        }
+
         const networkUserId = matchNumber(/(\d+)/, networkUserUrl);
-        console.log(`Network user url: ${networkUserUrl}`, networkUserId);
+        console.log(`Network user id: ${networkUserId}`);
 
         // do not event attempt to fetch network accounts for nobody
         if (networkUserId === void 0) {
