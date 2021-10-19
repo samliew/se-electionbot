@@ -14,6 +14,7 @@ import {
     isAskedAboutJokes,
     isAskedAboutJonSkeetJokes,
     isAskedAboutLightbulb,
+    isAskedAboutMissingComments,
     isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
@@ -787,6 +788,9 @@ import {
             // Can't we just edit the diamond in our username
             else if (isAskedAboutUsernameDiamond(content)) {
                 responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
+            }
+            else if (isAskedAboutMissingComments(content) && election.phase !== "nomination") {
+                responseText = `Comments are only visible on the "${makeURL("Nomination", election.electionUrl + '?tab=nomination')}" tab.`;
             }
             else if (/^happy birthday .*!*$/.test(content)) {
                 responseText = `Happy birthday!`;
