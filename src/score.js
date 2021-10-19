@@ -123,7 +123,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         /** @type {{ userId: number|null|undefined, content: string }} */
         let { userId, content } = message;
 
-        if (isNaN(userId) || userId <= 0) {
+        if (isNaN(userId)) {
             console.error(`Invalid user id: ${userId}`);
             return sayCalcFailed(false);
         }
@@ -159,7 +159,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         if (isAskingForOtherUser) {
             userId = isUsingChatLink ?
                 matchNumber(/\/users\/(\d+).*(?:\?|$)/, content) :
-                matchNumber(/(\d+)(?:\?|$)/, content);
+                matchNumber(/(-?\d+)(?:\?|$)/, content);
         }
 
         if (config.debug) {
