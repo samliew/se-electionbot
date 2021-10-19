@@ -280,13 +280,13 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             else if (!hasNominated && election.phase && election.phase !== 'nomination') {
 
                 const phaseMap = {
-                    "ended": `the election has ended.`,
-                    "cancelled": `the election is cancelled.`,
-                    "election": `the nomination period is over`,
-                    "primary": `the nomination period is over`
+                    "ended": `election has ended`,
+                    "cancelled": `election is cancelled`,
+                    "election": `nomination period is over`,
+                    "primary": `nomination period is over`
                 };
 
-                responseText += ` Alas, ${phaseMap[phase]} Hope to see your candidature next election!`;
+                responseText += ` Alas, the ${phaseMap[phase]}. Hope to see your candidature next election!`;
             }
         }
         // All others
