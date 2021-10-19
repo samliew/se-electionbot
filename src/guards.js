@@ -213,7 +213,7 @@ export const isSayingBotIsInsane = (text) => {
  * @returns {boolean}
  */
 export const isAskedForUserEligibility = (text) => {
-    return /^(?:can|is) user \d+(?: be)? (?:eligible|(?:nominate|electe)d?)/.test(text);
+    return /^(?:can|is) user \d+(?: be)? (?:eligible|nominated?|elected?)/.test(text);
 };
 
 /**
