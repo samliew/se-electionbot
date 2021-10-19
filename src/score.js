@@ -151,10 +151,6 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             });
         }
 
-        if (!isAskingForOtherUser && isStackOverflow && (isModerator || wasModerator) && !content.startsWith('sudo ')) {
-            return sayDiamondAlready(isModerator, wasModerator);
-        }
-
         if (isAskingForOtherUser && [isModerator, config.devIds.has(userId)].every((condition) => !condition)) {
             config.awaitingConfirmation.set(userId, () => makeCandidateScoreCalc(config, modIds)(election, user, { ...message, content: "" }));
             return sayLacksPrivilege("request candidate score of others", "tell you your own score");
@@ -243,6 +239,10 @@ export const makeCandidateScoreCalc = (config, modIds) =>
                 missingBadges,
                 hasNominated,
             });
+        }
+
+        if (!isAskingForOtherUser && isStackOverflow && (isModerator || wasModerator) && !content.startsWith('sudo ')) {
+            return sayDiamondAlready(candidateScore, isModerator, wasModerator);
         }
 
         // Privileged user asking for candidate score of another user

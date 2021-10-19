@@ -442,11 +442,13 @@ export const sayWhoMadeMe = async (config) => {
 
 /**
  * @summary builds an "already a diamond" message
+ * @param {CandidateScore} candidateScore candidate score instance
  * @param {boolean} isModerator is user a current moderator
  * @param {boolean} wasModerator was user a moderator
  * @returns {string}
  */
-export const sayDiamondAlready = (isModerator, wasModerator) => {
+export const sayDiamondAlready = (candidateScore, isModerator, wasModerator) => {
+    const { score, maxScore } = candidateScore;
 
     /**
      * @type {[boolean, string][]}
@@ -457,7 +459,7 @@ export const sayDiamondAlready = (isModerator, wasModerator) => {
     ];
 
     const [, message] = messageMap.find(([condition]) => condition) || [];
-    return message || `diamonds are forever!`;
+    return `${message || `diamonds are forever!`} Just so you know, your score is **${score}** (out of ${maxScore}).`;
 };
 
 /**
