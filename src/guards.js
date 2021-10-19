@@ -191,7 +191,7 @@ export const isLovingTheBot = (text) => {
 export const isHatingTheBot = (text) => {
     return [
         /\b(?:election)?bot\b/,
-        /\b(?:bad|terrible|horrible|broken|buggy|dislike|hate|detest|poor)\b/.test(text),
+        /\b(?:bad|terrible|horrible|broken|buggy|dislike|hate|detest|poor)\b/,
         /\b(?:is|the|this|bot|electionbot|wow|pretty|very)\b/
     ].every((expression) => expression.test(text));
 };
