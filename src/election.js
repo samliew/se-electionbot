@@ -472,7 +472,7 @@ export default class Election {
 
             this.updated = Date.now();
             this.siteName = $('meta[property="og:site_name"]').attr('content')?.replace('Stack Exchange', '').trim();
-            this.isStackOverflow = this.siteHostname === 'stackoverflow.com';
+            this.isStackOverflow = this.siteHostname === 'stackoverflow.com' && config.chatDomain === 'stackoverflow.com';
             this.siteUrl = 'https://' + this.siteHostname;
             this.title = pageTitle;
             this.dateNomination = nominationDate;
