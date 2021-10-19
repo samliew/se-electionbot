@@ -48,7 +48,7 @@ export class BotConfig {
      * @summary lower bound of activity (only after this amount of minimum messages)
      * @type {number}
      */
-    minActivityCountThreshold = parseNumEnv("low_activity_count_threshold", 20);
+    minActivityCountThreshold = parseNumEnv("low_activity_count_threshold", 30);
 
     /**
      * @summary upper bound of activity
