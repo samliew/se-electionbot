@@ -176,9 +176,20 @@ export const isThankingTheBot = (text) => {
  * @returns {boolean}
  */
 export const isLovingTheBot = (text) => {
-    return text.includes('bot')
-        && /\b(?:awesome|brilliant|clever|correct|excellent|good|great|impressive|like|love|legit|marvell?ous|nice|perfect|praise|right|smart|super|superb|swell|wise|wonderful)\b/.test(text)
-        && /\b(?:is|the|this|bot|electionbot|wow|pretty|very)\b/.test(text);
+    return text.includes('bot') &&
+        /\b(?:awesome|brilliant|clever|correct|excellent|good|great|impressive|like|love|legit|marvell?ous|nice|neat|perfect|praise|right|smart|super|superb|swell|wise|wonderful)\b/.test(text) &&
+        /\b(?:is|the|this|bot|electionbot|wow|pretty|very)\b/.test(text);
+};
+
+/**
+ * @summary detects if someone hates the bot
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isHatingTheBot = (text) => {
+    return text.includes('bot') &&
+        /\b(?:bad|terrible|horrible|broken|buggy|dislike|hate|detest|poor)\b/.test(text) &&
+        /\b(?:is|the|this|bot|electionbot|wow|pretty|very)\b/.test(text);
 };
 
 /**
@@ -190,18 +201,6 @@ export const isSayingBotIsInsane = (text) => {
     return [
         /(?<=(\bbot\b).+?|)(?:insane|crazy)(?:(?!\1)|.+?\bbot\b)/i
     ].some((expression) => expression.test(text));
-};
-
-/**
- * @summary detects if someone hates the bot
- * @param {string} text
- * @returns {boolean}
- */
-export const isHatingTheBot = (text) => {
-    return text.includes('bot') && (
-        /(?:^the|^this)?.*(?:bad|terrible|horrible|broken|buggy)/.test(text) ||
-        /^i (?:dislike|hate|detest) (?:the|this|electionbot)/.test(text)
-    );
 };
 
 /**
