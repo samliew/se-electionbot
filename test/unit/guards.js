@@ -276,6 +276,7 @@ describe('Message Guards', () => {
                 "i can't find the comments",
                 "i can't find the election comments",
                 "are the comments hidden",
+                "where did the comments go"
             ]);
 
             allMatch(isAskedForNominatingInfo, [
