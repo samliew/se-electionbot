@@ -1,7 +1,12 @@
 import { expect } from "chai";
 import Election from "../../src/election.js";
 import { sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI } from "../../src/messages.js";
+import { calculateScore } from "../../src/score.js";
 import { capitalize } from "../../src/utils.js";
+
+/**
+ * @typedef {import("@userscripters/stackexchange-api-types").default.User} ApiUser
+ */
 
 describe("Messages module", () => {
 
@@ -100,9 +105,16 @@ describe("Messages module", () => {
     describe('sayDiamondAlready', () => {
 
         it('should return correct version of the message based on mod status', () => {
-            const isModMessage = sayDiamondAlready(true, false);
-            const wasModMessage = sayDiamondAlready(false, true);
-            const shroedingerModMessage = sayDiamondAlready(true, true);
+            const election = new Election("https://pt.stackoverflow.com/election");
+
+            /** @type {ApiUser} */
+            const user = { reputation: 42 };
+
+            const score = calculateScore(user, [], election, true);
+
+            const isModMessage = sayDiamondAlready(score, true, false);
+            const wasModMessage = sayDiamondAlready(score, false, true);
+            const shroedingerModMessage = sayDiamondAlready(score, true, true);
 
             expect(isModMessage).to.match(/already have a diamond/);
             expect(wasModMessage).to.match(/want to be a moderator again/);
