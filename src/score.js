@@ -1,8 +1,7 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
-import { sayDiamondAlready, sayDoesNotMeetRequirements, sayLacksPrivilege, sayMissingBadges } from "./messages.js";
-import { getRandomNominationSynonym } from "./random.js";
+import { sayDiamondAlready, sayDoesNotMeetRequirements, sayHasMaximumCandidateScore, sayLacksPrivilege, sayMissingBadges } from "./messages.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID } from "./utils.js";
 import { matchNumber } from "./utils/expressions.js";
 
@@ -265,28 +264,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             responseText = sayDoesNotMeetRequirements(config, election, candidateScore);
         }
         else if (score === maxScore) {
-            responseText = `Wow! You have a maximum candidate score of **${maxScore}**!`;
-
-            // Already nominated, and not ended/cancelled
-            if (hasNominated && ['nomination', 'primary', 'election'].includes(/** @type {string} */(phase))) {
-                responseText += ` I can see you're already a candidate - good luck!`;
-            }
-            // If have not begun, or nomination phase, ask user to nominate themselves
-            else if (['null', 'nomination'].includes(/** @type {string} */(phase))) {
-                responseText += ` Please consider nominating yourself in the ${makeURL("election", electionUrl)}!`;
-            }
-            // Did not nominate (primary, election, ended, cancelled)
-            else if (!hasNominated && election.phase && election.phase !== 'nomination') {
-
-                const phaseMap = {
-                    "ended": `election has ended`,
-                    "cancelled": `election is cancelled`,
-                    "election": `nomination period is over`,
-                    "primary": `nomination period is over`
-                };
-
-                responseText += ` Alas, the ${phaseMap[phase]}. Hope to see your ${getRandomNominationSynonym()} next election!`;
-            }
+            return sayHasMaximumCandidateScore(election, candidateScore, hasNominated);
         }
         // All others
         else {

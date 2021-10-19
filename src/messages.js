@@ -1,7 +1,7 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
-import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJonSkeetJoke, getRandomOops, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomOops, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, dateToRelativetime, linkToRelativeTimestamp,
@@ -624,6 +624,42 @@ export const sayDoesNotMeetRequirements = (_config, election, candidateScore) =>
     const missing = isMissingRequiredBadges ? `${isMissingReputation ? '. You are also' : ' as you are'} missing the required badge${pluralize(numMissingRequiredBadges)}: ${missingRequiredBadgeNames.join(', ')}` : "";
 
     return `${prefix}${underRep}${missing}. Your candidate score is ${getScoreText(score, maxScore)}.`;
+};
+
+/**
+ * @summary builds a response to a user who has a maximum candidate score
+ * @param {Election} election current election
+ * @param {CandidateScore} candidateScore candidate score instance
+ * @param {boolean} [hasNominated] user already nominated
+ * @returns {string}
+ */
+export const sayHasMaximumCandidateScore = (election, candidateScore, hasNominated = false) => {
+    const { phase, electionUrl } = election;
+    const { maxScore } = candidateScore;
+
+    const maxScorePrefix = `Wow! You have a maximum candidate score of **${maxScore}**!`;
+
+    if (hasNominated && election.isActive()) {
+        return `${maxScorePrefix} I can see you're already a candidate - good luck!`;
+    }
+
+    if (election.isNotStartedYet()) {
+        return `${maxScorePrefix} Please consider nominating yourself in the ${makeURL("election", electionUrl)}!`;
+    }
+
+    if (!hasNominated && phase && phase !== 'nomination') {
+
+        const phaseMap = {
+            "ended": `election has ended`,
+            "cancelled": `election is cancelled`,
+            "election": `nomination period is over`,
+            "primary": `nomination period is over`
+        };
+
+        return `${maxScorePrefix} Alas, the ${phaseMap[phase]}. Hope to see your ${getRandomNominationSynonym()} next election!`;
+    }
+
+    return maxScorePrefix;
 };
 
 /**
