@@ -34,6 +34,7 @@ Current election info:
 - how many positions are there
 - how many users voted/participated
 - why was a nomination removed
+- where are the nomination comments _(outside of the nomination phase)_
 
 About moderators/moderating:
 
