@@ -250,16 +250,24 @@ describe('Message Guards', () => {
     const selfNominationMatches = [
         "how to nominate",
         "where can i register",
-        "how to register someone",
         "how to be a mod",
         "how can i be mod"
     ];
 
-    describe('isAskedForNominatingInfo', () => {
+    const otherNomiationMatches = [
+        "Can I nominate others?",
+        "How can one nominate another?",
+        "Can one user nominate another user?",
+        "can users nominate other users",
+        "how to register someone?"
+    ];
+
+    describe(isAskedForNominatingInfo.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedForNominatingInfo, selfNominationMatches);
 
             allMatch(isAskedForNominatingInfo, [
+                ...otherNomiationMatches,
                 "How doesn't it apply to your post?"
             ], false);
         });
@@ -410,12 +418,7 @@ describe('Message Guards', () => {
 
     describe(isAskedIfCanNominateOthers.name, () => {
         it('should correctly match content', () => {
-            allMatch(isAskedIfCanNominateOthers, [
-                "Can I nominate others?",
-                "How can one nominate another?",
-                "Can one user nominate another user?"
-            ]);
-
+            allMatch(isAskedIfCanNominateOthers, otherNomiationMatches);
             allMatch(isAskedIfCanNominateOthers, selfNominationMatches, false);
         });
     });

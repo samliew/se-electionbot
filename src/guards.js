@@ -6,10 +6,10 @@ import { someMatch } from "./utils/expressions.js";
  * @returns {boolean}
  */
 export const isAskedForNominatingInfo = (text) => {
-    return [
-        /^(?:how|where|can I)(?:\s+can I)?(?:\s+to)?\s+(?:nominate|submit|register|enter|apply|elect)/i,
+    return someMatch([
+        /^(?:how|where|can I)(?:\s+can I)?(?:\s+to)?\s+(?:nominate|submit|register|enter|apply|elect)(?!\s+(?:an)?others?|\s+some(?:one|body))/i,
         /^(?:how|where|can I)\s+(?:to |can I )?be(?:come)?(?:\s+a)?\s+mod(?:erator)?/i
-    ].some((expression) => expression.test(text));
+    ], text);
 };
 
 /**
@@ -19,7 +19,7 @@ export const isAskedForNominatingInfo = (text) => {
  */
 export const isAskedIfCanNominateOthers = (text) => {
     return someMatch([
-        /^(?:how\s+can|can|how\s+to)(?:\s+one|\s+i)(?:\s+user)?\s+nominate\s+(?:an)?others?(?:\s+users)?/i
+        /^(?:how\s+can|can|how\s+to)(?:\s+one|\s+i)?(?:\s+users?)?\s+(?:nominate|register)\s+(?:(?:an)?others?(?:\s+users?)?)|some(?:one|body)/i
     ], text);
 };
 
