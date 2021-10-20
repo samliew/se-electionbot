@@ -20,6 +20,7 @@ import {
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
     isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
+    isBotMentioned,
     isHatingTheBot,
     isLovingTheBot,
     isSayingBotIsInsane,
@@ -395,7 +396,7 @@ import {
              * ** Potentially do not need "targetUserId === me.id" as that is only used by the USER_MENTIONED (8) or message reply (18) event.
              * Test is done against "originalMessage", since "content" holds the normalised version for keyword/guard matching without username in front
              */
-            const botMentioned = new RegExp(`^\\s*@(?:ElectionBot|${me.name})[:,-]? `, "i").test(originalMessage) || targetUserId === me.id;
+            const botMentioned = isBotMentioned(originalMessage, me) || targetUserId === me.id;
             const botMentionedCasually = botMentioned || new RegExp(`\\b(?:ElectionBo[tx]|${me.name})\\b`, "i").test(originalMessage);
 
 

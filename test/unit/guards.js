@@ -1,9 +1,11 @@
 import { expect } from "chai";
+import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
+import { getMockUserProfile } from "../mocks/user.js";
 
 /**
  * @summary utility for running tests on sets of strings
@@ -389,6 +391,18 @@ describe('Message Guards', () => {
                 "how does STV work?",
                 "how STV works?",
                 "How many votes will we have in the Meek STV system?"
+            ]);
+        });
+    });
+
+    describe('isBotMentioned', () => {
+        it('should correctly match content', () => {
+            const name = "HAL9000";
+
+            allMatch(partialRight(isBotMentioned, [getMockUserProfile({
+                name
+            })]), [
+                `@${name} say why are you doing this?`
             ]);
         });
     });

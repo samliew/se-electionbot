@@ -318,3 +318,17 @@ export const isAskedAboutSTV = (text) => {
         /^(?:what|how).*?(?:\s+meek)?\s+s(?:ingle\s+)?t(?:ransferable\s+)?v(?:ote)?/i
     ].some((expression) => expression.test(text));
 };
+
+/**
+ * @summary checks if the bot is mentioned
+ * @param {string} text  message text
+ * @param {import("chatexchange/dist/Browser").IProfileData} botChatProfile
+ * @returns {boolean}
+ */
+export const isBotMentioned = (text, botChatProfile) => {
+    const { name } = botChatProfile;
+    const normalized = name.replace(/\s/g, "");
+    return someMatch(
+        [new RegExp(`^\\s*@(?:${normalized})[:,-]? `, "i")], text
+    );
+};
