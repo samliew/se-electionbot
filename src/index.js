@@ -690,7 +690,7 @@ import {
 
                 if (election.phase === 'election' && constituentBadgeId) {
                     const electionDate = new Date(election.dateElection);
-                    const numAwarded = getNumberOfVoters(config, election.apiSlug, constituentBadgeId, electionDate);
+                    const numAwarded = await getNumberOfVoters(config, election.apiSlug, constituentBadgeId, electionDate);
                     responseText = `Counting the number of awarded Constituent badges, currently ${numAwarded} has voted in the election.`;
                 }
                 else if (election.phase === 'ended') {
