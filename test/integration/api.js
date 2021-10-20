@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
 import { getSiteUserIdFromChatStackExchangeId } from "../../src/utils.js";
-import { getStackApiKey } from "../../src/api.js";
+import { getNumberOfVoters, getStackApiKey } from "../../src/api.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('getSiteUserIdFromChatStackExchangeId', function () {
@@ -34,6 +34,23 @@ describe('getSiteUserIdFromChatStackExchangeId', function () {
         );
 
         expect(userId).to.be.null;
+    });
+
+});
+
+describe('getVoterCount', function () {
+
+    dotenv.config();
+
+    it('should return number of awarded badges on success', async () => {
+        const totalAwarded = await getNumberOfVoters(
+            getMockBotConfig(),
+            "stackoverflow",
+            1974, // Constituent
+            new Date('2021-10-18 20:00:00Z'), // 1 Oct 2021 - start of election 13
+        );
+
+        expect(totalAwarded).to.gt(0);
     });
 
 });

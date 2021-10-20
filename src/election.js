@@ -72,6 +72,14 @@ export default class Election {
     ];
 
     /**
+     * @param {string} badgeName badge name
+     * @return {number|null}
+     */
+    getBadgeId(badgeName) {
+        return this.electionBadges.filter(x => x.name === badgeName)[0]?.badge_id || null;
+    }
+
+    /**
      * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
      * @param {string|number|null} [electionNum] number of election, can be a numeric string
      */

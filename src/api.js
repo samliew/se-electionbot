@@ -96,6 +96,36 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
 };
 
 /**
+ * @summary gets number of awarded Constituent badges from the API for current election
+ * @param {BotConfig} config
+ * @param {string} site election site slug
+ * @param {number} badgeId Constituent badge id
+ * @param {Date} electionPhaseDate election phase date
+ * @returns {Promise<number>}
+ */
+export const getNumberOfVoters = async (config, site, badgeId, electionPhaseDate) => {
+
+    let time = electionPhaseDate.getTime();
+    time /= 1000;
+
+    const badgeURI = new URL(`${apiBase}/${apiVer}/badges/${badgeId}/recipients`);
+    badgeURI.search = new URLSearchParams({
+        site,
+        fromdate: time.toString(),
+        filter: "!-)3Kfj1w8kqK", // NO items, only total
+        key: getStackApiKey(config.apiKeyPool)
+    }).toString();
+
+    if (config.debug) console.log(badgeURI.toString());
+
+    const { total = 0 } = /**@type {{ total: number }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
+
+    if (config.verbose) console.log(`API - ${getBadges.name}\n`, total);
+
+    return total;
+};
+
+/**
  * @summary gets the network mods from the API
  * @param {BotConfig} config
  * @param {string} site election site slug

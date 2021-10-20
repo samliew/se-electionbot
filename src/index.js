@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import sanitize from "sanitize-html";
 import Announcement from './announcement.js';
-import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
+import { getAllNamedBadges, getModerators, getNumberOfVoters, getStackApiKey } from "./api.js";
 import { announceNominees, announceWinners, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
@@ -686,7 +686,19 @@ import {
 
             // Election stats - How many voted/participants/participated
             else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
-                responseText = election.phase == 'ended' ? (election.statVoters || null) : `We won't know until the election ends. Come back ${linkToRelativeTimestamp(election.dateEnded)}.`;
+                const constituentBadgeId = election.getBadgeId("Constituent");
+
+                if (election.phase === 'election' && constituentBadgeId) {
+                    const electionDate = new Date(election.dateElection);
+                    const numAwarded = getNumberOfVoters(config, election.apiSlug, constituentBadgeId, electionDate);
+                    responseText = `Counting the number of awarded Constituent badges, currently ${numAwarded} has voted in the election.`;
+                }
+                else if (election.phase === 'ended') {
+                    responseText = election.statVoters || null;
+                }
+                else {
+                    responseText = `We won't know until the election starts. Come back ${linkToRelativeTimestamp(election.dateElection)}.`;
+                }
             }
             // Conflicts with isAskedAboutVoting below - should not match "how to vote"
             else if (isAskedHowOrWhoToVote(content)) {
