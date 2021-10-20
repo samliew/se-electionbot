@@ -104,3 +104,4 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `PASSWORD`                     | string   | no        | -            | password to access bot dashboard                                                                        |
 | `TRANSCRIPT_SIZE`              | number   | no        | `20`         | number of latest messages to show in the dashboard                                                      |
 | `SHOW_PRIMARY_COUNTDOWN_AFTER` | number   | no        | `8`          | minimum number of candidates to start showing countdown to primary if the current phase is _nomination_ |
+| `CONTROL_ROOM_ID`              | number   | no        | -            | flight control room for the bot to join                                                                 |

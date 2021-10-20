@@ -17,6 +17,12 @@ export class BotConfig {
     chatRoomId;
 
     /**
+     * @summary bot control chat room id
+     * @type {number|undefined}
+     */
+    controlRoomId = parseNumEnv("control_room_id");
+
+    /**
      * @summary chat server (Host)
      * @type {Host}
      */
