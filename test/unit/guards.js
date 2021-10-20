@@ -162,11 +162,14 @@ describe('Message Guards', () => {
                 "who is the best candidate?",
                 "who are the best candidates?",
                 "who were the bestest candidates ever?",
-                "what is the best nomination?"
+                "what is the best nomination?",
+                // https://chat.stackoverflow.com/transcript/message/53289881#53289881
+                "Who's the best candidate?"
             ]);
 
             allMatch(isAskedWhoIsTheBestCandidate, [
                 "who are the candidates?",
+                "who is the best mod"
             ], false);
         });
     });

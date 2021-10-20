@@ -319,7 +319,9 @@ export const isAskedAboutMissingComments = (text) => {
  * @returns {boolean}
  */
 export const isAskedWhoIsTheBestCandidate = (text) => {
-    return /^(?:who('s)?|what('s)?|which) (?:was |were |are |is )(?:a |the )?.*\bbest(?:est)? (?:candidate|nomination|nominee)s?/i.test(text);
+    return someMatch([
+        /^(?:who(?:'s)?|what(?:'s)?|which) (?:was |were |are |is )?(?:a |the )?.*\bbest(?:est)? (?:candidate|nomination|nominee)s?/i
+    ], text);
 };
 
 /**
@@ -346,7 +348,7 @@ export const isBotMentioned = (text, botChatProfile) => {
         [new RegExp(`^\\s*@(?:${normalized})[:,-]? `, "i")], text
     );
 };
-    
+
 /**
  * @summary checks if a message is asking how many mods are in the room
  * @param {string} text message text
