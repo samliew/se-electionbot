@@ -72,14 +72,6 @@ export default class Election {
     ];
 
     /**
-     * @param {string} badgeName badge name
-     * @return {number|null}
-     */
-    getBadgeId(badgeName) {
-        return this.electionBadges.filter(x => x.name === badgeName)[0]?.badge_id || null;
-    }
-
-    /**
      * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
      * @param {string|number|null} [electionNum] number of election, can be a numeric string
      */
@@ -245,6 +237,20 @@ export default class Election {
         return prev.dateNomination !== dateNomination ||
             prev.dateElection !== dateElection ||
             prev.dateEnded !== dateEnded;
+    }
+
+
+    /**
+     * @summary gets an election badge id by name
+     * @param {string} badgeName badge name
+     * @return {number|null}
+     */
+    getBadgeId(badgeName) {
+        const { electionBadges } = this;
+
+        const [{ badge_id = null } = {}] = electionBadges.filter(({ name }) => name === badgeName);
+
+        return badge_id;
     }
 
     /**
