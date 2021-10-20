@@ -171,13 +171,16 @@ describe('Message Guards', () => {
         });
     });
 
-    describe('isAskedHowOrWhoToVote', () => {
+    const whoToVoteMatches = [
+        "who to vote for?",
+        "who should i vote for",
+        "how to choose who to vote for?",
+        "who shouldn't I vote for"
+    ];
+
+    describe(isAskedHowOrWhoToVote.name, () => {
         it('should correctly match content', () => {
-            allMatch(isAskedHowOrWhoToVote, [
-                "who to vote for?",
-                "who should i vote for",
-                "how to choose who to vote for?"
-            ]);
+            allMatch(isAskedHowOrWhoToVote, whoToVoteMatches);
 
             allMatch(isAskedHowOrWhoToVote, [
                 "We want new blood, people who are excited about moderating and have enough time available in their lives for whatever reason to devote to the site."
