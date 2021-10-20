@@ -959,7 +959,7 @@ import {
         await room.watch();
         console.log(`INIT - Joined and listening in room https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`);
 
-        roomKeepAlive(config, client);
+        roomKeepAlive(config, client, room);
 
         await startServer(room, config, election);
 
