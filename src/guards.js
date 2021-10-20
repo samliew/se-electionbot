@@ -346,3 +346,14 @@ export const isBotMentioned = (text, botChatProfile) => {
         [new RegExp(`^\\s*@(?:${normalized})[:,-]? `, "i")], text
     );
 };
+    
+/**
+ * @summary checks if a message is asking how many mods are in the room
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedHowManyModsInTheRoom = (text) => {
+    return someMatch([
+        /^how many mod(?:erator)?s are here(?:\?|$)/i
+    ], text);
+};
