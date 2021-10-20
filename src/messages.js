@@ -59,8 +59,19 @@ export const sayWhyNominationRemoved = () => {
 };
 
 /**
+ * @summary builds a response on how to nominate others
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} _election current election
+ * @param {string} _text message content
+ * @returns {string}
+ */
+export const sayHowToNominateOthers = (_config, _election, _text) => {
+    return `Users can *only* nominate themselves, nobody can nominate others.`;
+};
+
+/**
  * @summary builds a response on how to nominate self or others
- * @param {Election} election
+ * @param {Election} election current election
  * @param {object} electionBadges list of election badges
  * @param {boolean} mentionsAnother if user asks about nominating others
  * @returns {string}
