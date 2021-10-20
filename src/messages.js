@@ -824,3 +824,35 @@ export const sayHowManyModsAreHere = async (config, client, room) => {
 
     return numMods ? `${numMods} moderator${pluralize(numMods)} ${pluralize(numMods, "are", "is")} in the room: ${modNames}` : "No moderators are in the room";
 };
+
+/**
+ * @summary builds a response to how many candidates are in the room query
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {import("chatexchange").default} client
+ * @param {Room} room current chat room
+ * @returns {Promise<string>}
+ */
+export const sayHowManyCandidatesAreHere = async (config, election, client, room) => {
+    const users = await getUsersCurrentlyInTheRoom(config, client, room);
+
+    const { arrNominees } = election;
+
+    const nomineeIds = arrNominees.map(({ userId }) => userId);
+
+    const nomineesInRoom = users.filter(({ userId }) => nomineeIds.includes(userId));
+    const { length: numNomineeInRoom } = nomineesInRoom;
+
+    const nomineeNames = listify(...nomineesInRoom.map(({ userName, userLink }) => userLink ? makeURL(userName, userLink) : userName));
+
+    if (config.debug) {
+        console.log({
+            users,
+            nomineesInRoom,
+            numNomineeInRoom,
+            nomineeNames
+        });
+    }
+
+    return numNomineeInRoom ? `${numNomineeInRoom} ${getCandidateOrNominee()}${pluralize(numNomineeInRoom)} ${pluralize(numNomineeInRoom, "are", "is")} in the room: ${nomineeNames}` : "No candidates are in the room";
+};
