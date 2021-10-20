@@ -262,6 +262,46 @@ import {
         rescraper.setAnnouncement(announcement);
         rescraper.start();
 
+        const { controlRoomId } = config;
+        if (controlRoomId) {
+            try {
+                const controlRoom = await client.joinRoom(controlRoomId);
+                controlRoom.ignore(...ignoredEventTypes);
+
+                controlRoom.on("message", async (/** @type {WebsocketEvent} */ msg) => {
+                    const encodedMessage = await msg.content;
+                    const roomId = await msg.roomId;
+
+                    const { userId } = msg;
+
+                    // Decode HTML entities in messages, create lowercase copy for guard matching
+                    const originalMessage = entities.decode(encodedMessage);
+                    const content = sanitize(originalMessage.toLowerCase().replace(/^@\S+\s+/, ''), { allowedTags: [] });
+
+                    // Get details of user who triggered the message
+                    const user = await getUser(client, userId);
+                    if (!user) return console.log(`missing user ${userId}`);
+
+                    const canSend = user.isModerator || config.devIds.has(user.id);
+                    const fromControlRoom = roomId === controlRoomId;
+                    const isAskingToSay = /\bsay\b/.test(content);
+                    const isAtMentionedMe = isBotMentioned(originalMessage, me);
+
+                    if (canSend && fromControlRoom && isAtMentionedMe && isAskingToSay) {
+                        await sendMessage(config, room, originalMessage.replace(/^@\S+\s+say /i, ''));
+                        return;
+                    }
+                });
+
+                await controlRoom.watch();
+
+                roomKeepAlive(config, client, controlRoom);
+
+                console.log(`INIT - joined control room: ${controlRoomId}`);
+            } catch (error) {
+                console.log(`INIT - failed to join control room: ${error}`);
+            }
+        }
 
         /*
          * Sync state from chat transcript on startup
