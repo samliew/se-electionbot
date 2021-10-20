@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -33,7 +33,13 @@ describe('Message Guards', () => {
         });
     });
 
-    describe('isAskedForCurrentNominees', () => {
+    const howManyNomineesMatches = [
+        "how many candidates are here?",
+        "are there any nominees in the room?",
+        "how many nominees are in the room?"
+    ];
+
+    describe(isAskedForCurrentNominees.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedForCurrentNominees, [
                 "who has nominated",
@@ -49,6 +55,7 @@ describe('Message Guards', () => {
             ]);
 
             allMatch(isAskedForCurrentNominees, [
+                ...howManyNomineesMatches,
                 "what is my candidate score",
                 "what is the candidate score for 245113",
             ], false);
@@ -429,4 +436,9 @@ describe('Message Guards', () => {
         });
     });
 
+    describe(isAskedHowManyCandidatesInTheRoom.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowManyCandidatesInTheRoom, howManyNomineesMatches);
+        });
+    });
 });

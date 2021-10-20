@@ -359,3 +359,15 @@ export const isAskedHowManyModsInTheRoom = (text) => {
         /^how many mod(?:erator)?s are here(?:\?|$)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking how many candidates are in the room
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedHowManyCandidatesInTheRoom = (text) => {
+    return someMatch([
+        /^how many (?:candidate|nominee)s are\s+(?:here|in\s+th(?:e|is)\s+room)(?:\?|$)/i,
+        /^are(?:\s+there\s+)?any\s+(?:candidate|nominee)s\s+(?:here|in\s+th(?:e|is)\s+room)(?:\?|$)/i
+    ], text);
+};
