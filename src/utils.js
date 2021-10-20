@@ -33,6 +33,7 @@ let _apiBackoff = Date.now();
  *
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Client").Host} Host
+ * @typedef {import("chatexchange").default} Client
  * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
  *
  * @typedef {import("./index").ElectionBadge} ElectionBadge
@@ -372,6 +373,21 @@ export const keepAlive = (url, mins = 20) => {
     setInterval(() => {
         get(url).on('error', (err) => console.error(`ERROR - Keep-alive failed. ${err.message}`));
     }, mins * 60000);
+};
+
+/**
+ * @summary stays connected to room by rejoining regularly
+ * @param {BotConfig} config bot config
+ * @param {Client} client ChatExchange client
+ */
+export const roomKeepAlive = (config, client) => {
+    return setInterval(async () => {
+        const { chatDomain, chatRoomId, verbose } = config;
+
+        await client.joinRoom(chatRoomId);
+
+        if (verbose) console.log('KEEP ALIVE - rejoin room:', chatDomain, chatRoomId);
+    }, 5 * 60000);
 };
 
 /**

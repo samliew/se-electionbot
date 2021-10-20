@@ -35,7 +35,7 @@ import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, pluralize, wait
+    linkToUtcTimestamp, makeURL, pluralize, roomKeepAlive, wait
 } from './utils.js';
 
 /**
@@ -959,14 +959,8 @@ import {
         await room.watch();
         console.log(`INIT - Joined and listening in room https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`);
 
+        roomKeepAlive(config, client);
 
-        // Stay connected to room by rejoining regularly
-        setInterval(async function () {
-            await client.joinRoom(config.chatRoomId);
-            if (config.verbose) console.log('KEEP ALIVE - rejoin room:', config.chatDomain, config.chatRoomId);
-        }, 5 * 60000);
-
-        // Start web server
         await startServer(room, config, election);
 
         // Catch all handler to swallow non-crashing rejections
