@@ -19,17 +19,27 @@ import { parsePackage } from "./utils/package.js";
 
 /**
  * @summary makes bot remind users that they are here
+ * @param {BotConfig} config bot config
  * @param {Election} election current election
  * @param {string} [greeting] greeting prefix
- * @returns {string}
+ * @returns {Promise<string>}
  */
-export const sayHI = (election, greeting = 'Welcome to the election chat room! ') => {
-    const { arrNominees, electionUrl, phase } = election;
+export const sayHI = async (config, election, greeting = 'Welcome to the election chat room! ') => {
+    const { arrNominees, electionUrl, phase, dateElection, apiSlug } = election;
 
     const { length } = arrNominees;
 
     const electionLink = makeURL("election", `${electionUrl}?tab=${phase}`);
     const phasePrefix = `The ${electionLink} is in the ${phase} phase`;
+
+    // Badge that is awarded for voting in elections
+    const electionBadgeName = "Constituent";
+    const electionBadgeId = election.getBadgeId(electionBadgeName);
+    let numVoters = 0;
+
+    if (phase === 'election' && electionBadgeId) {
+        numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
+    }
 
     const pluralCandidates = pluralizePhrase(length, `are ${length} candidates`, `is ${length} candidate`);
 
@@ -37,7 +47,7 @@ export const sayHI = (election, greeting = 'Welcome to the election chat room! '
         "null": `The ${electionLink} has not begun yet.`,
         "ended": `The ${electionLink} has ended.`,
         "cancelled": `The ${electionLink} has been cancelled.`,
-        "election": `The ${electionLink} is happening at the moment!`,
+        "election": `The ${electionLink} is happening at the moment, and ${numVoters} users have already voted!`,
         "nomination": `${phasePrefix}, and currently there ${pluralCandidates}.`,
         "primary": `${phasePrefix}, and currently there ${pluralCandidates}.`,
     };
@@ -693,7 +703,7 @@ export const sayLacksPrivilege = (action, alternative) => {
  * @param {Room} room current chat room
  * @returns {Promise<void>}
  */
-export const sayIdleGreeting = (config, election, room) => {
+export const sayIdleGreeting = async (config, election, room) => {
     const { activityCounter, minActivityCountThreshold } = config;
 
     console.log(`RESCRAPER - Room is inactive with ${activityCounter} messages posted so far (min ${minActivityCountThreshold})`);
@@ -701,7 +711,7 @@ export const sayIdleGreeting = (config, election, room) => {
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, sayHI(election, getRandomAnnouncement()), null, true);
+    return sendMessage(config, room, await sayHI(config, election, getRandomAnnouncement()), null, true);
 };
 
 /**
@@ -711,7 +721,7 @@ export const sayIdleGreeting = (config, election, room) => {
  * @param {Room} room current chat room
  * @returns {Promise<void>}
  */
-export const sayBusyGreeting = (config, election, room) => {
+export const sayBusyGreeting = async (config, election, room) => {
     const { activityCounter, maxActivityCountThreshold } = config;
 
     console.log(`Busy room:
@@ -721,7 +731,7 @@ export const sayBusyGreeting = (config, election, room) => {
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, sayHI(election, getRandomAnnouncement()), null, true);
+    return sendMessage(config, room, await sayHI(config, election, getRandomAnnouncement()), null, true);
 };
 
 /**
