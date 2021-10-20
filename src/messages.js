@@ -768,7 +768,7 @@ export const sayAlreadyVoted = async (config, election) => {
     if (phase === 'election' && constituentBadgeId) {
         const electionDate = new Date(dateElection);
         const numAwarded = await getNumberOfVoters(config, apiSlug, constituentBadgeId, electionDate);
-        return `Counting the number of awarded ${badgeName} badges, ${numAwarded} user${pluralize(numAwarded)} ${pluralize(numAwarded, "have", "has")} voted in the election.`;
+        return `Based on the number of ${badgeName} badges awarded, ${numAwarded} user${pluralize(numAwarded)} ${pluralize(numAwarded, "have", "has")} voted so far.`;
     }
 
     if (phase === 'ended') {
