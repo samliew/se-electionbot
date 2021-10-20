@@ -13,6 +13,17 @@ export const isAskedForNominatingInfo = (text) => {
 };
 
 /**
+ * @summary checks if the message asked if they can nominate others
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedIfCanNominateOthers = (text) => {
+    return someMatch([
+        /^(?:how\s+can|can|how\s+to)(?:\s+one|\s+i)(?:\s+user)?\s+nominate\s+(?:an)?others?(?:\s+users)?/i
+    ], text);
+};
+
+/**
  * @summary checks if the message asked why a nomination was removed
  * @param {string} text
  * @returns {boolean}

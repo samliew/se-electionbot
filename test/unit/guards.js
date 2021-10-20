@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -247,16 +247,17 @@ describe('Message Guards', () => {
         });
     });
 
+    const selfNominationMatches = [
+        "how to nominate",
+        "where can i register",
+        "how to register someone",
+        "how to be a mod",
+        "how can i be mod"
+    ];
+
     describe('isAskedForNominatingInfo', () => {
         it('should correctly match content', () => {
-            allMatch(isAskedForNominatingInfo, [
-                "how to nominate",
-                "where can i register",
-                "how to register someone",
-                "how to be a mod",
-                "how can i be mod",
-                "can i nominate another user",
-            ]);
+            allMatch(isAskedForNominatingInfo, selfNominationMatches);
 
             allMatch(isAskedForNominatingInfo, [
                 "How doesn't it apply to your post?"
@@ -404,6 +405,18 @@ describe('Message Guards', () => {
             })]), [
                 `@${name} say why are you doing this?`
             ]);
+        });
+    });
+
+    describe(isAskedIfCanNominateOthers.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedIfCanNominateOthers, [
+                "Can I nominate others?",
+                "How can one nominate another?",
+                "Can one user nominate another user?"
+            ]);
+
+            allMatch(isAskedIfCanNominateOthers, selfNominationMatches, false);
         });
     });
 
