@@ -3,6 +3,7 @@ import Election from "../../src/election.js";
 import { sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI } from "../../src/messages.js";
 import { calculateScore } from "../../src/score.js";
 import { capitalize } from "../../src/utils.js";
+import { getMockBotConfig } from "../mocks/bot.js";
 
 /**
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} ApiUser
@@ -74,11 +75,13 @@ describe("Messages module", () => {
         });
     });
 
-    describe('sayHI', () => {
+    describe('sayHI', async () => {
+
+        let config = getMockBotConfig();
 
         it('should not add phase info on no phase', async () => {
             const election = new Election("https://ja.stackoverflow.com/election");
-            const greeting = sayHI(election);
+            const greeting = await sayHI(config, election);
             expect(greeting).to.not.match(/is in the.*? phase/);
         });
 
@@ -90,15 +93,15 @@ describe("Messages module", () => {
             const election = new Election(electionLink, 12);
             election.phase = phase;
 
-            const greeting = sayHI(election);
+            const greeting = await sayHI(config, election);
             expect(greeting).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
         });
 
-        it('should override greeting if provided', () => {
+        it('should override greeting if provided', async () => {
             const override = "Hi all!";
 
             const election = new Election("https://pt.stackoverflow.com/election");
-            const greeting = sayHI(election, override);
+            const greeting = await sayHI(config, election, override);
 
             expect(greeting).to.match(new RegExp(`^${override}`));
         });
