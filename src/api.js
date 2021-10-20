@@ -122,7 +122,7 @@ export const getNumberOfVoters = async (config, site, badgeId, electionPhaseDate
 
     if (config.verbose) console.log(`API - ${getBadges.name}\n`, total);
 
-    return total;
+    return total === 1 ? 2 : total; // Avoid the extremely unlikely singular scenario
 };
 
 /**

@@ -770,19 +770,18 @@ export const sayAboutSTV = (_config, _election, text) => {
  * @returns {Promise<string>}
  */
 export const sayAlreadyVoted = async (config, election) => {
-    const badgeName = "Constituent";
 
-    const constituentBadgeId = election.getBadgeId(badgeName);
+    const { phase, dateElection, statVoters, apiSlug } = election;
 
-    const { phase, apiSlug, dateElection, statVoters } = election;
+    // Badge that is awarded for voting in elections
+    const electionBadgeName = "Constituent";
+    const electionBadgeId = election.getBadgeId(electionBadgeName);
 
-    if (phase === 'election' && constituentBadgeId) {
-        const electionDate = new Date(dateElection);
-        const numAwarded = await getNumberOfVoters(config, apiSlug, constituentBadgeId, electionDate);
-        return `Based on the number of ${badgeName} badges awarded, ${numAwarded} user${pluralize(numAwarded)} ${pluralize(numAwarded, "have", "has")} voted so far.`;
+    if (phase === 'election' && electionBadgeId) {
+        const numAwarded = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
+        return `Based on the number of ${electionBadgeName} badges awarded, ${numAwarded} users have voted so far.`;
     }
-
-    if (phase === 'ended') {
+    else if (phase === 'ended') {
         return statVoters || "";
     }
 
