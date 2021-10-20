@@ -33,10 +33,9 @@ let _apiBackoff = Date.now();
  *
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Client").Host} Host
- * @typedef {import("chatexchange").default} Client
- * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
- *
+ * @typedef {import("chatexchange/dist/Room").default} Room
+ * @typedef {import("chatexchange").default} Client
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  *
  * @typedef {{
@@ -325,14 +324,15 @@ export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) =
  *  userName: string,
  *  userId: number,
  *  userLink?: string,
- *  isModerator: boolean
- * }} RoomOwner
+ *  isModerator: boolean,
+ *  aboutMe?: string
+ * }} RoomUser
  *
  * @summary get room owners for the room bot is in
  * @param {BotConfig} config bot configuration
  * @param {Host} [chatDomain]
  * @param {string|number|null} [chatRoomId]
- * @returns {Promise<RoomOwner[]>} array of chat users
+ * @returns {Promise<RoomUser[]>} array of chat users
  */
 export const fetchRoomOwners = async (config, chatDomain, chatRoomId) => {
 
@@ -362,6 +362,52 @@ export const fetchRoomOwners = async (config, chatDomain, chatRoomId) => {
     console.log(`Fetched room owners for ${url}`, owners);
 
     return owners;
+};
+
+/**
+ * @summary gets users that are currently in the room
+ * @param {BotConfig} config bot configuration
+ * @param {Client} client ChatExchange client
+ * @param {Room} room room to get the info for
+ * @returns {Promise<RoomUser[]>}
+ */
+export const getUsersCurrentlyInTheRoom = async (config, client, room) => {
+    const { host } = client;
+    const { id } = room;
+
+    const url = new URL(`https://chat.${host}/rooms/info/${id}`);
+    url.search = new URLSearchParams({
+        tab: "general",
+        users: "current",
+        id: id.toString()
+    }).toString();
+
+    if (config.debug) console.log(url.toString());
+
+    const html = await fetchUrl(config, url.toString());
+
+    const { window: { document } } = new JSDOM(html);
+
+    return [...document.querySelectorAll("#room-usercards .usercard")].map((card) => {
+
+        const userName = card.querySelector(".user-header")?.getAttribute("title") || "";
+        const demoddedUserName = userName.replace(/\s\u2666$/, '');
+
+        const userLink = card.querySelector(`.user-header a[href*="/users/"]`)?.getAttribute("href") || "";
+
+        const aboutMe = card.querySelector(".user-message-info")?.getAttribute("title") || "";
+
+        const isModerator = !!card.querySelector(".user-header .moderator");
+
+        return {
+            userName: demoddedUserName,
+            userId: matchNumber(/(\d+)/, userLink) || -Infinity,
+            userLink,
+            isModerator,
+            aboutMe
+        };
+    });
+
 };
 
 /**
