@@ -242,7 +242,7 @@ export const isAskedAboutLightbulb = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutJonSkeetJokes = (text) => {
-    return /tell\b.*\bjon\s?skeet joke$/.test(text);
+    return /tell\b.*\bjon\s?skeet joke[!?]+$/.test(text);
 };
 
 /**
@@ -252,7 +252,7 @@ export const isAskedAboutJonSkeetJokes = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutJokes = (text) => {
-    return /(?:tell\b.*\bjoke|make\b.*\blaugh)$/.test(text);
+    return /(?:tell\b.*\bjoke|make\b.*\blaugh)[!?]+$/.test(text);
 };
 
 /**
