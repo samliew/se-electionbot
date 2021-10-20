@@ -47,6 +47,7 @@
         "node-cache": "^5.1.2",
         "node-cron": "^3.0.0",
         "patch-package": "^6.2.2",
+        "ramda": "^0.27.1",
         "rm": "^0.1.8",
         "sanitize-html": "^2.5.1"
     },
@@ -63,6 +64,7 @@
         "@types/express-handlebars": "^5.3.1",
         "@types/jsdom": "^16.2.13",
         "@types/mocha": "^9.0.0",
+        "@types/ramda": "^0.27.45",
         "@types/sanitize-html": "^2.3.2",
         "@types/sinon": "^10.0.4",
         "@userscripters/stackexchange-api-types": "^0.3.0",
