@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import sanitize from "sanitize-html";
 import Announcement from './announcement.js';
-import { getAllNamedBadges, getModerators, getNumberOfVoters, getStackApiKey } from "./api.js";
+import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { announceNominees, announceWinners, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
@@ -25,7 +25,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
+import { sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionSchedule, sayHI, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -686,19 +686,7 @@ import {
 
             // Election stats - How many voted/participants/participated
             else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
-                const constituentBadgeId = election.getBadgeId("Constituent");
-
-                if (election.phase === 'election' && constituentBadgeId) {
-                    const electionDate = new Date(election.dateElection);
-                    const numAwarded = await getNumberOfVoters(config, election.apiSlug, constituentBadgeId, electionDate);
-                    responseText = `Counting the number of awarded Constituent badges, currently ${numAwarded} has voted in the election.`;
-                }
-                else if (election.phase === 'ended') {
-                    responseText = election.statVoters || null;
-                }
-                else {
-                    responseText = `We won't know until the election starts. Come back ${linkToRelativeTimestamp(election.dateElection)}.`;
-                }
+                responseText = await sayAlreadyVoted(config, election);
             }
             // Conflicts with isAskedAboutVoting below - should not match "how to vote"
             else if (isAskedHowOrWhoToVote(content)) {
