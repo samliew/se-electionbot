@@ -4,7 +4,7 @@ import { sendMessage } from "./queue.js";
 import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomOops, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
-    capitalize, dateToRelativetime, linkToRelativeTimestamp,
+    capitalize, dateToRelativetime, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase
 } from "./utils.js";
 import { parsePackage } from "./utils/package.js";
@@ -787,4 +787,31 @@ export const sayAlreadyVoted = async (config, election) => {
     }
 
     return `We won't know until the election starts. Come back ${linkToRelativeTimestamp(dateElection)}.`;
+};
+
+/**
+ * @summary builds a response to how many mods are in the room query
+ * @param {BotConfig} config bot configuration
+ * @param {import("chatexchange").default} client
+ * @param {Room} room current chat room
+ * @returns {Promise<string>}
+ */
+export const sayHowManyModsAreHere = async (config, client, room) => {
+    const users = await getUsersCurrentlyInTheRoom(config, client, room);
+
+    const mods = users.filter(({ isModerator }) => isModerator);
+    const { length: numMods } = mods;
+
+    const modNames = listify(...mods.map(({ userName, userLink }) => userLink ? makeURL(userName, userLink) : userName));
+
+    if (config.debug) {
+        console.log({
+            users,
+            mods,
+            numMods,
+            modNames
+        });
+    }
+
+    return numMods ? `${numMods} moderator${pluralize(numMods)} ${pluralize(numMods, "are", "is")} in the room: ${modNames}` : "No moderators are in the room";
 };
