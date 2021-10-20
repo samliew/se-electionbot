@@ -593,7 +593,7 @@ import {
             /* TODO:
              *   When message queue is implemented, this will need to go as well.
              *   In it's place to avoid bot abuse, we can implement auto user mutes/ignores
-             *   (e.g.: if an individual user makes bot respond more than 5 times in 30 seconds, ignore 2 minutes)
+             *   (e.g.: if an individual user makes bot respond more than 3 times in 60 seconds, ignore 2 minutes)
              */
             // If too close to previous message, ignore (apply throttle)
             if (config.isMuted) {
