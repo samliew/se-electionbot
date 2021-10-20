@@ -105,9 +105,9 @@ export const isAskedForCurrentPositions = (text) => {
  */
 export const isAskedForCurrentNominees = (text) => {
     return someMatch([
-        /^(?:(?:are|is) there)?(?: ?any| a)?(?: new)? (?:nomination|nominee|candidate)s?(?: so far)?/,
+        /^(?:(?:are|is) there)?(?: ?any| a)?(?: new)? (?:nomination|nominee|candidate)s?(?: so far)?\b(?! in.+?room)/,
         /(?:who|what) (?:are|were|was|is|has)(?: the)? (?:nomin(?:ee|ation|ated)|particip(?:ant|ated)|candidate)s?(?!\s+score)/,
-        /how many (?:nomin(?:ee|ation|ated)|participant|candidate)s?(?!\s+score)/
+        /how many (?:nomin(?:ee|ation|ated)|participant|candidate)s?\b(?!\s+(?:score|are here|are in.+?room))/
     ], text);
 };
 
