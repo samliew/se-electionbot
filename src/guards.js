@@ -252,7 +252,9 @@ export const isAskedAboutJonSkeetJokes = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutJokes = (text) => {
-    return /(?:tell\b.*\bjoke|make\b.*\blaugh)[!?]+$/.test(text);
+    return someMatch([
+        /(?:tell|make)\b.+?\b(?:me|us)\b.+?(?:(?: a)? joke|laugh)/
+    ], text);
 };
 
 /**
