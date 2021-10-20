@@ -1,4 +1,4 @@
-import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
+import { getBadges, getNumberOfVoters, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
 import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomOops, RandomArray } from "./random.js";
@@ -750,4 +750,30 @@ export const sayAboutSTV = (_config, _election, text) => {
     }
 
     return `Visit the ${provider}'s ${makeURL("website", providerSite)} for detailed info on the voting system used.`;
+};
+
+/**
+ * @summary builds a number of voters based on the Constituent badge
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @returns {Promise<string>}
+ */
+export const sayAlreadyVoted = async (config, election) => {
+    const badgeName = "Constituent";
+
+    const constituentBadgeId = election.getBadgeId(badgeName);
+
+    const { phase, apiSlug, dateElection, statVoters } = election;
+
+    if (phase === 'election' && constituentBadgeId) {
+        const electionDate = new Date(dateElection);
+        const numAwarded = await getNumberOfVoters(config, apiSlug, constituentBadgeId, electionDate);
+        return `Counting the number of awarded ${badgeName} badges, ${numAwarded} user${pluralize(numAwarded)} has voted in the election.`;
+    }
+
+    if (phase === 'ended') {
+        return statVoters || "";
+    }
+
+    return `We won't know until the election starts. Come back ${linkToRelativeTimestamp(dateElection)}.`;
 };
