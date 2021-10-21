@@ -365,17 +365,22 @@ import {
             announcementHistory.filter(item => item.username === me.name || item.chatUserId === me.id).forEach(item => {
                 const [, userId] = item.messageMarkup.match(/#post-(\d+)/) || [, null];
 
+                const [, nominationLink] = item.messageMarkup.match(/href="(.+\/election\/13\?tab=\w+#post-\d+)"/i);
+
                 if (election.arrNominees.includes(userId)) return;
 
-                election.arrWithdrawnNominees.push({
+                const withdrawnNominee = {
                     userId,
                     userName: "",
                     userYears: "",
                     userScore: 0,
                     nominationDate: new Date(-1),
-                    nominationLink: "",
+                    nominationLink: nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions",
                     permalink: "",
-                });
+                };
+                election.arrWithdrawnNominees.push(withdrawnNominee);
+
+                console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
             });
         }
 
