@@ -364,7 +364,7 @@ import {
             // Parse previous nomination announcements and see which ones are no longer around
             announcementHistory.filter(item => item.username === me.name || item.chatUserId === me.id).forEach(item => {
 
-                const [, userName, nominationLink, postId] = item.messageMarkup.match(/\[(\w+)(?<!nomination)\]\((https:\/\/.+\/election\/\d\?tab=nomination#post-(\d+))\)!$/) || [, "", ""];
+                const [, userName, nominationLink, postId] = item.messageMarkup.match(/\[([a-z0-9\p{L}\p{M} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!$/) || [, "", ""];
 
                 const currentNomineePostIds = election.arrNominees.map(({ nominationLink }) => +nominationLink.replace(/\D+(\d+)$/, '$1'));
 
