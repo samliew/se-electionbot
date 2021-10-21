@@ -377,11 +377,24 @@ export const isAskedHowManyCandidatesInTheRoom = (text) => {
 /**
  * @summary checks if a message is asking for help
  * @param {string} text message text
- *  @returns {boolean}
+ * @returns {boolean}
  */
 export const isAskedForHelp = (text) => {
     return someMatch([
         /^can you help(?:\s+me)?/i,
         /^(?:please\s+)?(?:h[ae]lp|info)(?:(?:\s+me)?(?:,?\s+please)?)(?:[?!]|$)/i,
+    ], text);
+};
+
+/**
+ * @summary checks if a message is asking when is the next phase
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedWhenIsTheNextPhase = (text) => {
+    return someMatch([
+        /^when('s| is| does) (the )?next phase/i,
+        /^when('s| is| does) (the )?(?:nomination|election) (phase )?(?:start|end)(ing)?/i,
+        /is (?:it|election|nomination) (?:start|end)(?:ing|ed)\s?(soon|yet)?/i,
     ], text);
 };

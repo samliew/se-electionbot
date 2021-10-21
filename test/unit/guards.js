@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -30,6 +30,24 @@ describe('Message Guards', () => {
                 "how is the election scheduled?",
                 "election schedule, please",
             ]);
+        });
+    });
+
+    const nextPhaseMatches = [
+        "when is the next phase?",
+        "When does next phase start",
+        "is it starting soon?",
+        "Is it started yet?",
+        "when is the next phase",
+        "when is nomination ending?",
+        "when does election end?",
+        "is election starting?",
+        "is nomination ended?"
+    ];
+
+    describe(isAskedWhenIsTheNextPhase.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhenIsTheNextPhase, nextPhaseMatches);
         });
     });
 
