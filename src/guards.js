@@ -266,7 +266,7 @@ export const isAskedAboutJonSkeetJokes = (text) => {
  */
 export const isAskedAboutJokes = (text) => {
     return someMatch([
-        /(?:tell|make)\b.+?\b(?:me|us)\b.+?(?:(?: a)? joke|laugh)/
+        /(?:tell|make)\b.+?\b(?:me|us)?\b.+?(?:(?: a)? joke|laugh)/
     ], text);
 };
 

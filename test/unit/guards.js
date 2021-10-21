@@ -415,14 +415,17 @@ describe('Message Guards', () => {
         });
     });
 
-    describe('isAskedAboutJokes', () => {
+    const tellJokeMatches = [
+        "tell me a joke",
+        "tell us a joke",
+        "make us laugh",
+        "make me laugh",
+        "tell a joke"
+    ];
+
+    describe(isAskedAboutJokes.name, () => {
         it('should correctly match content', () => {
-            allMatch(isAskedAboutJokes, [
-                "tell me a joke",
-                "tell us a joke",
-                "make us laugh",
-                "make me laugh",
-            ]);
+            allMatch(isAskedAboutJokes, tellJokeMatches);
         });
     });
 
