@@ -362,10 +362,12 @@ import {
         if (announcementHistory) {
 
             const currentNomineePostIds = election.arrNominees.map(({ nominationLink }) => {
-                const [, postId] = nominationLink.match(/\d+$/) || [, null];
+                const [, postId] = nominationLink.match(/(\d+)$/) || [, null];
                 return postId ? +postId : null;
-            });
+            }).filter(Boolean);
+
             if (config.debugOrVerbose) {
+                console.log(`INIT - Current nominees:`, election.arrNominees);
                 console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
             }
 
@@ -373,7 +375,7 @@ import {
             announcementHistory.filter(item => item.username === me.name || item.chatUserId === me.id).forEach(item => {
 
                 const [, userName, nominationLink, postId] =
-                    item.messageMarkup.match(/\[([a-z0-9\p{L}\p{M} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!$/i) || [, "", "", ""];
+                    item.messageMarkup.match(/\[([a-z0-9\p{L}\p{M} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/i) || [, "", "", ""];
 
                 if (config.debugAndVerbose) {
                     console.log(`Nomination announcement:`, item.messageMarkup, { userName, nominationLink, postId });
