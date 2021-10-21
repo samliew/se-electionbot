@@ -12,7 +12,8 @@ import { getMockNominee } from "../mocks/nominee.js";
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} Message
  */
 
-describe('ScheduledAnnouncement', () => {
+describe('ScheduledAnnouncement', function () {
+    this.timeout(5000);
 
     /** @type {Client} */
     const client = new Client["default"]("stackoverflow.com");
