@@ -106,6 +106,30 @@ export default class ScheduledAnnouncement {
     }
 
     /**
+     * @summary announces nomination withdrawal
+     * @returns {Promise<boolean>}
+     */
+    async announceWithdrawnNominees() {
+        const { _room, config, _election } = this;
+
+        const messages = _election.withdrawnNominees
+            .filter(({ userName, nominationLink }) => {
+                if (!userName) {
+                    // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
+                    console.log(`missing username: ${nominationLink}`);
+                }
+                return !!userName;
+            })
+            .map(({ nominationLink, userName }) => {
+                return `**Attention:** Candidate ${makeURL(userName, nominationLink)} has withdrawn from the election.`;
+            });
+
+        await sendMessageList(config, _room, ...messages);
+
+        return true;
+    }
+
+    /**
      * @summary Announces winners when available
      * @param {Room} room chatroom to post to
      * @param {Election} [election] election to announce for
