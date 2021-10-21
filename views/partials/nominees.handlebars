@@ -1,0 +1,28 @@
+<table class="nested">
+    <thead>
+        <tr>
+            <th>Nominee</th>
+            <th>Post</th>
+            <th>Score</th>
+            <th>Member for</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each this}}
+        <tr>
+            <td>
+                <a href="{{this.permalink}}">{{{this.userName}}}</a>
+            </td>
+            <td>
+                <a href="{{this.nominationLink}}">nomination</a>
+            </td>
+            <td>
+                {{this.userScore}}
+            </td>
+            <td>
+                {{unprefix "member for" this.userYears}}
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
