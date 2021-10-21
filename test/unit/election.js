@@ -107,6 +107,24 @@ describe('Election', () => {
             });
         });
 
+        describe('withdrawnNominees', () => {
+            it('should correctly return withdrawn Nominees', () => {
+                const withdrawn = getMockNominee({ userId: 1 });
+                const remaining = getMockNominee({ userId: 2 });
+
+                const election = new Election("https://stackoverflow.com/election/12");
+                election.arrNominees.push(withdrawn, remaining);
+                election.pushHistory();
+
+                election.arrNominees.shift();
+
+                const { withdrawnNominees } = election;
+
+                expect(withdrawnNominees.length).to.equal(1);
+                expect(withdrawnNominees[0].userId).to.equal(withdrawn.userId);
+            });
+        });
+
         describe('newNominees', () => {
 
             it('should correctly return only new Nominees', () => {
