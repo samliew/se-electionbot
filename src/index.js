@@ -364,14 +364,14 @@ import {
             // Parse previous nomination announcements and see which ones are no longer around
             announcementHistory.filter(item => item.username === me.name || item.chatUserId === me.id).forEach(item => {
 
-                const [, userId] = item.messageMarkup.match(/#post-(\d+)/) || [, -42];
-                const [, userName] = item.messageMarkup.match(/>([^>]+)<\/a>!$/) || [, ""];
-                const [, nominationLink] = item.messageMarkup.match(/href="(.+\/election\/\d\?tab=\w+#post-\d+)"/i) || [, ""];
+                const [, userName, nominationLink, postId] = item.messageMarkup.match(/\[(\w+)(?<!nomination)\]\((https:\/\/.+\/election\/\d\?tab=nomination#post-(\d+))\)!$/) || [, "", ""];
 
-                if (!userId || election.arrNominees.includes(userId)) return;
+                const currentNomineePostIds = election.arrNominees.map(({ nominationLink }) => +nominationLink.replace(/\D+(\d+)$/, '$1'));
+
+                if (currentNomineePostIds.includes(postId)) return;
 
                 const withdrawnNominee = {
-                    userId: +userId,
+                    userId: -42,
                     userName: userName,
                     userYears: "",
                     userScore: 0,
@@ -381,7 +381,7 @@ import {
                 };
                 election.arrWithdrawnNominees.push(withdrawnNominee);
 
-                console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee, { item });
+                console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee, item.messageMarkup, { userName, nominationLink, postId });
             });
         }
 
