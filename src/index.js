@@ -200,7 +200,7 @@ import {
         }
 
         // Reduced longIdleDurationHours if it's a Stack Overflow election
-        if (election.isStackOverflow) config.longIdleDurationHours = 3;
+        if (election.isStackOverflow()) config.longIdleDurationHours = 3;
 
         // If is in production mode, and is an active election, auto-detect and set chat domain and chat room ID to join
         if (!config.debug && election.isActive()) {
@@ -716,7 +716,7 @@ import {
             }
             else if (isAskedAboutBadgesOfType(content)) {
                 const [, type] = /(participation|editing|moderation)/.exec(content) || [];
-                responseText = sayBadgesByType(electionBadges, type, election.isStackOverflow);
+                responseText = sayBadgesByType(electionBadges, type, election.isStackOverflow());
             }
             // SO required badges
             else if (['what', 'required', 'badges'].every(x => content.includes(x))) {

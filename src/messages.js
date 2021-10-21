@@ -99,7 +99,7 @@ export const sayHowToNominate = (election, electionBadges, mentionsAnother = fal
     const mentionsAnotherBold = mentionsAnother ? '**' : '';
 
     let requirements = [`at least ${election.repNominate} reputation`];
-    if (election.isStackOverflow) requirements.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
+    if (election.isStackOverflow()) requirements.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
     if (siteHostname && /askubuntu\.com$/.test(siteHostname)) requirements.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
     requirements.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
 

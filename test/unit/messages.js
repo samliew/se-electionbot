@@ -114,7 +114,7 @@ describe("Messages module", () => {
 
             const user =/** @type {ApiUser} */({ reputation: 42 });
 
-            const score = calculateScore(user, [], election, true);
+            const score = calculateScore(user, [], election);
 
             const isModMessage = sayDiamondAlready(score, true, false);
             const wasModMessage = sayDiamondAlready(score, false, true);

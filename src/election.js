@@ -349,6 +349,18 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election is a Stack Overflow election
+     *  @returns {boolean}
+     */
+    isStackOverflow() {
+        const { siteHostname, chatDomain } = this;
+        return [
+            siteHostname === 'stackoverflow.com',
+            chatDomain === 'stackoverflow.com'
+        ].every(Boolean);
+    }
+
+    /**
      * @summary checks if the election has ended
      * @returns {boolean}
      */
@@ -520,7 +532,6 @@ export default class Election {
 
             this.updated = Date.now();
             this.siteName = $('meta[property="og:site_name"]').attr('content')?.replace('Stack Exchange', '').trim();
-            this.isStackOverflow = this.siteHostname === 'stackoverflow.com' && config.chatDomain === 'stackoverflow.com';
             this.siteUrl = 'https://' + this.siteHostname;
             this.title = pageTitle;
             this.dateNomination = nominationDate;

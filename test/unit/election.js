@@ -257,6 +257,14 @@ describe('Election', () => {
         });
     });
 
+    describe('isStackOverflow', () => {
+        it('should correctly determine if the election is on SO', () => {
+            const election = new Election("https://stackoverflow.com/election/12", 12);
+            election.chatDomain = "stackoverflow.com";
+            expect(election.isStackOverflow()).to.be.true;
+        });
+    });
+
     describe('isNominee', () => {
 
         it('should correctly determine if an id is a nominee', () => {

@@ -51,10 +51,9 @@ const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurre
  * @param {ApiUser} user API user object
  * @param {Badge[]} userBadges user badges
  * @param {Election} election current election
- * @param {boolean} [isSO] is Stack Overflow election
  * @returns {CandidateScore}
  */
-export const calculateScore = (user, userBadges, election, isSO = false) => {
+export const calculateScore = (user, userBadges, election) => {
     const maxRepScore = 20;
     const repRepScore = 1000;
 
@@ -69,7 +68,7 @@ export const calculateScore = (user, userBadges, election, isSO = false) => {
 
     const missingBadgeIds = missingBadges.map(mapToId);
 
-    const missingRequiredBadges = isSO ? requiredBadges.filter(({ badge_id }) => missingBadgeIds.includes(badge_id)) : [];
+    const missingRequiredBadges = election.isStackOverflow() ? requiredBadges.filter(({ badge_id }) => missingBadgeIds.includes(badge_id)) : [];
 
     return {
         score: repScore + badgeScore,
@@ -130,13 +129,14 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         const { chatDomain } = config;
 
-        const { electionUrl, phase, repNominate, siteUrl, siteHostname, apiSlug, isStackOverflow = false } = election;
+        const { electionUrl, phase, repNominate, siteUrl, siteHostname, apiSlug } = election;
 
         const { isModerator } = user;
 
         const isAskingForOtherUser = isAskedForOtherScore(content);
         const isUsingChatLink = matchesOneOfChatHosts(content, `/users/`);
         const isUsingChatId = /\s+@\d+/.test(content);
+        const isStackOverflow = election.isStackOverflow();
 
         const wasModerator = modIds.includes(userId);
 
@@ -216,7 +216,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        const candidateScore = calculateScore(requestedUser, userBadges, election, isStackOverflow);
+        const candidateScore = calculateScore(requestedUser, userBadges, election);
 
         const { score, missing, isEligible, maxScore } = candidateScore;
 
