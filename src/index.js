@@ -794,7 +794,7 @@ import {
                     responseText = sayNotStartedYet(election);
                 }
                 else if (numWithdrawnNominees > 0) {
-                    responseText = `There ${numWithdrawnNominees === 1 ? 'is' : 'are'} ${numWithdrawnNominees} withdrawn candidate${pluralize(numWithdrawnNominees)}: ` +
+                    responseText = `There ${numWithdrawnNominees === 1 ? 'is' : 'are'} ${numWithdrawnNominees} candidate${pluralize(numWithdrawnNominees)} who have withdrawn: ` +
                         arrWithdrawnNominees.map(v => makeURL(v.userName, v.nominationLink)).join(', ');
                 }
                 else {
