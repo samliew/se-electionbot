@@ -181,6 +181,117 @@ export const fetchUrl = async (config, url, json = false) => {
 };
 
 /**
+ * @summary searches chat and retrieve messages
+ * @param {import("./config").BotConfig} config
+ * @param {string} chatDomain which chat server to search on (stackoverflow.com|stackexchange.com|meta.stackexchange.com)
+ * @param {string} query what to search for
+ * @param {number|string} roomId if omitted, searches all chat
+ * @returns {Promise<any>}
+ * [{
+ *   username,
+ *   chatUserId,
+ *   message,
+ *   messageMarkup,
+ *   date,
+ *   messageId
+ * }]
+ */
+export const searchChat = async (config, chatDomain, query, roomId = '', pagesize = 100, page = 1) => {
+
+    console.log('Searching chat:', { chatDomain, query, roomId });
+
+    const searchUrl = await fetchUrl(config, `https://chat.${chatDomain}/search?q=${query}&user=&room=${roomId}&pagesize=${pagesize}&page=${page}`);
+    const $chat = cheerio.load(/** @type {string} */(searchUrl));
+    const messages = [];
+
+    const today = new Date();
+    const now = Date.now();
+    const thisYear = today.getUTCFullYear();
+    const thisMonth = today.getUTCMonth();
+    const thisDate = today.getUTCDate();
+    const thisDay = today.getUTCDay();
+
+    $chat('#content .message').each(function (i, el) {
+        const $this = $chat(el);
+        const messageId = +($this.children('a').attr('name') || 0);
+        const userlink = $this.parent().siblings('.signature').find('a');
+        const messageElem = $this.find('.content');
+
+        if (!messageElem) return;
+
+        const messageText = messageElem.text()?.trim();
+        // Strip HTML from chat message
+        const messageHtml = messageElem.html()?.trim() || "";
+        const messageMarkup = htmlToChatMarkdown(messageHtml);
+
+        // Parse date & time
+        let year, monthValue, month, dayValue, date, yearValue, hour, min, dayDiff, h, apm;
+        const timestampString = $this.siblings('.timestamp').text();
+
+        // Today
+        if (/^\d+:\d+ [AP]M$/.test(timestampString)) {
+            [, h, min, apm] = timestampString.match(/^(\d+):(\d+) ([AP])M$/) || [, null, null, null];
+            month = thisMonth;
+            date = thisDate;
+        }
+        // Within this week
+        else if (/^\w{3} \d+:\d+ [AP]M$/.test(timestampString)) {
+            [, dayValue, h, min, apm] = timestampString.match(/^(\w{3}) (\d+):(\d+) ([AP])M$/) || [, null, null, null, null];
+            month = thisMonth;
+
+            if (dayValue === 'yst') {
+                date = thisDate - 1;
+            }
+            else {
+                const dayIndex = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(dayValue || "");
+                dayDiff = (thisDay - dayIndex) % 7;
+                date = thisDate - dayDiff;
+            }
+        }
+        // Has date, month, and maybe year
+        else {
+            [, monthValue, date, yearValue, h, min, apm] = timestampString.match(/^(\w{3}) (\d+)(?: '(\d+))? (\d+):(\d+) ([AP])M$/) || [, null, null, null, null, null, null];
+            month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthValue || "");
+        }
+
+        hour = h && apm ? +(
+            apm === 'A' ? (
+                h === '12' ? 0 : h
+            ) : +h + 12
+        ) : null;
+
+        year = yearValue || thisYear;
+        year = year < 2000 ? +year + 2000 : year;
+
+        if (config.debugAndVerbose) {
+            console.log(`Transcript message ${messageId} datetime:`, { timestampString, yearValue, monthValue, dayValue, dayDiff }, { year, month, date, hour, min });
+        }
+
+        let datetime = now;
+        if (year && month !== -1 && date && hour && min) {
+            datetime = Date.UTC(+year, month, +date, +hour, +min, 0);
+        }
+
+        messages.push({
+            username: userlink.text(),
+            // @ts-expect-error
+            chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
+            message: messageText,
+            messageMarkup: messageMarkup,
+            messageHtml: messageHtml,
+            date: datetime <= now ? datetime : now, // can never be in the future
+            messageId: messageId
+        });
+    }).get();
+
+    if (config.verbose) {
+        console.log('Transcript messages fetched:', messages.slice(-30));
+    }
+
+    return messages;
+};
+
+/**
  * @summary fetches the chat room transcript and retrieve messages
  * @param {import("./config").BotConfig} config
  * @param {string} url url of chat transcript

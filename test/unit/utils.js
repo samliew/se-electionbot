@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/utils.js";
+import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, searchChat, stripMarkdown } from "../../src/utils.js";
 import { matchNumber } from "../../src/utils/expressions.js";
 import { numericNullable } from "../../src/utils/objects.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -196,6 +196,23 @@ describe('String-related utils', async function () {
             expect(chatMessages[6].date).to.equal(1553053320000);
             expect(chatMessages[6].message).to.equal("how do I vote?  This is a test link");
             expect(chatMessages[6].messageMarkup).to.equal("**how do *I* vote?**  [This is a test link](https://stackoverflow.com/election)");
+        });
+    });
+
+    describe('searchChat', async () => {
+
+        it('should be able to search chat correctly', async () => {
+            const chatMessages = await searchChat(getMockBotConfig(), "stackoverflow.com", "We have a new nomination Please welcome our latest candidate", 238039);
+
+            expect(chatMessages).to.not.be.empty;
+
+            const reversedMessages = chatMessages.reverse();
+
+            expect(reversedMessages[0].username).to.equal("ElectionBot");
+            expect(reversedMessages[0].chatUserId).to.equal(10555677);
+            expect(reversedMessages[0].message).to.equal("We have a new nomination! Please welcome our latest candidate Tamás Sengel!");
+            expect(reversedMessages[0].date).to.equal(1633983300000);
+            expect(reversedMessages[0].messageId).to.equal(53211461);
         });
     });
 
