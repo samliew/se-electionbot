@@ -9,6 +9,7 @@ const __dirname = new URL(".", import.meta.url).pathname;
 
 const app = express().set('port', process.env.PORT || 5000);
 
+/** @type {Handlebars.ExphbsOptions} */
 const handlebarsConfig = {
     helpers: {
         ifEquals: function (arg1, arg2, options) {
@@ -77,6 +78,13 @@ const handlebarsConfig = {
         },
         required: function (data) {
             return `<span class="${data || data === 'required' ? 'required' : ''}">${data || data === 'required' ? 'required' : ''}</span>`;
+        },
+        call: function (name, ...args) {
+            return typeof this[name] === "function" ? this[name](...args.slice(0, -1)) : undefined;
+        },
+        contextCall: function (name, ctxt, ...args) {
+            console.log({ name, ctxt });
+            return typeof ctxt[name] === "function" ? ctxt[name](...args.slice(0, -1)) : undefined;
         }
     },
 };
@@ -206,7 +214,6 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteUrl: ELECTION.siteUrl,
                     siteHostname: ELECTION.siteHostname,
-                    isStackOverflow: ELECTION.isStackOverflow(),
                     election: ELECTION,
                     botconfig: {
                         // overrides should come after the object spread
