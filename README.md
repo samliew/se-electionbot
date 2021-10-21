@@ -74,7 +74,18 @@ Moderators can also make use of these commands _(requires mention)_ to help mode
 - greet
 - announce winners
 - whois _sitename_ mods
-- **what is the candidate score for _X_** _(calculates candidate score of userId "X")_
+- **what is the candidate score for _X_**
+
+Candidate score calculation
+
+`X` in a candidate score request can be one of:
+
+| Value                                                    | Meaning          | Example                                              |
+| -------------------------------------------------------- | ---------------- | ---------------------------------------------------- |
+| `<userId>`                                               | User's site id   | 22656                                                |
+| `@<userId>`                                              | User's chat id   | @22656                                               |
+| `https://<election site>.com/users/<userId>[/username]`  | User's site link | https://stackoverflow.com/users/22656/jon-skeet      |
+| `https://chat.<chat host>.com/users/<userId>[/username]` | User's chat link | https://chat.stackoverflow.com/users/22656/jon-skeet |
 
 ## Environment variables
 
