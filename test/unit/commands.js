@@ -219,7 +219,7 @@ describe('Individual commands', () => {
 
     });
 
-    describe('isAliveCommand', () => {
+    describe(isAliveCommand.name, () => {
 
         it('should correctly build responses', () => {
             const config = getMockBotConfig();
@@ -241,7 +241,7 @@ describe('Individual commands', () => {
 
             const started = isAliveCommand(config);
             expect(started).to.contain(dateToUtcTimestamp(mockStart));
-            expect(started).to.match(/uptime.+?\b\d+ seconds/);
+            expect(started).to.match(/\b\d+ seconds of uptime/);
 
             config.debug = true;
             const debug = isAliveCommand(config);
@@ -250,6 +250,14 @@ describe('Individual commands', () => {
             config.debug = false;
             const noDebug = isAliveCommand(config);
             expect(noDebug).to.not.contain("debug mode");
+
+            config.verbose = true;
+            const verbose = isAliveCommand(config);
+            expect(verbose).to.contain("verbose ");
+
+            config.verbose = false;
+            const noVerbose = isAliveCommand(config);
+            expect(noVerbose).to.not.contain("verbose ");
         });
 
     });
