@@ -19,7 +19,7 @@ export const isAskedForNominatingInfo = (text) => {
  */
 export const isAskedIfCanNominateOthers = (text) => {
     return someMatch([
-        /^(?:how\s+can|can|how\s+to)(?:\s+one|\s+i)?(?:\s+users?)?\s+(?:nominate|register)\s+(?:(?:an)?others?(?:\s+users?)?)|some(?:one|body)/i
+        /^(?:how\s+can|can|how\s+to)(?:\s+one|\s+i)?(?:\s+users?)?\s+(?:nominate|register)\s+(?:(?:an)?others?(?:\s+users?)?|some(?:one|body))/i
     ], text);
 };
 
