@@ -111,34 +111,38 @@ describe('Message Guards', () => {
         });
     });
 
+    const ownScoreMatches = [
+        "what is my candidate score?",
+        "what's my candidate score?",
+        "what is my score?",
+        "can i nominate myself",
+    ];
+
+    const otherScoreMatches = [
+        "what is candidate score for 007?",
+        "what is the candidate score of 42",
+        "what's the candidate score of 9000",
+        "what is candidate score for 65536", // account for a common mistake
+        "what's the candidate score of 404?",
+        "candidate score for 65535",
+        "what is the candidate score of -1?",
+        "what is the score of @42"
+    ];
+
     describe(isAskedForOwnScore.name, () => {
         it('should correctly match my score', () => {
-            allMatch(isAskedForOwnScore, [
-                "what is my candidate score?",
-                "what's my candidate score?",
-                "what is my score?",
-                "can i nominate myself",
-            ]);
+            allMatch(isAskedForOwnScore, ownScoreMatches);
 
-            allMatch(isAskedForOwnScore, [
-                "what is candidate score of 42",
-            ], false);
+            allMatch(isAskedForOwnScore, otherScoreMatches, false);
         });
     });
 
-    describe('isAskedForOtherScore', () => {
+    describe(isAskedForOtherScore.name, () => {
         it('should correctly match content', () => {
-            allMatch(isAskedForOtherScore, [
-                "what is candidate score for 007?",
-                "what is the candidate score of 42",
-                "what's the candidate score of 9000",
-                "what is candidate score for 65536", // account for a common mistake
-                "what's the candidate score of 404?",
-                "candidate score for 65535",
-                "what is the candidate score of -1?"
-            ]);
+            allMatch(isAskedForOtherScore, otherScoreMatches);
 
             allMatch(isAskedForOtherScore, [
+                ...ownScoreMatches,
                 "how is candidate score calculated",
                 "what is candidate score?",
             ], false);

@@ -1,4 +1,4 @@
-import { someMatch } from "./utils/expressions.js";
+import { allMatch, noneMatch, someMatch } from "./utils/expressions.js";
 
 /**
  * @summary checks if the message asked how or where to nominate
@@ -154,7 +154,9 @@ export const isAskedForOwnScore = (text) => {
  * @returns {boolean}
  */
 export const isAskedForOtherScore = (text) => {
-    return /(?:(?:what)?(?: is|'s)(?: the)? |^)candidate score (?:for |of )(?:the )?(?:(?:site |chat )?user )?(?:-?\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/.test(text) && !/\b(?:my|mine)\b/.test(text);
+    return allMatch([
+        /(?:(?:what)?(?: is|'s)(?: the)? |^)(?:candidate )?score (?:for |of )(?:the )?(?:(?:site )?user )?(?:@?-?\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/
+    ], text) && noneMatch([/\b(?:my|mine)\b/], text);
 };
 
 /**
