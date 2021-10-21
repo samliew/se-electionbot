@@ -11,6 +11,8 @@ const app = express().set('port', process.env.PORT || 5000);
 
 /** @type {Handlebars.ExphbsOptions} */
 const handlebarsConfig = {
+    // without extname property set to .<extension>, partials will not work
+    extname: ".handlebars",
     helpers: {
         ifEquals: function (arg1, arg2, options) {
             return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
