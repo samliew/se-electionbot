@@ -108,7 +108,8 @@ describe('Election', () => {
         });
 
         describe('withdrawnNominees', () => {
-            it('should correctly return withdrawn Nominees', () => {
+
+            it('should correctly return only new withdrawn Nominees', () => {
                 const withdrawn = getMockNominee({ userId: 1 });
                 const remaining = getMockNominee({ userId: 2 });
 
@@ -118,10 +119,10 @@ describe('Election', () => {
 
                 election.arrNominees.shift();
 
-                const { withdrawnNominees } = election;
+                const { newlyWithdrawnNominees } = election;
 
-                expect(withdrawnNominees.length).to.equal(1);
-                expect(withdrawnNominees[0].userId).to.equal(withdrawn.userId);
+                expect(newlyWithdrawnNominees.length).to.equal(1);
+                expect(newlyWithdrawnNominees[0].userId).to.equal(withdrawn.userId);
             });
         });
 
@@ -135,10 +136,10 @@ describe('Election', () => {
                 election._prevObj = { arrNominees: [oldNominee] };
                 election.arrNominees.push(newNominee);
 
-                const { newNominees } = election;
-                expect(newNominees).length(1);
+                const { newlyNominatedNominees } = election;
+                expect(newlyNominatedNominees).length(1);
 
-                const [nominee] = newNominees;
+                const [nominee] = newlyNominatedNominees;
                 expect(nominee.userId).to.equal(2);
             });
         });

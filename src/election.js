@@ -30,6 +30,9 @@ export default class Election {
     arrNominees = [];
 
     /** @type {Nominee[]} */
+    arrWithdrawnNominees = [];
+
+    /** @type {Nominee[]} */
     arrWinners = [];
 
     /** @type {User[]} */
@@ -176,7 +179,7 @@ export default class Election {
      * @summary gets a list of new Nominees
      * @returns {Nominee[]}
      */
-    get newNominees() {
+    get newlyNominatedNominees() {
         const { prev, arrNominees } = this;
         const prevIds = (prev?.arrNominees || []).map(({ userId }) => userId);
         return arrNominees.filter(({ userId }) => !prevIds.includes(userId));
@@ -186,7 +189,7 @@ export default class Election {
      * @summary gets a list of Nominees that has withdrawn
      * @returns {Nominee[]}
      */
-    get withdrawnNominees() {
+    get newlyWithdrawnNominees() {
         const { prev, arrNominees } = this;
         const prevNominees = prev?.arrNominees || [];
 
@@ -212,8 +215,8 @@ export default class Election {
      * @returns {boolean}
      */
     get hasNewNominees() {
-        const { newNominees } = this;
-        return !!newNominees.length;
+        const { newlyNominatedNominees } = this;
+        return !!newlyNominatedNominees.length;
     }
 
     /**
@@ -586,6 +589,9 @@ export default class Election {
                     this.arrWinners = this.getWinners(winnerIds);
                 }
             }
+
+            // Add withdrawn candidates to list
+            this.arrWithdrawnNominees = [...this.arrWithdrawnNominees, ...this.newlyWithdrawnNominees];
 
             console.log(
                 `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.` +

@@ -82,11 +82,11 @@ export default class ScheduledAnnouncement {
     async announceNewNominees() {
         const { _room, config, _election } = this;
 
-        const { newNominees, electionUrl } = _election;
+        const { newlyNominatedNominees, electionUrl } = _election;
 
         const nominationTab = `${electionUrl}?tab=nomination`;
 
-        const messages = newNominees
+        const messages = newlyNominatedNominees
             .filter(({ userName, nominationLink }) => {
                 if (!userName) {
                     // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
@@ -112,7 +112,7 @@ export default class ScheduledAnnouncement {
     async announceWithdrawnNominees() {
         const { _room, config, _election } = this;
 
-        const messages = _election.withdrawnNominees
+        const messages = _election.newlyWithdrawnNominees
             .filter(({ userName, nominationLink }) => {
                 if (!userName) {
                     // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
