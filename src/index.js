@@ -397,6 +397,9 @@ import {
 
                 console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
             });
+
+            // Order of nomination first
+            election.arrWithdrawnNominees.reverse();
         }
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
