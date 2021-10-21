@@ -891,3 +891,13 @@ export const sayHowManyAreEligibleToVote = async (config, election) => {
 
     return `${formatNumber(numEligible, 3)} user${pluralize(numEligible)} ${modal} eligible to vote in the election.`;
 };
+
+/**
+ * @summary builds an uptime response
+ * @param {BotConfig} config bot configuration
+ * @returns {string}
+ */
+export const sayUptime = (config) => {
+    const { scriptInitDate } = config;
+    return `${Math.floor((Date.now() - scriptInitDate.getTime()) / 1e3)} seconds of uptime.`;
+};
