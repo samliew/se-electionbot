@@ -1,4 +1,4 @@
-import { someMatch } from "./utils/expressions.js";
+import { allMatch, noneMatch, someMatch } from "./utils/expressions.js";
 
 /**
  * @summary checks if the message asked how or where to nominate
@@ -19,7 +19,7 @@ export const isAskedForNominatingInfo = (text) => {
  */
 export const isAskedIfCanNominateOthers = (text) => {
     return someMatch([
-        /^(?:how\s+can|can|how\s+to)(?:\s+one|\s+i)?(?:\s+users?)?\s+(?:nominate|register)\s+(?:(?:an)?others?(?:\s+users?)?)|some(?:one|body)/i
+        /^(?:how\s+can|can|how\s+to)(?:\s+one|\s+i)?(?:\s+users?)?\s+(?:nominate|register)\s+(?:(?:an)?others?(?:\s+users?)?|some(?:one|body))/i
     ], text);
 };
 
@@ -154,7 +154,9 @@ export const isAskedForOwnScore = (text) => {
  * @returns {boolean}
  */
 export const isAskedForOtherScore = (text) => {
-    return /(?:(?:what)?(?: is|'s)(?: the)? |^)candidate score (?:for |of )(?:the )?(?:(?:site |chat )?user )?(?:-?\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/.test(text) && !/\b(?:my|mine)\b/.test(text);
+    return allMatch([
+        /(?:(?:what)?(?: is|'s)(?: the)? |^)(?:candidate )?score (?:for |of )(?:the )?(?:(?:site )?user )?(?:@?-?\d+|https:\/\/.+\/users\/\d+.*)(?:$|\?)/
+    ], text) && noneMatch([/\b(?:my|mine)\b/], text);
 };
 
 /**
@@ -369,5 +371,30 @@ export const isAskedHowManyCandidatesInTheRoom = (text) => {
     return someMatch([
         /^how many (?:candidate|nominee)s are\s+(?:here|in\s+th(?:e|is)\s+room)(?:\?|$)/i,
         /^are(?:\s+there\s+)?any\s+(?:candidate|nominee)s\s+(?:here|in\s+th(?:e|is)\s+room)(?:\?|$)/i
+    ], text);
+};
+
+/**
+ * @summary checks if a message is asking for help
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedForHelp = (text) => {
+    return someMatch([
+        /^can you help(?:\s+me)?/i,
+        /^(?:please\s+)?(?:h[ae]lp|info)(?:(?:\s+me)?(?:,?\s+please)?)(?:[?!]|$)/i,
+    ], text);
+};
+
+/**
+ * @summary checks if a message is asking when is the next phase
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedWhenIsTheNextPhase = (text) => {
+    return someMatch([
+        /^when('s| is| does) (the )?next phase/i,
+        /^when('s| is| does) (the )?(?:nomination|election) (phase )?(?:start|end)(ing)?/i,
+        /is (?:it|election|nomination) (?:start|end)(?:ing|ed)\s?(soon|yet)?/i,
     ], text);
 };

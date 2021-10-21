@@ -18,7 +18,8 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe,
+    isAskedForHelp,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
     isBotMentioned,
     isHatingTheBot,
@@ -807,9 +808,7 @@ import {
                     if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${linkToRelativeTimestamp(election.dateElection)} to vote in the final election voting phase.`;
                 }
             }
-
-            // Next phase/ When is the election starting
-            else if (/^when('s| is| does) (the )?next phase/.test(content) || /^when('s| is| does) (the )?nomination (phase )?end(ing)?/.test(content) || /^when('s| is| does) (the )?election (phase )?start(ing)?/.test(content) || /is it starting\s?(soon|yet)?/.test(content)) {
+            else if (isAskedWhenIsTheNextPhase(content)) {
                 responseText = sayNextPhase(config, election);
             }
 
@@ -876,7 +875,7 @@ import {
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
 
                 // Help
-                if (/^(help|info)$/.test(content)) {
+                if (isAskedForHelp(content)) {
                     responseText = '\n' + [
                         'Examples of election FAQs I can help with:',
                         'what is an election',
