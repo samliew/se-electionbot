@@ -266,7 +266,7 @@ export const isAskedAboutJonSkeetJokes = (text) => {
  */
 export const isAskedAboutJokes = (text) => {
     return someMatch([
-        /(?:tell|make)\b.+?\b(?:me|us)\b.+?(?:(?: a)? joke|laugh)/
+        /(?:tell|make)\b.+?\b(?:me|us)?\b.+?(?:(?: a)? joke|laugh)/
     ], text);
 };
 
@@ -396,5 +396,16 @@ export const isAskedWhenIsTheNextPhase = (text) => {
         /^when('s| is| does) (the )?next phase/i,
         /^when('s| is| does) (the )?(?:nomination|election) (phase )?(?:start|end)(ing)?/i,
         /is (?:it|election|nomination) (?:start|end)(?:ing|ed)\s?(soon|yet)?/i,
+    ], text);
+};
+
+/**
+ * @summary checks if a message is asking how many users are eligible to vote
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedHowManyAreEligibleToVote = (text) => {
+    return someMatch([
+        /^how many(?: (?:users|people|bots))?(?: are eligible to| can) vote/i
     ], text);
 };

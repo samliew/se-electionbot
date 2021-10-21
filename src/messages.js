@@ -1,4 +1,4 @@
-import { getBadges, getNumberOfVoters, getStackApiKey, getUserInfo } from "./api.js";
+import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
 import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomOops, RandomArray } from "./random.js";
@@ -8,6 +8,7 @@ import {
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase
 } from "./utils.js";
 import { parsePackage } from "./utils/package.js";
+import { formatNumber } from "./utils/strings.js";
 
 /**
  * @typedef {import("./index").ElectionBadge} Badge
@@ -855,4 +856,29 @@ export const sayHowManyCandidatesAreHere = async (config, election, client, room
     }
 
     return numNomineeInRoom ? `${numNomineeInRoom} ${getCandidateOrNominee()}${pluralize(numNomineeInRoom)} ${pluralize(numNomineeInRoom, "are", "is")} in the room: ${nomineeNames}` : "No candidates are in the room";
+};
+
+/**
+ * @summary builds a response to how many candidates are in the room query
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @returns {Promise<string>}
+ */
+export const sayHowManyAreEligibleToVote = async (config, election) => {
+    const { repVote = 1, phase } = election;
+    const numEligible = await getNumberOfUsersEligibleToVote(config, election.apiSlug, repVote);
+
+    const isAre = pluralize(numEligible, "are", "is");
+    const wasWere = pluralize(numEligible, "were", "was");
+
+    const phaseMap = {
+        nomination: "will be",
+        election: isAre,
+        ended: wasWere,
+        cancelled: wasWere,
+    };
+
+    const modal = phaseMap[phase] || isAre;
+
+    return `${formatNumber(numEligible, 3)} user${pluralize(numEligible)} ${modal} eligible to vote in the election.`;
 };

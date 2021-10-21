@@ -126,8 +126,34 @@ export const getNumberOfVoters = async (config, site, badgeId, electionPhaseDate
 };
 
 /**
+ * @summary gets a number of users eligible to vote from the API
+ * @param {BotConfig} config bot configuration
+ * @param {string} site election site slug
+ * @param {number} minRep minimum reputation at which to cut off
+ * @returns {Promise<number>}
+ */
+export const getNumberOfUsersEligibleToVote = async (config, site, minRep) => {
+    const userURL = new URL(`${apiBase}/${apiVer}/users`);
+    userURL.search = new URLSearchParams({
+        pagesize: "100",
+        order: "desc",
+        sort: "reputation",
+        site,
+        filter: "!40CXOUq0axmHYcgDp", // only the total field
+        min: minRep.toString(),
+        key: getStackApiKey(config.apiKeyPool)
+    }).toString();
+
+    if (config.debug) console.log(userURL.toString());
+
+    const { total = 0 } = /** @type {{ total: number }} */(await fetchUrl(config, userURL.toString(), true)) || {};
+
+    return total;
+};
+
+/**
  * @summary gets the network mods from the API
- * @param {BotConfig} config
+ * @param {BotConfig} config bot configuration
  * @param {string} site election site slug
  * @param {number} [page] API response page
  * @returns {Promise<User[]>}
