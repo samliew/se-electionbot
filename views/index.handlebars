@@ -57,6 +57,17 @@
                     <td></td>
                     {{/if}}
                 </tr>
+                <tr><td>Withdrawn Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{arrWithdrawnNominees.length}}</span></td>
+                    {{#if arrWithdrawnNominees.length}}
+                    <td><ul class="list">
+                        {{#each arrWithdrawnNominees}}
+                        <li class="item"><a href="{{this.permalink}}">{{{this.userName}}}</a> (<em><a href="{{this.nominationLink}}">nomination</a></em>); score {{this.userScore}}, {{this.userYears}}</li>
+                        {{/each}}
+                    </ul></td>
+                    {{else}}
+                    <td></td>
+                    {{/if}}
+                </tr>
                 <tr><td>Winners <span class="small-count" data-prefix="(" data-suffix=")">{{arrWinners.length}}</span></td>
                     {{#if arrWinners.length}}
                     <td><ul class="list">

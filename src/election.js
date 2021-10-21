@@ -197,7 +197,14 @@ export default class Election {
         if (prevNominees.length === 0) return [];
 
         const currIds = arrNominees.map(({ userId }) => userId);
-        return prevNominees.filter(({ userId }) => !currIds.includes(userId));
+        const missingNominees = prevNominees.filter(({ userId }) => !currIds.includes(userId));
+
+        missingNominees.forEach(function () {
+            // Change to post history as original post can longer be viewed
+            this.nominationLink = (this.nominationLink || "").replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
+        })
+
+        return missingNominees;
     }
 
     /**
