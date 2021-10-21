@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -74,6 +74,48 @@ describe('Message Guards', () => {
 
             allMatch(isAskedForCurrentNominees, [
                 ...howManyNomineesMatches,
+                "what is my candidate score",
+                "what is the candidate score for 245113",
+            ], false);
+        });
+    });
+
+    describe(isAskedForWithdrawnNominees.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForWithdrawnNominees, [
+                "who has withdrawn",
+                "whom has been removed",
+                "who withdrew from the election",
+                "who was withdrawn from the election",
+                "who was removed from the election",
+                "which candidate has withdrawn",
+                "which candidate was withdrawn",
+                "which candidate was removed",
+                "which nominee has withdrawn",
+                "which nominee was withdrawn",
+                "which nominee was removed",
+                "which nomination has withdrawn",
+                "which nomination was withdrawn",
+                "which nomination was removed",
+                "how many candidates have withdrawn",
+                "how many nominees have withdrawn",
+                "who deleted their nomination",
+                "which candidate deleted their nomination",
+                "was a nomination removed",
+            ]);
+
+            allMatch(isAskedForWithdrawnNominees, [
+                ...howManyNomineesMatches,
+                "who has nominated",
+                "who has participated",
+                "who are the nominees?",
+                "who are the candidates?",
+                "what are the participants?",
+                "who is the participant?",
+                "what were the nominations",
+                "any new nominees?",
+                "is there a nomination",
+                "are there nominations?",
                 "what is my candidate score",
                 "what is the candidate score for 245113",
             ], false);
