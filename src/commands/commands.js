@@ -1,7 +1,7 @@
 import { getModerators } from "../api.js";
 import Election from "../election.js";
 import { sayOtherSiteMods, sayUptime } from "../messages.js";
-import { dateToUtcTimestamp } from "../utils.js";
+import { capitalize, dateToUtcTimestamp } from "../utils.js";
 import { matchNumber } from "../utils/expressions.js";
 
 /**
@@ -259,4 +259,16 @@ export const impersonateUser = (config, content) => {
     const userId = matchNumber(/\s+(\d+)$/, content);
     config.impersonatingUserId = userId;
     return userId ? `messages are now considered to be from ${userId}` : "not impersonating anyone";
+};
+
+/**
+ * @summary switches bot mode
+ * @param {BotConfig} config bot config
+ * @param {string} content message content
+ * @returns {string}
+ */
+export const switchMode = (config, content) => {
+    const [, mode = "debug", state = "on"] = /(debug|verbose)(?:\s+mode)?\s+(on|off)/.exec(content) || [];
+    config[mode] = state === "on";
+    return `${capitalize(mode)} mode ${state}`;
 };
