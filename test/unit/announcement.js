@@ -112,6 +112,8 @@ describe('ScheduledAnnouncement', () => {
         let ann = new ScheduledAnnouncement(config, room, election, scraper);
         afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
 
+        afterEach(() => sinon.restore());
+
         it('should return false on no election passed', async () => {
             const status = await ann.announceWinners(room);
             expect(status).to.be.false;
@@ -148,25 +150,43 @@ describe('ScheduledAnnouncement', () => {
             election.arrWinners.push(getMockNominee({ userName: "Jeanne" }));
             election.phase = "ended";
 
-            await new Promise(async (res, rej) => {
-                Room["default"].prototype.sendMessage = (text) => {
-                    try {
-                        expect(text).to.match(/to the winner\*\*.+Jeanne/);
-                    } catch (error) {
-                        rej(error);
-                    }
-                };
+            const stubbed = sinon.stub(room, "sendMessage");
 
-                const status = await ann.announceWinners(room, election);
+            const status = await ann.announceWinners(room, election);
 
-                try {
-                    expect(status).to.be.true;
-                } catch (error) {
-                    rej(error);
-                }
+            expect(status).to.be.true;
 
-                res(void 0);
-            });
+            const [[message]] = stubbed.args;
+
+            expect(message).to.match(/to the winner\*\*.+Jeanne/);
+        });
+    });
+
+    describe('announceWithdrawnNominees', () => {
+        let ann = new ScheduledAnnouncement(config, room, election, scraper);
+        afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
+
+        afterEach(() => sinon.restore());
+
+        it('should correctly announce withdrawn nominations', async () => {
+            const withdrawn = getMockNominee({ userName: "John", nominationLink: "test", userId: 1 });
+            const remaining = getMockNominee({ userName: "Joanne", nominationLink: "test2", userId: 2 });
+
+            election.arrNominees.push(remaining, withdrawn);
+            election.pushHistory();
+            election.arrNominees.pop();
+
+            const stubbed = sinon.stub(room, "sendMessage");
+
+            ann._election = election;
+
+            const status = await ann.announceWithdrawnNominees();
+
+            expect(status).to.be.true;
+
+            const [[message]] = stubbed.args;
+
+            expect(message).to.match(/John\b.+?\bwithdrawn/);
         });
     });
 });
