@@ -408,6 +408,7 @@ import { matchNumber } from "./utils/expressions.js";
                 const nominationDate = last([...document.querySelectorAll(`#content .relativetime`)])?.title;
 
                 const userId = matchNumber(/\/users\/(\d+)/, userIdHref);
+                const permalink = userIdHref ? `https://${election.siteHostname}${userIdHref}` : "";
 
                 const withdrawnNominee = {
                     userId: userId || -42,
@@ -416,8 +417,16 @@ import { matchNumber } from "./utils/expressions.js";
                     userScore: 0,
                     nominationDate: new Date(nominationDate || -1),
                     nominationLink: nominationRevisionsLink,
-                    permalink: userIdHref ? `https://${election.siteHostname}${userIdHref}` : "",
+                    permalink,
                 };
+
+                if (permalink) {
+                    const profilePage = await fetchUrl(config, `${permalink}?tab=profile`);
+                    const { window: { document } } = new JSDOM(profilePage);
+                    const { textContent } = document.querySelector(`#mainbar-full li [title$=Z]`) || {};
+                    withdrawnNominee.userYears = textContent || "";
+                }
+
                 election.arrWithdrawnNominees.push(withdrawnNominee);
 
                 console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
