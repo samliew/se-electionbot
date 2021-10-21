@@ -111,7 +111,7 @@ export default class Rescraper {
             }
 
             // Withdrawn nominations
-            if (['nomination', 'primary', 'election'].some(phase => phase === election.phase) && election.withdrawnNominees.length > 0) {
+            if (['nomination', 'primary', 'election'].some(phase => phase === election.phase) && election.newlyWithdrawnNominees.length > 0) {
                 await announcement?.announceWithdrawnNominees();
                 console.log(`RESCRAPER - Withdrawn nominees announced.`);
             }

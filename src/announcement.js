@@ -82,15 +82,15 @@ export default class ScheduledAnnouncement {
     async announceNewNominees() {
         const { _room, config, _election } = this;
 
-        const { newNominees, electionUrl } = _election;
+        const { newlyNominatedNominees, electionUrl } = _election;
 
         const nominationTab = `${electionUrl}?tab=nomination`;
 
-        const messages = newNominees
+        const messages = newlyNominatedNominees
             .filter(({ userName, nominationLink }) => {
-                if (!userName) {
+                if (!userName || !nominationLink) {
                     // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
-                    console.log(`missing username: ${nominationLink}`);
+                    console.log(`missing user info`, { userName, nominationLink });
                 }
                 return !!userName;
             })
@@ -112,11 +112,11 @@ export default class ScheduledAnnouncement {
     async announceWithdrawnNominees() {
         const { _room, config, _election } = this;
 
-        const messages = _election.withdrawnNominees
+        const messages = _election.newlyWithdrawnNominees
             .filter(({ userName, nominationLink }) => {
-                if (!userName) {
+                if (!userName || !nominationLink) {
                     // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
-                    console.log(`missing username: ${nominationLink}`);
+                    console.log(`missing user info`, { userName, nominationLink });
                 }
                 return !!userName;
             })

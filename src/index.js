@@ -37,7 +37,7 @@ import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, pluralize, roomKeepAlive, wait
+    linkToUtcTimestamp, makeURL, pluralize, roomKeepAlive, searchChat, wait
 } from './utils.js';
 
 /**
@@ -352,6 +352,36 @@ import {
                 if (/I can answer commonly-asked questions about elections/.test(item.message) && item.chatUserId === me.id) break;
             }
             config.activityCounter = count;
+        }
+
+        /*
+         * Sync withdrawn nominees on startup using past ElectionBot announcements
+         * (assuming ElectionBot managed to announce all the nominations from start of election)
+         */
+        const announcementHistory = await searchChat(config, config.chatDomain, "We have a new nomination Please welcome our latest candidate", config.chatRoomId);
+        if (announcementHistory) {
+
+            // Parse previous nomination announcements and see which ones are no longer around
+            announcementHistory.filter(item => item.username === me.name || item.chatUserId === me.id).forEach(item => {
+                const [, userId] = item.messageMarkup.match(/#post-(\d+)/) || [, null];
+
+                const [, nominationLink] = item.messageMarkup.match(/href="(.+\/election\/13\?tab=\w+#post-\d+)"/i);
+
+                if (election.arrNominees.includes(userId)) return;
+
+                const withdrawnNominee = {
+                    userId,
+                    userName: "",
+                    userYears: "",
+                    userScore: 0,
+                    nominationDate: new Date(-1),
+                    nominationLink: nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions",
+                    permalink: "",
+                };
+                election.arrWithdrawnNominees.push(withdrawnNominee);
+
+                console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
+            });
         }
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
