@@ -2,7 +2,7 @@ import { partialRight } from "ramda";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
-import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomOops, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, dateToRelativetime, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
@@ -49,7 +49,7 @@ export const sayHI = async (config, election, greeting = 'Welcome to the electio
         "null": `The ${electionLink} has not begun yet.`,
         "ended": `The ${electionLink} has ended.`,
         "cancelled": `The ${electionLink} has been cancelled.`,
-        "election": `The ${electionLink} is happening at the moment, and ${numVoters} users have already voted!`,
+        "election": `The ${electionLink} is ${getRandomNow()}, and ${numVoters} users have already voted!`,
         "nomination": `${phasePrefix}, and currently there ${pluralCandidates}.`,
         "primary": `${phasePrefix}, and currently there ${pluralCandidates}.`,
     };
@@ -796,7 +796,7 @@ export const sayAlreadyVoted = async (config, election) => {
         const numAwarded = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
 
         const basePrefix = `Based on the number of ${electionBadgeName} badges awarded`;
-        const eligible = `(${percentify(numAwarded, numEligible, 2)} out of ${format(numEligible)} eligible)`;
+        const eligible = `(${percentify(numAwarded, numEligible, 2)} of ${format(numEligible)} eligible)`;
         const postfix = `user${pluralize(numAwarded)} ha${pluralize(numAwarded, "ve", "s")} voted so far`;
 
         return `${basePrefix}, ${format(numAwarded)} ${eligible} ${postfix}.`;

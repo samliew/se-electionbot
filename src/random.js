@@ -127,3 +127,9 @@ export const getRandomNominationSynonym = () => new RandomArray(
     "candidacy",
     "nomination"
 ).getRandom();
+
+export const getRandomNow = () => new RandomArray(
+    "underway",
+    "happening at the moment",
+    "in progress"
+).getRandom();
