@@ -2,6 +2,8 @@ import Client from "chatexchange";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
+import { JSDOM } from "jsdom";
+// import { JSDOM } from "jsdom";
 import sanitize from "sanitize-html";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
@@ -35,10 +37,12 @@ import { makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
 import {
     dateToRelativetime,
-    dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, keepAlive,
+    dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, keepAlive,
     linkToRelativeTimestamp,
     linkToUtcTimestamp, makeURL, pluralize, roomKeepAlive, searchChat, wait
 } from './utils.js';
+import { last } from "./utils/arrays.js";
+import { matchNumber } from "./utils/expressions.js";
 
 /**
  * @typedef {(Pick<Badge, "name"|"badge_id"> & { required?: boolean, type: string })} ElectionBadge
@@ -371,32 +375,53 @@ import {
                 console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
             }
 
+            const { id, name } = me;
+
+            const botAnnouncements = announcementHistory
+                .filter(({ username, chatUserId }) => username === name || chatUserId === id);
+
             // Parse previous nomination announcements and see which ones are no longer around
-            announcementHistory.filter(item => item.username === me.name || item.chatUserId === me.id).forEach(item => {
+            for (const item of botAnnouncements) {
+                const { messageMarkup } = item;
 
                 const [, userName, nominationLink, postId] =
-                    item.messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
+                    messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
 
                 if (config.debugOrVerbose) {
-                    console.log(`Nomination announcement:`, item.messageMarkup, { userName, nominationLink, postId });
+                    console.log(`Nomination announcement:`, messageMarkup, { currentNomineePostIds, userName, nominationLink, postId });
                 }
 
                 // Invalid, or still a nominee based on nomination post ids
-                if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) return;
+                if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) continue;
+
+                const nominationRevisionsLink = nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
+
+                /** @type {string} */
+                const revisionHTML = await fetchUrl(config, nominationRevisionsLink);
+
+                const { window: { document } } = new JSDOM(revisionHTML);
+
+                // @ts-expect-error TODO: cleanup
+                const userIdHref = last([...document.querySelectorAll(`#content a[href*="/user"]`)])?.href;
+
+                //  @ts-expect-error TODO: cleanup
+                const nominationDate = last([...document.querySelectorAll(`#content .relativetime`)])?.title;
+
+                const userId = matchNumber(/\/users\/(\d+)/, userIdHref);
 
                 const withdrawnNominee = {
-                    userId: -42,
+                    userId: userId || -42,
                     userName: userName,
                     userYears: "",
                     userScore: 0,
-                    nominationDate: new Date(-1),
-                    nominationLink: nominationLink ? nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions" : "",
-                    permalink: "",
+                    nominationDate: new Date(nominationDate || -1),
+                    nominationLink: nominationRevisionsLink,
+                    permalink: userIdHref ? `https://${election.siteHostname}${userIdHref}` : "",
                 };
                 election.arrWithdrawnNominees.push(withdrawnNominee);
 
                 console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
-            });
+            }
 
             // Order of nomination first
             election.arrWithdrawnNominees.reverse();
