@@ -48,44 +48,15 @@
                 <tr><td>Positions</td><td>{{numPositions}}</td></tr>
                 <tr>
                     <td>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{arrNominees.length}}</span></td>
-                    <td>
-                        <table class="nested">
-                            <thead>
-                                <tr>
-                                    <th>Nominee</th>
-                                    <th>Post</th>
-                                    <th>Score</th>
-                                    <th>Member for</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{#each arrNominees}}
-                                <tr>
-                                    <td>
-                                        <a href="{{this.permalink}}">{{{this.userName}}}</a>
-                                    </td>
-                                    <td>
-                                        <a href="{{this.nominationLink}}">nomination</a>
-                                    </td>
-                                    <td>
-                                        {{this.userScore}}
-                                    </td>
-                                    <td>
-                                        {{unprefix "member for" this.userYears}}
-                                    </td>
-                                </tr>
-                                {{/each}}
-                            </tbody>
-                        </table>
-                    </td>
+                    {{#if arrNominees.length}}
+                    <td>{{> nominees arrNominees }}</td>
+                    {{else}}
+                    <td></td>
+                    {{/if}}
                 </tr>
                 <tr><td>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{arrWithdrawnNominees.length}}</span></td>
                     {{#if arrWithdrawnNominees.length}}
-                    <td><ul class="list">
-                        {{#each arrWithdrawnNominees}}
-                        <li class="item">{{{this.userName}}} (<em><a href="{{this.nominationLink}}">nomination</a></em>)</li>
-                        {{/each}}
-                    </ul></td>
+                    <td>{{> nominees arrWithdrawnNominees }}</td>
                     {{else}}
                     <td></td>
                     {{/if}}
