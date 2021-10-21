@@ -5,7 +5,7 @@ import entities from 'html-entities';
 import sanitize from "sanitize-html";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
-import { announceNominees, announceWinners, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import Election from './election.js';
@@ -493,11 +493,9 @@ import {
 
                 commander.add("alive", "bot reports on its status", isAliveCommand, AccessLevel.privileged);
 
-                commander.add("debug", "switches debugging on/off", (config, content) => {
-                    const [, state = "on"] = /(on|off)/.exec(content) || [];
-                    config.debug = state === "on";
-                    return `Debug mode ${state}`;
-                }, AccessLevel.dev);
+                commander.add("debug", "switches debugging on/off", switchMode, AccessLevel.dev);
+
+                commander.add("verbose", "switches verbose mode on/off", switchMode, AccessLevel.dev);
 
                 commander.add("fun", "switches fun mode on/off", (config, content) => {
                     const [, state = "on"] = /(on|off)/.exec(content) || [];
