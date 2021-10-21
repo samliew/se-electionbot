@@ -1,6 +1,6 @@
 import { getModerators } from "../api.js";
 import Election from "../election.js";
-import { sayOtherSiteMods } from "../messages.js";
+import { sayOtherSiteMods, sayUptime } from "../messages.js";
 import { dateToUtcTimestamp } from "../utils.js";
 import { matchNumber } from "../utils/expressions.js";
 
@@ -110,13 +110,16 @@ export const setThrottleCommand = (content, config) => {
  */
 export const isAliveCommand = (config) => {
 
-    const { debug, scriptInitDate, scriptHostname } = config;
+    const { debug, verbose, scriptInitDate, scriptHostname } = config;
 
     const hosted = `I'm alive on ${scriptHostname || "planet Earth"}`;
     const started = `started on ${dateToUtcTimestamp(scriptInitDate)}`;
-    const uptime = `uptime of ${Math.floor((Date.now() - scriptInitDate.getTime()) / 1e3)} seconds`;
+    const uptime = sayUptime(config);
 
-    return `${hosted}, ${started} with an ${uptime}.${debug ? ' I am in debug mode.' : ''}`;
+    const verbosed = verbose ? " verbose" : "";
+    const debugged = debug ? ` I am in${verbosed} debug mode.` : "";
+
+    return `${hosted}, ${started} with ${uptime}${debugged}`;
 };
 
 /**
