@@ -495,7 +495,7 @@ export const sayNumberOfPositions = (_config, election, _text) => {
 
     const suffix = pluralize(numPositions, "s", "");
     const pastBe = pluralize(numPositions, "were", "was");
-    const currBe = pluralize(numPositions, "are", "is");
+    const currBe = pluralize(numPositions, "are being", "is");
     const future = pluralize(numPositions, "will be", "shall be");
 
     const rules = [
