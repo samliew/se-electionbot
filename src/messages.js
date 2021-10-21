@@ -1,3 +1,4 @@
+import { partialRight } from "ramda";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
@@ -8,7 +9,7 @@ import {
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase
 } from "./utils.js";
 import { parsePackage } from "./utils/package.js";
-import { formatNumber } from "./utils/strings.js";
+import { formatNumber, percentify } from "./utils/strings.js";
 
 /**
  * @typedef {import("./index").ElectionBadge} Badge
@@ -782,15 +783,23 @@ export const sayAboutSTV = (_config, _election, text) => {
  */
 export const sayAlreadyVoted = async (config, election) => {
 
-    const { phase, dateElection, statVoters, apiSlug } = election;
+    const { phase, dateElection, statVoters, apiSlug, repVote = 1 } = election;
 
     // Badge that is awarded for voting in elections
     const electionBadgeName = "Constituent";
     const electionBadgeId = election.getBadgeId(electionBadgeName);
 
     if (phase === 'election' && electionBadgeId) {
+        const format = partialRight(formatNumber, [3]);
+
+        const numEligible = await getNumberOfUsersEligibleToVote(config, apiSlug, repVote);
         const numAwarded = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
-        return `Based on the number of ${electionBadgeName} badges awarded, ${numAwarded} users have voted so far.`;
+
+        const basePrefix = `Based on the number of ${electionBadgeName} badges awarded`;
+        const eligible = `(${percentify(numAwarded, numEligible, 2)} out of ${format(numEligible)} eligible)`;
+        const postfix = `user${pluralize(numAwarded)} ha${pluralize(numAwarded, "ve", "s")} voted so far`;
+
+        return `${basePrefix}, ${format(numAwarded)} ${eligible} ${postfix}.`;
     }
     else if (phase === 'ended') {
         return statVoters || "";
