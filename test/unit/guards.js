@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
-    isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore,
+    isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
@@ -443,6 +443,23 @@ describe('Message Guards', () => {
     describe(isAskedHowManyCandidatesInTheRoom.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedHowManyCandidatesInTheRoom, howManyNomineesMatches);
+        });
+    });
+
+    describe(isAskedForHelp.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForHelp, [
+                "Can you help me?",
+                "help me, please",
+                "can you help me please?",
+                "Can you help?",
+                "help",
+                "halp!",
+                "info",
+                "Please help me"
+            ]);
+
+            allMatch(isAskedForHelp, ["the bot is of no help", "help is on the way"], false);
         });
     });
 });

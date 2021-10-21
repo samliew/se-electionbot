@@ -18,6 +18,7 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
+    isAskedForHelp,
     isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
     isBotMentioned,
@@ -876,7 +877,7 @@ import {
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
 
                 // Help
-                if (/^(help|info)$/.test(content)) {
+                if (isAskedForHelp(content)) {
                     responseText = '\n' + [
                         'Examples of election FAQs I can help with:',
                         'what is an election',

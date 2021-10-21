@@ -373,3 +373,15 @@ export const isAskedHowManyCandidatesInTheRoom = (text) => {
         /^are(?:\s+there\s+)?any\s+(?:candidate|nominee)s\s+(?:here|in\s+th(?:e|is)\s+room)(?:\?|$)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking for help
+ * @param {string} text message text
+ *  @returns {boolean}
+ */
+export const isAskedForHelp = (text) => {
+    return someMatch([
+        /^can you help(?:\s+me)?/i,
+        /^(?:please\s+)?(?:h[ae]lp|info)(?:(?:\s+me)?(?:,?\s+please)?)(?:[?!]|$)/i,
+    ], text);
+};
