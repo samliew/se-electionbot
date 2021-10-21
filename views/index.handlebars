@@ -46,16 +46,38 @@
                 <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
                 <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
                 <tr><td>Positions</td><td>{{numPositions}}</td></tr>
-                <tr><td>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{arrNominees.length}}</span></td>
-                    {{#if arrNominees.length}}
-                    <td><ul class="list">
-                        {{#each arrNominees}}
-                        <li class="item"><a href="{{this.permalink}}">{{{this.userName}}}</a> (<em><a href="{{this.nominationLink}}">nomination</a></em>); score {{this.userScore}}, {{this.userYears}}</li>
-                        {{/each}}
-                    </ul></td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
+                <tr>
+                    <td>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{arrNominees.length}}</span></td>
+                    <td>
+                        <table class="nested">
+                            <thead>
+                                <tr>
+                                    <th>Nominee</th>
+                                    <th>Post</th>
+                                    <th>Score</th>
+                                    <th>Member for</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each arrNominees}}
+                                <tr>
+                                    <td>
+                                        <a href="{{this.permalink}}">{{{this.userName}}}</a>
+                                    </td>
+                                    <td>
+                                        <a href="{{this.nominationLink}}">nomination</a>
+                                    </td>
+                                    <td>
+                                        {{this.userScore}}
+                                    </td>
+                                    <td>
+                                        {{unprefix "member for" this.userYears}}
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </td>
                 </tr>
                 <tr><td>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{arrWithdrawnNominees.length}}</span></td>
                     {{#if arrWithdrawnNominees.length}}

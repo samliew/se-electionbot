@@ -83,8 +83,10 @@ const handlebarsConfig = {
             return typeof this[name] === "function" ? this[name](...args.slice(0, -1)) : undefined;
         },
         contextCall: function (name, ctxt, ...args) {
-            console.log({ name, ctxt });
             return typeof ctxt[name] === "function" ? ctxt[name](...args.slice(0, -1)) : undefined;
+        },
+        unprefix: function (prefix, text) {
+            return text.replace(new RegExp(`^${prefix}\\s*?`), "");
         }
     },
 };
