@@ -80,7 +80,11 @@ const handlebarsConfig = {
             return `<span class="${data || data === 'required' ? 'required' : ''}">${data || data === 'required' ? 'required' : ''}</span>`;
         },
         call: function (name, ...args) {
-            return this[name](...args);
+            return typeof this[name] === "function" ? this[name](...args.slice(0, -1)) : undefined;
+        },
+        contextCall: function (name, ctxt, ...args) {
+            console.log({ name, ctxt });
+            return typeof ctxt[name] === "function" ? ctxt[name](...args.slice(0, -1)) : undefined;
         }
     },
 };
