@@ -24,3 +24,11 @@ export const someMatch = (expressions, text) => expressions.some((expression) =>
  * @returns {boolean}
  */
 export const allMatch = (expressions, text) => expressions.every((expression) => expression.test(text));
+
+/**
+ * @summary ensures all expressions do not match
+ * @param {RegExp[]} expressions regular expression list
+ * @param {string} text text to test
+ * @returns {boolean}
+ */
+export const noneMatch = (expressions, text) => expressions.every((expression) => !expression.test(text));
