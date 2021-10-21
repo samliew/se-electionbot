@@ -361,14 +361,28 @@ import {
         const announcementHistory = await searchChat(config, config.chatDomain, "We have a new nomination Please welcome our latest candidate", config.chatRoomId);
         if (announcementHistory) {
 
+            const currentNomineePostIds = election.arrNominees.map(({ nominationLink }) => {
+                const [, postId] = nominationLink.match(/(\d+)$/) || [, null];
+                return postId ? +postId : null;
+            }).filter(Boolean);
+
+            if (config.debugOrVerbose) {
+                console.log(`INIT - Current nominees:`, election.arrNominees);
+                console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
+            }
+
             // Parse previous nomination announcements and see which ones are no longer around
             announcementHistory.filter(item => item.username === me.name || item.chatUserId === me.id).forEach(item => {
 
-                const [, userName, nominationLink, postId] = item.messageMarkup.match(/\[([a-z0-9\p{L}\p{M} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!$/) || [, "", ""];
+                const [, userName, nominationLink, postId] =
+                    item.messageMarkup.match(/\[([a-z0-9\p{L}\p{M} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/i) || [, "", "", ""];
 
-                const currentNomineePostIds = election.arrNominees.map(({ nominationLink }) => +nominationLink.replace(/\D+(\d+)$/, '$1'));
+                if (config.debugAndVerbose) {
+                    console.log(`Nomination announcement:`, item.messageMarkup, { userName, nominationLink, postId });
+                }
 
-                if (currentNomineePostIds.includes(postId)) return;
+                // Invalid, or still a nominee based on nomination post ids
+                if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) return;
 
                 const withdrawnNominee = {
                     userId: -42,
@@ -376,12 +390,12 @@ import {
                     userYears: "",
                     userScore: 0,
                     nominationDate: new Date(-1),
-                    nominationLink: nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions",
+                    nominationLink: nominationLink ? nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions" : "",
                     permalink: "",
                 };
                 election.arrWithdrawnNominees.push(withdrawnNominee);
 
-                console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee, item.messageMarkup, { userName, nominationLink, postId });
+                console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
             });
         }
 
