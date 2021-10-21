@@ -618,8 +618,9 @@ export const matchesOneOfChatHosts = (text, path) => {
  */
 export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, chatdomain, hostname, apiKey) => {
     try {
-        const chatUserPage = await fetchUrl(config, `https://chat.${chatdomain}/users/${chatUserId}`);
-        console.log(`User's chat profile: ${chatUserPage}`);
+        const chatUserUrl = `https://chat.${chatdomain}/users/${chatUserId}`;
+        const chatUserPage = await fetchUrl(config, chatUserUrl);
+        console.log(`User's chat profile: ${chatUserUrl}`);
 
         if (!chatUserPage) return null;
 
