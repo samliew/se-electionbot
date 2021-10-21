@@ -375,7 +375,7 @@ import {
             announcementHistory.filter(item => item.username === me.name || item.chatUserId === me.id).forEach(item => {
 
                 const [, userName, nominationLink, postId] =
-                    item.messageMarkup.match(/\[([a-z0-9\p{L}\p{M} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/i) || [, "", "", ""];
+                    item.messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
 
                 if (config.debugOrVerbose) {
                     console.log(`Nomination announcement:`, item.messageMarkup, { userName, nominationLink, postId });
