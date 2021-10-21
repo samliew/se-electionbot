@@ -104,7 +104,7 @@
                                     <th>Link</th>
                                     <th>Id</th>
                                     <th>Type</th>
-                                    {{#if isStackOverflow}}<th>Required</th>{{/if}}
+                                    {{#if @root/data/isStackOverflow}}<th>Required</th>{{/if}}
                                 </tr>
                             </thead>
                             <tbody>
@@ -113,7 +113,7 @@
                                 <td><a href="{{@root/data/siteUrl}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
                                 <td>{{this.badge_id}}</td>
                                 <td>{{this.type}}</td>
-                                {{#if ../isStackOverflow}}<td>{{{required this.required}}}</td>{{/if}}
+                                {{#if @root/data/isStackOverflow}}<td>{{{required this.required}}}</td>{{/if}}
                             </tr>
                             {{/each}}
                             </tbody>
