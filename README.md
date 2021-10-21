@@ -21,7 +21,10 @@ General election help:
 - what are the moderation badges
 - what are the participation badges
 - what are the editing badges
-- what are the required badges _(SO-only)_
+
+Stack Overflow-only:
+
+- what are the required badges
 
 Current election info:
 
@@ -52,7 +55,7 @@ About the voting system:
 
 ElectionBot info _(requires mention)_:
 
-- help
+- help/info/ can you help
 - about
 - alive
 - who made me/ who are the developers
@@ -72,7 +75,7 @@ Moderators can also make use of these commands _(requires mention)_ to help mode
 - coffee
 - commands
 - greet
-- announce winners
+- announce winners/nominees
 - whois _sitename_ mods
 - **what is the candidate score for _X_**
 
