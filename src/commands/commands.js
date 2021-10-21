@@ -110,16 +110,18 @@ export const setThrottleCommand = (content, config) => {
  */
 export const isAliveCommand = (config) => {
 
-    const { debug, verbose, scriptInitDate, scriptHostname } = config;
+    const { debug, verbose, scriptInitDate, scriptHostname, debugOrVerbose } = config;
 
     const hosted = `I'm alive on ${scriptHostname || "planet Earth"}`;
     const started = `started on ${dateToUtcTimestamp(scriptInitDate)}`;
     const uptime = sayUptime(config);
 
+    const modePrefix = debugOrVerbose ? " I am in" : "";
     const verbosed = verbose ? " verbose" : "";
-    const debugged = debug ? ` I am in${verbosed} debug mode.` : "";
+    const debugged = debug ? ` debug` : "";
+    const modePostfix = debugOrVerbose ? " mode." : "";
 
-    return `${hosted}, ${started} with ${uptime}${debugged}`;
+    return `${hosted}, ${started} with ${uptime}${modePrefix}${verbosed}${debugged}${modePostfix}`;
 };
 
 /**
