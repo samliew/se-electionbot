@@ -112,6 +112,19 @@ export const isAskedForCurrentNominees = (text) => {
 };
 
 /**
+ * @summary checks if the message asked to tell who the withdrawn nominees are
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isAskedForWithdrawnNominees = (text) => {
+    return someMatch([
+        /^(?:who)\b.*\b(?:withdr[ae]wn?|removed|deleted)\b.*\b(?:election|nomination)/,
+        /^(?:whom?) (?:has|have|was)\b.*\b(?:withdr[ae]wn?|removed|deleted)/,
+        /^(?:how many|which|was|were)\b.*\b(?:candidate|nomin(?:ee|ation))s?\b.*\b(?:withdr[ae]wn?|removed|deleted)/
+    ], text);
+};
+
+/**
  * @summary checks if the message asked for current election schedule
  * @param {string} text
  * @returns {boolean}

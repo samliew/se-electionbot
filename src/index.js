@@ -19,7 +19,7 @@ import {
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionSchedule,
     isAskedForHelp,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
     isBotMentioned,
     isHatingTheBot,
@@ -397,6 +397,9 @@ import {
 
                 console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
             });
+
+            // Order of nomination first
+            election.arrWithdrawnNominees.reverse();
         }
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
@@ -765,7 +768,7 @@ import {
                 responseText = sayCandidateScoreLeaderboard(election.apiSlug);
             }
 
-            // Current candidates
+            // Current candidates/nominees
             else if (isAskedForCurrentNominees(content)) {
                 if (election.phase === null) {
                     responseText = sayNotStartedYet(election);
@@ -777,6 +780,25 @@ import {
                 }
                 else {
                     responseText = `No users have nominated themselves yet. Why not be the first?`;
+                }
+            }
+
+            // Withdrawn candidates/nominations
+            else if (isAskedForWithdrawnNominees(content)) {
+
+                const { arrWithdrawnNominees } = election;
+
+                const numWithdrawnNominees = arrWithdrawnNominees.length;
+
+                if (election.phase === null) {
+                    responseText = sayNotStartedYet(election);
+                }
+                else if (numWithdrawnNominees > 0) {
+                    responseText = `There ${numWithdrawnNominees === 1 ? 'is' : 'are'} ${numWithdrawnNominees} candidate${pluralize(numWithdrawnNominees)} who have withdrawn: ` +
+                        arrWithdrawnNominees.map(v => makeURL(v.userName, v.nominationLink)).join(', ');
+                }
+                else {
+                    responseText = `No candidates have withdrawn from the election yet.`;
                 }
             }
 
