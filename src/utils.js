@@ -619,6 +619,8 @@ export const matchesOneOfChatHosts = (text, path) => {
 export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, chatdomain, hostname, apiKey) => {
     try {
         const chatUserPage = await fetchUrl(config, `https://chat.${chatdomain}/users/${chatUserId}`);
+        console.log(`User's chat profile: ${chatUserPage}`);
+
         if (!chatUserPage) return null;
 
         const $chat = cheerio.load(/** @type {string} */(chatUserPage));
@@ -626,9 +628,9 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         const linkedHref = $chat('.user-stats a').first().attr('href');
         if (!linkedHref) return null;
 
-        // ensure the parse won't break if SE stops using protocol-relative URLs
+        // Ensure the parse won't break if SE stops using protocol-relative URLs
         const linkedUserUrl = linkedHref.replace(/^\/\//, "https://") || "";
-        console.log(`Linked site user url: ${linkedUserUrl}`);
+        console.log(`User's linked profile: ${linkedUserUrl}`);
 
         // Linked site is the one we wanted, return site userid
         if (linkedUserUrl.includes(hostname)) {
@@ -654,7 +656,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         ];
 
         const networkUserUrl = /** @type {HTMLAnchorElement|null} */(document.querySelector(networkProfileSelectors.join(", ")))?.href;
-        console.log(`Network user URL: ${networkUserUrl}`);
+        console.log(`User's network profile: ${networkUserUrl}`);
 
         // do not attempt to parse network id if the URL is missing
         if (networkUserUrl === void 0) {

@@ -151,7 +151,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             });
         }
 
-        if (isAskingForOtherUser && [isModerator, config.devIds.has(userId)].every((condition) => !condition)) {
+        if (isAskingForOtherUser && [isModerator, config.adminIds.has(userId), config.devIds.has(userId)].every((condition) => !condition)) {
             config.awaitingConfirmation.set(userId, () => makeCandidateScoreCalc(config, modIds)(election, user, { ...message, content: "" }));
             return sayLacksPrivilege("request candidate score of others", "tell you your own score");
         }
