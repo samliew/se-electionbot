@@ -1,8 +1,8 @@
 /**
  * @summary formats a number accorting to the number of didits to group and a separator
- * @param {number} num
- * @param {number} group
- * @param {string} [sep]
+ * @param {number} num number to format
+ * @param {number} group number of sequential digits to separate
+ * @param {string} [sep] separator
  * @returns {string}
  */
 export const formatNumber = (num, group, sep = ",") => {
@@ -19,4 +19,18 @@ export const formatNumber = (num, group, sep = ",") => {
     }
 
     return output;
+};
+
+/**
+ * @summary formats two numbers as a percentage
+ * @param {number} numA quotient
+ * @param {number} numB divisor
+ * @param {number} precision percentage precision
+ * @param {string} [postfix=""] output postfix
+ * @returns {string}
+ */
+export const percentify = (numA, numB, precision, postfix = "%") => {
+    const percent = numA / numB * 100;
+    const isInt = percent === Math.trunc(percent);
+    return `${isInt ? percent : percent.toFixed(precision)}${postfix}`;
 };
