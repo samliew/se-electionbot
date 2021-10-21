@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -245,14 +245,30 @@ describe('Message Guards', () => {
         });
     });
 
+    const userEligibilityMatches = [
+        "can user 123 be elected?",
+        "can user 456 be nominated?",
+        "can user 789 be eligible?",
+        "is user 012 eligible?"
+    ];
+
+    const eligibleUserCountMatches = [
+        "how many users can vote?",
+        "how many can vote?",
+        "how many people can vote in the election?"
+    ];
+
     describe('isAskedForUserEligibility', () => {
         it('should correctly match content', () => {
-            allMatch(isAskedForUserEligibility, [
-                "can user 123 be elected?",
-                "can user 456 be nominated?",
-                "can user 789 be eligible?",
-                "is user 012 eligible?"
-            ]);
+            allMatch(isAskedForUserEligibility, userEligibilityMatches);
+            allMatch(isAskedForUserEligibility, eligibleUserCountMatches, false);
+        });
+    });
+
+    describe(isAskedHowManyAreEligibleToVote.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowManyAreEligibleToVote, eligibleUserCountMatches);
+            allMatch(isAskedHowManyAreEligibleToVote, userEligibilityMatches, false);
         });
     });
 
