@@ -276,6 +276,7 @@ export class BotConfig {
 
     /**
      * @summary returns whether the bot is in increased logging mode
+     * @description use this when you want logging either in development or production, because you can set verbose mode in production to get more data or stealth debugging
      */
     get debugOrVerbose() {
         return this.debug || this.verbose;
@@ -283,6 +284,7 @@ export class BotConfig {
 
     /**
      * @summary returns whether the bot is in increased logging mode
+     * @description use this when you want additional logging in development
      */
     get debugAndVerbose() {
         return this.debug && this.verbose;

@@ -366,7 +366,7 @@ import {
                 return postId ? +postId : null;
             }).filter(Boolean);
 
-            if (config.debugOrVerbose) {
+            if (config.verbose) {
                 console.log(`INIT - Current nominees:`, election.arrNominees);
                 console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
             }
@@ -377,7 +377,7 @@ import {
                 const [, userName, nominationLink, postId] =
                     item.messageMarkup.match(/\[([a-z0-9\p{L}\p{M} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/i) || [, "", "", ""];
 
-                if (config.debugAndVerbose) {
+                if (config.debugOrVerbose) {
                     console.log(`Nomination announcement:`, item.messageMarkup, { userName, nominationLink, postId });
                 }
 
