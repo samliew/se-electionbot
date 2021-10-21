@@ -183,6 +183,21 @@ export default class Election {
     }
 
     /**
+     * @summary gets a list of Nominees that has withdrawn
+     * @returns {Nominee[]}
+     */
+    get withdrawnNominees() {
+        const { prev, arrNominees } = this;
+        const prevNominees = prev?.arrNominees || [];
+
+        // Validation
+        if (prevNominees.length === 0) return [];
+
+        const currIds = arrNominees.map(({ userId }) => userId);
+        return prevNominees.filter(({ userId }) => !currIds.includes(userId));
+    }
+
+    /**
      * @summary gets a list of new Winners
      * @returns {Nominee[]}
      */

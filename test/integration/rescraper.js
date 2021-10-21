@@ -58,6 +58,11 @@ describe('Rescraper', () => {
             expect(announceStub.calledOnce).to.be.true;
         });
 
+        it('should attempt to announce withdrawn nominations if any', async () => {
+            // TODO
+            expect(true).to.be.true;
+        });
+
         it('should attempt to announce cancellation if cancelled', async () => {
             const cancelStub = sinon.stub(ann, "announceCancelled");
 

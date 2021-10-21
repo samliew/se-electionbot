@@ -104,6 +104,18 @@ export default class Rescraper {
                 return await heroku.restartApp() || process.exit(1);
             }
 
+            // New nominations
+            if (election.phase === 'nomination' && election.hasNewNominees) {
+                await announcement?.announceNewNominees();
+                console.log(`RESCRAPER - New nominees announced.`);
+            }
+
+            // Withdrawn nominations
+            if (['nomination', 'primary', 'election'].some(phase => phase === election.phase) && election.withdrawnNominees.length > 0) {
+                await announcement?.announceWithdrawnNominees();
+                console.log(`RESCRAPER - Withdrawn nominees announced.`);
+            }
+
             // Primary phase was activated (due to >10 candidates)
             if (!announcement?.hasPrimary && election.datePrimary != null) {
                 announcement?.initPrimary(election.datePrimary);
@@ -122,29 +134,14 @@ export default class Rescraper {
             // The election was cancelled
             if (election.phase === 'cancelled' && election.isNewPhase()) {
                 await announcement?.announceCancelled(room, election);
-
-                if (config.debugOrVerbose) {
-                    console.log(`RESCRAPER - Election was cancelled.`);
-                }
-            }
-
-            // New nominations
-            else if (election.phase === 'nomination' && election.hasNewNominees) {
-                await announcement?.announceNewNominees();
-
-                if (config.debugOrVerbose) {
-                    console.log(`RESCRAPER - New nominees announced.`);
-                }
+                console.log(`RESCRAPER - Election was cancelled.`);
             }
 
             // Official results out
-            else if (election.phase === 'ended' && election.hasNewWinners) {
+            if (election.phase === 'ended' && election.hasNewWinners) {
                 await announcement?.announceWinners(room, election);
                 this.stop();
-
-                if (config.debugOrVerbose) {
-                    console.log(`RESCRAPER - No previous scrape.`);
-                }
+                console.log(`RESCRAPER - Winners announced.`);
             }
 
             // Election is over but there are no winners
