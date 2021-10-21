@@ -281,6 +281,13 @@ export class BotConfig {
         return this.debug || this.verbose;
     }
 
+    /**
+     * @summary returns whether the bot is in increased logging mode
+     */
+    get debugAndVerbose() {
+        return this.debug && this.verbose;
+    }
+
     /* User groups */
 
     devIds = new Set(parseIds(process.env.DEV_IDS || ""));
