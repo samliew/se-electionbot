@@ -88,9 +88,9 @@ export default class ScheduledAnnouncement {
 
         const messages = newlyNominatedNominees
             .filter(({ userName, nominationLink }) => {
-                if (!userName) {
+                if (!userName || !nominationLink) {
                     // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
-                    console.log(`missing username: ${nominationLink}`);
+                    console.log(`missing user info`, { userName, nominationLink });
                 }
                 return !!userName;
             })
@@ -114,9 +114,9 @@ export default class ScheduledAnnouncement {
 
         const messages = _election.newlyWithdrawnNominees
             .filter(({ userName, nominationLink }) => {
-                if (!userName) {
+                if (!userName || !nominationLink) {
                     // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
-                    console.log(`missing username: ${nominationLink}`);
+                    console.log(`missing user info`, { userName, nominationLink });
                 }
                 return !!userName;
             })

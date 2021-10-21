@@ -199,10 +199,10 @@ export default class Election {
         const currIds = arrNominees.map(({ userId }) => userId);
         const missingNominees = prevNominees.filter(({ userId }) => !currIds.includes(userId));
 
-        missingNominees.forEach(function () {
+        missingNominees.forEach(item => {
             // Change to post history as original post can longer be viewed
-            this.nominationLink = (this.nominationLink || "").replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
-        })
+            item.nominationLink = (item.nominationLink || "").replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
+        });
 
         return missingNominees;
     }
