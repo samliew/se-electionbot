@@ -7,7 +7,7 @@ import { JSDOM } from "jsdom";
 import sanitize from "sanitize-html";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
-import { announceNominees, announceWinners, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
@@ -30,7 +30,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
+import { sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -566,10 +566,7 @@ import { matchNumber } from "./utils/expressions.js";
                     return "initiating shutdown sequence";
                 }, AccessLevel.privileged);
 
-                commander.add("greet", "makes the bot welcome everyone", async (election) => {
-                    await sendMessage(config, room, await sayHI(config, election), null, true);
-                    config.activityCounter = 0;
-                }, AccessLevel.privileged);
+                commander.add("greet", "makes the bot welcome everyone", greetCommand, AccessLevel.privileged);
 
                 commander.add("announce nominees", "makes the bot announce nominees", announceNominees, AccessLevel.privileged);
 
@@ -599,7 +596,7 @@ import { matchNumber } from "./utils/expressions.js";
                     ["commands", /commands|usage/],
                     ["alive", /^(?:alive|awake|ping|uptime)/, config],
                     ["say", /say/, originalMessage],
-                    ["greet", /^(?:greet|welcome)/, election],
+                    ["greet", /^(?:greet|welcome)/, config, election, room, content],
                     ["get time", /^(?:get time|time)$/, election],
                     ["get cron", /get cron/, announcement],
                     ["test cron", /test cron/, announcement],

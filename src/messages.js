@@ -37,10 +37,15 @@ export const sayHI = async (config, election, greeting = 'Welcome to the electio
     // Badge that is awarded for voting in elections
     const electionBadgeName = "Constituent";
     const electionBadgeId = election.getBadgeId(electionBadgeName);
-    let numVoters = 0;
 
+    let alreadyVoted = "";
     if (phase === 'election' && electionBadgeId) {
-        numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
+        const numEligible = await getNumberOfUsersEligibleToVote(config, apiSlug, election.repVote || 1);
+        const numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
+
+        const format = partialRight(formatNumber, [3]);
+        const eligible = `${percentify(numVoters, numEligible, 2)} of ${format(numEligible)} eligible`;
+        alreadyVoted = `${format(numVoters)} (${eligible}) user${pluralize(numVoters)} ha${pluralize(numVoters, "ve", "s")} already voted`;
     }
 
     const pluralCandidates = pluralizePhrase(length, `are ${length} candidates`, `is ${length} candidate`);
@@ -49,7 +54,7 @@ export const sayHI = async (config, election, greeting = 'Welcome to the electio
         "null": `The ${electionLink} has not begun yet.`,
         "ended": `The ${electionLink} has ended.`,
         "cancelled": `The ${electionLink} has been cancelled.`,
-        "election": `The ${electionLink} is ${getRandomNow()}, and ${numVoters} users have already voted!`,
+        "election": `The ${electionLink} is ${getRandomNow()}, and ${alreadyVoted}!`,
         "nomination": `${phasePrefix}, and currently there ${pluralCandidates}.`,
         "primary": `${phasePrefix}, and currently there ${pluralCandidates}.`,
     };
