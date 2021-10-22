@@ -425,7 +425,7 @@ import { matchNumber } from "./utils/expressions.js";
                     const profilePage = await fetchUrl(config, `${permalink}?tab=profile`);
                     const { window: { document } } = new JSDOM(profilePage);
                     const { textContent } = document.querySelector(`#mainbar-full li [title$=Z]`) || {};
-                    withdrawnNominee.userYears = textContent || "";
+                    withdrawnNominee.userYears = (textContent || "").replace(/,.+$/, ''); // truncate years as displayed in elections
                 }
 
                 election.arrWithdrawnNominees.push(withdrawnNominee);
