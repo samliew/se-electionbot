@@ -22,6 +22,26 @@ export const formatNumber = (num, group, sep = ",") => {
 };
 
 /**
+ * @summary formats a number with an ordinal suffix
+ * @param {number} num number to format
+ * @returns {string}
+ */
+export const formatOrdinal = (num) => {
+    const rule = new Intl.PluralRules("en-US", { type: "ordinal" });
+
+    const suffixMap = {
+        "zero": "th",
+        "one": "st",
+        "two": "nd",
+        "few": "rd",
+        "many": "th",
+        "other": "th"
+    };
+
+    return `${num}${suffixMap[rule.select(num)] || ""}`;
+};
+
+/**
  * @summary formats two numbers as a percentage
  * @param {number} numA quotient
  * @param {number} numB divisor
