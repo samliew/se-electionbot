@@ -112,9 +112,13 @@ export const getRandomJonSkeetJoke = () => new RandomArray(
     `Users don't mark Jon Skeet's answers as accepted. The universe accepts them out of a sense of truth and justice.`,
 ).getRandom();
 
+export const getRandomInterjectionVerb = () => new RandomArray(
+    "interject", "interrupt", "interfere"
+).getRandom();
+
 export const getRandomAnnouncement = () => new RandomArray(
     "Public service announcement: ",
-    "I'm sorry to interject, but... ",
+    `I'm sorry to ${getRandomInterjectionVerb()}, but... `,
     "A quick message from my sponsors: ",
     "Welcome to the election chat room! ",
     "And now for something completely different - ",
