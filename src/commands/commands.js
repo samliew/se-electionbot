@@ -1,6 +1,6 @@
 import { getModerators } from "../api.js";
 import Election from "../election.js";
-import { sayOtherSiteMods, sayUptime } from "../messages.js";
+import { sayBusyGreeting, sayIdleGreeting, sayOtherSiteMods, sayUptime } from "../messages.js";
 import { capitalize, dateToUtcTimestamp } from "../utils.js";
 import { matchNumber } from "../utils/expressions.js";
 
@@ -273,4 +273,26 @@ export const switchMode = (config, content) => {
     const [, mode = "debug", state = "on"] = /(debug|verbose)(?:\s+mode)?\s+(on|off)/.exec(content) || [];
     config[mode] = state === "on";
     return `${capitalize(mode)} mode ${state}`;
+};
+
+/**
+ * @summary makes the bot greet the room
+ * @param {BotConfig} config bot config
+ * @param {Election} election current election instance
+ * @param {Room} room current room
+ * @param {string} content message content
+ * @returns {Promise<void>}
+ */
+export const greetCommand = async (config, election, room, content) => {
+    const [, type = "idle"] = /\b(idle|busy)\b/.exec(content) || [];
+
+    /** @type {Record<"idle"|"busy", (c: BotConfig, e:Election, r:Room) => Promise<void>>} */
+    const greetingMap = {
+        idle: sayIdleGreeting,
+        busy: sayBusyGreeting
+    };
+
+    await greetingMap[type]?.(config, election, room);
+
+    config.activityCounter = 0;
 };
