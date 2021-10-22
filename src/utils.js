@@ -944,8 +944,22 @@ export const getUser = async (client, userId) => {
 };
 
 /**
+ * @typedef {import("chatexchange/dist/Browser").IProfileData} IProfileData
+ *
+ * @summary guard for checking if a message is a bot messsage
+ * @param {IProfileData} botProfile bot chat profile
+ * @param {ChatMessage} message chat message
+ * @returns {boolean}
+ */
+export const isBotMessage = (botProfile, message) => {
+    const { id, name } = botProfile;
+    const { username, chatUserId } = message;
+    return username === name || chatUserId === id;
+};
+
+/**
  * @summary predicate for filtering out messages not posted by the bot
- * @param {import("chatexchange/dist/Browser").IProfileData} botProfile
+ * @param {IProfileData} botProfile bot chat profile
  * @returns {(message: ChatMessage, index: number, original: ChatMessage[]) => boolean}
  */
 export const onlyBotMessages = (botProfile) => {

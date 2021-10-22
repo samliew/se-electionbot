@@ -38,7 +38,7 @@ import { makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
 import {
     dateToRelativetime,
-    dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, keepAlive,
+    dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, isBotMessage, keepAlive,
     linkToRelativeTimestamp,
     linkToUtcTimestamp, makeURL, onlyBotMessages, pluralize, roomKeepAlive, searchChat, wait
 } from './utils.js';
@@ -288,14 +288,14 @@ import { matchNumber } from "./utils/expressions.js";
             }
 
             // If last bot message not set yet, and is a message by bot
-            if (!botMessageFound && item.message && (item.username === me.name || item.chatUserId === me.id)) {
+            if (!botMessageFound && item.message && isBotMessage(me, item)) {
                 botMessageFound = true;
                 config.updateLastMessage(item.messageMarkup, item.date);
                 console.log(`INIT - Previous message in room was by bot at ${item.date}:`, item.messageMarkup);
             }
 
             // Exit loop once greet message by bot
-            if (/I can answer commonly-asked questions about elections/.test(item.message) && item.chatUserId === me.id) break;
+            if (/I can answer commonly-asked questions about elections/.test(item.message) && isBotMessage(me, item)) break;
         }
         config.activityCounter = count;
 
