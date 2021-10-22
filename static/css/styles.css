@@ -199,6 +199,7 @@ form .form-controls {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: start;
+  max-width: 1400px;
 }
 .dashboard section {
   flex: 1 1 calc(33% - var(--margin-size));
