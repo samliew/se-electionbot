@@ -142,7 +142,7 @@ export const chatMarkdownToHtml = (content) => {
 
 /**
  * @summary Sends a GET request. This wrapper handles Stack Exchange's API backoff
- * @param {import("./config").BotConfig} config
+ * @param {BotConfig} config bot configuration
  * @param {string} url the url to fetch
  * @param {boolean} json whether to return the response as a json object
  * @returns {Promise<any>}
@@ -182,7 +182,7 @@ export const fetchUrl = async (config, url, json = false) => {
 
 /**
  * @summary searches chat and retrieve messages
- * @param {import("./config").BotConfig} config
+ * @param {BotConfig} config bot configuration
  * @param {string} chatDomain which chat server to search on (stackoverflow.com|stackexchange.com|meta.stackexchange.com)
  * @param {string} query what to search for
  * @param {number|string} roomId if omitted, searches all chat
@@ -291,18 +291,19 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
 };
 
 /**
+ * @typedef {{
+ *   username: string,
+ *   chatUserId: number,
+ *   message: string,
+ *   messageMarkup: string,
+ *   date: number,
+ *   messageId: number
+ * }} ChatMessage
+ *
  * @summary fetches the chat room transcript and retrieve messages
- * @param {import("./config").BotConfig} config
+ * @param {BotConfig} config bot configuration
  * @param {string} url url of chat transcript
- * @returns {Promise<any>}
- * [{
- *   username,
- *   chatUserId,
- *   message,
- *   messageMarkup,
- *   date,
- *   messageId
- * }]
+ * @returns {Promise<ChatMessage[]>}
  *
  * INFO:
  * To get the rough datetime for a single message that doesn't have a timestamp,
@@ -310,15 +311,15 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
  * If a exact timestamps are required, use fetchLatestChatEvents
  */
 export const fetchChatTranscript = async (config, url) => {
+    const messages = [];
 
     // Validate chat transcript url
-    if (!/^https:\/\/chat\.stack(?:exchange|overflow)\.com\/transcript\/\d+/i.test(url)) return null;
+    if (!/^https:\/\/chat\.stack(?:exchange|overflow)\.com\/transcript\/\d+/i.test(url)) return messages;
 
     console.log('Fetching chat transcript:', url);
 
     const chatTranscript = await fetchUrl(config, url);
     const $chat = cheerio.load(/** @type {string} */(chatTranscript));
-    const messages = [];
 
     // Get date from transcript
     const [, year, m, date] = $chat('head title').text().match(/(\d+)-(\d+)-(\d+)/) || [, null, null, null];
@@ -379,26 +380,19 @@ export const fetchChatTranscript = async (config, url) => {
 
 /**
  * @summary fetches latest chat room messages via a more reliable method, but requires an fkey
- * @param {import("./config").BotConfig} config
+ * @param {BotConfig} config bot configuration
  * @param {string} url url of chat transcript
  * @param {number} msgCount limit number of results
  * @param {string} fkey required fkey
- * @returns {Promise<any>}
- * [{
- *   username,
- *   chatUserId,
- *   message,
- *   messageMarkup,
- *   date,
-  *  messageId
- * }]
+ * @returns {Promise<ChatMessage[]|void>}
  */
 export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) => {
+    const messages = [];
 
     // Validate chat url and extract vars
     const [, chatDomain = "", chatRoomId = ""] = /^https:\/\/chat\.(stack(?:exchange|overflow)\.com)\/(?:rooms|transcript|chats)\/(\d+)/.exec(url) || [];
 
-    if (!chatDomain || !chatRoomId) return;
+    if (!chatDomain || !chatRoomId) return messages;
 
     console.log('Fetching chat transcript:', url);
 
@@ -408,8 +402,6 @@ export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) =
         msgCount: msgCount,
         fkey: fkey,
     });
-
-    const messages = [];
 
     response.data.forEach(item => {
         messages.push({
