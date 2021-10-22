@@ -22,9 +22,13 @@ export class BotConfig {
      */
     controlRoomId = parseNumEnv("control_room_id");
 
+    /**
+     * @summary bot control chat room url
+     * @type {string}
+     */
     get controlRoomUrl() {
         const { chatDomain, controlRoomId } = this;
-        return `https://chat.${chatDomain}/rooms/${controlRoomId}`;
+        return chatDomain && controlRoomId ? `https://chat.${chatDomain}/rooms/${controlRoomId}` : "";
     }
 
     /**
