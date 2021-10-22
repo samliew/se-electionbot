@@ -114,7 +114,7 @@ export const getRandomJonSkeetJoke = () => new RandomArray(
 
 export const getRandomAnnouncement = () => new RandomArray(
     "Public service announcement: ",
-    "I'm sorry to say this, but... ",
+    "I'm sorry to interject, but... ",
     "A quick message from my sponsors: ",
     "Welcome to the election chat room! ",
     "And now for something completely different - ",
