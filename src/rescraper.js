@@ -75,13 +75,13 @@ export default class Rescraper {
                 }
 
                 const {
-                    roomReachedMinimumActivityCount, roomBecameIdleAWhileAgo,
+                    roomReachedMinActivityCount, roomBecameIdleAWhileAgo,
                     roomBecameIdleHoursAgo, botHasBeenQuiet, botSentLastMessage,
                     idleCanSayHi
                 } = config;
 
                 console.log(`RESCRAPER - IDLE? idleCanSayHi: ${idleCanSayHi}
-                    ----------- reachedMinActivity: ${roomReachedMinimumActivityCount};
+                    ----------- reachedMinActivity: ${roomReachedMinActivityCount};
                     ----------- roomBecameIdleAWhileAgo: ${roomBecameIdleAWhileAgo}; roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}
                     ----------- botHasBeenQuiet: ${botHasBeenQuiet}; botSentLastMessage: ${botSentLastMessage}`
                 );

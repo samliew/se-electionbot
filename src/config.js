@@ -22,6 +22,11 @@ export class BotConfig {
      */
     controlRoomId = parseNumEnv("control_room_id");
 
+    get controlRoomUrl() {
+        const { chatDomain, controlRoomId } = this;
+        return `https://chat.${chatDomain}/rooms/${controlRoomId}`;
+    }
+
     /**
      * @summary chat server (Host)
      * @type {Host}
@@ -66,7 +71,7 @@ export class BotConfig {
      * @summary checks if room has reached minimum activity count
      * @returns {boolean}
      */
-    get roomReachedMinimumActivityCount() {
+    get roomReachedMinActivityCount() {
         const { activityCounter, minActivityCountThreshold } = this;
         return activityCounter >= minActivityCountThreshold;
     }
@@ -75,7 +80,7 @@ export class BotConfig {
      * @summary checks if room has reached maximum activity count
      * @returns {boolean}
      */
-    get roomReachedMaximumActivityCount() {
+    get roomReachedMaxActivityCount() {
         const { activityCounter, maxActivityCountThreshold } = this;
         return activityCounter >= maxActivityCountThreshold;
     }
@@ -140,8 +145,8 @@ export class BotConfig {
      * @returns {boolean}
      */
     get roomTooBusyForMinutes() {
-        const { lastMessageTime, shortBusyDurationMinutes, roomReachedMaximumActivityCount } = this;
-        return roomReachedMaximumActivityCount && Date.now() >= lastMessageTime + shortBusyDurationMinutes * MS_IN_MINUTE;
+        const { lastMessageTime, shortBusyDurationMinutes, roomReachedMaxActivityCount } = this;
+        return roomReachedMaxActivityCount && Date.now() >= lastMessageTime + shortBusyDurationMinutes * MS_IN_MINUTE;
     }
 
     /**
@@ -149,8 +154,8 @@ export class BotConfig {
      * @returns {boolean}
      */
     get roomTooBusyForHours() {
-        const { lastMessageTime, longBusyDurationHours, roomReachedMaximumActivityCount } = this;
-        return roomReachedMaximumActivityCount && Date.now() >= lastMessageTime + longBusyDurationHours * MS_IN_HOUR;
+        const { lastMessageTime, longBusyDurationHours, roomReachedMaxActivityCount } = this;
+        return roomReachedMaxActivityCount && Date.now() >= lastMessageTime + longBusyDurationHours * MS_IN_HOUR;
     }
 
     /**
@@ -227,9 +232,9 @@ export class BotConfig {
     //    1. Room is idle, and there was at least some previous activity, and last bot message more than lowActivityCheckMins minutes ago
     // or 2. If no activity for a few hours, and last message was not posted by the bot
     get idleCanSayHi() {
-        const { roomBecameIdleAWhileAgo, roomReachedMinimumActivityCount, botHasBeenQuiet, roomBecameIdleHoursAgo, botSentLastMessage } = this;
+        const { roomBecameIdleAWhileAgo, roomReachedMinActivityCount, botHasBeenQuiet, roomBecameIdleHoursAgo, botSentLastMessage } = this;
 
-        return (roomBecameIdleAWhileAgo && roomReachedMinimumActivityCount && botHasBeenQuiet) ||
+        return (roomBecameIdleAWhileAgo && roomReachedMinActivityCount && botHasBeenQuiet) ||
             (roomBecameIdleHoursAgo && !botSentLastMessage);
     }
 

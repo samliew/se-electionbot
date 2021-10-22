@@ -125,6 +125,7 @@
             <table>
                 <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
                 <tr><td>scriptInitDate</td><td>{{utcTimestamp scriptInitDate}} <span class="relativetime" title="{{utcTimestamp scriptInitDate}}"></span></td></tr>
+                <tr><td>Control Room</td><td>{{{url controlRoomUrl}}}</td></tr>
                 <tr><td>isMuted</td><td>
                     {{{boolean isMuted}}}
                     {{#if isMuted}}
@@ -168,13 +169,15 @@
                     <pre>{{lastBotMessage}}</pre>
                     <div class="mt10">{{{lastBotMessageHtml}}}</div>
                 </td></tr>
+                <tr><td>ignoreSelf</td><td>{{{boolean ignoreSelf}}}</td></tr>
                 <tr><td>funResponseCounter</td><td>{{funResponseCounter}}</td></tr>
                 <tr><td>maxFunResponses</td><td>{{maxFunResponses}}</td></tr>
                 <tr><td>canSendFunResponse</td><td>{{{boolean canSendFunResponse}}}</td></tr>
                 <tr><td>activityCounter</td><td>{{activityCounter}}</td></tr>
                 <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>
+                <tr><td>roomReachedMinActivityCount</td><td>{{{boolean roomReachedMinActivityCount}}}</td></tr>
                 <tr><td>maxActivityCountThreshold</td><td>{{maxActivityCountThreshold}}</td></tr>
-                <tr><td>roomReachedMinimumActivityCount</td><td>{{{boolean roomReachedMinimumActivityCount}}}</td></tr>
+                <tr><td>roomReachedMaxActivityCount</td><td>{{{boolean roomReachedMaxActivityCount}}}</td></tr>
                 <tr><td>shortIdleDurationMins</td><td>{{shortIdleDurationMins}} mins</td></tr>
                 <tr><td>roomBecameIdleAWhileAgo</td><td>{{{boolean roomBecameIdleAWhileAgo}}}
                     {{#unless roomBecameIdleAWhileAgo}}
@@ -187,6 +190,10 @@
                     <span class="relativetime" title="{{utcTimestamp roomBecameIdleHoursDate}}"></span>
                     {{/unless}}
                 </td></tr>
+                <tr><td>shortBusyDurationMinutes</td><td>{{shortBusyDurationMinutes}} mins</td></tr>
+                <tr><td>roomTooBusyForMinutes</td><td>{{{boolean roomTooBusyForMinutes}}}</td></tr>
+                <tr><td>longBusyDurationHours</td><td>{{longBusyDurationHours}} hours</td></tr>
+                <tr><td>roomTooBusyForHours</td><td>{{{boolean roomTooBusyForHours}}}</td></tr>
                 <tr><td>lowActivityCheckMins</td><td>{{lowActivityCheckMins}} mins</td></tr>
                 <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}
                     {{#unless botHasBeenQuiet}}

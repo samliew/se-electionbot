@@ -4,6 +4,7 @@
   --link-colour: rgb(0, 0, 139);
   --border-color: #999;
   --margin-size: 40px;
+  --smaller-font-size: 0.85em;
 }
 
 * {
@@ -43,7 +44,7 @@ h2 {
 }
 
 nav {
-  font-size: 0.9em;
+  font-size: var(--smaller-font-size);
 }
 nav .navitem {
   text-decoration: none;
@@ -74,11 +75,12 @@ blockquote {
 
 table {
   min-width: 280px;
+  width: 100%;
   margin: 2em 0;
 }
 table.smaller-table {
   margin: 1em 0;
-  font-size: 0.9em;
+  font-size: var(--smaller-font-size);
 }
 
 h2 + table {
@@ -95,29 +97,31 @@ td {
 
 th,
 td {
-  min-width: 120px;
+  min-width: 150px;
   vertical-align: top;
 }
 
 th:last-child,
 td:last-child {
   min-width: 300px;
+  width: 80%;
 }
 
 th {
   text-align: left;
+  white-space: nowrap;
 }
 
 td .list {
   margin: 0;
-  font-size: 0.9em;
+  font-size: var(--smaller-font-size);
 }
 
 /* Nested tables */
 table.nested {
   width: calc(100% + 22px);
   margin: -7px -11px;
-  font-size: 0.9em;
+  font-size: var(--smaller-font-size);
 }
 
 table.nested th,
@@ -140,7 +144,7 @@ pre {
   max-width: 550px;
   margin: 0;
   overflow: auto;
-  font-size: 0.9em;
+  font-size: var(--smaller-font-size);
   font-family: monospace;
   background: #e6e6e6;
   padding: 3px 6px;
@@ -177,7 +181,7 @@ form textarea {
 }
 form input::placeholder {
   color: #ccc;
-  font-size: 0.9em;
+  font-size: var(--smaller-font-size);
 }
 form textarea {
   min-height: 130px;
@@ -198,7 +202,7 @@ form .form-controls {
 }
 .dashboard section {
   flex: 1 1 calc(33% - var(--margin-size));
-  max-width: 620px;
+  max-width: 48%;
   margin-right: var(--margin-size);
 }
 .dashboard section:last-child {
@@ -247,7 +251,7 @@ form .form-controls {
 .small-count {
   position: relative;
   top: -1px;
-  font-size: 0.9em;
+  font-size: var(--smaller-font-size);
   font-style: italic;
 }
 
@@ -275,7 +279,7 @@ form .form-controls {
 @media (max-width: 767px) {
   body {
     padding: 20px 20px;
-    font-size: 0.9em;
+    font-size: var(--smaller-font-size);
     word-break: break-word;
   }
 
