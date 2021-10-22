@@ -323,119 +323,115 @@ import { matchNumber } from "./utils/expressions.js";
          * NOTE: Not a very reliable method if there are few messages in the room, since transcript page only displays messages from the same day
          */
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
-        if (transcriptMessages) {
 
-            // Check for saidElectionEndingSoon
-            config.flags.saidElectionEndingSoon = transcriptMessages.filter(function (item) {
-                return /is ending soon. This is the final chance to cast or change your votes!/.test(item.message) && item.chatUserId === me.id;
-            }).length > 0;
+        // Check for saidElectionEndingSoon
+        config.flags.saidElectionEndingSoon = transcriptMessages.filter(function (item) {
+            return /is ending soon. This is the final chance to cast or change your votes!/.test(item.message) && item.chatUserId === me.id;
+        }).length > 0;
 
-            // Loops through messages by latest first
-            transcriptMessages.reverse();
+        // Loops through messages by latest first
+        transcriptMessages.reverse();
 
-            // Count valid messages (after a "greet" message by bot), and update activityCounter
-            // Also updates lastActivityTime, lastMessageTime, lastBotMessage
-            let botMessageFound = false;
-            let count = 0;
-            for (count = 0; count < transcriptMessages.length; count++) {
-                let item = transcriptMessages[count];
+        // Count valid messages (after a "greet" message by bot), and update activityCounter
+        // Also updates lastActivityTime, lastMessageTime, lastBotMessage
+        let botMessageFound = false;
+        let count = 0;
+        for (count = 0; count < transcriptMessages.length; count++) {
+            let item = transcriptMessages[count];
 
-                // Update lastActivityTime for last message in room
-                if (count === 0) {
-                    config.lastActivityTime = item.date;
-                }
-
-                // If last bot message not set yet, and is a message by bot
-                if (!botMessageFound && item.message && (item.username === me.name || item.chatUserId === me.id)) {
-                    botMessageFound = true;
-                    config.updateLastMessage(item.messageMarkup, item.date);
-                    console.log(`INIT - Previous message in room was by bot at ${item.date}:`, item.messageMarkup);
-                }
-
-                // Exit loop once greet message by bot
-                if (/I can answer commonly-asked questions about elections/.test(item.message) && item.chatUserId === me.id) break;
+            // Update lastActivityTime for last message in room
+            if (count === 0) {
+                config.lastActivityTime = item.date;
             }
-            config.activityCounter = count;
+
+            // If last bot message not set yet, and is a message by bot
+            if (!botMessageFound && item.message && (item.username === me.name || item.chatUserId === me.id)) {
+                botMessageFound = true;
+                config.updateLastMessage(item.messageMarkup, item.date);
+                console.log(`INIT - Previous message in room was by bot at ${item.date}:`, item.messageMarkup);
+            }
+
+            // Exit loop once greet message by bot
+            if (/I can answer commonly-asked questions about elections/.test(item.message) && item.chatUserId === me.id) break;
         }
+        config.activityCounter = count;
 
         /*
          * Sync withdrawn nominees on startup using past ElectionBot announcements
          * (assuming ElectionBot managed to announce all the nominations from start of election)
          */
         const announcementHistory = await searchChat(config, config.chatDomain, "We have a new nomination Please welcome our latest candidate", config.chatRoomId);
-        if (announcementHistory) {
 
-            const currentNomineePostIds = election.arrNominees.map(({ nominationLink }) => {
-                const [, postId] = nominationLink.match(/(\d+)$/) || [, null];
-                return postId ? +postId : null;
-            }).filter(Boolean);
+        const currentNomineePostIds = election.arrNominees.map(({ nominationLink }) => {
+            const [, postId] = nominationLink.match(/(\d+)$/) || [, null];
+            return postId ? +postId : null;
+        }).filter(Boolean);
 
-            if (config.verbose) {
-                console.log(`INIT - Current nominees:`, election.arrNominees);
-                console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
-            }
-
-            const { id, name } = me;
-
-            const botAnnouncements = announcementHistory
-                .filter(({ username, chatUserId }) => username === name || chatUserId === id);
-
-            // Parse previous nomination announcements and see which ones are no longer around
-            for (const item of botAnnouncements) {
-                const { messageMarkup } = item;
-
-                const [, userName, nominationLink, postId] =
-                    messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
-
-                if (config.debugOrVerbose) {
-                    console.log(`Nomination announcement:`, messageMarkup, { currentNomineePostIds, userName, nominationLink, postId });
-                }
-
-                // Invalid, or still a nominee based on nomination post ids
-                if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) continue;
-
-                const nominationRevisionsLink = nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
-
-                /** @type {string} */
-                const revisionHTML = await fetchUrl(config, nominationRevisionsLink);
-
-                const { window: { document } } = new JSDOM(revisionHTML);
-
-                // @ts-expect-error TODO: cleanup
-                const userIdHref = last([...document.querySelectorAll(`#content a[href*="/user"]`)])?.href;
-
-                //  @ts-expect-error TODO: cleanup
-                const nominationDate = last([...document.querySelectorAll(`#content .relativetime`)])?.title;
-
-                const userId = matchNumber(/\/users\/(\d+)/, userIdHref);
-                const permalink = userIdHref ? `https://${election.siteHostname}${userIdHref}` : "";
-
-                const withdrawnNominee = {
-                    userId: userId || -42,
-                    userName: userName,
-                    userYears: "",
-                    userScore: 0,
-                    nominationDate: new Date(nominationDate || -1),
-                    nominationLink: nominationRevisionsLink,
-                    withdrawnDate: null,
-                    permalink,
-                };
-
-                if (permalink) {
-                    const profilePage = await fetchUrl(config, `${permalink}?tab=profile`);
-                    const { window: { document } } = new JSDOM(profilePage);
-                    const { textContent } = document.querySelector(`#mainbar-full li [title$=Z]`) || {};
-                    withdrawnNominee.userYears = (textContent || "").replace(/,.+$/, ''); // truncate years as displayed in elections
-                }
-
-                election.arrWithdrawnNominees.push(withdrawnNominee);
-
-                console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
-            }
-
-            // Order of nomination first
-            election.arrWithdrawnNominees.reverse();
+        if (config.verbose) {
+            console.log(`INIT - Current nominees:`, election.arrNominees);
+            console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
         }
+
+        const { id, name } = me;
+
+        const botAnnouncements = announcementHistory
+            .filter(({ username, chatUserId }) => username === name || chatUserId === id);
+
+        // Parse previous nomination announcements and see which ones are no longer around
+        for (const item of botAnnouncements) {
+            const { messageMarkup } = item;
+
+            const [, userName, nominationLink, postId] =
+                messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
+
+            if (config.debugOrVerbose) {
+                console.log(`Nomination announcement:`, messageMarkup, { currentNomineePostIds, userName, nominationLink, postId });
+            }
+
+            // Invalid, or still a nominee based on nomination post ids
+            if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) continue;
+
+            const nominationRevisionsLink = nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
+
+            /** @type {string} */
+            const revisionHTML = await fetchUrl(config, nominationRevisionsLink);
+
+            const { window: { document } } = new JSDOM(revisionHTML);
+
+            // @ts-expect-error TODO: cleanup
+            const userIdHref = last([...document.querySelectorAll(`#content a[href*="/user"]`)])?.href;
+
+            //  @ts-expect-error TODO: cleanup
+            const nominationDate = last([...document.querySelectorAll(`#content .relativetime`)])?.title;
+
+            const userId = matchNumber(/\/users\/(\d+)/, userIdHref);
+            const permalink = userIdHref ? `https://${election.siteHostname}${userIdHref}` : "";
+
+            const withdrawnNominee = {
+                userId: userId || -42,
+                userName: userName,
+                userYears: "",
+                userScore: 0,
+                nominationDate: new Date(nominationDate || -1),
+                nominationLink: nominationRevisionsLink,
+                withdrawnDate: null,
+                permalink,
+            };
+
+            if (permalink) {
+                const profilePage = await fetchUrl(config, `${permalink}?tab=profile`);
+                const { window: { document } } = new JSDOM(profilePage);
+                const { textContent } = document.querySelector(`#mainbar-full li [title$=Z]`) || {};
+                withdrawnNominee.userYears = (textContent || "").replace(/,.+$/, ''); // truncate years as displayed in elections
+            }
+
+            election.arrWithdrawnNominees.push(withdrawnNominee);
+
+            console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
+        }
+
+        // Order of nomination first
+        election.arrWithdrawnNominees.reverse();
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended' && Date.now() < new Date(election.dateEnded).getTime() + 36e5) {
