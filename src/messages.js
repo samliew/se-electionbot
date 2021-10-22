@@ -9,7 +9,7 @@ import {
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase
 } from "./utils.js";
 import { parsePackage } from "./utils/package.js";
-import { formatNumber, percentify } from "./utils/strings.js";
+import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
 
 /**
  * @typedef {import("./index").ElectionBadge} Badge
@@ -79,6 +79,27 @@ export const sayWhyNominationRemoved = () => {
  */
 export const sayHowToNominateOthers = (_config, _election, _text) => {
     return `Users can *only* nominate themselves, nobody can nominate others.`;
+};
+
+/**
+ * @summary builds a response on where is the election page
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayElectionPage = (config, election) => {
+    const { electionUrl, electionNum, siteName } = election;
+
+    const isValidUrl = election.validElectionUrl(electionUrl);
+
+    if (config.debugOrVerbose && !isValidUrl) console.log({
+        electionUrl, electionNum, siteName
+    });
+
+    const nthElection = formatOrdinal(electionNum || 1);
+    const electionPage = makeURL("here", electionUrl);
+
+    return isValidUrl ? `The information on the ${nthElection} ${siteName} election can be found ${electionPage}` : `Sorry, the election page is missing`;
 };
 
 /**
