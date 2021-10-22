@@ -195,7 +195,7 @@ import { matchNumber } from "./utils/expressions.js";
         });
 
         // Get current site named badges (i.e.: non-tag badges)
-        if (!election.isStackOverflow) {
+        if (!election.isStackOverflow()) {
             const allNamedBadges = await getAllNamedBadges(config, election.apiSlug, getStackApiKey(apiKeyPool));
 
             electionBadges.forEach((electionBadge) => {

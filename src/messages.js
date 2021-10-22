@@ -227,7 +227,7 @@ export const sayBadgesByType = (badges, type, isSO = true) => {
  */
 export const sayRequiredBadges = (election) => {
 
-    if (!election.isStackOverflow) {
+    if (!election.isStackOverflow()) {
         return "There are no required badges for elections on this site.";
     }
 
