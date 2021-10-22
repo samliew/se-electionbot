@@ -37,7 +37,7 @@ import { makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
 import {
     dateToRelativetime,
-    dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, keepAlive,
+    dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, keepAlive,
     linkToRelativeTimestamp,
     linkToUtcTimestamp, makeURL, pluralize, roomKeepAlive, searchChat, wait
 } from './utils.js';
@@ -145,25 +145,6 @@ import { matchNumber } from "./utils/expressions.js";
         console.log('electionUrl:', electionUrl);
         Object.entries(config).forEach(([key, val]) => typeof val !== 'function' ? console.log(key, val) : 0);
     }
-
-    /**
-     * @summary gets a User given a resolved message from them
-     * @param {Client} client ChatExchange client
-     * @param {number} userId chat user id
-     * @returns {Promise<UserProfile|null>}
-     */
-    const getUser = async (client, userId) => {
-        try {
-            // This is so we can get extra info about the user
-            // @ts-expect-error
-            return client._browser.getProfile(userId);
-        }
-        catch (e) {
-            console.error(e);
-            return null;
-        }
-    };
-
 
     /**
      * @summary main bot function

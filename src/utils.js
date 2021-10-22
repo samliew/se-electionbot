@@ -37,6 +37,7 @@ let _apiBackoff = Date.now();
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("./index").ElectionBadge} ElectionBadge
+ * @typedef {import("./index").UserProfile} UserProfile
  *
  * @typedef {{
  *  items: ResItem[] //TODO: split into API entities
@@ -922,4 +923,22 @@ export const parseNumEnv = (key, def) => {
 export const parseBoolEnv = (key, def = false) => {
     const fetched = process.env[key.toUpperCase()]?.toLowerCase();
     return fetched !== void 0 ? JSON.parse(fetched) : def;
+};
+
+/**
+ * @summary gets a User given a resolved message from them
+ * @param {Client} client ChatExchange client
+ * @param {number} userId chat user id
+ * @returns {Promise<UserProfile|null>}
+ */
+export const getUser = async (client, userId) => {
+    try {
+        // This is so we can get extra info about the user
+        // @ts-expect-error
+        return client._browser.getProfile(userId);
+    }
+    catch (e) {
+        console.error(e);
+        return null;
+    }
 };
