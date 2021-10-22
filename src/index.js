@@ -40,7 +40,7 @@ import {
     dateToRelativetime,
     dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, pluralize, roomKeepAlive, searchChat, wait
+    linkToUtcTimestamp, makeURL, onlyBotMessages, pluralize, roomKeepAlive, searchChat, wait
 } from './utils.js';
 import { last } from "./utils/arrays.js";
 import { matchNumber } from "./utils/expressions.js";
@@ -268,9 +268,9 @@ import { matchNumber } from "./utils/expressions.js";
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
 
         // Check for saidElectionEndingSoon
-        config.flags.saidElectionEndingSoon = transcriptMessages.filter(function (item) {
-            return /is ending soon. This is the final chance to cast or change your votes!/.test(item.message) && item.chatUserId === me.id;
-        }).length > 0;
+        config.flags.saidElectionEndingSoon = transcriptMessages
+            .filter(onlyBotMessages(me))
+            .filter(({ message }) => /is ending soon. This is the final chance to cast or change your votes!/.test(message)).length > 0;
 
         // Loops through messages by latest first
         transcriptMessages.reverse();
@@ -312,10 +312,7 @@ import { matchNumber } from "./utils/expressions.js";
             console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
         }
 
-        const { id, name } = me;
-
-        const botAnnouncements = announcementHistory
-            .filter(({ username, chatUserId }) => username === name || chatUserId === id);
+        const botAnnouncements = announcementHistory.filter(onlyBotMessages(me));
 
         // Parse previous nomination announcements and see which ones are no longer around
         for (const item of botAnnouncements) {
