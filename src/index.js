@@ -452,8 +452,9 @@ import { matchNumber } from "./utils/expressions.js";
             if (eventType !== ChatEventType.MESSAGE_POSTED) return;
 
             // Log all un-ignored events
-            console.log(`EVENT - current activity: ${config.activityCounter}; reached minimum: ${config.roomReachedMinimumActivityCount}; reached maximum: ${config.roomReachedMaximumActivityCount};\n`,
+            console.log(`EVENT - current activity: ${config.activityCounter}; reached minimum: ${config.roomReachedMinActivityCount}; reached maximum: ${config.roomReachedMaxActivityCount};\n`,
                 JSON.stringify({ content, msg, user }));
+
 
             /*
              * As multiple events are emitted when user is mentioned or message is replied-to,
