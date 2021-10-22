@@ -942,3 +942,13 @@ export const getUser = async (client, userId) => {
         return null;
     }
 };
+
+/**
+ * @summary predicate for filtering out messages not posted by the bot
+ * @param {import("chatexchange/dist/Browser").IProfileData} botProfile
+ * @returns {(message: ChatMessage, index: number, original: ChatMessage[]) => boolean}
+ */
+export const onlyBotMessages = (botProfile) => {
+    const { id, name } = botProfile;
+    return ({ username, chatUserId }) => username === name || chatUserId === id;
+};
