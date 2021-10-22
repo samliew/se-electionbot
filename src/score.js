@@ -177,7 +177,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         }
 
         // If not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
-        if (!isStackOverflow && (isUsingChatLink || isUsingChatId)) {
+        if (!isStackOverflow && (isUsingChatLink || isUsingChatId || !isAskingForOtherUser)) {
             userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, siteHostname, getStackApiKey(config.apiKeyPool));
 
             // Unable to get user id on election site

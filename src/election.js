@@ -638,7 +638,7 @@ ended date        ${this.dateEnded};
 candidates        ${this.numNominees};
 winners           ${this.numWinners};
 chat URL          ${this.chatUrl}
-primary threshold ${primaryThreshold}` : "")
+primary threshold ${this.primaryThreshold}` : "")
             );
         }
         catch (err) {
