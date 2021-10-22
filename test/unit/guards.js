@@ -57,6 +57,28 @@ describe('Message Guards', () => {
         "how many nominees are in the room?"
     ];
 
+    const howManyNomineesWithdrawnMatches = [
+        "who has withdrawn",
+        "whom has been removed",
+        "who withdrew from the election",
+        "who was withdrawn from the election",
+        "who was removed from the election",
+        "which candidate has withdrawn",
+        "which candidate was withdrawn",
+        "which candidate was removed",
+        "which nominee has withdrawn",
+        "which nominee was withdrawn",
+        "which nominee was removed",
+        "which nomination has withdrawn",
+        "which nomination was withdrawn",
+        "which nomination was removed",
+        "how many candidates have withdrawn",
+        "how many nominees have withdrawn",
+        "who deleted their nomination",
+        "which candidate deleted their nomination",
+        "was a nomination removed",
+    ];
+
     describe(isAskedForCurrentNominees.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedForCurrentNominees, [
@@ -74,6 +96,7 @@ describe('Message Guards', () => {
 
             allMatch(isAskedForCurrentNominees, [
                 ...howManyNomineesMatches,
+                ...howManyNomineesWithdrawnMatches,
                 "what is my candidate score",
                 "what is the candidate score for 245113",
             ], false);
@@ -82,27 +105,7 @@ describe('Message Guards', () => {
 
     describe(isAskedForWithdrawnNominees.name, () => {
         it('should correctly match content', () => {
-            allMatch(isAskedForWithdrawnNominees, [
-                "who has withdrawn",
-                "whom has been removed",
-                "who withdrew from the election",
-                "who was withdrawn from the election",
-                "who was removed from the election",
-                "which candidate has withdrawn",
-                "which candidate was withdrawn",
-                "which candidate was removed",
-                "which nominee has withdrawn",
-                "which nominee was withdrawn",
-                "which nominee was removed",
-                "which nomination has withdrawn",
-                "which nomination was withdrawn",
-                "which nomination was removed",
-                "how many candidates have withdrawn",
-                "how many nominees have withdrawn",
-                "who deleted their nomination",
-                "which candidate deleted their nomination",
-                "was a nomination removed",
-            ]);
+            allMatch(isAskedForWithdrawnNominees, howManyNomineesWithdrawnMatches);
 
             allMatch(isAskedForWithdrawnNominees, [
                 ...howManyNomineesMatches,
