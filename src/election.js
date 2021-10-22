@@ -17,6 +17,7 @@ import { matchNumber } from "./utils/expressions.js";
  *  userScore: number,
  *  nominationDate: Date,
  *  nominationLink: string,
+ *  withdrawnDate: Date|null,
  *  permalink: string
  * }} Nominee
  */
@@ -444,6 +445,7 @@ export default class Election {
     scrapeNominee($, el, electionPageUrl, electionSiteUrl) {
         const userLink = $(el).find('.user-details a');
         const userId = +(userLink.attr('href')?.split('/')[2] || "");
+        const withdrawnDate = $(el).find('aside .relativetime').attr('title');
 
         return {
             userId: userId,
@@ -454,6 +456,7 @@ export default class Election {
             userScore: +($(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)?.[1] || 0),
             nominationDate: new Date($(el).find('.relativetime').attr('title') || ""),
             nominationLink: `${electionPageUrl}#${$(el).attr('id')}`,
+            withdrawnDate: withdrawnDate ? new Date(withdrawnDate) : null,
             permalink: `${electionSiteUrl}/users/${userId}`,
         };
     }
@@ -550,9 +553,11 @@ export default class Election {
             const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl, this.siteUrl)).get()
                 .sort((a, b) => a.nominationDate < b.nominationDate ? -1 : 1);
 
+            const activeNominees = nominees.filter(n => n.withdrawnDate === null);
+
             // Clear an array before rescraping
             this.arrNominees.length = 0;
-            this.arrNominees.push(...nominees);
+            this.arrNominees.push(...activeNominees);
 
             // Empty string if not set as environment variable, or not found on election page
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/')

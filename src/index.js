@@ -391,6 +391,7 @@ import {
                     userScore: 0,
                     nominationDate: new Date(-1),
                     nominationLink: nominationLink ? nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions" : "",
+                    withdrawnDate: null,
                     permalink: "",
                 };
                 election.arrWithdrawnNominees.push(withdrawnNominee);
