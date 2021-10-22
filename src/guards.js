@@ -422,3 +422,14 @@ export const isAskedHowManyAreEligibleToVote = (text) => {
         /^how many(?: (?:users|people|bots))?(?: are eligible to| can) vote/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking for the election page
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedForElectionPage = (text) => {
+    return someMatch([
+        /(?:what|where)\s+is(?:\s+the)?\s+(?:(?:link|url)\s+(?:to|of)(?:\s+the)?\s+election|election\s+page)/i
+    ], text);
+};

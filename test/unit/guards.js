@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
-    isAskedForCurrentPositions, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
+    isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
@@ -209,16 +209,18 @@ describe('Message Guards', () => {
         });
     });
 
+    const scoreFormulaMatches = [
+        "how is candidate score calculated",
+        "how is the candidate score calculated",
+        "what is candidate score?",
+        "what is candidate score formula?",
+        "what is the candidate score formula?",
+        "what is the formula for candidate score?",
+    ];
+
     describe('isAskedForScoreFormula', () => {
         it('should correctly match content', () => {
-            allMatch(isAskedForScoreFormula, [
-                "how is candidate score calculated",
-                "how is the candidate score calculated",
-                "what is candidate score?",
-                "what is candidate score formula?",
-                "what is the candidate score formula?",
-                "what is the formula for candidate score?",
-            ]);
+            allMatch(isAskedForScoreFormula, scoreFormulaMatches);
 
             allMatch(isAskedForScoreFormula, [
                 // https://chat.stackoverflow.com/transcript/message/53271257#53271257
@@ -539,6 +541,20 @@ describe('Message Guards', () => {
             ]);
 
             allMatch(isAskedForHelp, ["the bot is of no help", "help is on the way"], false);
+        });
+    });
+
+    const electionPageMatches = [
+        "What is the link to the election?",
+        "where is the election page?",
+        "what is election page url",
+        "what is the url of the election"
+    ];
+
+    describe(isAskedForElectionPage.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForElectionPage, electionPageMatches);
+            allMatch(isAskedForElectionPage, scoreFormulaMatches, false);
         });
     });
 });
