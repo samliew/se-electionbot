@@ -155,28 +155,6 @@ import { matchNumber } from "./utils/expressions.js";
         const election = new Election(electionUrl);
         const { electionBadges } = election;
 
-        // Get current site named badges (i.e.: non-tag badges)
-        if (!election.isStackOverflow) {
-            const allNamedBadges = await getAllNamedBadges(config, election.apiSlug, getStackApiKey(apiKeyPool));
-
-            electionBadges.forEach((electionBadge) => {
-                const { name: badgeName } = electionBadge;
-                const matchedBadge = allNamedBadges.find(({ name }) => badgeName === name);
-
-                // Replace the badge id for badges with the same badge names
-                // TODO: Hardcode list of badges where this will not work properly (non-english sites?)
-                if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
-            });
-
-            if (config.debug || config.verbose) {
-                console.log('API - Site election badges\n', electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n"));
-            }
-        }
-
-        // Get current site mods via API
-        const currentSiteMods = await getModerators(config, election.apiSlug);
-        election.currentSiteMods = currentSiteMods;
-
         // Wait for election page to be scraped
         await election.scrapeElection(config);
         const { status, errors } = election.validate();
@@ -215,6 +193,28 @@ import { matchNumber } from "./utils/expressions.js";
         owners.forEach(user => {
             if (!user.isModerator) config.addAdmin(user.userId);
         });
+
+        // Get current site named badges (i.e.: non-tag badges)
+        if (!election.isStackOverflow) {
+            const allNamedBadges = await getAllNamedBadges(config, election.apiSlug, getStackApiKey(apiKeyPool));
+
+            electionBadges.forEach((electionBadge) => {
+                const { name: badgeName } = electionBadge;
+                const matchedBadge = allNamedBadges.find(({ name }) => badgeName === name);
+
+                // Replace the badge id for badges with the same badge names
+                // TODO: Hardcode list of badges where this will not work properly (non-english sites?)
+                if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
+            });
+
+            if (config.debug || config.verbose) {
+                console.log('API - Site election badges\n', electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n"));
+            }
+        }
+
+        // Get current site mods via API
+        const currentSiteMods = await getModerators(config, election.apiSlug);
+        election.currentSiteMods = currentSiteMods;
 
 
         // "default" is a temp fix for ChatExchange being served as CJS module
