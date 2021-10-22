@@ -150,6 +150,18 @@ export default class Election {
     }
 
     /**
+     * @summary gets ids of active nomination posts
+     * @returns {number[]}
+     */
+    get currentNomineePostIds() {
+        const { arrNominees } = this;
+        return /** @type {number[]} */(arrNominees
+            .map(({ nominationLink }) => matchNumber(/(\d+)$/, nominationLink))
+            .filter(Boolean)
+        );
+    }
+
+    /**
      * @summary gets number of current moderators
      * @returns {number}
      */

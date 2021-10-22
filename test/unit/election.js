@@ -77,6 +77,20 @@ describe('Election', () => {
             });
         });
 
+        describe('currentNomineePostIds', () => {
+            it('should correctly return nominee post ids', () => {
+                const nominee1 = getMockNominee({ userId: 1, nominationLink: "https://stackoverflow.com/election/13#post-1" });
+                const nominee2 = getMockNominee({ userId: 2, nominationLink: "https://stackoverflow.com/election/13#post-2" });
+
+                const election = new Election("https://stackoverflow.com/election/13");
+                election.arrNominees.push(nominee1, nominee2);
+
+                const { currentNomineePostIds } = election;
+
+                expect(currentNomineePostIds).to.deep.equal([1, 2]);
+            });
+        });
+
         describe('numNominees', () => {
 
             it('should correctly return number of Nominees', () => {

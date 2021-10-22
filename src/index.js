@@ -305,10 +305,7 @@ import { matchNumber } from "./utils/expressions.js";
          */
         const announcementHistory = await searchChat(config, config.chatDomain, "We have a new nomination Please welcome our latest candidate", config.chatRoomId);
 
-        const currentNomineePostIds = election.arrNominees.map(({ nominationLink }) => {
-            const [, postId] = nominationLink.match(/(\d+)$/) || [, null];
-            return postId ? +postId : null;
-        }).filter(Boolean);
+        const { currentNomineePostIds } = election;
 
         if (config.verbose) {
             console.log(`INIT - Current nominees:`, election.arrNominees);
