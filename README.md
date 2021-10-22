@@ -18,6 +18,10 @@ General election help:
 - who should I vote for/ how to decide who to vote for
 - how is the candidate score calculated
 - **what is my candidate score** _(calculates if ownself is eligible for nomination)_
+- where is the election page
+
+Election badges:
+
 - what are the moderation badges
 - what are the participation badges
 - what are the editing badges
@@ -73,7 +77,7 @@ Moderators can also make use of these commands _(requires mention)_ to help mode
 - mute _X_
 - unmute
 - time
-- coffee
+- brew/make coffee [for _X_]
 - commands
 - greet
 - announce winners/nominees
