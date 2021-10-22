@@ -3,24 +3,35 @@ import sanitize from "sanitize-html";
 import { isBotMentioned } from "../guards.js";
 import { sayIdleGreeting } from "../messages.js";
 import { sendMessage } from "../queue.js";
-import { roomKeepAlive } from "../utils.js";
+import { getUser, roomKeepAlive } from "../utils.js";
 
 /**
  * @typedef {import("chatexchange").default} Client
+ * @typedef {import("chatexchange").ChatEventType} ChatEventType
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange/dist/WebsocketEvent").default} WebsocketEvent
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../election").default} Election
+ * @typedef {import('chatexchange/dist/Browser').IProfileData} IProfileData
  *
  * @summary makes the bot join the control room
  * @param {BotConfig} config bot configuration
  * @param {Election} election current election
  * @param {Client} client ChatExchange client
- * @param {number} controlRoomId control room id
- * @param {Room} controlledRoom room to control
+ * @param {{
+ *  botChatProfile: IProfileData,
+ *  controlRoomId: number,
+ *  controlledRoom: Room,
+ *  ignoredEventTypes?: ChatEventType[]
+ * }} options
  * @returns {Promise<boolean>}
  */
-export const joinControlRoom = async (config, election, client, controlRoomId, controlledRoom) => {
+export const joinControlRoom = async (config, election, client, {
+    controlRoomId,
+    controlledRoom,
+    botChatProfile,
+    ignoredEventTypes = []
+}) => {
     try {
         const controlRoom = await client.joinRoom(controlRoomId);
         controlRoom.ignore(...ignoredEventTypes);
@@ -43,7 +54,7 @@ export const joinControlRoom = async (config, election, client, controlRoomId, c
             const fromControlRoom = roomId === controlRoomId;
             const isAskingToSay = /\bsay\b/.test(content);
             const isAskingToGreet = /\bgreet\b/.test(content);
-            const isAtMentionedMe = isBotMentioned(originalMessage, me);
+            const isAtMentionedMe = isBotMentioned(originalMessage, botChatProfile);
 
             if (!canSend || !fromControlRoom || !isAtMentionedMe) return;
 

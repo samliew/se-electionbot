@@ -10,6 +10,7 @@ import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
 import { announceNominees, announceWinners, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
+import { joinControlRoom } from "./control/index.js";
 import Election from './election.js';
 import {
     isAskedAboutBadgesOfType,
@@ -29,7 +30,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIdleGreeting, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
+import { sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -250,51 +251,12 @@ import { matchNumber } from "./utils/expressions.js";
 
         const { controlRoomId } = config;
         if (controlRoomId) {
-            try {
-                const controlRoom = await client.joinRoom(controlRoomId);
-                controlRoom.ignore(...ignoredEventTypes);
-
-                controlRoom.on("message", async (/** @type {WebsocketEvent} */ msg) => {
-                    const encodedMessage = await msg.content;
-                    const roomId = await msg.roomId;
-
-                    const { userId } = msg;
-
-                    // Decode HTML entities in messages, create lowercase copy for guard matching
-                    const originalMessage = entities.decode(encodedMessage);
-                    const content = sanitize(originalMessage.toLowerCase().replace(/^@\S+\s+/, ''), { allowedTags: [] });
-
-                    // Get details of user who triggered the message
-                    const user = await getUser(client, userId);
-                    if (!user) return console.log(`missing user ${userId}`);
-
-                    const canSend = user.isModerator || config.devIds.has(user.id);
-                    const fromControlRoom = roomId === controlRoomId;
-                    const isAskingToSay = /\bsay\b/.test(content);
-                    const isAskingToGreet = /\bgreet\b/.test(content);
-                    const isAtMentionedMe = isBotMentioned(originalMessage, me);
-
-                    if (!canSend || !fromControlRoom || !isAtMentionedMe) return;
-
-                    if (isAskingToSay) {
-                        await sendMessage(config, room, originalMessage.replace(/^@\S+\s+say /i, ''));
-                        return;
-                    }
-
-                    if (isAskingToGreet) {
-                        await sayIdleGreeting(config, election, room);
-                        return;
-                    }
-                });
-
-                await controlRoom.watch();
-
-                roomKeepAlive(config, client, controlRoom);
-
-                console.log(`INIT - joined control room: ${controlRoomId}`);
-            } catch (error) {
-                console.log(`INIT - failed to join control room: ${error}`);
-            }
+            await joinControlRoom(config, election, client, {
+                controlRoomId,
+                controlledRoom: room,
+                botChatProfile: me,
+                ignoredEventTypes
+            });
         }
 
         /*
