@@ -1,5 +1,5 @@
 import { partialRight } from "ramda";
-import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getStackApiKey, getUserInfo } from "./api.js";
+import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
 import { getCandidateOrNominee, getRandomAnnouncement, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, RandomArray } from "./random.js";
@@ -555,11 +555,9 @@ export const sayNumberOfPositions = (_config, election, _text) => {
 export const sayUserEligibility = async (config, election, text) => {
     const userId = +text.replace(/\D/g, "");
 
-    const { apiKeyPool } = config;
-
     const { apiSlug } = election;
 
-    const userBadges = await getBadges(config, userId, apiSlug, getStackApiKey(apiKeyPool));
+    const userBadges = await getBadges(config, userId, apiSlug);
 
     const requestedUser = await getUserInfo(config, userId, apiSlug);
 

@@ -64,11 +64,10 @@ export const getAllNamedBadges = async (config, site, key, page = 1) => {
  * @param {BotConfig} config
  * @param {number} userId userId to request badges for
  * @param {string} site election site slug
- * @param {string} key api key
  * @param {number} [page] API response page
  * @returns {Promise<Badge[]>}
  */
-export const getBadges = async (config, userId, site, key, page = 1) => {
+export const getBadges = async (config, userId, site, page = 1) => {
 
     const badgeURI = new URL(`${apiBase}/${apiVer}/users/${userId}/badges`);
     badgeURI.search = new URLSearchParams({
@@ -86,7 +85,7 @@ export const getBadges = async (config, userId, site, key, page = 1) => {
     const { items = [], has_more } = /**@type {{ items: Badge[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
 
     if (has_more) {
-        const otherItems = await getBadges(config, userId, site, key, page + 1);
+        const otherItems = await getBadges(config, userId, site, page + 1);
         return [...items, ...otherItems];
     }
 

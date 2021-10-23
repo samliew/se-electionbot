@@ -775,7 +775,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
             return null;
         }
 
-        const networkAccounts = await getUserAssociatedAccounts(config, networkUserId, config.apiKeyPool);
+        const networkAccounts = await getUserAssociatedAccounts(config, networkUserId);
 
         const siteAccount = networkAccounts.find(({ site_url }) => site_url.includes(hostname));
         console.log(`Site account: ${JSON.stringify(siteAccount || {})}`);

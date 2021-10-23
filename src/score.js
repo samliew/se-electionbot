@@ -203,7 +203,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         }
 
         // TODO: Get a different API key here
-        const userBadges = await getBadges(config, userId, apiSlug, getStackApiKey(config.apiKeyPool));
+        const userBadges = await getBadges(config, userId, apiSlug);
 
         // Validation
         if (!userBadges.length) {
