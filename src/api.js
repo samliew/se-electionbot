@@ -1,4 +1,4 @@
-import { apiBase, apiVer, fetchUrl } from "./utils.js";
+import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
 
 /**
  * @description A simple in-memory cached list of network sites
@@ -12,6 +12,7 @@ export let allNetworkSites = [];
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
  * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
  * @typedef {import("./config.js").BotConfig} BotConfig
+ * @typedef {{ items: any[], has_more: boolean, backoff?: number }} ApiWrapper
  */
 
 /**
@@ -24,6 +25,25 @@ export const getStackApiKey = (keyPool) => {
     const [newKey] = keyPool;
     keyPool.push(/** @type {string} */(keyPool.shift()));
     return newKey;
+};
+
+/**
+ * @template {(res: ApiWrapper) => Promise<any>} T
+ * @template {(res: ApiWrapper) => Promise<any>} U
+ *
+ * @summary handles API response
+ * @param {ApiWrapper} response response from the API
+ * @param {T} backoffCallback function to call after backoff
+ * @param {U} successCallback function to call on success
+ */
+export const handleResponse = async (response, backoffCallback, successCallback) => {
+    const { backoff } = response;
+    if (backoff) {
+        await wait(backoff);
+        return backoffCallback(response);
+    }
+
+    return successCallback(response);
 };
 
 /**
