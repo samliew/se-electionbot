@@ -100,7 +100,7 @@ export const getBadges = async (config, userId, site, page = 1) => {
 
     if (config.debug) console.log(badgeURI.toString());
 
-    const { items = [], has_more } = /**@type {{ items: Badge[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
+    const { items = [], has_more } = /**@type {ApiWrapper} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
 
     if (has_more) {
         const otherItems = await getBadges(config, userId, site, page + 1);
@@ -188,7 +188,7 @@ export const getModerators = async (config, site, sort = "name", order = "asc", 
         key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
-    const { items = [], has_more } = /** @type {{ items: User[], has_more: boolean }} */(await fetchUrl(config, modURL.toString(), true)) || {};
+    const { items = [], has_more } = /** @type {ApiWrapper} */(await fetchUrl(config, modURL.toString(), true)) || {};
 
     if (has_more) {
         const otherItems = await getModerators(config, site, sort, order, page + 1);
@@ -222,7 +222,7 @@ export const getUserInfo = async (config, userId, site, page = 1) => {
 
     if (config.debug) console.log(userURL.toString());
 
-    const { items = [] } = /** @type {{ items: User[] }} */(await fetchUrl(config, userURL.toString(), true)) || {};
+    const { items = [] } = /** @type {ApiWrapper} */(await fetchUrl(config, userURL.toString(), true)) || {};
 
     const [userInfo] = items;
 
@@ -264,7 +264,7 @@ export const getAllNetworkSites = async (config, page = 1) => {
         page: page.toString(),
     }).toString();
 
-    const { items = [], has_more = false } = /** @type {{ items: Site[], has_more: boolean }} */(
+    const { items = [], has_more = false } = /** @type {ApiWrapper} */(
         await fetchUrl(config, siteURL.toString(), true)
     ) || {};
 
@@ -317,7 +317,7 @@ export const getUserAssociatedAccounts = async (config, networkId, page = 1) => 
     }).toString();
 
     // Fetch network accounts via API to get the account of the site we want
-    const { items = [] } = /** @type {{ items: NetworkUser[] }} */(await fetchUrl(config, url.toString())) || {};
+    const { items = [] } = /** @type {ApiWrapper} */(await fetchUrl(config, url.toString())) || {};
 
     return items;
 };
