@@ -273,21 +273,22 @@ export const getAllNetworkSites = async (config, page = 1) => {
         page: page.toString(),
     }).toString();
 
-    const { items = [], has_more = false } = /** @type {ApiWrapper} */(
-        await fetchUrl(config, siteURL, true)
-    ) || {};
+    return handleResponse(
+        (await fetchUrl(config, siteURL, true)) || {},
+        () => getAllNetworkSites(config, page),
+        async ({ items = [], has_more }) => {
+            if (has_more) {
+                const otherItems = await getAllNetworkSites(config, page + 1);
+                return [...items, ...otherItems];
+            }
+            else {
+                allNetworkSites = items;
+            }
 
-    if (has_more) {
-        const otherItems = await getAllNetworkSites(config, page + 1);
-        return [...items, ...otherItems];
-    }
-    else {
-        allNetworkSites = items;
-    }
+            if (config.verbose) console.log(`API - ${getAllNetworkSites.name}\n`, items);
 
-    if (config.verbose) console.log(`API - ${getAllNetworkSites.name}\n`, items);
-
-    return items;
+            return items;
+        });
 };
 
 /**
