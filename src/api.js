@@ -66,7 +66,7 @@ export const getAllNamedBadges = async (config, site, page = 1) => {
     }).toString();
 
     return handleResponse(
-        (await fetchUrl(config, badgeURI.toString(), true)) || {},
+        (await fetchUrl(config, badgeURI, true)) || {},
         () => getAllNamedBadges(config, site, page),
         async ({ items = [], has_more }) => {
             if (has_more) {
@@ -104,7 +104,7 @@ export const getBadges = async (config, userId, site, page = 1) => {
     if (config.debug) console.log(badgeURI.toString());
 
     return handleResponse(
-        (await fetchUrl(config, badgeURI.toString(), true)) || {},
+        (await fetchUrl(config, badgeURI, true)) || {},
         () => getBadges(config, userId, site, page),
         async ({ items = [], has_more }) => {
             if (has_more) {
@@ -141,7 +141,7 @@ export const getNumberOfVoters = async (config, site, badgeId, electionPhaseDate
 
     if (config.debug) console.log(badgeURI.toString());
 
-    const { total = 0 } = /**@type {{ total: number }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
+    const { total = 0 } = /**@type {{ total: number }} */(await fetchUrl(config, badgeURI, true)) || {};
 
     if (config.verbose) console.log(`API - ${getBadges.name}\n`, total);
 
@@ -169,7 +169,7 @@ export const getNumberOfUsersEligibleToVote = async (config, site, minRep) => {
 
     if (config.debug) console.log(userURL.toString());
 
-    const { total = 0 } = /** @type {{ total: number }} */(await fetchUrl(config, userURL.toString(), true)) || {};
+    const { total = 0 } = /** @type {{ total: number }} */(await fetchUrl(config, userURL, true)) || {};
 
     return total;
 };
@@ -195,7 +195,7 @@ export const getModerators = async (config, site, sort = "name", order = "asc", 
     }).toString();
 
     return handleResponse(
-        (await fetchUrl(config, modURL.toString(), true)) || {},
+        (await fetchUrl(config, modURL, true)) || {},
         () => getModerators(config, site, sort, order, page),
         async ({ items = [], has_more }) => {
             if (has_more) {
@@ -231,7 +231,7 @@ export const getUserInfo = async (config, userId, site, page = 1) => {
 
     if (config.debug) console.log(userURL.toString());
 
-    const { items = [] } = /** @type {ApiWrapper} */(await fetchUrl(config, userURL.toString(), true)) || {};
+    const { items = [] } = /** @type {ApiWrapper} */(await fetchUrl(config, userURL, true)) || {};
 
     const [userInfo] = items;
 
@@ -274,7 +274,7 @@ export const getAllNetworkSites = async (config, page = 1) => {
     }).toString();
 
     const { items = [], has_more = false } = /** @type {ApiWrapper} */(
-        await fetchUrl(config, siteURL.toString(), true)
+        await fetchUrl(config, siteURL, true)
     ) || {};
 
     if (has_more) {
@@ -327,7 +327,7 @@ export const getUserAssociatedAccounts = async (config, networkId, page = 1) => 
 
     // Fetch network accounts via API to get the account of the site we want
     return handleResponse(
-        (await fetchUrl(config, url.toString())) || {},
+        (await fetchUrl(config, url, true)) || {},
         () => getUserAssociatedAccounts(config, networkId, page),
         async ({ items = [] }) => items
     );

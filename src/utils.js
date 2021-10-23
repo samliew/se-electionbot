@@ -144,14 +144,14 @@ export const chatMarkdownToHtml = (content) => {
 /**
  * @summary Sends a GET request. This wrapper handles Stack Exchange's API backoff
  * @param {BotConfig} config bot configuration
- * @param {string} url the url to fetch
+ * @param {string|URL} url the url to fetch
  * @param {boolean} json whether to return the response as a json object
  * @returns {Promise<any>}
  */
 export const fetchUrl = async (config, url, json = false) => {
     const { SOURCE_VERSION, ACCOUNT_EMAIL } = process.env;
 
-    const isStackExchangeApi = /^https\:\/\/api\.stackexchange\.com/.test(url);
+    const isStackExchangeApi = /^https\:\/\/api\.stackexchange\.com/.test(url.toString());
 
     // Delay SE API query if backoff still active
     const backoffMillis = _apiBackoff - Date.now();
@@ -161,7 +161,7 @@ export const fetchUrl = async (config, url, json = false) => {
 
     try {
         const { data } = await axios({
-            url,
+            url: url.toString(),
             responseType: isStackExchangeApi || json ? "json" : "text",
             headers: {
                 'User-Agent': `Node.js/ElectionBot ver.${SOURCE_VERSION}; AccountEmail ${ACCOUNT_EMAIL}`,
