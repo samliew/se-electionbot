@@ -6,7 +6,7 @@ import { JSDOM } from "jsdom";
 // import { JSDOM } from "jsdom";
 import sanitize from "sanitize-html";
 import Announcement from './announcement.js';
-import { getAllNamedBadges, getModerators, getStackApiKey } from "./api.js";
+import { getAllNamedBadges, getModerators } from "./api.js";
 import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
@@ -197,7 +197,7 @@ import { matchNumber } from "./utils/expressions.js";
 
         // Get current site named badges (i.e.: non-tag badges)
         if (!election.isStackOverflow()) {
-            const allNamedBadges = await getAllNamedBadges(config, election.apiSlug, getStackApiKey(apiKeyPool));
+            const allNamedBadges = await getAllNamedBadges(config, election.apiSlug);
 
             electionBadges.forEach((electionBadge) => {
                 const { name: badgeName } = electionBadge;

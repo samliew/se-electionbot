@@ -30,12 +30,10 @@ export const getStackApiKey = (keyPool) => {
  * @summary gets all named badges from the API
  * @param {BotConfig} config
  * @param {string} site election site slug
- * @param {string} key api key
  * @param {number} [page] API response page
  * @returns {Promise<Badge[]>}
  */
-export const getAllNamedBadges = async (config, site, key, page = 1) => {
-    // https://api.stackexchange.com/2.3/badges/name?pagesize=100&order=desc&sort=rank&site=academia
+export const getAllNamedBadges = async (config, site, page = 1) => {
     const badgeURI = new URL(`${apiBase}/${apiVer}/badges/name`);
     badgeURI.search = new URLSearchParams({
         site,
@@ -44,13 +42,13 @@ export const getAllNamedBadges = async (config, site, key, page = 1) => {
         pagesize: "100",
         filter: ")j(RnCyiVMe7YpW4a2x",
         page: page.toString(),
-        key
+        key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
     const { items = [], has_more } = /**@type {{ items: Badge[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
 
     if (has_more) {
-        const otherItems = await getAllNamedBadges(config, site, key, page + 1);
+        const otherItems = await getAllNamedBadges(config, site, page + 1);
         return [...items, ...otherItems];
     }
 
