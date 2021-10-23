@@ -77,16 +77,13 @@ describe('ScheduledAnnouncement', function () {
 
     describe('announceNewNominees', () => {
 
-        /** @type {import("sinon").SinonFakeTimers} */
+        /** @type {sinon.SinonFakeTimers} */
         let clock;
-        before(() => clock = sinon.useFakeTimers());
-        after(() => clock.restore());
+        beforeEach(() => clock = sinon.useFakeTimers());
 
-        beforeEach(() => sinon.restore());
+        afterEach(() => sinon.restore());
 
-        it('should correctly announce new nominees', async function () {
-            this.timeout(1e4);
-
+        it('should correctly announce new nominees', async () => {
             const names = ["Jane", "John"];
 
             const messageStub = sinon.stub(room, "sendMessage");
@@ -98,7 +95,7 @@ describe('ScheduledAnnouncement', function () {
 
             const promise = ann.announceNewNominees();
 
-            clock.runAll();
+            await clock.runAllAsync();
 
             expect(await promise).to.be.true;
 
@@ -167,6 +164,10 @@ describe('ScheduledAnnouncement', function () {
         let ann = new ScheduledAnnouncement(config, room, election, scraper);
         afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
 
+        /** @type {sinon.SinonFakeTimers} */
+        let clock;
+        beforeEach(() => clock = sinon.useFakeTimers());
+
         afterEach(() => sinon.restore());
 
         it('should correctly announce withdrawn nominations', async () => {
@@ -181,9 +182,11 @@ describe('ScheduledAnnouncement', function () {
 
             ann._election = election;
 
-            const status = await ann.announceWithdrawnNominees();
+            const promise = ann.announceWithdrawnNominees();
 
-            expect(status).to.be.true;
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
 
             const [[message]] = stubbed.args;
 
