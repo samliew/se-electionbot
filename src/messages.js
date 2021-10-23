@@ -17,6 +17,7 @@ import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
  * @typedef {import("./score").CandidateScore} CandidateScore
+ * @typedef {import("./election").ElectionPhase} ElectionPhase
  */
 
 /**
@@ -926,4 +927,35 @@ export const sayHowManyAreEligibleToVote = async (config, election) => {
 export const sayUptime = (config) => {
     const { scriptInitDate } = config;
     return `${Math.floor((Date.now() - scriptInitDate.getTime()) / 1e3)} seconds of uptime.`;
+};
+
+/**
+ * @summary builds a response to how many candidates are in the room query
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayAboutBallotFile = (_config, election) => {
+    const { phase, electionUrl, electionBallotURL } = election;
+
+    const electionPage = makeURL("election page", electionUrl);
+
+    /** @type {Record<Exclude<ElectionPhase, null>, string>} */
+    const phaseMap = {
+        nomination: `will be available on the ${electionPage} once the election phase ends`,
+        election: `will become available on the ${electionPage} when the election ends`,
+        ended: `can be ${makeURL("downloaded", electionBallotURL)} as the election has ended`,
+        cancelled: "is not available for cancelled elections",
+        get primary() {
+            return this.election;
+        }
+    };
+
+    const content = phase ? phaseMap[phase] : `will be available when the election ends`;
+
+    const prefix = `The BLT (ballot) file`;
+    const bltURL = makeURL("this help article", "https://www.opavote.com/help/overview#blt-file-format");
+    const suffix = `To learn more about it, please read ${bltURL}`;
+
+    return `${prefix} ${content}. ${suffix}.`;
 };
