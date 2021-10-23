@@ -137,3 +137,9 @@ export const getRandomNow = () => new RandomArray(
     "happening at the moment",
     "in progress"
 ).getRandom();
+
+export const getRandomFAQ = () => new RandomArray(
+    "commonly-asked questions",
+    "frequently-asked questions",
+    "common questions"
+).getRandom();
