@@ -65,16 +65,19 @@ export const getAllNamedBadges = async (config, site, page = 1) => {
         key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
-    const { items = [], has_more } = /**@type {{ items: Badge[], has_more: boolean }} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
+    return handleResponse(
+        (await fetchUrl(config, badgeURI.toString(), true)) || {},
+        () => getAllNamedBadges(config, site, page),
+        async ({ items = [], has_more }) => {
+            if (has_more) {
+                const otherItems = await getAllNamedBadges(config, site, page + 1);
+                return [...items, ...otherItems];
+            }
 
-    if (has_more) {
-        const otherItems = await getAllNamedBadges(config, site, page + 1);
-        return [...items, ...otherItems];
-    }
+            if (config.verbose) console.log(`API - ${getAllNamedBadges.name}\n`, items);
 
-    if (config.verbose) console.log(`API - ${getAllNamedBadges.name}\n`, items);
-
-    return items;
+            return items;
+        });
 };
 
 /**
@@ -100,16 +103,19 @@ export const getBadges = async (config, userId, site, page = 1) => {
 
     if (config.debug) console.log(badgeURI.toString());
 
-    const { items = [], has_more } = /**@type {ApiWrapper} */(await fetchUrl(config, badgeURI.toString(), true)) || {};
+    return handleResponse(
+        (await fetchUrl(config, badgeURI.toString(), true)) || {},
+        () => getBadges(config, userId, site, page),
+        async ({ items = [], has_more }) => {
+            if (has_more) {
+                const otherItems = await getBadges(config, userId, site, page + 1);
+                return [...items, ...otherItems];
+            }
 
-    if (has_more) {
-        const otherItems = await getBadges(config, userId, site, page + 1);
-        return [...items, ...otherItems];
-    }
+            if (config.verbose) console.log(`API - ${getBadges.name}\n`, items);
 
-    if (config.verbose) console.log(`API - ${getBadges.name}\n`, items);
-
-    return items;
+            return items;
+        });
 };
 
 /**
@@ -188,18 +194,21 @@ export const getModerators = async (config, site, sort = "name", order = "asc", 
         key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
-    const { items = [], has_more } = /** @type {ApiWrapper} */(await fetchUrl(config, modURL.toString(), true)) || {};
+    return handleResponse(
+        (await fetchUrl(config, modURL.toString(), true)) || {},
+        () => getModerators(config, site, sort, order, page),
+        async ({ items = [], has_more }) => {
+            if (has_more) {
+                const otherItems = await getModerators(config, site, sort, order, page + 1);
+                return [...items, ...otherItems];
+            }
 
-    if (has_more) {
-        const otherItems = await getModerators(config, site, sort, order, page + 1);
-        return [...items, ...otherItems];
-    }
+            const nonEmployeeMods = items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1);
 
-    const nonEmployeeMods = items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1);
+            if (config.verbose) console.log(`API - ${getModerators.name}\n`, nonEmployeeMods);
 
-    if (config.verbose) console.log(`API - ${getModerators.name}\n`, nonEmployeeMods);
-
-    return nonEmployeeMods;
+            return nonEmployeeMods;
+        });
 };
 
 /**
@@ -317,7 +326,9 @@ export const getUserAssociatedAccounts = async (config, networkId, page = 1) => 
     }).toString();
 
     // Fetch network accounts via API to get the account of the site we want
-    const { items = [] } = /** @type {ApiWrapper} */(await fetchUrl(config, url.toString())) || {};
-
-    return items;
+    return handleResponse(
+        (await fetchUrl(config, url.toString())) || {},
+        () => getUserAssociatedAccounts(config, networkId, page),
+        async ({ items = [] }) => items
+    );
 };
