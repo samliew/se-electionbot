@@ -16,8 +16,8 @@ import { matchNumber } from "./utils/expressions.js";
 
 /**
  * @summary template getter for candidate score text
- * @param {number} score
- * @param {number} max
+ * @param {number} score user's score
+ * @param {number} max maximum candidate score
  * @returns {string}
  */
 export const getScoreText = (score, max) => `**${score}** (out of ${max})`;
@@ -27,7 +27,7 @@ export const getScoreText = (score, max) => `**${score}** (out of ${max})`;
  * @param {boolean} [isAskingForOtherUser] is asking for another user
  * @returns {string}
  */
-const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurred when calculating ${isAskingForOtherUser ? `the user's` : `your`} score.`;
+export const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurred when calculating ${isAskingForOtherUser ? `the user's` : `your`} score.`;
 
 /**
  * @typedef {{
@@ -44,6 +44,7 @@ const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurre
  *  numMissingRequiredBadges: number,
  *  numMissingBadges: number,
  *  maxScore: number,
+ *  missingRequiredBadges: ElectionBadge[],
  *  missingRequiredBadgeNames: string[]
  * }} CandidateScore
  *
@@ -68,28 +69,28 @@ export const calculateScore = (user, userBadges, election) => {
 
     const missingBadgeIds = missingBadges.map(mapToId);
 
-    const missingRequiredBadges = election.isStackOverflow() ? requiredBadges.filter(({ badge_id }) => missingBadgeIds.includes(badge_id)) : [];
-
     return {
         score: repScore + badgeScore,
-        missing: {
-            badges: {
-                election: missingBadges,
-                required: missingRequiredBadges
-            }
+        get missing() {
+            return {
+                badges: {
+                    election: missingBadges,
+                    required: this.missingRequiredBadges
+                }
+            };
         },
         get isEligible() {
             const { repNominate = 0 } = election;
-            return !missingRequiredBadges.length && (repNominate <= reputation);
+            return !this.isMissingRequiredBadges && (repNominate <= reputation);
         },
         get isMissingReputation() {
             return reputation < repNominate;
         },
         get isMissingRequiredBadges() {
-            return !!missingRequiredBadges.length;
+            return !!this.numMissingRequiredBadges;
         },
         get numMissingRequiredBadges() {
-            return missingRequiredBadges.length;
+            return this.missingRequiredBadges.length;
         },
         get numMissingBadges() {
             return missingBadges.length;
@@ -97,8 +98,11 @@ export const calculateScore = (user, userBadges, election) => {
         get maxScore() {
             return maxRepScore + electionBadges.length;
         },
+        get missingRequiredBadges() {
+            return election.isStackOverflow() ? requiredBadges.filter(({ badge_id }) => missingBadgeIds.includes(badge_id)) : [];
+        },
         get missingRequiredBadgeNames() {
-            return missingRequiredBadges.map(mapToName);
+            return this.missingRequiredBadges.map(mapToName);
         }
     };
 };
