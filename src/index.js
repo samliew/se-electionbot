@@ -85,8 +85,6 @@ import { matchNumber } from "./utils/expressions.js";
     // Other environment variables
     const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN || "stackexchange.com");
     const defaultChatRoomId = +(process.env.CHAT_ROOM_ID || 92073);
-    const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
-
 
     /** @type {{ ChatEventType: EventType }} */
     //@ts-expect-error
