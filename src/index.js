@@ -14,6 +14,7 @@ import { joinControlRoom } from "./control/index.js";
 import Election from './election.js';
 import {
     isAskedAboutBadgesOfType,
+    isAskedAboutBallotFile,
     isAskedAboutJokes,
     isAskedAboutJonSkeetJokes,
     isAskedAboutLightbulb,
@@ -30,7 +31,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
+import { sayAboutBallotFile, sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -678,7 +679,8 @@ import { matchNumber } from "./utils/expressions.js";
                 [isAskedAboutSTV, sayAboutSTV],
                 [isAskedIfCanNominateOthers, sayHowToNominateOthers],
                 [isAskedHowManyAreEligibleToVote, sayHowManyAreEligibleToVote],
-                [isAskedForElectionPage, sayElectionPage]
+                [isAskedForElectionPage, sayElectionPage],
+                [isAskedAboutBallotFile, sayAboutBallotFile]
             ];
 
             const matched = rules.find(([expr]) => expr(content));

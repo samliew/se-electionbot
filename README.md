@@ -57,6 +57,7 @@ About the voting system:
 
 - what is Single Transferable Vote?
 - what is Meek STV?
+- where can the ballot file be found?
 
 ElectionBot info _(requires mention)_:
 
