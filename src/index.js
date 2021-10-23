@@ -23,7 +23,7 @@ import {
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule,
     isAskedForHelp,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
     isBotMentioned,
     isHatingTheBot,
@@ -31,9 +31,9 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutBallotFile, sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
+import { sayAboutBallotFile, sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
-import { getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomSecretPrefix, RandomArray } from "./random.js";
+import { getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
@@ -668,7 +668,7 @@ import { matchNumber } from "./utils/expressions.js";
              *  Non-privileged response guards
              */
 
-            /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string) => (string|Promise<string>)][]} */
+            /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string, u: UserProfile) => (string|Promise<string>)][]} */
             const rules = [
                 [isAskedForCurrentPositions, sayNumberOfPositions],
                 [isAskedIfResponsesAreCanned, sayCannedResponses],
@@ -678,7 +678,8 @@ import { matchNumber } from "./utils/expressions.js";
                 [isAskedIfCanNominateOthers, sayHowToNominateOthers],
                 [isAskedHowManyAreEligibleToVote, sayHowManyAreEligibleToVote],
                 [isAskedForElectionPage, sayElectionPage],
-                [isAskedAboutBallotFile, sayAboutBallotFile]
+                [isAskedAboutBallotFile, sayAboutBallotFile],
+                [isAskedWhoIsTheBestMod, sayBestModerator]
             ];
 
             const matched = rules.find(([expr]) => expr(content));
@@ -693,7 +694,8 @@ import { matchNumber } from "./utils/expressions.js";
             if (matched) {
                 const [matcher, builder] = matched;
                 if (config.debug) console.log(`Matched response: ${matcher.name}`);
-                responseText = await builder(config, election, content);
+                responseText = await builder(config, election, content, user);
+                if (config.verbose) console.log(`Built response: ${responseText}`);
             }
             else if (isAskedAboutLightbulb(content) && config.funMode) {
                 responseText = sayHowManyModsItTakesToFixLightbulb(currentSiteMods);
@@ -777,20 +779,6 @@ import { matchNumber } from "./utils/expressions.js";
             else if (isAskedHowOrWhoToVote(content)) {
                 if (election.phase == null) responseText = sayNotStartedYet(election);
                 else responseText = sayInformedDecision();
-            }
-
-            // Who is the best mod
-            else if (['who', 'which'].some(x => content.startsWith(x)) && ['best', 'loved', 'favorite', 'favourite'].some(x => content.includes(x)) && content.includes('mod')) {
-                const currModNames = currentSiteMods.map(({ display_name }) => display_name);
-
-                if (user.isModerator && currModNames.includes(user.name)) {
-                    responseText = `${user.name} is the best mod!!!`;
-                }
-                else {
-                    const activeMods = currentSiteMods.filter(({ last_access_date }) => new Date(last_access_date).getTime() + 86400000 > Date.now());
-                    const pool = activeMods.map(({ display_name }) => `${getRandomSecretPrefix()} ${display_name} is the best mod!`);
-                    responseText = new RandomArray(...pool).getRandom();
-                }
             }
             // Current mods
             else if (isAskedForCurrentMods(content, election.apiSlug)) {
