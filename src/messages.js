@@ -2,7 +2,7 @@ import { partialRight } from "ramda";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getStackApiKey, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
-import { getCandidateOrNominee, getRandomAnnouncement, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAnnouncement, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, dateToRelativetime, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
@@ -19,6 +19,15 @@ import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
  * @typedef {import("./score").CandidateScore} CandidateScore
  * @typedef {import("./election").ElectionPhase} ElectionPhase
  */
+
+/**
+ * @summary builds a message for commonly-asked questions
+ * @param {string} [helpCommand] help command
+ */
+export const sayCommonlyAskedQuestions = (helpCommand = `@ElectionBot help`) => {
+    // TODO: switch to Command class
+    return `I can answer ${getRandomFAQ()} about elections (type *${helpCommand}* for more info)`;
+};
 
 /**
  * @summary makes bot remind users that they are here
@@ -61,10 +70,9 @@ export const sayHI = async (config, election, greeting = 'Welcome to the electio
     };
 
     const phaseText = phaseMap[phase] || "";
-    const helpCommand = `@ElectionBot help`;
 
     // Update index.js as well if this message changes
-    return `${greeting}${phaseText} I can answer commonly-asked questions about elections (type *${helpCommand}* for more info).`;
+    return `${greeting}${phaseText} ${sayCommonlyAskedQuestions()}.`;
 };
 
 /**
