@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for static/js/script.js</title>
+    <title>Code coverage report for src/control/index.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">static/js</a> script.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/control</a> index.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/73</span>
+                <span class='fraction'>0/83</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/73</span>
+                <span class='fraction'>0/83</span>
             </div>
         
             
@@ -129,7 +129,17 @@
 <a name='L70'></a><a href='#L70'>70</a>
 <a name='L71'></a><a href='#L71'>71</a>
 <a name='L72'></a><a href='#L72'>72</a>
-<a name='L73'></a><a href='#L73'>73</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -201,79 +211,99 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >/**</span></span></span>
-<span class="cstat-no" title="statement not covered" > * @summary converts a given Date to relative datetime string</span>
-<span class="cstat-no" title="statement not covered" > * @param {Date|string|number} date date to format</span>
-<span class="cstat-no" title="statement not covered" > * @param {string} [soonText] text to display when the election starts soon</span>
-<span class="cstat-no" title="statement not covered" > * @param {string} [justNowText] text to display when the election just started</span>
-<span class="cstat-no" title="statement not covered" > * @returns {string}</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import entities from 'html-entities';</span></span></span>
+<span class="cstat-no" title="statement not covered" >import sanitize from "sanitize-html";</span>
+<span class="cstat-no" title="statement not covered" >import { isBotMentioned } from "../guards.js";</span>
+<span class="cstat-no" title="statement not covered" >import { sayIdleGreeting } from "../messages.js";</span>
+<span class="cstat-no" title="statement not covered" >import { sendMessage } from "../queue.js";</span>
+<span class="cstat-no" title="statement not covered" >import { getUser, roomKeepAlive } from "../utils.js";</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >/**</span>
+<span class="cstat-no" title="statement not covered" > * @typedef {import("chatexchange").default} Client</span>
+<span class="cstat-no" title="statement not covered" > * @typedef {import("chatexchange").ChatEventType} ChatEventType</span>
+<span class="cstat-no" title="statement not covered" > * @typedef {import("chatexchange/dist/Room").default} Room</span>
+<span class="cstat-no" title="statement not covered" > * @typedef {import("chatexchange/dist/WebsocketEvent").default} WebsocketEvent</span>
+<span class="cstat-no" title="statement not covered" > * @typedef {import("../config").BotConfig} BotConfig</span>
+<span class="cstat-no" title="statement not covered" > * @typedef {import("../election").default} Election</span>
+<span class="cstat-no" title="statement not covered" > * @typedef {import('chatexchange/dist/Browser').IProfileData} IProfileData</span>
+<span class="cstat-no" title="statement not covered" > *</span>
+<span class="cstat-no" title="statement not covered" > * @summary makes the bot join the control room</span>
+<span class="cstat-no" title="statement not covered" > * @param {BotConfig} config bot configuration</span>
+<span class="cstat-no" title="statement not covered" > * @param {Election} election current election</span>
+<span class="cstat-no" title="statement not covered" > * @param {Client} client ChatExchange client</span>
+<span class="cstat-no" title="statement not covered" > * @param {{</span>
+<span class="cstat-no" title="statement not covered" > *  botChatProfile: IProfileData,</span>
+<span class="cstat-no" title="statement not covered" > *  controlRoomId: number,</span>
+<span class="cstat-no" title="statement not covered" > *  controlledRoom: Room,</span>
+<span class="cstat-no" title="statement not covered" > *  ignoredEventTypes?: ChatEventType[]</span>
+<span class="cstat-no" title="statement not covered" > * }} options</span>
+<span class="cstat-no" title="statement not covered" > * @returns {Promise&lt;boolean&gt;}</span>
 <span class="cstat-no" title="statement not covered" > */</span>
-<span class="cstat-no" title="statement not covered" >const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >export const joinControlRoom = async (config, election, client, {</span>
+<span class="cstat-no" title="statement not covered" >    controlRoomId,</span>
+<span class="cstat-no" title="statement not covered" >    controlledRoom,</span>
+<span class="cstat-no" title="statement not covered" >    botChatProfile,</span>
+<span class="cstat-no" title="statement not covered" >    ignoredEventTypes = []</span>
+<span class="cstat-no" title="statement not covered" >}) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    try {</span>
+<span class="cstat-no" title="statement not covered" >        const controlRoom = await client.joinRoom(controlRoomId);</span>
+<span class="cstat-no" title="statement not covered" >        controlRoom.ignore(...ignoredEventTypes);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const validateDate = (input) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        let output = input;</span>
+<span class="cstat-no" title="statement not covered" >        controlRoom.on("message", async (/** @type {WebsocketEvent} */ msg) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            const encodedMessage = await msg.content;</span>
+<span class="cstat-no" title="statement not covered" >            const roomId = await msg.roomId;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        if (typeof input === 'string' || typeof input === 'number') {</span>
-<span class="cstat-no" title="statement not covered" >            output = new Date(input);</span>
-<span class="cstat-no" title="statement not covered" >        };</span>
+<span class="cstat-no" title="statement not covered" >            const { userId } = msg;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        // use instanceof, as normal objects will pass `typeof !== "object"` validation</span>
-<span class="cstat-no" title="statement not covered" >        return output instanceof Date ? output : new Date();</span>
-<span class="cstat-no" title="statement not covered" >    };</span>
+<span class="cstat-no" title="statement not covered" >            // Decode HTML entities in messages, create lowercase copy for guard matching</span>
+<span class="cstat-no" title="statement not covered" >            const originalMessage = entities.decode(encodedMessage);</span>
+<span class="cstat-no" title="statement not covered" >            const content = sanitize(originalMessage.toLowerCase().replace(/^@\S+\s+/, ''), { allowedTags: [] });</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    date = validateDate(date);</span>
+<span class="cstat-no" title="statement not covered" >            // Get details of user who triggered the message</span>
+<span class="cstat-no" title="statement not covered" >            const user = await getUser(client, userId);</span>
+<span class="cstat-no" title="statement not covered" >            if (!user) return console.log(`missing user ${userId}`);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    if (date === null) return soonText;</span>
+<span class="cstat-no" title="statement not covered" >            const canSend = user.isModerator || config.devIds.has(user.id);</span>
+<span class="cstat-no" title="statement not covered" >            const fromControlRoom = roomId === controlRoomId;</span>
+<span class="cstat-no" title="statement not covered" >            const isAskingToSay = /\bsay\b/.test(content);</span>
+<span class="cstat-no" title="statement not covered" >            const isAskingToGreet = /\bgreet\b/.test(content);</span>
+<span class="cstat-no" title="statement not covered" >            const isAtMentionedMe = isBotMentioned(originalMessage, botChatProfile);</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Try future date</span>
-<span class="cstat-no" title="statement not covered" >    let diff = (date.getTime() - Date.now()) / 1000;</span>
-<span class="cstat-no" title="statement not covered" >    let dayDiff = Math.floor(diff / 86400);</span>
+<span class="cstat-no" title="statement not covered" >            if (!canSend || !fromControlRoom || !isAtMentionedMe) return;</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // In the future</span>
-<span class="cstat-no" title="statement not covered" >    if (diff &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >        return dayDiff &gt; 31 ? "" : (</span>
-<span class="cstat-no" title="statement not covered" >            diff &lt; 5 &amp;&amp; soonText ||</span>
-<span class="cstat-no" title="statement not covered" >            diff &lt; 60 &amp;&amp; (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}`; })(Math.floor(diff)) ||</span>
-<span class="cstat-no" title="statement not covered" >            diff &lt; 3600 &amp;&amp; (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}`; })(Math.floor(diff / 60)) ||</span>
-<span class="cstat-no" title="statement not covered" >            diff &lt; 86400 &amp;&amp; (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}`; })(Math.floor(diff / 3600)) ||</span>
-<span class="cstat-no" title="statement not covered" >            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}`; })(Math.floor(diff / 86400))</span>
-<span class="cstat-no" title="statement not covered" >        );</span>
+<span class="cstat-no" title="statement not covered" >            if (isAskingToSay) {</span>
+<span class="cstat-no" title="statement not covered" >                await sendMessage(config, controlledRoom, originalMessage.replace(/^@\S+\s+say /i, ''));</span>
+<span class="cstat-no" title="statement not covered" >                return;</span>
+<span class="cstat-no" title="statement not covered" >            }</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >            if (isAskingToGreet) {</span>
+<span class="cstat-no" title="statement not covered" >                await sayIdleGreeting(config, election, controlledRoom);</span>
+<span class="cstat-no" title="statement not covered" >                return;</span>
+<span class="cstat-no" title="statement not covered" >            }</span>
+<span class="cstat-no" title="statement not covered" >        });</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        await controlRoom.watch();</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        roomKeepAlive(config, client, controlRoom);</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >        console.log(`joined control room: ${controlRoomId}`);</span>
+<span class="cstat-no" title="statement not covered" >    } catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >        console.log(`failed to join control room: ${error}`);</span>
+<span class="cstat-no" title="statement not covered" >        return false;</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // In the past</span>
-<span class="cstat-no" title="statement not covered" >    diff = (Date.now() - date.getTime()) / 1000;</span>
-<span class="cstat-no" title="statement not covered" >    dayDiff = Math.floor(diff / 86400);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    return dayDiff &gt; 31 ? "" : (</span>
-<span class="cstat-no" title="statement not covered" >        diff &lt; 5 &amp;&amp; justNowText ||</span>
-<span class="cstat-no" title="statement not covered" >        diff &lt; 60 &amp;&amp; (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago`; })(Math.floor(diff)) ||</span>
-<span class="cstat-no" title="statement not covered" >        diff &lt; 3600 &amp;&amp; (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago`; })(Math.floor(diff / 60)) ||</span>
-<span class="cstat-no" title="statement not covered" >        diff &lt; 86400 &amp;&amp; (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago`; })(Math.floor(diff / 3600)) ||</span>
-<span class="cstat-no" title="statement not covered" >        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago`; })(Math.floor(diff / 86400))</span>
-<span class="cstat-no" title="statement not covered" >    );</span>
-<span class="cstat-no" title="statement not covered" >};</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const updateRelativeDates = () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    var spans = /** @type {NodeListOf&lt;HTMLElement&gt;} */(document.querySelectorAll('span.relativetime'));</span>
-<span class="cstat-no" title="statement not covered" >    spans.forEach(el =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        if (el.title) {</span>
-<span class="cstat-no" title="statement not covered" >            var prefix = el.dataset.prefix || "";</span>
-<span class="cstat-no" title="statement not covered" >            var suffix = el.dataset.suffix || "";</span>
-<span class="cstat-no" title="statement not covered" >            var date = dateToRelativetime(el.title);</span>
-<span class="cstat-no" title="statement not covered" >            if (date)</span>
-<span class="cstat-no" title="statement not covered" >                el.innerHTML = prefix + date + suffix;</span>
-<span class="cstat-no" title="statement not covered" >        }</span>
-<span class="cstat-no" title="statement not covered" >    });</span>
-<span class="cstat-no" title="statement not covered" >};</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >(function () {</span>
-<span class="cstat-no" title="statement not covered" >    updateRelativeDates();</span>
-<span class="cstat-no" title="statement not covered" >    setInterval(updateRelativeDates, 15000);</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    // Meta refresh fallback</span>
-<span class="cstat-no" title="statement not covered" >    const metaRefresh = document.querySelector('meta[http-equiv="refresh"]');</span>
-<span class="cstat-no" title="statement not covered" >    if (metaRefresh &amp;&amp; +metaRefresh.content &gt; 0) setTimeout(() =&gt; location.reload(true), +metaRefresh.content * 1000);</span>
-<span class="cstat-no" title="statement not covered" >})();</span></pre></td></tr></table></pre>
+<span class="cstat-no" title="statement not covered" >    return true;</span>
+<span class="cstat-no" title="statement not covered" >};</span></pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
