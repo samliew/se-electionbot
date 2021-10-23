@@ -287,16 +287,15 @@ export const getAllMainNetworkSites = async (config) => {
  * @summary gets a list of associated user accounts from the API
  * @param {BotConfig} config bot configuration
  * @param {number} networkId network user id (not the per-site id)
- * @param {string[]} keyPool pool of API keys to rotate through
  * @returns {Promise<NetworkUser[]>}
  */
-export const getUserAssociatedAccounts = async (config, networkId, keyPool, page = 1) => {
+export const getUserAssociatedAccounts = async (config, networkId, page = 1) => {
     const url = new URL(`${apiBase}/${apiVer}/users/${networkId}/associated`);
     url.search = new URLSearchParams({
         pagesize: "100",
         types: "main_site",
         filter: "!myEHnzbmE0",
-        key: getStackApiKey(keyPool),
+        key: getStackApiKey(config.apiKeyPool),
         page: page.toString(),
     }).toString();
 
