@@ -340,6 +340,17 @@ export const isAskedWhoIsTheBestCandidate = (text) => {
 };
 
 /**
+ * @summary checks if a message is asking who is the best mod
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedWhoIsTheBestMod = (text) => {
+    return someMatch([
+        /^(?:who|which)\s+(?:is|are)(?:\s+the)?(\s+most)?\s+(?:best|coolest|loved|favou?rite)\s+(?:mod|diamond)(?:erator)?/i
+    ], text);
+};
+
+/**
  * @summary checks if a message is asking about STV ranked-choice voting
  * @param {string} text message text
  * @returns {boolean}
@@ -445,3 +456,4 @@ export const isAskedAboutBallotFile = (text) => {
         /^is(?:\s+the)?\s+(?:ballot|blt)(?:\s+file)?\s+available/i
     ], text);
 };
+

@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -125,22 +125,43 @@ describe('Message Guards', () => {
         });
     });
 
+    const bestModeratorMatches = [
+        "who is the best mod",
+        "Which is the best moderator?",
+        "who is best diamond?",
+        "Who is best moderator?",
+        "Which is the coolest mod",
+        "who is the most loved mod?"
+    ];
+
+    const bestCandidateMatches = [
+        "who is the best candidate?",
+        "who are the best candidates?",
+        "who were the bestest candidates ever?",
+        "what is the best nomination?",
+        // https://chat.stackoverflow.com/transcript/message/53289881#53289881
+        "Who's the best candidate?"
+    ];
+
+    const moderatorDutiesMatches = [
+        "what is a moderator",
+        "what do moderators do?",
+        "what do mods do",
+        "what does mods do",
+        "what powers do mods have",
+        "what are mod responsibility",
+        "what are the mod responsibilities",
+        "what are the responsibilities of a mod",
+        "what are the responsibilities of moderators",
+        "what are the benefits of being a moderator",
+        "should i be a mod",
+        "does moderators have extra privileges",
+    ];
+
     describe('isAskedAboutModsOrModPowers', () => {
         it('should correctly match content', () => {
-            allMatch(isAskedAboutModsOrModPowers, [
-                "what is a moderator",
-                "what do moderators do?",
-                "what do mods do",
-                "what does mods do",
-                "what powers do mods have",
-                "what are mod responsibility",
-                "what are the mod responsibilities",
-                "what are the responsibilities of a mod",
-                "what are the responsibilities of moderators",
-                "what are the benefits of being a moderator",
-                "should i be a mod",
-                "does moderators have extra privileges",
-            ]);
+            allMatch(isAskedAboutModsOrModPowers, moderatorDutiesMatches);
+            allMatch(isAskedAboutModsOrModPowers, bestModeratorMatches, false);
         });
     });
 
@@ -232,20 +253,19 @@ describe('Message Guards', () => {
         });
     });
 
-    describe('isAskedWhoIsTheBestCandidate', () => {
+    describe(isAskedWhoIsTheBestMod.name, () => {
         it('should correctly match content', () => {
-            allMatch(isAskedWhoIsTheBestCandidate, [
-                "who is the best candidate?",
-                "who are the best candidates?",
-                "who were the bestest candidates ever?",
-                "what is the best nomination?",
-                // https://chat.stackoverflow.com/transcript/message/53289881#53289881
-                "Who's the best candidate?"
-            ]);
+            allMatch(isAskedWhoIsTheBestMod, bestModeratorMatches);
+            allMatch(isAskedWhoIsTheBestMod, bestCandidateMatches, false);
+        });
+    });
 
+    describe(isAskedWhoIsTheBestCandidate.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhoIsTheBestCandidate, bestCandidateMatches);
             allMatch(isAskedWhoIsTheBestCandidate, [
-                "who are the candidates?",
-                "who is the best mod"
+                ...bestModeratorMatches,
+                "who are the candidates?"
             ], false);
         });
     });
