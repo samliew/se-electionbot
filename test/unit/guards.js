@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { partialRight } from "ramda";
 import {
-    isAskedAboutBadgesOfType, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
+    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
@@ -558,6 +558,19 @@ describe('Message Guards', () => {
         it('should correctly match content', () => {
             allMatch(isAskedForElectionPage, electionPageMatches);
             allMatch(isAskedForElectionPage, scoreFormulaMatches, false);
+        });
+    });
+
+    describe(isAskedAboutBallotFile.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutBallotFile, [
+                "Where can I find the ballot file?",
+                "How can the ballot file be found",
+                "where can the ballot file be found?",
+                "where is the BLT file",
+                "where can I find BLT file?",
+                "Is BLT file available?"
+            ]);
         });
     });
 });

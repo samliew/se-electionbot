@@ -433,3 +433,15 @@ export const isAskedForElectionPage = (text) => {
         /(?:what|where)\s+is(?:\s+the)?\s+(?:(?:link|url)\s+(?:to|of)(?:\s+the)?\s+election|election\s+page)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking where can one find a ballot file
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutBallotFile = (text) => {
+    return someMatch([
+        /^(?:where|how)\s+(?:can|is)(?:\s+i\s+find)?(\s+the)?\s+(?:ballot|blt)(?:\s+file)?/i,
+        /^is(?:\s+the)?\s+(?:ballot|blt)(?:\s+file)?\s+available/i
+    ], text);
+};
