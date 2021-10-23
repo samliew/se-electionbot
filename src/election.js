@@ -277,6 +277,15 @@ export default class Election {
             prev.dateEnded !== dateEnded;
     }
 
+    /**
+     * @summary returns the election BLT file URL or empty string
+     * @returns {string}
+     */
+    get electionBallotURL() {
+        const { electionUrl, phase } = this;
+        return phase === "ended" ? electionUrl.replace(/(\d+)$/, "download-result/$1") : "";
+    }
+
 
     /**
      * @summary gets an election badge id by name

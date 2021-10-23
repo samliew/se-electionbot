@@ -66,6 +66,29 @@ describe('Election', () => {
             });
         });
 
+        describe('electionBallotURL', () => {
+            it('should correctly return ballot URL', () => {
+                const election = new Election("https://stackoverflow.com/election/12");
+                election.phase = "ended";
+                const { electionBallotURL } = election;
+                expect(electionBallotURL).to.equal(`https://stackoverflow.com/election/download-result/12`);
+            });
+
+            it('should return empty string if not ended', () => {
+                const election = new Election("https://stackoverflow.com/election/12");
+
+                /** @type {ElectionPhase[]} */
+                const phases = ["cancelled", "election", "nomination", "primary", null];
+
+                phases.forEach((phase) => {
+                    election.phase = phase;
+                    const { electionBallotURL } = election;
+                    expect(electionBallotURL).to.be.empty;
+                });
+
+            });
+        });
+
         describe('apiSlug', () => {
 
             it('should correctly get site api slug', () => {
