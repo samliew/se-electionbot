@@ -92,7 +92,8 @@ export const sayWhyNominationRemoved = () => {
  * @returns {string}
  */
 export const sayHowToNominateOthers = (_config, _election, _text) => {
-    return `Users can *only* nominate themselves, nobody can nominate others.`;
+    // https://chat.stackoverflow.com/transcript/message/53294378#53294378
+    return `Users can *only* nominate themselves. Nominating *others* is not possible.`;
 };
 
 /**
