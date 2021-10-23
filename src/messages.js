@@ -2,7 +2,7 @@ import { partialRight } from "ramda";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
-import { getCandidateOrNominee, getRandomAnnouncement, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAnnouncement, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, dateToRelativetime, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
@@ -662,6 +662,33 @@ export const sayBestCandidate = (_config, election) => {
     ) || [, everyoneIsGreat];
 
     return response;
+};
+
+/**
+ * @summary builds a response to asking who is the best moderator
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @param {string} _content message content
+ * @param { import("./index").UserProfile } user requesting user
+ * @returns {string}
+ */
+export const sayBestModerator = (_config, election, _content, user) => {
+    const { currentSiteMods } = election;
+    const { isModerator, name } = user;
+
+    const currModNames = currentSiteMods.map(({ display_name }) => display_name);
+
+    if (isModerator && currModNames.includes(name)) {
+        return `${name} is the best mod!!!`;
+    }
+
+    const now = Date.now();
+    const dayMs = 864e5;
+
+    const activeMods = currentSiteMods.filter(({ last_access_date }) => last_access_date * 1e3 + dayMs > now);
+
+    const { display_name, link } = new RandomArray(...activeMods).getRandom();
+    return `${getRandomSecretPrefix()} ${makeURL(display_name, link)} is the best mod!`;
 };
 
 /**
