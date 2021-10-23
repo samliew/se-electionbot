@@ -83,7 +83,7 @@ export const sendReply = async function (config, room, responseText, inResponseT
  * @param {Room} room room to announce in
  * @param {string} responseText Message to send
  * @param {WebsocketEvent} msg ChatExchange message
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>}
  */
 export const sendMultipartMessage = async (config, room, responseText, msg) => {
     const { maxMessageLength, maxMessageParts, minThrottleSecs } = config;
@@ -94,24 +94,25 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
     // Validate response
     if (isInvalid) {
         if (config.verbose) console.log("RESPONSE (INVALID) - ", responseText);
-        return;
+        return false;
     }
 
-    let messages = [];
+    /** @type {string[]} */
+    const messages = [];
 
     // If there are newlines in the message, split by newlines
     // see https://regex101.com/r/qfO6vy/3
     if (/\n/.test(responseText)) {
-        messages = responseText.split(
+        messages.push(...responseText.split(
             new RegExp(`([\\w\\W]{1,${maxMessageLength - 1}})(?:\\n|$)`, "gm")
-        ).filter(Boolean);
+        ).filter(Boolean));
     }
     // else split by spaces, commas, semicolons (avoid breaking up hyperlinks)
     // see https://regex101.com/r/9z9DAX/1
     else {
-        messages = responseText.split(
+        messages.push(...responseText.split(
             new RegExp(`(.{1,${maxMessageLength - 1}})(?:[\\s,;]|\\.(?!\\w)|$)`, "gm")
-        ).filter(Boolean);
+        ).filter(Boolean));
     }
 
     const { length } = responseText;
@@ -134,12 +135,12 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
     if (numParts > maxMessageParts) {
         await msg.reply(`I wrote a poem of ${numParts} messages for you!`);
         await wait(waitSecs);
+        return false;
     }
 
-    for (const message of messages) {
-        await room.sendMessage(message);
-        await wait(waitSecs);
-    }
+    await sendMessageList(config, room, ...messages);
+
+    return true;
 };
 
 /**
