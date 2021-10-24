@@ -6,7 +6,7 @@ import { JSDOM } from "jsdom";
 // import { JSDOM } from "jsdom";
 import sanitize from "sanitize-html";
 import Announcement from './announcement.js';
-import { getAllNamedBadges, getModerators } from "./api.js";
+import { getAllNamedBadges, getBadges, getModerators, getUserInfo } from "./api.js";
 import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
@@ -36,7 +36,7 @@ import { sayAboutBallotFile, sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeet
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
-import { makeCandidateScoreCalc } from "./score.js";
+import { calculateScore, makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
 import {
     dateToRelativetime,
@@ -314,6 +314,7 @@ import { matchNumber } from "./utils/expressions.js";
 
         const botAnnouncements = announcementHistory.filter(onlyBotMessages(me));
 
+        // TODO: make part of the election class
         /** @type {Map<number,import("./election.js").Nominee>} */
         const withdrawnNominees = new Map();
 
@@ -365,13 +366,24 @@ import { matchNumber } from "./utils/expressions.js";
                 withdrawnNominee.userYears = (textContent || "").replace(/,.+$/, ''); // truncate years as displayed in elections
             }
 
-            withdrawnNominees.set(userId, withdrawnNominee);
+            // do not attempt to calculate valid scores
+            if (userId > 0) {
+                const { apiSlug } = election;
+                const userBadges = await getBadges(config, userId, apiSlug);
+                const user = await getUserInfo(config, userId, apiSlug);
 
-            console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
+                if (user) {
+                    const { score } = calculateScore(user, userBadges, election);
+                    withdrawnNominee.userScore = score;
+                }
+            }
+
+            withdrawnNominees.set(userId, withdrawnNominee);
         }
 
         // Order of nomination first
-        election.arrWithdrawnNominees.reverse();
+        election.arrWithdrawnNominees.push(...[...withdrawnNominees.values()].reverse());
+        console.log(`INIT - Added withdrawn nominees:`, election.arrWithdrawnNominees);
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended' && Date.now() < new Date(election.dateEnded).getTime() + 36e5) {
