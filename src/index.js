@@ -20,6 +20,7 @@ import {
     isAskedAboutLightbulb,
     isAskedAboutMissingComments,
     isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting,
+    isAskedAmIalive,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule,
     isAskedForHelp,
@@ -33,7 +34,7 @@ import {
 } from "./guards.js";
 import { sayAboutBallotFile, sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
-import { getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
+import { getRandomAlive, getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
@@ -877,7 +878,6 @@ import { matchNumber } from "./utils/expressions.js";
                 return;
             }
 
-
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
 
@@ -906,14 +906,8 @@ import { matchNumber } from "./utils/expressions.js";
                     responseText = sayWhoAmI(me, content);
                 }
                 // Alive
-                else if (/^(where are you|alive|ping)$/.test(content)) {
-                    responseText = new RandomArray(
-                        `Hello, it's me.`,
-                        `No. I'm not here.`,
-                        `I'm here, aren't I?`,
-                        `I'm on the interwebs`,
-                        `I'm here and everywhere`,
-                    ).getRandom();
+                else if (isAskedAmIalive(content)) {
+                    responseText = getRandomAlive();
                 }
                 // Who made you
                 else if (isAskedWhoMadeMe(content)) {
