@@ -1,6 +1,6 @@
 # Stack Exchange Election Bot
 
-[![Build](https://github.com/samliew/se-electionbot/actions/workflows/nodejs.yml/badge.svg)](https://github.com/samliew/se-electionbot/actions/workflows/nodejs.yml)
+[![Build](https://github.com/samliew/se-electionbot/actions/workflows/nodejs.yml/badge.svg)](https://github.com/samliew/se-electionbot/actions/workflows/nodejs.yml) ![GitHub](https://img.shields.io/github/license/samliew/se-electionbot?color=blue) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/samliew/se-electionbot)
 
 ElectionBot is a chatbot that answers commonly-asked questions in chat rooms about elections for sites on the Stack Exchange network.
 
