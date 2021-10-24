@@ -344,6 +344,7 @@ import { matchNumber } from "./utils/expressions.js";
             const userId = matchNumber(/\/users\/(\d+)/, userIdHref);
             const permalink = userIdHref ? `https://${election.siteHostname}${userIdHref}` : "";
 
+            /** @type {import("./election.js").Nominee} */
             const withdrawnNominee = {
                 userId: userId || -42,
                 userName: userName,
@@ -352,6 +353,7 @@ import { matchNumber } from "./utils/expressions.js";
                 nominationDate: new Date(nominationDate || -1),
                 nominationLink: nominationRevisionsLink,
                 withdrawnDate: null,
+                withdrawnPhase: null,
                 permalink,
             };
 

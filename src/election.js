@@ -18,6 +18,7 @@ import { matchNumber } from "./utils/expressions.js";
  *  nominationDate: Date,
  *  nominationLink: string,
  *  withdrawnDate: Date|null,
+ *  withdrawnPhase: ElectionPhase,
  *  permalink: string
  * }} Nominee
  */
@@ -462,6 +463,7 @@ export default class Election {
      * @param {cheerio.Root} $ Cheerio root element
      * @param {cheerio.Element} el nominee element
      * @param {string} electionPageUrl election URL
+     * @param {string} [electionSiteUrl] election website URL
      * @returns {Nominee}
      */
     scrapeNominee($, el, electionPageUrl, electionSiteUrl) {
@@ -478,6 +480,7 @@ export default class Election {
             userScore: +($(el).find('.candidate-score-breakdown').find('b').text().match(/(\d+)\/\d+$/)?.[1] || 0),
             nominationDate: new Date($(el).find('.relativetime').attr('title') || ""),
             nominationLink: `${electionPageUrl}#${$(el).attr('id')}`,
+            withdrawnPhase: withdrawnDate ? this.getPhase(new Date(withdrawnDate)) : null,
             withdrawnDate: withdrawnDate ? new Date(withdrawnDate) : null,
             permalink: `${electionSiteUrl}/users/${userId}`,
         };
