@@ -11,7 +11,7 @@ import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonat
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import Election from './election.js';
+import Election, { Nominee } from './election.js';
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
@@ -314,6 +314,9 @@ import { matchNumber } from "./utils/expressions.js";
 
         const botAnnouncements = announcementHistory.filter(onlyBotMessages(me));
 
+        /** @type {Map<number,import("./election.js").Nominee>} */
+        const withdrawnNominees = new Map();
+
         // Parse previous nomination announcements and see which ones are no longer around
         for (const item of botAnnouncements) {
             const { messageMarkup } = item;
@@ -341,21 +344,19 @@ import { matchNumber } from "./utils/expressions.js";
             //  @ts-expect-error TODO: cleanup
             const nominationDate = last([...document.querySelectorAll(`#content .relativetime`)])?.title;
 
-            const userId = matchNumber(/\/users\/(\d+)/, userIdHref);
+            const userId = matchNumber(/\/users\/(\d+)/, userIdHref) || -42;
+
+            if (withdrawnNominees.has(userId)) continue;
+
             const permalink = userIdHref ? `https://${election.siteHostname}${userIdHref}` : "";
 
-            /** @type {import("./election.js").Nominee} */
-            const withdrawnNominee = {
-                userId: userId || -42,
-                userName: userName,
-                userYears: "",
-                userScore: 0,
+            const withdrawnNominee = new Nominee({
+                userId,
+                userName,
                 nominationDate: new Date(nominationDate || -1),
                 nominationLink: nominationRevisionsLink,
-                withdrawnDate: null,
-                withdrawnPhase: null,
                 permalink,
-            };
+            });
 
             if (permalink) {
                 const profilePage = await fetchUrl(config, `${permalink}?tab=profile`);
@@ -364,7 +365,7 @@ import { matchNumber } from "./utils/expressions.js";
                 withdrawnNominee.userYears = (textContent || "").replace(/,.+$/, ''); // truncate years as displayed in elections
             }
 
-            election.arrWithdrawnNominees.push(withdrawnNominee);
+            withdrawnNominees.set(userId, withdrawnNominee);
 
             console.log(`INIT - Added withdrawn nominee:`, withdrawnNominee);
         }

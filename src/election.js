@@ -7,21 +7,73 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import('chatexchange/dist/Client').Host} Host
  * @typedef {import("./config.js").BotConfig} BotConfig
- *
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
  * @typedef {import("./index").UserProfile} UserProfile
- * @typedef {{
- *  userId: number,
- *  userName: string,
- *  userYears: string,
- *  userScore: number,
- *  nominationDate: Date,
- *  nominationLink: string,
- *  withdrawnDate: Date|null,
- *  withdrawnPhase: ElectionPhase,
- *  permalink: string
- * }} Nominee
  */
+
+export class Nominee {
+
+    /**
+     * @summary nominee user id
+     * @type {number}
+     */
+    userId;
+
+    /**
+     * @summary nominee username
+     * @type {string}
+     */
+    userName;
+
+    /**
+     * @summary nominee "member for" stat
+     * @type {string}
+     */
+    userYears = "";
+
+    /**
+     * @summary canididate score total
+     * @type {number}
+     */
+    userScore = 0;
+
+    /**
+     * @summary date of the nomination
+     * @type {Date}
+     */
+    nominationDate;
+
+    /**
+     * @summary link to the nomination post
+     * @type {string}
+     */
+    nominationLink;
+
+    /**
+     * @summary date of the withdrawal if available
+     * @type {Date|null}
+     */
+    withdrawnDate = null;
+
+    /**
+     * @summary phase during which the withdrawal happened
+     * @type {ElectionPhase}
+     */
+    withdrawnPhase = null;
+
+    /**
+     * @summary user permalink
+     * @type {string}
+     */
+    permalink;
+
+    /**
+     * @param {Partial<Nominee>} init
+     */
+    constructor(init) {
+        Object.assign(this, init);
+    }
+}
 
 export default class Election {
 
@@ -471,8 +523,8 @@ export default class Election {
         const userId = +(userLink.attr('href')?.split('/')[2] || "");
         const withdrawnDate = $(el).find('aside .relativetime').attr('title');
 
-        return {
-            userId: userId,
+        return new Nominee({
+            userId,
             userName: userLink.text(),
             userYears: $(el).find('.user-details').contents().map((_i, { data, type }) =>
                 type === 'text' ? data?.trim() : ""
@@ -483,7 +535,7 @@ export default class Election {
             withdrawnPhase: withdrawnDate ? this.getPhase(new Date(withdrawnDate)) : null,
             withdrawnDate: withdrawnDate ? new Date(withdrawnDate) : null,
             permalink: `${electionSiteUrl}/users/${userId}`,
-        };
+        });
     }
 
     /**

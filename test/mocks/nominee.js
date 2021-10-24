@@ -1,11 +1,11 @@
+import { Nominee } from "../../src/election.js";
+
 /**
- * @typedef {import("../../src/election").Nominee} Nominee
  * @param {Partial<Nominee>} [overrides]
  * @returns {Nominee}
  */
 export const getMockNominee = (overrides = {}) => {
-    /** @type {Nominee} */
-    const defaults = {
+    const nominee = new Nominee({
         userId: 42,
         userName: "Answer",
         userYears: "42",
@@ -14,6 +14,6 @@ export const getMockNominee = (overrides = {}) => {
         nominationDate: new Date(),
         nominationLink: "",
         withdrawnDate: new Date(),
-    };
-    return Object.assign(defaults, overrides);
+    });
+    return Object.assign(nominee, overrides);
 };
