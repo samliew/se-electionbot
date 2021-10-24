@@ -2,7 +2,7 @@ import { partialRight } from "ramda";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
-import { getCandidateOrNominee, getRandomAnnouncement, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAnnouncement, getRandomCurrently, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, dateToRelativetime, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
@@ -266,7 +266,7 @@ export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = 
 
 /**
  * @summary builds current mods list response message
- * @param {Election} election
+ * @param {Election} election current election
  * @param {User[]} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
@@ -282,6 +282,40 @@ export const sayCurrentMods = (election, moderators, decodeEntities) => {
         `The current ${numMods} ${makeURL(`moderator${pluralize(numMods)}`, `${siteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(modNames.join(', '))}` :
         `The current moderators can be found on ${makeURL("this page", `${siteUrl}/users?tab=moderators`)}`
     );
+};
+
+/**
+ * @summary builds current nominees list response message
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayCurrentCandidates = (_config, election) => {
+    const { phase, numNominees, electionUrl, arrNominees } = election;
+
+    if (!phase) return sayNotStartedYet(election);
+
+    if (numNominees > 0) {
+        const pastBe = pluralize(numNominees, "were", "was");
+        const currBe = pluralize(numNominees, "are", "is");
+        const future = pluralize(numNominees, "will be", "shall be");
+
+        const rules = [
+            [election.isActive(), currBe],
+            [election.isNotStartedYet(), future],
+            [election.isEnded(), pastBe]
+        ];
+
+        const [, modal] = rules.find(([cond]) => cond) || [, currBe];
+
+        const link = makeURL(`${numNominees} ${getCandidateOrNominee()}${pluralize(numNominees)}`, electionUrl);
+        const prefix = election.isActive() ? `${capitalize(getRandomCurrently())}, there` : "There";
+
+        // Don't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
+        return `${prefix} ${modal} ${link}: ${arrNominees.map(({ userName }) => userName).join(', ')}`;
+    }
+
+    return `No users have nominated themselves yet. Why not be the first?`;
 };
 
 /**
@@ -480,7 +514,7 @@ export const sayWhatIsAnElection = (election) => {
 
 /**
  * @summary builds a contributor list message
- * @param {BotConfig} config
+ * @param {BotConfig} config bot configuration
  * @returns {Promise<string>}
  */
 export const sayWhoMadeMe = async (config) => {

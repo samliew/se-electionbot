@@ -31,7 +31,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutBallotFile, sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
+import { sayAboutBallotFile, sayAboutSTV, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -679,7 +679,8 @@ import { matchNumber } from "./utils/expressions.js";
                 [isAskedHowManyAreEligibleToVote, sayHowManyAreEligibleToVote],
                 [isAskedForElectionPage, sayElectionPage],
                 [isAskedAboutBallotFile, sayAboutBallotFile],
-                [isAskedWhoIsTheBestMod, sayBestModerator]
+                [isAskedWhoIsTheBestMod, sayBestModerator],
+                [isAskedForCurrentNominees, sayCurrentCandidates]
             ];
 
             const matched = rules.find(([expr]) => expr(content));
@@ -736,22 +737,6 @@ import { matchNumber } from "./utils/expressions.js";
             else if (isAskedForScoreLeaderboard(content)) {
                 responseText = sayCandidateScoreLeaderboard(election.apiSlug);
             }
-
-            // Current candidates/nominees
-            else if (isAskedForCurrentNominees(content)) {
-                if (election.phase === null) {
-                    responseText = sayNotStartedYet(election);
-                }
-                else if (election.numNominees > 0) {
-                    // Don't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
-                    responseText = `Currently there ${election.numNominees === 1 ? 'is' : 'are'} [${election.numNominees} candidate${pluralize(election.numNominees)}](${election.electionUrl}): ` +
-                        election.arrNominees.map(v => v.userName).join(', ');
-                }
-                else {
-                    responseText = `No users have nominated themselves yet. Why not be the first?`;
-                }
-            }
-
             // Withdrawn candidates/nominations
             else if (isAskedForWithdrawnNominees(content)) {
 
