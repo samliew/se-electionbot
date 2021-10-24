@@ -359,12 +359,7 @@ import { matchNumber } from "./utils/expressions.js";
                 permalink,
             });
 
-            if (permalink) {
-                const profilePage = await fetchUrl(config, `${permalink}?tab=profile`);
-                const { window: { document } } = new JSDOM(profilePage);
-                const { textContent } = document.querySelector(`#mainbar-full li [title$=Z]`) || {};
-                withdrawnNominee.userYears = (textContent || "").replace(/,.+$/, ''); // truncate years as displayed in elections
-            }
+            await withdrawnNominee.scrapeUserYears(config);
 
             // do not attempt to calculate valid scores
             if (userId > 0) {

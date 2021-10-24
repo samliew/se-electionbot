@@ -1,4 +1,5 @@
 import cheerio from 'cheerio';
+import { JSDOM } from 'jsdom';
 import { dateToUtcTimestamp, fetchUrl } from './utils.js';
 import { matchNumber } from "./utils/expressions.js";
 
@@ -65,13 +66,31 @@ export class Nominee {
      * @summary user permalink
      * @type {string}
      */
-    permalink;
+    permalink = "";
 
     /**
      * @param {Partial<Nominee>} init
      */
     constructor(init) {
         Object.assign(this, init);
+    }
+
+    /**
+     * @summary scrapes user "years for" from their profile
+     * @param {BotConfig} config bot configuration
+     * @returns {Promise<Nominee>}
+     */
+    async scrapeUserYears(config) {
+        const { permalink } = this;
+        if (!permalink) return this;
+
+        const profilePage = await fetchUrl(config, `${permalink}?tab=profile`);
+
+        const { window: { document } } = new JSDOM(profilePage);
+        const { textContent } = document.querySelector(`#mainbar-full li [title$=Z]`) || {};
+
+        this.userYears = (textContent || "").replace(/,.+$/, ''); // truncate years as displayed in elections
+        return this;
     }
 }
 
