@@ -883,24 +883,28 @@ import { matchNumber } from "./utils/expressions.js";
 
                 // Help
                 if (isAskedForHelp(content)) {
-                    responseText = '\n' + [
+                    await sendMultipartMessage(config, room, '\n' + [
                         'Examples of election FAQs I can help with:',
-                        'what is an election',
-                        'how to nominate myself',
-                        'how to vote',
-                        'who should I vote for',
-                        'how is candidate score calculated',
-                        'what is my candidate score',
-                        'what are the moderation/participation/editing badges',
-                        'what is the election status',
-                        'when is the election starting/ending',
-                        'when is the next phase',
-                        "how many positions are elected",
-                        'who are the candidates',
-                        'who are the current mods',
-                        "what is Single Transferable Vote?",
-                        "what is Meek STV?"
-                    ].join('\n- ');
+                        'What is an election',
+                        'How to nominate myself',
+                        'How to vote',
+                        'Who should I vote for',
+                        'How is candidate score calculated',
+                        'What is my candidate score',
+                        'What are the moderation/participation/editing/required badges',
+                        'What is the election status',
+                        'When is the election starting/ending',
+                        'When is the next phase',
+                        "How many users have voted?",
+                        "How many users are eligible to vote?",
+                        "How many positions are elected",
+                        'Who are the candidates',
+                        'Who are the current mods',
+                        "What is Single Transferable Vote?",
+                        "What is Meek STV?",
+                        "Where can the ballot file be found?"
+                    ].join('\n- '), msg);
+                    return;
                 }
                 else if (isAskedWhoAmI(content)) {
                     responseText = sayWhoAmI(me, content);
