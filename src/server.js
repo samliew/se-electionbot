@@ -89,6 +89,9 @@ const handlebarsConfig = {
         },
         unprefix: function (prefix, text) {
             return text.replace(new RegExp(`^${prefix}\\s*?`), "");
+        },
+        reverse: function (/** @type {any[]} */array) {
+            return [...array].reverse();
         }
     },
 };
