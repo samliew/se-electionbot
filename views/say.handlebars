@@ -27,7 +27,7 @@
             </tr>
         </thead>
         <tbody>
-        {{#each data/transcriptMessages}}
+        {{#each (reverse data/transcriptMessages)}}
         <tr>
             <td data-message-id="{{this.messageId}}" class="cursor-pointer" title="click to reply to this message">{{this.messageId}}</td>
             <td>{{utcTimestamp this.date}}</td>
