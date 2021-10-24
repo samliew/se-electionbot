@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { partialRight } from "ramda";
 import {
-    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
+    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
@@ -45,9 +45,25 @@ describe('Message Guards', () => {
         "is nomination ended?"
     ];
 
+    const listPhasesMatches = [
+        //https://chat.stackoverflow.com/transcript/message/53322800#53322800
+        "What are the phases?",
+        "what are election phases",
+        "What are the election's phases?",
+        "list election phases"
+    ];
+
     describe(isAskedWhenIsTheNextPhase.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedWhenIsTheNextPhase, nextPhaseMatches);
+            allMatch(isAskedWhenIsTheNextPhase, listPhasesMatches, false);
+        });
+    });
+
+    describe(isAskedAboutElectionPhases.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutElectionPhases, listPhasesMatches);
+            allMatch(isAskedAboutElectionPhases, nextPhaseMatches, false);
         });
     });
 

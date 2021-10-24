@@ -478,3 +478,14 @@ export const isAskedAboutBallotFile = (text) => {
     ], text);
 };
 
+/**
+ * @summary checks if a message is asking for the list of election phases
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutElectionPhases = (text) => {
+    return someMatch([
+        /^(?:what)\s+are(?:\s+the)?(?:\s+election(?:'s|s)?)?\s+phases(?:[?!]|$)/i,
+        /^list(?:\s+the)?\s+election(?:'s|s)?\s+phases(?:[?!]|$)/i
+    ], text);
+};
