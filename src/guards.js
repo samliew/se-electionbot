@@ -159,7 +159,7 @@ export const isAskedWhoMadeMe = (text) => {
 export const isAskedWhoAmI = (text) => {
     return someMatch([
         /^(?:(?:who|what)\s+are\s+you|about)\b/i,
-        /^are\s+you(?:\s+(?:a|the))?\s+(?:bot|robot|chatbot|dae?mon)/i
+        /^are\s+you(?:\s+(?:a|the))?\s+(?:bot|robot|chat\s*?bot|da?emon)/i
     ], text);
 };
 
