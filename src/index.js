@@ -321,12 +321,12 @@ import { matchNumber } from "./utils/expressions.js";
             const [, userName, nominationLink, postId] =
                 messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
 
+            // Invalid, or still a nominee based on nomination post ids
+            if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) continue;
+
             if (config.debugOrVerbose) {
                 console.log(`Nomination announcement:`, messageMarkup, { currentNomineePostIds, userName, nominationLink, postId });
             }
-
-            // Invalid, or still a nominee based on nomination post ids
-            if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) continue;
 
             const nominationRevisionsLink = nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
 
