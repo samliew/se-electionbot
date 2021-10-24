@@ -143,3 +143,7 @@ export const getRandomFAQ = () => new RandomArray(
     "frequently-asked questions",
     "common questions"
 ).getRandom();
+
+export const getRandomCurrently = () => new RandomArray(
+    "currently", "presently", "at the moment"
+).getRandom();
