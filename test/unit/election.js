@@ -268,19 +268,19 @@ describe('Election', () => {
             election.numPositions = 2;
             election.repNominate = 150;
 
-            const noPhase = Election.getPhase(election);
+            const noPhase = election.getPhase();
 
             election.dateNomination = yesterday;
-            const nomination = Election.getPhase(election);
+            const nomination = election.getPhase();
 
             election.datePrimary = yesterday;
-            const primary = Election.getPhase(election);
+            const primary = election.getPhase();
 
             election.dateElection = yesterday;
-            const start = Election.getPhase(election);
+            const start = election.getPhase();
 
             election.dateEnded = yesterday;
-            const ended = Election.getPhase(election);
+            const ended = election.getPhase();
 
             const { status, errors } = election.validate();
 

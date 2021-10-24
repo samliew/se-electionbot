@@ -426,12 +426,13 @@ export default class Election {
     }
 
     /**
-     * @static
      * @summary gets current phase given election dates
-     * @param {Election} election
+     * @param {Date} [today] current date
      * @returns {ElectionPhase}
      */
-    static getPhase({ dateNomination, dateElection, datePrimary, dateEnded }, today = new Date()) {
+    getPhase(today = new Date()) {
+        const { dateNomination, dateElection, datePrimary, dateEnded } = this;
+
         const now = today.valueOf();
 
         /** @type {[string, ElectionPhase][]} */
@@ -586,7 +587,7 @@ export default class Election {
             this.chatRoomId = matchNumber(/(\d+)$/, this.chatUrl) || null;
             this.chatDomain = /** @type {Host} */(this.chatUrl?.split('/')[2]?.replace('chat.', ''));
 
-            this.phase = Election.getPhase(this);
+            this.phase = this.getPhase();
 
             // Detect active election number if not specified
             if (this.isActive() && !this.electionNum) {

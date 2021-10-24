@@ -59,7 +59,7 @@ export const timetravelCommand = (config, election, content) => {
 
     const destination = today ? new Date() : new Date(+yyyy, +MM - 1, +dd);
 
-    const phase = Election.getPhase(election, destination);
+    const phase = election.getPhase(destination);
 
     election.phase = phase;
 
