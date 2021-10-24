@@ -164,6 +164,15 @@ export const isAskedWhoAmI = (text) => {
 };
 
 /**
+ * @summary checks if the message asked whether the bot is alive
+ * @param {string} text message content
+ * @returns {boolean}
+ */
+export const isAskedAmIalive = (text) => {
+    return someMatch([/^(?:where\s+ar[et]\s+(?:you|thou)|alive|dead|ping)(?:$|\?)/i, /^are\s+you\s+(?:t?here|alive|dead)(?:$|\?)/i], text);
+};
+
+/**
  * @summary checks if the message asked for one's candidate score
  * @param {string} text
  * @returns {boolean}

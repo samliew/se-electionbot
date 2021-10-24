@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { partialRight } from "ramda";
 import {
-    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
+    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
@@ -199,17 +199,32 @@ describe('Message Guards', () => {
         "are you a daemon?"
     ];
 
+    const aliveMatches = [
+        "where art thou",
+        "Where are you?",
+        "alive?",
+        "dead?",
+        "Are you alive?"
+    ];
+
     describe(isAskedWhoAmI.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedWhoAmI, whoAmImatches);
-            allMatch(isAskedWhoAmI, whoMadeMeMatches, false);
+            allMatch(isAskedWhoAmI, [...whoMadeMeMatches, ...aliveMatches], false);
         });
     });
 
     describe(isAskedWhoMadeMe.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedWhoMadeMe, whoMadeMeMatches);
-            allMatch(isAskedWhoMadeMe, whoAmImatches, false);
+            allMatch(isAskedWhoMadeMe, [...whoAmImatches, ...aliveMatches], false);
+        });
+    });
+
+    describe(isAskedAmIalive.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAmIalive, aliveMatches);
+            allMatch(isAskedAmIalive, [...whoAmImatches, ...whoMadeMeMatches], false);
         });
     });
 
