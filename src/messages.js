@@ -16,6 +16,7 @@ import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
  * @typedef {import("./config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
+ * @typedef {import("chatexchange/dist/Browser").IProfileData} UserProfile
  * @typedef {import("./score").CandidateScore} CandidateScore
  * @typedef {import("./election").ElectionPhase} ElectionPhase
  */
@@ -510,6 +511,18 @@ export const sayWhatIsAnElection = (election) => {
     const eligibility = `users with at least ${repVote} reputation can vote for them`;
 
     return `An ${electionURL} is where users nominate themselves as candidates for the role of ${diamondURL}, and ${eligibility}.`;
+};
+
+/**
+ * @summary builds a response to a who am I query
+ * @param {UserProfile} botChatProfile bot profile
+ * @param {string} content message content
+ */
+export const sayWhoAmI = (botChatProfile, content) => {
+    const { about, name } = botChatProfile;
+    const prefix = /^are\b.+?/i.test(content) ? "Yes, " : "";
+    const noAboutME = "I prefer to keep an air of mystery about me";
+    return `${prefix}I am ${name}, and ${about || noAboutME}`;
 };
 
 /**
