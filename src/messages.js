@@ -1040,3 +1040,21 @@ export const sayAboutBallotFile = (_config, election) => {
 
     return `${prefix} ${content}. ${suffix}.`;
 };
+
+/**
+ * @summary builds a response to what phases are there query
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayAboutThePhases = (_config, election) => {
+    const { datePrimary, numNominees, primaryThreshold, electionUrl } = election;
+
+    const phases = ["nomination", "election", "ended"].map((phase) => phase === "ended" ? `*${phase}*` : makeURL(phase, `${electionUrl}?tab=${phase}`));
+
+    const prefix = `The election has the ${listify(...phases)} phases.`;
+    const threshold = `as the number of ${getCandidateOrNominee()}s (${numNominees}) is over the threshold (${primaryThreshold})`;
+    const primarySuffix = datePrimary ? ` It also has a ${makeURL("primary", `${electionUrl}?tab=primary`)} phase ${threshold}.` : "";
+
+    return `${prefix}${primarySuffix}`;
+};
