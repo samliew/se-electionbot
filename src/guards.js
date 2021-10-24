@@ -152,6 +152,18 @@ export const isAskedWhoMadeMe = (text) => {
 };
 
 /**
+ * @summary checks if the message asked who or what the bot is
+ * @param {string} text message content
+ * @returns {boolean}
+ */
+export const isAskedWhoAmI = (text) => {
+    return someMatch([
+        /^(?:(?:who|what)\s+are\s+you|about)\b/i,
+        /^are\s+you(?:\s+(?:a|the))?\s+(?:bot|robot|chatbot|dae?mon)/i
+    ], text);
+};
+
+/**
  * @summary checks if the message asked for one's candidate score
  * @param {string} text
  * @returns {boolean}

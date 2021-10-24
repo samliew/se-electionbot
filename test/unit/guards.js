@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -179,19 +179,37 @@ describe('Message Guards', () => {
         });
     });
 
-    describe('isAskedWhoMadeMe', () => {
+    const whoMadeMeMatches = [
+        "who made you?",
+        "who maintains you?",
+        "who develops you?",
+        "who are your developers?",
+        "who developed you?",
+        "who owns you?",
+        "who is your developer?",
+        "who is your maintainer?",
+        "who is your owner",
+    ];
+
+    const whoAmImatches = [
+        "who are you?",
+        "are you a bot?",
+        "What are you",
+        // https://chat.stackexchange.com/transcript/message/59433679#59433679
+        "are you a daemon?"
+    ];
+
+    describe(isAskedWhoAmI.name, () => {
         it('should correctly match content', () => {
-            allMatch(isAskedWhoMadeMe, [
-                "who made you?",
-                "who maintains you?",
-                "who develops you?",
-                "who are your developers?",
-                "who developed you?",
-                "who owns you?",
-                "who is your developer?",
-                "who is your maintainer?",
-                "who is your owner",
-            ]);
+            allMatch(isAskedWhoAmI, whoAmImatches);
+            allMatch(isAskedWhoAmI, whoMadeMeMatches, false);
+        });
+    });
+
+    describe(isAskedWhoMadeMe.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhoMadeMe, whoMadeMeMatches);
+            allMatch(isAskedWhoMadeMe, whoAmImatches, false);
         });
     });
 
