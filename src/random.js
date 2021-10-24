@@ -147,3 +147,14 @@ export const getRandomFAQ = () => new RandomArray(
 export const getRandomCurrently = () => new RandomArray(
     "currently", "presently", "at the moment"
 ).getRandom();
+
+export const getRandomAlive = () => new RandomArray(
+    `Hello, it's me.`,
+    `No. I'm not here.`,
+    `I'm here, aren't I?`,
+    `I'm on the interwebs`,
+    `I'm here and everywhere`,
+    "I am, are you?",
+    "Alive or not, what is the difference?",
+    "I am not quite sure"
+).getRandom();
