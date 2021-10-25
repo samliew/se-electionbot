@@ -890,9 +890,10 @@ export const sayAboutSTV = (_config, _election, text) => {
  * @summary builds a number of voters based on the Constituent badge
  * @param {BotConfig} config bot configuration
  * @param {Election} election current election
+ * @param {string} text message content
  * @returns {Promise<string>}
  */
-export const sayAlreadyVoted = async (config, election) => {
+export const sayAlreadyVoted = async (config, election, text) => {
 
     const { phase, dateElection, statVoters, apiSlug, repVote = 1 } = election;
 
@@ -900,17 +901,23 @@ export const sayAlreadyVoted = async (config, election) => {
     const electionBadgeName = "Constituent";
     const electionBadgeId = election.getBadgeId(electionBadgeName);
 
+    const isInverted = /\bnot\b/i.test(text);
+
     if (phase === 'election' && electionBadgeId) {
         const format = partialRight(formatNumber, [3]);
 
         const numEligible = await getNumberOfUsersEligibleToVote(config, apiSlug, repVote);
         const numAwarded = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
 
-        const basePrefix = `Based on the number of ${electionBadgeName} badges awarded`;
-        const eligible = `(${percentify(numAwarded, numEligible, 2)} of ${format(numEligible)} eligible)`;
-        const postfix = `user${pluralize(numAwarded)} ha${pluralize(numAwarded, "ve", "s")} voted so far`;
 
-        return `${basePrefix}, ${format(numAwarded)} ${eligible} ${postfix}.`;
+        const numVoted = isInverted ? numEligible - numAwarded : numAwarded;
+        const negated = isInverted ? " not" : "";
+
+        const basePrefix = `Based on the number of ${electionBadgeName} badges awarded`;
+        const eligible = `(${percentify(numVoted, numEligible, 2)} of ${format(numEligible)} eligible)`;
+        const postfix = `user${pluralize(numVoted)} ha${pluralize(numVoted, "ve", "s")}${negated} voted so far`;
+
+        return `${basePrefix}, ${format(numVoted)} ${eligible} ${postfix}.`;
     }
     else if (phase === 'ended') {
         return statVoters || "";

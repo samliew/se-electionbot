@@ -771,7 +771,7 @@ import { matchNumber } from "./utils/expressions.js";
 
             // Election stats - How many voted/participants/participated
             else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
-                responseText = await sayAlreadyVoted(config, election);
+                responseText = await sayAlreadyVoted(config, election, content);
             }
             // Conflicts with isAskedAboutVoting below - should not match "how to vote"
             else if (isAskedHowOrWhoToVote(content)) {
