@@ -50,5 +50,18 @@
         }
     }, false);
 
+    function scheduleReload() {
+        return setTimeout(function () {
+            return window.location.reload();
+        }, 60 * 1e3);
+    }
+
+    var timeout = scheduleReload();
+
+    msgField.addEventListener("input", function () {
+        clearTimeout(timeout);
+        timeout = scheduleReload();
+    });
+
 })();
 </script>
