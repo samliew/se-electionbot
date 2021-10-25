@@ -886,7 +886,7 @@ import { matchNumber } from "./utils/expressions.js";
             }
             else if (isAskedHowManyCandidatesInTheRoom(content)) {
                 const nomineeNumResponse = await sayHowManyCandidatesAreHere(config, election, client, room);
-                await sendMultipartMessage(config, room, nomineeNumResponse, msg.id);
+                await sendMultipartMessage(config, room, nomineeNumResponse, msg.id, true);
                 return;
             }
 
