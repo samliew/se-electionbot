@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { sendMessageList } from "./queue.js";
-import { dateToUtcTimestamp, makeURL, pluralize } from "./utils.js";
+import { makeURL, pluralize } from "./utils.js";
+import { dateToUtcTimestamp } from "./utils/dates.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig

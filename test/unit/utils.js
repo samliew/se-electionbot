@@ -1,5 +1,6 @@
 import { expect } from "chai";
-import { asyncCacheable, dateToRelativetime, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, searchChat, stripMarkdown } from "../../src/utils.js";
+import { asyncCacheable, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, searchChat, stripMarkdown } from "../../src/utils.js";
+import { dateToRelativetime } from "../../src/utils/dates.js";
 import { matchNumber } from "../../src/utils/expressions.js";
 import { numericNullable } from "../../src/utils/objects.js";
 import { getMockBotConfig } from "../mocks/bot.js";

@@ -1,6 +1,7 @@
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
-import { dateToUtcTimestamp, fetchUrl } from './utils.js';
+import { fetchUrl } from './utils.js';
+import { dateToUtcTimestamp } from './utils/dates.js';
 import { matchNumber } from "./utils/expressions.js";
 
 /**

@@ -6,9 +6,10 @@ import { sendMessage } from "./queue.js";
 import { getCandidateOrNominee, getRandomAnnouncement, getRandomCurrently, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
-    capitalize, dateToRelativetime, fetchUrl, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
+    capitalize, fetchUrl, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase
 } from "./utils.js";
+import { dateToRelativetime } from "./utils/dates.js";
 import { matchNumber } from "./utils/expressions.js";
 import { parsePackage } from "./utils/package.js";
 import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";

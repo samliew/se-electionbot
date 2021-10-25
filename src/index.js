@@ -3,7 +3,6 @@ import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { JSDOM } from "jsdom";
-// import { JSDOM } from "jsdom";
 import sanitize from "sanitize-html";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getBadges, getModerators, getUserInfo } from "./api.js";
@@ -40,12 +39,12 @@ import Rescraper from "./rescraper.js";
 import { calculateScore, makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
 import {
-    dateToRelativetime,
-    dateToUtcTimestamp, fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, isBotMessage, keepAlive,
+    fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, isBotMessage, keepAlive,
     linkToRelativeTimestamp,
     linkToUtcTimestamp, makeURL, onlyBotMessages, pluralize, roomKeepAlive, searchChat, wait
 } from './utils.js';
 import { last } from "./utils/arrays.js";
+import { dateToRelativetime, dateToUtcTimestamp } from "./utils/dates.js";
 import { matchNumber } from "./utils/expressions.js";
 
 /**

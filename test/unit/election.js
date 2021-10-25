@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import Election from "../../src/election.js";
-import { dateToUtcTimestamp } from "../../src/utils.js";
+import { dateToUtcTimestamp } from "../../src/utils/dates.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
 /**

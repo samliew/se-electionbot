@@ -3,7 +3,7 @@ import sinon from "sinon";
 import { isAliveCommand, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "../../src/commands/commands.js";
 import { AccessLevel, CommandManager } from "../../src/commands/index.js";
 import Election from "../../src/election.js";
-import { dateToUtcTimestamp } from "../../src/utils.js";
+import { dateToUtcTimestamp } from "../../src/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 import { getMockUserProfile } from "../mocks/user.js";

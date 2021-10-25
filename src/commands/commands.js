@@ -1,7 +1,8 @@
 import { getModerators } from "../api.js";
 import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting, sayOtherSiteMods, sayUptime } from "../messages.js";
-import { capitalize, dateToUtcTimestamp } from "../utils.js";
+import { capitalize } from "../utils.js";
+import { dateToUtcTimestamp } from "../utils/dates.js";
 import { matchNumber } from "../utils/expressions.js";
 
 /**
