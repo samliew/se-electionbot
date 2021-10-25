@@ -916,7 +916,7 @@ import { matchNumber } from "./utils/expressions.js";
                         "What is Single Transferable Vote?",
                         //"What is Meek STV?",
                         //"Where can the ballot file be found?"
-                    ].join('\n- '), msg.id);
+                    ].join('\n- '), msg.id, true);
                     return;
                 }
                 else if (isAskedWhoAmI(content)) {
