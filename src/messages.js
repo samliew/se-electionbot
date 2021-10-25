@@ -1,3 +1,4 @@
+import { JSDOM } from "jsdom";
 import { partialRight } from "ramda";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "./api.js";
 import Election from "./election.js";
@@ -5,9 +6,10 @@ import { sendMessage } from "./queue.js";
 import { getCandidateOrNominee, getRandomAnnouncement, getRandomCurrently, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
-    capitalize, dateToRelativetime, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
+    capitalize, dateToRelativetime, fetchUrl, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase
 } from "./utils.js";
+import { matchNumber } from "./utils/expressions.js";
 import { parsePackage } from "./utils/package.js";
 import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
 
@@ -1057,4 +1059,53 @@ export const sayAboutThePhases = (_config, election) => {
     const primarySuffix = datePrimary ? ` It also has a ${makeURL("primary", `${electionUrl}?tab=primary`)} phase ${threshold}.` : "";
 
     return `${prefix}${primarySuffix}`;
+};
+
+/**
+ * @summary builds a response to a query of a user if they already voted
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {string} _text message content
+ * @param {UserProfile} user requesting user
+ * @returns {Promise<string>}
+ */
+export const sayIfOneHasVoted = async (config, election, _text, user) => {
+    const { siteHostname, electionNum } = election;
+    const { id } = user;
+
+    const electionBadgeName = "Constituent";
+    const electionBadgeId = election.getBadgeId(electionBadgeName);
+
+    const html = await fetchUrl(config, `https://${siteHostname}/help/badges/${electionBadgeId}?userId=${id}`);
+
+    const { window: { document } } = new JSDOM(html);
+
+    /** @type {Record<number, Date>} */
+    const awards = {};
+
+    document.querySelectorAll("#mainbar .single-badge-row-reason").forEach((awardRow) => {
+        /** @type {HTMLSpanElement|null} */
+        const awardDateElem = awardRow.querySelector(`[title$="Z"]`);
+        /** @type {HTMLAnchorElement|null} */
+        const awardReasonElem = awardRow.querySelector(`.single-badge-reason a[href*="/election"]`);
+
+        if (!awardDateElem || !awardReasonElem) return;
+
+        const awardedForElectionNum = matchNumber(/\/election\/(\d+)/, awardReasonElem.href);
+        if (!awardedForElectionNum) return;
+
+        awards[awardedForElectionNum] = new Date(awardDateElem.title);
+    });
+
+    if (config.debugOrVerbose) {
+        console.log(awards);
+    }
+
+    const foundBadge = awards[electionNum || 1];
+
+    const badgeInfo = `the ${electionBadgeName} badge`;
+
+    return foundBadge ?
+        `As you are awarded ${badgeInfo} for this election, you already voted.` :
+        `No, you haven't voted in the election (or ${badgeInfo} haven't been awarded to you yet).`;
 };

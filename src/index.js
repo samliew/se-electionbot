@@ -25,7 +25,7 @@ import {
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule,
     isAskedForHelp,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfModsArePaid, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
     isBotMentioned,
     isHatingTheBot,
@@ -33,7 +33,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutBallotFile, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
+import { sayAboutBallotFile, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIfOneHasVoted, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getCandidateOrNominee, getRandomAlive, getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -693,7 +693,8 @@ import { matchNumber } from "./utils/expressions.js";
                 [isAskedAboutBallotFile, sayAboutBallotFile],
                 [isAskedWhoIsTheBestMod, sayBestModerator],
                 [isAskedForCurrentNominees, sayCurrentCandidates],
-                [isAskedAboutElectionPhases, sayAboutThePhases]
+                [isAskedAboutElectionPhases, sayAboutThePhases],
+                [isAskedIfOneHasVoted, sayIfOneHasVoted]
             ];
 
             const matched = rules.find(([expr]) => expr(content));
