@@ -641,12 +641,17 @@ export const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
 
 
 /**
+ * @typedef {{
+ *  soonText ?: string,
+ *  justNowText?: string
+ * }} RelativeTimeOptions
+ *
  * @summary formats date to relative time
  * @param {Date|number|string} date
- * @param {string} [soonText]
+ * @param {RelativeTimeOptions} [options]
  * @returns {string}
  */
-export const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') => {
+export const dateToRelativetime = (date, { soonText = 'soon', justNowText = 'just now' } = {}) => {
 
     date = validateDate(date);
 
