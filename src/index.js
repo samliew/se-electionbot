@@ -658,7 +658,7 @@ import { matchNumber } from "./utils/expressions.js";
                  *   so we could possibly leave this block as it is
                  */
                 if (responseText) {
-                    await sendMultipartMessage(config, room, responseText, msg.id);
+                    await sendMultipartMessage(config, room, responseText, msg.id, true);
                     return; // no further action
                 }
             }
@@ -881,7 +881,7 @@ import { matchNumber } from "./utils/expressions.js";
             }
             else if (isPrivileged && isAskedHowManyModsInTheRoom(content)) {
                 const modNumResponse = await sayHowManyModsAreHere(config, client, room);
-                await sendMultipartMessage(config, room, modNumResponse, msg.id);
+                await sendMultipartMessage(config, room, modNumResponse, msg.id, true);
                 return;
             }
             else if (isAskedHowManyCandidatesInTheRoom(content)) {
@@ -893,28 +893,29 @@ import { matchNumber } from "./utils/expressions.js";
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
 
-                // Help
+                // Help - keep this to a single message
+                // To split into simple and full help
                 if (isAskedForHelp(content)) {
-                    await sendMultipartMessage(config, room, '\n' + [
-                        'Examples of election FAQs I can help with:',
-                        'What is an election',
-                        'How to nominate myself',
-                        'How to vote',
-                        'Who should I vote for',
-                        'How is candidate score calculated',
-                        'What is my candidate score',
-                        'What are the moderation/participation/editing/required badges',
-                        'What is the election status',
-                        'When is the election starting/ending',
-                        'When is the next phase',
+                    await sendMultipartMessage(config, room, "\n" + [
+                        "Examples of election FAQs I can help with:",
+                        "What is an election",
+                        "How to nominate myself",
+                        "How to vote",
+                        "Who should I vote for",
+                        "How is the candidate score calculated",
+                        "What is my candidate score",
+                        "What are the moderation/participation/editing badges",
+                        "What is the election status",
+                        //"When is the election starting/ending",
+                        "When is the next phase",
                         "How many users have voted?",
-                        "How many users are eligible to vote?",
-                        "How many positions are elected",
-                        'Who are the candidates',
-                        'Who are the current mods',
+                        //"How many users are eligible to vote?",
+                        //"How many positions are elected",
+                        "Who are the candidates",
+                        "Who are the current mods",
                         "What is Single Transferable Vote?",
-                        "What is Meek STV?",
-                        "Where can the ballot file be found?"
+                        //"What is Meek STV?",
+                        //"Where can the ballot file be found?"
                     ].join('\n- '), msg.id);
                     return;
                 }
