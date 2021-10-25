@@ -70,7 +70,7 @@ export const sendMessage = async function (config, room, responseText, inRespons
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to announce in
  * @param {null|string} responseText Message to send
- * @param {number} inResponseTo message ID to reply to
+ * @param {null|number} inResponseTo message ID to reply to
  * @param {boolean} [isPrivileged] privileged user flag
  * @returns {Promise<any>}
  */
@@ -82,10 +82,13 @@ export const sendReply = async function (config, room, responseText, inResponseT
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to announce in
  * @param {string} responseText Message to send
- * @param {WebsocketEvent} msg ChatExchange message
+ * @param {null|number} inResponseTo message ID to reply to
+ * @param {boolean} [isPrivileged] privileged user flag
  * @returns {Promise<boolean>}
  */
-export const sendMultipartMessage = async (config, room, responseText, msg) => {
+export const sendMultipartMessage = async (config, room, responseText, inResponseTo = null, isPrivileged = false) => {
+
+    const { debugOrVerbose, verbose } = config;
     const { maxMessageLength, maxMessageParts, minThrottleSecs } = config;
 
     const messageLength = responseText?.length || 0;
@@ -93,7 +96,7 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
 
     // Validate response
     if (isInvalid) {
-        if (config.verbose) console.log("RESPONSE (INVALID) - ", responseText);
+        if (verbose) console.log("RESPONSE (INVALID) - ", responseText);
         return false;
     }
 
@@ -120,6 +123,12 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
 
     console.log(`RESPONSE (${length}/${numParts})`, responseText);
 
+    // Respect bot mute if not a privileged response
+    if (!isPrivileged && config.isMuted) {
+        if (debugOrVerbose) console.log("RESPONSE (MUTED) - ", responseText);
+        return false;
+    }
+
     const waitSecs = Math.max(minThrottleSecs, 2.5);
     const completionDate = Date.now() + numParts * waitSecs;
 
@@ -129,16 +138,25 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
         config.lastMessageTime = completionDate;
     }
 
-    // Record last activity time (for room idle checks)
     config.lastActivityTime = completionDate;
 
     if (numParts > maxMessageParts) {
-        await msg.reply(`I wrote a poem of ${numParts} messages for you!`);
+        await room.sendMessage(`${inResponseTo ? `:${inResponseTo} ` : ""}I wrote a poem of ${numParts} messages for you!`);
         await wait(waitSecs);
-        return false;
+        return false; // Do not send actual response if they take too many messages
     }
 
-    await sendMessageList(config, room, ...messages);
+    await sendMessageList(config, room, isPrivileged, ...messages);
+
+    if (!isPrivileged) {
+        // Record last bot message and time
+        // Overrides mute status, so it must have already been pre-validated above
+        config.updateLastMessage(responseText);
+    }
+    else {
+        // Only record last bot message
+        config.lastBotMessage = responseText;
+    }
 
     return true;
 };
@@ -148,13 +166,14 @@ export const sendMultipartMessage = async (config, room, responseText, msg) => {
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to send messages to
  * @param {...string} messages message text list
+ * @param {boolean} [isPrivileged] privileged user flag
  */
-export const sendMessageList = async (config, room, ...messages) => {
+export const sendMessageList = async (config, room, isPrivileged = false, ...messages) => {
     const { throttleSecs } = config;
 
     let sent = 1;
     for (const message of messages) {
-        await room.sendMessage(message);
+        await _sendTheMessage(config, room, message, null, isPrivileged);
         await wait(throttleSecs * sent);
         sent += 1;
     }

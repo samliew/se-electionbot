@@ -42,31 +42,27 @@ describe('Message Queue', () => {
 
         it('should exit early on invalid response', async () => {
             const send = sinon.stub(room, "sendMessage");
-            const reply = sinon.stub(message, "reply");
 
             const response = "";
 
-            const status = await sendMultipartMessage(config, room, response, message);
+            const status = await sendMultipartMessage(config, room, response, message.id, true);
 
             expect(status).to.be.false;
             expect(send.calledOnce).to.be.false;
-            expect(reply.calledOnce).to.be.false;
         });
 
         it('should split on newlines', async () => {
             config.maxMessageLength = 6;
 
             const send = sinon.stub(room, "sendMessage");
-            const reply = sinon.stub(message, "reply");
 
             const response = "first\nfifth";
 
-            const promise = sendMultipartMessage(config, room, response, message);
+            const promise = sendMultipartMessage(config, room, response, message.id, true);
             await clock.runAllAsync();
             const status = await promise;
 
             expect(status).to.be.true;
-            expect(reply.calledOnce).to.be.false;
             expect(send.firstCall.args[0]).to.equal("first");
             expect(send.secondCall.args[0]).to.equal("fifth");
         });
@@ -75,16 +71,14 @@ describe('Message Queue', () => {
             config.maxMessageLength = 6;
 
             const send = sinon.stub(room, "sendMessage");
-            const reply = sinon.stub(message, "reply");
 
             const response = "first fifth";
 
-            const promise = sendMultipartMessage(config, room, response, message);
+            const promise = sendMultipartMessage(config, room, response, message.id, true);
             await clock.runAllAsync();
             const status = await promise;
 
             expect(status).to.be.true;
-            expect(reply.calledOnce).to.be.false;
             expect(send.firstCall.args[0]).to.equal("first");
             expect(send.secondCall.args[0]).to.equal("fifth");
         });
@@ -93,17 +87,16 @@ describe('Message Queue', () => {
             config.maxMessageLength = 6;
 
             const send = sinon.stub(room, "sendMessage");
-            const reply = sinon.stub(message, "reply");
 
             const response = "first second third fourth fifth";
 
-            const promise = sendMultipartMessage(config, room, response, message);
+            const promise = sendMultipartMessage(config, room, response, message.id, true);
             await clock.runAllAsync();
             const status = await promise;
 
             expect(status).to.be.false;
-            expect(send.calledOnce).to.be.false;
-            expect(reply.firstCall.args[0]).to.include("wrote a poem");
+            expect(send.calledOnce).to.be.true; // because we only sent one message - the warning itself
+            expect(send.firstCall.args[0]).to.include("wrote a poem");
         });
     });
 });

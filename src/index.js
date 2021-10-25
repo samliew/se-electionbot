@@ -658,7 +658,7 @@ import { matchNumber } from "./utils/expressions.js";
                  *   so we could possibly leave this block as it is
                  */
                 if (responseText) {
-                    await sendMultipartMessage(config, room, responseText, msg);
+                    await sendMultipartMessage(config, room, responseText, msg.id);
                     return; // no further action
                 }
             }
@@ -881,12 +881,12 @@ import { matchNumber } from "./utils/expressions.js";
             }
             else if (isPrivileged && isAskedHowManyModsInTheRoom(content)) {
                 const modNumResponse = await sayHowManyModsAreHere(config, client, room);
-                await sendMultipartMessage(config, room, modNumResponse, msg);
+                await sendMultipartMessage(config, room, modNumResponse, msg.id);
                 return;
             }
             else if (isAskedHowManyCandidatesInTheRoom(content)) {
                 const nomineeNumResponse = await sayHowManyCandidatesAreHere(config, election, client, room);
-                await sendMultipartMessage(config, room, nomineeNumResponse, msg);
+                await sendMultipartMessage(config, room, nomineeNumResponse, msg.id);
                 return;
             }
 
@@ -915,7 +915,7 @@ import { matchNumber } from "./utils/expressions.js";
                         "What is Single Transferable Vote?",
                         "What is Meek STV?",
                         "Where can the ballot file be found?"
-                    ].join('\n- '), msg);
+                    ].join('\n- '), msg.id);
                     return;
                 }
                 else if (isAskedWhoAmI(content)) {

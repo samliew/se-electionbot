@@ -100,7 +100,7 @@ export default class ScheduledAnnouncement {
                 return `${prefix} ${link}`;
             });
 
-        await sendMessageList(config, _room, ...messages);
+        await sendMessageList(config, _room, true, ...messages);
 
         return true;
     }
@@ -124,7 +124,7 @@ export default class ScheduledAnnouncement {
                 return `**Attention:** Candidate ${makeURL(userName, nominationLink)} has withdrawn from the election.`;
             });
 
-        await sendMessageList(config, _room, ...messages);
+        await sendMessageList(config, _room, true, ...messages);
 
         return true;
     }
