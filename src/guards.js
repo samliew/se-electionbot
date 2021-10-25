@@ -489,3 +489,14 @@ export const isAskedAboutElectionPhases = (text) => {
         /^list(?:\s+the)?\s+election(?:'s|s)?\s+phases(?:[?!]|$)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking if one has voted themselves
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedIfOneHasVoted = (text) => {
+    return someMatch([
+        /^(?:did|have)\s+i\s+voted?(?:\s+in(?:\s+th[ei]s?)\s+election)??(?:\?|$)/i
+    ], text);
+};

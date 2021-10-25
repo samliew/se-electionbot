@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -326,11 +326,27 @@ describe('Message Guards', () => {
         "who shouldn't I vote for"
     ];
 
+    const haveIvotedMatches = [
+        "have I voted?",
+        "did I vote",
+        "Have I voted in this election?",
+        "did I vote in the election?"
+    ];
+
+    describe(isAskedIfOneHasVoted.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedIfOneHasVoted, haveIvotedMatches);
+            allMatch(isAskedIfOneHasVoted, [
+                ...whoToVoteMatches,
+            ], false);
+        });
+    });
+
     describe(isAskedHowOrWhoToVote.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedHowOrWhoToVote, whoToVoteMatches);
-
             allMatch(isAskedHowOrWhoToVote, [
+                ...haveIvotedMatches,
                 "We want new blood, people who are excited about moderating and have enough time available in their lives for whatever reason to devote to the site."
             ], false);
         });
