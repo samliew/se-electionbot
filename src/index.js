@@ -35,7 +35,7 @@ import {
 } from "./guards.js";
 import { sayAboutBallotFile, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
-import { getRandomAlive, getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAlive, getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import { calculateScore, makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
@@ -818,14 +818,14 @@ import { matchNumber } from "./utils/expressions.js";
                     responseText = election.statVoters || null;
                 }
                 else if (election.phase === 'election') {
-                    responseText = `The [election](${election.electionUrl}?tab=election) is in the final voting phase. `;
-                    responseText += `You may now cast your election ballot in order of your top three preferred candidates.`;
+                    responseText = `The ${makeURL("election", `${election.electionUrl}?tab=election`)} is in the final voting phase. `;
+                    responseText += `You can cast your ballot by ranking ${getCandidateOrNominee()}s in order of preference if you haven't done so already.`;
                 }
                 // Nomination or primary phase
                 else {
-                    responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.numNominees} candidates.`;
+                    responseText = `The [election](${election.electionUrl}?tab=${election.phase}) is currently in the ${election.phase} phase with ${election.numNominees} ${getCandidateOrNominee()}s.`;
 
-                    if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation you may freely vote on the candidates, and come back ${linkToRelativeTimestamp(election.dateElection)} to vote in the final election voting phase.`;
+                    if (election.phase === 'primary') responseText += `. If you have at least ${election.repVote} reputation, you may freely vote on the ${getCandidateOrNominee()}s, and come back ${linkToRelativeTimestamp(election.dateElection)} to vote in the final election voting phase.`;
                 }
             }
             else if (isAskedWhenIsTheNextPhase(content)) {
