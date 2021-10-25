@@ -224,8 +224,7 @@ describe('String-related utils', async function () {
         });
     });
 
-    describe('dateToRelativetime', () => {
-
+    describe(dateToRelativetime.name, () => {
         it('should be able to convert a date in the future correctly', () => {
             let date, result;
 

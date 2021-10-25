@@ -652,32 +652,47 @@ export const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just 
 
     if (date === null) return soonText;
 
+    const MS_SEC = 1000;
+    const S_MIN = 60;
+    const S_HOUR = S_MIN * 60;
+    const S_DAY = S_HOUR * 24;
+
     // Try future date
-    let diff = (date.getTime() - Date.now()) / 1000;
-    let dayDiff = Math.floor(diff / 86400);
+    let diff = (date.getTime() - Date.now()) / MS_SEC;
+    let dayDiff = Math.floor(diff / S_DAY);
 
     // In the future
     if (diff > 0) {
-        return dayDiff > 31 ? "" : (
-            diff < 5 && soonText ||
-            diff < 60 && (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}`; })(Math.floor(diff)) ||
-            diff < 3600 && (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}`; })(Math.floor(diff / 60)) ||
-            diff < 86400 && (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}`; })(Math.floor(diff / 3600)) ||
-            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}`; })(Math.floor(diff / 86400))
-        );
+        /** @type {[boolean, string][]} */
+        const rules = [
+            [dayDiff > 31, ""],
+            [diff < 5, soonText],
+            [diff < S_MIN, ((x) => `in ${x} sec${pluralize(x)}`)(Math.floor(diff))],
+            [diff < S_HOUR, ((x) => `in ${x} min${pluralize(x)}`)(Math.floor(diff / S_MIN))],
+            [diff < S_DAY, ((x) => `in ${x} hour${pluralize(x)}`)(Math.floor(diff / S_HOUR))],
+            [true, ((x) => `in ${x} day${pluralize(x)}`)(Math.floor(diff / S_DAY))]
+        ];
+
+        const [, relative = ""] = rules.find(([rule]) => rule) || [];
+        return relative;
     }
 
     // In the past
-    diff = (Date.now() - date.getTime()) / 1000;
-    dayDiff = Math.floor(diff / 86400);
+    diff = (Date.now() - date.getTime()) / MS_SEC;
+    dayDiff = Math.floor(diff / S_DAY);
 
-    return dayDiff > 31 ? "" : (
-        diff < 5 && justNowText ||
-        diff < 60 && (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago`; })(Math.floor(diff)) ||
-        diff < 3600 && (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago`; })(Math.floor(diff / 60)) ||
-        diff < 86400 && (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago`; })(Math.floor(diff / 3600)) ||
-        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago`; })(Math.floor(diff / 86400))
-    );
+    /** @type {[boolean, string][]} */
+    const rules = [
+        [dayDiff > 31, ""],
+        [diff < 5, justNowText],
+        [diff < S_MIN, ((x) => `${x} sec${pluralize(x)} ago`)(Math.floor(diff))],
+        [diff < S_HOUR, ((x) => `${x} min${pluralize(x)} ago`)(Math.floor(diff / S_MIN))],
+        [diff < S_DAY, ((x) => `${x} hour${pluralize(x)} ago`)(Math.floor(diff / S_HOUR))],
+        [true, ((x) => `${x} day${pluralize(x)} ago`)(Math.floor(diff / S_DAY))]
+    ];
+
+    const [, relative = ""] = rules.find(([rule]) => rule) || [];
+    return relative;
 };
 
 /**
