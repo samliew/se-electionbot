@@ -95,7 +95,7 @@ export const sayWhyNominationRemoved = () => {
  */
 export const sayHowToNominateOthers = (_config, _election, _text) => {
     // https://chat.stackoverflow.com/transcript/message/53294378#53294378
-    return `Users can *only* nominate themselves. Nominating *others* is not possible.`;
+    return `You can only nominate yourself. It is not possible to nominate another user.`;
 };
 
 /**
@@ -116,7 +116,7 @@ export const sayElectionPage = (config, election) => {
     const nthElection = formatOrdinal(electionNum || 1);
     const electionPage = makeURL("here", electionUrl);
 
-    return isValidUrl ? `The information on the ${nthElection} ${siteName} election can be found ${electionPage}` : `Sorry, the election page is missing`;
+    return isValidUrl ? `The information on the ${nthElection} ${siteName} election can be found ${electionPage}.` : `Sorry, the election page is missing.`;
 };
 
 /**
@@ -662,10 +662,10 @@ export const sayAJoke = () => {
  * @returns {string}
  */
 export const sayCannedResponses = () => new RandomArray(
+    "Sometimes all you have is a can",
     "I am a bot, what did you expect?",
     "Some only deserve canned responses",
-    "Sometimes all you have is a can",
-    "How do I know your message is not canned?"
+    "How do I know *your* message is not canned?"
 ).getRandom();
 
 /**
@@ -1031,7 +1031,7 @@ export const sayAboutBallotFile = (_config, election) => {
 
     /** @type {Record<Exclude<ElectionPhase, null>, string>} */
     const phaseMap = {
-        nomination: `will be available on the ${electionPage} once the election phase ends`,
+        nomination: `will be available on the ${electionPage} once the election ends`,
         election: `will become available on the ${electionPage} when the election ends`,
         ended: `can be ${makeURL("downloaded", electionBallotURL)} as the election has ended`,
         cancelled: "is not available for cancelled elections",
@@ -1044,7 +1044,7 @@ export const sayAboutBallotFile = (_config, election) => {
 
     const prefix = `The BLT (ballot) file`;
     const bltURL = makeURL("this help article", "https://www.opavote.com/help/overview#blt-file-format");
-    const suffix = `To learn more about it, please read ${bltURL}`;
+    const suffix = `To learn more about it, please read ${bltURL}.`;
 
     return `${prefix} ${content}. ${suffix}.`;
 };
@@ -1114,7 +1114,7 @@ export const sayIfOneCanVote = async (config, election, _text, user) => {
     /** @type {[boolean, string][]} */
     const addendumRules = [
         [election.isEnded(), `the election is over...`],
-        [election.isNotStartedYet(), `the election has not started yet...`,]
+        [election.isNotStartedYet(), `the election has not started yet.`,]
     ];
 
     const [, addendum] = addendumRules.find(([rule]) => rule) || [, ""];
@@ -1126,7 +1126,7 @@ export const sayIfOneCanVote = async (config, election, _text, user) => {
     const [badgeURL, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
     const foundBadge = awards[electionNum || 1];
 
-    const postfix = foundBadge ? ` but judging by your ${makeURL(electionBadgeName, badgeURL)} badge, you have already voted!` : ".";
+    const postfix = foundBadge ? ` but looks like you have already voted, as you have the ${makeURL(electionBadgeName, badgeURL)} badge!` : ".";
 
     const extra = addendum && ` Just so you know, ${addendum}`;
 
