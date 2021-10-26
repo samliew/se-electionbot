@@ -1,8 +1,8 @@
-import { getStackApiKey, getUserInfo } from "./api.js";
+import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
 import { sayDiamondAlready, sayDoesNotMeetRequirements, sayHasMaximumCandidateScore, sayLacksPrivilege, sayMissingBadges } from "./messages.js";
-import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID, scrapeEarnedBadges } from "./utils.js";
+import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID } from "./utils.js";
 import { matchNumber } from "./utils/expressions.js";
 
 /**
@@ -204,7 +204,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         // parallel scrape + API call speeds up calculation
         const [userBadges, requestedUser] = await Promise.all([
-            scrapeEarnedBadges(config, siteHostname, userId),
+            getBadges(config, userId, apiSlug, "named"),
             getUserInfo(config, userId, apiSlug)
         ]);
 
