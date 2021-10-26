@@ -1,8 +1,8 @@
-import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
+import { getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
 import { sayDiamondAlready, sayDoesNotMeetRequirements, sayHasMaximumCandidateScore, sayLacksPrivilege, sayMissingBadges } from "./messages.js";
-import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID } from "./utils.js";
+import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID, scrapeEarnedBadges } from "./utils.js";
 import { matchNumber } from "./utils/expressions.js";
 
 /**
@@ -50,7 +50,7 @@ export const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error 
  *
  * @summary calculates the score
  * @param {ApiUser} user API user object
- * @param {Badge[]} userBadges user badges
+ * @param {Omit<Badge, "award_count">[]} userBadges user badges
  * @param {Election} election current election
  * @returns {CandidateScore}
  */
@@ -202,18 +202,11 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        // TODO: Get a different API key here
-        const userBadges = await getBadges(config, userId, apiSlug);
-
-        // Validation
-        if (!userBadges.length) {
-            console.error('No data from API.');
-            return sayCalcFailed(isAskingForOtherUser);
-        }
-
-        const hasNominated = election.isNominee(userId);
-
-        const requestedUser = await getUserInfo(config, userId, apiSlug);
+        // parallel scrape + API call speeds up calculation
+        const [userBadges, requestedUser] = await Promise.all([
+            scrapeEarnedBadges(config, siteHostname, userId),
+            getUserInfo(config, userId, apiSlug)
+        ]);
 
         if (!requestedUser) {
             console.error(`failed to get user info to calculate`);
@@ -234,6 +227,8 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         const missingBadgeNames = missingBadges.map(mapToName);
 
         if (numMissingBadges > 0) console.log('Missing Badges: ', missingBadgeNames.join(','));
+
+        const hasNominated = election.isNominee(userId);
 
         let responseText = "";
 
