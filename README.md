@@ -19,6 +19,7 @@ General election help:
 - how is the candidate score calculated
 - **what is my candidate score** _(calculates if ownself is eligible for nomination)_
 - where is the election page
+- can I vote in the election
 
 Election badges:
 
