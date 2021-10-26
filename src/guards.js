@@ -500,3 +500,14 @@ export const isAskedIfOneHasVoted = (text) => {
         /^(?:did|have)\s+i\s+voted?(?:\s+in(?:\s+th[ei]s?)\s+election)??(?:\?|$)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking if one can vote
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedIfCanVote = (text) => {
+    return someMatch([
+        /^can\s+i\s+vote(?:\s+in(?:\s+th[ei]s?)?\s+election)?(?:\?|$)/i
+    ], text);
+};
