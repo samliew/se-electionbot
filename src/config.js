@@ -235,7 +235,7 @@ export class BotConfig {
     // Can the bot send an idle greeting
     //    1. Room is idle, and there was at least some previous activity, and last bot message more than lowActivityCheckMins minutes ago
     // or 2. If no activity for a few hours, and last message was not posted by the bot
-    get idleCanSayHi() {
+    get canIdleGreet() {
         const { roomBecameIdleAWhileAgo, roomReachedMinActivityCount, botHasBeenQuiet, roomBecameIdleHoursAgo, botSentLastMessage } = this;
 
         return (roomBecameIdleAWhileAgo && roomReachedMinActivityCount && botHasBeenQuiet) ||

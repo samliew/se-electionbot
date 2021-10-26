@@ -77,7 +77,7 @@ export default class Rescraper {
                 const {
                     roomReachedMinActivityCount, roomBecameIdleAWhileAgo,
                     roomBecameIdleHoursAgo, botHasBeenQuiet, botSentLastMessage,
-                    idleCanSayHi
+                    canIdleGreet: idleCanSayHi
                 } = config;
 
                 console.log(`RESCRAPER - IDLE? idleCanSayHi: ${idleCanSayHi}
@@ -172,7 +172,7 @@ export default class Rescraper {
             }
 
             // If room is idle, remind users that bot is around to help
-            else if (config.idleCanSayHi) {
+            else if (config.canIdleGreet) {
                 await sayIdleGreeting(config, election, room);
             }
             else if (config.canBusyGreet) {
