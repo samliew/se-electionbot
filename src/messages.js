@@ -184,7 +184,7 @@ export const sayElectionIsOver = (election) => {
     }
 
     return responseText;
-}
+};
 
 /**
  * @summary Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
@@ -1058,7 +1058,7 @@ export const sayAboutBallotFile = (_config, election) => {
 
     const prefix = `The BLT (ballot) file`;
     const bltURL = makeURL("this help article", "https://www.opavote.com/help/overview#blt-file-format");
-    const suffix = `To learn more about it, please read ${bltURL}.`;
+    const suffix = `To learn more about it, please read ${bltURL}`;
 
     return `${prefix} ${content}. ${suffix}.`;
 };
