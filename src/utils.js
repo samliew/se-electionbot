@@ -144,12 +144,12 @@ export const chatMarkdownToHtml = (content) => {
 
 /**
  * @summary Sends a GET request. This wrapper handles Stack Exchange's API backoff
- * @param {BotConfig} config bot configuration
+ * @param {BotConfig} _config bot configuration
  * @param {string|URL} url the url to fetch
  * @param {boolean} json whether to return the response as a json object
  * @returns {Promise<any>}
  */
-export const fetchUrl = async (config, url, json = false) => {
+export const fetchUrl = async (_config, url, json = false) => {
     const { SOURCE_VERSION, ACCOUNT_EMAIL } = process.env;
 
     const isStackExchangeApi = /^https\:\/\/api\.stackexchange\.com/.test(url.toString());
@@ -176,8 +176,8 @@ export const fetchUrl = async (config, url, json = false) => {
 
         return data;
     }
-    catch (e) {
-        console.error(`fetch error - ${url}:`, config.verbose ? e : e.message);
+    catch ({ code, message, errno }) {
+        console.error(`fetch error - ${url}: ${{ code, message, errno }}`);
         return null;
     }
 };
