@@ -595,17 +595,17 @@ export const scrapeEarnedBadges = async (config, siteHostname, userId, page = 1)
         });
     });
 
-    const pages = document.querySelectorAll(".user-tab-paging .js-pagination-item");
+    /** @type {HTMLAnchorElement|null} */
+    const nextPage = document.querySelector(`.user-tab-paging .js-pagination-item[rel="next"]`);
 
-    for (const pageLink of pages) {
-        const pageNum = numericNullable(pageLink, "textContent");
-        if (!pageNum || pageNum <= page) continue;
+    if (!nextPage) return earned;
 
+    const pageNum = matchNumber(/\s+(\d+)$/, nextPage.title);
+    if (pageNum) {
+        console.log({ pageNum, page });
         const moreBadges = await scrapeEarnedBadges(config, siteHostname, userId, pageNum);
         earned.push(...moreBadges);
     }
-
-    if (config.verbose) console.log(earned);
 
     return earned;
 };
