@@ -232,10 +232,12 @@ export class BotConfig {
         return this.lastActivityTime === this.lastMessageTime;
     }
 
-    // Can the bot send an idle greeting
-    //    1. Room is idle, and there was at least some previous activity, and last bot message more than lowActivityCheckMins minutes ago
-    // or 2. If no activity for a few hours, and last message was not posted by the bot
-    get idleCanSayHi() {
+    /**
+     * @summary checks if the bot can idle-greet either:
+     * 1. Room is idle, and there was at least some previous activity, and last bot message more than lowActivityCheckMins minutes ago
+     * 2. If no activity for a few hours, and last message was not posted by the bot
+     */
+    get canIdleGreet() {
         const { roomBecameIdleAWhileAgo, roomReachedMinActivityCount, botHasBeenQuiet, roomBecameIdleHoursAgo, botSentLastMessage } = this;
 
         return (roomBecameIdleAWhileAgo && roomReachedMinActivityCount && botHasBeenQuiet) ||
@@ -243,7 +245,7 @@ export class BotConfig {
     }
 
     /**
-     * @summary checks if a bot can busy-greet
+     * @summary checks if the bot can busy-greet
      * @returns {boolean}
      */
     get canBusyGreet() {
