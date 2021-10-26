@@ -52,7 +52,7 @@ export const sayHI = async (config, election, greeting = 'Welcome to the electio
 
     let alreadyVoted = "";
     if (phase === 'election' && electionBadgeId) {
-        const numEligible = await getNumberOfUsersEligibleToVote(config, apiSlug, election.repVote || 1);
+        const numEligible = await getNumberOfUsersEligibleToVote(config, election);
         const numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
 
         const format = partialRight(formatNumber, [3]);
@@ -893,7 +893,7 @@ export const sayAboutSTV = (_config, _election, text) => {
  */
 export const sayAlreadyVoted = async (config, election, text) => {
 
-    const { phase, dateElection, statVoters, apiSlug, repVote = 1 } = election;
+    const { phase, dateElection, statVoters, apiSlug } = election;
 
     // Badge that is awarded for voting in elections
     const electionBadgeName = "Constituent";
@@ -904,7 +904,7 @@ export const sayAlreadyVoted = async (config, election, text) => {
     if (phase === 'election' && electionBadgeId) {
         const format = partialRight(formatNumber, [3]);
 
-        const numEligible = await getNumberOfUsersEligibleToVote(config, apiSlug, repVote);
+        const numEligible = await getNumberOfUsersEligibleToVote(config, election);
         const numAwarded = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
 
 
@@ -990,8 +990,8 @@ export const sayHowManyCandidatesAreHere = async (config, election, client, room
  * @returns {Promise<string>}
  */
 export const sayHowManyAreEligibleToVote = async (config, election) => {
-    const { repVote = 1, phase } = election;
-    const numEligible = await getNumberOfUsersEligibleToVote(config, election.apiSlug, repVote);
+    const { phase } = election;
+    const numEligible = await getNumberOfUsersEligibleToVote(config, election);
 
     const isAre = pluralize(numEligible, "are", "is");
     const wasWere = pluralize(numEligible, "were", "was");

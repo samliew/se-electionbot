@@ -151,11 +151,12 @@ export const getNumberOfVoters = async (config, site, badgeId, electionPhaseDate
 /**
  * @summary gets a number of users eligible to vote from the API
  * @param {BotConfig} config bot configuration
- * @param {string} site election site slug
- * @param {number} minRep minimum reputation at which to cut off
+ * @param {import("./election").default} election current election
  * @returns {Promise<number>}
  */
-export const getNumberOfUsersEligibleToVote = async (config, site, minRep) => {
+export const getNumberOfUsersEligibleToVote = async (config, election) => {
+    const { repVote = 1, apiSlug: site } = election;
+
     const userURL = new URL(`${apiBase}/${apiVer}/users`);
     userURL.search = new URLSearchParams({
         pagesize: "100",
@@ -163,7 +164,7 @@ export const getNumberOfUsersEligibleToVote = async (config, site, minRep) => {
         sort: "reputation",
         site,
         filter: "!40CXOUq0axmHYcgDp", // only the total field
-        min: minRep.toString(),
+        min: repVote.toString(),
         key: getStackApiKey(config.apiKeyPool)
     }).toString();
 
