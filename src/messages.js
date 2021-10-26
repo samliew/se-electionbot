@@ -1146,3 +1146,25 @@ export const sayIfOneCanVote = async (config, election, _text, user) => {
 
     return `${message}${postfix}${extra}`;
 };
+
+/**
+ * @summary builds a response to a query where to find results
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayWhereToFindElectionResults = (_config, election) => {
+    const { opavoteUrl, siteName, electionNum, dateEnded } = election;
+
+    const resultsLocation = opavoteUrl ? ` The results can be found online via ${makeURL("OpaVote", opavoteUrl)}.` : "";
+
+    /** @type {[boolean,string][]} */
+    const rules = [
+        [election.isActive(), `The election is ${getRandomNow()} — the results will become available after it ends ${dateToRelativetime(dateEnded)}.`],
+        [election.isNotStartedYet(), sayNotStartedYet(election)],
+        [election.isEnded(), `The ${formatOrdinal(electionNum || 1)} ${siteName} election has ended.${resultsLocation}`]
+    ];
+
+    const [, response = ""] = rules.find(([cond]) => cond) || [];
+    return response;
+};
