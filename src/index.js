@@ -805,14 +805,8 @@ import { matchNumber } from "./utils/expressions.js";
                 if (election.phase === null) {
                     responseText = sayNotStartedYet(election);
                 }
-                else if (election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}.`;
-
-                    if (election.opavoteUrl) {
-                        responseText += ` You can [view the results online via OpaVote](${election.opavoteUrl}).`;
-                    }
-                }
                 else if (election.phase === 'ended') {
+                    // with or without winners
                     responseText = sayElectionIsOver(election);
                 }
                 else if (election.phase === 'cancelled') {
