@@ -215,15 +215,14 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         const candidateScore = calculateScore(requestedUser, userBadges, election);
 
-        const { score, missing, isEligible, maxScore } = candidateScore;
+        const {
+            score, missing, isEligible, maxScore,
+            missingRequiredBadgeNames,
+            numMissingRequiredBadges,
+            numMissingBadges
+        } = candidateScore;
 
         const missingBadges = missing.badges.election;
-        const missingRequiredBadges = missing.badges.required;
-
-        const { length: numMissingBadges } = missingBadges;
-        const { length: numMissingRequiredBadges } = missingRequiredBadges;
-
-        const missingRequiredBadgeNames = missingRequiredBadges.map(mapToName);
         const missingBadgeNames = missingBadges.map(mapToName);
 
         if (numMissingBadges > 0) console.log('Missing Badges: ', missingBadgeNames.join(','));
