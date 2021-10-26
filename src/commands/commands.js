@@ -1,7 +1,8 @@
 import { getModerators } from "../api.js";
 import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting, sayOtherSiteMods, sayUptime } from "../messages.js";
-import { capitalize } from "../utils.js";
+import { RandomArray } from "../random.js";
+import { capitalize, makeURL } from "../utils.js";
 import { dateToUtcTimestamp } from "../utils/dates.js";
 import { matchNumber } from "../utils/expressions.js";
 
@@ -296,4 +297,32 @@ export const greetCommand = async (config, election, room, content) => {
     await greetingMap[type]?.(config, election, room);
 
     config.activityCounter = 0;
+};
+
+/**
+ * @summary
+ * @param {BotConfig} config bot config
+ * @returns {string}
+ */
+export const sayFeedback = (config) => {
+    const { feedbackUrl, repoUrl } = config;
+
+    const repoIssueUrl = `${repoUrl}/issues/new?labels=feature&template=feature_request.md`;
+
+    // End in punctuation
+    const randomGreet = new RandomArray([
+        "I'm scheduled for an upgrade soon.",
+        "Thank you for being my test subjects.",
+        "Hope you have found me useful (or not).",
+    ]);
+
+    // End in punctuation
+    const randomFeedback = new RandomArray([
+        "Please take a moment to express your gratitude.",
+        "My developers would appreciate your feedback and suggestions.",
+    ]);
+
+    const feedbackForm = feedbackUrl ? `The feedback form is at ${makeURL(feedbackUrl)}` : `Feature requests can be submitted at ${makeURL(repoIssueUrl)}`;
+
+    return `${randomGreet} ${randomFeedback} ${feedbackForm}. Thanks!`;
 };

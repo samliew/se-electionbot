@@ -170,7 +170,21 @@ export const sayNotStartedYet = ({ dateNomination, electionUrl }) => `The ${make
  * @param {Election} election
  * @returns {string}
  */
-export const sayElectionIsOver = ({ electionUrl }) => `The ${makeURL("election", electionUrl)} is over. See you next time!`;
+export const sayElectionIsOver = (election) => {
+    const { electionUrl, numWinners, arrWinners, siteUrl, opavoteUrl } = election;
+
+    let responseText = `The ${makeURL("election", electionUrl)} is over. See you next time!`;
+
+    if (numWinners > 0) {
+        responseText = `The [election](${electionUrl}) has ended. The ${pluralizePhrase(numWinners, "winners are:", "winner is")} ${arrWinners.map(v => `[${v.userName}](${siteUrl + '/users/' + v.userId})`).join(', ')}.`;
+
+        if (opavoteUrl) {
+            responseText += ` You can [view the results online via OpaVote](${opavoteUrl}).`;
+        }
+    }
+
+    return responseText;
+}
 
 /**
  * @summary Calculate num of days/hours to start of final election, so we can remind users in the primary to come back

@@ -6,7 +6,7 @@ import { JSDOM } from "jsdom";
 import sanitize from "sanitize-html";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getBadges, getModerators, getUserInfo } from "./api.js";
-import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
@@ -582,6 +582,8 @@ import { matchNumber } from "./utils/expressions.js";
 
                 commander.add("announce winners", "makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged);
 
+                commander.add("feedback", "bot says how to provide feedback", sayFeedback, AccessLevel.dev);
+
                 commander.add("whois", "retrieve mods from another site", listSiteModerators, AccessLevel.privileged);
 
                 commander.add("rm_election", "resets the current election", resetElection, AccessLevel.dev);
@@ -626,6 +628,7 @@ import { matchNumber } from "./utils/expressions.js";
                     ["set access", /set (?:access|level)/, config, user, content],
                     ["announce nominees", /^announce nominees/, config, election, announcement],
                     ["announce winners", /^announce winners/, config, election, room, announcement],
+                    ["feedback", /^feedback/, config],
                     ["list moderators", /^whois/, config, content, entities],
                     ["reset election", /^reset election/, config, election],
                     ["ignore", /^ignore \d+/, config, room, content],
@@ -805,14 +808,8 @@ import { matchNumber } from "./utils/expressions.js";
                 if (election.phase === null) {
                     responseText = sayNotStartedYet(election);
                 }
-                else if (election.phase === 'ended' && election.arrWinners && election.arrWinners.length > 0) {
-                    responseText = `The [election](${election.electionUrl}) has ended. The winner${election.arrWinners.length == 1 ? ' is' : 's are:'} ${election.arrWinners.map(v => `[${v.userName}](${election.siteUrl + '/users/' + v.userId})`).join(', ')}.`;
-
-                    if (election.opavoteUrl) {
-                        responseText += ` You can [view the results online via OpaVote](${election.opavoteUrl}).`;
-                    }
-                }
                 else if (election.phase === 'ended') {
+                    // with or without winners
                     responseText = sayElectionIsOver(election);
                 }
                 else if (election.phase === 'cancelled') {

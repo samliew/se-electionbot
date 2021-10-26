@@ -219,7 +219,13 @@ export class BotConfig {
         return chatMarkdownToHtml(this.lastBotMessage);
     }
 
-    // pool of API keys
+    // Feedback form URL
+    feedbackUrl = process.env.FEEDBACK_FORM_URL || "";
+
+    // Repo URL
+    repoUrl = `https://github.com/samliew/se-electionbot`;
+
+    // Pool of API keys
     apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
 
     // Checks if the bot is currently muted

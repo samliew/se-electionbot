@@ -857,7 +857,16 @@ export const getSiteDefaultChatroom = async (config, siteUrl) => {
  * @param {string} label
  * @param {string} uri
  */
-export const makeURL = (label, uri) => `[${label}](${uri})`;
+export const makeURL = (label, uri = "") => {
+
+    // If second param not provided, assume label is a valid link
+    // Shorten link label: Strip https:// from start, and query params from end
+    if (uri === "") {
+        uri = label.replace(/^https?:\/\//, "").replace(/\?.*$/, "");
+    }
+
+    return `[${label}](${uri})`;
+}
 
 /**
  * @summary callback for mapping badge to id
