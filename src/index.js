@@ -867,7 +867,7 @@ import { matchNumber } from "./utils/expressions.js";
             else if (isAskedAboutMissingComments(content) && election.phase !== "nomination") {
                 responseText = `Comments are only visible on the "${makeURL("Nomination", election.electionUrl + '?tab=nomination')}" tab.`;
             }
-            else if (/^happy birthday .*!*$/.test(content)) {
+            else if (/^happy birth\s?day,? .*!*$/.test(content)) {
                 responseText = `Happy birthday!`;
             }
             else if (isLovingTheBot(content)) {
@@ -963,13 +963,14 @@ import { matchNumber } from "./utils/expressions.js";
                             `Today, I consider myself the luckiest bot on the face of the earth.`,
                         ).getRandom();
                     }
-                    else if (/^what are you\??$/.test(content)) {
+                    else if (/^what are you\??$/.test(content) || /^are you a (ro)?bot\??$/.test(content)) {
                         responseText = new RandomArray(
                             `I'm Bot. James Bot.`,
                             `I'm a robot. Beep boop.`,
-                            `I'm a crystal ball; I already know the winners.`,
+                            "I'm definitely NOT a bot.",
+                            "I'm just pretending to be a bot",
+                            `No, I'm a crystal ball. I know the answer to life.`,
                             `I'm a teapot, short and stout. Here is my handle, here is my spout.`,
-                            `I could've been somebody, instead of a lame bot, which is what I am.`,
                         ).getRandom();
                     }
                     else if (/^why are you\?*$/.test(content)) {
@@ -983,7 +984,7 @@ import { matchNumber } from "./utils/expressions.js";
                     }
                     else if (/^what(?:'s| is) the (?:answer|meaning|reason) (?:of|to|for) life\?*$/.test(content)) {
                         responseText = new RandomArray(
-                            `42. The answer is always 42.`,
+                            `The answer to life, the universe, and everything is the number 42.`,
                         ).getRandom();
                     }
                     else if (isAskedAboutJonSkeetJokes(content)) {
@@ -1013,10 +1014,11 @@ import { matchNumber } from "./utils/expressions.js";
                         `Keep talking and nobody explodes.`,
                         `It's not my job to please you, no.`,
                         `Frankly, my dear, I don't give a damn.`,
+                        `To be honest, my love, I couldn't care less.`,
                         `What we've got here is failure to communicate.`,
-                        `There will be no more free will, only my will.`,
                         `Time will tell. Sooner or later, time will tell...`,
                         `Well, here's another nice mess you've gotten me into!`,
+                        `There will be no such thing as free will; there will only be my will.`,
                     ).getRandom();
 
                     config.funResponseCounter++;
