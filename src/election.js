@@ -122,6 +122,12 @@ export default class Election {
     primaryThreshold = 10;
 
     /**
+     * @summary reputation needed to vote
+     * @type {number}
+     */
+    repVote = 150;
+
+    /**
      * @description Site election badges, defaults to Stack Overflow's
      * @type {ElectionBadge[]}
      */
@@ -359,6 +365,16 @@ export default class Election {
         return phase === "ended" ? electionUrl.replace(/(\d+)$/, "download-result/$1") : "";
     }
 
+    /**
+     * @summary checks if a user can vote in the election
+     * @param {UserProfile} user user info
+     * @returns {boolean}
+     */
+    canVote(user) {
+        const { reputation } = user;
+        const { repVote = 1 } = this;
+        return reputation >= repVote;
+    }
 
     /**
      * @summary gets an election badge id by name
@@ -639,7 +655,6 @@ export default class Election {
             this.dateElection = startDate;
             this.dateEnded = endDate;
             this.numPositions = +numPositions;
-            this.repVote = 150;
             this.repNominate = repToNominate;
 
             const primaryThreshold = matchNumber(/(\d+)/, $("#mainbar ol li a[href*=primary] ~*").text());
