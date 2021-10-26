@@ -295,7 +295,7 @@ import { matchNumber } from "./utils/expressions.js";
             }
 
             // Exit loop once greet message by bot
-            if (/I can answer commonly-asked questions about elections/.test(item.message) && isBotMessage(me, item)) break;
+            if (/I can answer\b.+?\bquestions about elections/.test(item.message) && isBotMessage(me, item)) break;
         }
         config.activityCounter = count;
 
