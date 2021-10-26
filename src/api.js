@@ -85,13 +85,15 @@ export const getAllNamedBadges = async (config, site, page = 1) => {
  * @param {BotConfig} config
  * @param {number} userId userId to request badges for
  * @param {string} site election site slug
+ * @param {"all"|"named"|"tag_based"} type badge type
  * @param {number} [page] API response page
  * @returns {Promise<Badge[]>}
  */
-export const getBadges = async (config, userId, site, page = 1) => {
+export const getBadges = async (config, userId, site, type = "all", page = 1) => {
 
     const badgeURI = new URL(`${apiBase}/${apiVer}/users/${userId}/badges`);
-    badgeURI.search = new URLSearchParams({
+
+    const search = new URLSearchParams({
         site,
         order: "asc",
         sort: "type",
@@ -99,16 +101,23 @@ export const getBadges = async (config, userId, site, page = 1) => {
         filter: "7W_5Hvzzo",
         page: page.toString(),
         key: getStackApiKey(config.apiKeyPool)
-    }).toString();
+    });
+
+    if (type !== "all") {
+        const limitMap = { named: "max", tag_based: "min" };
+        search.append(limitMap[type], type);
+    }
+
+    badgeURI.search = search.toString();
 
     if (config.debug) console.log(badgeURI.toString());
 
     return handleResponse(
         (await fetchUrl(config, badgeURI, true)) || {},
-        () => getBadges(config, userId, site, page),
+        () => getBadges(config, userId, site, type, page),
         async ({ items = [], has_more }) => {
             if (has_more) {
-                const otherItems = await getBadges(config, userId, site, page + 1);
+                const otherItems = await getBadges(config, userId, site, type, page + 1);
                 return [...items, ...otherItems];
             }
 
