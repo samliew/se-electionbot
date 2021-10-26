@@ -85,13 +85,15 @@ export const getAllNamedBadges = async (config, site, page = 1) => {
  * @param {BotConfig} config
  * @param {number} userId userId to request badges for
  * @param {string} site election site slug
+ * @param {"all"|"named"|"tag_based"} type badge type
  * @param {number} [page] API response page
  * @returns {Promise<Badge[]>}
  */
-export const getBadges = async (config, userId, site, page = 1) => {
+export const getBadges = async (config, userId, site, type = "all", page = 1) => {
 
     const badgeURI = new URL(`${apiBase}/${apiVer}/users/${userId}/badges`);
-    badgeURI.search = new URLSearchParams({
+
+    const search = new URLSearchParams({
         site,
         order: "asc",
         sort: "type",
@@ -99,16 +101,23 @@ export const getBadges = async (config, userId, site, page = 1) => {
         filter: "7W_5Hvzzo",
         page: page.toString(),
         key: getStackApiKey(config.apiKeyPool)
-    }).toString();
+    });
+
+    if (type !== "all") {
+        const limitMap = { named: "max", tag_based: "min" };
+        search.append(limitMap[type], type);
+    }
+
+    badgeURI.search = search.toString();
 
     if (config.debug) console.log(badgeURI.toString());
 
     return handleResponse(
         (await fetchUrl(config, badgeURI, true)) || {},
-        () => getBadges(config, userId, site, page),
+        () => getBadges(config, userId, site, type, page),
         async ({ items = [], has_more }) => {
             if (has_more) {
-                const otherItems = await getBadges(config, userId, site, page + 1);
+                const otherItems = await getBadges(config, userId, site, type, page + 1);
                 return [...items, ...otherItems];
             }
 
@@ -151,11 +160,12 @@ export const getNumberOfVoters = async (config, site, badgeId, electionPhaseDate
 /**
  * @summary gets a number of users eligible to vote from the API
  * @param {BotConfig} config bot configuration
- * @param {string} site election site slug
- * @param {number} minRep minimum reputation at which to cut off
+ * @param {import("./election").default} election current election
  * @returns {Promise<number>}
  */
-export const getNumberOfUsersEligibleToVote = async (config, site, minRep) => {
+export const getNumberOfUsersEligibleToVote = async (config, election) => {
+    const { repVote = 1, apiSlug: site } = election;
+
     const userURL = new URL(`${apiBase}/${apiVer}/users`);
     userURL.search = new URLSearchParams({
         pagesize: "100",
@@ -163,7 +173,7 @@ export const getNumberOfUsersEligibleToVote = async (config, site, minRep) => {
         sort: "reputation",
         site,
         filter: "!40CXOUq0axmHYcgDp", // only the total field
-        min: minRep.toString(),
+        min: repVote.toString(),
         key: getStackApiKey(config.apiKeyPool)
     }).toString();
 

@@ -50,7 +50,7 @@ export const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error 
  *
  * @summary calculates the score
  * @param {ApiUser} user API user object
- * @param {Badge[]} userBadges user badges
+ * @param {Omit<Badge, "award_count">[]} userBadges user badges
  * @param {Election} election current election
  * @returns {CandidateScore}
  */
@@ -202,18 +202,11 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             return sayCalcFailed(isAskingForOtherUser);
         }
 
-        // TODO: Get a different API key here
-        const userBadges = await getBadges(config, userId, apiSlug);
-
-        // Validation
-        if (!userBadges.length) {
-            console.error('No data from API.');
-            return sayCalcFailed(isAskingForOtherUser);
-        }
-
-        const hasNominated = election.isNominee(userId);
-
-        const requestedUser = await getUserInfo(config, userId, apiSlug);
+        // parallel scrape + API call speeds up calculation
+        const [userBadges, requestedUser] = await Promise.all([
+            getBadges(config, userId, apiSlug, "named"),
+            getUserInfo(config, userId, apiSlug)
+        ]);
 
         if (!requestedUser) {
             console.error(`failed to get user info to calculate`);
@@ -222,18 +215,19 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         const candidateScore = calculateScore(requestedUser, userBadges, election);
 
-        const { score, missing, isEligible, maxScore } = candidateScore;
+        const {
+            score, missing, isEligible, maxScore,
+            missingRequiredBadgeNames,
+            numMissingRequiredBadges,
+            numMissingBadges
+        } = candidateScore;
 
         const missingBadges = missing.badges.election;
-        const missingRequiredBadges = missing.badges.required;
-
-        const { length: numMissingBadges } = missingBadges;
-        const { length: numMissingRequiredBadges } = missingRequiredBadges;
-
-        const missingRequiredBadgeNames = missingRequiredBadges.map(mapToName);
         const missingBadgeNames = missingBadges.map(mapToName);
 
         if (numMissingBadges > 0) console.log('Missing Badges: ', missingBadgeNames.join(','));
+
+        const hasNominated = election.isNominee(userId);
 
         let responseText = "";
 
