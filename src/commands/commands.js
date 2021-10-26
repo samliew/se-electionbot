@@ -310,17 +310,17 @@ export const sayFeedback = (config) => {
     const repoIssueUrl = `${repoUrl}/issues/new?labels=feature&template=feature_request.md`;
 
     // End in punctuation
-    const randomGreet = new RandomArray([
+    const randomGreet = new RandomArray(
         "I'm scheduled for an upgrade soon.",
         "Thank you for being my test subjects.",
         "Hope you have found me useful (or not).",
-    ]).getRandom();
+    ).getRandom();
 
     // End in punctuation
-    const randomFeedback = new RandomArray([
+    const randomFeedback = new RandomArray(
         "Please take a moment to express your gratitude.",
         "My developers would appreciate your feedback and suggestions.",
-    ]).getRandom();
+    ).getRandom();
 
     const feedbackForm = feedbackUrl ? `The feedback form is at ${makeURL(feedbackUrl)}` : `Feature requests can be submitted at ${makeURL(repoIssueUrl)}`;
 
