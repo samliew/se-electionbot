@@ -552,6 +552,65 @@ export const scrapeAwardedBadge = async (config, siteHostname, badgeId, user) =>
 };
 
 /**
+ * @summary scrapes the badge page to get the list of badges the user earned
+ * @param {BotConfig} config bot configuration
+ * @param {string} siteHostname site to get the info for
+ * @param {number} userId user id to get the badge for
+ * @param {number} [page] page number
+ * @returns {Promise<Omit<Badge, "award_count">[]>}
+ */
+export const scrapeEarnedBadges = async (config, siteHostname, userId, page = 1) => {
+    const badgesURL = new URL(`https://${siteHostname}/users/${userId}`);
+    badgesURL.search = new URLSearchParams({
+        tab: "badges",
+        sort: "name",
+        page: page.toString(),
+    }).toString();
+
+    if (config.debug) console.log(badgesURL.toString());
+
+    const html = await fetchUrl(config, badgesURL);
+    const { window: { document } } = new JSDOM(html);
+
+    /** @type {Omit<Badge, "award_count">[]} */
+    const earned = [];
+
+    /** @type {NodeListOf<HTMLAnchorElement>} */
+    (document.querySelectorAll(`#user-tab-badges a[href*="/badges/"]`)).forEach((badgeURL) => {
+        const { href, title, textContent } = badgeURL;
+
+        const badgeId = matchNumber(/\/badges\/(\d+)/, href);
+        if (!badgeId) return;
+
+        const [, rank, description] = /^(bronze|silver|gold)\s+badge:\s+(.+)$/.exec(title) || [];
+        if (!rank || !description) return;
+
+        earned.push({
+            badge_id: badgeId,
+            badge_type: "named",
+            link: `https://${siteHostname}/help/badges/${badgeId}`,
+            name: /** @type {string} */ (textContent).trim(),
+            rank: /** @type {Badge["rank"]} */(rank),
+            description,
+        });
+    });
+
+    const pages = document.querySelectorAll(".user-tab-paging .js-pagination-item");
+
+    for (const pageLink of pages) {
+        const pageNum = numericNullable(pageLink, "textContent");
+        if (!pageNum || pageNum <= page) continue;
+
+        const moreBadges = await scrapeEarnedBadges(config, siteHostname, userId, pageNum);
+        earned.push(...moreBadges);
+    }
+
+    if (config.verbose) console.log(earned);
+
+    return earned;
+};
+
+/**
  * @summary pings endpoint periodically to prevent idling
  * @param {string} url
  * @param {number} mins
