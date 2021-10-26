@@ -1,5 +1,6 @@
 import entities from 'html-entities';
 import sanitize from "sanitize-html";
+import { sayFeedback } from '../commands/commands.js';
 import { isBotMentioned } from "../guards.js";
 import { sayIdleGreeting } from "../messages.js";
 import { sendMessage } from "../queue.js";
@@ -52,8 +53,9 @@ export const joinControlRoom = async (config, election, client, {
 
             const canSend = user.isModerator || config.devIds.has(user.id);
             const fromControlRoom = roomId === controlRoomId;
-            const isAskingToSay = /\bsay\b/.test(content);
-            const isAskingToGreet = /\bgreet\b/.test(content);
+            const isAskingToSay = /^say\b/.test(content);
+            const isAskingToGreet = /^greet\b/.test(content);
+            const isAskingToFeedback = /^\feedback\b/.test(content);
             const isAtMentionedMe = isBotMentioned(originalMessage, botChatProfile);
 
             if (!canSend || !fromControlRoom || !isAtMentionedMe) return;
@@ -65,6 +67,11 @@ export const joinControlRoom = async (config, election, client, {
 
             if (isAskingToGreet) {
                 await sayIdleGreeting(config, election, controlledRoom);
+                return;
+            }
+
+            if (isAskingToFeedback) {
+                await sayFeedback(config);
                 return;
             }
         });
