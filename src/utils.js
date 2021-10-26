@@ -324,8 +324,8 @@ export const fetchChatTranscript = async (config, url) => {
     const $chat = cheerio.load(/** @type {string} */(chatTranscript));
 
     // Get date from transcript
-    const [, year, m, date] = $chat('head title').text().match(/(\d+)-(\d+)-(\d+)/) || [, null, null, null];
-    const month = m ? +m - 1 : null;
+    const [, year, m, date] = $chat('head title').text().match(/(\d+)-(\d+)-(\d+)/) || [];
+    const month = m ? +m - 1 : void 0;
 
     const now = Date.now();
     let lastKnownDatetime = null;
@@ -343,17 +343,17 @@ export const fetchChatTranscript = async (config, url) => {
         const messageHtml = messageElem.html()?.trim() || "";
         const messageMarkup = htmlToChatMarkdown(messageHtml);
 
-        const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [, null, null, null];
+        const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [];
 
         const hour = h && apm ? +(
             apm === 'A' ? (
                 h === '12' ? 0 : h
             ) : +h + 12
-        ) : null;
+        ) : void 0;
 
         // Increment by 1s if no timestamp, otherwise new UTC timestamp
-        if (year && month && date && hour && min) {
-            lastKnownDatetime = Date.UTC(+year, +month, +date, +hour, +min, 0);
+        if ([year, month, date, hour, min].every(p => p !== void 0)) {
+            lastKnownDatetime = Date.UTC(+year, /** @type {number} */(month), +date, hour, +min, 0);
 
             if (config.verbose) console.log("lastKnownDatetime", messageId, lastKnownDatetime);
         }
