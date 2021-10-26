@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -662,16 +662,34 @@ describe('Message Guards', () => {
         });
     });
 
+    const ballotFileMatches = [
+        "Where can I find the ballot file?",
+        "How can the ballot file be found",
+        "where can the ballot file be found?",
+        "where is the BLT file",
+        "where can I find BLT file?",
+        "Is BLT file available?"
+    ];
+
     describe(isAskedAboutBallotFile.name, () => {
         it('should correctly match content', () => {
-            allMatch(isAskedAboutBallotFile, [
-                "Where can I find the ballot file?",
-                "How can the ballot file be found",
-                "where can the ballot file be found?",
-                "where is the BLT file",
-                "where can I find BLT file?",
-                "Is BLT file available?"
-            ]);
+            allMatch(isAskedAboutBallotFile, ballotFileMatches);
+        });
+    });
+
+    const electionResultsMatches = [
+        "Where can I find the results?",
+        "where results can be found?",
+        "How can I find election results?",
+        "where can the election results be found?"
+    ];
+
+    describe(isAskedWhereToFindResults.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhereToFindResults, electionResultsMatches);
+            allMatch(isAskedWhereToFindResults, [
+                ...ballotFileMatches
+            ], false);
         });
     });
 });

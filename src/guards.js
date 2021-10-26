@@ -511,3 +511,15 @@ export const isAskedIfCanVote = (text) => {
         /^can\s+i\s+vote(?:\s+in(?:\s+th[ei]s?)?\s+election)?(?:\?|$)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking where to find results
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedWhereToFindResults = (text) => {
+    return someMatch([
+        /^(?:where|how)\s+can\s+i\s+find(?:\s+th[ei]s?)?(?:\s+election)?\s+results(?:\?|$)$/i,
+        /^(?:where|how)(\s+can|)?(?:\s+th[ei]s?)?(?:\s+election)?\s+results(?:\1|\s+can)?\s+be\s+found(?:\?|$)$/i
+    ], text);
+};
