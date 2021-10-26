@@ -1,4 +1,3 @@
-import { JSDOM } from "jsdom";
 import { partialRight } from "ramda";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "./api.js";
 import Election from "./election.js";
@@ -6,11 +5,10 @@ import { sendMessage } from "./queue.js";
 import { getCandidateOrNominee, getRandomAnnouncement, getRandomCurrently, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
-    capitalize, fetchUrl, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
-    linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase
+    capitalize, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
+    linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase, scrapeAwardedBadge
 } from "./utils.js";
 import { dateToRelativetime } from "./utils/dates.js";
-import { matchNumber } from "./utils/expressions.js";
 import { parsePackage } from "./utils/package.js";
 import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
 
@@ -19,7 +17,7 @@ import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
  * @typedef {import("./config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
- * @typedef {import("chatexchange/dist/Browser").IProfileData} UserProfile
+ * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {import("./score").CandidateScore} CandidateScore
  * @typedef {import("./election").ElectionPhase} ElectionPhase
  */
@@ -518,7 +516,7 @@ export const sayWhatIsAnElection = (election) => {
 
 /**
  * @summary builds a response to a who am I query
- * @param {UserProfile} botChatProfile bot profile
+ * @param {Omit<UserProfile, "access">} botChatProfile bot profile
  * @param {string} content message content
  */
 export const sayWhoAmI = (botChatProfile, content) => {
@@ -1079,31 +1077,12 @@ export const sayAboutThePhases = (_config, election) => {
  */
 export const sayIfOneHasVoted = async (config, election, _text, user) => {
     const { siteHostname, electionNum } = election;
-    const { id } = user;
 
     const electionBadgeName = "Constituent";
     const electionBadgeId = election.getBadgeId(electionBadgeName);
+    if (!electionBadgeId) return "Time will tell..."; // just in case
 
-    const html = await fetchUrl(config, `https://${siteHostname}/help/badges/${electionBadgeId}?userId=${id}`);
-
-    const { window: { document } } = new JSDOM(html);
-
-    /** @type {Record<number, Date>} */
-    const awards = {};
-
-    document.querySelectorAll("#mainbar .single-badge-row-reason").forEach((awardRow) => {
-        /** @type {HTMLSpanElement|null} */
-        const awardDateElem = awardRow.querySelector(`[title$="Z"]`);
-        /** @type {HTMLAnchorElement|null} */
-        const awardReasonElem = awardRow.querySelector(`.single-badge-reason a[href*="/election"]`);
-
-        if (!awardDateElem || !awardReasonElem) return;
-
-        const awardedForElectionNum = matchNumber(/\/election\/(\d+)/, awardReasonElem.href);
-        if (!awardedForElectionNum) return;
-
-        awards[awardedForElectionNum] = new Date(awardDateElem.title);
-    });
+    const [badgeURL, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
 
     if (config.debugOrVerbose) {
         console.log(awards);
@@ -1111,9 +1090,45 @@ export const sayIfOneHasVoted = async (config, election, _text, user) => {
 
     const foundBadge = awards[electionNum || 1];
 
-    const badgeInfo = `the ${electionBadgeName} badge`;
+    const badgeInfo = `the ${makeURL(electionBadgeName, badgeURL)} badge`;
 
     return foundBadge ?
         `As you are awarded ${badgeInfo} for this election, you have already voted.` :
         `No, you haven't voted in the election (or ${badgeInfo} haven't been awarded to you yet).`;
+};
+
+/**
+ * @summary builds a response to a query if a user can vote in the election
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {string} _text message content
+ * @param {UserProfile} user requesting user
+ * @returns {Promise<string>}
+ */
+export const sayIfOneCanVote = async (config, election, _text, user) => {
+    const { siteHostname, electionNum } = election;
+
+    const prefix = election.canVote(user) ? `Yes, you can` : `No, you cannot`;
+    const message = `${prefix} vote in the election`;
+
+    /** @type {[boolean, string][]} */
+    const addendumRules = [
+        [election.isEnded(), `the election is over...`],
+        [election.isNotStartedYet(), `the election has not started yet.`,]
+    ];
+
+    const [, addendum] = addendumRules.find(([rule]) => rule) || [, ""];
+
+    const electionBadgeName = "Constituent";
+    const electionBadgeId = election.getBadgeId(electionBadgeName);
+    if (!electionBadgeId) return `${message}.${addendum && ` FYI, ${addendum}`}`; // just in case
+
+    const [badgeURL, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
+    const foundBadge = awards[electionNum || 1];
+
+    const postfix = foundBadge ? ` but looks like you have already voted, as you have the ${makeURL(electionBadgeName, badgeURL)} badge!` : ".";
+
+    const extra = addendum && ` Just so you know, ${addendum}`;
+
+    return `${message}${postfix}${extra}`;
 };

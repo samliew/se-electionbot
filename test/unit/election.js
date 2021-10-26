@@ -2,6 +2,7 @@ import { expect } from "chai";
 import Election from "../../src/election.js";
 import { dateToUtcTimestamp } from "../../src/utils/dates.js";
 import { getMockNominee } from "../mocks/nominee.js";
+import { getMockUserProfile } from "../mocks/user.js";
 
 /**
  * @typedef { import("../../src/election").ElectionPhase} ElectionPhase
@@ -423,6 +424,19 @@ describe('Election', () => {
 
             const oldPhase = election.isNewPhase();
             expect(oldPhase).to.be.false;
+        });
+    });
+
+    describe('canVote', () => {
+        it('should correctly determine if a user can vote', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.repVote = 150;
+
+            const cannotVote = election.canVote(getMockUserProfile({ reputation: 42 }));
+            expect(cannotVote).to.be.false;
+
+            const canVote = election.canVote(getMockUserProfile({ reputation: 9001 }));
+            expect(canVote).to.be.true;
         });
     });
 

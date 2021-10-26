@@ -515,6 +515,43 @@ export const getUsersCurrentlyInTheRoom = async (config, client, room) => {
 };
 
 /**
+ * @summary scrapes the badge page to get badge award info
+ * @param {BotConfig} config bot configuration
+ * @param {string} siteHostname site to get the info for
+ * @param {number} badgeId id of the badge to lookup
+ * @param {IProfileData} user user to get the badge for
+ * @returns {Promise<[string, Record<number, Date>]>}
+ */
+export const scrapeAwardedBadge = async (config, siteHostname, badgeId, user) => {
+    const { id } = user;
+
+    const badgeURL = `https://${siteHostname}/help/badges/${badgeId}?userId=${id}`;
+
+    const html = await fetchUrl(config, badgeURL);
+
+    const { window: { document } } = new JSDOM(html);
+
+    /** @type {Record<number, Date>} */
+    const awards = {};
+
+    document.querySelectorAll("#mainbar .single-badge-row-reason").forEach((awardRow) => {
+        /** @type {HTMLSpanElement|null} */
+        const awardDateElem = awardRow.querySelector(`[title$="Z"]`);
+        /** @type {HTMLAnchorElement|null} */
+        const awardReasonElem = awardRow.querySelector(`.single-badge-reason a[href*="/election"]`);
+
+        if (!awardDateElem || !awardReasonElem) return;
+
+        const awardedForElectionNum = matchNumber(/\/election\/(\d+)/, awardReasonElem.href);
+        if (!awardedForElectionNum) return;
+
+        awards[awardedForElectionNum] = new Date(awardDateElem.title);
+    });
+
+    return [badgeURL, awards];
+};
+
+/**
  * @summary pings endpoint periodically to prevent idling
  * @param {string} url
  * @param {number} mins
