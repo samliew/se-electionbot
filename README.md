@@ -119,6 +119,8 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `DEBUG`                        | boolean  | no        | `false`      | whether bot is in debug mode                                                                            |
 | `VERBOSE`                      | boolean  | no        | `false`      | a debug variable                                                                                        |
 | `FUN_MODE`                     | boolean  | no        | `true`       | enable fun random responses                                                                             |
+| `REPO_URL`                     | string   | no        | -            | url of this git repository                                                                              |
+| `FEEDBACK_FORM_URL`            | string   | no        | -            | url for users to provide feedback about the bot                                                         |
 | `SCRIPT_HOSTNAME`              | string   | no        | -            | instance identifier, hostname for dashboard, also where keep-alive will ping                            |
 | `HEROKU_API_TOKEN`             | string   | no        | -            | to be used only when hosted on Heroku for bot config updates                                            |
 | `NODE_ENV`                     | string   | no        | `production` | whether bot is in Node debug mode                                                                       |

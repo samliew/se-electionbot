@@ -223,7 +223,7 @@ export class BotConfig {
     feedbackUrl = process.env.FEEDBACK_FORM_URL || "";
 
     // Repo URL
-    repoUrl = `https://github.com/samliew/se-electionbot`;
+    repoUrl = process.env.REPO_URL || "https://github.com/samliew/se-electionbot";
 
     // Pool of API keys
     apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
