@@ -42,7 +42,6 @@ describe('Candidate Score', () => {
 
             const score = calculateScore(user, [{
                 badge_id: 32,
-                award_count: 1,
                 badge_type: "named",
                 link: "",
                 name: "Civic Duty",
