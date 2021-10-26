@@ -1082,7 +1082,7 @@ export const sayIfOneHasVoted = async (config, election, _text, user) => {
     const electionBadgeId = election.getBadgeId(electionBadgeName);
     if (!electionBadgeId) return "Time will tell..."; // just in case
 
-    const [, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
+    const [badgeURL, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
 
     if (config.debugOrVerbose) {
         console.log(awards);
@@ -1090,10 +1090,10 @@ export const sayIfOneHasVoted = async (config, election, _text, user) => {
 
     const foundBadge = awards[electionNum || 1];
 
-    const badgeInfo = `the ${electionBadgeName} badge`;
+    const badgeInfo = `the ${makeURL(electionBadgeName, badgeURL)} badge`;
 
     return foundBadge ?
-        `As you are awarded ${badgeInfo} for this election, you already voted.` :
+        `As you are awarded ${badgeInfo} for this election, you have already voted.` :
         `No, you haven't voted in the election (or ${badgeInfo} haven't been awarded to you yet).`;
 };
 
