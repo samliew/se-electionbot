@@ -1082,7 +1082,7 @@ export const sayIfOneHasVoted = async (config, election, _text, user) => {
     const electionBadgeId = election.getBadgeId(electionBadgeName);
     if (!electionBadgeId) return "Time will tell..."; // just in case
 
-    const awards = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
+    const [, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
 
     if (config.debugOrVerbose) {
         console.log(awards);
@@ -1123,10 +1123,10 @@ export const sayIfOneCanVote = async (config, election, _text, user) => {
     const electionBadgeId = election.getBadgeId(electionBadgeName);
     if (!electionBadgeId) return `${message}.${addendum && ` FYI, ${addendum}`}`; // just in case
 
-    const awards = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
+    const [badgeURL, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
     const foundBadge = awards[electionNum || 1];
 
-    const postfix = foundBadge ? ` but judging by the ${electionBadgeName} badge, you have already voted!` : ".";
+    const postfix = foundBadge ? ` but judging by your ${makeURL(electionBadgeName, badgeURL)} badge, you have already voted!` : ".";
 
     const extra = addendum && ` Just so you know, ${addendum}`;
 

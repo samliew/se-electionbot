@@ -520,12 +520,14 @@ export const getUsersCurrentlyInTheRoom = async (config, client, room) => {
  * @param {string} siteHostname site to get the info for
  * @param {number} badgeId id of the badge to lookup
  * @param {IProfileData} user user to get the badge for
- * @returns {Promise<Record<number, Date>>}
+ * @returns {Promise<[string, Record<number, Date>]>}
  */
 export const scrapeAwardedBadge = async (config, siteHostname, badgeId, user) => {
     const { id } = user;
 
-    const html = await fetchUrl(config, `https://${siteHostname}/help/badges/${badgeId}?userId=${id}`);
+    const badgeURL = `https://${siteHostname}/help/badges/${badgeId}?userId=${id}`;
+
+    const html = await fetchUrl(config, badgeURL);
 
     const { window: { document } } = new JSDOM(html);
 
@@ -546,7 +548,7 @@ export const scrapeAwardedBadge = async (config, siteHostname, badgeId, user) =>
         awards[awardedForElectionNum] = new Date(awardDateElem.title);
     });
 
-    return awards;
+    return [badgeURL, awards];
 };
 
 /**
