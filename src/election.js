@@ -609,6 +609,17 @@ export default class Election {
     }
 
     /**
+     * @summary adds a nominee to the collection of active nominees
+     * @param {Nominee} nominee nominee to add
+     * @returns {Election}
+     */
+    addActiveNominee(nominee) {
+        const { arrNominees } = this;
+        arrNominees.push(nominee);
+        return this;
+    }
+
+    /**
      * @summary adds a widthdrawn nominee to the collection
      * @param {Nominee} nominee nominee to add
      * @returns {Election}
