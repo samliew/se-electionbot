@@ -5,8 +5,9 @@
             <th>Post</th>
             <th>Score</th>
             <th>Member for</th>
+            <th>Nominated on</th>
             {{#if (someTruthy this "withdrawnDate")}}
-                <th>Withdrawal date</th>
+                <th>Withdrawn on</th>
             {{/if}}
         </tr>
     </thead>
@@ -24,6 +25,9 @@
             </td>
             <td>
                 {{unprefix "member for" this.userYears}}
+            </td>
+            <td>
+                {{{withRelativeDT this.nominationDate}}}
             </td>
             {{#if this.withdrawnDate}}
             <td>{{{withRelativeDT this.withdrawnDate}}}</td>
