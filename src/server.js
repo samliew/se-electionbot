@@ -220,7 +220,6 @@ app.route('/')
                     utcNow: new Date().toISOString().replace('T', ' ').replace(/\.\d+/, ''),
                     autoRefreshInterval: BOT_CONFIG.scrapeIntervalMins * 60,
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
-                    siteUrl: ELECTION.siteUrl,
                     siteHostname: ELECTION.siteHostname,
                     election: ELECTION,
                     botconfig: {
