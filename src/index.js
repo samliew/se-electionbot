@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import { JSDOM } from "jsdom";
 import sanitize from "sanitize-html";
+import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getBadges, getModerators, getUserInfo } from "./api.js";
 import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
@@ -39,7 +40,7 @@ import Rescraper from "./rescraper.js";
 import { calculateScore, makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
 import {
-    fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, isBotMessage, keepAlive,
+    fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, keepAlive,
     linkToRelativeTimestamp,
     linkToUtcTimestamp, makeURL, onlyBotMessages, pluralize, roomKeepAlive, searchChat, wait
 } from './utils.js';
@@ -275,29 +276,7 @@ import { matchNumber } from "./utils/expressions.js";
         // Loops through messages by latest first
         transcriptMessages.reverse();
 
-        // Count valid messages (after a "greet" message by bot), and update activityCounter
-        // Also updates lastActivityTime, lastMessageTime, lastBotMessage
-        let botMessageFound = false;
-        let count = 0;
-        for (count = 0; count < transcriptMessages.length; count++) {
-            let item = transcriptMessages[count];
-
-            // Update lastActivityTime for last message in room
-            if (count === 0) {
-                config.lastActivityTime = item.date;
-            }
-
-            // If last bot message not set yet, and is a message by bot
-            if (!botMessageFound && item.message && isBotMessage(me, item)) {
-                botMessageFound = true;
-                config.updateLastMessage(item.messageMarkup, item.date);
-                console.log(`INIT - Previous message in room was by bot at ${item.date}:`, item.messageMarkup);
-            }
-
-            // Exit loop once greet message by bot
-            if (/I can answer\b.+?\bquestions about elections/.test(item.message) && isBotMessage(me, item)) break;
-        }
-        config.activityCounter = count;
+        config.activityCounter = countValidBotMessages(config, transcriptMessages, me);
 
         /*
          * Sync withdrawn nominees on startup using past ElectionBot announcements
