@@ -572,10 +572,11 @@ export default class Election {
      * @param {cheerio.Root} $ Cheerio root element
      * @param {cheerio.Element} el nominee element
      * @param {string} electionPageUrl election URL
-     * @param {string} [electionSiteUrl] election website URL
      * @returns {Nominee}
      */
-    scrapeNominee($, el, electionPageUrl, electionSiteUrl) {
+    scrapeNominee($, el, electionPageUrl) {
+        const { siteUrl } = this;
+
         const userLink = $(el).find('.user-details a');
         const userId = +(userLink.attr('href')?.split('/')[2] || "");
         const withdrawnDate = $(el).find('aside .relativetime').attr('title');
@@ -591,7 +592,7 @@ export default class Election {
             nominationLink: `${electionPageUrl}#${$(el).attr('id')}`,
             withdrawnPhase: withdrawnDate ? this.getPhase(new Date(withdrawnDate)) : null,
             withdrawnDate: withdrawnDate ? new Date(withdrawnDate) : null,
-            permalink: `${electionSiteUrl}/users/${userId}`,
+            permalink: `${siteUrl}/users/${userId}`,
         });
     }
 
@@ -693,7 +694,7 @@ export default class Election {
 
             const candidateElems = $('#mainbar .candidate-row');
 
-            const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl, this.siteUrl)).get()
+            const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get()
                 .sort((a, b) => a.nominationDate < b.nominationDate ? -1 : 1);
 
             const activeNominees = nominees.filter(n => n.withdrawnDate === null);
