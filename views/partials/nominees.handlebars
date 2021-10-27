@@ -5,6 +5,9 @@
             <th>Post</th>
             <th>Score</th>
             <th>Member for</th>
+            {{#if this.withdrawnDate}}
+                <th>Withdrew on</th>
+            {{/if}}
         </tr>
     </thead>
     <tbody>
@@ -22,6 +25,9 @@
             <td>
                 {{unprefix "member for" this.userYears}}
             </td>
+            {{#if this.withdrawnDate}}
+            <td>{{utcTimestamp this.withdrawnDate}}</td>
+            {{/if}}
         </tr>
         {{/each}}
     </tbody>
