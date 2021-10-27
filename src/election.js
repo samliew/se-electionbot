@@ -220,6 +220,15 @@ export default class Election {
     }
 
     /**
+     * @summary returns a protocol-prefixed SE network site URL
+     * @returns {`https://${string}`}
+     */
+    get siteUrl() {
+        const { siteHostname } = this;
+        return `https://${siteHostname}`;
+    }
+
+    /**
      * @summary gets api slug from site hostname
      * @returns {string}
      */
@@ -648,7 +657,6 @@ export default class Election {
 
             this.updated = Date.now();
             this.siteName = $('meta[property="og:site_name"]').attr('content')?.replace('Stack Exchange', '').trim();
-            this.siteUrl = 'https://' + this.siteHostname;
             this.title = pageTitle;
             this.dateNomination = nominationDate;
             this.datePrimary = primaryDate;

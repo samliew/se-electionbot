@@ -67,6 +67,15 @@ describe('Election', () => {
             });
         });
 
+        describe('siteURL', () => {
+            it('should return site TLD prefixed with HTTPS protocol', () => {
+                const election = new Election("https://stackoverflow.com/election/12");
+                const { siteUrl, siteHostname } = election;
+                expect(siteUrl).to.match(/^https:\/\//);
+                expect(siteUrl).to.include(siteHostname);
+            });
+        });
+
         describe('electionBallotURL', () => {
             it('should correctly return ballot URL', () => {
                 const election = new Election("https://stackoverflow.com/election/12");
