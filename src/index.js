@@ -46,7 +46,6 @@ import {
 import { last } from "./utils/arrays.js";
 import { dateToRelativetime, dateToUtcTimestamp } from "./utils/dates.js";
 import { matchNumber } from "./utils/expressions.js";
-import { mergeMaps } from "./utils/maps.js";
 
 /**
  * @typedef {(Pick<Badge, "name"|"badge_id"> & { required?: boolean, type: string })} ElectionBadge
@@ -315,10 +314,6 @@ import { mergeMaps } from "./utils/maps.js";
 
         const botAnnouncements = announcementHistory.filter(onlyBotMessages(me));
 
-        // TODO: make part of the election class
-        /** @type {Map<number,import("./election.js").Nominee>} */
-        const withdrawnNominees = new Map();
-
         // Parse previous nomination announcements and see which ones are no longer around
         for (const item of botAnnouncements) {
             const { messageMarkup } = item;
@@ -348,7 +343,7 @@ import { mergeMaps } from "./utils/maps.js";
 
             const userId = matchNumber(/\/users\/(\d+)/, userIdHref) || -42;
 
-            if (withdrawnNominees.has(userId)) continue;
+            if (election.withdrawnNominees.has(userId)) continue;
 
             const permalink = userIdHref ? `https://${election.siteHostname}${userIdHref}` : "";
 
@@ -374,11 +369,9 @@ import { mergeMaps } from "./utils/maps.js";
                 }
             }
 
-            withdrawnNominees.set(userId, withdrawnNominee);
+            election.addWithdrawnNominee(withdrawnNominee);
         }
 
-        // Order of nomination first
-        election.withdrawnNominees = mergeMaps(election.withdrawnNominees, withdrawnNominees);
         console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
