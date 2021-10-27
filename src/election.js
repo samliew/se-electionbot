@@ -103,8 +103,11 @@ export default class Election {
     /** @type {Nominee[]} */
     arrNominees = [];
 
-    /** @type {Nominee[]} */
-    arrWithdrawnNominees = [];
+    /**
+     * @summary map of userId to Nominee instances that has been withdrawn
+     * @type {Map<number,Nominee>}
+     */
+    withdrawnNominees = new Map();
 
     /** @type {Nominee[]} */
     arrWinners = [];
@@ -734,7 +737,8 @@ export default class Election {
             }
 
             // Add withdrawn candidates to list
-            this.arrWithdrawnNominees = [...this.arrWithdrawnNominees, ...this.newlyWithdrawnNominees];
+            const { withdrawnNominees } = this;
+            this.newlyWithdrawnNominees.forEach((nominee) => withdrawnNominees.set(nominee.userId, nominee));
 
             console.log(
                 `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.` +
