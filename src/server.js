@@ -93,7 +93,9 @@ const handlebarsConfig = {
         reverse: function (/** @type {any[]} */array) {
             return [...array].reverse();
         },
-        getter: (ctxt, propertyName) => ctxt[propertyName]
+        getter: (ctxt, propertyName) => ctxt[propertyName],
+        /** @type {(source: Map|Set) => any[]} */
+        values: (source) => [...source.values()]
     },
 };
 
