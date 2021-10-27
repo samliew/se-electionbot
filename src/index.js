@@ -46,6 +46,7 @@ import {
 import { last } from "./utils/arrays.js";
 import { dateToRelativetime, dateToUtcTimestamp } from "./utils/dates.js";
 import { matchNumber } from "./utils/expressions.js";
+import { mergeMaps } from "./utils/maps.js";
 
 /**
  * @typedef {(Pick<Badge, "name"|"badge_id"> & { required?: boolean, type: string })} ElectionBadge
@@ -377,8 +378,8 @@ import { matchNumber } from "./utils/expressions.js";
         }
 
         // Order of nomination first
-        election.arrWithdrawnNominees.push(...[...withdrawnNominees.values()].reverse());
-        console.log(`INIT - Added withdrawn nominees:`, election.arrWithdrawnNominees);
+        election.withdrawnNominees = mergeMaps(election.withdrawnNominees, withdrawnNominees);
+        console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended' && Date.now() < new Date(election.dateEnded).getTime() + 36e5) {
@@ -758,16 +759,16 @@ import { matchNumber } from "./utils/expressions.js";
             // Withdrawn candidates/nominations
             else if (isAskedForWithdrawnNominees(content)) {
 
-                const { arrWithdrawnNominees } = election;
+                const { withdrawnNominees } = election;
 
-                const numWithdrawnNominees = arrWithdrawnNominees.length;
+                const numWithdrawnNominees = withdrawnNominees.size;
 
                 if (election.phase === null) {
                     responseText = sayNotStartedYet(election);
                 }
                 else if (numWithdrawnNominees > 0) {
                     responseText = `There ${numWithdrawnNominees === 1 ? 'is' : 'are'} ${numWithdrawnNominees} candidate${pluralize(numWithdrawnNominees)} who have withdrawn: ` +
-                        arrWithdrawnNominees.map(v => makeURL(v.userName, v.nominationLink)).join(', ');
+                        [...withdrawnNominees.values()].map(v => makeURL(v.userName, v.nominationLink)).join(', ');
                 }
                 else {
                     responseText = `No candidates have withdrawn from the election yet.`;
