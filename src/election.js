@@ -599,6 +599,17 @@ export default class Election {
     }
 
     /**
+     * @summary adds a widthdrawn nominee to the collection
+     * @param {Nominee} nominee nominee to add
+     * @returns {Election}
+     */
+    addWithdrawnNominee(nominee) {
+        const { withdrawnNominees } = this;
+        withdrawnNominees.set(nominee.userId, nominee);
+        return this;
+    }
+
+    /**
      * @summary scrapes current election page
      * @param {BotConfig} config bot configuration
      * @param {boolean} [retry] whether we are retrying the scrape
@@ -736,9 +747,7 @@ export default class Election {
                 }
             }
 
-            // Add withdrawn candidates to list
-            const { withdrawnNominees } = this;
-            this.newlyWithdrawnNominees.forEach((nominee) => withdrawnNominees.set(nominee.userId, nominee));
+            this.newlyWithdrawnNominees.forEach((nominee) => this.addWithdrawnNominee(nominee));
 
             console.log(
                 `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.` +
@@ -748,6 +757,7 @@ primary date      ${this.datePrimary};
 election date     ${this.dateElection};
 ended date        ${this.dateEnded};
 candidates        ${this.numNominees};
+withdrawals       ${this.withdrawnNominees.size}
 winners           ${this.numWinners};
 chat URL          ${this.chatUrl}
 primary threshold ${this.primaryThreshold}` : "")
