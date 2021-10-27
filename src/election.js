@@ -280,6 +280,15 @@ export default class Election {
     }
 
     /**
+     * @summary gets current number of withdrawn Nominees
+     * @returns {number}
+     */
+    get numWithdrawals() {
+        const { withdrawnNominees } = this;
+        return withdrawnNominees.size || 0;
+    }
+
+    /**
      * @summary gets a list of new Nominees
      * @returns {Nominee[]}
      */
@@ -757,10 +766,10 @@ primary date      ${this.datePrimary};
 election date     ${this.dateElection};
 ended date        ${this.dateEnded};
 candidates        ${this.numNominees};
-withdrawals       ${this.withdrawnNominees.size}
+withdrawals       ${this.numWithdrawals}
 winners           ${this.numWinners};
 chat URL          ${this.chatUrl}
-primary threshold ${this.primaryThreshold}` : "")
+primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; winners: ${this.numWinners}; withdrawals: ${this.numWithdrawals}`)
             );
         }
         catch (err) {
