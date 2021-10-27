@@ -5,8 +5,8 @@
             <th>Post</th>
             <th>Score</th>
             <th>Member for</th>
-            {{#if this.withdrawnDate}}
-                <th>Withdrew on</th>
+            {{#if (someTruthy this "withdrawnDate")}}
+                <th>Withdrawal date</th>
             {{/if}}
         </tr>
     </thead>
