@@ -23,7 +23,8 @@ import { getUser, roomKeepAlive } from "../utils.js";
  *  botChatProfile: IProfileData,
  *  controlRoomId: number,
  *  controlledRoom: Room,
- *  ignoredEventTypes?: ChatEventType[]
+ *  ignoredEventTypes?: ChatEventType[],
+ *  allowSameRoom?: boolean
  * }} options
  * @returns {Promise<boolean>}
  */
@@ -31,9 +32,13 @@ export const joinControlRoom = async (config, election, client, {
     controlRoomId,
     controlledRoom,
     botChatProfile,
-    ignoredEventTypes = []
+    ignoredEventTypes = [],
+    allowSameRoom = false
 }) => {
     try {
+        const isSameRoom = controlRoomId === controlledRoom.id;
+        if (isSameRoom && !allowSameRoom) return false;
+
         const controlRoom = await client.joinRoom(controlRoomId);
         controlRoom.ignore(...ignoredEventTypes);
 
