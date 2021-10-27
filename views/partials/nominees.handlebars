@@ -26,7 +26,7 @@
                 {{unprefix "member for" this.userYears}}
             </td>
             {{#if this.withdrawnDate}}
-            <td>{{utcTimestamp this.withdrawnDate}}</td>
+            <td>{{{withRelativeDT this.withdrawnDate}}}</td>
             {{/if}}
         </tr>
         {{/each}}

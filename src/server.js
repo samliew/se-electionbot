@@ -1,3 +1,4 @@
+import { dateToUtcTimestamp } from './utils/dates.js';
 import express from 'express';
 import Handlebars from 'express-handlebars';
 import { join } from 'path';
@@ -81,6 +82,8 @@ const handlebarsConfig = {
         required: function (data) {
             return `<span class="${data || data === 'required' ? 'required' : ''}">${data || data === 'required' ? 'required' : ''}</span>`;
         },
+        /** @type {(date:Date) => string} */
+        withRelativeDT: (date) => `${dateToUtcTimestamp(date)} <span class="relativetime" title="${dateToUtcTimestamp(date)}"></span>`,
         call: function (name, ...args) {
             return typeof this[name] === "function" ? this[name](...args.slice(0, -1)) : undefined;
         },
