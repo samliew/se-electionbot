@@ -71,7 +71,7 @@ export const joinControlRoom = async (config, election, client, {
             }
 
             if (isAskingToFeedback) {
-                await sayFeedback(config);
+                await sendMessage(config, controlledRoom, sayFeedback(config));
                 return;
             }
         });
