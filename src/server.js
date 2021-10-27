@@ -99,7 +99,9 @@ const handlebarsConfig = {
         /** @type {(source: unknown[]|Map|Set)=> number} */
         len: (source) => {
             return source instanceof Map || source instanceof Set ? source.size : source.length;
-        }
+        },
+        /** @type {(source:object[], key:string) => boolean} */
+        someTruthy: (source, key) => source.some((obj) => !!obj[key])
     },
 };
 
