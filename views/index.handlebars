@@ -54,9 +54,9 @@
                     <td></td>
                     {{/if}}
                 </tr>
-                <tr><td>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{arrWithdrawnNominees.length}}</span></td>
-                    {{#if arrWithdrawnNominees.length}}
-                    <td>{{> nominees arrWithdrawnNominees }}</td>
+                <tr><td>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{withdrawnNominees.size}}</span></td>
+                    {{#if withdrawnNominees.size}}
+                    <td>{{> nominees (values withdrawnNominees) }}</td>
                     {{else}}
                     <td></td>
                     {{/if}}
