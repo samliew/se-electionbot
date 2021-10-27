@@ -705,14 +705,17 @@ export default class Election {
 
             const candidateElems = $('#mainbar .candidate-row');
 
+            /** @type {Nominee[]} */
             const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get()
                 .sort((a, b) => a.nominationDate < b.nominationDate ? -1 : 1);
 
-            const activeNominees = nominees.filter(n => n.withdrawnDate === null);
-
             // Clear an array before rescraping
             this.arrNominees.length = 0;
-            this.arrNominees.push(...activeNominees);
+
+            nominees.forEach((nominee) => {
+                const { withdrawnDate } = nominee;
+                withdrawnDate ? this.addWithdrawnNominee(nominee) : this.addActiveNominee(nominee);
+            });
 
             // Empty string if not set as environment variable, or not found on election page
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/')
