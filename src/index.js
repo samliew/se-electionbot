@@ -900,14 +900,14 @@ import { matchNumber } from "./utils/expressions.js";
 
                 // Full help
                 if (isAskedForFullHelp(content)) {
-                    await sendMultipartMessage(config, room, "Examples of election FAQs I can help with:\n" +
+                    await sendMultipartMessage(config, room, "Examples of election FAQs I can help with:\n- " +
                         helpTopics.map(({ text }) => text).join('\n- '), msg.id, true);
                     return; // Message sent, no need to continue
                 }
 
                 // Help - contain this to a single message please (<500 chars including line breaks, bullets, and whitespace)
                 if (isAskedForHelp(content)) {
-                    responseText = "Examples of election FAQs I can help with:\n" +
+                    responseText = "Examples of election FAQs I can help with:\n- " +
                         helpTopics.filter(({ short }) => short).map(({ text }) => text).join('\n- ');
                 }
                 else if (isAskedWhoAmI(content)) {
