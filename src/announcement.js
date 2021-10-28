@@ -1,6 +1,7 @@
 import cron from "node-cron";
+import { sayFeedback } from "./commands/commands.js";
 import { sendMessageList } from "./queue.js";
-import { makeURL, pluralize } from "./utils.js";
+import { makeURL, pluralize, wait } from "./utils.js";
 import { dateToUtcTimestamp } from "./utils/dates.js";
 
 /**
@@ -181,6 +182,13 @@ export default class ScheduledAnnouncement {
         await room.sendMessage(msg);
 
         console.log("announceWinners - announced winners");
+
+        // Wait before asking for feedback
+        // Will always be true because repoUrl has a default value, for now
+        if (config.feedbackUrl || config.repoUrl) {
+            await wait(60);
+            await room.sendMessage(sayFeedback(config));
+        }
 
         return true;
     }
