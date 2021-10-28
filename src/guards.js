@@ -40,8 +40,8 @@ export const isAskedWhyNominationRemoved = (text) => {
  * @returns {boolean}
  */
 export const isAskedIfModsArePaid = (text) => {
-    return /^(?:why|what|are|how)\b/.test(text) &&
-        /\b(?:reward|rewarded|paid|compensated|money)\b/.test(text) &&
+    return /^(?:why|what|are|how|do)\b/.test(text) &&
+        /\b(?:reward|rewarded|paid|compensat(?:ed|ion)|money)\b/.test(text) &&
         /\b(?:mods|moderators)\b/.test(text);
 };
 

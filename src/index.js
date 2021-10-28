@@ -841,8 +841,10 @@ import { matchNumber } from "./utils/expressions.js";
             else if (isAskedAboutUsernameDiamond(content)) {
                 responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
             }
-            else if (isAskedAboutMissingComments(content) && election.phase !== "nomination") {
-                responseText = `Comments are only visible on the "${makeURL("Nomination", election.electionUrl + '?tab=nomination')}" tab.`;
+            else if (isAskedAboutMissingComments(content)) {
+                responseText = election.phase !== "nomination" ?
+                    `Comments are only visible on the "${makeURL("Nomination", election.electionUrl + '?tab=nomination')}" tab.` :
+                    `If you cannot see any comments on the ${makeURL("Election", election.electionUrl + '?tab=election')} page, either nobody has commented yet or you need to wear glasses.`;
             }
             else if (/^happy birth\s?day,? .*!*$/.test(content)) {
                 responseText = `Happy birthday!`;

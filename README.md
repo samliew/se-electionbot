@@ -26,10 +26,7 @@ Election badges:
 - what are the moderation badges
 - what are the participation badges
 - what are the editing badges
-
-Stack Overflow-only:
-
-- what are the required badges
+- what are the required badges _(SO-only)_
 
 Current election info:
 
@@ -43,13 +40,13 @@ Current election info:
 - how many users voted/participated
 - how many users are eligible to vote
 - why was a nomination removed
-- where are the nomination comments _(outside of the nomination phase)_
+- where are the nomination comments
 
 About moderators/moderating:
 
 - what are the responsibilities of a moderator
 - why should I be a moderator
-- are moderators paid
+- do moderators get paid
 - who are the current moderators
 - who is the best moderator
 - could we just insert a diamond into our username
