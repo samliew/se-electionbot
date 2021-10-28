@@ -17,6 +17,7 @@ describe('ScheduledAnnouncement', function () {
 
     /** @type {Client} */
     const client = new Client["default"]("stackoverflow.com");
+    /** @type {Room} */
     const room = new Room["default"](client, -1);
 
     const oldSendMessage = Room["default"].prototype.sendMessage;
