@@ -219,10 +219,16 @@ export class BotConfig {
         return chatMarkdownToHtml(this.lastBotMessage);
     }
 
-    // Feedback form URL
+    /**
+     * @summary Feedback form URL
+     * @type {string}
+     */
     feedbackUrl = process.env.FEEDBACK_FORM_URL || "";
 
-    // Repo URL
+    /**
+     * @summary Repo URL
+     * @type {string}
+     */
     repoUrl = process.env.REPO_URL || "https://github.com/samliew/se-electionbot";
 
     // Pool of API keys
