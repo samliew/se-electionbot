@@ -237,6 +237,10 @@ form .form-controls {
   color: indianred;
 }
 
+.nowrap,
+.relativetime {
+  white-space: nowrap;
+}
 .relativetime {
   font-style: italic;
 }
@@ -368,6 +372,7 @@ form .form-controls {
   th:last-child,
   td:last-child {
     min-width: 0;
+    width: auto;
   }
 
   pre {
@@ -378,6 +383,11 @@ form .form-controls {
 
   .dashboard section {
     flex-basis: 100%;
+    max-width: none;
     margin-right: 0;
+  }
+
+  .mobile-hidden {
+    display: none;
   }
 }

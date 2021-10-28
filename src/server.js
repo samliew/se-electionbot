@@ -83,7 +83,7 @@ const handlebarsConfig = {
             return `<span class="${data || data === 'required' ? 'required' : ''}">${data || data === 'required' ? 'required' : ''}</span>`;
         },
         /** @type {(date:Date) => string} */
-        withRelativeDT: (date) => `${dateToUtcTimestamp(date)} <span class="relativetime" title="${dateToUtcTimestamp(date)}"></span>`,
+        withRelativeDT: (date) => `<span class="mobile-hidden">${dateToUtcTimestamp(date)}</span> <span class="relativetime" title="${dateToUtcTimestamp(date)}"></span>`,
         call: function (name, ...args) {
             return typeof this[name] === "function" ? this[name](...args.slice(0, -1)) : undefined;
         },
