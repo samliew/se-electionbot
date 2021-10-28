@@ -49,7 +49,13 @@ export class Nominee {
      * @summary link to the nomination post
      * @type {string}
      */
-    nominationLink;
+    _nominationLink;
+
+    /**
+     * @summary set this to true if nominee has withdrawn
+     * @type {boolean}
+     */
+    withdrawn = false;
 
     /**
      * @summary date of the withdrawal if available
@@ -92,6 +98,21 @@ export class Nominee {
 
         this.userYears = (textContent || "").replace(/,.+$/, ''); // truncate years as displayed in elections
         return this;
+    }
+
+    // TODO: write test for this
+    get hasWithdrawn() {
+        return this.withdrawn || this.withdrawnDate !== null;
+    }
+
+    // TODO: write test for this
+    get nominationLink() {
+        // If withdrawn, change to post history as original post can longer be viewed
+        return this.hasWithdrawn ? this._nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`).replace(/(\/revisions)+$/i, "") + "/revisions" : this._nominationLink;
+    }
+
+    set nominationLink(value) {
+        this._nominationLink = value;
     }
 }
 
@@ -311,11 +332,6 @@ export default class Election {
 
         const currIds = arrNominees.map(({ userId }) => userId);
         const missingNominees = prevNominees.filter(({ userId }) => !currIds.includes(userId));
-
-        missingNominees.forEach(item => {
-            // Change to post history as original post can longer be viewed
-            item.nominationLink = (item.nominationLink || "").replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
-        });
 
         return missingNominees;
     }

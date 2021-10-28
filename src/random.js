@@ -60,6 +60,7 @@ export const getRandomNegative = () => new RandomArray(
     `Am I supposed to feel bad about that?`,
     `Frankly, my dear, I don't give a damn.`,
     `What we've got here is a small misunderstanding.`,
+    `I'm only human after all, don't put the blame on me.`,
     `Love me or hate me, I swear it won't make or break me.`,
 ).getRandom();
 

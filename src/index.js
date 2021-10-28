@@ -332,13 +332,14 @@ import { matchNumber } from "./utils/expressions.js";
                 userId,
                 userName,
                 nominationDate: new Date(nominationDate || -1),
-                nominationLink: nominationRevisionsLink,
+                nominationLink: nominationLink,
+                withdrawn: true,
                 permalink,
             });
 
             await withdrawnNominee.scrapeUserYears(config);
 
-            // do not attempt to calculate valid scores
+            // Do not attempt to calculate valid scores
             if (userId > 0) {
                 const { apiSlug } = election;
                 const userBadges = await getBadges(config, userId, apiSlug);

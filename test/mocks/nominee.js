@@ -13,7 +13,7 @@ export const getMockNominee = (overrides = {}) => {
         permalink: "",
         nominationDate: new Date(),
         nominationLink: "",
-        withdrawnDate: new Date(),
+        withdrawnDate: null,
     });
     return Object.assign(nominee, overrides);
 };
