@@ -146,18 +146,25 @@ describe('ScheduledAnnouncement', function () {
         });
 
         it('should correctly announce winners', async () => {
+
+            const clock = sinon.useFakeTimers();
+
             election.arrWinners.push(getMockNominee({ userName: "Jeanne" }));
             election.phase = "ended";
 
             const stubbed = sinon.stub(room, "sendMessage");
 
-            const status = await ann.announceWinners(room, election);
+            const promise = ann.announceWinners(room, election);
 
-            expect(status).to.be.true;
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
 
             const [[message]] = stubbed.args;
 
             expect(message).to.match(/to the winner\*\*.+Jeanne/);
+
+            clock.restore();
         });
     });
 
