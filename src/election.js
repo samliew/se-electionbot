@@ -100,17 +100,27 @@ export class Nominee {
         return this;
     }
 
-    // TODO: write test for this
+    /**
+     * @summary checks whether a nominee has withdrawn
+     * @return {boolean}
+     */
     get hasWithdrawn() {
         return this.withdrawn || this.withdrawnDate !== null;
     }
 
-    // TODO: write test for this
+    /**
+     * @summary get link to the nomination post
+     * @return {string}
+     */
     get nominationLink() {
         // If withdrawn, change to post history as original post can longer be viewed
         return this.hasWithdrawn ? this._nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`).replace(/(\/revisions)+$/i, "") + "/revisions" : this._nominationLink;
     }
 
+    /**
+     * @summary set link to the nomination post
+     * @param {string} value
+     */
     set nominationLink(value) {
         this._nominationLink = value;
     }
