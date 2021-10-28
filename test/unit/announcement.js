@@ -33,6 +33,12 @@ describe('ScheduledAnnouncement', function () {
     afterEach(() => scraper = new Rescraper(config, room, election));
 
     describe('announceCancelled', () => {
+
+        /** @type {sinon.SinonFakeTimers} */
+        let clock;
+        beforeEach(() => clock = sinon.useFakeTimers());
+        afterEach(() => sinon.restore());
+
         it('should return false on no Electon', async () => {
             const ann = new ScheduledAnnouncement(config, room, election, scraper);
 
@@ -52,27 +58,17 @@ describe('ScheduledAnnouncement', function () {
             election.phase = "cancelled";
             election.cancelledText = mockReason;
 
+            const messageStub = sinon.stub(room, "sendMessage");
+
             const ann = new ScheduledAnnouncement(config, room, election, scraper);
+            const promise = ann.announceCancelled(room, election);
 
-            await new Promise(async (res, rej) => {
-                Room["default"].prototype.sendMessage = (text) => {
-                    try {
-                        expect(text).to.equal(mockReason);
-                    } catch (error) {
-                        rej(error);
-                    }
-                };
+            await clock.runAllAsync();
 
-                const status = await ann.announceCancelled(room, election);
+            expect(await promise).to.be.true;
 
-                try {
-                    expect(status).to.be.true;
-                } catch (error) {
-                    rej(error);
-                }
-
-                res(void 0);
-            });
+            const [[message]] = messageStub.args;
+            expect(message).to.equal(mockReason);
         });
     });
 
