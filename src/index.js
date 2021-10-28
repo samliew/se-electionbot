@@ -353,8 +353,8 @@ import { matchNumber } from "./utils/expressions.js";
 
             election.addWithdrawnNominee(withdrawnNominee);
 
-            // Limit to scraping of withdrawn nominations from transcript in debug mode
-            if (config.debug && ++withdrawnCount >= 5) break;
+            // Limit to scraping of withdrawn nominations from transcript if more than number of nominations
+            if (++withdrawnCount >= election.numNominees) break;
         }
 
         console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);
