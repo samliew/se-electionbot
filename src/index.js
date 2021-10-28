@@ -293,6 +293,7 @@ import { matchNumber } from "./utils/expressions.js";
         }
 
         const botAnnouncements = announcementHistory.filter(onlyBotMessages(me));
+        let withdrawnCount = 0;
 
         // Parse previous nomination announcements and see which ones are no longer around
         for (const item of botAnnouncements) {
@@ -350,6 +351,9 @@ import { matchNumber } from "./utils/expressions.js";
             }
 
             election.addWithdrawnNominee(withdrawnNominee);
+
+            // Limit to scraping of withdrawn nominations from transcript in debug mode
+            if (config.debug && ++withdrawnCount >= 5) break;
         }
 
         console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);
