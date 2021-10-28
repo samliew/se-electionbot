@@ -24,6 +24,7 @@ import {
     isAskedAmIalive,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule,
+    isAskedForFullHelp,
     isAskedForHelp,
     isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
@@ -862,34 +863,52 @@ import { matchNumber } from "./utils/expressions.js";
                 return;
             }
 
+            const helpTopics = [
+                { short: true, text: "What is an election" },
+                { short: true, text: "How to nominate myself" },
+                { short: true, text: "How to vote" },
+                { short: true, text: "Who should I vote for" },
+                { short: true, text: "How is the candidate score calculated" },
+                { short: true, text: "What is my candidate score" },
+                { short: false, text: "Who has the highest candidate score" },
+                { short: true, text: "What are the moderation/participation/editing badges" },
+                { short: false, text: "What is the election schedule" },
+                { short: true, text: "What is the election status" },
+                { short: false, text: "When is the election starting/ending" },
+                { short: true, text: "When is the next phase" },
+                { short: false, text: "How many users have voted?" },
+                { short: true, text: "How many users are eligible to vote?" },
+                { short: false, text: "How many positions are there" },
+                { short: true, text: "Who are the candidates" },
+                { short: false, text: "Who is the best candidate" },
+                { short: false, text: "Which candidates have withdrawn" },
+                { short: false, text: "Why was a nomination removed" },
+                { short: false, text: "Who are the winners" },
+                { short: true, text: "Who are the current mods" },
+                { short: false, text: "Who is the best mod" },
+                { short: false, text: "Do moderators get paid" },
+                { short: true, text: "What are the responsibilities of a moderator" },
+                { short: false, text: "Can we edit a diamond into our username" },
+                { short: true, text: "What is Single Transferable Vote (STV)" },
+                { short: false, text: "What is Meek STV" },
+                { short: false, text: "Where can the ballot file be found" },
+                { short: false, text: "What is the link to the election" },
+            ];
+
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
 
-                // Help - keep this to a single message
-                // To split into simple and full help
+                // Full help
+                if (isAskedForFullHelp(content)) {
+                    await sendMultipartMessage(config, room, "Examples of election FAQs I can help with:\n" +
+                        helpTopics.map(({ text }) => text).join('\n- '), msg.id, true);
+                    return; // Message sent, no need to continue
+                }
+
+                // Help - contain this to a single message please (<500 chars including line breaks, bullets, and whitespace)
                 if (isAskedForHelp(content)) {
-                    await sendMultipartMessage(config, room, "\n" + [
-                        "Examples of election FAQs I can help with:",
-                        "What is an election",
-                        "How to nominate myself",
-                        "How to vote",
-                        "Who should I vote for",
-                        "How is the candidate score calculated",
-                        "What is my candidate score",
-                        "What are the moderation/participation/editing badges",
-                        "What is the election status",
-                        //"When is the election starting/ending",
-                        "When is the next phase",
-                        "How many users have voted?",
-                        //"How many users are eligible to vote?",
-                        //"How many positions are elected",
-                        "Who are the candidates",
-                        "Who are the current mods",
-                        "What is Single Transferable Vote?",
-                        //"What is Meek STV?",
-                        //"Where can the ballot file be found?"
-                    ].join('\n- '), msg.id, true);
-                    return;
+                    responseText = "Examples of election FAQs I can help with:\n" +
+                        helpTopics.filter(({ short }) => short).map(({ text }) => text).join('\n- ');
                 }
                 else if (isAskedWhoAmI(content)) {
                     responseText = sayWhoAmI(me, content);
@@ -976,6 +995,7 @@ import { matchNumber } from "./utils/expressions.js";
                 // Bot was mentioned and did not match any previous guards - return a random response
                 if (config.funMode && config.canSendFunResponse) {
                     responseText = new RandomArray(
+                        `Nobody knows why.`,
                         `You talking to me?`,
                         `I want to play a game.`,
                         `*reticulating splines*`,
@@ -983,6 +1003,7 @@ import { matchNumber } from "./utils/expressions.js";
                         `What do you want from me?`,
                         `*error* - AI not installed`,
                         `Houston, we have a problem.`,
+                        `What makes you think I know that?`,
                         `Keep talking and nobody explodes.`,
                         `It's not my job to please you, no.`,
                         `Frankly, my dear, I don't give a damn.`,

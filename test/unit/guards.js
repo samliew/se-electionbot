@@ -649,10 +649,14 @@ describe('Message Guards', () => {
     });
 
     const electionPageMatches = [
-        "What is the link to the election?",
+        "what is the link to the election?",
+        "what is the url of the election",
         "where is the election page?",
         "what is election page url",
-        "what is the url of the election"
+        "election page url",
+        "election page link",
+        "election url",
+        "election link",
     ];
 
     describe(isAskedForElectionPage.name, () => {
@@ -688,7 +692,12 @@ describe('Message Guards', () => {
         it('should correctly match content', () => {
             allMatch(isAskedWhereToFindResults, electionResultsMatches);
             allMatch(isAskedWhereToFindResults, [
-                ...ballotFileMatches
+                ...ballotFileMatches,
+                "where are the results",
+                "what are the results",
+                "why are the results",
+                "who won the election",
+                "where can I find more info about the election",
             ], false);
         });
     });

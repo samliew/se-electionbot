@@ -130,7 +130,7 @@ export const isAskedForWithdrawnNominees = (text) => {
  * @returns {boolean}
  */
 export const isAskedForElectionSchedule = (text) => {
-    return /(?:when|how)(?: is|'s) the election(?: scheduled)?|election schedule/.test(text);
+    return /(?:when|how|what)(?: is|'s) the election(?: scheduled)?|election schedule/.test(text);
 };
 
 /**
@@ -213,8 +213,8 @@ export const isAskedForScoreFormula = (text) => {
  * @returns {boolean}
  */
 export const isAskedForScoreLeaderboard = (text) => {
-    return /who\b.*\b(?:highest|greatest|most)\b.*\bcandidate score/.test(text) ||
-        /candidate score leaderboard(?:$|\?)/.test(text);
+    return /who\b.*\b(?:highest|greatest|most)\b.*\bcandidate scores?/.test(text) ||
+        /candidate scores? leaderboard(?:$|\?)/.test(text);
 };
 
 /**
@@ -432,6 +432,17 @@ export const isAskedForHelp = (text) => {
 };
 
 /**
+ * @summary checks if a message is asking for full help
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedForFullHelp = (text) => {
+    return someMatch([
+        /^(?:(?:help|info|topics) (full|all|complete)|(full|all|complete) (?:help|info|topics))/i,
+    ], text);
+};
+
+/**
  * @summary checks if a message is asking when is the next phase
  * @param {string} text message text
  * @returns {boolean}
@@ -462,7 +473,9 @@ export const isAskedHowManyAreEligibleToVote = (text) => {
  */
 export const isAskedForElectionPage = (text) => {
     return someMatch([
-        /(?:what|where)\s+is(?:\s+the)?\s+(?:(?:link|url)\s+(?:to|of)(?:\s+the)?\s+election|election\s+page)/i
+        /(?:what|where)\s+is(?:\s+the)?\s+(?:(?:link|url)\s+(?:to|of)(?:\s+the)?\s+election|election\s+page)/i,
+        /(?:link|url)\b.*\belection\b(?:page)?\s?(?:[?!]|$)/i,
+        /election (?:page )?(?:link|url)(?:[?!]|$)/i,
     ], text);
 };
 
