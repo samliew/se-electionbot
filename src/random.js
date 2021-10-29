@@ -159,3 +159,9 @@ export const getRandomAlive = () => new RandomArray(
     "Alive or not, what is the difference?",
     "I am not quite sure"
 ).getRandom();
+
+export const getRandomSoFar = () => new RandomArray(
+    "so far",
+    "thus far",
+    "to date"
+).getRandom();

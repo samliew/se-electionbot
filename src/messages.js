@@ -2,7 +2,7 @@ import { partialRight } from "ramda";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
-import { getCandidateOrNominee, getRandomAnnouncement, getRandomCurrently, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAnnouncement, getRandomCurrently, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, getRandomSoFar, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
@@ -927,7 +927,7 @@ export const sayAlreadyVoted = async (config, election, text) => {
 
         const basePrefix = `Based on the number of ${electionBadgeName} badges awarded`;
         const eligible = `(${percentify(numVoted, numEligible, 2)} of ${format(numEligible)} eligible)`;
-        const postfix = `user${pluralize(numVoted)} ha${pluralize(numVoted, "ve", "s")}${negated} voted so far`;
+        const postfix = `user${pluralize(numVoted)} ha${pluralize(numVoted, "ve", "s")}${negated} voted ${getRandomSoFar()}`;
 
         return `${basePrefix}, ${format(numVoted)} ${eligible} ${postfix}.`;
     }
