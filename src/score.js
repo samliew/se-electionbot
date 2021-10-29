@@ -7,10 +7,10 @@ import { matchNumber } from "./utils/expressions.js";
 
 /**
  * @typedef {import("./index.js").UserProfile} UserProfile
- * @typedef {import("@userscripters/stackexchange-api-types").default.User} ApiUser
+ * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
- * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
+ * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  */
 

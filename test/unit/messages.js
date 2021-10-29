@@ -6,7 +6,7 @@ import { capitalize } from "../../src/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 /**
- * @typedef {import("@userscripters/stackexchange-api-types").default.User} ApiUser
+ * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
  * @typedef { import("../../src/election").ElectionPhase} ElectionPhase
  */
 

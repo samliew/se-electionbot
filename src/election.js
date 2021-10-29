@@ -9,7 +9,7 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import('chatexchange/dist/Client').Host} Host
  * @typedef {import("./config.js").BotConfig} BotConfig
- * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
+ * @typedef {import("@userscripters/stackexchange-api-types").User} User
  * @typedef {import("./index").UserProfile} UserProfile
  */
 

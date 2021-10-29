@@ -9,7 +9,7 @@ import { getMockNominee } from "../mocks/nominee.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
 /**
- * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
+ * @typedef {import("@userscripters/stackexchange-api-types").User} User
  */
 
 

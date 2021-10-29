@@ -16,7 +16,7 @@ import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
  * @typedef {import("./index").ElectionBadge} Badge
  * @typedef {import("./config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
- * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
+ * @typedef {import("@userscripters/stackexchange-api-types").User} User
  * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {import("./score").CandidateScore} CandidateScore
  * @typedef {import("./election").ElectionPhase} ElectionPhase

@@ -51,7 +51,7 @@ import { matchNumber } from "./utils/expressions.js";
 
 /**
  * @typedef {(Pick<Badge, "name"|"badge_id"> & { required?: boolean, type: string })} ElectionBadge
- * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
+ * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} WebsocketEvent
  * @typedef {typeof import("chatexchange/dist/WebsocketEvent").ChatEventType} EventType
  * @typedef {import("chatexchange/dist/Client").Host} Host

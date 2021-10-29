@@ -19,31 +19,13 @@ export const apiVer = 2.3;
 let _apiBackoff = Date.now();
 
 /**
- * @typedef {{
- *  id: string,
- *  site_url: string,
- *  user_id: string,
- *  user: {
- *      reputation:number
- *  },
- *  name: string,
- *  is_employee: boolean,
- *  display_name: string,
- *  account_id: number
- * }} ResItem
- *
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Client").Host} Host
- * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
+ * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import("./index").UserProfile} UserProfile
- *
- * @typedef {{
- *  items: ResItem[] //TODO: split into API entities
- *  has_more: boolean
- * }} APIListResponse
  */
 
 /**
@@ -867,7 +849,7 @@ export const makeURL = (label, uri = "") => {
     }
 
     return `[${label}](${uri})`;
-}
+};
 
 /**
  * @summary callback for mapping badge to id
