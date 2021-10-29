@@ -1,19 +1,24 @@
 import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
 
 /**
+ * @typedef {import("./election").default} Election
+ * @typedef {import("@userscripters/stackexchange-api-types").Site} Site
+ * @typedef {import("@userscripters/stackexchange-api-types").NetworkUser} NetworkUser
+ * @typedef {import("@userscripters/stackexchange-api-types").User} User
+ * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
+ * @typedef {import("./config.js").BotConfig} BotConfig
+ */
+
+/**
+ * @template T
+ * @typedef {import("@userscripters/stackexchange-api-types").CommonWrapperObject<T>} ApiWrapper<T>
+ */
+
+/**
  * @description A simple in-memory cached list of network sites
  * @type {Site[]}
  */
 export let allNetworkSites = [];
-
-/**
- * @typedef {import("@userscripters/stackexchange-api-types").default.Site} Site
- * @typedef {import("@userscripters/stackexchange-api-types").default.NetworkUser} NetworkUser
- * @typedef {import("@userscripters/stackexchange-api-types").default.User} User
- * @typedef {import("@userscripters/stackexchange-api-types").default.Badge} Badge
- * @typedef {import("./config.js").BotConfig} BotConfig
- * @typedef {{ items: any[], has_more: boolean, backoff?: number }} ApiWrapper
- */
 
 /**
 * @summary Get the next API key from a rotating set
@@ -28,11 +33,12 @@ export const getStackApiKey = (keyPool) => {
 };
 
 /**
- * @template {(res: ApiWrapper) => Promise<any>} T
- * @template {(res: ApiWrapper) => Promise<any>} U
+ * @template V
+ * @template {(res: ApiWrapper<V>) => Promise<any>} T
+ * @template {(res: ApiWrapper<V>) => Promise<any>} U
  *
  * @summary handles API response
- * @param {ApiWrapper} response response from the API
+ * @param {ApiWrapper<V>} response response from the API
  * @param {T} backoffCallback function to call after backoff
  * @param {U} successCallback function to call on success
  */
@@ -66,7 +72,7 @@ export const getAllNamedBadges = async (config, site, page = 1) => {
     }).toString();
 
     return handleResponse(
-        (await fetchUrl(config, badgeURI, true)) || {},
+       /** @type {ApiWrapper<Badge>} */(await fetchUrl(config, badgeURI, true)) || {},
         () => getAllNamedBadges(config, site, page),
         async ({ items = [], has_more }) => {
             if (has_more) {
@@ -85,7 +91,7 @@ export const getAllNamedBadges = async (config, site, page = 1) => {
  * @param {BotConfig} config
  * @param {number} userId userId to request badges for
  * @param {string} site election site slug
- * @param {"all"|"named"|"tag_based"} type badge type
+ * @param {"all"|Badge["badge_type"]} type badge type
  * @param {number} [page] API response page
  * @returns {Promise<Badge[]>}
  */
@@ -113,7 +119,7 @@ export const getBadges = async (config, userId, site, type = "all", page = 1) =>
     if (config.debug) console.log(badgeURI.toString());
 
     return handleResponse(
-        (await fetchUrl(config, badgeURI, true)) || {},
+        /** @type {ApiWrapper<Badge>} */(await fetchUrl(config, badgeURI, true)) || {},
         () => getBadges(config, userId, site, type, page),
         async ({ items = [], has_more }) => {
             if (has_more) {
@@ -150,7 +156,7 @@ export const getNumberOfVoters = async (config, site, badgeId, electionPhaseDate
 
     if (config.debug) console.log(badgeURI.toString());
 
-    const { total = 0 } = /**@type {{ total: number }} */(await fetchUrl(config, badgeURI, true)) || {};
+    const { total = 0 } = /**@type {ApiWrapper<User>} */(await fetchUrl(config, badgeURI, true)) || {};
 
     if (config.verbose) console.log(`API - ${getBadges.name}\n`, total);
 
@@ -160,7 +166,7 @@ export const getNumberOfVoters = async (config, site, badgeId, electionPhaseDate
 /**
  * @summary gets a number of users eligible to vote from the API
  * @param {BotConfig} config bot configuration
- * @param {import("./election").default} election current election
+ * @param {Election} election current election
  * @returns {Promise<number>}
  */
 export const getNumberOfUsersEligibleToVote = async (config, election) => {
@@ -179,7 +185,7 @@ export const getNumberOfUsersEligibleToVote = async (config, election) => {
 
     if (config.debug) console.log(userURL.toString());
 
-    const { total = 0 } = /** @type {{ total: number }} */(await fetchUrl(config, userURL, true)) || {};
+    const { total = 0 } = /** @type {ApiWrapper<User>} */(await fetchUrl(config, userURL, true)) || {};
 
     return total;
 };
@@ -191,7 +197,7 @@ export const getNumberOfUsersEligibleToVote = async (config, election) => {
  * @param {number} [page] API response page
  * @returns {Promise<User[]>}
  */
-export const getModerators = async (config, site, sort = "name", order = "asc", page = 1) => {
+export const getModerators = async (config, site, page = 1) => {
     // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
     const modURL = new URL(`${apiBase}/${apiVer}/users/moderators`);
     modURL.search = new URLSearchParams({
@@ -205,11 +211,11 @@ export const getModerators = async (config, site, sort = "name", order = "asc", 
     }).toString();
 
     return handleResponse(
-        (await fetchUrl(config, modURL, true)) || {},
-        () => getModerators(config, site, sort, order, page),
+        /** @type {ApiWrapper<User>} */(await fetchUrl(config, modURL, true)) || {},
+        () => getModerators(config, site, page),
         async ({ items = [], has_more }) => {
             if (has_more) {
-                const otherItems = await getModerators(config, site, sort, order, page + 1);
+                const otherItems = await getModerators(config, site, page + 1);
                 return [...items, ...otherItems];
             }
 
@@ -241,7 +247,7 @@ export const getUserInfo = async (config, userId, site, page = 1) => {
 
     if (config.debug) console.log(userURL.toString());
 
-    const { items = [] } = /** @type {ApiWrapper} */(await fetchUrl(config, userURL, true)) || {};
+    const { items = [] } = /** @type {ApiWrapper<User>} */(await fetchUrl(config, userURL, true)) || {};
 
     const [userInfo] = items;
 
@@ -284,7 +290,7 @@ export const getAllNetworkSites = async (config, page = 1) => {
     }).toString();
 
     return handleResponse(
-        (await fetchUrl(config, siteURL, true)) || {},
+        /** @type {ApiWrapper<Site>} */(await fetchUrl(config, siteURL, true)) || {},
         () => getAllNetworkSites(config, page),
         async ({ items = [], has_more }) => {
             if (has_more) {
@@ -338,7 +344,7 @@ export const getUserAssociatedAccounts = async (config, networkId, page = 1) => 
 
     // Fetch network accounts via API to get the account of the site we want
     return handleResponse(
-        (await fetchUrl(config, url, true)) || {},
+        /** @type {ApiWrapper<NetworkUser>} */(await fetchUrl(config, url, true)) || {},
         () => getUserAssociatedAccounts(config, networkId, page),
         async ({ items = [] }) => items
     );
