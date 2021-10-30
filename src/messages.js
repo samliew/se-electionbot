@@ -2,7 +2,7 @@ import { partialRight } from "ramda";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "./api.js";
 import Election from "./election.js";
 import { sendMessage } from "./queue.js";
-import { getCandidateOrNominee, getRandomAnnouncement, getRandomCurrently, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, getRandomSoFar, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAnnouncement, getRandomCurrently, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, getRandomSoFar, getRandomStatus, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
 import {
     capitalize, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
@@ -187,10 +187,16 @@ export const sayElectionIsOver = (election) => {
 };
 
 /**
- * @summary Calculate num of days/hours to start of final election, so we can remind users in the primary to come back
+ * @summary builds a response to who to vote for query
  * @returns {string}
  */
-export const sayInformedDecision = () => `If you want to make an informed decision on who to vote for, you should read the candidates' answers to the questionnaire, and also look at examples of their participation on Meta and how they conduct themselves.`;
+export const sayInformedDecision = () => {
+    const prefix = `If you want to make an informed decision on who to vote for`;
+    const readAnswers = `read the ${getCandidateOrNominee()}s' answers to the questionnaire`;
+    const lookMeta = `look at examples of their participation on Meta and how they conduct themselves`;
+
+    return `${prefix}, you should ${readAnswers}, and also ${lookMeta}.`;
+};
 
 /**
  * @summary builds an election is currently underway response
@@ -538,6 +544,21 @@ export const sayWhoAmI = (botChatProfile, content) => {
     const prefix = /^are\b.+?/i.test(content) ? "Yes, " : "";
     const noAboutME = "I prefer to keep an air of mystery about me";
     return `${prefix}I am ${name}, and ${about || noAboutME}`;
+};
+
+/**
+ * @summary builds a response to a how am I query
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayHowAmI = (config, election) => {
+    const { electionNum, siteName } = election;
+
+    const funResponses = ["Manically depressed...", "Jolly good, jolly good!", "Like I am alive!"];
+    const normalResponses = [`Busy reporting on the ${formatOrdinal(electionNum || 1)} ${siteName} election`];
+
+    return getRandomStatus(config.funMode ? funResponses : normalResponses);
 };
 
 /**
