@@ -165,3 +165,15 @@ export const getRandomSoFar = () => new RandomArray(
     "thus far",
     "to date"
 ).getRandom();
+
+/**
+ * @param {string[]} [extras] extra messages to pool from
+ */
+export const getRandomStatus = (extras = []) => new RandomArray(
+    ...extras,
+    "Splendid, sir!",
+    "I am doing fine, thank you.",
+    "Never felt better!",
+    "Same old, same old...",
+    "Doing fine, and you?"
+).getRandom();
