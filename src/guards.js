@@ -164,6 +164,18 @@ export const isAskedWhoAmI = (text) => {
 };
 
 /**
+ * @mention
+ * @summary checks if the message asked how the bot fares
+ * @param {string} text message content
+ * @returns {boolean}
+ */
+export const isAskedHowAmI = (text) => {
+    return someMatch([
+        /^(?:(?:hello|hi|heya)(?:\s+bot)?,?\s+)?how\s+are\s+you(?:\s+today)?(?:$|\?)/i
+    ], text);
+};
+
+/**
  * @summary checks if the message asked whether the bot is alive
  * @param {string} text message content
  * @returns {boolean}

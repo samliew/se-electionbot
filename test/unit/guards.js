@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedWhenIsTheNextPhase, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -215,6 +215,13 @@ describe('Message Guards', () => {
         "are you a daemon?"
     ];
 
+    const howAmImatches = [
+        "Hello, how are you?",
+        "Hi bot how are you",
+        "hello bot, how are you today?",
+        "how are you?"
+    ];
+
     const aliveMatches = [
         "where art thou",
         "Where are you?",
@@ -226,7 +233,14 @@ describe('Message Guards', () => {
     describe(isAskedWhoAmI.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedWhoAmI, whoAmImatches);
-            allMatch(isAskedWhoAmI, [...whoMadeMeMatches, ...aliveMatches], false);
+            allMatch(isAskedWhoAmI, [...whoMadeMeMatches, ...aliveMatches, ...whoMadeMeMatches], false);
+        });
+    });
+
+    describe(isAskedHowAmI.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowAmI, howAmImatches);
+            allMatch(isAskedHowAmI, [...whoAmImatches, ...aliveMatches], false);
         });
     });
 
