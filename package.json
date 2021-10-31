@@ -34,7 +34,7 @@
         "node": "14.x"
     },
     "dependencies": {
-        "axios": "^0.23.0",
+        "axios": "^0.24.0",
         "chatexchange": "^0.5.4",
         "cheerio": "^1.0.0-rc.10",
         "dotenv": "^10.0.0",
@@ -45,11 +45,11 @@
         "node-cron": "^3.0.0"
     },
     "devDependencies": {
-        "@babel/cli": "^7.15.7",
-        "@babel/core": "^7.15.8",
-        "@babel/node": "^7.15.8",
-        "@babel/preset-env": "^7.15.8",
-        "@babel/register": "^7.15.3",
+        "@babel/cli": "^7.16.0",
+        "@babel/core": "^7.16.0",
+        "@babel/node": "^7.16.0",
+        "@babel/preset-env": "^7.16.0",
+        "@babel/register": "^7.16.0",
         "@types/chai": "^4.2.22",
         "@types/chai-as-promised": "^7.1.4",
         "@types/cheerio": "^0.22.30",
