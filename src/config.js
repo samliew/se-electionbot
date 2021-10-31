@@ -280,15 +280,6 @@ export class BotConfig {
      */
     maxMessageParts = 3;
 
-    /* Debug variables */
-
-    // Fun mode
-    funMode = parseBoolEnv("fun_mode", true);
-    // Debug mode
-    debug = parseBoolEnv("debug", false);
-    // Verbose logging
-    verbose = parseBoolEnv("verbose", false);
-
     // Keep track of fun responses so we can impose a limit
     funResponseCounter = 0;
     maxFunResponses = parseNumEnv("max_fun_responses", 2);
@@ -302,7 +293,8 @@ export class BotConfig {
      * @description use this when you want logging either in development or production, because you can set verbose mode in production to get more data or stealth debugging
      */
     get debugOrVerbose() {
-        return this.debug || this.verbose;
+        const { flags } = this;
+        return flags.debug || flags.verbose;
     }
 
     /**
@@ -310,7 +302,8 @@ export class BotConfig {
      * @description use this when you want additional logging in development
      */
     get debugAndVerbose() {
-        return this.debug && this.verbose;
+        const { flags } = this;
+        return flags.debug && flags.verbose;
     }
 
     /* User groups */
@@ -324,12 +317,31 @@ export class BotConfig {
      */
     modIds = new Set();
 
-    /* Flags and bot-specific utility functions */
-
+    /**
+     * @summary bot configuration flags
+     */
     flags = {
         saidElectionEndingSoon: false,
         announcedWinners: false,
+        fun: parseBoolEnv("fun_mode", true),
+        debug: parseBoolEnv("debug", false),
+        verbose: parseBoolEnv("verbose", false),
     };
+
+    get debug() {
+        const { flags } = this;
+        return flags.debug;
+    }
+
+    get fun() {
+        const { flags } = this;
+        return flags.fun;
+    }
+
+    get verbose() {
+        const { flags } = this;
+        return flags.verbose;
+    }
 
     /* dashboard variables */
 
