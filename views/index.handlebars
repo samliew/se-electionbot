@@ -148,10 +148,7 @@
                 <tr><td>keepAlive</td><td>{{{boolean keepAlive}}}</td></tr>
                 <tr><td>feedbackUrl</td><td>{{{url feedbackUrl}}}</td></tr>
                 <tr><td>repoUrl</td><td>{{{url repoUrl}}}</td></tr>
-                {{#with flags}}
-                <tr><td>flags.saidElectionEndingSoon</td><td>{{{boolean saidElectionEndingSoon}}}</td></tr>
-                <tr><td>flags.announcedWinners</td><td>{{{boolean announcedWinners}}}</td></tr>
-                {{/with}}
+                <tr><td>flags</td><td>{{> deep flags}}</td></tr>
             </table>
             {{/with}}
         </aside>
