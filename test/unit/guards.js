@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -33,6 +33,14 @@ describe('Message Guards', () => {
         });
     });
 
+    const electionStatusMatches = [
+        "election status",
+        "What is the election status?",
+        "What is the progress of election?",
+        "how is election progressing?",
+        "what is election state?"
+    ];
+
     const nextPhaseMatches = [
         "when is the next phase?",
         "When does next phase start",
@@ -57,6 +65,12 @@ describe('Message Guards', () => {
         "What are the election's phases?",
         "list election phases"
     ];
+
+    describe(isAskedWhatIsElectionStatus.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhatIsElectionStatus, electionStatusMatches);
+        });
+    });
 
     describe(isAskedWhenIsTheNextPhase.name, () => {
         it('should correctly match content', () => {

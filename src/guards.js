@@ -467,6 +467,19 @@ export const isAskedForFullHelp = (text) => {
 };
 
 /**
+ * @summary checks if a message is asking what the election status is
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedWhatIsElectionStatus = (text) => {
+    return someMatch([
+        /^(?:what|how)\s+is(?:\s+the)?\s+election\s+(?:stat(?:us|e)|progress(?:ing)?)(?:\?\!?|$)/i,
+        /^election\s+(?:stat(?:us|e)|progress)(?:\?\!?|$)/i,
+        /^what\s+is(?:\s+the)?\s+(?:stat(?:us|e)|progress)\s+of(?:\s+the)?\s+election(?:\?\!?|$)/i
+    ], text);
+};
+
+/**
  * @summary checks if a message is asking when is the next phase
  * @param {string} text message text
  * @returns {boolean}
