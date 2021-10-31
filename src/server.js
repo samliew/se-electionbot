@@ -1,10 +1,10 @@
-import { dateToUtcTimestamp } from './utils/dates.js';
 import express from 'express';
 import Handlebars from 'express-handlebars';
 import { join } from 'path';
 import Election from './election.js';
 import { HerokuClient } from "./herokuClient.js";
 import { fetchChatTranscript } from './utils.js';
+import { dateToUtcTimestamp } from './utils/dates.js';
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
@@ -250,7 +250,7 @@ app.route('/')
                 },
                 heading: `Chatbot up and running.`,
                 data: {
-                    utcNow: new Date().toISOString().replace('T', ' ').replace(/\.\d+/, ''),
+                    utcNow: dateToUtcTimestamp(Date.now()),
                     autoRefreshInterval: BOT_CONFIG.scrapeIntervalMins * 60,
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteHostname: ELECTION.siteHostname,

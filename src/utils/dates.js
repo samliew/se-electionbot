@@ -79,7 +79,7 @@ export const dateToRelativetime = (date, { soonText = 'soon', justNowText = 'jus
 
 /**
  * @summary formats date input to UTC timestamp in Stack Exchange's format
- * @param {Date|string|number} date
+ * @param {Date|string|number} date date to format
  * @returns {string}
  */
 export const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
