@@ -268,6 +268,27 @@ export const sayElectionIsRunning = (election) => {
 };
 
 /**
+ * @summary builds a response to when does election end query
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayElectionIsEnding = (election) => {
+    const { phase, dateEnded } = election;
+
+    /** @type {[phase:ElectionPhase, handler:(e:Election) => string][]} */
+    const phaseMap = [
+        ["ended", (e) => sayElectionIsOver(e)]
+    ];
+
+    const [, handler] = phaseMap.find(([p]) => phase === p) || [];
+
+    if (handler) return handler(election);
+
+    const relativetime = dateToRelativetime(dateEnded);
+    return `The election ends at ${linkToUtcTimestamp(dateEnded)} (${relativetime}).`;
+};
+
+/**
  * @summary builds a response to voting info query
  * @param {Election} election
  * @returns {string}

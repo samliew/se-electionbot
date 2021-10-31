@@ -1,8 +1,9 @@
 import { expect } from "chai";
 import Election from "../../src/election.js";
-import { sayAboutElectionStatus, sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI, sayWithdrawnNominations } from "../../src/messages.js";
+import { sayAboutElectionStatus, sayBadgesByType, sayDiamondAlready, sayElectionIsEnding, sayElectionSchedule, sayHI, sayWithdrawnNominations } from "../../src/messages.js";
 import { calculateScore } from "../../src/score.js";
 import { capitalize } from "../../src/utils.js";
+import { matchesUTC } from "../../src/utils/expressions.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
@@ -214,6 +215,31 @@ describe("Messages module", () => {
             const message = sayAboutElectionStatus(config, election);
             expect(message).to.include(`is in the ${election.phase} phase`);
             expect(message).to.match(/come back.+?to vote/);
+        });
+    });
+
+    describe(sayElectionIsEnding.name, () => {
+        it('should correctly determine if election is over', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.phase = "ended";
+
+            const message = sayElectionIsEnding(election);
+            expect(message).to.match(/is over/i);
+        });
+
+        it('should build correct message for normal phases', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+
+            /** @type {Exclude<ElectionPhase, "ended">[]} */
+            const phases = ["cancelled", "election", "primary", "nomination"];
+
+            phases.forEach((phase) => {
+                election.phase = phase;
+
+                const message = sayElectionIsEnding(election);
+                expect(message).to.include("ends at");
+                expect(matchesUTC(message)).to.be.true;
+            });
         });
     });
 });
