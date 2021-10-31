@@ -757,37 +757,27 @@ import { matchNumber } from "./utils/expressions.js";
                 const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x));
                 responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
             }
-            // Why was the nomination removed
             else if (isAskedWhyNominationRemoved(content)) {
                 responseText = sayWhyNominationRemoved();
             }
-            // Are moderators paid
             else if (isAskedIfModsArePaid(content)) {
                 responseText = sayAreModsPaid(election);
             }
-
-            // Status of the election
             else if (isAskedWhatIsElectionStatus(content)) {
                 responseText = sayAboutElectionStatus(config, election);
             }
             else if (isAskedWhenIsTheNextPhase(content)) {
                 responseText = sayNextPhase(config, election);
             }
-
-            // When is the election ending
             else if (isAskedWhenTheElectionEnds(content)) {
                 responseText = sayElectionIsEnding(election);
             }
-
-            // How to vote
             else if (isAskedAboutVoting(content)) {
                 responseText = sayAboutVoting(election);
             }
-            // Who are the winners
             else if (isAskedForCurrentWinners(content)) {
                 responseText = sayCurrentWinners(election);
             }
-            // Election schedule
             else if (isAskedForElectionSchedule(content)) {
                 responseText = sayElectionSchedule(election);
             }
