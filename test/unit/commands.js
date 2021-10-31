@@ -133,7 +133,10 @@ describe('Individual commands', () => {
             const config = getMockBotConfig({
                 flags: {
                     announcedWinners: true,
-                    saidElectionEndingSoon: true
+                    saidElectionEndingSoon: true,
+                    debug: false,
+                    fun: false,
+                    verbose: false
                 }
             });
             const election = new Election("https://stackoverflow.com/election/12");
@@ -243,19 +246,19 @@ describe('Individual commands', () => {
             expect(started).to.contain(dateToUtcTimestamp(mockStart));
             expect(started).to.match(/\b\d+ seconds of uptime/);
 
-            config.debug = true;
+            config.flags.debug = true;
             const debug = isAliveCommand(config);
             expect(debug).to.contain("debug mode");
 
-            config.debug = false;
+            config.flags.debug = false;
             const noDebug = isAliveCommand(config);
             expect(noDebug).to.not.contain("debug mode");
 
-            config.verbose = true;
+            config.flags.verbose = true;
             const verbose = isAliveCommand(config);
             expect(verbose).to.contain("verbose ");
 
-            config.verbose = false;
+            config.flags.verbose = false;
             const noVerbose = isAliveCommand(config);
             expect(noVerbose).to.not.contain("verbose ");
         });

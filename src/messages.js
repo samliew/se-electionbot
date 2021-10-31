@@ -558,7 +558,7 @@ export const sayHowAmI = (config, election) => {
     const funResponses = ["Manically depressed...", "Jolly good, jolly good!", "Like I am alive!"];
     const normalResponses = [`Busy reporting on the ${formatOrdinal(electionNum || 1)} ${siteName} election`];
 
-    return getRandomStatus(config.funMode ? funResponses : normalResponses);
+    return getRandomStatus(config.fun ? funResponses : normalResponses);
 };
 
 /**

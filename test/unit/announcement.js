@@ -130,7 +130,10 @@ describe('ScheduledAnnouncement', function () {
             ann.config = getMockBotConfig({
                 flags: {
                     announcedWinners: true,
-                    saidElectionEndingSoon: true
+                    saidElectionEndingSoon: true,
+                    debug: false,
+                    verbose: false,
+                    fun: false
                 }
             });
 

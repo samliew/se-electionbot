@@ -695,7 +695,7 @@ import { matchNumber } from "./utils/expressions.js";
                 responseText = await builder(config, election, content, user);
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
-            else if (isAskedAboutLightbulb(content) && config.funMode) {
+            else if (isAskedAboutLightbulb(content) && config.fun) {
                 responseText = sayHowManyModsItTakesToFixLightbulb(currentSiteMods);
             }
             else if (isAskedAboutBadgesOfType(content)) {
@@ -950,7 +950,7 @@ import { matchNumber } from "./utils/expressions.js";
                     config.awaitingConfirmation.delete(userId);
                 }
                 // The rest below are fun mode only
-                else if (config.funMode) {
+                else if (config.fun) {
 
                     if (content.startsWith(`i love you`)) {
                         responseText = `I love you 3000`;
@@ -1003,7 +1003,7 @@ import { matchNumber } from "./utils/expressions.js";
                 }
 
                 // Bot was mentioned and did not match any previous guards - return a random response
-                if (config.funMode && config.canSendFunResponse) {
+                if (config.fun && config.canSendFunResponse) {
                     responseText = new RandomArray(
                         `Nobody knows why.`,
                         `You talking to me?`,
