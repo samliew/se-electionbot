@@ -453,15 +453,14 @@ export const fetchRoomOwners = async (config, chatDomain, chatRoomId) => {
 /**
  * @summary gets users that are currently in the room
  * @param {BotConfig} config bot configuration
- * @param {Client} client ChatExchange client
+ * @param {Host} chatHost ChatExchange client
  * @param {Room} room room to get the info for
  * @returns {Promise<RoomUser[]>}
  */
-export const getUsersCurrentlyInTheRoom = async (config, client, room) => {
-    const { host } = client;
+export const getUsersCurrentlyInTheRoom = async (config, chatHost, room) => {
     const { id } = room;
 
-    const url = new URL(`https://chat.${host}/rooms/info/${id}`);
+    const url = new URL(`https://chat.${chatHost}/rooms/info/${id}`);
     url.search = new URLSearchParams({
         tab: "general",
         users: "current",
