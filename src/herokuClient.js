@@ -5,6 +5,7 @@ import Heroku from 'heroku-client';
 
 export class HerokuClient {
 
+    /** @type {Heroku} */
     _client;
 
     // Mask some config vars
@@ -22,14 +23,16 @@ export class HerokuClient {
      * @param {string|null} apiKey Heroku API key
      */
     constructor(config, apiKey = null) {
+        const { debugAndVerbose } = config;
 
         this._appName = process.env.HEROKU_APP_NAME;
 
         this._client = new Heroku({
             token: apiKey || process.env.HEROKU_API_TOKEN,
             parseJSON: true,
-            debug: config.debug && config.verbose,
-            logger: console,
+            debug: debugAndVerbose,
+            // the package will log in any mode unless not passed 'logger'
+            logger: debugAndVerbose ? console : void 0,
         });
     }
 
