@@ -62,6 +62,7 @@
         "@types/cheerio": "^0.22.30",
         "@types/express": "^4.17.13",
         "@types/express-handlebars": "^5.3.1",
+        "@types/heroku-client": "^3.1.0",
         "@types/jsdom": "^16.2.13",
         "@types/mocha": "^9.0.0",
         "@types/ramda": "^0.27.45",
