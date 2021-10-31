@@ -375,6 +375,8 @@ import { matchNumber } from "./utils/expressions.js";
             await sendMessage(config, room, getRandomPlop(), null, true);
         }
 
+        // initialize per-room ignore list
+        config.ignoredUserIds.forEach((userId) => room.block(userId));
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
@@ -394,9 +396,6 @@ import { matchNumber } from "./utils/expressions.js";
 
             // Ignore events Community or Feeds users
             if (userId <= 0) return;
-
-            // Ignore events from ignored users
-            if (config.ignoredUserIds.has(userId)) return;
 
             // Record time of last new message/reply in room, and increment activity count
             config.lastActivityTime = Date.now();
