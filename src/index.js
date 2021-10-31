@@ -34,7 +34,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutBallotFile, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowAmI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhereToFindElectionResults, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
+import { sayAboutBallotFile, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowAmI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhereToFindElectionResults, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getCandidateOrNominee, getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -43,7 +43,7 @@ import { startServer } from "./server.js";
 import {
     fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, keepAlive,
     linkToRelativeTimestamp,
-    linkToUtcTimestamp, makeURL, onlyBotMessages, pluralize, roomKeepAlive, searchChat, wait
+    linkToUtcTimestamp, makeURL, onlyBotMessages, roomKeepAlive, searchChat, wait
 } from './utils.js';
 import { last } from "./utils/arrays.js";
 import { dateToRelativetime, dateToUtcTimestamp } from "./utils/dates.js";
@@ -735,21 +735,7 @@ import { matchNumber } from "./utils/expressions.js";
             }
             // Withdrawn candidates/nominations
             else if (isAskedForWithdrawnNominees(content)) {
-
-                const { withdrawnNominees } = election;
-
-                const numWithdrawnNominees = withdrawnNominees.size;
-
-                if (election.phase === null) {
-                    responseText = sayNotStartedYet(election);
-                }
-                else if (numWithdrawnNominees > 0) {
-                    responseText = `There ${numWithdrawnNominees === 1 ? 'is' : 'are'} ${numWithdrawnNominees} candidate${pluralize(numWithdrawnNominees)} who have withdrawn: ` +
-                        [...withdrawnNominees.values()].map(v => makeURL(v.userName, v.nominationLink)).join(', ');
-                }
-                else {
-                    responseText = `No candidates have withdrawn from the election yet.`;
-                }
+                responseText = sayWithdrawnNominations(config, election);
             }
 
             // Election stats - How many voted/participants/participated

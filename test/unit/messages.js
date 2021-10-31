@@ -1,9 +1,10 @@
 import { expect } from "chai";
 import Election from "../../src/election.js";
-import { sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI } from "../../src/messages.js";
+import { sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI, sayWithdrawnNominations } from "../../src/messages.js";
 import { calculateScore } from "../../src/score.js";
 import { capitalize } from "../../src/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
+import { getMockNominee } from "../mocks/nominee.js";
 
 /**
  * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
@@ -126,4 +127,43 @@ describe("Messages module", () => {
         });
     });
 
+    describe(sayWithdrawnNominations.name, () => {
+        /** @type {ReturnType<typeof getMockBotConfig>} */
+        let config;
+        beforeEach(() => config = getMockBotConfig());
+
+        it('should correctly determine if no nominees withdrawn', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.phase = "ended";
+
+            const message = sayWithdrawnNominations(config, election);
+            expect(message).to.match(/no.+?withdrawn/i);
+        });
+
+        it('should correctly determine if election has not started yet', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.dateNomination = Date.now() + 864e5 * 7;
+
+            const message = sayWithdrawnNominations(config, election);
+            expect(message).to.match(/not started/i);
+        });
+
+        it('should correctly return withdrawn nominees list', () => {
+            const nominees = [
+                { userId: 1, userName: "John" },
+                { userId: 2, userName: "Joanne" }
+            ].map(getMockNominee);
+
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.phase = "election";
+            nominees.forEach((nominee) => election.addWithdrawnNominee(nominee));
+
+            const message = sayWithdrawnNominations(config, election);
+            expect(message).to.include(nominees.length);
+
+            nominees.forEach(({ userName }) => {
+                expect(message).to.include(userName);
+            });
+        });
+    });
 });

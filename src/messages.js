@@ -87,6 +87,33 @@ export const sayWhyNominationRemoved = () => {
 };
 
 /**
+ * @summary builds a response to who are the withdrawn nominees
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayWithdrawnNominations = (_config, election) => {
+    const { withdrawnNominees, numWithdrawals } = election;
+
+    if (election.isNotStartedYet()) return sayNotStartedYet(election);
+
+    if (numWithdrawals > 0) {
+        const isAre = pluralize(numWithdrawals, "are", "is");
+        const withdrawn = [...withdrawnNominees.values()];
+
+        const nomineeList = withdrawn.map(
+            ({ userName, nominationLink }) => nominationLink ?
+                makeURL(userName, nominationLink) :
+                userName
+        );
+
+        return `There ${isAre} ${numWithdrawals} withdrawn ${getCandidateOrNominee()}${pluralize(numWithdrawals)}: ${listify(...nomineeList)}`;
+    }
+
+    return `No ${getCandidateOrNominee()}s have withdrawn from the election yet.`;
+};
+
+/**
  * @summary builds a response on how to nominate others
  * @param {BotConfig} _config bot configuration
  * @param {Election} _election current election
