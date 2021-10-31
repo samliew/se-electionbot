@@ -957,7 +957,7 @@ import { matchNumber } from "./utils/expressions.js";
 
         roomKeepAlive(config, client, room);
 
-        await startServer(room, config, election);
+        await startServer(client, room, config, election);
 
         // Catch all handler to swallow non-crashing rejections
         process.on("unhandledRejection", (reason) => {

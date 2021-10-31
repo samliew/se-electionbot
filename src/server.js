@@ -137,6 +137,7 @@ app.set('view cache', 'false');
 /**
  * @typedef {import("./config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
+ * @typedef {import("chatexchange").default} Client
  */
 
 /**
@@ -146,6 +147,14 @@ app.set('view cache', 'false');
  * @type {BotConfig | undefined}
  */
 let BOT_CONFIG;
+
+/**
+ * @private
+ *
+ * @summary internal ChatExchange client reference
+ * @type {Client | undefined}
+ */
+let BOT_CLIENT;
 
 /**
  * @private
@@ -222,6 +231,11 @@ app.route('/')
 
         if (!ELECTION) {
             console.error("SERVER - election data missing");
+            return res.sendStatus(500);
+        }
+
+        if (!BOT_CLIENT) {
+            console.error("SERVER - chat client missing");
             return res.sendStatus(500);
         }
 
@@ -436,16 +450,27 @@ export const setElection = (election) => {
 };
 
 /**
+ * @summary sets the server's chat client
+ * @param {Client} client chat client
+ */
+export const setClient = (client) => {
+    BOT_CLIENT = client;
+};
+
+/**
  * @summary starts the bot server
+ * @param {Client} client chat client
  * @param {Room} room current room the bot is in
  * @param {import("./config.js").BotConfig} config  bot configuration
+ * @param {Election} election current election
  * @returns {Promise<import("express").Application>}
  */
-export const startServer = async (room, config, election) => {
+export const startServer = async (client, room, config, election) => {
 
     setBot(config);
     setRoom(room);
     setElection(election);
+    setClient(client);
 
     const server = app.listen(app.get('port'), () => {
         console.log(`SERVER - Node app ${staticPath} is listening on port ${app.get('port')}.`);
