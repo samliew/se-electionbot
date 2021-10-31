@@ -473,9 +473,20 @@ export const isAskedForFullHelp = (text) => {
  */
 export const isAskedWhenIsTheNextPhase = (text) => {
     return someMatch([
-        /^when('s| is| does) (the )?next phase/i,
-        /^when('s| is| does) (the )?(?:nomination|election) (phase )?(?:start|end)(ing)?/i,
+        /^when(?:'s| is| does) (?:the )?next phase/i,
+        /^when(?:'s| is| does) (?:the )?(?:nomination|election) (?:phase )?(?:start|end)(?:ing)/i,
         /is (?:it|election|nomination) (?:start|end)(?:ing|ed)\s?(soon|yet)?/i,
+    ], text);
+};
+
+/**
+ * @summary checks if a message is asking when the election ends
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedWhenTheElectionEnds = (text) => {
+    return someMatch([
+        /^when(?:\s+does)?(?:\s+the)?\s+(?:it|election)\s+ends?(?:\?\!?|$)/i
     ], text);
 };
 
