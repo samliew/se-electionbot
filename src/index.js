@@ -36,7 +36,7 @@ import {
 } from "./guards.js";
 import { sayAboutBallotFile, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowAmI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhereToFindElectionResults, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
-import { getCandidateOrNominee, getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomWhoAmI, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomWhoAmI, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import { calculateScore, makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
@@ -954,14 +954,12 @@ import { matchNumber } from "./utils/expressions.js";
                     if (content.startsWith(`i love you`)) {
                         responseText = `I love you 3000`;
                     }
-                    else if (/^how are you\b/.test(content)) {
-                        responseText = new RandomArray(
-                            `good, and you?`,
-                            `I'm fine, thank you.`,
+                    else if (isAskedHowAmI(content)) {
+                        responseText = getRandomStatus([
                             `I'm bored. Amuse me.`,
                             `Why don't you come up sometime and see me?`,
                             `Today, I consider myself the luckiest bot on the face of the earth.`,
-                        ).getRandom();
+                        ]);
                     }
                     else if (isAskedWhoAmI(content)) {
                         responseText = getRandomWhoAmI();
