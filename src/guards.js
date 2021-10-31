@@ -185,6 +185,18 @@ export const isAskedAmIalive = (text) => {
 };
 
 /**
+ * @summary checks if the message asked for meaning of life
+ * @param {string} text message content
+ * @returns {boolean}
+ */
+export const isAskedMeaningOfLife = (text) => {
+    return someMatch([
+        /^what(?:'s| is)(?:\s+the|an?)\s+(?:answer|meaning|reason)\s+(?:of|to|for)\s+life(?:$|\?)/i,
+        /^what\s+is\s+42(?:$|\?)/i
+    ], text);
+};
+
+/**
  * @summary checks if the message asked for one's candidate score
  * @param {string} text
  * @returns {boolean}
