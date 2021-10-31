@@ -197,3 +197,12 @@ export const getRandomStatus = (extras = []) => new RandomArray(
     "Same old, same old...",
     "Doing fine, and you?"
 ).getRandom();
+
+export const getRandomWhoAmI = () => new RandomArray(
+    `I'm Bot. James Bot.`,
+    `I'm a robot. Beep boop.`,
+    "I'm definitely NOT a bot.",
+    "I'm just pretending to be a bot",
+    `No, I'm a crystal ball. I know the answer to life.`,
+    `I'm a teapot, short and stout. Here is my handle, here is my spout.`,
+).getRandom();
