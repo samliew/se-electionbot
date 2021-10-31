@@ -64,6 +64,26 @@ export const getRandomNegative = () => new RandomArray(
     `Love me or hate me, I swear it won't make or break me.`,
 ).getRandom();
 
+export const getRandomFunResponse = () => new RandomArray(
+    `Nobody knows why.`,
+    `You talking to me?`,
+    `I want to play a game.`,
+    `*reticulating splines*`,
+    `Tell that to the aliens.`,
+    `What do you want from me?`,
+    `*error* - AI not installed`,
+    `Houston, we have a problem.`,
+    `What makes you think I know that?`,
+    `Keep talking and nobody explodes.`,
+    `It's not my job to please you, no.`,
+    `Frankly, my dear, I don't give a damn.`,
+    `To be honest, my love, I couldn't care less.`,
+    `What we've got here is failure to communicate.`,
+    `Time will tell. Sooner or later, time will tell...`,
+    `Well, here's another nice mess you've gotten me into!`,
+    `There will be no such thing as free will; there will only be my will.`,
+).getRandom();
+
 export const getRandomJoke = () => new RandomArray(
     `What's the object-oriented way to become wealthy? Inheritance.`,
     `Why did the programmer quit his job? Because he didn't get arrays.`,

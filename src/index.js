@@ -36,7 +36,7 @@ import {
 } from "./guards.js";
 import { sayAboutBallotFile, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsOver, sayElectionPage, sayElectionSchedule, sayHowAmI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayInsaneComeback, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhereToFindElectionResults, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
-import { getCandidateOrNominee, getRandomAlive, getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
+import { getCandidateOrNominee, getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import { calculateScore, makeCandidateScoreCalc } from "./score.js";
 import { startServer } from "./server.js";
@@ -1003,26 +1003,7 @@ import { matchNumber } from "./utils/expressions.js";
 
                 // Bot was mentioned and did not match any previous guards - return a random response
                 if (config.fun && config.canSendFunResponse) {
-                    responseText = new RandomArray(
-                        `Nobody knows why.`,
-                        `You talking to me?`,
-                        `I want to play a game.`,
-                        `*reticulating splines*`,
-                        `Tell that to the aliens.`,
-                        `What do you want from me?`,
-                        `*error* - AI not installed`,
-                        `Houston, we have a problem.`,
-                        `What makes you think I know that?`,
-                        `Keep talking and nobody explodes.`,
-                        `It's not my job to please you, no.`,
-                        `Frankly, my dear, I don't give a damn.`,
-                        `To be honest, my love, I couldn't care less.`,
-                        `What we've got here is failure to communicate.`,
-                        `Time will tell. Sooner or later, time will tell...`,
-                        `Well, here's another nice mess you've gotten me into!`,
-                        `There will be no such thing as free will; there will only be my will.`,
-                    ).getRandom();
-
+                    responseText = getRandomFunResponse();
                     config.funResponseCounter++;
                 } // End random response
 
