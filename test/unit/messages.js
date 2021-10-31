@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import Election from "../../src/election.js";
-import { sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI, sayWithdrawnNominations } from "../../src/messages.js";
+import { sayAboutElectionStatus, sayBadgesByType, sayDiamondAlready, sayElectionSchedule, sayHI, sayWithdrawnNominations } from "../../src/messages.js";
 import { calculateScore } from "../../src/score.js";
 import { capitalize } from "../../src/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -164,6 +164,56 @@ describe("Messages module", () => {
             nominees.forEach(({ userName }) => {
                 expect(message).to.include(userName);
             });
+        });
+    });
+
+    describe(sayAboutElectionStatus.name, () => {
+        /** @type {ReturnType<typeof getMockBotConfig>} */
+        let config;
+        beforeEach(() => config = getMockBotConfig());
+
+        it('should correctly determine if election has not started yet', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.dateNomination = Date.now() + 864e5 * 7;
+
+            const message = sayAboutElectionStatus(config, election);
+            expect(message).to.match(/not started/i);
+        });
+
+        it('should correctly determine if election is over', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.phase = "ended";
+
+            const message = sayAboutElectionStatus(config, election);
+            expect(message).to.match(/is over/i);
+        });
+
+        it('should correctly determine if election is cancelled', () => {
+            const statVoters = "test voter stats";
+
+            const election = new Election("https://stackoverflow.com/election/42");
+            election.phase = "cancelled";
+            election.statVoters = statVoters;
+
+            const message = sayAboutElectionStatus(config, election);
+            expect(message).to.include(statVoters);
+        });
+
+        it('should build correct message for the election phase', () => {
+            const election = new Election("https://stackoverflow.com/election/42");
+            election.phase = "election";
+
+            const message = sayAboutElectionStatus(config, election);
+            expect(message).to.include("final voting phase");
+        });
+
+        it('shoudl build correct message for the primary phase', () => {
+            const election = new Election("https://stackoverflow.com/election/42");
+            election.phase = "primary";
+
+            const message = sayAboutElectionStatus(config, election);
+            expect(message).to.include(`is in the ${election.phase} phase`);
+            expect(message).to.match(/come back.+?to vote/);
         });
     });
 });

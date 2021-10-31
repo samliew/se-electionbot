@@ -114,6 +114,38 @@ export const sayWithdrawnNominations = (_config, election) => {
 };
 
 /**
+ * @summary builds a response to the election status query
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayAboutElectionStatus = (_config, election) => {
+    const { phase, numNominees, electionUrl, statVoters = "", repVote, dateElection } = election;
+
+    if (election.isNotStartedYet()) return sayNotStartedYet(election);
+    if (election.isEnded()) return sayElectionIsOver(election);
+    if (phase === 'cancelled') return statVoters;
+
+    const phaseLink = makeURL("election", `${electionUrl}?tab=${phase}`);
+
+    if (phase === 'election') {
+        const status = `The ${phaseLink} is in the final voting phase`;
+        return `${status}. You can cast your ballot by ranking ${getCandidateOrNominee()}s in order of preference if you haven't done so already.`;
+    }
+
+    const prefix = `The ${phaseLink} is in the ${phase} phase with ${numNominees} ${getCandidateOrNominee()}s`;
+
+    if (phase === 'primary') {
+        const postfix = `come back ${linkToRelativeTimestamp(dateElection)} to vote in the final election voting phase`;
+        const conditions = `If you have at least ${repVote} reputation`;
+        const actions = `you may freely vote on the ${getCandidateOrNominee()}s`;
+        return `${prefix}. ${conditions}, ${actions}, and ${postfix}.`;
+    }
+
+    return `${prefix}.`;
+};
+
+/**
  * @summary builds a response on how to nominate others
  * @param {BotConfig} _config bot configuration
  * @param {Election} _election current election
