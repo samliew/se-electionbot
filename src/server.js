@@ -3,7 +3,7 @@ import Handlebars from 'express-handlebars';
 import { join } from 'path';
 import Election from './election.js';
 import { HerokuClient } from "./herokuClient.js";
-import { fetchChatTranscript } from './utils.js';
+import { fetchChatTranscript, isBotInTheRoom } from './utils.js';
 import { dateToUtcTimestamp } from './utils/dates.js';
 
 const __dirname = new URL(".", import.meta.url).pathname;
@@ -222,7 +222,7 @@ app.use((req, res, next) => {
 
 // GET /
 app.route('/')
-    .get((_req, res) => {
+    .get(async (_req, res) => {
 
         if (!BOT_CONFIG) {
             console.error("SERVER - bot config missing");
@@ -257,6 +257,8 @@ app.route('/')
                 apiKeyPool: []
             };
 
+            const isBotInRoom = BOT_ROOM ? await isBotInTheRoom(BOT_CONFIG, BOT_CLIENT, BOT_ROOM) : false;
+
             res.render('index', {
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
@@ -264,6 +266,7 @@ app.route('/')
                 },
                 heading: `Chatbot up and running.`,
                 data: {
+                    isBotInRoom,
                     utcNow: dateToUtcTimestamp(Date.now()),
                     autoRefreshInterval: BOT_CONFIG.scrapeIntervalMins * 60,
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,

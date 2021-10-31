@@ -1047,7 +1047,7 @@ export const sayAlreadyVoted = async (config, election, text) => {
  * @returns {Promise<string>}
  */
 export const sayHowManyModsAreHere = async (config, client, room) => {
-    const users = await getUsersCurrentlyInTheRoom(config, client, room);
+    const users = await getUsersCurrentlyInTheRoom(config, client.host, room);
 
     const mods = users.filter(({ isModerator }) => isModerator);
     const { length: numMods } = mods;
@@ -1075,7 +1075,7 @@ export const sayHowManyModsAreHere = async (config, client, room) => {
  * @returns {Promise<string>}
  */
 export const sayHowManyCandidatesAreHere = async (config, election, client, room) => {
-    const users = await getUsersCurrentlyInTheRoom(config, client, room);
+    const users = await getUsersCurrentlyInTheRoom(config, client.host, room);
 
     const { arrNominees } = election;
 
