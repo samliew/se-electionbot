@@ -15,6 +15,24 @@ const handlebarsConfig = {
     // without extname property set to .<extension>, partials will not work
     extname: ".handlebars",
     helpers: {
+        /** @type {(source: unknown) => boolean} */
+        isObj: (source) => typeof source === "object",
+        /** @type {(source: unknown) => boolean} */
+        isBool: (source) => typeof source === "boolean",
+        /** @type {(source: unknown) => boolean} */
+        isURL: (source) => {
+            if (typeof source !== "string") return false;
+            try {
+                /**
+                 * URL constructor throws TypeError if invalid
+                 * @see https://nodejs.org/api/url.html#new-urlinput-base
+                 */
+                const url = new URL(source);
+                return url.protocol.startsWith("http");
+            } catch (error) {
+                return false;
+            }
+        },
         ifEquals: function (arg1, arg2, options) {
             return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
         },
