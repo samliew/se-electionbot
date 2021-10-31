@@ -1,0 +1,18 @@
+<table class="nested">
+    <tbody>
+        {{#each this}}
+        <tr>
+            <td>{{@key}}</td>
+            {{#if (isObj this)}}
+            <td>{{> deep this}}</td>
+            {{else if (isBool this)}}
+            <td>{{{boolean this}}}</td>
+            {{else if (isURL this)}}
+            <td>{{{url this}}}</td>
+            {{else}}
+            <td>{{this}}</td>
+            {{/if}}
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
