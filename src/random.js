@@ -206,3 +206,9 @@ export const getRandomWhoAmI = () => new RandomArray(
     `No, I'm a crystal ball. I know the answer to life.`,
     `I'm a teapot, short and stout. Here is my handle, here is my spout.`,
 ).getRandom();
+
+export const getRandomThanks = () => new RandomArray(
+    "Not at all!",
+    "My pleasure.",
+    "You are welcome.",
+).getRandom();
