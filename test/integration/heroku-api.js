@@ -9,7 +9,15 @@ describe('Heroku API', function () {
 
     this.timeout(5e3); // APIs can be slow
 
-    const heroku = new HerokuClient(getMockBotConfig());
+    const heroku = new HerokuClient(getMockBotConfig({
+        flags: {
+            debug: false,
+            fun: false,
+            verbose: false,
+            announcedWinners: true,
+            saidElectionEndingSoon: true
+        }
+    }));
 
     it('should be able to fetch environment variables', async () => {
 
