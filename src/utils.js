@@ -951,6 +951,23 @@ export const getUser = async (client, userId) => {
 };
 
 /**
+ * @summary checks if the bot is currently in the given room
+ * @param {BotConfig} config bot configuration
+ * @param {Client} client ChatExchange client
+ * @param {Room} room room to check bot presense in
+ * @returns {Promise<boolean>}
+ */
+export const isBotInTheRoom = async (config, client, room) => {
+    const { chatDomain } = config;
+
+    const users = await getUsersCurrentlyInTheRoom(config, chatDomain, room);
+
+    const { id } = await client.getMe();
+
+    return users.some(({ userId }) => userId === id);
+};
+
+/**
  * @typedef {import("chatexchange/dist/Browser").IProfileData} IProfileData
  *
  * @summary guard for checking if a message is a bot messsage
