@@ -117,9 +117,13 @@ const handlebarsConfig = {
         getter: (ctxt, propertyName) => ctxt[propertyName],
         /** @type {(source: Map|Set) => any[]} */
         values: (source) => [...source.values()],
-        /** @type {(source: unknown[]|Map|Set)=> number} */
+        /** @type {(source: object|unknown[]|Map|Set)=> number} */
         len: (source) => {
-            return source instanceof Map || source instanceof Set ? source.size : source.length;
+            return source instanceof Map || source instanceof Set ?
+                source.size :
+                Array.isArray(source) ?
+                    source.length :
+                    Object.keys(source).length;
         },
         /** @type {(source:object[], key:string) => boolean} */
         someTruthy: (source, key) => source.some((obj) => !!obj[key])
