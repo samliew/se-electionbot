@@ -963,7 +963,7 @@ import { matchNumber } from "./utils/expressions.js";
                             `Today, I consider myself the luckiest bot on the face of the earth.`,
                         ).getRandom();
                     }
-                    else if (/^what are you\??$/.test(content) || /^are you a (ro)?bot\??$/.test(content)) {
+                    else if (isAskedWhoAmI(content)) {
                         responseText = new RandomArray(
                             `I'm Bot. James Bot.`,
                             `I'm a robot. Beep boop.`,

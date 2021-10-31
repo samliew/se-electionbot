@@ -212,7 +212,10 @@ describe('Message Guards', () => {
         "are you a bot?",
         "What are you",
         // https://chat.stackexchange.com/transcript/message/59433679#59433679
-        "are you a daemon?"
+        "are you a daemon?",
+        "Are you a robot?",
+        "Are you bot?"
+
     ];
 
     const howAmImatches = [
