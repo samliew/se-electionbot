@@ -103,7 +103,7 @@ export const toTadParamFormat = (date) => validateDate(date).toISOString()
 
 /**
  * @summary gets number of seconds since *nix epoch
- * @param {Date} date date to get seconds from
+ * @param {Date|string|number} date date to get seconds from
  * @returns {number}
  */
-export const getSeconds = (date) => date.getTime() / MS_IN_SECOND;
+export const getSeconds = (date) => new Date(date).getTime() / MS_IN_SECOND;
