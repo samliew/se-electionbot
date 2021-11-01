@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
-import { getSiteUserIdFromChatStackExchangeId } from "../../src/utils.js";
 import { getNumberOfVoters, getStackApiKey } from "../../src/api.js";
+import { getSiteUserIdFromChatStackExchangeId } from "../../src/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('getSiteUserIdFromChatStackExchangeId', function () {
@@ -47,7 +47,7 @@ describe('getVoterCount', function () {
             getMockBotConfig(),
             "stackoverflow",
             1974, // Constituent
-            new Date('2021-10-18 20:00:00Z'), // 1 Oct 2021 - start of election 13
+            { from: '2021-10-18 20:00:00Z' } // 11 Oct 2021 - start of election 13
         );
 
         expect(totalAwarded).to.gt(0);

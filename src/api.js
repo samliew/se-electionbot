@@ -139,26 +139,32 @@ export const getBadges = async (config, userId, site, type = "all", page = 1) =>
  * @param {BotConfig} config
  * @param {string} site election site slug
  * @param {number} badgeId Constituent badge id
- * @param {Date} electionPhaseDate election phase date
+ * @param {{
+ *  from: Date|string|number,
+ *  to?: Date|string|number
+ * }} options configuration
  * @returns {Promise<number>}
  */
-export const getNumberOfVoters = async (config, site, badgeId, electionPhaseDate) => {
+export const getNumberOfVoters = async (config, site, badgeId, options) => {
+    const { from, to } = options;
 
-    const time = getSeconds(electionPhaseDate);
+    const params = new URLSearchParams({
+        site,
+        fromdate: getSeconds(from).toString(),
+        key: getStackApiKey(config.apiKeyPool),
+        filter: "total"
+    });
+
+    if (to) params.append("todate", getSeconds(to).toString());
 
     const badgeURI = new URL(`${apiBase}/${apiVer}/badges/${badgeId}/recipients`);
-    badgeURI.search = new URLSearchParams({
-        site,
-        fromdate: time.toString(),
-        filter: "!-)3Kfj1w8kqK", // NO items, only total
-        key: getStackApiKey(config.apiKeyPool)
-    }).toString();
+    badgeURI.search = params.toString();
 
     if (config.debug) console.log(badgeURI.toString());
 
     const { total = 0 } = /**@type {ApiWrapper<User>} */(await fetchUrl(config, badgeURI, true)) || {};
 
-    if (config.verbose) console.log(`API - ${getBadges.name}\n`, total);
+    if (config.verbose) console.log(`API - ${getNumberOfVoters.name}\n`, total);
 
     return total === 1 ? 2 : total; // Avoid the extremely unlikely singular scenario
 };
