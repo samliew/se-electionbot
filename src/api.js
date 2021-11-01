@@ -1,4 +1,5 @@
 import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
+import { getSeconds } from "./utils/dates.js";
 
 /**
  * @typedef {import("./election").default} Election
@@ -143,8 +144,7 @@ export const getBadges = async (config, userId, site, type = "all", page = 1) =>
  */
 export const getNumberOfVoters = async (config, site, badgeId, electionPhaseDate) => {
 
-    let time = electionPhaseDate.getTime();
-    time /= 1000;
+    const time = getSeconds(electionPhaseDate);
 
     const badgeURI = new URL(`${apiBase}/${apiVer}/badges/${badgeId}/recipients`);
     badgeURI.search = new URLSearchParams({
