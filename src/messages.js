@@ -9,6 +9,7 @@ import {
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase, scrapeAwardedBadge
 } from "./utils.js";
 import { dateToRelativetime } from "./utils/dates.js";
+import { safeCapture } from "./utils/expressions.js";
 import { parsePackage } from "./utils/package.js";
 import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
 
@@ -53,7 +54,7 @@ export const sayHI = async (config, election, greeting = 'Welcome to the electio
     let alreadyVoted = "";
     if (phase === 'election' && electionBadgeId) {
         const numEligible = await getNumberOfUsersEligibleToVote(config, election);
-        const numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
+        const numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, { from: dateElection });
 
         const format = partialRight(formatNumber, [3]);
         const eligible = `${percentify(numVoters, numEligible, 2)} of ${format(numEligible)} eligible`;
@@ -1015,13 +1016,18 @@ export const sayAlreadyVoted = async (config, election, text) => {
     const electionBadgeId = election.getBadgeId(electionBadgeName);
 
     const isInverted = /\bnot\b/i.test(text);
+    const todate = safeCapture(/\b(?:to|till)\s+(\d{4}-\d{2}-\d{2})(?:\?\!?|$)/i, text);
 
     if (phase === 'election' && electionBadgeId) {
         const format = partialRight(formatNumber, [3]);
 
-        const numEligible = await getNumberOfUsersEligibleToVote(config, election);
-        const numAwarded = await getNumberOfVoters(config, apiSlug, electionBadgeId, new Date(dateElection));
-
+        const [numEligible, numAwarded] = await Promise.all([
+            getNumberOfUsersEligibleToVote(config, election),
+            getNumberOfVoters(config, apiSlug, electionBadgeId, {
+                from: dateElection,
+                to: todate
+            })
+        ]);
 
         const numVoted = isInverted ? numEligible - numAwarded : numAwarded;
         const negated = isInverted ? " not" : "";
