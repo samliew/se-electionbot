@@ -319,18 +319,22 @@ import { matchNumber } from "./utils/expressions.js";
             const userIdHref = last([...document.querySelectorAll(`#content a[href*="/user"]`)])?.href;
 
             //  @ts-expect-error TODO: cleanup
-            const nominationDate = last([...document.querySelectorAll(`#content .relativetime`)])?.title;
+            const nominationDateString = last([...document.querySelectorAll(`#content .relativetime`)])?.title;
 
             const userId = matchNumber(/\/users\/(\d+)/, userIdHref) || -42;
 
             if (election.withdrawnNominees.has(userId)) continue;
+
+            // Withdrawn candidate's nominationDate cannot have been outside of the election's nomination period
+            const nominationDate = new Date(nominationDateString || -1);
+            if (nominationDate < election.dateNomination || nominationDate >= election.dateElection || (election.datePrimary && nominationDate >= election.datePrimary)) continue;
 
             const permalink = userIdHref ? `https://${election.siteHostname}${userIdHref}` : "";
 
             const withdrawnNominee = new Nominee({
                 userId,
                 userName,
-                nominationDate: new Date(nominationDate || -1),
+                nominationDate: nominationDate,
                 nominationLink: nominationLink,
                 withdrawn: true,
                 permalink,
