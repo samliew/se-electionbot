@@ -21,12 +21,12 @@ export const matchNumber = (expression, text) => {
 };
 
 /**
- * @summary checks if a given text is a UTC timestamp
+ * @summary checks if a given text is a ISO 8601 timestamp
  * @param {string} text text to match
  * @returns {boolean}
  */
-export const matchesUTC = (text) => {
-    return /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}Z\b/.test(text);
+export const matchesISO8601 = (text) => {
+    return /\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}Z\b/.test(text);
 };
 
 /**

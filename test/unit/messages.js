@@ -3,7 +3,7 @@ import Election from "../../src/election.js";
 import { sayAboutElectionStatus, sayBadgesByType, sayDiamondAlready, sayElectionIsEnding, sayElectionSchedule, sayHI, sayWithdrawnNominations } from "../../src/messages.js";
 import { calculateScore } from "../../src/score.js";
 import { capitalize } from "../../src/utils.js";
-import { matchesUTC } from "../../src/utils/expressions.js";
+import { matchesISO8601 } from "../../src/utils/expressions.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
@@ -238,7 +238,7 @@ describe("Messages module", () => {
 
                 const message = sayElectionIsEnding(election);
                 expect(message).to.include("ends at");
-                expect(matchesUTC(message)).to.be.true;
+                expect(matchesISO8601(message)).to.be.true;
             });
         });
     });
