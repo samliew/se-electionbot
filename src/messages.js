@@ -9,7 +9,7 @@ import {
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase, scrapeAwardedBadge
 } from "./utils.js";
 import { dateToRelativetime } from "./utils/dates.js";
-import { safeCapture } from "./utils/expressions.js";
+import { matchISO8601 } from "./utils/expressions.js";
 import { parsePackage } from "./utils/package.js";
 import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
 
@@ -1017,12 +1017,10 @@ export const sayAlreadyVoted = async (config, election, text) => {
 
     const isInverted = /\bnot\b/i.test(text);
 
-    const timestamp = safeCapture(/\b(?:to|till)\s+(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2}(?=Z|))?)/i, text);
-    const [toDate, toTime = "00:00:00"] = timestamp?.split(/\s+/) || [];
-    const todate = timestamp && `${toDate} ${toTime}`;
+    const todate = matchISO8601(text, { preMatches: /\b(?:to|till)\s+/ });
 
     if (config.debugOrVerbose) {
-        console.log("voting date upper bound", { todate, toDate, toTime, timestamp });
+        console.log("voting date bounds", { todate, fromdate: dateElection });
     }
 
     if (phase === 'election' && electionBadgeId) {
