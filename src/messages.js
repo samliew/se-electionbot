@@ -1016,7 +1016,14 @@ export const sayAlreadyVoted = async (config, election, text) => {
     const electionBadgeId = election.getBadgeId(electionBadgeName);
 
     const isInverted = /\bnot\b/i.test(text);
-    const todate = safeCapture(/\b(?:to|till)\s+(\d{4}-\d{2}-\d{2})(?:\?\!?|$)/i, text);
+
+    const timestamp = safeCapture(/\b(?:to|till)\s+(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2}(?=Z|))?)/i, text);
+    const [toDate, toTime = "00:00:00"] = timestamp?.split(/\s+/) || [];
+    const todate = timestamp && `${toDate} ${toTime}`;
+
+    if (config.debugOrVerbose) {
+        console.log("voting date upper bound", { todate, toDate, toTime, timestamp });
+    }
 
     if (phase === 'election' && electionBadgeId) {
         const format = partialRight(formatNumber, [3]);
