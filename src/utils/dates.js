@@ -1,5 +1,7 @@
 import { pluralize } from "../utils.js";
 
+const MS_IN_SECOND = 1000;
+
 /**
  * @summary validates and normalizes the Date
  * @param {Date|number|string} input
@@ -34,13 +36,12 @@ export const dateToRelativetime = (date, { soonText = 'soon', justNowText = 'jus
 
     if (date === null) return soonText;
 
-    const MS_SEC = 1000;
     const S_MIN = 60;
     const S_HOUR = S_MIN * 60;
     const S_DAY = S_HOUR * 24;
 
     // Try future date
-    let diff = (date.getTime() - Date.now()) / MS_SEC;
+    let diff = (date.getTime() - Date.now()) / MS_IN_SECOND;
     let dayDiff = Math.floor(diff / S_DAY);
 
     // In the future
@@ -60,7 +61,7 @@ export const dateToRelativetime = (date, { soonText = 'soon', justNowText = 'jus
     }
 
     // In the past
-    diff = (Date.now() - date.getTime()) / MS_SEC;
+    diff = (Date.now() - date.getTime()) / MS_IN_SECOND;
     dayDiff = Math.floor(diff / S_DAY);
 
     /** @type {[boolean, string][]} */
@@ -99,3 +100,10 @@ export const toTadParamFormat = (date) => validateDate(date).toISOString()
     .replace(/(-|:|\d\dZ)/gi, '')
     .replace(/\..*$/, '')
     .replace(/ /g, 'T');
+
+/**
+ * @summary gets number of seconds since *nix epoch
+ * @param {Date} date date to get seconds from
+ * @returns {number}
+ */
+export const getSeconds = (date) => date.getTime() / MS_IN_SECOND;
