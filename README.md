@@ -42,6 +42,18 @@ Current election info:
 - why was a nomination removed
 - where are the nomination comments
 
+Voting stats calculation
+
+"how many users voted" command optionally accepts "to `<timestamp>`" postfix to limit the query.<br>
+If none is provided, it will default to the current date and time.
+The timestamp can be specified in several formats (`Z`, aka Zulu time indicator can be omitted for brevity):
+
+| Format                 | Meaning                                                    |
+| ---------------------- | ---------------------------------------------------------- |
+| `yyyy-MM-dd`           | short timestamp, the time part will default to `00:00:00Z` |
+| `yyyy-MM-dd HH-mm-ss`  | full timestamp with a space in place of `T` as per RFC3339 |
+| `yyyy-MM-ddTHH-mm-ssZ` | full timestamp as per ISO8601 standard                     |
+
 About moderators/moderating:
 
 - what are the responsibilities of a moderator
