@@ -10,6 +10,20 @@ export const safeCapture = (expression, text) => {
 };
 
 /**
+ * @summary matches an ISO8601 timestamp from a given string
+ * @param {string} text text to match
+ * @param {{ preMatches?: RegExp, postMatches?: RegExp; }} [options] additional config
+ * @returns {string | undefined}
+ */
+export const matchISO8601 = (text, { preMatches, postMatches } = {}) => {
+    const isoRegex = /(\d{4}-\d{2}-\d{2}(?:(?:\s+|T)\d{2}:\d{2}:\d{2}(?=Z|))?)/;
+    const expression = new RegExp((preMatches?.source || "") + isoRegex.source + (postMatches?.source || ""), "i");
+    const timestamp = safeCapture(expression, text);
+    const [toDate, toTime = "00:00:00"] = timestamp?.split(/\s+|T/) || [];
+    return timestamp && `${toDate}T${toTime}Z`;
+};
+
+/**
  * @summary matches and parses a number from a string
  * @param {RegExp} expression regular expression (must have a capturing group)
  * @param {string} text text to match the number in
