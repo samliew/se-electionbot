@@ -96,4 +96,50 @@ export class HerokuClient {
     async restartApp() {
         return await this.updateConfigVar("TEST", "restart-" + Math.floor(Math.random() * 99999) + 1);
     };
+
+    /**
+     * @summary scale app's dynos
+     * @return {Promise<boolean>}
+     *
+     * Heroku dyno sizes: free, hobby, standard-1X, standard-2X, Performance-M, Performance-L
+     */
+    async _scale(webQuantity = 1, webSize = "free", workerQuantity = 0, workerSize = "free") {
+        const formationArr = [
+            {
+                "quantity": webQuantity,
+                "size": webSize,
+                "type": "web"
+            },
+            {
+                "quantity": workerQuantity,
+                "size": workerSize,
+                "type": "worker"
+            },
+        ];
+        return await this._client.patch(`/apps/${this._appName}/formation`, { body: { updates: formationArr } }) && true;
+    };
+
+    /**
+     * @summary scale app's dynos to nothing (kills process with manual rescale needed to restart)
+     * @return {Promise<boolean>}
+     */
+    async scaleNone() {
+        return await this._scale(0, "free");
+    };
+
+    /**
+     * @summary scale app's dynos to free
+     * @return {Promise<boolean>}
+     */
+    async scaleFree() {
+        return await this._scale(1, "free");
+    };
+
+    /**
+     * @summary scale app's dynos to free
+     * @return {Promise<boolean>}
+     */
+    async scaleHobby() {
+        return await this._scale(1, "hobby");
+    };
 }

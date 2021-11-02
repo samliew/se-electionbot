@@ -135,12 +135,15 @@ export default class Rescraper {
             if (election.phase === 'cancelled' && election.isNewPhase()) {
                 await announcement?.announceCancelled(room, election);
                 console.log(`RESCRAPER - Election was cancelled.`);
+
+                // Scale Heroku dynos to free (restarts app)
+                const heroku = new HerokuClient(config);
+                await heroku.scaleFree();
             }
 
             // Official results out
             if (election.phase === 'ended' && election.hasNewWinners) {
                 await announcement?.announceWinners(room, election);
-                this.stop();
                 console.log(`RESCRAPER - Winners announced.`);
             }
 
@@ -158,13 +161,18 @@ export default class Rescraper {
             // The election is ending within the next 10 minutes or less, do once only
             else if (election.isEnding() && !config.flags.saidElectionEndingSoon) {
 
+                config.flags.saidElectionEndingSoon = true;
+
                 // Reduce scrape interval
                 config.scrapeIntervalMins = 1;
+
+                // Scale Heroku dynos to paid (restarts app)
+                const heroku = new HerokuClient(config);
+                await heroku.scaleHobby();
 
                 // Announce election ending soon
                 // Update index.js as well if message changes
                 await sendMessage(config, room, `The ${makeURL('election', election.electionUrl)} is ending soon. This is the final chance to cast or change your votes!`);
-                config.flags.saidElectionEndingSoon = true;
 
                 if (config.debugOrVerbose) {
                     console.log(`RESCRAPER - Election ending - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
@@ -183,6 +191,10 @@ export default class Rescraper {
 
                 // Increase scrape interval since we don't need to scrape often
                 config.scrapeIntervalMins = 10;
+
+                // Scale Heroku dynos to free (restarts app)
+                const heroku = new HerokuClient(config);
+                await heroku.scaleFree();
 
                 if (config.debugOrVerbose) {
                     console.log(`RESCRAPER - Scrape interval increased to ${config.scrapeIntervalMins}.`);
