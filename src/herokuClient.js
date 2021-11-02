@@ -142,4 +142,12 @@ export class HerokuClient {
     async scaleHobby() {
         return await this._scale(1, "hobby");
     };
+
+    /**
+     * @summary get app's dynos
+     * @return {Promise<any>}
+     */
+    async getDynos() {
+        return await this._client.get(`/apps/${this._appName}/formation`);
+    };
 }
