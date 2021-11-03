@@ -1,7 +1,7 @@
 import { HerokuClient } from "./herokuClient.js";
 import { sayBusyGreeting, sayElectionSchedule, sayIdleGreeting } from "./messages.js";
-import { sendMessage } from "./queue.js";
-import { makeURL, wait } from "./utils.js";
+import { sendMessage, sendMessageList } from "./queue.js";
+import { makeURL } from "./utils.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -126,9 +126,12 @@ export default class Rescraper {
             if (election.electionDatesChanged) {
                 announcement?.stopAll();
                 announcement?.initAll();
-                await sendMessage(config, room, `The ${makeURL("election", election.electionUrl)} dates have changed:`);
-                await wait(1);
-                await sendMessage(config, room, sayElectionSchedule(election));
+
+                await sendMessageList(
+                    config, room, true,
+                    `The ${makeURL("election", election.electionUrl)} dates have changed:`,
+                    sayElectionSchedule(election)
+                );
             }
 
             // The election was cancelled
