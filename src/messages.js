@@ -505,9 +505,10 @@ export const sayElectionSchedule = (election) => {
 
     const prefix = `    ${siteName} Election ${electionNum} Schedule`;
 
+    /** @type {[Exclude<ElectionPhase,null>,string][]} */
     const dateMap = [
         ["nomination", dateNomination],
-        ["primary", datePrimary],
+        ["primary", datePrimary || ""],
         ["election", dateElection],
         ["ended", dateEnded]
     ];

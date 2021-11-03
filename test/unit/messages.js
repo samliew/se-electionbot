@@ -143,7 +143,7 @@ describe("Messages module", () => {
 
         it('should correctly determine if election has not started yet', () => {
             const election = new Election("https://stackoverflow.com/election/12");
-            election.dateNomination = Date.now() + 864e5 * 7;
+            election.dateNomination = new Date(Date.now() + 864e5 * 7).toISOString();
 
             const message = sayWithdrawnNominations(config, election);
             expect(message).to.match(/not started/i);
@@ -175,7 +175,7 @@ describe("Messages module", () => {
 
         it('should correctly determine if election has not started yet', () => {
             const election = new Election("https://stackoverflow.com/election/12");
-            election.dateNomination = Date.now() + 864e5 * 7;
+            election.dateNomination = new Date(Date.now() + 864e5 * 7).toISOString();
 
             const message = sayAboutElectionStatus(config, election);
             expect(message).to.match(/not started/i);

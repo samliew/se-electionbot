@@ -295,6 +295,7 @@ import { matchNumber } from "./utils/expressions.js";
         let withdrawnCount = 0;
 
         // Parse previous nomination announcements and see which ones are no longer around
+        const { dateElectionMs, dateNominationMs, datePrimaryMs, siteHostname } = election;
         for (const item of botAnnouncements) {
             const { messageMarkup } = item;
 
@@ -327,9 +328,10 @@ import { matchNumber } from "./utils/expressions.js";
 
             // Withdrawn candidate's nominationDate cannot have been outside of the election's nomination period
             const nominationDate = new Date(nominationDateString || -1);
-            if (nominationDate < election.dateNomination || nominationDate >= election.dateElection || (election.datePrimary && nominationDate >= election.datePrimary)) continue;
+            const nominationMs = nominationDate.valueOf();
+            if (nominationMs < dateNominationMs || nominationMs >= dateElectionMs || (datePrimaryMs && nominationMs >= datePrimaryMs)) continue;
 
-            const permalink = userIdHref ? `https://${election.siteHostname}${userIdHref}` : "";
+            const permalink = userIdHref ? `https://${siteHostname}${userIdHref}` : "";
 
             const withdrawnNominee = new Nominee({
                 userId,

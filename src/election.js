@@ -189,6 +189,30 @@ export default class Election {
     ];
 
     /**
+     * @summary date of the start of the nomination phase
+     * @type {string}
+     */
+    dateNomination;
+
+    /**
+     * @summary date of the start of the primary phase
+     * @type {string|undefined}
+     */
+    datePrimary;
+
+    /**
+     * @summary date of the start of the election phase
+     * @type {string}
+     */
+    dateElection;
+
+    /**
+     * @summary end date of the election
+     * @type {string}
+     */
+    dateEnded;
+
+    /**
      * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
      * @param {string|number|null} [electionNum] number of election, can be a numeric string
      */
@@ -207,6 +231,33 @@ export default class Election {
 
         // private
         this._prevObj = null;
+    }
+
+    /**
+     * @summary returns dateNomination time value in milliseconds
+     * @returns {number}
+     */
+    get dateNominationMs() {
+        const { dateNomination } = this;
+        return new Date(dateNomination).valueOf();
+    }
+
+    /**
+     * @summary returns datePrimary time value in milliseconds
+     * @returns {number|undefined}
+     */
+    get datePrimaryMs() {
+        const { datePrimary } = this;
+        return datePrimary ? new Date(datePrimary).valueOf() : void 0;
+    }
+
+    /**
+     * @summary returns dateElection time value in milliseconds
+     * @returns {number}
+     */
+    get dateElectionMs() {
+        const { dateElection } = this;
+        return new Date(dateElection).valueOf();
     }
 
     /**
@@ -458,6 +509,7 @@ export default class Election {
     validate() {
 
         // validation rules with error messages
+        /** @type {[boolean|string, string][]} */
         const rules = [
             [this.validElectionUrl(this.electionUrl), "invalid election URL"],
             [typeof this.electionNum === "number", "invalid election number"],
@@ -494,7 +546,7 @@ export default class Election {
      */
     isNotStartedYet() {
         const { phase, dateNomination } = this;
-        return !phase || dateNomination > Date.now();
+        return !phase || new Date(dateNomination).valueOf() > Date.now();
     }
 
     /**
@@ -526,7 +578,7 @@ export default class Election {
         const { phase, dateEnded } = this;
         return phase !== "cancelled" && [
             phase === "ended",
-            dateEnded < Date.now()
+            new Date(dateEnded).valueOf() < Date.now()
         ].some(Boolean);
     }
 
@@ -537,7 +589,7 @@ export default class Election {
      */
     isEnding(threshold = 15 * 6e5) {
         const { phase, dateEnded } = this;
-        const isUnderThreshold = dateEnded.valueOf() - threshold <= Date.now();
+        const isUnderThreshold = new Date(dateEnded).valueOf() - threshold <= Date.now();
         return phase === 'election' && isUnderThreshold;
     }
 
@@ -571,7 +623,7 @@ export default class Election {
 
         const now = today.valueOf();
 
-        /** @type {[string, ElectionPhase][]} */
+        /** @type {[string|undefined, ElectionPhase][]} */
         const phaseMap = [
             [dateEnded, "ended"],
             [dateElection, "election"],

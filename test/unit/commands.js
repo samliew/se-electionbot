@@ -141,7 +141,7 @@ describe('Individual commands', () => {
             });
             const election = new Election("https://stackoverflow.com/election/12");
             election.phase = "nomination";
-            election.dateEnded = endingDate;
+            election.dateEnded = endingDate.toISOString();
 
             const isoDate = futureDate.toISOString().slice(0, 10);
 
@@ -152,7 +152,7 @@ describe('Individual commands', () => {
             expect(config.flags.announcedWinners).to.be.false;
             expect(config.flags.saidElectionEndingSoon).to.be.false;
 
-            election.dateEnded = null;
+            election.dateEnded = "";
 
             const noDate = timetravelCommand(config, election, `timetravel to ${isoDate}`);
             expect(noDate).to.contain("no phase");

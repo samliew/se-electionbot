@@ -255,7 +255,10 @@ describe('Election', () => {
 
                 const election = new Election("https://stackoverflow.com/election/12");
                 election._prevObj = { dateEnded: date };
-                election.dateEnded = date.setHours(date.getHours() + 1);
+
+                date.setHours(date.getHours() + 1);
+
+                election.dateEnded = date.toISOString();
 
                 expect(election.electionDatesChanged).to.be.true;
             });
@@ -342,7 +345,7 @@ describe('Election', () => {
 
             expect(election.isNotStartedYet()).to.be.true;
 
-            election.dateNomination = Date.now() - 864e5;
+            election.dateNomination = new Date(Date.now() - 864e5).toISOString();
             election.phase = "nomination";
             expect(election.isNotStartedYet()).to.be.false;
 
@@ -383,10 +386,10 @@ describe('Election', () => {
         it('should corrrectly check if election has ended', () => {
             const election = new Election("https://stackoverflow.com/election/12");
 
-            election.dateEnded = Date.now() - 100 * 864e5;
+            election.dateEnded = new Date(Date.now() - 100 * 864e5).toISOString();
             expect(election.isEnded()).to.be.true;
 
-            election.dateEnded = Date.now() + 2 * 64e5;
+            election.dateEnded = new Date(Date.now() + 2 * 64e5).toISOString();
             expect(election.isEnded()).to.be.false;
 
             election.phase = "cancelled";
@@ -401,12 +404,12 @@ describe('Election', () => {
 
             const election = new Election("https://stackoverflow.com/election/12");
             election.phase = "election";
-            election.dateEnded = Date.now();
+            election.dateEnded = new Date().toISOString();
 
             const isEndedInThePast = election.isEnding(offset);
             expect(isEndedInThePast).to.be.true;
 
-            election.dateEnded = Date.now() + offset * 2;
+            election.dateEnded = new Date(Date.now() + offset * 2).toISOString();
 
             const isEndedInTheFuture = election.isEnding(offset);
             expect(isEndedInTheFuture).to.be.false;
