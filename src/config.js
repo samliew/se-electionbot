@@ -323,6 +323,7 @@ export class BotConfig {
     flags = {
         saidElectionEndingSoon: false,
         announcedWinners: false,
+        announcedMetaPost: false,
         fun: parseBoolEnv("fun_mode", true),
         debug: parseBoolEnv("debug", false),
         verbose: parseBoolEnv("verbose", false),
