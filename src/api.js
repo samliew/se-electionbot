@@ -387,17 +387,24 @@ export const getMetaSite = async (config, site) => {
  * @summary gets a list of official Meta posts with moderator election results
  * @param {BotConfig} config bot configuration
  * @param {string} metasite meta site API slug
+ * @param {{ from?: string|number|Date, to?: string|number|Date }} [options] configuration
  * @returns {Promise<Question[]>}
  */
-export const getMetaResultAnnouncements = async (config, metasite) => {
-    const url = new URL(`${apiBase}/${apiVer}/search`);
-    url.search = new URLSearchParams({
+export const getMetaResultAnnouncements = async (config, metasite, options = {}) => {
+    const params = new URLSearchParams({
         site: metasite,
         pagesize: "100",
         filter: "!nHkM3G6aJMhrhGJqQcd_m2",
         intitle: "moderator election results",
         key: getStackApiKey(config.apiKeyPool),
-    }).toString();
+    });
+
+    const { from, to } = options;
+    if (from) params.append("fromdate", getSeconds(from).toString());
+    if (to) params.append("todate", getSeconds(to).toString());
+
+    const url = new URL(`${apiBase}/${apiVer}/search`);
+    url.search = params.toString();
 
     return handleResponse(
         /** @type {ApiWrapper<Question>} */(await fetchUrl(config, url, true)) || {},
