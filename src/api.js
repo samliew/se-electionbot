@@ -394,7 +394,7 @@ export const getMetaResultAnnouncements = async (config, metasite, options = {})
     const params = new URLSearchParams({
         site: metasite,
         pagesize: "100",
-        filter: "!nHkM3G6aJMhrhGJqQcd_m2",
+        filter: "!6VClR6P6lkPmj6TkZcXJE*kb-",
         intitle: "moderator election results",
         key: getStackApiKey(config.apiKeyPool),
     });
