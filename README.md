@@ -144,3 +144,16 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `TRANSCRIPT_SIZE`              | number   | no        | `20`         | number of latest messages to show in the dashboard                                                      |
 | `SHOW_PRIMARY_COUNTDOWN_AFTER` | number   | no        | `8`          | minimum number of candidates to start showing countdown to primary if the current phase is _nomination_ |
 | `CONTROL_ROOM_ID`              | number   | no        | -            | flight control room for the bot to join                                                                 |
+
+## Flags
+
+The bot keeps track of its internal state via a set of boolean flags:
+
+| Flag                     | Default | Description                                           |
+| ------------------------ | ------- | ----------------------------------------------------- |
+| `announcedMetaPost`      | `false` | official Meta post announcing winners has been posted |
+| `announcedWinners`       | `false` | election winners have been announced in the room      |
+| `debug`                  | `false` | debug mode is on (moderate logging)                   |
+| `fun`                    | `true`  | fun mode is on                                        |
+| `saidElectionEndingSoon` | `false` | upcoming end of election has been announced           |
+| `verbose`                | `false` | verbose mode is on (extra logging)                    |
