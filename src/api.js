@@ -3,6 +3,7 @@ import { getSeconds } from "./utils/dates.js";
 
 /**
  * @typedef {import("./election").default} Election
+ * @typedef {import("@userscripters/stackexchange-api-types").Question} Question
  * @typedef {import("@userscripters/stackexchange-api-types").Site} Site
  * @typedef {import("@userscripters/stackexchange-api-types").NetworkUser} NetworkUser
  * @typedef {import("@userscripters/stackexchange-api-types").User} User
@@ -352,6 +353,55 @@ export const getUserAssociatedAccounts = async (config, networkId, page = 1) => 
     return handleResponse(
         /** @type {ApiWrapper<NetworkUser>} */(await fetchUrl(config, url, true)) || {},
         () => getUserAssociatedAccounts(config, networkId, page),
+        async ({ items = [] }) => items
+    );
+};
+
+/**
+ * @see https://api.stackexchange.com/docs/info
+ * @param {BotConfig} config bot configuration
+ * @param {string} site site API slug
+ * @returns {Promise<Site|undefined>}
+ */
+export const getMetaSite = async (config, site) => {
+    const url = new URL(`${apiBase}/${apiVer}/info`);
+    url.search = new URLSearchParams({
+        site,
+        pagesize: "100",
+        filter: "!.0j6AKUvkY2pnnyuzGkDGyJz",
+        intitle: "moderator election results",
+        key: getStackApiKey(config.apiKeyPool),
+    }).toString();
+
+    return handleResponse(
+        /** @type {ApiWrapper<Site>} */(await fetchUrl(config, url, true)) || {},
+        () => getMetaSite(config, site),
+        async ({ items = [] }) => {
+            const [{ related_sites = [] }] = items;
+            return related_sites.find(({ relation }) => relation === "meta");
+        }
+    );
+};
+
+/**
+ * @summary gets a list of official Meta posts with moderator election results
+ * @param {BotConfig} config bot configuration
+ * @param {string} metasite meta site API slug
+ * @returns {Promise<Question[]>}
+ */
+export const getMetaResultAnnouncements = async (config, metasite) => {
+    const url = new URL(`${apiBase}/${apiVer}/search`);
+    url.search = new URLSearchParams({
+        site: metasite,
+        pagesize: "100",
+        filter: "!nHkM3G6aJMhrhGJqQcd_m2",
+        intitle: "moderator election results",
+        key: getStackApiKey(config.apiKeyPool),
+    }).toString();
+
+    return handleResponse(
+        /** @type {ApiWrapper<Question>} */(await fetchUrl(config, url, true)) || {},
+        () => getMetaResultAnnouncements(config, metasite),
         async ({ items = [] }) => items
     );
 };
