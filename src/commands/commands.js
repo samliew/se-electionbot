@@ -359,4 +359,6 @@ export const postMetaAnnouncement = async (config, election, room, content) => {
     const oneBox = !/\bprett(?:y|ify)/.test(content);
 
     await sendMessage(config, room, oneBox ? link : makeURL(title, link), null, true);
+
+    config.flags.announcedMetaPost = true;
 };
