@@ -364,7 +364,7 @@ import { matchNumber } from "./utils/expressions.js";
 
         // TODO: check if not posted yet
         const metaAnnouncements = await searchChat(config, config.chatDomain, "moderator election results", config.chatRoomId);
-        if (election.isEnded() && !metaAnnouncements.length) {
+        if (election.isEnded() && config.canAnnounceMetaPost && !metaAnnouncements.length) {
             await postMetaAnnouncement(config, election, room, "");
             console.log(`INIT - posted meta announcement`);
         }

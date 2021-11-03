@@ -289,6 +289,15 @@ export class BotConfig {
     }
 
     /**
+     * @summary checks if the bot can post the official meta announcement
+     * @returns {boolean}
+     */
+    get canAnnounceMetaPost() {
+        const { flags } = this;
+        return !flags.announcedMetaPost;
+    }
+
+    /**
      * @summary returns whether the bot is in increased logging mode
      * @description use this when you want logging either in development or production, because you can set verbose mode in production to get more data or stealth debugging
      */
