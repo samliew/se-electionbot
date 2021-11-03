@@ -4,6 +4,7 @@ import { getSeconds } from "./utils/dates.js";
 /**
  * @typedef {import("./election").default} Election
  * @typedef {import("@userscripters/stackexchange-api-types").Question} Question
+ * @typedef {import("@userscripters/stackexchange-api-types").Info} Info
  * @typedef {import("@userscripters/stackexchange-api-types").Site} Site
  * @typedef {import("@userscripters/stackexchange-api-types").NetworkUser} NetworkUser
  * @typedef {import("@userscripters/stackexchange-api-types").User} User
@@ -374,10 +375,10 @@ export const getMetaSite = async (config, site) => {
     }).toString();
 
     return handleResponse(
-        /** @type {ApiWrapper<Site>} */(await fetchUrl(config, url, true)) || {},
+        /** @type {ApiWrapper<Info>} */(await fetchUrl(config, url, true)) || {},
         () => getMetaSite(config, site),
         async ({ items = [] }) => {
-            const [{ related_sites = [] }] = items;
+            const [{ site: { related_sites = [] } = {} }] = items;
             return related_sites.find(({ relation }) => relation === "meta");
         }
     );
