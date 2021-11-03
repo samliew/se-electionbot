@@ -7,7 +7,7 @@ import sanitize from "sanitize-html";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getBadges, getModerators, getUserInfo } from "./api.js";
-import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { AccessLevel, CommandManager } from './commands/index.js';
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
@@ -571,6 +571,8 @@ import { matchNumber } from "./utils/expressions.js";
 
                 commander.add("impersonate", "impersonates a user", impersonateUser, AccessLevel.dev);
 
+                commander.add("post meta", "posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged);
+
                 commander.aliases({
                     timetravel: ["delorean", "88 miles"],
                     mute: ["timeout", "sleep"],
@@ -613,7 +615,8 @@ import { matchNumber } from "./utils/expressions.js";
                     ["list moderators", /^whois/, config, content, entities],
                     ["reset election", /^reset election/, config, election],
                     ["ignore", /^ignore \d+/, config, room, content],
-                    ["impersonate", /^impersonate \d+/, config, content]
+                    ["impersonate", /^impersonate \d+/, config, content],
+                    ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, content]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, content);

@@ -1,6 +1,7 @@
-import { getModerators } from "../api.js";
+import { getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting, sayOtherSiteMods, sayUptime } from "../messages.js";
+import { sendMessage } from "../queue.js";
 import { RandomArray } from "../random.js";
 import { capitalize, makeURL } from "../utils.js";
 import { dateToUtcTimestamp } from "../utils/dates.js";
@@ -325,4 +326,37 @@ export const sayFeedback = (config) => {
     const feedbackForm = feedbackUrl ? `The feedback form is at ${makeURL(feedbackUrl)}` : `Feature requests can be submitted at ${makeURL(repoIssueUrl)}`;
 
     return `${randomGreet} ${randomFeedback} ${feedbackForm}. Thanks!`;
+};
+
+/**
+ * @summary posts a meta announcement in the room
+ * @param {BotConfig} config bot config
+ * @param {Election} election current election instance
+ * @param {Room} room current room
+ * @param {string} content message content
+ * @returns {Promise<void>}
+ */
+export const postMetaAnnouncement = async (config, election, room, content) => {
+    const { apiSlug, dateEnded } = election;
+
+    const { api_site_parameter } = await getMetaSite(config, apiSlug) || {};
+    if (config.debugOrVerbose) {
+        console.log(postMetaAnnouncement.name, {
+            api_site_parameter, apiSlug
+        });
+    }
+
+    if (!api_site_parameter) return;
+
+    const [announcement] = await getMetaResultAnnouncements(
+        config, api_site_parameter,
+        { from: dateEnded }
+    );
+    if (!announcement) return;
+
+    const { title, link } = announcement;
+
+    const oneBox = !/\bprett(?:y|ify)/.test(content);
+
+    await sendMessage(config, room, oneBox ? link : makeURL(title, link), null, true);
 };
