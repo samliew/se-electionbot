@@ -104,19 +104,32 @@ export class HerokuClient {
      * Heroku dyno sizes: free, hobby, standard-1X, standard-2X, Performance-M, Performance-L
      */
     async _scale(webQuantity = 1, webSize = "free", workerQuantity = 0, workerSize = "free") {
-        const formationArr = [
-            {
-                "quantity": webQuantity,
-                "size": webSize,
-                "type": "web"
-            },
-            {
-                "quantity": workerQuantity,
-                "size": workerSize,
-                "type": "worker"
-            },
-        ];
-        return await this._client.patch(`/apps/${this._appName}/formation`, { body: { updates: formationArr } }) && true;
+        try {
+            const { _client, _appName } = this;
+
+            const formationArr = [
+                {
+                    "quantity": webQuantity,
+                    "size": webSize,
+                    "type": "web"
+                },
+                {
+                    "quantity": workerQuantity,
+                    "size": workerSize,
+                    "type": "worker"
+                },
+            ];
+
+            await _client.patch(
+                `/apps/${_appName}/formation`,
+                { body: { updates: formationArr } }
+            );
+
+            return true;
+        } catch (error) {
+            console.log(`HerokuClient error:\n${error}`);
+            return false;
+        }
     };
 
     /**
