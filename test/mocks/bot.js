@@ -1,7 +1,10 @@
 import BotConfig from "../../src/config.js";
 
 /**
- * @param {Partial<BotConfig>} [overrides]
+ * @template T
+ * @typedef {{ [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P] }} DeepPartial<T>
+ *
+ * @param {DeepPartial<BotConfig>} [overrides]
  * @returns {BotConfig}
  */
 export const getMockBotConfig = (overrides = {}) => {
