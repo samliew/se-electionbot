@@ -94,7 +94,7 @@ export class HerokuClient {
      * @return {Promise<boolean>}
      */
     async restartApp() {
-        return await this.updateConfigVar("TEST", "restart-" + Math.floor(Math.random() * 99999) + 1);
+        return this.updateConfigVar("TEST", "restart-" + Math.floor(Math.random() * 99999) + 1);
     };
 
     /**
@@ -124,7 +124,7 @@ export class HerokuClient {
      * @return {Promise<boolean>}
      */
     async scaleNone() {
-        return await this._scale(0, "free");
+        return this._scale(0, "free");
     };
 
     /**
@@ -132,7 +132,7 @@ export class HerokuClient {
      * @return {Promise<boolean>}
      */
     async scaleFree() {
-        return await this._scale(1, "free");
+        return this._scale(1, "free");
     };
 
     /**
@@ -140,7 +140,7 @@ export class HerokuClient {
      * @return {Promise<boolean>}
      */
     async scaleHobby() {
-        return await this._scale(1, "hobby");
+        return this._scale(1, "hobby");
     };
 
     /**
@@ -148,6 +148,6 @@ export class HerokuClient {
      * @return {Promise<any>}
      */
     async getDynos() {
-        return await this._client.get(`/apps/${this._appName}/formation`);
+        return this._client.get(`/apps/${this._appName}/formation`);
     };
 }
