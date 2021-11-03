@@ -362,6 +362,13 @@ import { matchNumber } from "./utils/expressions.js";
 
         console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);
 
+        // TODO: check if not posted yet
+        const metaAnnouncements = await searchChat(config, config.chatDomain, "moderator election results", config.chatRoomId);
+        if (election.isEnded() && !metaAnnouncements.length) {
+            await postMetaAnnouncement(config, election, room, "");
+            console.log(`INIT - posted meta announcement`);
+        }
+
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.phase === 'ended' && Date.now() < new Date(election.dateEnded).getTime() + 36e5) {
 
