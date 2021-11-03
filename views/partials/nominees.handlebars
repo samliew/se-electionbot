@@ -1,38 +1,38 @@
 <table class="nested">
-    <thead>
-        <tr>
-            <th>Nominee</th>
-            <th>Post</th>
-            <th>Score</th>
-            <th>Member for</th>
-            <th>Nominated on</th>
-            {{#if (someTruthy this "withdrawnDate")}}
-                <th>Withdrawn on</th>
-            {{/if}}
-        </tr>
-    </thead>
-    <tbody>
-        {{#each this}}
-        <tr>
-            <td>
-                <a href="{{this.permalink}}">{{{this.userName}}}</a>
-            </td>
-            <td>
-                <a href="{{this.nominationLink}}">nomination</a>
-            </td>
-            <td>
-                {{this.userScore}}
-            </td>
-            <td>
-                {{unprefix "member for" this.userYears}}
-            </td>
-            <td>
-                {{{withRelativeDT this.nominationDate}}}
-            </td>
-            {{#if this.withdrawnDate}}
-            <td>{{{withRelativeDT this.withdrawnDate}}}</td>
-            {{/if}}
-        </tr>
-        {{/each}}
-    </tbody>
+  <thead>
+    <tr>
+      <th>Nominee</th>
+      <th>Post</th>
+      <th>Score</th>
+      <th>Member for</th>
+      <th>Nominated on</th>
+      {{#if (someTruthy this "withdrawnDate")}}
+        <th>Withdrawn on</th>
+      {{/if}}
+    </tr>
+  </thead>
+  <tbody>
+    {{#each this}}
+      <tr>
+        <td>
+          <a href="{{this.permalink}}">{{{this.userName}}}</a>
+        </td>
+        <td>
+          {{{url (getter this "nominationLink") "nomination"}}}
+        </td>
+        <td>
+          {{this.userScore}}
+        </td>
+        <td>
+          {{unprefix "member for" this.userYears}}
+        </td>
+        <td>
+          {{{withRelativeDT this.nominationDate}}}
+        </td>
+        {{#if this.withdrawnDate}}
+          <td>{{{withRelativeDT this.withdrawnDate}}}</td>
+        {{/if}}
+      </tr>
+    {{/each}}
+  </tbody>
 </table>
