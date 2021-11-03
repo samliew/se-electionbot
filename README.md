@@ -76,9 +76,9 @@ ElectionBot info _(requires mention)_:
 - alive
 - who made me/ who are the developers
 
-## Mod-only commands
+## Privileged commands
 
-Moderators can also make use of these commands _(requires mention)_ to help moderate the chat room:
+Moderators and privileged users can also use these commands _(requires mention)_ to help moderate the chat room:
 
 - say _message_
 - alive
@@ -94,6 +94,13 @@ Moderators can also make use of these commands _(requires mention)_ to help mode
 - announce winners/nominees
 - whois _sitename_ mods
 - **what is the candidate score for _X_**
+- post meta [pretty]
+
+Election results Meta post
+
+The "post meta" command accepts an optional parameter "pretty" (or "prettify")
+that will force the bot to post a Markdown-formatted link instead.
+By default, the bot will post a one-boxed link to the Meta post.
 
 Candidate score calculation
 
