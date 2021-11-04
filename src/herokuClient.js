@@ -111,31 +111,27 @@ export class HerokuClient {
     };
 
     /**
-     * @summary scale app's dynos
-     * @return {Promise<boolean>}
+     * @see https://devcenter.heroku.com/articles/platform-api-reference#formation-batch-update
      *
-     * Heroku dyno sizes: free, hobby, standard-1X, standard-2X, Performance-M, Performance-L
+     * @typedef {{ quantity?: number, size?: Formation["size"] }} ScaleUpdates
+     *
+     * @summary scale app's dynos
+     * @param {{ web?: ScaleUpdates, worker?: ScaleUpdates }} updates
+     * @return {Promise<boolean>}
      */
-    async _scale(webQuantity = 1, webSize = "free", workerQuantity = 0, workerSize = "free") {
+    async _scale({ web, worker }) {
         try {
             const { _client, _appName } = this;
 
-            const formationArr = [
-                {
-                    "quantity": webQuantity,
-                    "size": webSize,
-                    "type": "web"
-                },
-                {
-                    "quantity": workerQuantity,
-                    "size": workerSize,
-                    "type": "worker"
-                },
-            ];
+            /** @type {(Partial<Pick<Formation, "size"|"quantity">> & Pick<Formation, "type">)[]} */
+            const updates = [];
+
+            if (web) updates.push({ type: "web", ...web });
+            if (worker) updates.push({ type: "worker", ...worker });
 
             await _client.patch(
                 `/apps/${_appName}/formation`,
-                { body: { updates: formationArr } }
+                { body: { updates } }
             );
 
             return true;
@@ -147,26 +143,35 @@ export class HerokuClient {
 
     /**
      * @summary scale app's dynos to nothing (kills process with manual rescale needed to restart)
+     * @param {"web"|"worker"} [type] process type to scale
      * @return {Promise<boolean>}
      */
-    async scaleNone() {
-        return this._scale(0, "free");
+    async scaleNone(type = "web") {
+        return this._scale({
+            [type]: { quantity: 0, size: "free" }
+        });
     };
 
     /**
      * @summary scale app's dynos to free
+     * @param {"web"|"worker"} [type] process type to scale
      * @return {Promise<boolean>}
      */
-    async scaleFree() {
-        return this._scale(1, "free");
+    async scaleFree(type = "web") {
+        return this._scale({
+            [type]: { quantity: 1, size: "free" }
+        });
     };
 
     /**
      * @summary scale app's dynos to free
+     * @param {"web"|"worker"} [type] process type to scale
      * @return {Promise<boolean>}
      */
-    async scaleHobby() {
-        return this._scale(1, "hobby");
+    async scaleHobby(type = "web") {
+        return this._scale({
+            [type]: { quantity: 1, size: "hobby" }
+        });
     };
 
     /**
