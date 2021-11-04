@@ -161,6 +161,7 @@ export class HerokuClient {
      * @return {Promise<any>}
      */
     async getDynos() {
-        return this._client.get(`/apps/${this._appName}/formation`);
+        const { _client, _appName } = this;
+        return _client.get(`/apps/${_appName}/formation`);
     };
 }
