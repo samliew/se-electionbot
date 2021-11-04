@@ -3,6 +3,19 @@ import Heroku from 'heroku-client';
 // Heroku API documentation
 // https://devcenter.heroku.com/articles/platform-api-reference
 
+/**
+ * @typedef {{
+ *  app: { id: string, name: string },
+ *  command: string,
+ *  created_at: string,
+ *  id: string,
+ *  quantity: number,
+ *  size: "free" | "hobby" | "standard-1X" | "standard-2X" | "performance-M" | "performance-L",
+ *  type: "web" | "worker",
+ *  updated_at: string
+ * }} Formation
+ */
+
 export class HerokuClient {
 
     /** @type {Heroku} */
@@ -158,7 +171,7 @@ export class HerokuClient {
 
     /**
      * @summary get app's dynos
-     * @return {Promise<any>}
+     * @return {Promise<Formation[]>}
      */
     async getDynos() {
         const { _client, _appName } = this;
