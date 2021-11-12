@@ -333,7 +333,7 @@ import { matchNumber } from "./utils/expressions.js";
 
             const permalink = userIdHref ? `https://${siteHostname}${userIdHref}` : "";
 
-            const withdrawnNominee = new Nominee({
+            const withdrawnNominee = new Nominee(election, {
                 userId,
                 userName,
                 nominationDate: nominationDate,

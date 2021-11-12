@@ -16,7 +16,7 @@ describe('Election', () => {
 
             it('should correctly determine if threshold is reached', () => {
                 const election = new Election("https://stackoverflow.com/election/1");
-                election.arrNominees.push(getMockNominee(), getMockNominee());
+                election.arrNominees.push(getMockNominee(election), getMockNominee(election));
 
                 expect(election.reachedPrimaryThreshold).to.be.false;
 
@@ -32,7 +32,7 @@ describe('Election', () => {
             it('should correctly return the number of nominees left to reach threshold', () => {
                 const election = new Election("https://stackoverflow.com/election/42");
                 election.primaryThreshold = 42;
-                election.arrNominees.push(getMockNominee(), getMockNominee());
+                election.arrNominees.push(getMockNominee(election), getMockNominee(election));
 
                 expect(election.nomineesLeftToReachPrimaryThreshold).to.equal(41);
             });
@@ -40,7 +40,7 @@ describe('Election', () => {
             it('should return 0 if the threshold is already reached', () => {
                 const election = new Election("https://stackoverflow.com/election/1");
                 election.primaryThreshold = 1;
-                election.arrNominees.push(getMockNominee(), getMockNominee());
+                election.arrNominees.push(getMockNominee(election), getMockNominee(election));
 
                 expect(election.nomineesLeftToReachPrimaryThreshold).to.equal(0);
             });
@@ -112,10 +112,11 @@ describe('Election', () => {
 
         describe('currentNomineePostIds', () => {
             it('should correctly return nominee post ids', () => {
-                const nominee1 = getMockNominee({ userId: 1, nominationLink: "https://stackoverflow.com/election/13#post-1" });
-                const nominee2 = getMockNominee({ userId: 2, nominationLink: "https://stackoverflow.com/election/13#post-2" });
-
                 const election = new Election("https://stackoverflow.com/election/13");
+
+                const nominee1 = getMockNominee(election, { userId: 1, nominationLink: "https://stackoverflow.com/election/13#post-1" });
+                const nominee2 = getMockNominee(election, { userId: 2, nominationLink: "https://stackoverflow.com/election/13#post-2" });
+
                 election.arrNominees.push(nominee1, nominee2);
 
                 const { currentNomineePostIds } = election;
@@ -127,10 +128,11 @@ describe('Election', () => {
         describe('numNominees', () => {
 
             it('should correctly return number of Nominees', () => {
-                const nominee1 = getMockNominee({ userId: 1 });
-                const nominee2 = getMockNominee({ userId: 2 });
-
                 const election = new Election("https://stackoverflow.com/election/12");
+
+                const nominee1 = getMockNominee(election, { userId: 1 });
+                const nominee2 = getMockNominee(election, { userId: 2 });
+
                 election.arrNominees.push(nominee1);
                 election.arrNominees.push(nominee2);
 
@@ -142,10 +144,11 @@ describe('Election', () => {
         describe('numWinners', () => {
 
             it('should correctly return number of Winners', () => {
-                const nominee1 = getMockNominee({ userId: 1 });
-                const nominee2 = getMockNominee({ userId: 2 });
-
                 const election = new Election("https://stackoverflow.com/election/12");
+
+                const nominee1 = getMockNominee(election, { userId: 1 });
+                const nominee2 = getMockNominee(election, { userId: 2 });
+
                 election.arrWinners.push(nominee1);
                 election.arrWinners.push(nominee2);
 
@@ -157,10 +160,11 @@ describe('Election', () => {
         describe('withdrawnNominees', () => {
 
             it('should correctly return only new withdrawn Nominees', () => {
-                const withdrawn = getMockNominee({ userId: 1 });
-                const remaining = getMockNominee({ userId: 2 });
-
                 const election = new Election("https://stackoverflow.com/election/12");
+
+                const withdrawn = getMockNominee(election, { userId: 1 });
+                const remaining = getMockNominee(election, { userId: 2 });
+
                 election.arrNominees.push(withdrawn, remaining);
                 election.pushHistory();
 
@@ -176,10 +180,11 @@ describe('Election', () => {
         describe('newNominees', () => {
 
             it('should correctly return only new Nominees', () => {
-                const oldNominee = getMockNominee({ userId: 1 });
-                const newNominee = getMockNominee({ userId: 2 });
-
                 const election = new Election("https://stackoverflow.com/election/12");
+
+                const oldNominee = getMockNominee(election, { userId: 1 });
+                const newNominee = getMockNominee(election, { userId: 2 });
+
                 election._prevObj = { arrNominees: [oldNominee] };
                 election.arrNominees.push(newNominee);
 
@@ -194,9 +199,10 @@ describe('Election', () => {
         describe('newWinners', () => {
 
             it('should correctly return only new Winners', () => {
-                const newWinner = getMockNominee({ userId: 2 });
-
                 const election = new Election("https://stackoverflow.com/election/12");
+
+                const newWinner = getMockNominee(election, { userId: 2 });
+
                 election._prevObj = { arrWinners: [] };
                 election.arrWinners.push(newWinner);
 
@@ -216,9 +222,10 @@ describe('Election', () => {
             });
 
             it('hasNewWinners should correctly check if there are new winners', () => {
-                const newWinner = getMockNominee({ userId: 42 });
-
                 const election = new Election("https://stackoverflow.com/election/12");
+
+                const newWinner = getMockNominee(election, { userId: 42 });
+
                 election._prevObj = { arrWinners: [] };
                 election.arrWinners.push(newWinner);
 

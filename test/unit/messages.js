@@ -150,12 +150,13 @@ describe("Messages module", () => {
         });
 
         it('should correctly return withdrawn nominees list', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+
             const nominees = [
                 { userId: 1, userName: "John" },
                 { userId: 2, userName: "Joanne" }
-            ].map(getMockNominee);
+            ].map((n) => getMockNominee(election, n));
 
-            const election = new Election("https://stackoverflow.com/election/12");
             election.phase = "election";
             nominees.forEach((nominee) => election.addWithdrawnNominee(nominee));
 

@@ -1,11 +1,14 @@
 import { Nominee } from "../../src/election.js";
 
 /**
+ * @typedef {import("../../src/election").default} Election
+ *
+ * @param {Election} election
  * @param {Partial<Nominee>} [overrides]
  * @returns {Nominee}
  */
-export const getMockNominee = (overrides = {}) => {
-    const nominee = new Nominee({
+export const getMockNominee = (election, overrides = {}) => {
+    const nominee = new Nominee(election, {
         userId: 42,
         userName: "Answer",
         userYears: "42",

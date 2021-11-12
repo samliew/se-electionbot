@@ -280,8 +280,8 @@ describe('Individual commands', () => {
 
         it('should reset current election state', () => {
             const election = new Election("https://stackoverflow.com/election/13");
-            election.arrNominees.push(getMockNominee());
-            election.arrWinners.push(getMockNominee());
+            election.arrNominees.push(getMockNominee(election));
+            election.arrWinners.push(getMockNominee(election));
             election.currentSiteMods.push( /** @type {User} */({}));
             election.phase = "primary";
 

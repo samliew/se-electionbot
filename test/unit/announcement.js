@@ -85,7 +85,7 @@ describe('ScheduledAnnouncement', function () {
 
             const messageStub = sinon.stub(room, "sendMessage");
 
-            const nominees = names.map((userName) => getMockNominee({ userName }));
+            const nominees = names.map((userName) => getMockNominee(election, { userName }));
             election.arrNominees.push(...nominees);
 
             const ann = new ScheduledAnnouncement(config, room, election, scraper);
@@ -137,7 +137,7 @@ describe('ScheduledAnnouncement', function () {
                 }
             });
 
-            election.arrWinners.push(getMockNominee());
+            election.arrWinners.push(getMockNominee(election));
             election.phase = "ended";
 
             const status = await ann.announceWinners(room, election);
@@ -148,7 +148,7 @@ describe('ScheduledAnnouncement', function () {
 
             const clock = sinon.useFakeTimers();
 
-            election.arrWinners.push(getMockNominee({ userName: "Jeanne" }));
+            election.arrWinners.push(getMockNominee(election, { userName: "Jeanne" }));
             election.phase = "ended";
 
             const stubbed = sinon.stub(room, "sendMessage");
@@ -178,8 +178,8 @@ describe('ScheduledAnnouncement', function () {
         afterEach(() => sinon.restore());
 
         it('should correctly announce withdrawn nominations', async () => {
-            const withdrawn = getMockNominee({ userName: "John", nominationLink: "test", userId: 1 });
-            const remaining = getMockNominee({ userName: "Joanne", nominationLink: "test2", userId: 2 });
+            const withdrawn = getMockNominee(election, { userName: "John", nominationLink: "test", userId: 1 });
+            const remaining = getMockNominee(election, { userName: "Joanne", nominationLink: "test2", userId: 2 });
 
             election.arrNominees.push(remaining, withdrawn);
             election.pushHistory();
