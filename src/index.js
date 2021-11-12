@@ -87,6 +87,7 @@ import { matchNumber } from "./utils/expressions.js";
     // Other environment variables
     const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN || "stackexchange.com");
     const defaultChatRoomId = +(process.env.CHAT_ROOM_ID || 92073);
+    const defaultChatNotSet = !process.env.CHAT_DOMAIN || !process.env.CHAT_ROOM_ID;
 
     /** @type {{ ChatEventType: EventType }} */
     //@ts-expect-error
@@ -167,8 +168,9 @@ import { matchNumber } from "./utils/expressions.js";
         // Reduced longIdleDurationHours if it's a Stack Overflow election
         if (election.isStackOverflow()) config.longIdleDurationHours = 3;
 
-        // If is in production mode, and is an active election, auto-detect and set chat domain and chat room ID to join
-        if (!config.debug && election.isActive()) {
+        // If is in production mode, default chatroom not set, and is an active election,
+        //   auto-detect and set chat domain & room to join
+        if (!config.debug && defaultChatNotSet && election.isActive()) {
 
             // Election chat room found on election page
             if (election.chatRoomId && election.chatDomain) {
