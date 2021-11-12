@@ -121,8 +121,12 @@ export class Nominee {
      * @return {string}
      */
     get nominationLink() {
+        const { _nominationLink, hasWithdrawn, election } = this;
+
+        const postId = matchNumber(/\/election\/(\d+)/, _nominationLink);
+
         // If withdrawn, change to post history as original post can longer be viewed
-        return this.hasWithdrawn ? this._nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`).replace(/(\/revisions)+$/i, "") + "/revisions" : this._nominationLink;
+        return hasWithdrawn ? `${election.siteUrl}/posts/${postId}/revisions` : _nominationLink;
     }
 
     /**
