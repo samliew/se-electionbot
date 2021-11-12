@@ -123,7 +123,7 @@ export class Nominee {
     get nominationLink() {
         const { _nominationLink, hasWithdrawn, election } = this;
 
-        const postId = matchNumber(/\/election\/(\d+)/, _nominationLink);
+        const postId = matchNumber(/#post-(\d+)/, _nominationLink);
 
         // If withdrawn, change to post history as original post can longer be viewed
         return hasWithdrawn ? `${election.siteUrl}/posts/${postId}/revisions` : _nominationLink;
