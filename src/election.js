@@ -16,6 +16,12 @@ import { matchNumber } from "./utils/expressions.js";
 export class Nominee {
 
     /**
+     * @summary election the candidate nominated on
+     * @type {Election}
+     */
+    election;
+
+    /**
      * @summary nominee user id
      * @type {number}
      */
@@ -76,9 +82,11 @@ export class Nominee {
     permalink = "";
 
     /**
-     * @param {Partial<Nominee>} init
+     * @param {Election} election election the candidate nominated on
+     * @param {Partial<Nominee>} init initial field values
      */
-    constructor(init) {
+    constructor(election, init) {
+        this.election = election;
         Object.assign(this, init);
     }
 
@@ -123,6 +131,12 @@ export class Nominee {
      */
     set nominationLink(value) {
         this._nominationLink = value;
+    }
+
+    toJSON() {
+        // prevents circular dependency on the election
+        const { election, ...rest } = this;
+        return rest;
     }
 }
 
@@ -659,7 +673,7 @@ export default class Election {
         const userId = +(userLink.attr('href')?.split('/')[2] || "");
         const withdrawnDate = $(el).find('aside .relativetime').attr('title');
 
-        return new Nominee({
+        return new Nominee(this, {
             userId,
             userName: userLink.text(),
             userYears: $(el).find('.user-details').contents().map((_i, { data, type }) =>
