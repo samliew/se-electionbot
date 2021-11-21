@@ -1,16 +1,14 @@
 import express from 'express';
 import Handlebars from 'express-handlebars';
-import { resolve } from 'path';
+import { join } from 'path';
 import Election from '../src/election.js';
 import { HerokuClient } from "../src/herokuClient.js";
 import { fetchChatTranscript, isBotInTheRoom } from '../src/utils.js';
 import { dateToUtcTimestamp } from '../src/utils/dates.js';
 
-const __dirname = new URL(".", import.meta.url).pathname.replace(/^\//, "");
-const viewsPath = resolve(__dirname, "views");
-const staticPath = resolve(__dirname, 'static');
-
-console.log(new URL(".", import.meta.url));
+const __dirname = new URL(".", import.meta.url).pathname;
+const viewsPath = join(__dirname, "views");
+const staticPath = join(__dirname, 'static');
 
 const app = express().set('port', process.env.PORT || 5000);
 
@@ -484,9 +482,10 @@ export const startServer = async (client, room, config, election) => {
     const server = app.listen(app.get('port'), () => {
         console.log(`SERVER
         Node application started:
-        static ${staticPath}
-        views  ${viewsPath}
-        port   ${app.get('port')}`);
+        dirname ${__dirname}
+        static  ${staticPath}
+        views   ${viewsPath}
+        port    ${app.get('port')}`);
     });
 
     const farewell = async () => {
