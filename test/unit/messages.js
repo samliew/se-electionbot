@@ -1,15 +1,15 @@
 import { expect } from "chai";
-import Election from "../../src/election.js";
-import { sayAboutElectionStatus, sayBadgesByType, sayDiamondAlready, sayElectionIsEnding, sayElectionSchedule, sayHI, sayWithdrawnNominations } from "../../src/messages.js";
-import { calculateScore } from "../../src/score.js";
-import { capitalize } from "../../src/utils.js";
-import { matchesISO8601 } from "../../src/utils/expressions.js";
+import Election from "../../src/bot/election.js";
+import { sayAboutElectionStatus, sayBadgesByType, sayDiamondAlready, sayElectionIsEnding, sayElectionSchedule, sayHI, sayWithdrawnNominations } from "../../src/bot/messages.js";
+import { calculateScore } from "../../src/bot/score.js";
+import { capitalize } from "../../src/bot/utils.js";
+import { matchesISO8601 } from "../../src/bot/utils/expressions.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
 /**
  * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
- * @typedef { import("../../src/election").ElectionPhase} ElectionPhase
+ * @typedef { import("../../src/bot/election").ElectionPhase} ElectionPhase
  */
 
 describe("Messages module", () => {
@@ -41,7 +41,7 @@ describe("Messages module", () => {
 
     describe('sayBadgesByType', () => {
 
-        /** @type {import("../../src/index").ElectionBadge[]} */
+        /** @type {import("../../src/bot/index").ElectionBadge[]} */
         const badges = [{
             badge_id: 1, name: "Badge1", type: "moderation"
         },

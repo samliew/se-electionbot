@@ -1,7 +1,7 @@
-import { AccessLevel } from "../../src/commands/index.js";
+import { AccessLevel } from "../../src/bot/commands/index.js";
 
 /**
- * @typedef {import("../../src/index.js").UserProfile} UserProfile
+ * @typedef {import("../../src/bot/index.js").UserProfile} UserProfile
  * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
  */
 

@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
-import { getNumberOfVoters, getStackApiKey } from "../../src/api.js";
-import { getSiteUserIdFromChatStackExchangeId } from "../../src/utils.js";
+import { getNumberOfVoters, getStackApiKey } from "../../src/bot/api.js";
+import { getSiteUserIdFromChatStackExchangeId } from "../../src/bot/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('getSiteUserIdFromChatStackExchangeId', function () {

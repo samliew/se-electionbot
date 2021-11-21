@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
-import { HerokuClient } from "../../src/herokuClient.js";
+import { HerokuClient } from "../../src/bot/herokuClient.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('Heroku API', function () {

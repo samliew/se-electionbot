@@ -1,4 +1,4 @@
-import BotConfig from "../../src/config.js";
+import BotConfig from "../../src/bot/config.js";
 
 /**
  * @template T

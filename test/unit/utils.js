@@ -1,8 +1,8 @@
 import { expect } from "chai";
-import { asyncCacheable, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, searchChat, stripMarkdown } from "../../src/utils.js";
-import { dateToRelativetime } from "../../src/utils/dates.js";
-import { matchNumber } from "../../src/utils/expressions.js";
-import { numericNullable } from "../../src/utils/objects.js";
+import { asyncCacheable, fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, searchChat, stripMarkdown } from "../../src/bot/utils.js";
+import { dateToRelativetime } from "../../src/bot/utils/dates.js";
+import { matchNumber } from "../../src/bot/utils/expressions.js";
+import { numericNullable } from "../../src/bot/utils/objects.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('RegExp-related utils', () => {

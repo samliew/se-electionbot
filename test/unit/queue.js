@@ -3,7 +3,7 @@ import Client, { ChatEventType } from "chatexchange";
 import Room from "chatexchange/dist/Room.js";
 import WebsocketEvent from "chatexchange/dist/WebsocketEvent.js";
 import sinon from "sinon";
-import { sendMultipartMessage } from "../../src/queue.js";
+import { sendMultipartMessage } from "../../src/bot/queue.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('Message Queue', () => {

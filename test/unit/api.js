@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { getStackApiKey } from "../../src/api.js";
+import { getStackApiKey } from "../../src/bot/api.js";
 
 describe('SE API', () => {
 
