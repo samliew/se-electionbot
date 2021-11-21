@@ -15,6 +15,6 @@
       "@utils/*": ["./src/utils/*"]
     }
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "server/index.js"],
   "exclude": ["dist"]
 }

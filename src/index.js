@@ -39,7 +39,7 @@ import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import { calculateScore, makeCandidateScoreCalc } from "./score.js";
-import { startServer } from "./server.js";
+import { startServer } from "../server/index.js";
 import {
     fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, keepAlive,
     linkToRelativeTimestamp, makeURL, onlyBotMessages, roomKeepAlive, searchChat, wait

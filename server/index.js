@@ -1,12 +1,16 @@
 import express from 'express';
 import Handlebars from 'express-handlebars';
-import { join } from 'path';
-import Election from './election.js';
-import { HerokuClient } from "./herokuClient.js";
-import { fetchChatTranscript, isBotInTheRoom } from './utils.js';
-import { dateToUtcTimestamp } from './utils/dates.js';
+import { resolve } from 'path';
+import Election from '../src/election.js';
+import { HerokuClient } from "../src/herokuClient.js";
+import { fetchChatTranscript, isBotInTheRoom } from '../src/utils.js';
+import { dateToUtcTimestamp } from '../src/utils/dates.js';
 
-const __dirname = new URL(".", import.meta.url).pathname;
+const __dirname = new URL(".", import.meta.url).pathname.replace(/^\//, "");
+const viewsPath = resolve(__dirname, "views");
+const staticPath = resolve(__dirname, 'static');
+
+console.log(new URL(".", import.meta.url));
 
 const app = express().set('port', process.env.PORT || 5000);
 
@@ -130,12 +134,14 @@ const handlebarsConfig = {
     },
 };
 
-app.engine('handlebars', Handlebars(handlebarsConfig));
-app.set('view engine', 'handlebars');
-app.set('view cache', 'false');
+app
+    .engine('handlebars', Handlebars(handlebarsConfig))
+    .set("views", viewsPath)
+    .set('view engine', 'handlebars')
+    .set('view cache', 'false');
 
 /**
- * @typedef {import("./config").BotConfig} BotConfig
+ * @typedef {import("../src/config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange").default} Client
  */
@@ -172,7 +178,7 @@ let BOT_ROOM;
  */
 let ELECTION;
 
-const staticPath = join(__dirname, '../static');
+
 app.use(express.static(staticPath));
 
 // see https://stackoverflow.com/a/59892173
@@ -187,17 +193,17 @@ app.use((req, res, next) => {
 
     // Redirect to hostname specified in bot config
     const scriptHostname = BOT_CONFIG?.scriptHostname;
-    if (scriptHostname && !scriptHostname.includes(req.hostname)) {
-        if (BOT_CONFIG?.debug) console.log(`SERVER - Redirected ${req.hostname} to ${scriptHostname}`);
+    if (scriptHostname && !scriptHostname.includes(hostname)) {
+        if (BOT_CONFIG?.debug) console.log(`SERVER - Redirected ${hostname} to ${scriptHostname}`);
 
         const querystring = req.url.split('?')[1] || null;
-        res.redirect(`${scriptHostname}${req.path}${querystring ? '?' + querystring : ''}`);
+        res.redirect(`${scriptHostname}${path}${querystring ? '?' + querystring : ''}`);
         return;
     }
 
     // Only these paths will be non-password protected
     const publicPaths = [
-        "/"
+        "/", "/static", "/favicon.ico"
     ];
 
     // Password-protect pages
@@ -464,7 +470,7 @@ export const setClient = (client) => {
  * @summary starts the bot server
  * @param {Client} client chat client
  * @param {Room} room current room the bot is in
- * @param {import("./config.js").BotConfig} config  bot configuration
+ * @param {import("../src/config.js").BotConfig} config  bot configuration
  * @param {Election} election current election
  * @returns {Promise<import("express").Application>}
  */
@@ -476,7 +482,11 @@ export const startServer = async (client, room, config, election) => {
     setClient(client);
 
     const server = app.listen(app.get('port'), () => {
-        console.log(`SERVER - Node app ${staticPath} is listening on port ${app.get('port')}.`);
+        console.log(`SERVER
+        Node application started:
+        static ${staticPath}
+        views  ${viewsPath}
+        port   ${app.get('port')}`);
     });
 
     const farewell = async () => {
