@@ -1,12 +1,13 @@
 import express from 'express';
 import Handlebars from 'express-handlebars';
-import { join } from 'path';
+import { dirname, join } from 'path';
+import { fileURLToPath } from "url";
 import Election from '../src/election.js';
 import { HerokuClient } from "../src/herokuClient.js";
 import { fetchChatTranscript, isBotInTheRoom } from '../src/utils.js';
 import { dateToUtcTimestamp } from '../src/utils/dates.js';
 
-const __dirname = new URL(".", import.meta.url).pathname;
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const viewsPath = join(__dirname, "views");
 const staticPath = join(__dirname, 'static');
 
