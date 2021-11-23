@@ -373,10 +373,11 @@ export const startServer = async (client, room, config, election) => {
     const server = app.listen(app.get('port'), () => {
         console.log(`SERVER
         Node application started:
-        dirname ${__dirname}
-        static  ${staticPath}
-        views   ${viewsPath}
-        port    ${app.get('port')}`);
+        dirname  ${__dirname}
+        partials ${partsPath}
+        static   ${staticPath}
+        views    ${viewsPath}
+        port     ${app.get('port')}`);
     });
 
     const farewell = async () => {
