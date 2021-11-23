@@ -4,7 +4,7 @@
     "description": "ElectionBot - a chatbot that answers commonly-asked questions in chat rooms about elections for sites on the Stack Exchange network.",
     "main": "dist/bot/index.js",
     "scripts": {
-        "build": "rimraf dist && npm run copy-files && tsc --project tsconfig.bot.json",
+        "build": "rimraf dist && tsc --project tsconfig.bot.json && npm run copy-files",
         "typecheck": "tsc --noEmit -p ./tsconfig.bot.json",
         "start": "node dist/bot/index.js",
         "dev": "node src/bot/index.js",
