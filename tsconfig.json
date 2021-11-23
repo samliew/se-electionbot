@@ -2,19 +2,13 @@
   "compilerOptions": {
     "checkJs": true,
     "allowJs": true,
-    "noEmit": true,
     "declaration": false,
-    "target": "ES6",
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
     "module": "es2020",
-    "paths": {
-      "@utils/*": ["./src/utils/*"]
-    }
-  },
-  "include": ["src", "test", "server/index.js"],
-  "exclude": ["dist"]
+    "target": "ES6"
+  }
 }

@@ -2,10 +2,10 @@ import express from 'express';
 import Handlebars from 'express-handlebars';
 import { dirname, join } from 'path';
 import { fileURLToPath } from "url";
-import Election from '../src/election.js';
-import { HerokuClient } from "../src/herokuClient.js";
-import { fetchChatTranscript, isBotInTheRoom } from '../src/utils.js';
-import { dateToUtcTimestamp } from '../src/utils/dates.js';
+import Election from '../bot/election.js';
+import { HerokuClient } from "../bot/herokuClient.js";
+import { fetchChatTranscript, isBotInTheRoom } from '../bot/utils.js';
+import { dateToUtcTimestamp } from '../bot/utils/dates.js';
 import * as helpers from "./helpers.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -28,7 +28,7 @@ app
     .set('view cache', 'false');
 
 /**
- * @typedef {import("../src/config").BotConfig} BotConfig
+ * @typedef {import("../bot/config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange").default} Client
  */
@@ -357,7 +357,7 @@ export const setClient = (client) => {
  * @summary starts the bot server
  * @param {Client} client chat client
  * @param {Room} room current room the bot is in
- * @param {import("../src/config.js").BotConfig} config  bot configuration
+ * @param {BotConfig} config  bot configuration
  * @param {Election} election current election
  * @returns {Promise<import("express").Application>}
  */

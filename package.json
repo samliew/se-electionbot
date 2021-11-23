@@ -2,12 +2,12 @@
     "name": "se-electionbot",
     "version": "1.0.0",
     "description": "ElectionBot - a chatbot that answers commonly-asked questions in chat rooms about elections for sites on the Stack Exchange network.",
-    "main": "src/index.js",
+    "main": "dist/bot/index.js",
     "scripts": {
-        "typecheck": "tsc --noEmit -p ./tsconfig.json",
-        "build": "rimraf dist/ && babel src/ --out-dir dist/",
-        "start": "node dist/index.js",
-        "dev": "babel-node src/index.js",
+        "build": "rimraf dist && tsc --project tsconfig.bot.json",
+        "typecheck": "tsc --noEmit -p ./tsconfig.bot.json",
+        "start": "node dist/bot/index.js",
+        "dev": "babel-node src/bot/index.js",
         "test": "npm run typecheck && mocha",
         "coverage": "c8 mocha"
     },
@@ -48,15 +48,9 @@
         "node-cron": "^3.0.0",
         "patch-package": "^6.2.2",
         "ramda": "^0.27.1",
-        "rm": "^0.1.8",
         "sanitize-html": "^2.5.1"
     },
     "devDependencies": {
-        "@babel/cli": "^7.14.8",
-        "@babel/core": "^7.15.0",
-        "@babel/node": "^7.14.9",
-        "@babel/preset-env": "^7.15.0",
-        "@babel/register": "^7.14.5",
         "@types/chai": "^4.2.21",
         "@types/chai-as-promised": "^7.1.4",
         "@types/cheerio": "^0.22.30",

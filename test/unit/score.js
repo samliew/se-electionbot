@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import Election from "../../src/election.js";
-import { calculateScore, getScoreText, sayCalcFailed } from "../../src/score.js";
+import Election from "../../src/bot/election.js";
+import { calculateScore, getScoreText, sayCalcFailed } from "../../src/bot/score.js";
 import { getMockApiUser } from "../mocks/user.js";
 
 describe('Candidate Score', () => {

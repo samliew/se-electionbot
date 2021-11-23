@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import Election from "../../src/election.js";
+import Election from "../../src/bot/election.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('Election', function () {

@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src/server"],
+  "exclude": ["dist", "node_modules", "coverage", "test", "src/bot"]
+}

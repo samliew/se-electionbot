@@ -1,7 +1,7 @@
-import { Nominee } from "../../src/election.js";
+import { Nominee } from "../../src/bot/election.js";
 
 /**
- * @typedef {import("../../src/election").default} Election
+ * @typedef {import("../../src/bot/election").default} Election
  *
  * @param {Election} election
  * @param {Partial<Nominee>} [overrides]

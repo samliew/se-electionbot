@@ -1,4 +1,4 @@
-import { dateToUtcTimestamp } from "../src/utils/dates.js";
+import { dateToUtcTimestamp } from "../bot/utils/dates.js";
 
 /** @type {(source: unknown) => boolean} */
 export const isObj = (source) => typeof source === "object";

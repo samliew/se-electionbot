@@ -1,11 +1,11 @@
 import { expect } from "chai";
-import Election from "../../src/election.js";
-import { dateToUtcTimestamp } from "../../src/utils/dates.js";
+import Election from "../../src/bot/election.js";
+import { dateToUtcTimestamp } from "../../src/bot/utils/dates.js";
 import { getMockNominee } from "../mocks/nominee.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
 /**
- * @typedef { import("../../src/election").ElectionPhase} ElectionPhase
+ * @typedef { import("../../src/bot/election").ElectionPhase} ElectionPhase
  */
 
 describe('Election', () => {
@@ -335,7 +335,7 @@ describe('Election', () => {
         });
 
         it('should accept User instance instead of an id', () => {
-            const user = /** @type {import("../../src/index").UserProfile} */({ id: 42 });
+            const user = /** @type {import("../../src/bot/index").UserProfile} */({ id: 42 });
 
             const election = new Election("https://stackoverflow.com/election/42");
             // @ts-expect-error

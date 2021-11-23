@@ -4,7 +4,7 @@ import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
-} from "../../src/guards.js";
+} from "../../src/bot/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
 /**
