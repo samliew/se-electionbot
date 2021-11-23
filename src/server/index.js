@@ -372,6 +372,15 @@ export const startServer = async (client, room, config, election) => {
     setElection(election);
     setClient(client);
 
+    const { readdirSync } = await import("fs");
+    console.log(readdirSync(viewsPath));
+
+    try {
+        console.log(readdirSync(partialsPath));
+    } catch (error) {
+        console.log(error);
+    }
+
     const server = app.listen(app.get('port'), () => {
         console.log(`SERVER
         Node application started:
