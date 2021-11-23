@@ -11,6 +11,7 @@ import * as helpers from "./helpers.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const viewsPath = join(__dirname, "views");
 const staticPath = join(__dirname, 'static');
+const partsPath = join(viewsPath, "partials");
 
 const app = express().set('port', process.env.PORT || 5000);
 
@@ -18,6 +19,7 @@ const app = express().set('port', process.env.PORT || 5000);
 const handlebarsConfig = {
     // without extname property set to .<extension>, partials will not work
     extname: ".handlebars",
+    partialsDir: partsPath,
     helpers
 };
 
