@@ -10,7 +10,7 @@
         "dev": "node src/bot/index.js",
         "test": "npm run typecheck && mocha",
         "coverage": "c8 mocha",
-        "copy-files": "copyfiles -u 1 src/server/**/* dist/"
+        "copy-files": "copyup \"src/server/**/*\" dist/"
     },
     "author": {
         "name": "Samuel Liew",
