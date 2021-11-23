@@ -7,7 +7,7 @@
         "build": "rimraf dist && npm run copy-files && tsc --project tsconfig.bot.json",
         "typecheck": "tsc --noEmit -p ./tsconfig.bot.json",
         "start": "node dist/bot/index.js",
-        "dev": "babel-node src/bot/index.js",
+        "dev": "node src/bot/index.js",
         "test": "npm run typecheck && mocha",
         "coverage": "c8 mocha",
         "copy-files": "copyfiles -u 1 src/server/**/* dist/"
