@@ -4,12 +4,13 @@
     "description": "ElectionBot - a chatbot that answers commonly-asked questions in chat rooms about elections for sites on the Stack Exchange network.",
     "main": "dist/bot/index.js",
     "scripts": {
-        "build": "rimraf dist && tsc --project tsconfig.bot.json",
+        "build": "rimraf dist && npm run copy-files && tsc --project tsconfig.bot.json",
         "typecheck": "tsc --noEmit -p ./tsconfig.bot.json",
         "start": "node dist/bot/index.js",
         "dev": "babel-node src/bot/index.js",
         "test": "npm run typecheck && mocha",
-        "coverage": "c8 mocha"
+        "coverage": "c8 mocha",
+        "copy-files": "copyfiles -u 1 src/server/**/* dist/"
     },
     "author": {
         "name": "Samuel Liew",
@@ -66,6 +67,7 @@
         "c8": "^7.9.0",
         "chai": "^4.3.4",
         "chai-as-promised": "^7.1.1",
+        "copyfiles": "^2.4.1",
         "mocha": "^9.0.3",
         "rimraf": "^3.0.2",
         "sinon": "^11.1.2",
