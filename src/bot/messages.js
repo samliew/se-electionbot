@@ -14,10 +14,12 @@ import { parsePackage } from "./utils/package.js";
 import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
 
 /**
+ * @typedef {import("chatexchange/dist/Browser").IProfileData} IProfileData
  * @typedef {import("./index").ElectionBadge} Badge
  * @typedef {import("./config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
- * @typedef {import("@userscripters/stackexchange-api-types").User} User
+ * @typedef {import("chatexchange/dist/User").default} User
+ * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
  * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {import("./score").CandidateScore} CandidateScore
  * @typedef {import("./election").ElectionPhase} ElectionPhase
@@ -370,7 +372,7 @@ export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = 
 /**
  * @summary builds current mods list response message
  * @param {Election} election current election
- * @param {User[]} moderators
+ * @param {ApiUser[]} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
@@ -424,7 +426,7 @@ export const sayCurrentCandidates = (_config, election) => {
 /**
  * @summary builds another site's mods list response message
  * @param {string} siteHostname
- * @param {User[]} moderators
+ * @param {ApiUser[]} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
@@ -618,11 +620,13 @@ export const sayWhatIsAnElection = (election) => {
 
 /**
  * @summary builds a response to a who am I query
- * @param {Omit<UserProfile, "access">} botChatProfile bot profile
+ * @param {IProfileData|User} botChatProfile bot profile
  * @param {string} content message content
+ * @returns {Promise<string>}
  */
-export const sayWhoAmI = (botChatProfile, content) => {
-    const { about, name } = botChatProfile;
+export const sayWhoAmI = async (botChatProfile, content) => {
+    const about = await botChatProfile.about;
+    const name = await botChatProfile.name;
     const prefix = /^are\b.+?/i.test(content) ? "Yes, " : "";
     const noAboutME = "I prefer to keep an air of mystery about me";
     return `${prefix}I am ${name}, and ${about || noAboutME}`;
@@ -741,7 +745,7 @@ export const sayUserEligibility = async (config, election, text) => {
 /**
  * @fun
  * @summary builds a "how many mods it takes" response message
- * @param {User[]} moderators current moderators
+ * @param {ApiUser[]} moderators current moderators
  * @returns {string}
  */
 export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {

@@ -19,6 +19,8 @@ export const apiVer = 2.3;
 let _apiBackoff = Date.now();
 
 /**
+ * @typedef {import("chatexchange/dist/Browser").IProfileData} IProfileData
+ * @typedef {import("chatexchange/dist/User").default} User
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Client").Host} Host
  * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
@@ -968,25 +970,25 @@ export const isBotInTheRoom = async (config, client, room) => {
 };
 
 /**
- * @typedef {import("chatexchange/dist/Browser").IProfileData} IProfileData
- *
  * @summary guard for checking if a message is a bot messsage
- * @param {IProfileData} botProfile bot chat profile
+ * @param {IProfileData|User} botProfile bot chat profile
  * @param {ChatMessage} message chat message
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
-export const isBotMessage = (botProfile, message) => {
-    const { id, name } = botProfile;
+export const isBotMessage = async (botProfile, message) => {
+    const { id } = botProfile;
+    const name = await botProfile.name;
     const { username, chatUserId } = message;
     return username === name || chatUserId === id;
 };
 
 /**
  * @summary predicate for filtering out messages not posted by the bot
- * @param {IProfileData} botProfile bot chat profile
- * @returns {(message: ChatMessage, index: number, original: ChatMessage[]) => boolean}
+ * @param {IProfileData|User} botProfile bot chat profile
+ * @returns {Promise<(message: ChatMessage, index: number, original: ChatMessage[]) => boolean>}
  */
-export const onlyBotMessages = (botProfile) => {
-    const { id, name } = botProfile;
+export const onlyBotMessages = async (botProfile) => {
+    const { id } = botProfile;
+    const name = await botProfile.name;
     return ({ username, chatUserId }) => username === name || chatUserId === id;
 };

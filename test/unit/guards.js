@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { partialRight } from "ramda";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
@@ -674,15 +673,15 @@ describe('Message Guards', () => {
         });
     });
 
-    describe('isBotMentioned', () => {
-        it('should correctly match content', () => {
+    describe(isBotMentioned.name, () => {
+        it('should correctly match content', async () => {
             const name = "HAL9000";
 
-            allMatch(partialRight(isBotMentioned, [getMockUserProfile({
-                name
-            })]), [
+            const status = await isBotMentioned(
                 `@${name} say why are you doing this?`
-            ]);
+                , getMockUserProfile({ name }));
+
+            expect(status).to.be.true;
         });
     });
 

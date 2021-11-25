@@ -233,9 +233,7 @@ import { matchNumber } from "./utils/expressions.js";
         }
 
         // Get bot's chat profile
-        const _me = await client.getMe();
-        const me = await client._browser.getProfile(_me.id);
-        me.id = _me.id; // because getProfile() doesn't return id
+        const me = await client.getMe();
         console.log(`INIT - Logged in to ${config.chatDomain} as ${me.name} (${me.id})`);
 
         // Join the election chat room
@@ -270,15 +268,17 @@ import { matchNumber } from "./utils/expressions.js";
          */
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
 
+        const botMessageFilter = await onlyBotMessages(me);
+
         // Check for saidElectionEndingSoon
         config.flags.saidElectionEndingSoon = transcriptMessages
-            .filter(onlyBotMessages(me))
+            .filter(botMessageFilter)
             .filter(({ message }) => /is ending soon. This is the final chance to cast or change your votes!/.test(message)).length > 0;
 
         // Loops through messages by latest first
         transcriptMessages.reverse();
 
-        config.activityCounter = countValidBotMessages(config, transcriptMessages, me);
+        config.activityCounter = await countValidBotMessages(config, transcriptMessages, me);
 
         /*
          * Sync withdrawn nominees on startup using past ElectionBot announcements
@@ -293,7 +293,7 @@ import { matchNumber } from "./utils/expressions.js";
             console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
         }
 
-        const botAnnouncements = announcementHistory.filter(onlyBotMessages(me));
+        const botAnnouncements = announcementHistory.filter(botMessageFilter);
         let withdrawnCount = 0;
 
         // Parse previous nomination announcements and see which ones are no longer around
@@ -466,7 +466,7 @@ import { matchNumber } from "./utils/expressions.js";
              * ** Potentially do not need "targetUserId === me.id" as that is only used by the USER_MENTIONED (8) or message reply (18) event.
              * Test is done against "originalMessage", since "content" holds the normalised version for keyword/guard matching without username in front
              */
-            const botMentioned = isBotMentioned(originalMessage, me) || targetUserId === me.id;
+            const botMentioned = await isBotMentioned(originalMessage, me) || targetUserId === me.id;
             const botMentionedCasually = botMentioned || new RegExp(`\\b(?:ElectionBo[tx]|${me.name})\\b`, "i").test(originalMessage);
 
 
@@ -885,7 +885,7 @@ import { matchNumber } from "./utils/expressions.js";
                         helpTopics.filter(({ short }) => short).map(({ text }) => text).join('\n- ');
                 }
                 else if (isAskedWhoAmI(content)) {
-                    responseText = sayWhoAmI(me, content);
+                    responseText = await sayWhoAmI(me, content);
                 }
                 // Alive
                 else if (isAskedAmIalive(content)) {

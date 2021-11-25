@@ -1,6 +1,7 @@
 import { isBotMessage } from "../utils.js";
 
 /**
+ * @typedef {import("chatexchange/dist/User").default} User
  * @typedef {import("../utils.js").ChatMessage} ChatMessage
  * @typedef {import("../config.js").BotConfig} BotConfig
  * @typedef {import('chatexchange/dist/Browser').IProfileData} IProfileData
@@ -10,10 +11,10 @@ import { isBotMessage } from "../utils.js";
  * @summary Count valid messages (after a "greet" message by bot), and update activityCounter
  * @param {BotConfig} config bot configuration
  * @param {ChatMessage[]} messages list of messages
- * @param {IProfileData} botChatProfile chat profile of the bot
- * @returns {number}
+ * @param {IProfileData|User} botChatProfile chat profile of the bot
+ * @returns {Promise<number>}
  */
-export const countValidBotMessages = (config, messages, botChatProfile) => {
+export const countValidBotMessages = async (config, messages, botChatProfile) => {
     const { length: numMessages } = messages;
 
     // Also updates lastActivityTime, lastMessageTime, lastBotMessage
@@ -27,7 +28,7 @@ export const countValidBotMessages = (config, messages, botChatProfile) => {
         // Update lastActivityTime for last message in room
         if (count === 0) config.lastActivityTime = date;
 
-        const isFromBot = isBotMessage(botChatProfile, item);
+        const isFromBot = await isBotMessage(botChatProfile, item);
 
         // If last bot message not set yet, and is a message by bot
         if (!botMessageFound && message && isFromBot) {

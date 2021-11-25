@@ -1,6 +1,11 @@
 import { allMatch, noneMatch, someMatch } from "./utils/expressions.js";
 
 /**
+ * @typedef {import("chatexchange/dist/User").default} User
+ * @typedef {import("chatexchange/dist/Browser").IProfileData} ChatProfile
+ */
+
+/**
  * @summary checks if the message asked how or where to nominate
  * @param {string} text
  * @returns {boolean}
@@ -409,12 +414,12 @@ export const isAskedAboutSTV = (text) => {
 /**
  * @summary checks if the bot is mentioned
  * @param {string} text  message text
- * @param {import("chatexchange/dist/Browser").IProfileData} botChatProfile
- * @returns {boolean}
+ * @param {ChatProfile|User} botChatProfile
+ * @returns {Promise<boolean>}
  */
-export const isBotMentioned = (text, botChatProfile) => {
+export const isBotMentioned = async (text, botChatProfile) => {
     const { name } = botChatProfile;
-    const normalized = name.replace(/\s/g, "");
+    const normalized = (await name).replace(/\s/g, "");
     return someMatch(
         [new RegExp(`^\\s*@(?:${normalized})[:,-]? `, "i")], text
     );
