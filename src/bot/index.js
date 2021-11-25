@@ -44,7 +44,7 @@ import {
     fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, keepAlive,
     linkToRelativeTimestamp, makeURL, onlyBotMessages, roomKeepAlive, searchChat, wait
 } from './utils.js';
-import { last } from "./utils/arrays.js";
+import { last, mapify } from "./utils/arrays.js";
 import { dateToUtcTimestamp } from "./utils/dates.js";
 import { matchNumber } from "./utils/expressions.js";
 
@@ -199,17 +199,18 @@ import { matchNumber } from "./utils/expressions.js";
         // Get current site named badges (i.e.: non-tag badges)
         if (!election.isStackOverflow()) {
             const allNamedBadges = await getAllNamedBadges(config, election.apiSlug);
+            const badgeMap = mapify(allNamedBadges, "name");
 
             electionBadges.forEach((electionBadge) => {
-                const { name: badgeName } = electionBadge;
-                const matchedBadge = allNamedBadges.find(({ name }) => badgeName === name);
+                const { name } = electionBadge;
+                const matchedBadge = badgeMap.get(name);
 
                 // Replace the badge id for badges with the same badge names
                 // TODO: Hardcode list of badges where this will not work properly (non-english sites?)
                 if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
             });
 
-            if (config.debug || config.verbose) {
+            if (config.debugOrVerbose) {
                 console.log('API - Site election badges\n', electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n"));
             }
         }
