@@ -171,7 +171,7 @@ import { matchNumber } from "./utils/expressions.js";
 
         // If is in production mode, default chatroom not set, and is an active election,
         //   auto-detect and set chat domain & room to join
-        if (!config.debug && defaultChatNotSet && election.isActive()) {
+        if (!config.debugOrVerbose && defaultChatNotSet && election.isActive()) {
 
             // Election chat room found on election page
             if (election.chatRoomId && election.chatDomain) {
