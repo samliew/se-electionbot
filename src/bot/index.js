@@ -194,9 +194,7 @@ import { matchNumber } from "./utils/expressions.js";
 
         // Add non-mod room owners to list of admins (privileged users)
         const owners = await fetchRoomOwners(config);
-        owners.forEach(user => {
-            if (!user.isModerator) config.addAdmin(user.userId);
-        });
+        config.addAdmins(...owners);
 
         // Get current site named badges (i.e.: non-tag badges)
         if (!election.isStackOverflow()) {

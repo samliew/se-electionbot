@@ -6,6 +6,7 @@ const MS_IN_HOUR = 60 * MS_IN_MINUTE;
 
 /**
  * @typedef {import("chatexchange/dist/Client").Host} Host
+ * @typedef {import("./utils").RoomUser} RoomUser
  */
 
 export class BotConfig {
@@ -362,11 +363,28 @@ export class BotConfig {
 
     /**
      * @summary adds a user as a bot administrator
-     * @param {number} chatUserId chat id of the user
+     * @param {number|RoomUser} user chat id of the user or chat user
+     * @returns {BotConfig}
      */
-    addAdmin(chatUserId) {
-        this.adminIds.add(chatUserId);
-        console.log(`User ${chatUserId} temporarily added as admin`);
+    addAdmin(user) {
+        const { adminIds } = this;
+        adminIds.add(typeof user === "number" ? user : user.userId);
+        return this;
+    }
+
+    /**
+     * @summary adds users to admin list in bulk
+     * @param {...(number|RoomUser)} users list of users to add
+     * @returns {BotConfig}
+     */
+    addAdmins(...users) {
+        const { adminIds, debugOrVerbose } = this;
+        users.forEach((user) => {
+            adminIds.add(typeof user === "number" ? user : user.userId);
+        });
+
+        if (debugOrVerbose) console.log(`Current admin ids: ${[...adminIds]}`);
+        return this;
     }
 
     // If called without params, resets active mutes (future-dated lastMessageTime)
