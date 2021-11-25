@@ -11,8 +11,9 @@ describe('Election', function () {
         it('should correctly scrape election', async () => {
 
             const election = new Election("https://stackoverflow.com/election/12");
-            await election.scrapeElection(getMockBotConfig());
+            const result = await election.scrapeElection(getMockBotConfig());
 
+            expect(result).to.be.true;
             expect(election.chatRoomId).to.not.be.null;
             expect(election.repVote).to.equal(150);
             expect(election.electionNum).to.equal(12);
