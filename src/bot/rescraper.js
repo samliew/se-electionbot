@@ -59,7 +59,13 @@ export default class Rescraper {
         }
 
         try {
-            await election.scrapeElection(config);
+            const rescraped = await election.scrapeElection(config);
+            const { status, errors } = election.validate();
+
+            if (!status || !rescraped) {
+                console.error(`RESCRAPER - Invalid election data:\n${errors.join("\n")}`);
+                return this.start();
+            }
 
             if (config.verbose) {
                 console.log('RESCRAPER -', election.updated, election);
