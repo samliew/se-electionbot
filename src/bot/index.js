@@ -365,7 +365,9 @@ import { matchNumber } from "./utils/expressions.js";
             if (++withdrawnCount >= election.numNominees) break;
         }
 
-        console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);
+        if (config.verbose) {
+            console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);
+        }
 
         // TODO: check if not posted yet
         const metaAnnouncements = await searchChat(config, config.chatDomain, "moderator election results", config.chatRoomId);
