@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import { JSDOM } from "jsdom";
 import sanitize from "sanitize-html";
+import { startServer } from "../server/index.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getBadges, getModerators, getUserInfo } from "./api.js";
@@ -39,7 +40,6 @@ import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import { calculateScore, makeCandidateScoreCalc } from "./score.js";
-import { startServer } from "../server/index.js";
 import {
     fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, keepAlive,
     linkToRelativeTimestamp, makeURL, onlyBotMessages, roomKeepAlive, searchChat, wait
@@ -158,9 +158,10 @@ import { matchNumber } from "./utils/expressions.js";
         const { electionBadges } = election;
 
         // Wait for election page to be scraped
-        await election.scrapeElection(config);
+        const scraped = await election.scrapeElection(config);
         const { status, errors } = election.validate();
-        if (!status) {
+
+        if (!status || !scraped) {
             console.error(`FATAL - Invalid election data:\n${errors.join("\n")}`);
             return;
         }
