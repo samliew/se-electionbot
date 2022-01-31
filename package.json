@@ -37,7 +37,7 @@
         "axios": "^0.25.0",
         "chatexchange": "^0.5.4",
         "cheerio": "^1.0.0-rc.10",
-        "dotenv": "^10.0.0",
+        "dotenv": "^14.3.2",
         "express": "^4.17.2",
         "heroku-client": "^3.1.0",
         "html-entities": "^2.3.2",
