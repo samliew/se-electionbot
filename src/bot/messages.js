@@ -198,7 +198,7 @@ export const sayHowToNominate = (election, electionBadges, mentionsAnother = fal
     // Markup to bold additional text if talking about nominating others
     const mentionsAnotherBold = mentionsAnother ? '**' : '';
 
-    let requirements = [`at least ${election.repNominate} reputation`];
+    let requirements = [`at least ${election.repNominate} reputation`, 'at least 18 years of age'];
     if (election.isStackOverflow()) requirements.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
     if (siteHostname && /askubuntu\.com$/.test(siteHostname)) requirements.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
     requirements.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
