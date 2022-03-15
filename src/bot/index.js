@@ -400,7 +400,10 @@ import { matchNumber } from "./utils/expressions.js";
 
             // Decode HTML entities in messages, create lowercase copy for guard matching
             const originalMessage = entities.decode(encodedMessage);
-            const content = sanitize(originalMessage.toLowerCase().replace(/^@\S+\s+/, ''), { allowedTags: [] });
+            const content = sanitize(
+                originalMessage.toLowerCase().replace(/^@\S+\s+/, '').replace(/’/, "'"),
+                { allowedTags: [] }
+            );
 
             const { eventType, userId: originalUserId, targetUserId } = msg;
 

@@ -211,7 +211,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
 
         // Parse date & time
         let year, monthValue, month, dayValue, date, yearValue, hour, min, dayDiff, h, apm;
-        const timestampString = $this.siblings('.timestamp').text();
+        const timestampString = $this.siblings('.timestamp').text().trim();
 
         // Today
         if (/^\d+:\d+ [AP]M$/.test(timestampString)) {
@@ -235,7 +235,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
         }
         // Has date, month, and maybe year
         else {
-            [, monthValue, date, yearValue, h, min, apm] = timestampString.match(/^(\w{3}) (\d+)(?: '(\d+))? (\d+):(\d+) ([AP])M$/) || [, null, null, null, null, null, null];
+            [, monthValue, date, yearValue, h, min, apm] = timestampString.match(/^(\w{3}) (\d+)(?:, (\d+))? (\d+):(\d+) ([AP])M$/) || [, null, null, null, null, null, null];
             month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthValue || "");
         }
 
@@ -267,7 +267,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
             date: datetime <= now ? datetime : now, // can never be in the future
             messageId: messageId
         });
-    }).get();
+    });
 
     if (config.verbose) {
         console.log('Transcript messages fetched:', messages.slice(-30));
