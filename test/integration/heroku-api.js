@@ -1,11 +1,19 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
+import { test } from "mocha";
 import { HerokuClient } from "../../src/bot/herokuClient.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
-describe('Heroku API', function () {
+describe('Heroku API integration', function () {
 
     dotenv.config();
+
+    const hasCreds = !!process.env.HEROKU_API_TOKEN;
+    const testIf = hasCreds ? test : test.skip;
+
+    if (!hasCreds) {
+        console.log("Cannot test Heroku API integration with no API token, skipping");
+    }
 
     this.timeout(5e3); // APIs can be slow
 
@@ -19,22 +27,19 @@ describe('Heroku API', function () {
         }
     }));
 
-    it('should be able to fetch environment variables', async () => {
-
+    testIf('should be able to fetch environment variables', async () => {
         const configVars = await heroku.fetchConfigVars();
         expect(typeof configVars).to.equal("object");
     });
 
-    it('should be able to update environment variables', async () => {
-
+    testIf('should be able to update environment variables', async () => {
         const success = await heroku.updateConfigVars({
             "TEST": "pass"
         });
         expect(success).to.be.true;
     });
 
-    it('should not be able to update sensitive environment variables', async () => {
-
+    testIf('should not be able to update sensitive environment variables', async () => {
         const success = await heroku.updateConfigVars({
             "TEST": "fail",
             "ACCOUNT_EMAIL": "fail",
@@ -42,5 +47,4 @@ describe('Heroku API', function () {
         });
         expect(success).to.be.false;
     });
-
 });
