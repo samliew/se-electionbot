@@ -40,7 +40,10 @@ export const joinControlRoom = async (config, election, client, {
         const isSameRoom = controlRoomId === controlledRoom.id;
         if (isSameRoom && !allowSameRoom) return false;
 
-        const controlRoom = await client.joinRoom(controlRoomId);
+        const joinedControl = await client.joinRoom(controlRoomId);
+        if (!joinedControl) return false;
+
+        const controlRoom = client.getRoom(controlRoomId);
         controlRoom.ignore(...ignoredEventTypes);
 
         controlRoom.on("message", async (/** @type {WebsocketEvent} */ msg) => {

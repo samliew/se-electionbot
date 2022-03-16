@@ -237,7 +237,13 @@ import { matchNumber } from "./utils/expressions.js";
         console.log(`INIT - Logged in to ${config.chatDomain} as ${me.name} (${me.id})`);
 
         // Join the election chat room
-        const room = await client.joinRoom(config.chatRoomId);
+        const joinedRoom = await client.joinRoom(config.chatRoomId);
+        if (!joinedRoom) {
+            console.error(`FATAL - failed to join room ${config.chatRoomId}`);
+            return;
+        }
+
+        const room = client.getRoom(config.chatRoomId);
 
         // Ignore ignored event types
         room.ignore(...ignoredEventTypes);
