@@ -123,7 +123,8 @@ export default class ScheduledAnnouncement {
                 return !!userName;
             })
             .map(({ nominationLink, userName }) => {
-                return `**Attention:** Candidate ${makeURL(userName, nominationLink)} has withdrawn from the election.`;
+                return `**Attention:** Candidate ${nominationLink ? makeURL(userName, nominationLink) : userName
+                    } has withdrawn from the election.`;
             });
 
         await sendMessageList(config, _room, true, ...messages);
