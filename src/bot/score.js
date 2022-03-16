@@ -118,7 +118,6 @@ export const makeCandidateScoreCalc = (config, modIds) =>
      * @param {Election} election
      * @param {UserProfile} user
      * @param {Pick<ResolvedMessage, "userId"|"content">} message
-     * @param {boolean} [isSO]
      * @returns {Promise<string>}
      */
     async (election, user, message) => {
