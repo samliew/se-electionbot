@@ -2,19 +2,18 @@ import Client from "chatexchange";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import { JSDOM } from "jsdom";
 import sanitize from "sanitize-html";
 import { startServer } from "../server/index.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
-import { getAllNamedBadges, getBadges, getModerators, getUserInfo } from "./api.js";
+import { getAllNamedBadges, getModerators } from "./api.js";
 import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { AccessLevel } from "./commands/access.js";
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import Election, { Nominee } from './election.js';
+import Election, { addWithdrawnNomineesFromChat } from './election.js';
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
@@ -41,14 +40,13 @@ import { sayAboutBallotFile, sayAboutElectionStatus, sayAboutSTV, sayAboutThePha
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
-import { calculateScore, makeCandidateScoreCalc } from "./score.js";
+import { makeCandidateScoreCalc } from "./score.js";
 import {
-    fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, keepAlive,
+    fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive,
     linkToRelativeTimestamp, makeURL, onlyBotMessages, roomKeepAlive, searchChat, wait
 } from './utils.js';
-import { last, mapify } from "./utils/arrays.js";
+import { mapify } from "./utils/arrays.js";
 import { dateToUtcTimestamp } from "./utils/dates.js";
-import { matchNumber } from "./utils/expressions.js";
 
 /**
  * @typedef {(Pick<Badge, "name"|"badge_id"> & { required?: boolean, type: string })} ElectionBadge
@@ -302,75 +300,8 @@ import { matchNumber } from "./utils/expressions.js";
         }
 
         const botAnnouncements = announcementHistory.filter(botMessageFilter);
-        let withdrawnCount = 0;
 
-        // Parse previous nomination announcements and see which ones are no longer around
-        const { dateElectionMs, dateNominationMs, datePrimaryMs, siteHostname } = election;
-        for (const item of botAnnouncements) {
-            const { messageMarkup } = item;
-
-            const [, userName, nominationLink, postId] =
-                messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
-
-            // Invalid, or still a nominee based on nomination post ids
-            if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) continue;
-
-            if (config.debugOrVerbose) {
-                console.log(`Nomination announcement:`, messageMarkup, { currentNomineePostIds, userName, nominationLink, postId });
-            }
-
-            const nominationRevisionsLink = nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
-
-            /** @type {string} */
-            const revisionHTML = await fetchUrl(config, nominationRevisionsLink);
-
-            const { window: { document } } = new JSDOM(revisionHTML);
-
-            // @ts-expect-error TODO: cleanup
-            const userIdHref = last([...document.querySelectorAll(`#content a[href*="/user"]`)])?.href;
-
-            //  @ts-expect-error TODO: cleanup
-            const nominationDateString = last([...document.querySelectorAll(`#content .relativetime`)])?.title;
-
-            const userId = matchNumber(/\/users\/(\d+)/, userIdHref) || -42;
-
-            if (election.withdrawnNominees.has(userId)) continue;
-
-            // Withdrawn candidate's nominationDate cannot have been outside of the election's nomination period
-            const nominationDate = new Date(nominationDateString || -1);
-            const nominationMs = nominationDate.valueOf();
-            if (nominationMs < dateNominationMs || nominationMs >= dateElectionMs || (datePrimaryMs && nominationMs >= datePrimaryMs)) continue;
-
-            const permalink = userIdHref ? `https://${siteHostname}${userIdHref}` : "";
-
-            const withdrawnNominee = new Nominee(election, {
-                userId,
-                userName,
-                nominationDate: nominationDate,
-                nominationLink: nominationLink,
-                withdrawn: true,
-                permalink,
-            });
-
-            await withdrawnNominee.scrapeUserYears(config);
-
-            // Do not attempt to calculate valid scores
-            if (userId > 0) {
-                const { apiSlug } = election;
-                const userBadges = await getBadges(config, userId, apiSlug);
-                const user = await getUserInfo(config, userId, apiSlug);
-
-                if (user) {
-                    const { score } = calculateScore(user, userBadges, election);
-                    withdrawnNominee.userScore = score;
-                }
-            }
-
-            election.addWithdrawnNominee(withdrawnNominee);
-
-            // Limit to scraping of withdrawn nominations from transcript if more than number of nominations
-            if (++withdrawnCount >= election.numNominees) break;
-        }
+        await addWithdrawnNomineesFromChat(config, election, botAnnouncements);
 
         if (config.verbose) {
             console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);

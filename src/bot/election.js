@@ -1,5 +1,7 @@
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
+import { getBadges, getUserInfo } from './api.js';
+import { calculateScore } from './score.js';
 import { fetchUrl } from './utils.js';
 import { dateToUtcTimestamp } from './utils/dates.js';
 import { matchNumber } from "./utils/expressions.js";
@@ -12,7 +14,95 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("@userscripters/stackexchange-api-types").User} User
  * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {import("./commands/user").User} ChatUser
+ * @typedef {import("./utils").ChatMessage} ChatMessage
  */
+
+/**
+ * @summary finds withdrawn {@link Nominee}s that were only announced in chat
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current {@link Election}
+ * @param {ChatMessage[]} messages list of {@link ChatMessage}s
+ * @returns {Promise<number>}
+ */
+export const addWithdrawnNomineesFromChat = async (config, election, messages) => {
+    const {
+        currentNomineePostIds,
+        dateElectionMs,
+        dateNominationMs,
+        datePrimaryMs,
+        siteHostname
+    } = election;
+
+    let withdrawnCount = 0;
+
+    for (const item of messages) {
+        const { messageMarkup } = item;
+
+        const [, userName, nominationLink, postId] =
+            messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
+
+        // Invalid, or still a nominee based on nomination post ids
+        if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) continue;
+
+        if (config.debugOrVerbose) {
+            console.log(`Nomination announcement:`, messageMarkup, { currentNomineePostIds, userName, nominationLink, postId });
+        }
+
+        const nominationRevisionsLink = nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
+
+        /** @type {string} */
+        const revisionHTML = await fetchUrl(config, nominationRevisionsLink);
+
+        const { window: { document } } = new JSDOM(revisionHTML);
+
+        // @ts-expect-error TODO: cleanup
+        const userIdHref = last([...document.querySelectorAll(`#content a[href*="/user"]`)])?.href;
+
+        //  @ts-expect-error TODO: cleanup
+        const nominationDateString = last([...document.querySelectorAll(`#content .relativetime`)])?.title;
+
+        const userId = matchNumber(/\/users\/(\d+)/, userIdHref) || -42;
+
+        if (election.withdrawnNominees.has(userId)) continue;
+
+        // Withdrawn candidate's nominationDate cannot have been outside of the election's nomination period
+        const nominationDate = new Date(nominationDateString || -1);
+        const nominationMs = nominationDate.valueOf();
+        if (nominationMs < dateNominationMs || nominationMs >= dateElectionMs || (datePrimaryMs && nominationMs >= datePrimaryMs)) continue;
+
+        const permalink = userIdHref ? `https://${siteHostname}${userIdHref}` : "";
+
+        const withdrawnNominee = new Nominee(election, {
+            userId,
+            userName,
+            nominationDate: nominationDate,
+            nominationLink: nominationLink,
+            withdrawn: true,
+            permalink,
+        });
+
+        await withdrawnNominee.scrapeUserYears(config);
+
+        // Do not attempt to calculate valid scores
+        if (userId > 0) {
+            const { apiSlug } = election;
+            const userBadges = await getBadges(config, userId, apiSlug);
+            const user = await getUserInfo(config, userId, apiSlug);
+
+            if (user) {
+                const { score } = calculateScore(user, userBadges, election);
+                withdrawnNominee.userScore = score;
+            }
+        }
+
+        election.addWithdrawnNominee(withdrawnNominee);
+
+        // Limit to scraping of withdrawn nominations from transcript if more than number of nominations
+        if (++withdrawnCount >= election.numNominees) break;
+    }
+
+    return withdrawnCount;
+};
 
 export class Nominee {
 

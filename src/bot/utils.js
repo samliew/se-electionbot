@@ -173,14 +173,7 @@ export const fetchUrl = async (_config, url, json = false) => {
  * @param {string} chatDomain which chat server to search on (stackoverflow.com|stackexchange.com|meta.stackexchange.com)
  * @param {string} query what to search for
  * @param {number|string} roomId if omitted, searches all chat
- * @returns {Promise<{
- *   username: string,
- *   chatUserId: number,
- *   message: string,
- *   messageMarkup: string,
- *   date: number,
- *   messageId: number
- * }[]>}
+ * @returns {Promise<ChatMessage[]>}
  */
 export const searchChat = async (config, chatDomain, query, roomId = '', pagesize = 100, page = 1) => {
 
