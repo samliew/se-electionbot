@@ -23,6 +23,7 @@ import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
  * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {import("./score").CandidateScore} CandidateScore
  * @typedef {import("./election").ElectionPhase} ElectionPhase
+ * @typedef {import("./commands/user").User} ChatUser
  */
 
 /**
@@ -838,16 +839,16 @@ export const sayBestCandidate = (_config, election) => {
  * @param {BotConfig} _config bot configuration
  * @param {Election} election current election
  * @param {string} _content message content
- * @param { import("./index").UserProfile } user requesting user
+ * @param {ChatUser} user requesting user
  * @returns {string}
  */
 export const sayBestModerator = (_config, election, _content, user) => {
     const { currentSiteMods } = election;
-    const { isModerator, name } = user;
+    const { name } = user;
 
     const currModNames = currentSiteMods.map(({ display_name }) => display_name);
 
-    if (isModerator && currModNames.includes(name)) {
+    if (user.isMod() && currModNames.includes(name)) {
         return `${name} is the best mod!!!`;
     }
 
@@ -1203,7 +1204,7 @@ export const sayAboutThePhases = (_config, election) => {
  * @param {BotConfig} config bot configuration
  * @param {Election} election current election
  * @param {string} _text message content
- * @param {UserProfile} user requesting user
+ * @param {ChatUser} user requesting user
  * @returns {Promise<string>}
  */
 export const sayIfOneHasVoted = async (config, election, _text, user) => {
@@ -1233,7 +1234,7 @@ export const sayIfOneHasVoted = async (config, election, _text, user) => {
  * @param {BotConfig} config bot configuration
  * @param {Election} election current election
  * @param {string} _text message content
- * @param {UserProfile} user requesting user
+ * @param {ChatUser} user requesting user
  * @returns {Promise<string>}
  */
 export const sayIfOneCanVote = async (config, election, _text, user) => {

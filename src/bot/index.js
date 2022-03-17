@@ -9,7 +9,9 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getBadges, getModerators, getUserInfo } from "./api.js";
 import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
-import { AccessLevel, CommandManager } from './commands/index.js';
+import { CommandManager } from './commands/index.js';
+import { AccessLevel } from "./commands/access.js";
+import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
 import Election, { Nominee } from './election.js';
@@ -430,10 +432,10 @@ import { matchNumber } from "./utils/expressions.js";
             if (content.includes('onebox')) return;
 
             // Get details of user who triggered the message
-            const user = await getUser(client, userId);
+            const profile = await getUser(client, userId);
 
             //if user is null, we have a problem
-            if (!user) return console.log(`missing user ${userId}`);
+            if (!profile) return console.log(`missing user ${userId}`);
 
             // TODO: make a part of User
             /** @type {[Set<number>, number][]} */
@@ -443,15 +445,15 @@ import { matchNumber } from "./utils/expressions.js";
                 [config.adminIds, AccessLevel.admin]
             ];
 
-            if (user.isModerator) {
-                config.modIds.add(user.id);
+            if (profile.isModerator) {
+                config.modIds.add(profile.id);
             }
 
-            const [, access] = userLevels.find(([ids]) => ids.has(user.id)) || [, AccessLevel.user];
+            const [, access] = userLevels.find(([ids]) => ids.has(profile.id)) || [, AccessLevel.user];
 
-            user.access = access;
+            const user = new User(profile, access);
 
-            const isPrivileged = user.isModerator || ((AccessLevel.privileged) & access);
+            const isPrivileged = user.isMod() || ((AccessLevel.privileged) & access);
 
             // Ignore if message is too short or long, unless a mod was trying to use say command
             const { length } = content;
@@ -688,7 +690,7 @@ import { matchNumber } from "./utils/expressions.js";
              *  Non-privileged response guards
              */
 
-            /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string, u: UserProfile) => (string|Promise<string>)][]} */
+            /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string, u: User) => (string|Promise<string>)][]} */
             const rules = [
                 [isAskedForCurrentPositions, sayNumberOfPositions],
                 [isAskedIfResponsesAreCanned, sayCannedResponses],

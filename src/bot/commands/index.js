@@ -1,21 +1,6 @@
-/**
- * @typedef {import("../index").UserProfile} UserProfile
- */
 
-export const AccessLevel = {
-    user: 1,
-    admin: 2,
-    mod: 4,
-    dev: 8,
-    get privileged() {
-        const { admin, dev, mod } = this;
-        return admin | dev | mod;
-    },
-    get all() {
-        const { user, privileged } = this;
-        return user | privileged;
-    }
-};
+import { User } from "./user.js";
+import { AccessLevel } from "./access.js";
 
 /**
  * @template {(...args:any[]) => any} T
@@ -68,11 +53,11 @@ export class CommandManager {
     /**@type {{ [name:string]: Command }} */
     commands = {};
 
-    /** @type {UserProfile} */
+    /** @type {User} */
     user;
 
     /**
-     * @param {UserProfile} user user for whom to manage commands
+     * @param {User} user user for whom to manage commands
      */
     constructor(user) {
         this.user = user;

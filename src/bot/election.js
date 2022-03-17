@@ -11,6 +11,7 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("@userscripters/stackexchange-api-types").User} User
  * @typedef {import("./index").UserProfile} UserProfile
+ * @typedef {import("./commands/user").User} ChatUser
  */
 
 export class Nominee {
@@ -483,7 +484,7 @@ export default class Election {
 
     /**
      * @summary checks if a user can vote in the election
-     * @param {UserProfile} user user info
+     * @param {UserProfile|ChatUser} user user info
      * @returns {boolean}
      */
     canVote(user) {

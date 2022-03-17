@@ -28,6 +28,7 @@ let _apiBackoff = Date.now();
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import("./index").UserProfile} UserProfile
+ * @typedef {import("./commands/user").User} ChatUser
  */
 
 /**
@@ -502,7 +503,7 @@ export const getUsersCurrentlyInTheRoom = async (config, chatHost, room) => {
  * @param {BotConfig} config bot configuration
  * @param {string} siteHostname site to get the info for
  * @param {number} badgeId id of the badge to lookup
- * @param {IProfileData} user user to get the badge for
+ * @param {IProfileData|ChatUser} user user to get the badge for
  * @returns {Promise<[string, Record<number, Date>]>}
  */
 export const scrapeAwardedBadge = async (config, siteHostname, badgeId, user) => {
@@ -938,13 +939,12 @@ export const parseBoolEnv = (key, def = false) => {
  * @summary gets a User given a resolved message from them
  * @param {Client} client ChatExchange client
  * @param {number} userId chat user id
- * @returns {Promise<UserProfile|null>}
+ * @returns {Promise<IProfileData|null>}
  */
 export const getUser = async (client, userId) => {
     try {
         // This is so we can get extra info about the user
-        // @ts-expect-error
-        return client._browser.getProfile(userId);
+        return client.getProfile(userId);
     }
     catch (e) {
         console.error(e);
