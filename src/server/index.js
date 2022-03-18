@@ -155,6 +155,7 @@ app.route('/')
             };
 
             const chatProfile = await BOT_CLIENT.getMe();
+            const chatDisplayName = chatProfile.name;
 
             const isBotInRoom = BOT_ROOM ? await isBotInTheRoom(BOT_CONFIG, BOT_CLIENT, BOT_ROOM) : false;
 
@@ -179,7 +180,7 @@ app.route('/')
                         roomBecameIdleAWhileDate: new Date(lastActivityTime + (shortIdleDurationMins * 6e4)),
                         roomBecameIdleHoursDate: new Date(lastActivityTime + (longIdleDurationHours * 60 * 6e4)),
                         botWillBeQuietDate: new Date(lastMessageTime + (lowActivityCheckMins * 6e4)),
-                        chatProfile,
+                        chatDisplayName,
                     }
                 }
             });

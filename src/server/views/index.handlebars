@@ -128,7 +128,7 @@
                 <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
                 <tr><td>scriptInitDate</td><td>{{utcTimestamp scriptInitDate}} <span class="relativetime" title="{{utcTimestamp scriptInitDate}}"></span></td></tr>
                 <tr><td>Control Room</td><td>{{{url controlRoomUrl}}}</td></tr>
-                <tr><td>Display Name</td><td>{{chatProfile?.name ?? ''}}</td></tr>
+                <tr><td>Display Name</td><td>{{chatDisplayName}}</td></tr>
                 <tr><td>isMuted</td><td>
                     {{{boolean isMuted}}}
                     {{#if isMuted}}
