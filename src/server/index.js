@@ -84,8 +84,8 @@ app.use((req, res, next) => {
 
     // Redirect to hostname specified in bot config
     const scriptHostname = BOT_CONFIG?.scriptHostname;
-    if (scriptHostname && !scriptHostname.includes(hostname)) {
-        if (BOT_CONFIG?.debug) console.log(`SERVER - Redirected ${hostname} to ${scriptHostname}`);
+    if (scriptHostname && !scriptHostname.includes(hostname) && !scriptHostname.includes('localhost')) {
+        if (BOT_CONFIG?.debugOrVerbose) console.log(`SERVER - Redirected ${hostname} to ${scriptHostname}`);
 
         const querystring = req.url.split('?')[1] || null;
         res.redirect(`${scriptHostname}${path}${querystring ? '?' + querystring : ''}`);
@@ -154,6 +154,8 @@ app.route('/')
                 apiKeyPool: []
             };
 
+            const chatProfile = await BOT_CLIENT.getMe();
+
             const isBotInRoom = BOT_ROOM ? await isBotInTheRoom(BOT_CONFIG, BOT_CLIENT, BOT_ROOM) : false;
 
             res.render('index', {
@@ -177,6 +179,7 @@ app.route('/')
                         roomBecameIdleAWhileDate: new Date(lastActivityTime + (shortIdleDurationMins * 6e4)),
                         roomBecameIdleHoursDate: new Date(lastActivityTime + (longIdleDurationHours * 60 * 6e4)),
                         botWillBeQuietDate: new Date(lastMessageTime + (lowActivityCheckMins * 6e4)),
+                        chatProfile,
                     }
                 }
             });
