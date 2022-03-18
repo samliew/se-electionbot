@@ -155,7 +155,7 @@ app.route('/')
             };
 
             const chatProfile = await BOT_CLIENT.getMe();
-            const chatDisplayName = chatProfile.name;
+            const chatDisplayName = await chatProfile.name;
 
             const isBotInRoom = BOT_ROOM ? await isBotInTheRoom(BOT_CONFIG, BOT_CLIENT, BOT_ROOM) : false;
 
