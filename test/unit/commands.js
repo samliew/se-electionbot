@@ -1,15 +1,17 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { isAliveCommand, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "../../src/bot/commands/commands.js";
-import { AccessLevel, CommandManager } from "../../src/bot/commands/index.js";
+import { CommandManager } from "../../src/bot/commands/index.js";
+import { AccessLevel } from "../../src/bot/commands/access.js";
 import Election from "../../src/bot/election.js";
 import { dateToUtcTimestamp } from "../../src/bot/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 import { getMockUserProfile } from "../mocks/user.js";
+import { User } from "../../src/bot/commands/user.js";
 
 /**
- * @typedef {import("@userscripters/stackexchange-api-types").User} User
+ * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
  */
 
 
@@ -17,7 +19,9 @@ describe('Commander', () => {
 
     describe('aliasing', () => {
         it('"alias" should correctly add aliases', () => {
-            const commander = new CommandManager(getMockUserProfile());
+            const user = new User(getMockUserProfile());
+
+            const commander = new CommandManager(user);
             commander.add("bark", "barks, what else?", () => "bark!", AccessLevel.all);
             commander.alias("bark", ["say"]);
 
@@ -26,8 +30,9 @@ describe('Commander', () => {
         });
 
         it('"aliases" method should correct set aliases', () => {
+            const user = new User(getMockUserProfile());
 
-            const commander = new CommandManager(getMockUserProfile());
+            const commander = new CommandManager(user);
             commander.add("♦", "gets a diamond", () => "♦");
             commander.add("gold", "gets some gold", () => "#FFD700");
 
@@ -49,10 +54,9 @@ describe('Commander', () => {
     describe('help', () => {
 
         it('should only list available commands', () => {
+            const user = new User(getMockUserProfile());
 
-            const commander = new CommandManager(getMockUserProfile({
-                access: AccessLevel.user
-            }));
+            const commander = new CommandManager(user);
             commander.add("alive", "pings the bot", () => "I am alive", AccessLevel.all);
             commander.add("stop", "stops the bot", () => "stopping...", AccessLevel.dev);
 
@@ -63,7 +67,7 @@ describe('Commander', () => {
             expect(userHelp).to.match(aliveRegex);
             expect(userHelp).to.not.match(stopRegex);
 
-            commander.user.access = AccessLevel.dev;
+            user.access = AccessLevel.dev;
 
             const devHelp = commander.help();
             expect(devHelp).to.match(aliveRegex);
@@ -71,7 +75,9 @@ describe('Commander', () => {
         });
 
         it('should correctly list aliases', () => {
-            const commander = new CommandManager(getMockUserProfile());
+            const user = new User(getMockUserProfile());
+
+            const commander = new CommandManager(user);
             commander.add("bark", "barks, what else?", () => "bark!", AccessLevel.all);
             commander.alias("bark", ["say"]);
 
@@ -81,12 +87,16 @@ describe('Commander', () => {
     });
 
     describe('AccessLevel', () => {
-        const commander = new CommandManager(getMockUserProfile());
+        const user = new User(getMockUserProfile());
+
+        const commander = new CommandManager(user);
         commander.add("destroy", "Destroys the universe", () => "💥", AccessLevel.dev);
         commander.add("restart", "Restarts the bot", () => true, AccessLevel.privileged);
         commander.add("pet", "Pets the bot", () => "good bot! Who's a good bot?", AccessLevel.all);
 
         it('should allow privileged commands for privileged users', () => {
+            user.access = AccessLevel.dev;
+
             const boom = commander.run("destroy");
             expect(boom).to.not.be.undefined;
 
@@ -98,7 +108,8 @@ describe('Commander', () => {
         });
 
         it('should disallow privileged commands for underprivileged users', () => {
-            commander.user = getMockUserProfile({ access: AccessLevel.user });
+            user.access = AccessLevel.user;
+
             const poof = commander.run("destroy");
             expect(poof).to.be.undefined;
 
@@ -282,7 +293,7 @@ describe('Individual commands', () => {
             const election = new Election("https://stackoverflow.com/election/13");
             election.arrNominees.push(getMockNominee(election));
             election.arrWinners.push(getMockNominee(election));
-            election.currentSiteMods.push( /** @type {User} */({}));
+            election.currentSiteMods.push( /** @type {ApiUser} */({}));
             election.phase = "primary";
 
             resetElection(getMockBotConfig(), election);

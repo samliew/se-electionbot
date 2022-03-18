@@ -4,11 +4,14 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import { JSDOM } from "jsdom";
 import sanitize from "sanitize-html";
+import { startServer } from "../server/index.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getBadges, getModerators, getUserInfo } from "./api.js";
 import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
-import { AccessLevel, CommandManager } from './commands/index.js';
+import { CommandManager } from './commands/index.js';
+import { AccessLevel } from "./commands/access.js";
+import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
 import Election, { Nominee } from './election.js';
@@ -39,12 +42,11 @@ import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import { calculateScore, makeCandidateScoreCalc } from "./score.js";
-import { startServer } from "../server/index.js";
 import {
     fetchChatTranscript, fetchRoomOwners, fetchUrl, getSiteDefaultChatroom, getUser, keepAlive,
     linkToRelativeTimestamp, makeURL, onlyBotMessages, roomKeepAlive, searchChat, wait
 } from './utils.js';
-import { last } from "./utils/arrays.js";
+import { last, mapify } from "./utils/arrays.js";
 import { dateToUtcTimestamp } from "./utils/dates.js";
 import { matchNumber } from "./utils/expressions.js";
 
@@ -158,9 +160,10 @@ import { matchNumber } from "./utils/expressions.js";
         const { electionBadges } = election;
 
         // Wait for election page to be scraped
-        await election.scrapeElection(config);
+        const scraped = await election.scrapeElection(config);
         const { status, errors } = election.validate();
-        if (!status) {
+
+        if (!status || !scraped) {
             console.error(`FATAL - Invalid election data:\n${errors.join("\n")}`);
             return;
         }
@@ -170,7 +173,7 @@ import { matchNumber } from "./utils/expressions.js";
 
         // If is in production mode, default chatroom not set, and is an active election,
         //   auto-detect and set chat domain & room to join
-        if (!config.debug && defaultChatNotSet && election.isActive()) {
+        if (!config.debugOrVerbose && defaultChatNotSet && election.isActive()) {
 
             // Election chat room found on election page
             if (election.chatRoomId && election.chatDomain) {
@@ -193,24 +196,23 @@ import { matchNumber } from "./utils/expressions.js";
 
         // Add non-mod room owners to list of admins (privileged users)
         const owners = await fetchRoomOwners(config);
-        owners.forEach(user => {
-            if (!user.isModerator) config.addAdmin(user.userId);
-        });
+        config.addAdmins(...owners);
 
         // Get current site named badges (i.e.: non-tag badges)
         if (!election.isStackOverflow()) {
             const allNamedBadges = await getAllNamedBadges(config, election.apiSlug);
+            const badgeMap = mapify(allNamedBadges, "name");
 
             electionBadges.forEach((electionBadge) => {
-                const { name: badgeName } = electionBadge;
-                const matchedBadge = allNamedBadges.find(({ name }) => badgeName === name);
+                const { name } = electionBadge;
+                const matchedBadge = badgeMap.get(name);
 
                 // Replace the badge id for badges with the same badge names
                 // TODO: Hardcode list of badges where this will not work properly (non-english sites?)
                 if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
             });
 
-            if (config.debug || config.verbose) {
+            if (config.debugOrVerbose) {
                 console.log('API - Site election badges\n', electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n"));
             }
         }
@@ -233,13 +235,17 @@ import { matchNumber } from "./utils/expressions.js";
         }
 
         // Get bot's chat profile
-        const _me = await client.getMe();
-        const me = await client._browser.getProfile(_me.id);
-        me.id = _me.id; // because getProfile() doesn't return id
+        const me = await client.getMe();
         console.log(`INIT - Logged in to ${config.chatDomain} as ${me.name} (${me.id})`);
 
         // Join the election chat room
-        const room = await client.joinRoom(config.chatRoomId);
+        const joinedRoom = await client.joinRoom(config.chatRoomId);
+        if (!joinedRoom) {
+            console.error(`FATAL - failed to join room ${config.chatRoomId}`);
+            return;
+        }
+
+        const room = client.getRoom(config.chatRoomId);
 
         // Ignore ignored event types
         room.ignore(...ignoredEventTypes);
@@ -270,15 +276,17 @@ import { matchNumber } from "./utils/expressions.js";
          */
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
 
+        const botMessageFilter = await onlyBotMessages(me);
+
         // Check for saidElectionEndingSoon
         config.flags.saidElectionEndingSoon = transcriptMessages
-            .filter(onlyBotMessages(me))
+            .filter(botMessageFilter)
             .filter(({ message }) => /is ending soon. This is the final chance to cast or change your votes!/.test(message)).length > 0;
 
         // Loops through messages by latest first
         transcriptMessages.reverse();
 
-        config.activityCounter = countValidBotMessages(config, transcriptMessages, me);
+        config.activityCounter = await countValidBotMessages(config, transcriptMessages, me);
 
         /*
          * Sync withdrawn nominees on startup using past ElectionBot announcements
@@ -293,7 +301,7 @@ import { matchNumber } from "./utils/expressions.js";
             console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
         }
 
-        const botAnnouncements = announcementHistory.filter(onlyBotMessages(me));
+        const botAnnouncements = announcementHistory.filter(botMessageFilter);
         let withdrawnCount = 0;
 
         // Parse previous nomination announcements and see which ones are no longer around
@@ -364,7 +372,9 @@ import { matchNumber } from "./utils/expressions.js";
             if (++withdrawnCount >= election.numNominees) break;
         }
 
-        console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);
+        if (config.verbose) {
+            console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);
+        }
 
         // TODO: check if not posted yet
         const metaAnnouncements = await searchChat(config, config.chatDomain, "moderator election results", config.chatRoomId);
@@ -398,7 +408,10 @@ import { matchNumber } from "./utils/expressions.js";
 
             // Decode HTML entities in messages, create lowercase copy for guard matching
             const originalMessage = entities.decode(encodedMessage);
-            const content = sanitize(originalMessage.toLowerCase().replace(/^@\S+\s+/, ''), { allowedTags: [] });
+            const content = sanitize(
+                originalMessage.toLowerCase().replace(/^@\S+\s+/, '').replace(/’/, "'"),
+                { allowedTags: [] }
+            );
 
             const { eventType, userId: originalUserId, targetUserId } = msg;
 
@@ -419,10 +432,10 @@ import { matchNumber } from "./utils/expressions.js";
             if (content.includes('onebox')) return;
 
             // Get details of user who triggered the message
-            const user = await getUser(client, userId);
+            const profile = await getUser(client, userId);
 
             //if user is null, we have a problem
-            if (!user) return console.log(`missing user ${userId}`);
+            if (!profile) return console.log(`missing user ${userId}`);
 
             // TODO: make a part of User
             /** @type {[Set<number>, number][]} */
@@ -432,15 +445,15 @@ import { matchNumber } from "./utils/expressions.js";
                 [config.adminIds, AccessLevel.admin]
             ];
 
-            if (user.isModerator) {
-                config.modIds.add(user.id);
+            if (profile.isModerator) {
+                config.modIds.add(profile.id);
             }
 
-            const [, access] = userLevels.find(([ids]) => ids.has(user.id)) || [, AccessLevel.user];
+            const [, access] = userLevels.find(([ids]) => ids.has(profile.id)) || [, AccessLevel.user];
 
-            user.access = access;
+            const user = new User(profile, access);
 
-            const isPrivileged = user.isModerator || ((AccessLevel.privileged) & access);
+            const isPrivileged = user.isMod() || ((AccessLevel.privileged) & access);
 
             // Ignore if message is too short or long, unless a mod was trying to use say command
             const { length } = content;
@@ -464,7 +477,7 @@ import { matchNumber } from "./utils/expressions.js";
              * ** Potentially do not need "targetUserId === me.id" as that is only used by the USER_MENTIONED (8) or message reply (18) event.
              * Test is done against "originalMessage", since "content" holds the normalised version for keyword/guard matching without username in front
              */
-            const botMentioned = isBotMentioned(originalMessage, me) || targetUserId === me.id;
+            const botMentioned = await isBotMentioned(originalMessage, me) || targetUserId === me.id;
             const botMentionedCasually = botMentioned || new RegExp(`\\b(?:ElectionBo[tx]|${me.name})\\b`, "i").test(originalMessage);
 
 
@@ -677,7 +690,7 @@ import { matchNumber } from "./utils/expressions.js";
              *  Non-privileged response guards
              */
 
-            /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string, u: UserProfile) => (string|Promise<string>)][]} */
+            /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string, u: User) => (string|Promise<string>)][]} */
             const rules = [
                 [isAskedForCurrentPositions, sayNumberOfPositions],
                 [isAskedIfResponsesAreCanned, sayCannedResponses],
@@ -883,7 +896,7 @@ import { matchNumber } from "./utils/expressions.js";
                         helpTopics.filter(({ short }) => short).map(({ text }) => text).join('\n- ');
                 }
                 else if (isAskedWhoAmI(content)) {
-                    responseText = sayWhoAmI(me, content);
+                    responseText = await sayWhoAmI(me, content);
                 }
                 // Alive
                 else if (isAskedAmIalive(content)) {

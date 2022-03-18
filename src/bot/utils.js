@@ -19,6 +19,8 @@ export const apiVer = 2.3;
 let _apiBackoff = Date.now();
 
 /**
+ * @typedef {import("chatexchange/dist/Browser").IProfileData} IProfileData
+ * @typedef {import("chatexchange/dist/User").default} User
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Client").Host} Host
  * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
@@ -26,6 +28,7 @@ let _apiBackoff = Date.now();
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import("./index").UserProfile} UserProfile
+ * @typedef {import("./commands/user").User} ChatUser
  */
 
 /**
@@ -209,7 +212,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
 
         // Parse date & time
         let year, monthValue, month, dayValue, date, yearValue, hour, min, dayDiff, h, apm;
-        const timestampString = $this.siblings('.timestamp').text();
+        const timestampString = $this.siblings('.timestamp').text().trim();
 
         // Today
         if (/^\d+:\d+ [AP]M$/.test(timestampString)) {
@@ -233,7 +236,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
         }
         // Has date, month, and maybe year
         else {
-            [, monthValue, date, yearValue, h, min, apm] = timestampString.match(/^(\w{3}) (\d+)(?: '(\d+))? (\d+):(\d+) ([AP])M$/) || [, null, null, null, null, null, null];
+            [, monthValue, date, yearValue, h, min, apm] = timestampString.match(/^(\w{3}) (\d+)(?:, (\d+))? (\d+):(\d+) ([AP])M$/) || [, null, null, null, null, null, null];
             month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthValue || "");
         }
 
@@ -265,7 +268,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
             date: datetime <= now ? datetime : now, // can never be in the future
             messageId: messageId
         });
-    }).get();
+    });
 
     if (config.verbose) {
         console.log('Transcript messages fetched:', messages.slice(-30));
@@ -500,7 +503,7 @@ export const getUsersCurrentlyInTheRoom = async (config, chatHost, room) => {
  * @param {BotConfig} config bot configuration
  * @param {string} siteHostname site to get the info for
  * @param {number} badgeId id of the badge to lookup
- * @param {IProfileData} user user to get the badge for
+ * @param {IProfileData|ChatUser} user user to get the badge for
  * @returns {Promise<[string, Record<number, Date>]>}
  */
 export const scrapeAwardedBadge = async (config, siteHostname, badgeId, user) => {
@@ -936,13 +939,12 @@ export const parseBoolEnv = (key, def = false) => {
  * @summary gets a User given a resolved message from them
  * @param {Client} client ChatExchange client
  * @param {number} userId chat user id
- * @returns {Promise<UserProfile|null>}
+ * @returns {Promise<IProfileData|null>}
  */
 export const getUser = async (client, userId) => {
     try {
         // This is so we can get extra info about the user
-        // @ts-expect-error
-        return client._browser.getProfile(userId);
+        return client.getProfile(userId);
     }
     catch (e) {
         console.error(e);
@@ -968,25 +970,25 @@ export const isBotInTheRoom = async (config, client, room) => {
 };
 
 /**
- * @typedef {import("chatexchange/dist/Browser").IProfileData} IProfileData
- *
  * @summary guard for checking if a message is a bot messsage
- * @param {IProfileData} botProfile bot chat profile
+ * @param {IProfileData|User} botProfile bot chat profile
  * @param {ChatMessage} message chat message
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
-export const isBotMessage = (botProfile, message) => {
-    const { id, name } = botProfile;
+export const isBotMessage = async (botProfile, message) => {
+    const { id } = botProfile;
+    const name = await botProfile.name;
     const { username, chatUserId } = message;
     return username === name || chatUserId === id;
 };
 
 /**
  * @summary predicate for filtering out messages not posted by the bot
- * @param {IProfileData} botProfile bot chat profile
- * @returns {(message: ChatMessage, index: number, original: ChatMessage[]) => boolean}
+ * @param {IProfileData|User} botProfile bot chat profile
+ * @returns {Promise<(message: ChatMessage, index: number, original: ChatMessage[]) => boolean>}
  */
-export const onlyBotMessages = (botProfile) => {
-    const { id, name } = botProfile;
+export const onlyBotMessages = async (botProfile) => {
+    const { id } = botProfile;
+    const name = await botProfile.name;
     return ({ username, chatUserId }) => username === name || chatUserId === id;
 };

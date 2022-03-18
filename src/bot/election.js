@@ -11,6 +11,7 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("@userscripters/stackexchange-api-types").User} User
  * @typedef {import("./index").UserProfile} UserProfile
+ * @typedef {import("./commands/user").User} ChatUser
  */
 
 export class Nominee {
@@ -483,7 +484,7 @@ export default class Election {
 
     /**
      * @summary checks if a user can vote in the election
-     * @param {UserProfile} user user info
+     * @param {UserProfile|ChatUser} user user info
      * @returns {boolean}
      */
     canVote(user) {
@@ -730,7 +731,7 @@ export default class Election {
      * @summary scrapes current election page
      * @param {BotConfig} config bot configuration
      * @param {boolean} [retry] whether we are retrying the scrape
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     async scrapeElection(config, retry = false) {
 
@@ -752,7 +753,7 @@ export default class Election {
                 // Only retry once
                 if (retry) {
                     console.error("Invalid site or election page.");
-                    throw new Error("Invalid site or election page.");
+                    return false;
                 }
 
                 // Set next election number and url
@@ -762,7 +763,7 @@ export default class Election {
                 console.log(`Retrying with election number ${this.electionNum} - ${this.electionUrl}`);
 
                 // Try again with updated election number
-                return await this.scrapeElection(config, true);
+                return this.scrapeElection(config, true);
             }
 
             this.pushHistory();
@@ -882,9 +883,12 @@ winners           ${this.numWinners};
 chat URL          ${this.chatUrl}
 primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; winners: ${this.numWinners}; withdrawals: ${this.numWithdrawals}`)
             );
+
+            return true;
         }
-        catch (err) {
-            console.error(`SCRAPE - Failed scraping ${this.electionUrl}`, err);
+        catch ({ message }) {
+            console.error(`SCRAPE - Failed scraping ${this.electionUrl}`, message);
+            return false;
         }
     }
 

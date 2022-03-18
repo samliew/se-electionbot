@@ -14,13 +14,16 @@ import { parsePackage } from "./utils/package.js";
 import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
 
 /**
+ * @typedef {import("chatexchange/dist/Browser").IProfileData} IProfileData
  * @typedef {import("./index").ElectionBadge} Badge
  * @typedef {import("./config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
- * @typedef {import("@userscripters/stackexchange-api-types").User} User
+ * @typedef {import("chatexchange/dist/User").default} User
+ * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
  * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {import("./score").CandidateScore} CandidateScore
  * @typedef {import("./election").ElectionPhase} ElectionPhase
+ * @typedef {import("./commands/user").User} ChatUser
  */
 
 /**
@@ -196,7 +199,7 @@ export const sayHowToNominate = (election, electionBadges, mentionsAnother = fal
     // Markup to bold additional text if talking about nominating others
     const mentionsAnotherBold = mentionsAnother ? '**' : '';
 
-    let requirements = [`at least ${election.repNominate} reputation`];
+    let requirements = [`at least ${election.repNominate} reputation`, 'at least 18 years of age'];
     if (election.isStackOverflow()) requirements.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
     if (siteHostname && /askubuntu\.com$/.test(siteHostname)) requirements.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
     requirements.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
@@ -370,7 +373,7 @@ export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = 
 /**
  * @summary builds current mods list response message
  * @param {Election} election current election
- * @param {User[]} moderators
+ * @param {ApiUser[]} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
@@ -424,7 +427,7 @@ export const sayCurrentCandidates = (_config, election) => {
 /**
  * @summary builds another site's mods list response message
  * @param {string} siteHostname
- * @param {User[]} moderators
+ * @param {ApiUser[]} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
@@ -618,11 +621,13 @@ export const sayWhatIsAnElection = (election) => {
 
 /**
  * @summary builds a response to a who am I query
- * @param {Omit<UserProfile, "access">} botChatProfile bot profile
+ * @param {IProfileData|User} botChatProfile bot profile
  * @param {string} content message content
+ * @returns {Promise<string>}
  */
-export const sayWhoAmI = (botChatProfile, content) => {
-    const { about, name } = botChatProfile;
+export const sayWhoAmI = async (botChatProfile, content) => {
+    const about = await botChatProfile.about;
+    const name = await botChatProfile.name;
     const prefix = /^are\b.+?/i.test(content) ? "Yes, " : "";
     const noAboutME = "I prefer to keep an air of mystery about me";
     return `${prefix}I am ${name}, and ${about || noAboutME}`;
@@ -741,7 +746,7 @@ export const sayUserEligibility = async (config, election, text) => {
 /**
  * @fun
  * @summary builds a "how many mods it takes" response message
- * @param {User[]} moderators current moderators
+ * @param {ApiUser[]} moderators current moderators
  * @returns {string}
  */
 export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {
@@ -834,16 +839,16 @@ export const sayBestCandidate = (_config, election) => {
  * @param {BotConfig} _config bot configuration
  * @param {Election} election current election
  * @param {string} _content message content
- * @param { import("./index").UserProfile } user requesting user
+ * @param {ChatUser} user requesting user
  * @returns {string}
  */
 export const sayBestModerator = (_config, election, _content, user) => {
     const { currentSiteMods } = election;
-    const { isModerator, name } = user;
+    const { name } = user;
 
     const currModNames = currentSiteMods.map(({ display_name }) => display_name);
 
-    if (isModerator && currModNames.includes(name)) {
+    if (user.isMod() && currModNames.includes(name)) {
         return `${name} is the best mod!!!`;
     }
 
@@ -1199,7 +1204,7 @@ export const sayAboutThePhases = (_config, election) => {
  * @param {BotConfig} config bot configuration
  * @param {Election} election current election
  * @param {string} _text message content
- * @param {UserProfile} user requesting user
+ * @param {ChatUser} user requesting user
  * @returns {Promise<string>}
  */
 export const sayIfOneHasVoted = async (config, election, _text, user) => {
@@ -1229,7 +1234,7 @@ export const sayIfOneHasVoted = async (config, election, _text, user) => {
  * @param {BotConfig} config bot configuration
  * @param {Election} election current election
  * @param {string} _text message content
- * @param {UserProfile} user requesting user
+ * @param {ChatUser} user requesting user
  * @returns {Promise<string>}
  */
 export const sayIfOneCanVote = async (config, election, _text, user) => {

@@ -12,6 +12,7 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
  * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
  * @typedef {import("./index").ElectionBadge} ElectionBadge
+ * @typedef {import("./commands/user").User} ChatUser
  */
 
 /**
@@ -116,9 +117,8 @@ export const makeCandidateScoreCalc = (config, modIds) =>
     /**
      * @summary calculates candidate score
      * @param {Election} election
-     * @param {UserProfile} user
+     * @param {ChatUser} user
      * @param {Pick<ResolvedMessage, "userId"|"content">} message
-     * @param {boolean} [isSO]
      * @returns {Promise<string>}
      */
     async (election, user, message) => {
@@ -135,7 +135,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         const { electionUrl, phase, repNominate, siteUrl, siteHostname, apiSlug } = election;
 
-        const { isModerator } = user;
+        const isModerator = user.isMod();
 
         const isAskingForOtherUser = isAskedForOtherScore(content);
         const isUsingChatLink = matchesOneOfChatHosts(content, `/users/`);

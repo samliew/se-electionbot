@@ -7,6 +7,7 @@ import { sendMessage } from "../queue.js";
 import { getUser, roomKeepAlive } from "../utils.js";
 
 /**
+ * @typedef {import("chatexchange/dist/User").default} User
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("chatexchange").ChatEventType} ChatEventType
  * @typedef {import("chatexchange/dist/Room").default} Room
@@ -20,7 +21,7 @@ import { getUser, roomKeepAlive } from "../utils.js";
  * @param {Election} election current election
  * @param {Client} client ChatExchange client
  * @param {{
- *  botChatProfile: IProfileData,
+ *  botChatProfile: IProfileData|User,
  *  controlRoomId: number,
  *  controlledRoom: Room,
  *  ignoredEventTypes?: ChatEventType[],
@@ -39,7 +40,10 @@ export const joinControlRoom = async (config, election, client, {
         const isSameRoom = controlRoomId === controlledRoom.id;
         if (isSameRoom && !allowSameRoom) return false;
 
-        const controlRoom = await client.joinRoom(controlRoomId);
+        const joinedControl = await client.joinRoom(controlRoomId);
+        if (!joinedControl) return false;
+
+        const controlRoom = client.getRoom(controlRoomId);
         controlRoom.ignore(...ignoredEventTypes);
 
         controlRoom.on("message", async (/** @type {WebsocketEvent} */ msg) => {
@@ -61,7 +65,7 @@ export const joinControlRoom = async (config, election, client, {
             const isAskingToSay = /^say\b/.test(content);
             const isAskingToGreet = /^greet\b/.test(content);
             const isAskingToFeedback = /^\feedback\b/.test(content);
-            const isAtMentionedMe = isBotMentioned(originalMessage, botChatProfile);
+            const isAtMentionedMe = await isBotMentioned(originalMessage, botChatProfile);
 
             if (!canSend || !fromControlRoom || !isAtMentionedMe) return;
 

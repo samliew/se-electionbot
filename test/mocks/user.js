@@ -1,4 +1,4 @@
-import { AccessLevel } from "../../src/bot/commands/index.js";
+import { AccessLevel } from "../../src/bot/commands/access.js";
 
 /**
  * @typedef {import("../../src/bot/index.js").UserProfile} UserProfile
