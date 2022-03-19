@@ -4,6 +4,7 @@ import { getBadges, getUserInfo } from './api.js';
 import { calculateScore } from './score.js';
 import { fetchUrl, onlyBotMessages, searchChat } from './utils.js';
 import { dateToUtcTimestamp } from './utils/dates.js';
+import { findLast } from './utils/dom.js';
 import { matchNumber } from "./utils/expressions.js";
 
 /**
@@ -69,11 +70,10 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
 
         const { window: { document } } = new JSDOM(revisionHTML);
 
-        // @ts-expect-error TODO: cleanup
-        const userIdHref = last([...document.querySelectorAll(`#content a[href*="/user"]`)])?.href;
-
-        //  @ts-expect-error TODO: cleanup
-        const nominationDateString = last([...document.querySelectorAll(`#content .relativetime`)])?.title;
+        // @ts-expect-error
+        const userIdHref = /** @type {string} */(findLast(`#content a[href*="/user"]`, document)?.href);
+        // @ts-expect-error
+        const nominationDateString = /** @type {string} */(findLast(`#content .relativetime`, document)?.title);
 
         const userId = matchNumber(/\/users\/(\d+)/, userIdHref) || -42;
 
