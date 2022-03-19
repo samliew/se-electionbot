@@ -1,6 +1,6 @@
 
-import { User } from "./user.js";
 import { AccessLevel } from "./access.js";
+import { User } from "./user.js";
 
 /**
  * @template {(...args:any[]) => any} T
@@ -74,10 +74,12 @@ export class CommandManager {
     }
 
     /**
+     * @template {(...args:any[]) => unknown} T
+     *
      * @summary adds a command to manager
      * @param {string} name
      * @param {string} description
-     * @param {(...args:any[]) => unknown} handler
+     * @param {T} handler
      * @param {number} [access]
      */
     add(name, description, handler, access = AccessLevel.user) {

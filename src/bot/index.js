@@ -377,7 +377,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
 
             const user = new User(profile, access);
 
-            const isPrivileged = user.isMod() || ((AccessLevel.privileged) & access);
+            const isPrivileged = user.isMod() || (AccessLevel.privileged & access);
 
             // Ignore if message is too short or long, unless a mod was trying to use say command
             const { length } = preparedMessage;
