@@ -421,11 +421,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
 
                 commander.add("verbose", "switches verbose mode on/off", switchMode, AccessLevel.dev);
 
-                commander.add("fun", "switches fun mode on/off", (config, content) => {
-                    const [, state = "on"] = /(on|off)/.exec(content) || [];
-                    config.funMode = state === "on";
-                    return config.funMode ? "I am having fun." : "We hate fun.";
-                }, AccessLevel.privileged);
+                commander.add("fun", "switches fun mode on/off", switchMode, AccessLevel.privileged);
 
                 commander.add("test cron", "sets up a test cron job", (announcement) => {
                     announcement.initTest();

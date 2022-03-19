@@ -344,14 +344,26 @@ export class BotConfig {
         return flags.debug;
     }
 
+    set debug(val) {
+        this.flags.debug = val;
+    }
+
     get fun() {
         const { flags } = this;
         return flags.fun;
     }
 
+    set fun(val) {
+        this.flags.fun = val;
+    }
+
     get verbose() {
         const { flags } = this;
         return flags.verbose;
+    }
+
+    set verbose(val) {
+        this.flags.verbose = val;
     }
 
     /* dashboard variables */
