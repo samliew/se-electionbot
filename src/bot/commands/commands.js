@@ -374,3 +374,13 @@ export const echoSomething = async (config, room, content) => {
     const normalized = content.replace(/^@\S+\s+say /i, '');
     await sendMessage(config, room, normalized, null, true);
 };
+
+/**
+ * @summary gets the current throttle value
+ * @param {BotConfig} config bot config
+ * @returns {string}
+ */
+export const getThrottleCommand = (config) => {
+    const { throttleSecs } = config;
+    return `Reply throttle is currently ${throttleSecs} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
+};

@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, echoSomething, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, echoSomething, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -436,11 +436,8 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     return 'Currently scheduled announcements: `' + JSON.stringify(schedules) + '`';
                 }, AccessLevel.dev);
 
-                commander.add("get throttle", "get throttle value (secs)", (throttle) => {
-                    return `Reply throttle is currently ${throttle} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
-                }, AccessLevel.privileged);
-
                 commander.add("set throttle", "set throttle value (secs)", setThrottleCommand, AccessLevel.privileged);
+                commander.add("get throttle", "get throttle value (secs)", getThrottleCommand, AccessLevel.privileged);
 
                 commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
@@ -543,7 +540,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     ["get time", /^(?:get time|time)$/, election],
                     ["get cron", /get cron/, announcement],
                     ["test cron", /test cron/, announcement],
-                    ["get throttle", /get throttle/, config.throttleSecs],
+                    ["get throttle", /get throttle/, config],
                     ["set throttle", /set throttle/, preparedMessage, config],
                     ["chatroom", /chatroom/, election],
                     ["get rooms", /get rooms/, config, client],
