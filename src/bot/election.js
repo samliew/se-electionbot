@@ -2,7 +2,7 @@ import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
 import { getBadges, getUserInfo } from './api.js';
 import { calculateScore } from './score.js';
-import { fetchUrl } from './utils.js';
+import { fetchUrl, onlyBotMessages, searchChat } from './utils.js';
 import { dateToUtcTimestamp } from './utils/dates.js';
 import { matchNumber } from "./utils/expressions.js";
 
@@ -11,11 +11,25 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import('chatexchange/dist/Client').Host} Host
  * @typedef {import("./config.js").BotConfig} BotConfig
- * @typedef {import("@userscripters/stackexchange-api-types").User} User
+ * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
  * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {import("./commands/user").User} ChatUser
+ * @typedef {import("chatexchange/dist/User").default} BotUser
  * @typedef {import("./utils").ChatMessage} ChatMessage
  */
+
+/**
+ * @summary finds all bot announcements in chat transcript
+ * @param {BotConfig} config bot configuration
+ * @param {BotUser} user current bot user
+ * @returns {Promise<ChatMessage[]>}
+ */
+export const findNominationAnnouncementsInChat = async (config, user) => {
+    const term = "We have a new nomination Please welcome our latest candidate";
+    const announcements = await searchChat(config, config.chatDomain, term, config.chatRoomId);
+    const botMessageFilter = await onlyBotMessages(user);
+    return announcements.filter(botMessageFilter);
+};
 
 /**
  * @summary finds withdrawn {@link Nominee}s that were only announced in chat
@@ -252,7 +266,7 @@ export default class Election {
     /** @type {Nominee[]} */
     arrWinners = [];
 
-    /** @type {User[]} */
+    /** @type {ApiUser[]} */
     currentSiteMods = [];
 
     /** @type {ElectionPhase|null} */
