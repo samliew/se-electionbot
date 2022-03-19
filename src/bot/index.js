@@ -7,13 +7,13 @@ import { startServer } from "../server/index.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
+import { AccessLevel } from "./commands/access.js";
 import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
-import { AccessLevel } from "./commands/access.js";
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import Election, { addWithdrawnNomineesFromChat } from './election.js';
+import Election, { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat } from './election.js';
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
@@ -286,12 +286,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
 
         config.activityCounter = await countValidBotMessages(config, transcriptMessages, me);
 
-        /*
-         * Sync withdrawn nominees on startup using past ElectionBot announcements
-         * (assuming ElectionBot managed to announce all the nominations from start of election)
-         */
-        const announcementHistory = await searchChat(config, config.chatDomain, "We have a new nomination Please welcome our latest candidate", config.chatRoomId);
-
         const { currentNomineePostIds } = election;
 
         if (config.verbose) {
@@ -299,9 +293,12 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
             console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
         }
 
-        const botAnnouncements = announcementHistory.filter(botMessageFilter);
-
-        await addWithdrawnNomineesFromChat(config, election, botAnnouncements);
+        /*
+         * Sync withdrawn nominees on startup using past ElectionBot announcements
+         * (assuming ElectionBot managed to announce all the nominations from start of election)
+         */
+        const announcements = await findNominationAnnouncementsInChat(config, me);
+        await addWithdrawnNomineesFromChat(config, election, announcements);
 
         if (config.verbose) {
             console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);
