@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, echoSomething, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -414,7 +414,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
 
                 const commander = new CommandManager(user);
 
-                commander.add("say", "bot echoes something", (content) => content.replace(/^@\S+\s+say /i, ''), AccessLevel.privileged);
 
                 commander.add("alive", "bot reports on its status", isAliveCommand, AccessLevel.privileged);
 
@@ -520,6 +519,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 commander.add("impersonate", "impersonates a user", impersonateUser, AccessLevel.dev);
 
                 commander.add("post meta", "posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged);
+                commander.add("say", "bot echoes something", echoSomething, AccessLevel.privileged);
 
                 commander.aliases({
                     timetravel: ["delorean", "88 miles"],
@@ -538,7 +538,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 const matches = [
                     ["commands", /commands|usage/],
                     ["alive", /^(?:alive|awake|ping|uptime)/, config],
-                    ["say", /say/, decodedMessage],
+                    ["say", /say/, config, room, decodedMessage],
                     ["greet", /^(?:greet|welcome)/, config, election, room, preparedMessage],
                     ["get time", /^(?:get time|time)$/, election],
                     ["get cron", /get cron/, announcement],

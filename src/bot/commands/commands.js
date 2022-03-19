@@ -362,3 +362,15 @@ export const postMetaAnnouncement = async (config, election, room, content) => {
 
     config.flags.announcedMetaPost = true;
 };
+
+/**
+ * @summary makes the bot echo a message
+ * @param {BotConfig} config bot config
+ * @param {Room} room current room
+ * @param {string} content message content
+ * @returns {Promise<void>}
+ */
+export const echoSomething = async (config, room, content) => {
+    const normalized = content.replace(/^@\S+\s+say /i, '');
+    await sendMessage(config, room, normalized, null, true);
+};

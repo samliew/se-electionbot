@@ -1,4 +1,4 @@
-import { sayFeedback } from '../commands/commands.js';
+import { echoSomething, sayFeedback } from '../commands/commands.js';
 import { isBotMentioned } from "../guards.js";
 import { sayIdleGreeting } from "../messages.js";
 import { sendMessage } from "../queue.js";
@@ -71,7 +71,7 @@ export const joinControlRoom = async (config, election, client, {
             if (!canSend || !fromControlRoom || !isAtMentionedMe) return;
 
             if (isAskingToSay) {
-                await sendMessage(config, controlledRoom, decodedMessage.replace(/^@\S+\s+say /i, ''));
+                await echoSomething(config, controlledRoom, decodedMessage);
                 return;
             }
 
