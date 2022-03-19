@@ -4,10 +4,9 @@ import { getMockBotConfig } from "../mocks/bot.js";
 
 describe('Election', function () {
 
-    describe('scrapeElection', function () {
+    this.timeout(10e3); // scraping can be slow
 
-        this.timeout(10e3); // scraping can be slow
-
+    describe('scrapeElection', () => {
         it('should correctly scrape election', async () => {
 
             const election = new Election("https://stackoverflow.com/election/12");
