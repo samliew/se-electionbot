@@ -273,7 +273,7 @@ export const impersonateUser = (config, content) => {
  * @returns {string}
  */
 export const switchMode = (config, content) => {
-    const [, mode = "debug", state = "on"] = /(debug|verbose)(?:\s+mode)?\s+(on|off)/.exec(content) || [];
+    const [, mode = "debug", state = "on"] = /(debug|verbose|fun)(?:\s+mode)?\s+(on|off)/.exec(content) || [];
     config[mode] = state === "on";
     return `${capitalize(mode)} mode ${state}`;
 };
