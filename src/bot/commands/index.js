@@ -87,6 +87,23 @@ export class CommandManager {
     }
 
     /**
+     * @param {{
+     *  [name: string]: [
+     *      description: string,
+     *      handler: (...args:any[]) => unknown,
+     *      access?: number
+     * ]
+     * }} newCommands commands to add
+     */
+    bulkAdd(newCommands) {
+        const { commands } = this;
+        Object.entries(newCommands).forEach(([name, config]) => {
+            commands[name] = new Command(name, ...config);
+        });
+        return this;
+    }
+
+    /**
      * @summary aliases a command
      * @param {string} name
      * @param {string[]} aliases

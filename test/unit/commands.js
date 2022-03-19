@@ -1,14 +1,14 @@
 import { expect } from "chai";
 import sinon from "sinon";
+import { AccessLevel } from "../../src/bot/commands/access.js";
 import { isAliveCommand, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "../../src/bot/commands/commands.js";
 import { CommandManager } from "../../src/bot/commands/index.js";
-import { AccessLevel } from "../../src/bot/commands/access.js";
+import { User } from "../../src/bot/commands/user.js";
 import Election from "../../src/bot/election.js";
 import { dateToUtcTimestamp } from "../../src/bot/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 import { getMockUserProfile } from "../mocks/user.js";
-import { User } from "../../src/bot/commands/user.js";
 
 /**
  * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
@@ -16,6 +16,21 @@ import { User } from "../../src/bot/commands/user.js";
 
 
 describe('Commander', () => {
+
+    describe('adding', () => {
+        it("bulkAdd should correctly add commands", () => {
+            const user = new User(getMockUserProfile());
+
+            const commander = new CommandManager(user);
+            commander.bulkAdd({
+                build: ["builds something", () => void 0],
+                test: ["tests something", () => true]
+            });
+
+            expect(commander.run("build")).to.be.undefined;
+            expect(commander.run("test")).to.be.true;
+        });
+    });
 
     describe('aliasing', () => {
         it('"alias" should correctly add aliases', () => {
