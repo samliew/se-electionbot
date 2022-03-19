@@ -90,6 +90,9 @@ export const joinControlRoom = async (config, election, client, {
         roomKeepAlive(config, client, controlRoom);
 
         console.log(`joined control room: ${controlRoomId}`);
+
+        await controlRoom.sendMessage("reporting for duty, control");
+
     } catch (error) {
         console.log(`failed to join control room: ${error}`);
         return false;
