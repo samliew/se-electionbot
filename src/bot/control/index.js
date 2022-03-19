@@ -59,6 +59,7 @@ export const joinControlRoom = async (config, election, client, {
 
             const canSend = user.isModerator || config.devIds.has(user.id);
             const fromControlRoom = roomId === controlRoomId;
+            const isAskingToLeave = /^leave room\b/.test(preparedMessage);
             const isAskingToSay = /^say\b/.test(preparedMessage);
             const isAskingToGreet = /^greet\b/.test(preparedMessage);
             const isAskingToFeedback = /^\feedback\b/.test(preparedMessage);
@@ -79,6 +80,13 @@ export const joinControlRoom = async (config, election, client, {
             if (isAskingToFeedback) {
                 await sendMessage(config, controlledRoom, sayFeedback(config));
                 return;
+            }
+
+            if (isAskingToLeave) {
+                const status = await controlRoom.leave();
+                if (!status) {
+                    await controlRoom.sendMessage("I was unable to leave the room");
+                }
             }
         });
 
