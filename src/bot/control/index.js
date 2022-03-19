@@ -51,7 +51,10 @@ export const joinControlRoom = async (config, election, client, {
 
             const { userId } = msg;
 
-            const { decodedMessage, preparedMessage } = prepareMessageForMatching(encodedMessage);
+            const {
+                decodedMessage,
+                preparedMessage
+            } = prepareMessageForMatching(encodedMessage, await botChatProfile.name);
 
             // Get details of user who triggered the message
             const user = await getUser(client, userId);

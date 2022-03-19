@@ -333,8 +333,9 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
             const encodedMessage = await msg.content;
+            const botName = await me.name;
 
-            const { decodedMessage, preparedMessage } = prepareMessageForMatching(encodedMessage);
+            const { decodedMessage, preparedMessage } = prepareMessageForMatching(encodedMessage, botName);
 
             const { eventType, userId: originalUserId, targetUserId } = msg;
 
@@ -401,7 +402,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
              * Test is done against "originalMessage", since "content" holds the normalised version for keyword/guard matching without username in front
              */
             const botMentioned = await isBotMentioned(decodedMessage, me) || targetUserId === me.id;
-            const botMentionedCasually = botMentioned || new RegExp(`\\b(?:ElectionBo[tx]|${me.name})\\b`, "i").test(decodedMessage);
+            const botMentionedCasually = botMentioned || new RegExp(`\\b(?:ElectionBo[tx]|${botName})\\b`, "i").test(decodedMessage);
 
 
             /*
