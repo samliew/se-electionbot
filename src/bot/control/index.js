@@ -1,10 +1,9 @@
-import entities from 'html-entities';
-import sanitize from "sanitize-html";
 import { sayFeedback } from '../commands/commands.js';
 import { isBotMentioned } from "../guards.js";
 import { sayIdleGreeting } from "../messages.js";
 import { sendMessage } from "../queue.js";
 import { getUser, roomKeepAlive } from "../utils.js";
+import { prepareMessageForMatching } from '../utils/chat.js';
 
 /**
  * @typedef {import("chatexchange/dist/User").default} User
@@ -52,9 +51,7 @@ export const joinControlRoom = async (config, election, client, {
 
             const { userId } = msg;
 
-            // Decode HTML entities in messages, create lowercase copy for guard matching
-            const originalMessage = entities.decode(encodedMessage);
-            const content = sanitize(originalMessage.toLowerCase().replace(/^@\S+\s+/, ''), { allowedTags: [] });
+            const { decodedMessage, preparedMessage } = prepareMessageForMatching(encodedMessage);
 
             // Get details of user who triggered the message
             const user = await getUser(client, userId);
@@ -62,15 +59,15 @@ export const joinControlRoom = async (config, election, client, {
 
             const canSend = user.isModerator || config.devIds.has(user.id);
             const fromControlRoom = roomId === controlRoomId;
-            const isAskingToSay = /^say\b/.test(content);
-            const isAskingToGreet = /^greet\b/.test(content);
-            const isAskingToFeedback = /^\feedback\b/.test(content);
-            const isAtMentionedMe = await isBotMentioned(originalMessage, botChatProfile);
+            const isAskingToSay = /^say\b/.test(preparedMessage);
+            const isAskingToGreet = /^greet\b/.test(preparedMessage);
+            const isAskingToFeedback = /^\feedback\b/.test(preparedMessage);
+            const isAtMentionedMe = await isBotMentioned(decodedMessage, botChatProfile);
 
             if (!canSend || !fromControlRoom || !isAtMentionedMe) return;
 
             if (isAskingToSay) {
-                await sendMessage(config, controlledRoom, originalMessage.replace(/^@\S+\s+say /i, ''));
+                await sendMessage(config, controlledRoom, decodedMessage.replace(/^@\S+\s+say /i, ''));
                 return;
             }
 

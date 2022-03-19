@@ -2,7 +2,6 @@ import Client from "chatexchange";
 import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
-import sanitize from "sanitize-html";
 import { startServer } from "../server/index.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
@@ -46,6 +45,7 @@ import {
     linkToRelativeTimestamp, makeURL, onlyBotMessages, roomKeepAlive, searchChat, wait
 } from './utils.js';
 import { mapify } from "./utils/arrays.js";
+import { prepareMessageForMatching } from "./utils/chat.js";
 import { dateToUtcTimestamp } from "./utils/dates.js";
 
 /**
@@ -334,12 +334,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
             const encodedMessage = await msg.content;
 
-            // Decode HTML entities in messages, create lowercase copy for guard matching
-            const originalMessage = entities.decode(encodedMessage);
-            const content = sanitize(
-                originalMessage.toLowerCase().replace(/^@\S+\s+/, '').replace(/’/, "'"),
-                { allowedTags: [] }
-            );
+            const { decodedMessage, preparedMessage } = prepareMessageForMatching(encodedMessage);
 
             const { eventType, userId: originalUserId, targetUserId } = msg;
 
@@ -357,7 +352,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
             config.activityCounter++;
 
             // Ignore messages with oneboxes
-            if (content.includes('onebox')) return;
+            if (preparedMessage.includes('onebox')) return;
 
             // Get details of user who triggered the message
             const profile = await getUser(client, userId);
@@ -384,9 +379,9 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
             const isPrivileged = user.isMod() || ((AccessLevel.privileged) & access);
 
             // Ignore if message is too short or long, unless a mod was trying to use say command
-            const { length } = content;
-            if ((length <= 3 || length >= 70) && !(isPrivileged && (content.startsWith('say') || content.includes('candidate score')))) {
-                console.log(`EVENT - Ignoring due to message length ${content.length}: ${content}`);
+            const { length } = preparedMessage;
+            if ((length <= 3 || length >= 70) && !(isPrivileged && (preparedMessage.startsWith('say') || preparedMessage.includes('candidate score')))) {
+                console.log(`EVENT - Ignoring due to message length ${preparedMessage.length}: ${preparedMessage}`);
                 return;
             }
 
@@ -396,7 +391,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
 
             // Log all un-ignored events
             console.log(`EVENT - current activity: ${config.activityCounter}; reached minimum: ${config.roomReachedMinActivityCount}; reached maximum: ${config.roomReachedMaxActivityCount};\n`,
-                JSON.stringify({ content, msg, user }));
+                JSON.stringify({ content: preparedMessage, msg, user }));
 
 
             /*
@@ -405,8 +400,8 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
              * ** Potentially do not need "targetUserId === me.id" as that is only used by the USER_MENTIONED (8) or message reply (18) event.
              * Test is done against "originalMessage", since "content" holds the normalised version for keyword/guard matching without username in front
              */
-            const botMentioned = await isBotMentioned(originalMessage, me) || targetUserId === me.id;
-            const botMentionedCasually = botMentioned || new RegExp(`\\b(?:ElectionBo[tx]|${me.name})\\b`, "i").test(originalMessage);
+            const botMentioned = await isBotMentioned(decodedMessage, me) || targetUserId === me.id;
+            const botMentionedCasually = botMentioned || new RegExp(`\\b(?:ElectionBo[tx]|${me.name})\\b`, "i").test(decodedMessage);
 
 
             /*
@@ -542,36 +537,36 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 const matches = [
                     ["commands", /commands|usage/],
                     ["alive", /^(?:alive|awake|ping|uptime)/, config],
-                    ["say", /say/, originalMessage],
-                    ["greet", /^(?:greet|welcome)/, config, election, room, content],
+                    ["say", /say/, decodedMessage],
+                    ["greet", /^(?:greet|welcome)/, config, election, room, preparedMessage],
                     ["get time", /^(?:get time|time)$/, election],
                     ["get cron", /get cron/, announcement],
                     ["test cron", /test cron/, announcement],
                     ["get throttle", /get throttle/, config.throttleSecs],
-                    ["set throttle", /set throttle/, content, config],
+                    ["set throttle", /set throttle/, preparedMessage, config],
                     ["chatroom", /chatroom/, election],
                     ["get rooms", /get rooms/, config, client],
-                    ["leave room", /leave room/, content, client],
-                    ["mute", /^(?:mute|timeout|sleep)/, config, content, config.throttleSecs],
+                    ["leave room", /leave room/, preparedMessage, client],
+                    ["mute", /^(?:mute|timeout|sleep)/, config, preparedMessage, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
-                    ["coffee", /(?:brew|make).+coffee/, originalMessage, user],
-                    ["timetravel", /88 miles|delorean|timetravel/, config, election, content],
-                    ["fun", /fun/, config, content],
-                    ["debug", /debug(?:ing)?/, config, content],
-                    ["verbose", /^(?:verbose|chatty)/, config, content],
+                    ["coffee", /(?:brew|make).+coffee/, decodedMessage, user],
+                    ["timetravel", /88 miles|delorean|timetravel/, config, election, preparedMessage],
+                    ["fun", /fun/, config, preparedMessage],
+                    ["debug", /debug(?:ing)?/, config, preparedMessage],
+                    ["verbose", /^(?:verbose|chatty)/, config, preparedMessage],
                     ["die", /die|shutdown|turn off/],
-                    ["set access", /set (?:access|level)/, config, user, content],
+                    ["set access", /set (?:access|level)/, config, user, preparedMessage],
                     ["announce nominees", /^announce nominees/, config, election, announcement],
                     ["announce winners", /^announce winners/, config, election, room, announcement],
                     ["feedback", /^feedback/, config],
-                    ["list moderators", /^whois/, config, content, entities],
+                    ["list moderators", /^whois/, config, preparedMessage, entities],
                     ["reset election", /^reset election/, config, election],
-                    ["ignore", /^ignore \d+/, config, room, content],
-                    ["impersonate", /^impersonate \d+/, config, content],
-                    ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, content]
+                    ["ignore", /^ignore \d+/, config, room, preparedMessage],
+                    ["impersonate", /^impersonate \d+/, config, preparedMessage],
+                    ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, preparedMessage]
                 ];
 
-                const boundRunIf = commander.runIfMatches.bind(commander, content);
+                const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);
 
                 for (const [name, regex, ...args] of matches) {
                     // TODO: switch to &&= on Node.js 15+
@@ -582,8 +577,8 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     console.log(`Response info -
                 response text: ${responseText}
                 response chars: ${responseText.length}
-                content: ${content}
-                original: ${originalMessage}
+                content: ${preparedMessage}
+                original: ${decodedMessage}
                 last message: ${config.lastMessageTime}
                 last activity: ${config.lastActivityTime}
                 `);
@@ -637,7 +632,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 [isAskedWhereToFindResults, sayWhereToFindElectionResults]
             ];
 
-            const matched = rules.find(([expr]) => expr(content));
+            const matched = rules.find(([expr]) => expr(preparedMessage));
 
             /** @type {string | null} */
             let responseText = null;
@@ -649,34 +644,34 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
             if (matched) {
                 const [matcher, builder] = matched;
                 if (config.debug) console.log(`Matched response: ${matcher.name}`);
-                responseText = await builder(config, election, content, user);
+                responseText = await builder(config, election, preparedMessage, user);
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
-            else if (isAskedAboutLightbulb(content) && config.fun) {
+            else if (isAskedAboutLightbulb(preparedMessage) && config.fun) {
                 responseText = sayHowManyModsItTakesToFixLightbulb(currentSiteMods);
             }
-            else if (isAskedAboutBadgesOfType(content)) {
-                const [, type] = /(participation|editing|moderation)/.exec(content) || [];
+            else if (isAskedAboutBadgesOfType(preparedMessage)) {
+                const [, type] = /(participation|editing|moderation)/.exec(preparedMessage) || [];
                 responseText = sayBadgesByType(electionBadges, type, election.isStackOverflow());
             }
             // SO required badges
-            else if (['what', 'required', 'badges'].every(x => content.includes(x))) {
+            else if (['what', 'required', 'badges'].every(x => preparedMessage.includes(x))) {
                 responseText = sayRequiredBadges(election);
             }
 
             // What are the benefits of mods
             // Why should I be a moderator
-            else if (isAskedAboutModsOrModPowers(content)) {
+            else if (isAskedAboutModsOrModPowers(preparedMessage)) {
                 responseText = sayWhatModsDo(election);
             }
 
             // Calculate own candidate score
-            else if (isAskedForOwnScore(content) || isAskedForOtherScore(content)) {
+            else if (isAskedForOwnScore(preparedMessage) || isAskedForOtherScore(preparedMessage)) {
 
                 // TODO: use config object pattern instead, 6 parameters is way too much
                 const calcCandidateScore = makeCandidateScoreCalc(config, soPastAndPresentModIds);
 
-                responseText = await calcCandidateScore(election, user, { userId, content });
+                responseText = await calcCandidateScore(election, user, { userId, content: preparedMessage });
 
                 // TODO: msg.id is not guaranteed to be defined
                 await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
@@ -684,93 +679,93 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 return; // stop here since we are using a different default response method
             }
             // How is candidate score calculated
-            else if (isAskedForScoreFormula(content)) {
+            else if (isAskedForScoreFormula(preparedMessage)) {
                 responseText = sayCandidateScoreFormula(electionBadges);
             }
             // Who has the highest candidate score
-            else if (isAskedForScoreLeaderboard(content)) {
+            else if (isAskedForScoreLeaderboard(preparedMessage)) {
                 responseText = sayCandidateScoreLeaderboard(election.apiSlug);
             }
             // Withdrawn candidates/nominations
-            else if (isAskedForWithdrawnNominees(content)) {
+            else if (isAskedForWithdrawnNominees(preparedMessage)) {
                 responseText = sayWithdrawnNominations(config, election);
             }
 
             // Election stats - How many voted/participants/participated
-            else if (['how', 'many'].every(x => content.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => content.includes(x))) {
-                responseText = await sayAlreadyVoted(config, election, content);
+            else if (['how', 'many'].every(x => preparedMessage.includes(x)) && ['voters', 'voted', 'participated', 'participants'].some(x => preparedMessage.includes(x))) {
+                responseText = await sayAlreadyVoted(config, election, preparedMessage);
             }
             // Conflicts with isAskedAboutVoting below - should not match "how to vote"
-            else if (isAskedHowOrWhoToVote(content)) {
+            else if (isAskedHowOrWhoToVote(preparedMessage)) {
                 if (election.phase == null) responseText = sayNotStartedYet(election);
                 else responseText = sayInformedDecision();
             }
             // Current mods
-            else if (isAskedForCurrentMods(content, election.apiSlug)) {
+            else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
                 responseText = sayCurrentMods(election, currentSiteMods, entities.decode);
             }
 
             // How to nominate self/others
             // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
-            else if (isAskedForNominatingInfo(content)) {
-                const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => content.includes(x));
+            else if (isAskedForNominatingInfo(preparedMessage)) {
+                const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => preparedMessage.includes(x));
                 responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
             }
-            else if (isAskedWhyNominationRemoved(content)) {
+            else if (isAskedWhyNominationRemoved(preparedMessage)) {
                 responseText = sayWhyNominationRemoved();
             }
-            else if (isAskedIfModsArePaid(content)) {
+            else if (isAskedIfModsArePaid(preparedMessage)) {
                 responseText = sayAreModsPaid(election);
             }
-            else if (isAskedWhatIsElectionStatus(content)) {
+            else if (isAskedWhatIsElectionStatus(preparedMessage)) {
                 responseText = sayAboutElectionStatus(config, election);
             }
-            else if (isAskedWhenIsTheNextPhase(content)) {
+            else if (isAskedWhenIsTheNextPhase(preparedMessage)) {
                 responseText = sayNextPhase(config, election);
             }
-            else if (isAskedWhenTheElectionEnds(content)) {
+            else if (isAskedWhenTheElectionEnds(preparedMessage)) {
                 responseText = sayElectionIsEnding(election);
             }
-            else if (isAskedAboutVoting(content)) {
+            else if (isAskedAboutVoting(preparedMessage)) {
                 responseText = sayAboutVoting(election);
             }
-            else if (isAskedForCurrentWinners(content)) {
+            else if (isAskedForCurrentWinners(preparedMessage)) {
                 responseText = sayCurrentWinners(election);
             }
-            else if (isAskedForElectionSchedule(content)) {
+            else if (isAskedForElectionSchedule(preparedMessage)) {
                 responseText = sayElectionSchedule(election);
             }
             // What is an election
-            else if (content.length <= 56 && (/^(?:what|what's) (?:is )?(?:a |an |the )?election/.test(content) || /^how do(?:es)? (?:a |an |the )?election work/.test(content))) {
+            else if (preparedMessage.length <= 56 && (/^(?:what|what's) (?:is )?(?:a |an |the )?election/.test(preparedMessage) || /^how do(?:es)? (?:a |an |the )?election work/.test(preparedMessage))) {
                 responseText = sayWhatIsAnElection(election);
             }
             // Can't we just edit the diamond in our username
-            else if (isAskedAboutUsernameDiamond(content)) {
+            else if (isAskedAboutUsernameDiamond(preparedMessage)) {
                 responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
             }
-            else if (isAskedAboutMissingComments(content)) {
+            else if (isAskedAboutMissingComments(preparedMessage)) {
                 responseText = election.phase !== "nomination" ?
                     `Comments are only visible on the "${makeURL("Nomination", election.electionUrl + '?tab=nomination')}" tab.` :
                     `If you cannot see any comments on the ${makeURL("Election", election.electionUrl + '?tab=election')} page, either nobody has commented yet or you need to wear glasses.`;
             }
-            else if (/^happy birth\s?day,? .*!*$/.test(content)) {
+            else if (/^happy birth\s?day,? .*!*$/.test(preparedMessage)) {
                 responseText = `Happy birthday!`;
             }
-            else if (isLovingTheBot(content)) {
+            else if (isLovingTheBot(preparedMessage)) {
                 responseText = getRandomGoodThanks();
             }
-            else if (isHatingTheBot(content)) {
+            else if (isHatingTheBot(preparedMessage)) {
                 responseText = getRandomNegative();
             }
-            else if (isPrivileged && isAskedForUserEligibility(content)) {
-                responseText = await sayUserEligibility(config, election, content);
+            else if (isPrivileged && isAskedForUserEligibility(preparedMessage)) {
+                responseText = await sayUserEligibility(config, election, preparedMessage);
             }
-            else if (isPrivileged && isAskedHowManyModsInTheRoom(content)) {
+            else if (isPrivileged && isAskedHowManyModsInTheRoom(preparedMessage)) {
                 const modNumResponse = await sayHowManyModsAreHere(config, client, room);
                 await sendMultipartMessage(config, room, modNumResponse, msg.id, true);
                 return;
             }
-            else if (isAskedHowManyCandidatesInTheRoom(content)) {
+            else if (isAskedHowManyCandidatesInTheRoom(preparedMessage)) {
                 const nomineeNumResponse = await sayHowManyCandidatesAreHere(config, election, client, room);
                 await sendMultipartMessage(config, room, nomineeNumResponse, msg.id, true);
                 return;
@@ -812,38 +807,38 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
 
                 // Full help
-                if (isAskedForFullHelp(content)) {
+                if (isAskedForFullHelp(preparedMessage)) {
                     await sendMultipartMessage(config, room, "Examples of election FAQs I can help with:\n- " +
                         helpTopics.map(({ text }) => text).join('\n- '), msg.id, true);
                     return; // Message sent, no need to continue
                 }
 
                 // Help - contain this to a single message please (<500 chars including line breaks, bullets, and whitespace)
-                if (isAskedForHelp(content)) {
+                if (isAskedForHelp(preparedMessage)) {
                     responseText = "Examples of election FAQs I can help with:\n- " +
                         helpTopics.filter(({ short }) => short).map(({ text }) => text).join('\n- ');
                 }
-                else if (isAskedWhoAmI(content)) {
-                    responseText = await sayWhoAmI(me, content);
+                else if (isAskedWhoAmI(preparedMessage)) {
+                    responseText = await sayWhoAmI(me, preparedMessage);
                 }
                 // Alive
-                else if (isAskedAmIalive(content)) {
+                else if (isAskedAmIalive(preparedMessage)) {
                     responseText = getRandomAlive();
                 }
                 // Who made you
-                else if (isAskedWhoMadeMe(content)) {
+                else if (isAskedWhoMadeMe(preparedMessage)) {
                     responseText = await sayWhoMadeMe(config);
                 }
-                else if (isAskedHowAmI(content)) {
+                else if (isAskedHowAmI(preparedMessage)) {
                     responseText = sayHowAmI(config, election);
                 }
                 // Thanks
-                else if (isThankingTheBot(content)) {
+                else if (isThankingTheBot(preparedMessage)) {
                     responseText = getRandomThanks();
                 }
                 // Offtopic
-                else if (content.startsWith('offtopic')) {
-                    responseText = sayOffTopicMessage(election, content);
+                else if (preparedMessage.startsWith('offtopic')) {
+                    responseText = sayOffTopicMessage(election, preparedMessage);
                     await sendMessage(config, room, responseText, null, false);
                     return; // stop here since we are using a different default response method
                 }
@@ -854,37 +849,37 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 // The rest below are fun mode only
                 else if (config.fun) {
 
-                    if (content.startsWith(`i love you`)) {
+                    if (preparedMessage.startsWith(`i love you`)) {
                         responseText = `I love you 3000`;
                     }
-                    else if (isAskedHowAmI(content)) {
+                    else if (isAskedHowAmI(preparedMessage)) {
                         responseText = getRandomStatus([
                             `I'm bored. Amuse me.`,
                             `Why don't you come up sometime and see me?`,
                             `Today, I consider myself the luckiest bot on the face of the earth.`,
                         ]);
                     }
-                    else if (isAskedWhoAmI(content)) {
+                    else if (isAskedWhoAmI(preparedMessage)) {
                         responseText = getRandomWhoAmI();
                     }
-                    else if (/^why are you\?*$/.test(content)) {
+                    else if (/^why are you\?*$/.test(preparedMessage)) {
                         responseText = new RandomArray(
                             `because.`,
                             `why what???`,
                         ).getRandom();
                     }
-                    else if (/^what(?:'s| is| are) your pronouns\?*$/.test(content)) {
+                    else if (/^what(?:'s| is| are) your pronouns\?*$/.test(preparedMessage)) {
                         responseText = `naturally, my pronouns are it/its/itself.`;
                     }
-                    else if (isAskedMeaningOfLife(content)) {
+                    else if (isAskedMeaningOfLife(preparedMessage)) {
                         responseText = new RandomArray(
                             `The answer to life, the universe, and everything is the number 42.`,
                         ).getRandom();
                     }
-                    else if (isAskedAboutJonSkeetJokes(content)) {
+                    else if (isAskedAboutJonSkeetJokes(preparedMessage)) {
                         responseText = sayAJonSkeetJoke();
                     }
-                    else if (isAskedAboutJokes(content)) {
+                    else if (isAskedAboutJokes(preparedMessage)) {
                         responseText = sayAJoke();
                     }
                 } // End fun mode
