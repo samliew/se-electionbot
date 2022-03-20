@@ -279,6 +279,20 @@ export const switchMode = (config, content) => {
 };
 
 /**
+ * @summary gets a report on the current bot modes
+ * @param {BotConfig} config bot config
+ * @returns {string}
+ */
+export const getModeReport = (config) => {
+    const { debug, verbose, fun } = config;
+    return `    | Mode    | State |
+    | ------- | ----- |
+    | Debug   | ${debug ? "on " : "off"}   |
+    | Fun     | ${fun ? "on " : "off"}   |
+    | Verbose | ${verbose ? "on " : "off"}   |`;
+};
+
+/**
  * @summary makes the bot greet the room
  * @param {BotConfig} config bot config
  * @param {Election} election current election instance

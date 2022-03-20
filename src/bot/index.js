@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, echoSomething, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, echoSomething, getModeReport, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -462,6 +462,8 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     return current;
                 }, AccessLevel.privileged);
 
+                commander.add("get modes", "gets the current state of modes", getModeReport, AccessLevel.dev);
+
                 commander.add("get rooms", "get list of rooms where bot is in", (config, client) => {
                     const rooms = client.getRooms();
                     const roomIds = [...rooms.keys()];
@@ -557,7 +559,8 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     ["reset election", /^reset election/, config, election],
                     ["ignore", /^ignore \d+/, config, room, preparedMessage],
                     ["impersonate", /^impersonate \d+/, config, preparedMessage],
-                    ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, preparedMessage]
+                    ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, preparedMessage],
+                    ["get modes", /^(?:get modes?\s+report|report\s+modes)/, config]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);
