@@ -919,6 +919,15 @@ export const sayHasMaximumCandidateScore = (election, candidateScore, hasNominat
 };
 
 /**
+ * @summary builds a response to requested user not having an account to calc candidate score for
+ * @param {boolean} isAskingForOtherUser whether the target and the subject user are different
+ * @returns {string}
+ */
+export const sayNoAccountToCalcScore = (isAskingForOtherUser) => {
+    return `Sorry, ${isAskingForOtherUser ? "the user" : "you"} must have an account on the site to get the score!`;
+};
+
+/**
  * @summary builds a response to a user attempting to perform a sensitive action without permission
  * @param {string} action action user attempted to perform
  * @param {string} [alternative] alternative to suggest
