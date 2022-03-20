@@ -239,7 +239,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             });
         }
 
-        if (!isAskingForOtherUser && isStackOverflow && (isModerator || wasModerator) && !content.startsWith('sudo ')) {
+        if (!isAskingForOtherUser && (isModerator || wasModerator) && !content.startsWith('sudo ')) {
             return sayDiamondAlready(candidateScore, isModerator, wasModerator);
         }
 
