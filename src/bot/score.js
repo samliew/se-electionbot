@@ -259,14 +259,14 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         }
         // Does not meet minimum requirements
         else if (!isEligible && repNominate !== void 0) {
-            responseText = sayDoesNotMeetRequirements(config, election, candidateScore);
+            return sayDoesNotMeetRequirements(config, election, candidateScore);
         }
         else if (score === maxScore) {
             return sayHasMaximumCandidateScore(election, candidateScore, hasNominated);
         }
         // All others
         else {
-            responseText = `Your candidate score is **${score}** (out of ${maxScore}).`;
+            responseText = `Your candidate score is ${getScoreText(score, maxScore)}.`;
 
             if (numMissingBadges > 0) {
                 responseText += sayMissingBadges(missingBadgeNames, numMissingBadges, true);
