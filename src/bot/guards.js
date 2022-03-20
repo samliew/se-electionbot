@@ -472,6 +472,18 @@ export const isAskedForFullHelp = (text) => {
 };
 
 /**
+ * @summary checks if a message is asking for what an election is
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedWhatElectionIs = (text) => {
+    return text.length <= 56 && someMatch([
+        /^(?:what|what's) (?:is )?(?:a |an |the )?election(?:\?\!?|$)/i,
+        /^how do(?:es)? (?:a |an |the )?elections? work/i
+    ], text);
+};
+
+/**
  * @summary checks if a message is asking what the election status is
  * @param {string} text message text
  * @returns {boolean}
