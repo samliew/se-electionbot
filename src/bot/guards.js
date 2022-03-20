@@ -569,6 +569,18 @@ export const isAskedAboutElectionPhases = (text) => {
 };
 
 /**
+ * @summary checks if a message is asking how many users already voted
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedHowManyVoted = (text) => {
+    return someMatch([
+        /^how\s+(?:many|much)(?:\s+users)?(?:\s+have)?\s+(?:vote|participate)d/i,
+        /^how\s+(?:many|much)\s+(?:participant|voter)s/i
+    ], text);
+};
+
+/**
  * @summary checks if a message is asking if one has voted themselves
  * @param {string} text message text
  * @returns {boolean}
