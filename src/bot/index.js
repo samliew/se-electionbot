@@ -129,6 +129,37 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
         541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
     ];
 
+    const helpTopics = [
+        { short: true, text: "What is an election" },
+        { short: true, text: "How to nominate myself" },
+        { short: true, text: "How to vote" },
+        { short: true, text: "Who should I vote for" },
+        { short: true, text: "How is the candidate score calculated" },
+        { short: true, text: "What is my candidate score" },
+        { short: false, text: "Who has the highest candidate score" },
+        { short: true, text: "What are the moderation/participation/editing badges" },
+        { short: false, text: "What is the election schedule" },
+        { short: true, text: "What is the election status" },
+        { short: false, text: "When is the election starting/ending" },
+        { short: true, text: "When is the next phase" },
+        { short: false, text: "How many users have voted?" },
+        { short: true, text: "How many users are eligible to vote?" },
+        { short: false, text: "How many positions are there" },
+        { short: true, text: "Who are the candidates" },
+        { short: false, text: "Who is the best candidate" },
+        { short: false, text: "Which candidates have withdrawn" },
+        { short: false, text: "Why was a nomination removed" },
+        { short: false, text: "Who are the winners" },
+        { short: true, text: "Who are the current mods" },
+        { short: false, text: "Who is the best mod" },
+        { short: false, text: "Do moderators get paid" },
+        { short: true, text: "What are the responsibilities of a moderator" },
+        { short: false, text: "Can we edit a diamond into our username" },
+        { short: true, text: "What is Single Transferable Vote (STV)" },
+        { short: false, text: "What is Meek STV" },
+        { short: false, text: "Where can the ballot file be found" },
+        { short: false, text: "What is the link to the election" },
+    ];
 
     // Overrides console.log/error to insert newlines
     (function () {
@@ -749,38 +780,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 await sendMultipartMessage(config, room, nomineeNumResponse, msg.id, true);
                 return;
             }
-
-            const helpTopics = [
-                { short: true, text: "What is an election" },
-                { short: true, text: "How to nominate myself" },
-                { short: true, text: "How to vote" },
-                { short: true, text: "Who should I vote for" },
-                { short: true, text: "How is the candidate score calculated" },
-                { short: true, text: "What is my candidate score" },
-                { short: false, text: "Who has the highest candidate score" },
-                { short: true, text: "What are the moderation/participation/editing badges" },
-                { short: false, text: "What is the election schedule" },
-                { short: true, text: "What is the election status" },
-                { short: false, text: "When is the election starting/ending" },
-                { short: true, text: "When is the next phase" },
-                { short: false, text: "How many users have voted?" },
-                { short: true, text: "How many users are eligible to vote?" },
-                { short: false, text: "How many positions are there" },
-                { short: true, text: "Who are the candidates" },
-                { short: false, text: "Who is the best candidate" },
-                { short: false, text: "Which candidates have withdrawn" },
-                { short: false, text: "Why was a nomination removed" },
-                { short: false, text: "Who are the winners" },
-                { short: true, text: "Who are the current mods" },
-                { short: false, text: "Who is the best mod" },
-                { short: false, text: "Do moderators get paid" },
-                { short: true, text: "What are the responsibilities of a moderator" },
-                { short: false, text: "Can we edit a diamond into our username" },
-                { short: true, text: "What is Single Transferable Vote (STV)" },
-                { short: false, text: "What is Meek STV" },
-                { short: false, text: "Where can the ballot file be found" },
-                { short: false, text: "What is the link to the election" },
-            ];
 
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
