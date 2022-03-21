@@ -63,35 +63,45 @@ export const isAskedAboutModsOrModPowers = (text) => {
 
 /**
  * @summary checks if the message asked how or where to vote
- * @param {string} text
+ * @param {string} text message text
  * @returns {boolean}
  */
 export const isAskedAboutVoting = (text) => {
-    return /^(?:where|how|want|when)\b/.test(text) &&
-        /\b(?:do|can|to|give|cast|should)\b/.test(text) &&
-        /\b(?:voting|vote|elect)\b/.test(text);
+    return allMatch([
+        /^(?:where|how|want|when)\b/,
+        /\b(?:do|can|to|give|cast|should)\b/,
+        /\b(?:voting|vote|elect)\b/,
+    ], text);
 };
 
 /**
  * @summary checks if the message asked to tell who the current mods are
- * @param {string} text
+ * @param {string} text message text
  * @param {string|null} apiSlug current site's apiSlug
  * @returns {boolean}
  */
 export const isAskedForCurrentMods = (text, apiSlug = null) => {
-    return new RegExp(`^whois ${apiSlug} mod(?:erator)?s$`).test(text) ||
-        /^who(?: are| is|'s) the current mod(?:erator)?s?/.test(text) ||
-        /^how many mod(?:erator)?s? (are there|do we have)/.test(text) ||
-        /^how.*\bcontact\b.*mod(?:erator)?s?/.test(text);
+    return someMatch([
+        new RegExp(`^whois ${apiSlug} mod(?:erator)?s$`),
+        /^who(?: are| is|'s) the current mod(?:erator)?s?/,
+        /^how many mod(?:erator)?s? (are there|do we have)/,
+        /^how.*\bcontact\b.*mod(?:erator)?s?/
+    ], text);
+
+
+
 };
 
 /**
  * @summary checks if the message asked to tell who winners are
- * @param {string} text
+ * @param {string} text message text
  * @returns {boolean}
  */
 export const isAskedForCurrentWinners = (text) => {
-    return /^(?:who|how many)/.test(text) && /winners|new mod|will win|future mod/.test(text);
+    return allMatch([
+        /^(?:who|how\s+many)/,
+        /winners|new\s+mod|will\s+win|future\s+mod/
+    ], text);
 };
 
 /**
@@ -385,9 +395,11 @@ export const isAskedHowOrWhoToVote = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutMissingComments = (text) => {
-    return /^(where|why|are|were|did|who|how|i|is|election)\b/.test(text) &&
-        /\b(missing|hidden|cleared|deleted?|removed?|go|election|nominations?|all|view|find|bug|see)\b/.test(text) &&
-        /\bcomments?\b/.test(text);
+    return allMatch([
+        /^(where|why|are|were|did|who|how|i|is|election)\b/,
+        /\b(missing|hidden|cleared|deleted?|removed?|go|election|nominations?|all|view|find|bug|see)\b/,
+        /\bcomments?\b/
+    ], text);
 };
 
 /**
@@ -418,9 +430,9 @@ export const isAskedWhoIsTheBestMod = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutSTV = (text) => {
-    return [
+    return someMatch([
         /^(?:what|how).*?(?:\s+meek)?\s+s(?:ingle\s+)?t(?:ransferable\s+)?v(?:ote)?/i
-    ].some((expression) => expression.test(text));
+    ], text);
 };
 
 /**
