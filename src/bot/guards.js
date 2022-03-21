@@ -343,6 +343,18 @@ export const isAskedIfResponsesAreCanned = (text) => {
 };
 
 /**
+ * @summary checks if a message is asking to list required badges
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutRequiredBadges = (text) => {
+    return someMatch([
+        /^(?:what\s+are|list)(?:\s+the)?\s+(?:required|mandatory|necessary)\s+badges/i,
+        /^(?:what|which)(?:\s+of)?(?:\s+the)?\s+badges\s+are\s+(?:required|mandatory|necessary)/i
+    ], text);
+};
+
+/**
  * @summary checks if a message is asking to list badges of a certain type
  * @param {string} text message text
  * @returns {boolean}

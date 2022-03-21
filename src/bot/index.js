@@ -21,7 +21,7 @@ import {
     isAskedAboutJonSkeetJokes,
     isAskedAboutLightbulb,
     isAskedAboutMissingComments,
-    isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting,
+    isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedAmIalive,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule,
@@ -651,8 +651,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 const [, type] = /(participation|editing|moderation)/.exec(preparedMessage) || [];
                 responseText = sayBadgesByType(electionBadges, type, election.isStackOverflow());
             }
-            // SO required badges
-            else if (['what', 'required', 'badges'].every(x => preparedMessage.includes(x))) {
+            else if (isAskedAboutRequiredBadges(preparedMessage)) {
                 responseText = sayRequiredBadges(election);
             }
 

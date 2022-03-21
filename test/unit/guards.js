@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import {
-    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
+    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/bot/guards.js";
@@ -446,13 +446,30 @@ describe('Message Guards', () => {
         });
     });
 
+    const listRequiredBadgesMatches = [
+        "What are required badges?",
+        "which badges are required?",
+        "What badges are necessary?",
+        "Which of the badges are mandatory?",
+        "list the mandatory badges"
+    ];
+
+    const listBadgeTypeMatches = [
+        "what are the participation badges?",
+        "list the moderation badges?",
+        "what are editing badges?"
+    ];
+
+    describe(isAskedAboutRequiredBadges.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutRequiredBadges, listRequiredBadgesMatches);
+            allMatch(isAskedAboutRequiredBadges, listBadgeTypeMatches, false);
+        });
+    });
+
     describe('isAskedAboutBadgesOfType', () => {
         it('should correctly match content', () => {
-            allMatch(isAskedAboutBadgesOfType, [
-                "what are the participation badges?",
-                "list the moderation badges?",
-                "what are editing badges?"
-            ]);
+            allMatch(isAskedAboutBadgesOfType, listBadgeTypeMatches);
         });
     });
 
