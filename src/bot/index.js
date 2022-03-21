@@ -442,15 +442,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
 
                 const commander = new CommandManager(user);
 
-
-                commander.add("alive", "bot reports on its status", isAliveCommand, AccessLevel.privileged);
-
-                commander.add("debug", "switches debugging on/off", switchMode, AccessLevel.dev);
-
-                commander.add("verbose", "switches verbose mode on/off", switchMode, AccessLevel.dev);
-
-                commander.add("fun", "switches fun mode on/off", switchMode, AccessLevel.privileged);
-
                 commander.add("test cron", "sets up a test cron job", (announcement) => {
                     announcement.initTest();
                     return `*setting up test cron job*`;
@@ -459,9 +450,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 commander.add("get cron", "lists scheduled announcements", ({ schedules }) => {
                     return 'Currently scheduled announcements: `' + JSON.stringify(schedules) + '`';
                 }, AccessLevel.dev);
-
-                commander.add("set throttle", "set throttle value (secs)", setThrottleCommand, AccessLevel.privileged);
-                commander.add("get throttle", "get throttle value (secs)", getThrottleCommand, AccessLevel.privileged);
 
                 commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
@@ -473,8 +461,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     config.updateLastMessage(responseText, Date.now() + (+num * 6e4) - (throttle * 1e3));
                     return responseText;
                 }, AccessLevel.privileged);
-
-                commander.add("ignore", "stop bot from responding to a user", ignoreUser, AccessLevel.privileged);
 
                 commander.add("unmute", "allows the bot to respond", (config) => {
                     responseText = `I can speak freely again.`;
@@ -489,8 +475,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     }
                     return current;
                 }, AccessLevel.privileged);
-
-                commander.add("get modes", "gets the current state of modes", getModeReport, AccessLevel.dev);
 
                 commander.add("get rooms", "get list of rooms where bot is in", (config, client) => {
                     const rooms = client.getRooms();
@@ -512,13 +496,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     return `Brewing some ${coffee.getRandom()} for ${otherUser || name}`;
                 }, AccessLevel.privileged);
 
-                commander.add("set access", "sets user's access level", setAccessCommand, AccessLevel.dev);
-
-                commander.add("timetravel", "sends bot back in time to another phase", timetravelCommand, AccessLevel.dev);
-
-                // to reserve the keyword 'help' for normal users
-                commander.add("commands", "Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged);
-
                 commander.add("die", "stops the bot in case of emergency", () => {
                     wait(3).then(() => {
                         room.leave();
@@ -527,22 +504,29 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     return "initiating shutdown sequence";
                 }, AccessLevel.privileged);
 
-                commander.add("greet", "makes the bot welcome everyone", greetCommand, AccessLevel.privileged);
-
-                commander.add("announce nominees", "makes the bot announce nominees", announceNominees, AccessLevel.privileged);
-
-                commander.add("announce winners", "makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged);
-
-                commander.add("feedback", "bot says how to provide feedback", sayFeedback, AccessLevel.dev);
-
-                commander.add("whois", "retrieve mods from another site", listSiteModerators, AccessLevel.privileged);
-
-                commander.add("rm_election", "resets the current election", resetElection, AccessLevel.dev);
-
-                commander.add("impersonate", "impersonates a user", impersonateUser, AccessLevel.dev);
-
-                commander.add("post meta", "posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged);
-                commander.add("say", "bot echoes something", echoSomething, AccessLevel.privileged);
+                commander.bulkAdd({
+                    "alive": ["bot reports on its status", isAliveCommand, AccessLevel.privileged],
+                    "announce nominees": ["makes the bot announce nominees", announceNominees, AccessLevel.privileged],
+                    "announce winners": ["makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged],
+                    // to reserve the keyword 'help' for normal users
+                    "commands": ["Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged],
+                    "debug": ["switches debugging on/off", switchMode, AccessLevel.dev],
+                    "feedback": ["bot says how to provide feedback", sayFeedback, AccessLevel.dev],
+                    "fun": ["switches fun mode on/off", switchMode, AccessLevel.privileged],
+                    "get modes": ["gets the current state of modes", getModeReport, AccessLevel.dev],
+                    "get throttle": ["get throttle value (secs)", getThrottleCommand, AccessLevel.privileged],
+                    "greet": ["makes the bot welcome everyone", greetCommand, AccessLevel.privileged],
+                    "ignore": ["stop bot from responding to a user", ignoreUser, AccessLevel.privileged],
+                    "impersonate": ["impersonates a user", impersonateUser, AccessLevel.dev],
+                    "post meta": ["posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged],
+                    "rm_election": ["resets the current election", resetElection, AccessLevel.dev],
+                    "say": ["bot echoes something", echoSomething, AccessLevel.privileged],
+                    "set access": ["sets user's access level", setAccessCommand, AccessLevel.dev],
+                    "set throttle": ["set throttle value (secs)", setThrottleCommand, AccessLevel.privileged],
+                    "timetravel": ["sends bot back in time to another phase", timetravelCommand, AccessLevel.dev],
+                    "verbose": ["switches verbose mode on/off", switchMode, AccessLevel.dev],
+                    "whois": ["retrieve mods from another site", listSiteModerators, AccessLevel.privileged]
+                });
 
                 commander.aliases({
                     timetravel: ["delorean", "88 miles"],
