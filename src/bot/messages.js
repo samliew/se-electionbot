@@ -1295,3 +1295,16 @@ export const sayWhereToFindElectionResults = (_config, election) => {
     const [, response = ""] = rules.find(([cond]) => cond) || [];
     return response;
 };
+
+/**
+ * @summary builds a response to a query why some comments are missing
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ */
+export const sayMissingComments = (_config, election) => {
+    const { electionUrl, phase } = election;
+
+    return phase !== "nomination" ?
+        `Comments are only visible on the "${makeURL("Nomination", `${electionUrl}?tab=nomination`)}" tab.` :
+        `If you cannot see any comments on the ${makeURL("Election", `${electionUrl}?tab=election`)} page, either nobody has commented yet, or you need to wear glasses.`;
+};
