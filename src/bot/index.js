@@ -35,7 +35,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutBallotFile, sayAboutElectionStatus, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsEnding, sayElectionPage, sayElectionSchedule, sayHowAmI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayInsaneComeback, sayMissingComments, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhereToFindElectionResults, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages.js";
+import { sayAboutBallotFile, sayAboutElectionStatus, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCanEditDiamond, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsEnding, sayElectionPage, sayElectionSchedule, sayHowAmI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayInsaneComeback, sayMissingComments, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayRequiredBadges, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhereToFindElectionResults, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -722,7 +722,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 responseText = sayWhatIsAnElection(election);
             }
             else if (isAskedAboutUsernameDiamond(preparedMessage)) {
-                responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
+                responseText = sayCanEditDiamond();
             }
             else if (isAskedAboutMissingComments(preparedMessage)) {
                 responseText = sayMissingComments(config, election);

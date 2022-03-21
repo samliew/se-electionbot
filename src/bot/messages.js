@@ -670,6 +670,14 @@ export const sayWhoMadeMe = async (config) => {
 };
 
 /**
+ * @summary builds a response to a query if it is possible to add a ♦ in a username
+ * @returns {string}
+ */
+export const sayCanEditDiamond = () => {
+    return `No one can edit the diamond symbol (♦) into their username.`;
+};
+
+/**
  * @summary builds an "already a diamond" message
  * @param {CandidateScore} candidateScore candidate score instance
  * @param {boolean} isModerator is user a current moderator
