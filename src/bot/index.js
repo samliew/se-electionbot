@@ -654,14 +654,9 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
             else if (isAskedAboutRequiredBadges(preparedMessage)) {
                 responseText = sayRequiredBadges(election);
             }
-
-            // What are the benefits of mods
-            // Why should I be a moderator
             else if (isAskedAboutModsOrModPowers(preparedMessage)) {
                 responseText = sayWhatModsDo(election);
             }
-
-            // Calculate own candidate score
             else if (isAskedForOwnScore(preparedMessage) || isAskedForOtherScore(preparedMessage)) {
 
                 // TODO: use config object pattern instead, 6 parameters is way too much
@@ -674,19 +669,15 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
 
                 return; // stop here since we are using a different default response method
             }
-            // How is candidate score calculated
             else if (isAskedForScoreFormula(preparedMessage)) {
                 responseText = sayCandidateScoreFormula(electionBadges);
             }
-            // Who has the highest candidate score
             else if (isAskedForScoreLeaderboard(preparedMessage)) {
                 responseText = sayCandidateScoreLeaderboard(election.apiSlug);
             }
-            // Withdrawn candidates/nominations
             else if (isAskedForWithdrawnNominees(preparedMessage)) {
                 responseText = sayWithdrawnNominations(config, election);
             }
-
             else if (isAskedHowManyVoted(preparedMessage)) {
                 responseText = await sayAlreadyVoted(config, election, preparedMessage);
             }
@@ -695,12 +686,9 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 if (election.phase == null) responseText = sayNotStartedYet(election);
                 else responseText = sayInformedDecision();
             }
-            // Current mods
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
                 responseText = sayCurrentMods(election, currentSiteMods, entities.decode);
             }
-
-            // How to nominate self/others
             // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
             else if (isAskedForNominatingInfo(preparedMessage)) {
                 const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => preparedMessage.includes(x));
@@ -730,11 +718,9 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
             else if (isAskedForElectionSchedule(preparedMessage)) {
                 responseText = sayElectionSchedule(election);
             }
-            // What is an election
             else if (isAskedWhatElectionIs(preparedMessage)) {
                 responseText = sayWhatIsAnElection(election);
             }
-            // Can't we just edit the diamond in our username
             else if (isAskedAboutUsernameDiamond(preparedMessage)) {
                 responseText = `No one is able to edit the diamond symbol (♦) into their username.`;
             }
