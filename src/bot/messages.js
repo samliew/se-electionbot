@@ -36,6 +36,19 @@ export const sayCommonlyAskedQuestions = (helpCommand = `@ElectionBot help`) => 
 };
 
 /**
+ * @summary builds a message for short help
+ * @param {{ short: boolean, text: string }[]} topics list of help topics
+ * @returns {string}
+ */
+export const sayShortHelp = (topics) => {
+    const short = topics.filter(({ short }) => short);
+    return [
+        "Examples of election FAQs I can help with:",
+        ...short.map(({ text }) => text)
+    ].join('\n- ');
+};
+
+/**
  * @summary makes bot remind users that they are here
  * @param {BotConfig} config bot config
  * @param {Election} election current election
