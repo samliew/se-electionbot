@@ -188,7 +188,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
         const election = new Election(electionUrl);
         const { electionBadges } = election;
 
-        // Wait for election page to be scraped
         const scraped = await election.scrapeElection(config);
         const { status, errors } = election.validate();
 
@@ -246,7 +245,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
             }
         }
 
-        // Get current site mods via API
         const currentSiteMods = await getModerators(config, election.apiSlug);
         election.currentSiteMods = currentSiteMods;
 
@@ -276,7 +274,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
 
         const room = client.getRoom(config.chatRoomId);
 
-        // Ignore ignored event types
         room.ignore(...ignoredEventTypes);
 
         // Start rescraper utility, and initialise announcement cron jobs
@@ -689,8 +686,6 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 responseText = sayWhatModsDo(election);
             }
             else if (isAskedForOwnScore(preparedMessage) || isAskedForOtherScore(preparedMessage)) {
-
-                // TODO: use config object pattern instead, 6 parameters is way too much
                 const calcCandidateScore = makeCandidateScoreCalc(config, soPastAndPresentModIds);
 
                 responseText = await calcCandidateScore(election, user, { userId, content: preparedMessage });
@@ -784,13 +779,11 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
 
-                // Full help
                 if (isAskedForFullHelp(preparedMessage)) {
                     await sendMultipartMessage(config, room, "Examples of election FAQs I can help with:\n- " +
                         helpTopics.map(({ text }) => text).join('\n- '), msg.id, true);
                     return; // Message sent, no need to continue
                 }
-
                 // Help - contain this to a single message please (<500 chars including line breaks, bullets, and whitespace)
                 if (isAskedForHelp(preparedMessage)) {
                     responseText = sayShortHelp(helpTopics);
@@ -798,22 +791,18 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                 else if (isAskedWhoAmI(preparedMessage)) {
                     responseText = await sayWhoAmI(me, preparedMessage);
                 }
-                // Alive
                 else if (isAskedAmIalive(preparedMessage)) {
                     responseText = getRandomAlive();
                 }
-                // Who made you
                 else if (isAskedWhoMadeMe(preparedMessage)) {
                     responseText = await sayWhoMadeMe(config);
                 }
                 else if (isAskedHowAmI(preparedMessage)) {
                     responseText = sayHowAmI(config, election);
                 }
-                // Thanks
                 else if (isThankingTheBot(preparedMessage)) {
                     responseText = getRandomThanks();
                 }
-                // Offtopic
                 else if (preparedMessage.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, preparedMessage);
                     await sendMessage(config, room, responseText, null, false);
@@ -859,7 +848,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     else if (isAskedAboutJokes(preparedMessage)) {
                         responseText = sayAJoke();
                     }
-                } // End fun mode
+                }
 
                 if (responseText) {
                     // TODO: msg.id might be undefined
