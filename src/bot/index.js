@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, dieCommand, echoSomething, getModeReport, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, dieCommand, echoSomething, getCronCommand, getModeReport, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -447,9 +447,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     return `*setting up test cron job*`;
                 }, AccessLevel.dev);
 
-                commander.add("get cron", "lists scheduled announcements", ({ schedules }) => {
-                    return 'Currently scheduled announcements: `' + JSON.stringify(schedules) + '`';
-                }, AccessLevel.dev);
+                commander.add("get cron", "lists scheduled announcements", getCronCommand, AccessLevel.dev);
 
                 commander.add("chatroom", "gets election chat room link", ({ chatUrl }) => {
                     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;

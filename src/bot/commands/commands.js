@@ -471,3 +471,29 @@ export const dieCommand = async (room) => {
     });
     return "initiating shutdown sequence";
 };
+
+/**
+ * @summary gets a list of currently scheduled announcements
+ * @param {Announcement} announcement announcement controller
+ * @returns {string}
+ */
+export const getCronCommand = (announcement) => {
+    const { schedules } = announcement;
+
+    const entries = Object.entries(schedules);
+
+    const maxPhaseNameLen = Math.max(...entries.map(([{ length }]) => length));
+    const maxPhaseCronLen = Math.max(...entries.map(([, v]) => (v || "").length));
+
+    const lines = entries.map(
+        ([k, v]) => {
+            const cron = v || "unset";
+            return `    | ${k}${" ".repeat(maxPhaseNameLen - k.length)} | ${cron}${" ".repeat(maxPhaseCronLen - cron.length)} |`;
+        }
+    );
+
+    return `    Currently scheduled announcements:
+    | Phase${" ".repeat(maxPhaseNameLen - 5)} | cron${" ".repeat(maxPhaseCronLen - 4)} |
+    | -----${"-".repeat(maxPhaseNameLen - 5)} | ----${"-".repeat(maxPhaseCronLen - 4)} |
+${lines.join("\n")}`;
+};
