@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, echoSomething, getModeReport, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, dieCommand, echoSomething, getModeReport, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -42,7 +42,7 @@ import Rescraper from "./rescraper.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive,
-    linkToRelativeTimestamp, onlyBotMessages, roomKeepAlive, searchChat, wait
+    linkToRelativeTimestamp, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
 import { mapify } from "./utils/arrays.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
@@ -486,13 +486,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
 
                 commander.add("join room", "joins a given room", joinRoomCommand, AccessLevel.dev);
 
-                commander.add("die", "stops the bot in case of emergency", () => {
-                    wait(3).then(() => {
-                        room.leave();
-                        process.exit(0);
-                    });
-                    return "initiating shutdown sequence";
-                }, AccessLevel.privileged);
+                commander.add("die", "stops the bot in case of emergency", dieCommand, AccessLevel.privileged);
 
                 commander.bulkAdd({
                     "alive": ["bot reports on its status", isAliveCommand, AccessLevel.privileged],
@@ -553,7 +547,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     ["fun", /fun/, config, preparedMessage],
                     ["debug", /debug(?:ing)?/, config, preparedMessage],
                     ["verbose", /^(?:verbose|chatty)/, config, preparedMessage],
-                    ["die", /die|shutdown|turn off/],
+                    ["die", /die|shutdown|turn off/, room],
                     ["set access", /set (?:access|level)/, config, user, preparedMessage],
                     ["announce nominees", /^announce nominees/, config, election, announcement],
                     ["announce winners", /^announce winners/, config, election, room, announcement],

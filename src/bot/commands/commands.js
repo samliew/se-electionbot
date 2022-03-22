@@ -3,7 +3,7 @@ import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting, sayOtherSiteMods, sayUptime } from "../messages.js";
 import { sendMessage } from "../queue.js";
 import { RandomArray } from "../random.js";
-import { capitalize, makeURL } from "../utils.js";
+import { capitalize, makeURL, wait } from "../utils.js";
 import { dateToUtcTimestamp } from "../utils/dates.js";
 import { matchNumber } from "../utils/expressions.js";
 
@@ -458,4 +458,16 @@ export const leaveRoomCommand = async (client, room, content) => {
     const [, roomId = ""] = /\s+(\d+)$/.exec(content) || [];
     roomId && client.leaveRoom(+roomId);
     return roomId ? `*left room ${roomId}*` : "*missing room ID*";
+};
+
+/**
+ * @summary forces the bot to shut down
+ * @param {Room} room current room
+ */
+export const dieCommand = async (room) => {
+    wait(3).then(() => {
+        room.leave();
+        process.exit(0);
+    });
+    return "initiating shutdown sequence";
 };
