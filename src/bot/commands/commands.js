@@ -417,4 +417,27 @@ export const listRoomsCommand = (config, client) => {
         `I'm in these rooms: ${roomURLs.join(", ")}` :
         "I'm only in this room.";
 };
+
+/**
+ * @summary forces the bot to join a chat room
+ * @param {BotConfig} config bot config
+ * @param {Client} client ChatExchange package client
+ * @param {string} content message content
+ * @returns {Promise<string>}
+ */
+export const joinRoomCommand = async (config, client, content) => {
+    const [, preId, postId] = /(\d+|)\s+room(?:\s+(\d+)|)/.exec(content) || [];
+    const roomId = preId || postId;
+    if (!roomId) {
+        return "Missing target room ID";
+    }
+
+    const status = await client.joinRoom(+roomId);
+    // https://github.com/samliew/chatexchange/pull/174
+    // TODO: remove when the PR is merged
+    if (status) { client.getRoom(+roomId); }
+
+    const roomURL = makeURL(roomId, `https://chat.${config.chatDomain}/rooms/${roomId}`);
+
+    return status ? `Joined room ${roomURL}` : `Failed to join room ${roomId}`;
 };
