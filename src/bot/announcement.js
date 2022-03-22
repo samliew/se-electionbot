@@ -294,7 +294,10 @@ export default class ScheduledAnnouncement {
         }
     }
 
-    // Test if cron works and if scrapeElection() can be called from cron.schedule
+    /**
+     * @summary schedules a test cron job rescraping the {@link Election}
+     * @returns {string}
+     */
     initTest() {
         const dNow = new Date();
         const cs = `${dNow.getMinutes() + 2} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`;
@@ -309,6 +312,7 @@ export default class ScheduledAnnouncement {
             { timezone: "Etc/UTC" }
         );
         console.log('CRON - testing cron     - ', cs);
+        return cs;
     }
 
     initAll() {
