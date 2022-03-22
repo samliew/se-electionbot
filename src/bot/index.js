@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, echoSomething, getModeReport, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, echoSomething, getModeReport, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -42,7 +42,7 @@ import Rescraper from "./rescraper.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive,
-    linkToRelativeTimestamp, makeURL, onlyBotMessages, roomKeepAlive, searchChat, wait
+    linkToRelativeTimestamp, onlyBotMessages, roomKeepAlive, searchChat, wait
 } from './utils.js';
 import { mapify } from "./utils/arrays.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
@@ -476,25 +476,15 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     return current;
                 }, AccessLevel.privileged);
 
-                commander.add("get rooms", "get list of rooms where bot is in", (config, client) => {
-                    const rooms = client.getRooms();
-                    const roomIds = [...rooms.keys()];
-                    return roomIds.length > 1 ? `I'm in these rooms: ` +
-                        roomIds.map(id => `${makeURL(id, `https://chat.${config.chatDomain}/rooms/${id}/info`)}`).join(", ") :
-                        "I'm only in this room.";
-                }, AccessLevel.dev);
-
-                commander.add("leave room", "makes bot leave a room (room ID)", (content, client) => {
-                    const [, roomId = ""] = /\s+(\d+)$/.exec(content) || [];
-                    roomId && client.leaveRoom(roomId);
-                    return roomId ? `*left room ${roomId}*` : "*missing room ID*";
-                }, AccessLevel.dev);
+                commander.add("get rooms", "get list of rooms where bot is in", listRoomsCommand, AccessLevel.dev);
 
                 commander.add("coffee", "brews some coffee", (originalMessage, { name = "you" }) => {
                     const [, otherUser = ""] = / for ((?:\w+\s?){1,2})/i.exec(originalMessage) || [];
                     const coffee = new RandomArray("cappuccino", "espresso", "latte", "ristretto", "macchiato");
                     return `Brewing some ${coffee.getRandom()} for ${otherUser || name}`;
                 }, AccessLevel.privileged);
+
+                commander.add("join room", "joins a given room", joinRoomCommand, AccessLevel.dev);
 
                 commander.add("die", "stops the bot in case of emergency", () => {
                     wait(3).then(() => {
@@ -518,6 +508,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     "greet": ["makes the bot welcome everyone", greetCommand, AccessLevel.privileged],
                     "ignore": ["stop bot from responding to a user", ignoreUser, AccessLevel.privileged],
                     "impersonate": ["impersonates a user", impersonateUser, AccessLevel.dev],
+                    "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, AccessLevel.dev],
                     "post meta": ["posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged],
                     "rm_election": ["resets the current election", resetElection, AccessLevel.dev],
                     "say": ["bot echoes something", echoSomething, AccessLevel.privileged],
@@ -554,7 +545,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     ["set throttle", /set throttle/, preparedMessage, config],
                     ["chatroom", /chatroom/, election],
                     ["get rooms", /get rooms/, config, client],
-                    ["leave room", /leave room/, preparedMessage, client],
+                    ["leave room", /leave(?:\s+this)?\s+room/, client, room, preparedMessage],
                     ["mute", /^(?:mute|timeout|sleep)/, config, preparedMessage, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
                     ["coffee", /(?:brew|make).+coffee/, decodedMessage, user],
@@ -572,7 +563,8 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     ["ignore", /^ignore \d+/, config, room, preparedMessage],
                     ["impersonate", /^impersonate \d+/, config, preparedMessage],
                     ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, preparedMessage],
-                    ["get modes", /^(?:get modes?\s+report|report\s+modes)/, config]
+                    ["get modes", /^(?:get modes?\s+report|report\s+modes)/, config],
+                    ["join room", /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, config, client, preparedMessage]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);

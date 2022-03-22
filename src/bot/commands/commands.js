@@ -441,3 +441,21 @@ export const joinRoomCommand = async (config, client, content) => {
 
     return status ? `Joined room ${roomURL}` : `Failed to join room ${roomId}`;
 };
+
+/**
+ * @summary forces the bot to leave a chat room
+ * @param {Client} client ChatExchange package client
+ * @param {Room} room current room
+ * @param {string} content message content
+ * @returns {Promise<string>}
+ */
+export const leaveRoomCommand = async (client, room, content) => {
+    if (/(?:this|current)\s+room/.test(content)) {
+        await room.leave();
+        return "";
+    }
+
+    const [, roomId = ""] = /\s+(\d+)$/.exec(content) || [];
+    roomId && client.leaveRoom(+roomId);
+    return roomId ? `*left room ${roomId}*` : "*missing room ID*";
+};
