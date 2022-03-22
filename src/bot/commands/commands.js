@@ -497,3 +497,13 @@ export const getCronCommand = (announcement) => {
     | -----${"-".repeat(maxPhaseNameLen - 5)} | ----${"-".repeat(maxPhaseCronLen - 4)} |
 ${lines.join("\n")}`;
 };
+
+/**
+ * @summary gets a list of currently scheduled announcements
+ * @param {Announcement} announcement announcement controller
+ * @returns {string}
+ */
+export const scheduleTestCronCommand = (announcement) => {
+    const schedule = announcement.initTest();
+    return `setting up test cron job: ${schedule}`;
+};

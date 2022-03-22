@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, dieCommand, echoSomething, getCronCommand, getModeReport, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, dieCommand, echoSomething, getCronCommand, getModeReport, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -442,10 +442,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
 
                 const commander = new CommandManager(user);
 
-                commander.add("test cron", "sets up a test cron job", (announcement) => {
-                    announcement.initTest();
-                    return `*setting up test cron job*`;
-                }, AccessLevel.dev);
+                commander.add("test cron", "sets up a test cron job", scheduleTestCronCommand, AccessLevel.dev);
 
                 commander.add("get cron", "lists scheduled announcements", getCronCommand, AccessLevel.dev);
 
