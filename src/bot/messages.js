@@ -1045,7 +1045,7 @@ export const sayAboutSTV = (_config, _election, text) => {
  */
 export const sayAlreadyVoted = async (config, election, text) => {
 
-    const { phase, dateElection, statVoters, apiSlug } = election;
+    const { phase, dateElection, statVoters, apiSlug, siteUrl } = election;
 
     // Badge that is awarded for voting in elections
     const electionBadgeName = "Constituent";
@@ -1073,7 +1073,9 @@ export const sayAlreadyVoted = async (config, election, text) => {
         const numVoted = isInverted ? numEligible - numAwarded : numAwarded;
         const negated = isInverted ? " not" : "";
 
-        const basePrefix = `Based on the number of ${electionBadgeName} badges awarded`;
+        const badgeLink = makeURL(electionBadgeName, `${siteUrl}/help/badges/${electionBadgeId}`);
+
+        const basePrefix = `Based on the number of ${badgeLink} badges awarded`;
         const eligible = `(${percentify(numVoted, numEligible, 2)} of ${format(numEligible)} eligible)`;
         const postfix = `user${pluralize(numVoted)} ha${pluralize(numVoted, "ve", "s")}${negated} voted ${getRandomSoFar()}`;
 
