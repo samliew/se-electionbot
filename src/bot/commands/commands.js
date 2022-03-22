@@ -10,6 +10,7 @@ import { matchNumber } from "../utils/expressions.js";
 /**
  * @typedef {import("../announcement").default} Announcement
  * @typedef {import("../config").BotConfig} BotConfig
+ * @typedef {import("chatexchange").default} Client
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../index").UserProfile} UserProfile
  */
@@ -397,4 +398,23 @@ export const echoSomething = async (config, room, content) => {
 export const getThrottleCommand = (config) => {
     const { throttleSecs } = config;
     return `Reply throttle is currently ${throttleSecs} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
+};
+
+/**
+ * @summary lists rooms the bot is currently in
+ * @param {BotConfig} config bot config
+ * @param {Client} client ChatExchange package client
+ * @returns {string}
+ */
+export const listRoomsCommand = (config, client) => {
+    const rooms = client.getRoomsAsArray();
+
+    const roomURLs = rooms.map(({ id }) => `${makeURL(id.toString(),
+        `https://chat.${config.chatDomain}/rooms/${id}/info`
+    )}`);
+
+    return rooms.length > 1 ?
+        `I'm in these rooms: ${roomURLs.join(", ")}` :
+        "I'm only in this room.";
+};
 };
