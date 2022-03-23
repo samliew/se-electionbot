@@ -19,3 +19,18 @@ export const mapify = (array, key) => {
     array.forEach((elem) => map.set(elem[key], elem));
     return map;
 };
+
+/**
+ * @summary flattens an array
+ * @param {Array<any>} array
+ * @returns {Array<any>}
+ */
+export const flat = (array) => {
+    const flattened = /** @type {any[]} */ ([]);
+    array.forEach((el) => {
+        Array.isArray(el) ?
+            flattened.push(...flat(el)) :
+            flattened.push(el);
+    });
+    return flattened;
+};
