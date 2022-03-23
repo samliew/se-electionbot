@@ -74,6 +74,8 @@ export const timetravelCommand = (config, election, content) => {
     config.flags.announcedWinners = false;
     config.flags.saidElectionEndingSoon = false;
 
+    config.nowOverride = today ? void 0 : destination;
+
     const intl = new Intl.DateTimeFormat("en-US", {
         year: "numeric",
         month: "short",

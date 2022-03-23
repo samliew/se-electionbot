@@ -8,7 +8,7 @@ import {
     capitalize, getUsersCurrentlyInTheRoom, linkToRelativeTimestamp,
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase, scrapeAwardedBadge
 } from "./utils.js";
-import { dateToRelativetime } from "./utils/dates.js";
+import { dateToRelativetime, dateToShortISO8601Timestamp } from "./utils/dates.js";
 import { matchISO8601 } from "./utils/expressions.js";
 import { parsePackage } from "./utils/package.js";
 import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
@@ -1053,7 +1053,8 @@ export const sayAlreadyVoted = async (config, election, text) => {
 
     const isInverted = /\bnot\b/i.test(text);
 
-    const todate = matchISO8601(text, { preMatches: /\b(?:to|till)\s+/ });
+    const todate = matchISO8601(text, { preMatches: /\b(?:to|till)\s+/ }) ||
+        dateToShortISO8601Timestamp(config.nowOverride || new Date());
 
     if (config.debugOrVerbose) {
         console.log("voting date bounds", { todate, fromdate: dateElection });
