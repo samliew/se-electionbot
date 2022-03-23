@@ -49,6 +49,12 @@ export class BotConfig {
 
     scriptInitDate = new Date();
 
+    /**
+     * @summary current date and time override for timetravel
+     * @type {Date|undefined}
+     */
+    nowOverride;
+
     keepAlive = process.env.KEEP_ALIVE === 'true';
 
     // Bot instance identifier, base hostname for dashboard, also where keep-alive will ping
