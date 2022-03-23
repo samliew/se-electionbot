@@ -53,14 +53,14 @@ export class CommandManager {
     /**@type {{ [name:string]: Command }} */
     commands = {};
 
-    /** @type {User} */
+    /** @type {?User} */
     user;
 
     /**
-     * @param {User} user user for whom to manage commands
+     * @param {User} [user] user for whom to manage commands
      */
     constructor(user) {
-        this.user = user;
+        this.user = user || null;
     }
 
     /**
@@ -69,6 +69,8 @@ export class CommandManager {
      */
     canRun(command) {
         const { user } = this;
+        if (!user) return false;
+
         return command && !!(user.access & command.access);
 
     }

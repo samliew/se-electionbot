@@ -356,6 +356,56 @@ import { prepareMessageForMatching } from "./utils/chat.js";
         // initialize per-room ignore list
         config.ignoredUserIds.forEach((userId) => room.block(userId));
 
+        const commander = new CommandManager();
+        commander.bulkAdd({
+            "alive": ["bot reports on its status", isAliveCommand, AccessLevel.privileged],
+            "announce nominees": ["makes the bot announce nominees", announceNominees, AccessLevel.privileged],
+            "announce winners": ["makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged],
+            "chatroom": ["gets election chat room link", getElectionRoomURL, AccessLevel.dev],
+            "coffee": ["brews some coffee", brewCoffeeCommand, AccessLevel.privileged],
+            // to reserve the keyword 'help' for normal users
+            "commands": ["Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged],
+            "debug": ["switches debugging on/off", switchMode, AccessLevel.dev],
+            "die": ["stops the bot in case of emergency", dieCommand, AccessLevel.privileged],
+            "feedback": ["bot says how to provide feedback", sayFeedback, AccessLevel.dev],
+            "fun": ["switches fun mode on/off", switchMode, AccessLevel.privileged],
+            "get cron": ["lists scheduled announcements", getCronCommand, AccessLevel.dev],
+            "get modes": ["gets the current state of modes", getModeReport, AccessLevel.dev],
+            "get rooms": ["get list of rooms where bot is in", listRoomsCommand, AccessLevel.dev],
+            "get throttle": ["get throttle value (secs)", getThrottleCommand, AccessLevel.privileged],
+            "get time": ["gets current UTC time", getTimeCommand, AccessLevel.privileged],
+            "greet": ["makes the bot welcome everyone", greetCommand, AccessLevel.privileged],
+            "ignore": ["stop bot from responding to a user", ignoreUser, AccessLevel.privileged],
+            "impersonate": ["impersonates a user", impersonateUser, AccessLevel.dev],
+            "join room": ["joins a given room", joinRoomCommand, AccessLevel.dev],
+            "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, AccessLevel.dev],
+            "mute": ["stop bot from responding for N mins", muteCommand, AccessLevel.privileged],
+            "post meta": ["posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged],
+            "rm_election": ["resets the current election", resetElection, AccessLevel.dev],
+            "say": ["bot echoes something", echoSomething, AccessLevel.privileged],
+            "set access": ["sets user's access level", setAccessCommand, AccessLevel.dev],
+            "set throttle": ["set throttle value (secs)", setThrottleCommand, AccessLevel.privileged],
+            "test cron": ["sets up a test cron job", scheduleTestCronCommand, AccessLevel.dev],
+            "timetravel": ["sends bot back in time to another phase", timetravelCommand, AccessLevel.dev],
+            "unmute": ["allows the bot to respond", unmuteCommand, AccessLevel.privileged],
+            "verbose": ["switches verbose mode on/off", switchMode, AccessLevel.dev],
+            "whois": ["retrieve mods from another site", listSiteModerators, AccessLevel.privileged]
+        });
+
+        commander.aliases({
+            timetravel: ["delorean", "88 miles"],
+            mute: ["timeout", "sleep"],
+            commands: ["usage"],
+            die: ["shutdown"],
+            greet: ["welcome"],
+            whois: [
+                "list moderators",
+                "list mods",
+                "get mods"
+            ],
+            rm_election: ["reset election"]
+        });
+
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
             const encodedMessage = await msg.content;
@@ -403,6 +453,9 @@ import { prepareMessageForMatching } from "./utils/chat.js";
 
             const user = new User(profile, access);
 
+            // update the user to check the commands against
+            commander.user = user;
+
             const isPrivileged = user.isMod() || (AccessLevel.privileged & access);
 
             // Ignore if message is too short or long, unless a mod was trying to use say command
@@ -437,56 +490,6 @@ import { prepareMessageForMatching } from "./utils/chat.js";
              */
             if (isPrivileged && botMentioned) {
                 let responseText = "";
-
-                const commander = new CommandManager(user);
-                commander.bulkAdd({
-                    "alive": ["bot reports on its status", isAliveCommand, AccessLevel.privileged],
-                    "announce nominees": ["makes the bot announce nominees", announceNominees, AccessLevel.privileged],
-                    "announce winners": ["makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged],
-                    "chatroom": ["gets election chat room link", getElectionRoomURL, AccessLevel.dev],
-                    "coffee": ["brews some coffee", brewCoffeeCommand, AccessLevel.privileged],
-                    // to reserve the keyword 'help' for normal users
-                    "commands": ["Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged],
-                    "debug": ["switches debugging on/off", switchMode, AccessLevel.dev],
-                    "die": ["stops the bot in case of emergency", dieCommand, AccessLevel.privileged],
-                    "feedback": ["bot says how to provide feedback", sayFeedback, AccessLevel.dev],
-                    "fun": ["switches fun mode on/off", switchMode, AccessLevel.privileged],
-                    "get cron": ["lists scheduled announcements", getCronCommand, AccessLevel.dev],
-                    "get modes": ["gets the current state of modes", getModeReport, AccessLevel.dev],
-                    "get rooms": ["get list of rooms where bot is in", listRoomsCommand, AccessLevel.dev],
-                    "get throttle": ["get throttle value (secs)", getThrottleCommand, AccessLevel.privileged],
-                    "get time": ["gets current UTC time", getTimeCommand, AccessLevel.privileged],
-                    "greet": ["makes the bot welcome everyone", greetCommand, AccessLevel.privileged],
-                    "ignore": ["stop bot from responding to a user", ignoreUser, AccessLevel.privileged],
-                    "impersonate": ["impersonates a user", impersonateUser, AccessLevel.dev],
-                    "join room": ["joins a given room", joinRoomCommand, AccessLevel.dev],
-                    "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, AccessLevel.dev],
-                    "mute": ["stop bot from responding for N mins", muteCommand, AccessLevel.privileged],
-                    "post meta": ["posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged],
-                    "rm_election": ["resets the current election", resetElection, AccessLevel.dev],
-                    "say": ["bot echoes something", echoSomething, AccessLevel.privileged],
-                    "set access": ["sets user's access level", setAccessCommand, AccessLevel.dev],
-                    "set throttle": ["set throttle value (secs)", setThrottleCommand, AccessLevel.privileged],
-                    "test cron": ["sets up a test cron job", scheduleTestCronCommand, AccessLevel.dev],
-                    "timetravel": ["sends bot back in time to another phase", timetravelCommand, AccessLevel.dev],
-                    "unmute": ["allows the bot to respond", unmuteCommand, AccessLevel.privileged],
-                    "verbose": ["switches verbose mode on/off", switchMode, AccessLevel.dev],
-                    "whois": ["retrieve mods from another site", listSiteModerators, AccessLevel.privileged]
-                });
-
-                commander.aliases({
-                    timetravel: ["delorean", "88 miles"],
-                    mute: ["timeout", "sleep"],
-                    commands: ["usage"],
-                    die: ["shutdown"],
-                    greet: ["welcome"],
-                    whois: [
-                        "list moderators",
-                        "list mods",
-                        "get mods"
-                    ],
-                    rm_election: ["reset election"]
-                });
 
                 const matches = [
                     ["commands", /commands|usage/],
