@@ -507,3 +507,13 @@ export const scheduleTestCronCommand = (announcement) => {
     const schedule = announcement.initTest();
     return `setting up test cron job: ${schedule}`;
 };
+
+/**
+ * @summary gets the current election chat room URL
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const getElectionRoomURL = (election) => {
+    const { chatUrl } = election;
+    return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
+};
