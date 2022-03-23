@@ -1,6 +1,7 @@
 import { AccessLevel } from "./access.js";
 
 /**
+ * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Browser").IProfileData} IProfileData
  */
 
@@ -46,5 +47,35 @@ export class User {
     isMod() {
         const { profile } = this;
         return profile.isModerator;
+    }
+
+    /**
+     * @summary checks if the user is privileged
+     * @returns {boolean}
+     */
+    isPrivileged() {
+        const { access } = this;
+        return !!(AccessLevel.privileged & access);
+    }
+
+    /**
+     * @summary updates user's {@link AccessLevel}
+     * @param {BotConfig} config bot configuration
+     * @returns {User}
+     */
+    updateAccess(config) {
+        const { profile: { id } } = this;
+
+        /** @type {[Set<number>, number][]} */
+        const userLevels = [
+            [config.devIds, AccessLevel.dev],
+            [config.modIds, AccessLevel.admin],
+            [config.adminIds, AccessLevel.admin]
+        ];
+
+        const [, access] = userLevels.find(([ids]) => ids.has(id)) || [, AccessLevel.user];
+
+        this.access = access;
+        return this;
     }
 }

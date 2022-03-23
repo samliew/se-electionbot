@@ -437,26 +437,17 @@ import { prepareMessageForMatching } from "./utils/chat.js";
             //if user is null, we have a problem
             if (!profile) return console.log(`missing user ${userId}`);
 
-            // TODO: make a part of User
-            /** @type {[Set<number>, number][]} */
-            const userLevels = [
-                [config.devIds, AccessLevel.dev],
-                [config.modIds, AccessLevel.admin],
-                [config.adminIds, AccessLevel.admin]
-            ];
-
             if (profile.isModerator) {
                 config.modIds.add(profile.id);
             }
 
-            const [, access] = userLevels.find(([ids]) => ids.has(profile.id)) || [, AccessLevel.user];
-
-            const user = new User(profile, access);
+            const user = new User(profile);
+            user.updateAccess(config);
 
             // update the user to check the commands against
             commander.user = user;
 
-            const isPrivileged = user.isMod() || (AccessLevel.privileged & access);
+            const isPrivileged = user.isMod() || user.isPrivileged();
 
             // Ignore if message is too short or long, unless a mod was trying to use say command
             const { length } = preparedMessage;
