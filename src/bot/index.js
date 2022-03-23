@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, resetElection, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -446,18 +446,9 @@ import { prepareMessageForMatching } from "./utils/chat.js";
 
                 commander.add("chatroom", "gets election chat room link", getElectionRoomURL, AccessLevel.dev);
 
-                commander.add("mute", "stop bot from responding for N mins", (config, content, throttle) => {
-                    const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
-                    responseText = `*silenced for ${num} mins*`;
-                    config.updateLastMessage(responseText, Date.now() + (+num * 6e4) - (throttle * 1e3));
-                    return responseText;
-                }, AccessLevel.privileged);
+                commander.add("mute", "stop bot from responding for N mins", muteCommand, AccessLevel.privileged);
 
-                commander.add("unmute", "allows the bot to respond", (config) => {
-                    responseText = `I can speak freely again.`;
-                    config.updateLastMessage(responseText);
-                    return responseText;
-                }, AccessLevel.privileged);
+                commander.add("unmute", "allows the bot to respond", unmuteCommand, AccessLevel.privileged);
 
                 commander.add("get time", "gets current UTC time", getTimeCommand, AccessLevel.privileged);
 
@@ -521,8 +512,8 @@ import { prepareMessageForMatching } from "./utils/chat.js";
                     ["chatroom", /chatroom/, election],
                     ["get rooms", /get rooms/, config, client],
                     ["leave room", /leave(?:\s+this)?\s+room/, client, room, preparedMessage],
-                    ["mute", /^(?:mute|timeout|sleep)/, config, preparedMessage, config.throttleSecs],
-                    ["unmute", /unmute|clear timeout/, config],
+                    ["mute", /^(?:mute|timeout|sleep)/, config, room, preparedMessage],
+                    ["unmute", /unmute|clear timeout/, config, room],
                     ["coffee", /(?:brew|make).+coffee/, config, decodedMessage, user],
                     ["timetravel", /88 miles|delorean|timetravel/, config, election, preparedMessage],
                     ["fun", /fun/, config, preparedMessage],

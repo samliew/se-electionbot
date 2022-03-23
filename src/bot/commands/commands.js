@@ -555,3 +555,34 @@ export const brewCoffeeCommand = async (config, content, { name = "you" }) => {
 
     return `Brewing some ${names.getRandom()} for ${otherUser || name}`;
 };
+
+/**
+ * @summary mutes the bot temporarily
+ * @param {BotConfig} config bot config
+ * @param {Room} room current room
+ * @param {string} content message content
+ * @returns {Promise<void>}
+ */
+export const muteCommand = async (config, room, content) => {
+    const { throttleSecs } = config;
+
+    const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
+
+    const response = `*silenced for ${num} mins*`;
+
+    await sendMessage(config, room, response, null, true);
+
+    config.updateLastMessage(response, Date.now() + (+num * 6e4) - (throttleSecs * 1e3));
+};
+
+/**
+ * @summary unmutes the bot
+ * @param {BotConfig} config bot config
+ * @param {Room} room current room
+ * @returns {Promise<void>}
+ */
+export const unmuteCommand = async (config, room) => {
+    const response = `I can speak freely again.`;
+    await sendMessage(config, room, response, null, true);
+    config.updateLastMessage(response);
+};
