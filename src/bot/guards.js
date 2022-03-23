@@ -599,7 +599,7 @@ export const isAskedAboutElectionPhases = (text) => {
  */
 export const isAskedHowManyVoted = (text) => {
     return someMatch([
-        /^how\s+(?:many|much)(?:\s+users)?(?:\s+have)?\s+(?:vote|participate)d/i,
+        /^how\s+(?:many|much)(?:\s+users)?(?:\s+have)?(?:\s+not)?\s+(?:vote|participate)d/i,
         /^how\s+(?:many|much)\s+(?:participant|voter)s/i
     ], text);
 };
