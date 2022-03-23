@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -41,12 +41,10 @@ import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNeg
 import Rescraper from "./rescraper.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
-    fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive,
-    linkToRelativeTimestamp, onlyBotMessages, roomKeepAlive, searchChat
+    fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
 import { mapify } from "./utils/arrays.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
-import { dateToUtcTimestamp } from "./utils/dates.js";
 
 /**
  * @typedef {(Pick<Badge, "name"|"badge_id"> & { required?: boolean, type: string })} ElectionBadge
@@ -461,13 +459,7 @@ import { dateToUtcTimestamp } from "./utils/dates.js";
                     return responseText;
                 }, AccessLevel.privileged);
 
-                commander.add("get time", "gets current UTC time", ({ phase, dateElection }) => {
-                    const current = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
-                    if (!['election', 'ended', 'cancelled'].includes(phase)) {
-                        return `${current} (election phase starts ${linkToRelativeTimestamp(dateElection)})`;
-                    }
-                    return current;
-                }, AccessLevel.privileged);
+                commander.add("get time", "gets current UTC time", getTimeCommand, AccessLevel.privileged);
 
                 commander.add("get rooms", "get list of rooms where bot is in", listRoomsCommand, AccessLevel.dev);
 

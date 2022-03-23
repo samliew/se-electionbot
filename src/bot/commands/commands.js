@@ -3,7 +3,7 @@ import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting, sayOtherSiteMods, sayUptime } from "../messages.js";
 import { sendMessage } from "../queue.js";
 import { RandomArray } from "../random.js";
-import { capitalize, makeURL, wait } from "../utils.js";
+import { capitalize, linkToRelativeTimestamp, makeURL, wait } from "../utils.js";
 import { dateToUtcTimestamp } from "../utils/dates.js";
 import { matchNumber } from "../utils/expressions.js";
 
@@ -516,4 +516,20 @@ export const scheduleTestCronCommand = (announcement) => {
 export const getElectionRoomURL = (election) => {
     const { chatUrl } = election;
     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
+};
+
+/**
+ * @summary gets current time in UTC
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const getTimeCommand = (election) => {
+    const { phase, dateElection } = election;
+
+    const current = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
+    if (!['election', 'ended', 'cancelled'].includes(phase || "")) {
+        return `${current} (election phase starts ${linkToRelativeTimestamp(dateElection)})`;
+    }
+
+    return current;
 };
