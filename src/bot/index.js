@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, postMetaAnnouncement, resetElection, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -463,11 +463,7 @@ import { prepareMessageForMatching } from "./utils/chat.js";
 
                 commander.add("get rooms", "get list of rooms where bot is in", listRoomsCommand, AccessLevel.dev);
 
-                commander.add("coffee", "brews some coffee", (originalMessage, { name = "you" }) => {
-                    const [, otherUser = ""] = / for ((?:\w+\s?){1,2})/i.exec(originalMessage) || [];
-                    const coffee = new RandomArray("cappuccino", "espresso", "latte", "ristretto", "macchiato");
-                    return `Brewing some ${coffee.getRandom()} for ${otherUser || name}`;
-                }, AccessLevel.privileged);
+                commander.add("coffee", "brews some coffee", brewCoffeeCommand, AccessLevel.privileged);
 
                 commander.add("join room", "joins a given room", joinRoomCommand, AccessLevel.dev);
 
@@ -527,7 +523,7 @@ import { prepareMessageForMatching } from "./utils/chat.js";
                     ["leave room", /leave(?:\s+this)?\s+room/, client, room, preparedMessage],
                     ["mute", /^(?:mute|timeout|sleep)/, config, preparedMessage, config.throttleSecs],
                     ["unmute", /unmute|clear timeout/, config],
-                    ["coffee", /(?:brew|make).+coffee/, decodedMessage, user],
+                    ["coffee", /(?:brew|make).+coffee/, config, decodedMessage, user],
                     ["timetravel", /88 miles|delorean|timetravel/, config, election, preparedMessage],
                     ["fun", /fun/, config, preparedMessage],
                     ["debug", /debug(?:ing)?/, config, preparedMessage],

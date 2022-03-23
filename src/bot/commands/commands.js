@@ -3,7 +3,8 @@ import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting, sayOtherSiteMods, sayUptime } from "../messages.js";
 import { sendMessage } from "../queue.js";
 import { RandomArray } from "../random.js";
-import { capitalize, linkToRelativeTimestamp, makeURL, wait } from "../utils.js";
+import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, wait } from "../utils.js";
+import { flat } from "../utils/arrays.js";
 import { dateToUtcTimestamp } from "../utils/dates.js";
 import { matchNumber } from "../utils/expressions.js";
 
@@ -13,6 +14,7 @@ import { matchNumber } from "../utils/expressions.js";
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../index").UserProfile} UserProfile
+ * @typedef {import("./user").User} User
  */
 
 /**
@@ -532,4 +534,24 @@ export const getTimeCommand = (election) => {
     }
 
     return current;
+};
+
+/**
+ * @summary brews coffee for a user
+ * @param {BotConfig} config bot config
+ * @param {string} content message content
+ * @param {User} user user messaging the bot
+ * @returns {Promise<string>}
+ */
+export const brewCoffeeCommand = async (config, content, { name = "you" }) => {
+    const [, otherUser = ""] = / for ((?:\w+\s?){1,2})/i.exec(content) || [];
+
+    const coffee = /** @type {{ [type:string]: { title: string }[] }} */ (await fetchUrl(
+        config,
+        "https://raw.githubusercontent.com/jermbo/SampleAPIs/main/server/api/coffee.json"
+    ));
+
+    const names = new RandomArray(...flat(Object.values(coffee)).map(({ title }) => title));
+
+    return `Brewing some ${names.getRandom()} for ${otherUser || name}`;
 };
