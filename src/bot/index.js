@@ -91,34 +91,6 @@ import { prepareMessageForMatching } from "./utils/chat.js";
     //@ts-expect-error
     const { ChatEventType } = WE;
 
-    // Other app constants
-    const ignoredEventTypes = [
-        ChatEventType.USER_MENTIONED,
-        ChatEventType.MESSAGE_EDITED,
-        ChatEventType.USER_JOINED,
-        ChatEventType.USER_LEFT,
-        ChatEventType.ROOM_RENAMED,
-        ChatEventType.STARS_CHANGED,
-        ChatEventType.MESSAGE_FLAGGED,
-        ChatEventType.MESSAGE_DELETED,
-        ChatEventType.FILE_ADDED,
-        12, // MessageFlaggedForModerator
-        13, // UserSettingsChanged
-        14, // GlobalNotification
-        15, // AccessLevelChanged
-        16, // UserNotification
-        17, // Invitation
-        18, // MessageReply
-        19, // MessageMovedOut
-        20, // MessageMovedIn
-        21, // TimeBreak
-        22, // FeedTicker
-        29, // UserSuspended
-        30, // UserMerged
-        34, // UserNameOrAvatarChanged
-        7, 23, 24, 25, 26, 27, 28, 31, 32, 33, 35 // InternalEvents
-    ];
-
     // Rarely changed until a Stack Overflow election, so we cache it here
     const soPastAndPresentModIds = [
         34397, 50049, 102937, 267, 419, 106224, 396458, 50776, 105971, 2598,
@@ -272,7 +244,7 @@ import { prepareMessageForMatching } from "./utils/chat.js";
 
         const room = client.getRoom(config.chatRoomId);
 
-        room.ignore(...ignoredEventTypes);
+        room.only(ChatEventType.MESSAGE_POSTED);
 
         // Start rescraper utility, and initialise announcement cron jobs
         const rescraper = new Rescraper(config, room, election);
@@ -288,7 +260,6 @@ import { prepareMessageForMatching } from "./utils/chat.js";
                 controlRoomId,
                 controlledRoom: room,
                 botChatProfile: me,
-                ignoredEventTypes
             });
         }
 

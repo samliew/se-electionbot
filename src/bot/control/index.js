@@ -1,3 +1,4 @@
+import { ChatEventType } from 'chatexchange';
 import { echoSomething, sayFeedback } from '../commands/commands.js';
 import { isBotMentioned } from "../guards.js";
 import { sayIdleGreeting } from "../messages.js";
@@ -8,7 +9,6 @@ import { prepareMessageForMatching } from '../utils/chat.js';
 /**
  * @typedef {import("chatexchange/dist/User").default} User
  * @typedef {import("chatexchange").default} Client
- * @typedef {import("chatexchange").ChatEventType} ChatEventType
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange/dist/WebsocketEvent").default} WebsocketEvent
  * @typedef {import("../config").BotConfig} BotConfig
@@ -23,7 +23,6 @@ import { prepareMessageForMatching } from '../utils/chat.js';
  *  botChatProfile: IProfileData|User,
  *  controlRoomId: number,
  *  controlledRoom: Room,
- *  ignoredEventTypes?: ChatEventType[],
  *  allowSameRoom?: boolean
  * }} options
  * @returns {Promise<boolean>}
@@ -32,7 +31,6 @@ export const joinControlRoom = async (config, election, client, {
     controlRoomId,
     controlledRoom,
     botChatProfile,
-    ignoredEventTypes = [],
     allowSameRoom = false
 }) => {
     try {
@@ -43,7 +41,7 @@ export const joinControlRoom = async (config, election, client, {
         if (!joinedControl) return false;
 
         const controlRoom = client.getRoom(controlRoomId);
-        controlRoom.ignore(...ignoredEventTypes);
+        controlRoom.only(ChatEventType.MESSAGE_POSTED);
 
         controlRoom.on("message", async (/** @type {WebsocketEvent} */ msg) => {
             const encodedMessage = await msg.content;
