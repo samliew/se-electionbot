@@ -370,6 +370,25 @@ import { prepareMessageForMatching } from "./utils/chat.js";
             rm_election: ["reset election"]
         });
 
+        /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string, u: User) => (string|Promise<string>)][]} */
+        const unprivilegedRules = [
+            [isAskedForCurrentPositions, sayNumberOfPositions],
+            [isAskedIfResponsesAreCanned, sayCannedResponses],
+            [isAskedWhoIsTheBestCandidate, sayBestCandidate],
+            [isSayingBotIsInsane, sayInsaneComeback],
+            [isAskedAboutSTV, sayAboutSTV],
+            [isAskedIfCanNominateOthers, sayHowToNominateOthers],
+            [isAskedHowManyAreEligibleToVote, sayHowManyAreEligibleToVote],
+            [isAskedForElectionPage, sayElectionPage],
+            [isAskedAboutBallotFile, sayAboutBallotFile],
+            [isAskedWhoIsTheBestMod, sayBestModerator],
+            [isAskedForCurrentNominees, sayCurrentCandidates],
+            [isAskedAboutElectionPhases, sayAboutThePhases],
+            [isAskedIfOneHasVoted, sayIfOneHasVoted],
+            [isAskedIfCanVote, sayIfOneCanVote],
+            [isAskedWhereToFindResults, sayWhereToFindElectionResults]
+        ];
+
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
             const encodedMessage = await msg.content;
@@ -527,26 +546,7 @@ import { prepareMessageForMatching } from "./utils/chat.js";
              *  Non-privileged response guards
              */
 
-            /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string, u: User) => (string|Promise<string>)][]} */
-            const rules = [
-                [isAskedForCurrentPositions, sayNumberOfPositions],
-                [isAskedIfResponsesAreCanned, sayCannedResponses],
-                [isAskedWhoIsTheBestCandidate, sayBestCandidate],
-                [isSayingBotIsInsane, sayInsaneComeback],
-                [isAskedAboutSTV, sayAboutSTV],
-                [isAskedIfCanNominateOthers, sayHowToNominateOthers],
-                [isAskedHowManyAreEligibleToVote, sayHowManyAreEligibleToVote],
-                [isAskedForElectionPage, sayElectionPage],
-                [isAskedAboutBallotFile, sayAboutBallotFile],
-                [isAskedWhoIsTheBestMod, sayBestModerator],
-                [isAskedForCurrentNominees, sayCurrentCandidates],
-                [isAskedAboutElectionPhases, sayAboutThePhases],
-                [isAskedIfOneHasVoted, sayIfOneHasVoted],
-                [isAskedIfCanVote, sayIfOneCanVote],
-                [isAskedWhereToFindResults, sayWhereToFindElectionResults]
-            ];
-
-            const matched = rules.find(([expr]) => expr(preparedMessage));
+            const matched = unprivilegedRules.find(([expr]) => expr(preparedMessage));
 
             /** @type {string | null} */
             let responseText = null;
