@@ -3,7 +3,7 @@ import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting, sayOtherSiteMods, sayUptime } from "../messages.js";
 import { sendMessage } from "../queue.js";
 import { RandomArray } from "../random.js";
-import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, wait } from "../utils.js";
+import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
 import { flat } from "../utils/arrays.js";
 import { dateToUtcTimestamp } from "../utils/dates.js";
 import { matchNumber } from "../utils/expressions.js";
@@ -11,9 +11,11 @@ import { matchNumber } from "../utils/expressions.js";
 /**
  * @typedef {import("../announcement").default} Announcement
  * @typedef {import("../config").BotConfig} BotConfig
+ * @typedef {import("../utils").ChatMessage} ChatMessage
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../index").UserProfile} UserProfile
+ * @typedef {import("chatexchange/dist/User").default} ChatUser
  * @typedef {import("./user").User} User
  */
 
@@ -378,6 +380,28 @@ export const postMetaAnnouncement = async (config, election, room, content) => {
     await sendMessage(config, room, oneBox ? link : makeURL(title, link), null, true);
 
     config.flags.announcedMetaPost = true;
+};
+
+/**
+ * @summary announces
+ * @param {BotConfig} config bot config
+ * @param {Room} room current room
+ * @param {Election} election current election instance
+ * @param {Announcement} announcement announcement controller
+ * @param {ChatMessage[]} messages transcript messages
+ * @param {ChatUser} botUser bot user
+ * @returns {Promise<boolean>}
+ */
+export const postWinnersAnnouncement = async (config, room, election, announcement, messages, botUser) => {
+    const { id } = botUser;
+
+    const expr = /^(?:The winners? (?:are|is):|Congratulations to the winners?)/;
+
+    const winnersAnnounced = messages.filter(({ message, chatUserId }) => expr.test(message) && chatUserId === id);
+
+    if (config.debug) console.log(`announced ${winnersAnnounced.length} winner${pluralize(winnersAnnounced.length)}`);
+
+    return !!winnersAnnounced || election.numWinners <= 0 || announcement.announceWinners(room, election);
 };
 
 /**
