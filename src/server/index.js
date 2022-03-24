@@ -145,8 +145,6 @@ app.route('/')
                 lowActivityCheckMins,
                 lastActivityTime,
                 lastMessageTime,
-                funResponseCounter,
-                canSendFunResponse,
             } = BOT_CONFIG;
 
             const safeBotData = {
@@ -175,8 +173,6 @@ app.route('/')
                     botconfig: {
                         // overrides should come after the object spread
                         ...safeBotData,
-                        funResponseCounter: funResponseCounter,
-                        canSendFunResponse: canSendFunResponse,
                         roomBecameIdleAWhileDate: new Date(lastActivityTime + (shortIdleDurationMins * 6e4)),
                         roomBecameIdleHoursDate: new Date(lastActivityTime + (longIdleDurationHours * 60 * 6e4)),
                         botWillBeQuietDate: new Date(lastMessageTime + (lowActivityCheckMins * 6e4)),
@@ -375,15 +371,6 @@ export const startServer = async (client, room, config, election) => {
     setRoom(room);
     setElection(election);
     setClient(client);
-
-    const { readdirSync } = await import("fs");
-    console.log(readdirSync(viewsPath));
-
-    try {
-        console.log(readdirSync(partialsPath));
-    } catch (error) {
-        console.log(error);
-    }
 
     const server = app.listen(app.get('port'), () => {
         console.log(`SERVER
