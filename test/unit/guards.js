@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import {
-    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
+    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutElectionPhases, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
     isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
 } from "../../src/bot/guards.js";
@@ -682,9 +682,24 @@ describe('Message Guards', () => {
         "tell a joke"
     ];
 
+    const tellSkeetJokeMatches = [
+        "Tell us a Jon Skeet joke!",
+        "say a Jon Skeet joke",
+        "Can you tell us a Jon Skeet joke?",
+        "Tell a Jon Skeet fact",
+        "tell us about the Jon Skeet meme"
+    ];
+
     describe(isAskedAboutJokes.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedAboutJokes, tellJokeMatches);
+        });
+    });
+
+    describe(isAskedAboutJonSkeetJokes.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutJonSkeetJokes, tellSkeetJokeMatches);
+            allMatch(isAskedAboutJonSkeetJokes, tellJokeMatches, false);
         });
     });
 

@@ -328,7 +328,7 @@ export const isAskedAboutLightbulb = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutJonSkeetJokes = (text) => {
-    return /(?:tell|say)\b.*\bjon\s?skeet\s?(?:joke|fact|meme)?[!?]+$/.test(text);
+    return /(?:tell|say)\b.*\bjon\s?skeet\s?(?:joke|fact|meme)?(?:[?!]|$)/i.test(text);
 };
 
 /**
