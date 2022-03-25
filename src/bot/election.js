@@ -118,6 +118,19 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
     return withdrawnCount;
 };
 
+/**
+ * @summary scrapes the election questionnaire questions
+ * @param {cheerio.Root} $ Cheerio root element
+ * @param {cheerio.Element} el questionnaire element
+ * @returns {string[]}
+ */
+export const scrapeQuestionnaire = ($, el) => {
+    /** @type {string[]} */
+    const questions = [];
+    $(el).find("blockquote ol li").each((_, e) => questions.push($(e).text()));
+    return questions;
+};
+
 export class Nominee {
 
     /**
@@ -334,6 +347,12 @@ export default class Election {
      * @type {string}
      */
     dateEnded;
+
+    /**
+     * @summary election questionnaire
+     * @type {string[]}
+     */
+    questionnaire = [];
 
     /**
      * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
@@ -900,6 +919,7 @@ export default class Election {
             this.dateEnded = endDate;
             this.numPositions = +numPositions;
             this.repNominate = repToNominate;
+            this.questionnaire = scrapeQuestionnaire($, $("#questionnaire-questions").get(0));
 
             const primaryThreshold = matchNumber(/(\d+)/, $("#mainbar ol li a[href*=primary] ~*").text());
             if (primaryThreshold) this.primaryThreshold = primaryThreshold;

@@ -9,7 +9,7 @@ import {
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase, scrapeAwardedBadge
 } from "./utils.js";
 import { dateToRelativetime, dateToShortISO8601Timestamp } from "./utils/dates.js";
-import { matchISO8601 } from "./utils/expressions.js";
+import { matchISO8601, safeCapture } from "./utils/expressions.js";
 import { parsePackage } from "./utils/package.js";
 import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
 
@@ -1324,6 +1324,7 @@ export const sayWhereToFindElectionResults = (_config, election) => {
  * @summary builds a response to a query why some comments are missing
  * @param {BotConfig} _config bot configuration
  * @param {Election} election current election
+ * @returns {string}
  */
 export const sayMissingComments = (_config, election) => {
     const { electionUrl, phase } = election;
@@ -1331,4 +1332,23 @@ export const sayMissingComments = (_config, election) => {
     return phase !== "nomination" ?
         `Comments are only visible on the "${makeURL("Nomination", `${electionUrl}?tab=nomination`)}" tab.` :
         `If you cannot see any comments on the ${makeURL("Election", `${electionUrl}?tab=election`)} page, either nobody has commented yet, or you need to wear glasses.`;
+};
+
+/**
+ * @summary builds a response to a query to post a specific questionnaire question
+ * @param {BotConfig} _config bot configuration
+ * @param {Election} election current election
+ * @param {string} text message content
+ * @returns {string}
+ */
+export const sayQuestionnaireQuestion = (_config, election, text) => {
+    const { questionnaire } = election;
+    const { length: numQuestions } = questionnaire;
+
+    const questionPos = safeCapture(/(\d+(?=st|nd|rd|th))/, text);
+    if (!questionPos || +questionPos > numQuestions) {
+        return `There are only ${numQuestions} question${pluralize(numQuestions)}`;
+    }
+
+    return `> ${questionnaire[+questionPos - 1]}`;
 };

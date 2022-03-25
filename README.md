@@ -69,6 +69,10 @@ About the voting system:
 - what is Meek STV?
 - where can the ballot file be found?
 
+About the election questionnaire:
+
+- what is the `N<st|nd|rd|th>` question of the questionnaire?
+
 ElectionBot info _(requires mention)_:
 
 - help/info/ can you help

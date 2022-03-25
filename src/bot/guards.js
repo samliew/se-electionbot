@@ -637,3 +637,14 @@ export const isAskedWhereToFindResults = (text) => {
         /^(?:where|how)(\s+can|)?(?:\s+th[ei]s?)?(?:\s+election)?\s+results(?:\1|\s+can)?\s+be\s+found(?:\?|$)$/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking for a question from the questionnaire
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedForQuestionnaireQuestion = (text) => {
+    return someMatch([
+        /^what\s+is(?:\s+the)?\s+(\w+|\d+(?:st|nd|rd|th))(?:\s+questionnaire)?\s+question(?:\s+of(?:\s+the)?\s+questionnaire)?/i
+    ], text);
+};
