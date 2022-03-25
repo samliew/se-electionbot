@@ -42,7 +42,7 @@ Current election info:
 - why was a nomination removed
 - where are the nomination comments
 
-Voting stats calculation
+**Voting stats calculation**
 
 "how many users voted" command optionally accepts "to `<timestamp>`" postfix to limit the query.<br>
 If none is provided, it will default to the current date and time.
@@ -84,31 +84,56 @@ ElectionBot info _(requires mention)_:
 
 Moderators and privileged users can also use these commands _(requires mention)_ to help moderate the chat room:
 
-- say _message_
-- alive
-- fun on/off
-- get throttle
-- set throttle _X_
-- mute _X_
-- unmute
-- time
-- brew/make coffee [for _X_]
-- commands
-- greet
-- announce winners/nominees
-- whois _sitename_ mods
-- **what is the candidate score for _X_**
-- post meta [pretty]
+| Command                                  | Action                                        |
+| ---------------------------------------- | --------------------------------------------- |
+| alive                                    | Requests a status report from the bot         |
+| announce `<nominees\|winners>`           | Makes the bot announce candidates or winners  |
+| commands                                 | Prints help for all bot commands              |
+| `<brew\|make>` coffee `[for <username>]` | Brew a random cup of coffee                   |
+| `<die\|shutdown>`                        | Shuts down the bot in case of an emergency    |
+| fun `<on\|off>`                          | Switches fun mode on or off                   |
+| get throttle                             | Gets the current throttle value (seconds)     |
+| get time                                 | Gets the current UTC timestamp                |
+| greet                                    | Posts a greeting message from the bot         |
+| ignore `<userId>`                        | Stops the bot from responding to a user       |
+| `<mute\|timeout\|sleep>` `[N]`           | Stops the bot from responding for `N` minutes |
+| post meta [pretty]                       | Posts an official Meta announcement           |
+| say `<message>`                          | Makes the bot echo a `message`                |
+| set throttle `<N>`                       | Sets the current throttle value (seconds)     |
+| `<unmute\|clear timeout>`                | Allows bot to respond if previously muted     |
+| whois `<sitename>` mods                  | Lists current mods of a `sitename`            |
 
-Election results Meta post
+## Developer-only commands
+
+Users with access level set to `AccessLevel.dev` have access to a list of power user commands _(requires @-mention)_:
+
+| Command                                                    | Action                                                                                    |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| chatroom                                                   | Gets the current election chat room URL                                                   |
+| debug `<on\|off>`                                          | Switches debug mode on or off                                                             |
+| feedback                                                   | Posts a message about giving feedback to the bot                                          |
+| get cron                                                   | Gets a report on the current cron jobs                                                    |
+| `<get modes report\|report modes>`                         | Gets a report on the current mode state                                                   |
+| get rooms                                                  | Lists the chat rooms the bot is currently joined to                                       |
+| impersonate `<userId>`                                     | Considers all messages to come from a user with `userId` (NB: might downlevel privileges) |
+| join `[roomId]` room `[roomId]`                            | Makes the bot join a room wiht `roomId`                                                   |
+| leave `[this\|current]` room `[roomId]`                    | Makes the bot leave the current room or a room with `roomId`                              |
+| reset election                                             | Resets the current election state and clears the scraping history                         |
+| set `<access\|level>` `<me\|userId>` `<user\|admin\|dev>`  | Sets access level of a user with `userId`                                                 |
+| test cron                                                  | Schedules a test cron job                                                                 |
+| `<88 miles\|delorean\|timetravel>` to `<today\|yyy-MM-dd>` | Adjusts the bot's internal clock to a given date                                          |
+| verbose `<on\|off>`                                        | Switches verbose mode on or off                                                           |
+| what is the candidate score for `<userRef>`                | Calculates candidate score of a user by `userRef` (see below)                             |
+
+**Election results Meta post**
 
 The "post meta" command accepts an optional parameter "pretty" (or "prettify")
 that will force the bot to post a Markdown-formatted link instead.
 By default, the bot will post a one-boxed link to the Meta post.
 
-Candidate score calculation
+**Candidate score calculation**
 
-`X` in a candidate score request can be one of:
+`userRef` in a candidate score request can be one of:
 
 | Value                                                    | Meaning          | Example                                              |
 | -------------------------------------------------------- | ---------------- | ---------------------------------------------------- |
