@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "noEmit": true,
     "checkJs": true,
     "allowJs": true,
     "declaration": false,
@@ -10,5 +11,6 @@
     "moduleResolution": "node",
     "module": "es2020",
     "target": "ES6"
-  }
+  },
+  "exclude": ["coverage", "dist"]
 }
