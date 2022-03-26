@@ -162,7 +162,7 @@ app.route('/')
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Home"
                 },
-                heading: `Chatbot up and running.`,
+                heading: `${chatDisplayName} up and running.`,
                 data: {
                     isBotInRoom,
                     utcNow: dateToUtcTimestamp(Date.now()),
@@ -191,7 +191,7 @@ app.route('/say')
     .get(async ({ query }, res) => {
         const { success, password = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
 
-        if (!BOT_CONFIG) {
+        if (!BOT_CONFIG || !BOT_CLIENT) {
             console.error("SERVER - Bot config missing");
             return res.sendStatus(500);
         }
@@ -203,22 +203,24 @@ app.route('/say')
                 undefined: ""
             };
 
-            const { chatDomain, chatRoomId } = BOT_CONFIG;
+            const { chatDomain, chatRoomId, showTranscriptMessages } = BOT_CONFIG;
 
             const transcriptMessages = await fetchChatTranscript(BOT_CONFIG, `https://chat.${chatDomain}/transcript/${chatRoomId}`);
+
+            const botChatUser = await BOT_CLIENT.getMe();
 
             res.render('say', {
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Privileged Say"
                 },
-                heading: `ElectionBot say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+                heading: `${await botChatUser.name} say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
                 data: {
-                    chatDomain: BOT_CONFIG.chatDomain,
-                    chatRoomId: BOT_CONFIG.chatRoomId,
-                    password: password,
+                    chatDomain,
+                    chatRoomId,
+                    password,
                     statusText: statusMap[success],
-                    transcriptMessages: transcriptMessages.slice(-BOT_CONFIG.showTranscriptMessages),
+                    transcriptMessages: transcriptMessages.slice(-showTranscriptMessages),
                 }
             });
         } catch (error) {
@@ -255,7 +257,7 @@ app.route('/config')
     .get(async ({ query }, res) => {
         const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
 
-        if (!BOT_CONFIG) {
+        if (!BOT_CONFIG || !BOT_CLIENT) {
             console.error("SERVER - bot config missing");
             return res.sendStatus(500);
         }
@@ -271,12 +273,14 @@ app.route('/config')
             const heroku = new HerokuClient(BOT_CONFIG);
             const envVars = await heroku.fetchConfigVars();
 
+            const botChatUser = await BOT_CLIENT.getMe();
+
             res.render('config', {
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Config"
                 },
-                heading: `Update ElectionBot environment variables`,
+                heading: `Update ${await botChatUser.name} environment variables`,
                 data: {
                     configObject: envVars,
                     password: password,
