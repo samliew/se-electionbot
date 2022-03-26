@@ -30,7 +30,7 @@
         {{#each (reverse data/transcriptMessages)}}
         <tr>
             <td data-message-id="{{this.messageId}}" class="cursor-pointer" title="click to reply to this message">{{this.messageId}}</td>
-            <td>{{utcTimestamp this.date}}</td>
+            <td title="click to open the message"><a href="https://chat.{{@root/data/chatDomain}}/transcript/message/{{this.messageId}}" target="_blank">{{utcTimestamp this.date}}</a></td>
             <td><a href="https://chat.{{@root/data/chatDomain}}/users/{{this.chatUserId}}" target="_blank">{{this.username}}</a></td>
             <td>{{{this.messageHtml}}}</td>
         </tr>
@@ -40,25 +40,22 @@
 </div>
 
 <script>
-(function() {
+(() => {
 
     const msgField = document.getElementById('message');
-    document.body.addEventListener('click', function (evt) {
-        const el = evt.target;
-        if (el.dataset.messageId && el.dataset.messageId.length) {
-            msgField.value = `:${el.dataset.messageId} ` + msgField.value.replace(/^:\d+\s*/, '');
-        }
+    document.body.addEventListener('click', ({ target }) => {
+        const { dataset: { messageId } } = target;
+
+        if(!messageId) return;
+
+        msgField.value = `:${messageId} ${msgField.value.replace(/^:\d+\s*/, '')}`;
     }, false);
 
-    function scheduleReload() {
-        return setTimeout(function () {
-            return window.location.reload();
-        }, 5 * 60 * 1e3);
-    }
+    const scheduleReload = () => setTimeout(() =>  window.location.reload(), 5 * 60 * 1e3);
 
-    var timeout = scheduleReload();
+    let timeout = scheduleReload();
 
-    msgField.addEventListener("input", function () {
+    msgField.addEventListener("input", () => {
         clearTimeout(timeout);
         timeout = scheduleReload();
     });
