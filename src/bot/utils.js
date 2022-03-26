@@ -7,7 +7,7 @@ import Cache from "node-cache";
 import sanitize from "sanitize-html";
 import { getUserAssociatedAccounts } from "./api.js";
 import { dateToRelativetime, dateToUtcTimestamp, toTadParamFormat } from "./utils/dates.js";
-import { matchNumber } from "./utils/expressions.js";
+import { matchNumber, safeCapture } from "./utils/expressions.js";
 import { numericNullable } from "./utils/objects.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
@@ -449,7 +449,7 @@ export const fetchRoomOwners = async (config, chatDomain, chatRoomId) => {
 /**
  * @summary gets users that are currently in the room
  * @param {BotConfig} config bot configuration
- * @param {Host} chatHost ChatExchange client
+ * @param {Host} chatHost chat room {@link Host}
  * @param {Room} room room to get the info for
  * @returns {Promise<RoomUser[]>}
  */
@@ -470,11 +470,11 @@ export const getUsersCurrentlyInTheRoom = async (config, chatHost, room) => {
     const { window: { document } } = new JSDOM(html);
 
     return [...document.querySelectorAll("#room-usercards .usercard")].map((card) => {
-
         const userName = card.querySelector(".user-header")?.getAttribute("title") || "";
         const demoddedUserName = userName.replace(/\s\u2666$/, '');
 
         const userLink = card.querySelector(`.user-header a[href*="/users/"]`)?.getAttribute("href") || "";
+        const userId = matchNumber(/(\d+)/, userLink) || -Infinity;
 
         const aboutMe = card.querySelector(".user-message-info")?.getAttribute("title") || "";
 
@@ -482,13 +482,31 @@ export const getUsersCurrentlyInTheRoom = async (config, chatHost, room) => {
 
         return {
             userName: demoddedUserName,
-            userId: matchNumber(/(\d+)/, userLink) || -Infinity,
+            userId,
             userLink,
             isModerator,
             aboutMe
         };
     });
+};
 
+/**
+ * @summary gets parent user info by a chat user Id
+ * @param {BotConfig} config bot configuration
+ * @param {Host} chatHost chat room {@link Host}
+ * @param {number} userId chat user Id
+ * @returns {Promise<{ id?: number, domain?: string }>}
+ */
+export const scrapeChatUserParentUserInfo = async (config, chatHost, userId) => {
+    const chatUserPage = await fetchUrl(config, `https://chat.${chatHost}/users/${userId}`);
+    const { window: { document } } = new JSDOM(chatUserPage);
+
+    const parentUserLink = document.querySelector(".user-valuecell a[href*='/users/']")?.getAttribute("href") || "";
+
+    const domain = safeCapture(/\/\/(.*?)\//, parentUserLink);
+    const id = matchNumber(/\/users\/(\d+)\//, parentUserLink);
+
+    return { id, domain };
 };
 
 /**
