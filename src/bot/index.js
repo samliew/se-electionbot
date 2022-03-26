@@ -12,7 +12,7 @@ import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import Election, { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat } from './election.js';
+import Election, { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections } from './election.js';
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
@@ -45,6 +45,7 @@ import {
 } from './utils.js';
 import { mapify } from "./utils/arrays.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
+import { matchNumber } from "./utils/expressions.js";
 
 /**
  * @typedef {(Pick<Badge, "name"|"badge_id"> & { required?: boolean, type: string })} ElectionBadge
@@ -156,17 +157,30 @@ import { prepareMessageForMatching } from "./utils/chat.js";
      * @summary main bot function
      */
     const main = async () => {
+        const electionNum = matchNumber(/election\/(\d+)/, electionUrl) || 1;
 
-        const election = new Election(electionUrl);
-        const { electionBadges } = election;
+        const [elections, errors] = await getSiteElections(
+            config,
+            electionUrl.replace(/\/election\/\d+/, ""),
+            electionNum,
+            true
+        );
 
-        const scraped = await election.scrapeElection(config);
-        const { status, errors } = election.validate();
+        const election = elections.get(electionNum);
 
-        if (!status || !scraped) {
-            console.error(`FATAL - Invalid election data:\n${errors.join("\n")}`);
+        if (!election) {
+            console.error(`FATAL - missing election #${electionNum}`);
             return;
         }
+
+        if (errors.size) {
+            console.error(`FATAL - Invalid election data:\n${[...errors].map(([electionNum, errors]) => `#${electionNum}\n${errors.join("\n")}`
+            ).join("\n")
+                }`);
+            return;
+        }
+
+        const { electionBadges } = election;
 
         // Reduced longIdleDurationHours if it's a Stack Overflow election
         if (election.isStackOverflow()) config.longIdleDurationHours = 3;
