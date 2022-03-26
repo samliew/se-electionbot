@@ -648,3 +648,16 @@ export const isAskedForQuestionnaireQuestion = (text) => {
         /^what\s+is(?:\s+the)?\s+(\w+|\d+(?:st|nd|rd|th))(?:\s+questionnaire)?\s+question(?:\s+of(?:\s+the)?\s+questionnaire)?/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking for past election results
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutElectionResults = (text) => {
+    return someMatch([
+        /^what\s+(?:are|were)(?:\s+the)?\s+election\s+(?:number\s+|#)(?:\d+)\s+results/i,
+        /^what(?:\s+the)?\s+election\s+(?:number\s+|#)(?:\d+)\s+results\s+(?:are|were)/i,
+        /^what\s+(?:are|were)(?:\s+the)?\s+results\s+of(?:\s+the)?\s+election\s+(?:number\s+|#)(?:\d+)/i
+    ], text);
+};
