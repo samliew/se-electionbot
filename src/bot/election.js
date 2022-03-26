@@ -172,7 +172,14 @@ export const getSiteElections = async (config, siteUrl, maxElectionNumber, scrap
     const validationErrors = new Map();
 
     for (let electionNum = maxElectionNumber; electionNum >= 1; electionNum--) {
-        const election = new Election(`${siteUrl}/election/${electionNum}`, electionNum);
+        const electionURL = `${siteUrl}/election/${electionNum}`;
+
+        // if the election page is not reachable, it's not the bot's fault,
+        // therefore we just skip adding the election to the map
+        const data = await fetchUrl(config, electionURL);
+        if (!data) continue;
+
+        const election = new Election(electionURL, electionNum);
         elections.set(electionNum, election);
 
         if (scrape) {
