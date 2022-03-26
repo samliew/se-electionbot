@@ -2,7 +2,7 @@ import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
 import { getBadges, getUserInfo } from './api.js';
 import { calculateScore } from './score.js';
-import { fetchUrl, onlyBotMessages, searchChat } from './utils.js';
+import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
 import { dateToUtcTimestamp } from './utils/dates.js';
 import { findLast } from './utils/dom.js';
 import { matchNumber } from "./utils/expressions.js";
@@ -17,6 +17,7 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("./commands/user").User} ChatUser
  * @typedef {import("chatexchange/dist/User").default} BotUser
  * @typedef {import("./utils").ChatMessage} ChatMessage
+ * @typedef {import("./utils").RoomUser} RoomUser
  */
 
 /**
@@ -116,6 +117,40 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
     }
 
     return withdrawnCount;
+};
+
+/**
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current {@link Election}
+ * @param {Host} host chat {@link Host}
+ * @param {RoomUser[]} users chat users currently in the room
+ * @returns {Promise<RoomUser[]>}
+ */
+export const listNomineesInRoom = async (config, election, host, users) => {
+    const { arrNominees, siteHostname } = election;
+
+    const nomineeIds = arrNominees.map(({ userId }) => userId);
+
+    /** @type {RoomUser[]} */
+    const nomineesInRoom = [];
+    for (const user of users) {
+        const { userId } = user;
+
+        if (host === "stackoverflow.com" && nomineeIds.includes(userId)) {
+            nomineesInRoom.push(user);
+            continue;
+        }
+
+        const { domain, id } = await scrapeChatUserParentUserInfo(config, host, userId);
+
+        if (domain === siteHostname && id && nomineeIds.includes(id)) {
+            nomineesInRoom.push(user);
+            continue;
+        }
+
+        // TODO: add the heavy getSiteUserIdFromChatStackExchangeId
+    }
+    return nomineesInRoom;
 };
 
 /**
