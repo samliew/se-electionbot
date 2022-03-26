@@ -604,7 +604,7 @@ import { matchNumber } from "./utils/expressions.js";
                 return; // stop here since we are using a different default response method
             }
             else if (isAskedForScoreFormula(preparedMessage)) {
-                responseText = sayCandidateScoreFormula(electionBadges);
+                responseText = sayCandidateScoreFormula(config, elections, election);
             }
             else if (isAskedForScoreLeaderboard(preparedMessage)) {
                 responseText = sayCandidateScoreLeaderboard(election.apiSlug);

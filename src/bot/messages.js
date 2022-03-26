@@ -582,14 +582,17 @@ export const sayWhatModsDo = (election) => {
 
 /**
  * @summary builds a candidate score formula message
- * @param {Badge[]} badges
+ * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
+ * @param {Election} election current election
  * @returns {string}
  */
-export const sayCandidateScoreFormula = (badges) => {
+export const sayCandidateScoreFormula = (_config, _elections, election) => {
+    const { electionBadges } = election;
 
     const badgeCounts = { moderation: 0, editing: 0, participation: 0 };
 
-    const numModBadges = badges.reduce((a, { type }) => {
+    const numModBadges = electionBadges.reduce((a, { type }) => {
         a[type] += 1;
         return a;
     }, badgeCounts);
@@ -599,10 +602,13 @@ export const sayCandidateScoreFormula = (badges) => {
     const badgeSum = Object.values(numModBadges).reduce((a, c) => a + c);
 
     const maxRepPts = 20;
+    const repPerScorePt = 1000;
 
     const allPts = badgeSum + maxRepPts;
 
-    const repPts = `1 point for each 1,000 reputation up to 20,000 reputation (${maxRepPts} point${pluralize(badgeSum)})`;
+    const format = partialRight(formatNumber, [3]);
+
+    const repPts = `1 point for each ${format(repPerScorePt)} reputation up to ${format(maxRepPts * repPerScorePt)} reputation (${maxRepPts} point${pluralize(badgeSum)})`;
 
     const badgePts = `and 1 point for each of the ${listify(...counts)} badges (${badgeSum} point${pluralize(badgeSum)})`;
 
