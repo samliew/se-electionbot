@@ -48,7 +48,11 @@
                 <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
                 <tr><td>Positions</td><td>{{numPositions}}</td></tr>
                 <tr>
-                    <td>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{arrNominees.length}}</span></td>
+                    <td>Candidates<br/>
+                        <span class="small-count" data-prefix="(" data-suffix=")">
+                            {{arrNominees.length}}, {{len @root/data/nomineesInRoom}} in the room
+                        </span>
+                    </td>
                     {{#if arrNominees.length}}
                     <td>{{> nominees arrNominees }}</td>
                     {{else}}

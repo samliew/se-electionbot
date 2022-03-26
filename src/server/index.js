@@ -2,9 +2,9 @@ import express from 'express';
 import Handlebars from 'express-handlebars';
 import { dirname, join } from 'path';
 import { fileURLToPath } from "url";
-import Election from '../bot/election.js';
+import Election, { listNomineesInRoom } from '../bot/election.js';
 import { HerokuClient } from "../bot/herokuClient.js";
-import { fetchChatTranscript, isBotInTheRoom } from '../bot/utils.js';
+import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom } from '../bot/utils.js';
 import { dateToUtcTimestamp } from '../bot/utils/dates.js';
 import * as helpers from "./helpers.js";
 
@@ -35,6 +35,7 @@ app
  * @typedef {import("../bot/config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange").default} Client
+ * @typedef {import("../bot/utils").RoomUser} RoomUser
  */
 
 /**
@@ -157,6 +158,15 @@ app.route('/')
 
             const isBotInRoom = BOT_ROOM ? await isBotInTheRoom(BOT_CONFIG, BOT_CLIENT, BOT_ROOM) : false;
 
+            /** @type {RoomUser[]} */
+            const nomineesInRoom = [];
+            if (BOT_ROOM) {
+                const users = await getUsersCurrentlyInTheRoom(BOT_CONFIG, BOT_CLIENT.host, BOT_ROOM);
+                const nominees = await listNomineesInRoom(BOT_CONFIG, ELECTION, BOT_CLIENT.host, users);
+                nomineesInRoom.push(...nominees);
+            }
+
+
             res.render('index', {
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
@@ -170,6 +180,7 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteHostname: ELECTION.siteHostname,
                     election: ELECTION,
+                    nomineesInRoom,
                     botconfig: {
                         // overrides should come after the object spread
                         ...safeBotData,
