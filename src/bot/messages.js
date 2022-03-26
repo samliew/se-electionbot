@@ -1,6 +1,6 @@
 import { partialRight } from "ramda";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "./api.js";
-import Election from "./election.js";
+import Election, { listNomineesInRoom } from "./election.js";
 import { sendMessage } from "./queue.js";
 import { getCandidateOrNominee, getRandomAnnouncement, getRandomCurrently, getRandomFAQ, getRandomJoke, getRandomJonSkeetJoke, getRandomNominationSynonym, getRandomNow, getRandomOops, getRandomSecretPrefix, getRandomSoFar, getRandomStatus, RandomArray } from "./random.js";
 import { calculateScore, getScoreText } from "./score.js";
@@ -1125,13 +1125,12 @@ export const sayHowManyModsAreHere = async (config, client, room) => {
  * @returns {Promise<string>}
  */
 export const sayHowManyCandidatesAreHere = async (config, election, client, room) => {
-    const users = await getUsersCurrentlyInTheRoom(config, client.host, room);
+    const { host } = client;
 
-    const { arrNominees } = election;
+    const users = await getUsersCurrentlyInTheRoom(config, host, room);
 
-    const nomineeIds = arrNominees.map(({ userId }) => userId);
+    const nomineesInRoom = await listNomineesInRoom(config, election, host, users);
 
-    const nomineesInRoom = users.filter(({ userId }) => nomineeIds.includes(userId));
     const { length: numNomineeInRoom } = nomineesInRoom;
 
     const nomineeNames = listify(...nomineesInRoom.map(({ userName, userLink }) => userLink ? makeURL(userName, userLink) : userName));
