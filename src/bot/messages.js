@@ -9,7 +9,7 @@ import {
     linkToUtcTimestamp, listify, makeURL, mapToName, mapToRequired, numToString, pluralize, pluralizePhrase, scrapeAwardedBadge
 } from "./utils.js";
 import { dateToRelativetime, dateToShortISO8601Timestamp } from "./utils/dates.js";
-import { matchISO8601, safeCapture } from "./utils/expressions.js";
+import { matchISO8601, matchNumber, safeCapture } from "./utils/expressions.js";
 import { parsePackage } from "./utils/package.js";
 import { formatNumber, formatOrdinal, percentify } from "./utils/strings.js";
 
@@ -165,11 +165,12 @@ export const sayAboutElectionStatus = (_config, election) => {
 /**
  * @summary builds a response on how to nominate others
  * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} _election current election
  * @param {string} _text message content
  * @returns {string}
  */
-export const sayHowToNominateOthers = (_config, _election, _text) => {
+export const sayHowToNominateOthers = (_config, _elections, _election, _text) => {
     // https://chat.stackoverflow.com/transcript/message/53294378#53294378
     return `You can only nominate yourself. It is not possible to nominate another user.`;
 };
@@ -177,10 +178,11 @@ export const sayHowToNominateOthers = (_config, _election, _text) => {
 /**
  * @summary builds a response on where is the election page
  * @param {BotConfig} config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @returns {string}
  */
-export const sayElectionPage = (config, election) => {
+export const sayElectionPage = (config, _elections, election) => {
     const { electionUrl, electionNum, siteName } = election;
 
     const isValidUrl = election.validElectionUrl(electionUrl);
@@ -406,10 +408,11 @@ export const sayCurrentMods = (election, moderators, decodeEntities) => {
 /**
  * @summary builds current nominees list response message
  * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @returns {string}
  */
-export const sayCurrentCandidates = (_config, election) => {
+export const sayCurrentCandidates = (_config, _elections, election) => {
     const { phase, numNominees, electionUrl, arrNominees } = election;
 
     if (!phase) return sayNotStartedYet(election);
@@ -715,11 +718,12 @@ export const sayDiamondAlready = (candidateScore, isModerator, wasModerator) => 
 /**
  * @summary builds a "number of positions" message
  * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @param {string} _text message content
  * @returns {string}
  */
-export const sayNumberOfPositions = (_config, election, _text) => {
+export const sayNumberOfPositions = (_config, _elections, election, _text) => {
     const { numPositions = 0 } = election;
 
     const suffix = pluralize(numPositions, "s", "");
@@ -820,9 +824,10 @@ export const sayInsaneComeback = () => new RandomArray("What did you just call m
 /**
  * @summary builds a response to asking who is the best candidate
  * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  */
-export const sayBestCandidate = (_config, election) => {
+export const sayBestCandidate = (_config, _elections, election) => {
     const { numNominees } = election;
 
     const candidateOrNominee = getCandidateOrNominee();
@@ -858,12 +863,13 @@ export const sayBestCandidate = (_config, election) => {
 /**
  * @summary builds a response to asking who is the best moderator
  * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @param {string} _content message content
  * @param {ChatUser} user requesting user
  * @returns {string}
  */
-export const sayBestModerator = (_config, election, _content, user) => {
+export const sayBestModerator = (_config, _elections, election, _content, user) => {
     const { currentSiteMods } = election;
     const { name } = user;
 
@@ -1000,11 +1006,12 @@ export const sayBusyGreeting = async (config, election, room) => {
 /**
  * @summary builds a response to asking what is STV
  * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} _election current election
  * @param {string} text message content
  * @returns {string}
  */
-export const sayAboutSTV = (_config, _election, text) => {
+export const sayAboutSTV = (_config, _elections, _election, text) => {
     const provider = "OpaVote";
     const providerSite = "https://www.opavote.com";
 
@@ -1150,10 +1157,11 @@ export const sayHowManyCandidatesAreHere = async (config, election, client, room
 /**
  * @summary builds a response to how many candidates are in the room query
  * @param {BotConfig} config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @returns {Promise<string>}
  */
-export const sayHowManyAreEligibleToVote = async (config, election) => {
+export const sayHowManyAreEligibleToVote = async (config, _elections, election) => {
     const { phase } = election;
     const numEligible = await getNumberOfUsersEligibleToVote(config, election);
 
@@ -1185,10 +1193,11 @@ export const sayUptime = (config) => {
 /**
  * @summary builds a response to how many candidates are in the room query
  * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @returns {string}
  */
-export const sayAboutBallotFile = (_config, election) => {
+export const sayAboutBallotFile = (_config, _elections, election) => {
     const { phase, electionUrl, electionBallotURL } = election;
 
     const electionPage = makeURL("election page", electionUrl);
@@ -1216,10 +1225,11 @@ export const sayAboutBallotFile = (_config, election) => {
 /**
  * @summary builds a response to what phases are there query
  * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @returns {string}
  */
-export const sayAboutThePhases = (_config, election) => {
+export const sayAboutThePhases = (_config, _elections, election) => {
     const { datePrimary, numNominees, primaryThreshold, electionUrl } = election;
 
     const phases = ["nomination", "election", "ended"].map((phase) => phase === "ended" ? `*${phase}*` : makeURL(phase, `${electionUrl}?tab=${phase}`));
@@ -1234,12 +1244,13 @@ export const sayAboutThePhases = (_config, election) => {
 /**
  * @summary builds a response to a query of a user if they already voted
  * @param {BotConfig} config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @param {string} _text message content
  * @param {ChatUser} user requesting user
  * @returns {Promise<string>}
  */
-export const sayIfOneHasVoted = async (config, election, _text, user) => {
+export const sayIfOneHasVoted = async (config, _elections, election, _text, user) => {
     const { siteHostname, electionNum } = election;
 
     const electionBadgeName = "Constituent";
@@ -1264,12 +1275,13 @@ export const sayIfOneHasVoted = async (config, election, _text, user) => {
 /**
  * @summary builds a response to a query if a user can vote in the election
  * @param {BotConfig} config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @param {string} _text message content
  * @param {ChatUser} user requesting user
  * @returns {Promise<string>}
  */
-export const sayIfOneCanVote = async (config, election, _text, user) => {
+export const sayIfOneCanVote = async (config, _elections, election, _text, user) => {
     const { siteHostname, electionNum } = election;
 
     const prefix = election.canVote(user) ? `Yes, you can` : `No, you cannot`;
@@ -1300,10 +1312,11 @@ export const sayIfOneCanVote = async (config, election, _text, user) => {
 /**
  * @summary builds a response to a query where to find results
  * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @returns {string}
  */
-export const sayWhereToFindElectionResults = (_config, election) => {
+export const sayWhereToFindElectionResults = (_config, _elections, election) => {
     const { opavoteUrl, siteName, electionNum, dateEnded } = election;
 
     const resultsLocation = opavoteUrl ? ` The results can be found online via ${makeURL("OpaVote", opavoteUrl)}.` : "";
@@ -1336,11 +1349,12 @@ export const sayMissingComments = (_config, election) => {
 /**
  * @summary builds a response to a query to post a specific questionnaire question
  * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} _elections election history
  * @param {Election} election current election
  * @param {string} text message content
  * @returns {string}
  */
-export const sayQuestionnaireQuestion = (_config, election, text) => {
+export const sayQuestionnaireQuestion = (_config, _elections, election, text) => {
     const { questionnaire } = election;
     const { length: numQuestions } = questionnaire;
 
@@ -1350,4 +1364,36 @@ export const sayQuestionnaireQuestion = (_config, election, text) => {
     }
 
     return `> ${questionnaire[+questionPos - 1]}`;
+};
+
+/**
+ * @summary builds a response to a query to post specific election results
+ * @param {BotConfig} _config bot configuration
+ * @param {Map<number, Election>} elections election history
+ * @param {Election} _election current election
+ * @param {string} text message content
+ * @returns {string}
+ */
+export const sayElectionResults = (_config, elections, _election, text) => {
+    const electionNum = matchNumber(/(?:number\s+|#)(\d+)/i, text) || 1;
+    const requestedElection = elections.get(electionNum);
+    if (!requestedElection) {
+        return `It appears that election #${electionNum} does not exist`;
+    }
+
+    const { statVoters, cancelledText } = requestedElection;
+
+    if (statVoters) {
+        return statVoters;
+    }
+
+    if (requestedElection.isActive()) {
+        return `Election #${electionNum} is currently in progress.`;
+    }
+
+    if (cancelledText) {
+        return cancelledText;
+    }
+
+    return `Election #${electionNum} is in a weird state.`;
 };

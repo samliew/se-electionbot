@@ -17,6 +17,7 @@ import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
     isAskedAboutElectionPhases,
+    isAskedAboutElectionResults,
     isAskedAboutJokes,
     isAskedAboutJonSkeetJokes,
     isAskedAboutLightbulb,
@@ -35,7 +36,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutBallotFile, sayAboutElectionStatus, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCanEditDiamond, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsEnding, sayElectionPage, sayElectionSchedule, sayHowAmI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayInsaneComeback, sayMissingComments, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayQuestionnaireQuestion, sayRequiredBadges, sayShortHelp, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhereToFindElectionResults, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages.js";
+import { sayAboutBallotFile, sayAboutElectionStatus, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCanEditDiamond, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsEnding, sayElectionPage, sayElectionResults, sayElectionSchedule, sayHowAmI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayInsaneComeback, sayMissingComments, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayQuestionnaireQuestion, sayRequiredBadges, sayShortHelp, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhereToFindElectionResults, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -386,7 +387,7 @@ import { matchNumber } from "./utils/expressions.js";
             rm_election: ["reset election"]
         });
 
-        /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Election, t:string, u: User) => (string|Promise<string>)][]} */
+        /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Map<number,Election>, ce:Election, t:string, u: User) => (string|Promise<string>)][]} */
         const unprivilegedRules = [
             [isAskedForCurrentPositions, sayNumberOfPositions],
             [isAskedIfResponsesAreCanned, sayCannedResponses],
@@ -403,7 +404,8 @@ import { matchNumber } from "./utils/expressions.js";
             [isAskedIfOneHasVoted, sayIfOneHasVoted],
             [isAskedIfCanVote, sayIfOneCanVote],
             [isAskedWhereToFindResults, sayWhereToFindElectionResults],
-            [isAskedForQuestionnaireQuestion, sayQuestionnaireQuestion]
+            [isAskedForQuestionnaireQuestion, sayQuestionnaireQuestion],
+            [isAskedAboutElectionResults, sayElectionResults]
         ];
 
         // Main event listener
@@ -575,7 +577,7 @@ import { matchNumber } from "./utils/expressions.js";
             if (matched) {
                 const [matcher, builder] = matched;
                 if (config.debug) console.log(`Matched response: ${matcher.name}`);
-                responseText = await builder(config, election, preparedMessage, user);
+                responseText = await builder(config, elections, election, preparedMessage, user);
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
             else if (isAskedAboutLightbulb(preparedMessage) && config.fun) {
