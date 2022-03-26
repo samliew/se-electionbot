@@ -47,25 +47,6 @@
                 <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
                 <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
                 <tr><td>Positions</td><td>{{numPositions}}</td></tr>
-                <tr>
-                    <td>Candidates<br/>
-                        <span class="small-count" data-prefix="(" data-suffix=")">
-                            {{arrNominees.length}}, {{len @root/data/nomineesInRoom}} in the room
-                        </span>
-                    </td>
-                    {{#if arrNominees.length}}
-                    <td>{{> nominees arrNominees }}</td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
-                <tr><td>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{len withdrawnNominees}}</span></td>
-                    {{#if (len withdrawnNominees)}}
-                    <td>{{> nominees (values withdrawnNominees) }}</td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
                 <tr><td>Winners <span class="small-count" data-prefix="(" data-suffix=")">{{arrWinners.length}}</span></td>
                     {{#if arrWinners.length}}
                     <td><ul class="list">
@@ -80,6 +61,28 @@
                 <tr><td>Opavote URL</td><td>{{{url opavoteUrl}}}</td></tr>
                 <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
                 <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
+            </table>
+
+            <h2>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len arrNominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
+            <table>
+                <tr>
+                    {{#if arrNominees.length}}
+                    <td>{{> nominees arrNominees }}</td>
+                    {{else}}
+                    <td></td>
+                    {{/if}}
+                </tr>
+            </table>
+
+            <h2>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{len withdrawnNominees}} total</span></h2>
+            <table>
+                <tr>
+                    {{#if (len withdrawnNominees)}}
+                    <td>{{> nominees (values withdrawnNominees) }}</td>
+                    {{else}}
+                    <td></td>
+                    {{/if}}
+                </tr>
             </table>
 
             <table>
