@@ -154,6 +154,40 @@ export const listNomineesInRoom = async (config, election, host, users) => {
 };
 
 /**
+ * @summary gets all {@link Election}s for a given site
+ * @param {BotConfig} config bot configuration
+ * @param {string} siteUrl URL of the network site to get {@link Election}s for
+ * @param {number} maxElectionNumber upper bound {@link Election} number
+ * @param {boolean} [scrape=false] whether to scrape the elections
+ * @returns {Promise<[
+ *  Map<number, Election>,
+ *  Map<number, string[]>
+ * ]>}
+ */
+export const getSiteElections = async (config, siteUrl, maxElectionNumber, scrape = false) => {
+    /** @type {Map<number, Election>} */
+    const elections = new Map();
+
+    /** @type {Map<number, string[]>} */
+    const validationErrors = new Map();
+
+    for (let electionNum = maxElectionNumber; electionNum >= 1; electionNum--) {
+        const election = new Election(`${siteUrl}/election/${electionNum}`, electionNum);
+        elections.set(electionNum, election);
+
+        if (scrape) {
+            await election.scrapeElection(config);
+            const { errors } = election.validate();
+            if (errors.length) {
+                validationErrors.set(electionNum, errors);
+            }
+        }
+    }
+
+    return [elections, validationErrors];
+};
+
+/**
  * @summary scrapes the election questionnaire questions
  * @param {cheerio.Root} $ Cheerio root element
  * @param {cheerio.Element} el questionnaire element
