@@ -1,6 +1,8 @@
 import { getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election from "../election.js";
-import { sayBusyGreeting, sayIdleGreeting, sayOtherSiteMods, sayUptime } from "../messages.js";
+import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
+import { sayUptime } from "../messages/metadata.js";
+import { sayOtherSiteMods } from "../messages/moderators.js";
 import { sendMessage } from "../queue.js";
 import { RandomArray } from "../random.js";
 import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";

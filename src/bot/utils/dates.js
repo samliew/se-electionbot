@@ -30,7 +30,7 @@ export const validateDate = (input) => {
  * @param {RelativeTimeOptions} [options]
  * @returns {string}
  */
-export const dateToRelativetime = (date, { soonText = 'soon', justNowText = 'just now' } = {}) => {
+export const dateToRelativeTime = (date, { soonText = 'soon', justNowText = 'just now' } = {}) => {
 
     date = validateDate(date);
 

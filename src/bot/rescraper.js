@@ -1,5 +1,6 @@
 import { HerokuClient } from "./herokuClient.js";
-import { sayBusyGreeting, sayElectionSchedule, sayIdleGreeting } from "./messages.js";
+import { sayBusyGreeting, sayIdleGreeting } from "./messages/greetings.js";
+import { sayElectionSchedule } from "./messages/phases.js";
 import { sendMessage, sendMessageList } from "./queue.js";
 import { makeURL } from "./utils.js";
 

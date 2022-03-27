@@ -6,7 +6,7 @@ import { JSDOM } from "jsdom";
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
 import { getUserAssociatedAccounts } from "./api.js";
-import { dateToRelativetime, dateToUtcTimestamp, toTadParamFormat } from "./utils/dates.js";
+import { dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "./utils/dates.js";
 import { matchNumber, safeCapture } from "./utils/expressions.js";
 import { numericNullable } from "./utils/objects.js";
 
@@ -697,7 +697,7 @@ export const numToString = (num, zeroText = 'zero') => {
  * @returns {string}
  */
 export const linkToRelativeTimestamp = (date) =>
-    `[${dateToRelativetime(date)}](${link}${toTadParamFormat(date)})`;
+    `[${dateToRelativeTime(date)}](${link}${toTadParamFormat(date)})`;
 
 
 /**

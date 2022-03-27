@@ -1,7 +1,11 @@
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
-import { sayDiamondAlready, sayDoesNotMeetRequirements, sayHasMaximumCandidateScore, sayLacksPrivilege, sayMissingBadges, sayNoAccountToCalcScore } from "./messages.js";
+import { sayMissingBadges } from "./messages/badges.js";
+import { sayDoesNotMeetRequirements } from "./messages/candidates.js";
+import { sayLacksPrivilege } from "./messages/metadata.js";
+import { sayDiamondAlready } from "./messages/moderators.js";
+import { sayHasMaximumCandidateScore, sayNoAccountToCalcScore } from "./messages/score.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID } from "./utils.js";
 import { matchNumber } from "./utils/expressions.js";
 

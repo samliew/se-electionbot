@@ -1,6 +1,10 @@
 import { expect } from "chai";
 import Election from "../../src/bot/election.js";
-import { sayAboutElectionStatus, sayBadgesByType, sayDiamondAlready, sayElectionIsEnding, sayElectionSchedule, sayHI, sayWithdrawnNominations } from "../../src/bot/messages.js";
+import { sayBadgesByType } from "../../src/bot/messages/badges.js";
+import { sayWithdrawnNominations } from "../../src/bot/messages/candidates.js";
+import { sayHI } from "../../src/bot/messages/greetings.js";
+import { sayDiamondAlready } from "../../src/bot/messages/moderators.js";
+import { sayAboutElectionStatus, sayElectionIsEnding, sayElectionSchedule } from "../../src/bot/messages/phases.js";
 import { calculateScore } from "../../src/bot/score.js";
 import { capitalize } from "../../src/bot/utils.js";
 import { matchesISO8601 } from "../../src/bot/utils/expressions.js";

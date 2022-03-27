@@ -36,7 +36,18 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
-import { sayAboutBallotFile, sayAboutElectionStatus, sayAboutSTV, sayAboutThePhases, sayAboutVoting, sayAJoke, sayAJonSkeetJoke, sayAlreadyVoted, sayAreModsPaid, sayBadgesByType, sayBestCandidate, sayBestModerator, sayCandidateScoreFormula, sayCandidateScoreLeaderboard, sayCanEditDiamond, sayCannedResponses, sayCurrentCandidates, sayCurrentMods, sayCurrentWinners, sayElectionIsEnding, sayElectionPage, sayElectionResults, sayElectionSchedule, sayHowAmI, sayHowManyAreEligibleToVote, sayHowManyCandidatesAreHere, sayHowManyModsAreHere, sayHowManyModsItTakesToFixLightbulb, sayHowToNominate, sayHowToNominateOthers, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayInsaneComeback, sayMissingComments, sayNextPhase, sayNotStartedYet, sayNumberOfPositions, sayOffTopicMessage, sayQuestionnaireQuestion, sayRequiredBadges, sayShortHelp, sayUserEligibility, sayWhatIsAnElection, sayWhatModsDo, sayWhereToFindElectionResults, sayWhoAmI, sayWhoMadeMe, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages.js";
+import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
+import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
+import { sayCurrentWinners, sayElectionPage, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
+import { sayAJoke, sayAJonSkeetJoke, sayCannedResponses, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback } from "./messages/jokes.js";
+import { sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
+import { sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
+import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayHowManyModsAreHere, sayWhatModsDo } from "./messages/moderators.js";
+import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElectionNotStartedYet, sayElectionSchedule, sayNextPhase } from "./messages/phases.js";
+import { sayQuestionnaireQuestion } from "./messages/questionnaire.js";
+import { sayCandidateScoreFormula, sayCandidateScoreLeaderboard } from "./messages/score.js";
+import { sayAboutBallotFile, sayAboutSTV } from "./messages/stv.js";
+import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -617,7 +628,7 @@ import { matchNumber } from "./utils/expressions.js";
             }
             // Conflicts with isAskedAboutVoting below - should not match "how to vote"
             else if (isAskedHowOrWhoToVote(preparedMessage)) {
-                if (election.phase == null) responseText = sayNotStartedYet(election);
+                if (election.phase == null) responseText = sayElectionNotStartedYet(election);
                 else responseText = sayInformedDecision();
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {

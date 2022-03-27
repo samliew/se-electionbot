@@ -1,7 +1,7 @@
 import { ChatEventType } from 'chatexchange';
 import { echoSomething, sayFeedback } from '../commands/commands.js';
 import { isBotMentioned } from "../guards.js";
-import { sayIdleGreeting } from "../messages.js";
+import { sayIdleGreeting } from '../messages/greetings.js';
 import { sendMessage } from "../queue.js";
 import { getUser, roomKeepAlive } from "../utils.js";
 import { prepareMessageForMatching } from '../utils/chat.js';
