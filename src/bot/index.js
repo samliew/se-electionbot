@@ -29,7 +29,7 @@ import {
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule,
     isAskedForFullHelp,
     isAskedForHelp,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyModsVoted, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
     isAskedWhyNominationRemoved,
     isBotMentioned,
     isHatingTheBot,
@@ -383,6 +383,7 @@ ELECTION_URL, ACCOUNT_EMAIL, ACCOUNT_PASSWORD`); // TODO: make dynamic
             "join room": ["joins a given room", joinRoomCommand, AccessLevel.dev],
             "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, AccessLevel.dev],
             "mute": ["stop bot from responding for N mins", muteCommand, AccessLevel.privileged],
+            "mods voted": ["posts how many mods voted", sayHowManyModsVoted, AccessLevel.privileged],
             "post meta": ["posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged],
             "rm_election": ["resets the current election", resetElection, AccessLevel.dev],
             "say": ["bot echoes something", echoSomething, AccessLevel.privileged],
@@ -428,7 +429,6 @@ ELECTION_URL, ACCOUNT_EMAIL, ACCOUNT_PASSWORD`); // TODO: make dynamic
             [isAskedWhereToFindResults, sayWhereToFindElectionResults],
             [isAskedForQuestionnaireQuestion, sayQuestionnaireQuestion],
             [isAskedAboutElectionResults, sayElectionResults],
-            [isAskedHowManyModsVoted, sayHowManyModsVoted],
             [isAskedAboutElectionPhaseDuration, sayElectionPhaseDuration]
         ];
 
@@ -539,6 +539,7 @@ ELECTION_URL, ACCOUNT_EMAIL, ACCOUNT_PASSWORD`); // TODO: make dynamic
                     ["impersonate", /^impersonate \d+/, config, preparedMessage],
                     ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, preparedMessage],
                     ["get modes", /^(?:get modes?\s+report|report\s+modes)/, config],
+                    ["mods voted", /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, config, elections, election, preparedMessage],
                     ["join room", /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, config, client, preparedMessage]
                 ];
 
