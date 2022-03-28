@@ -12,10 +12,11 @@ import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import Election, { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections } from './election.js';
+import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections } from './election.js';
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
+    isAskedAboutElectionPhaseDuration,
     isAskedAboutElectionPhases,
     isAskedAboutElectionResults,
     isAskedAboutJokes,
@@ -38,7 +39,7 @@ import {
 } from "./guards.js";
 import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
-import { sayCurrentWinners, sayElectionPage, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
+import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayCannedResponses, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback } from "./messages/jokes.js";
 import { sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
 import { sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
@@ -60,6 +61,7 @@ import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
 
 /**
+ * @typedef {import("./election").default} Election
  * @typedef {(Pick<Badge, "name"|"badge_id"> & { required?: boolean, type: string })} ElectionBadge
  * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} WebsocketEvent
@@ -76,6 +78,14 @@ import { matchNumber } from "./utils/expressions.js";
  * }} ResolvedMessage
  *
  * @typedef {import("chatexchange/dist/Browser").IProfileData & { access: number }} UserProfile
+ *
+ * @typedef {(
+ *  config: BotConfig,
+ *  elections: Map<number, Election>,
+ *  election: Election,
+ *  text: string,
+ *  u: User
+ * ) => string | Promise<string>} MessageBuilder
  */
 
 (async () => {
@@ -261,7 +271,7 @@ import { matchNumber } from "./utils/expressions.js";
 
         // Get bot's chat profile
         const me = await client.getMe();
-        console.log(`INIT - Logged in to ${config.chatDomain} as ${me.name} (${me.id})`);
+        console.log(`INIT - Logged in to ${config.chatDomain} as ${await me.name} (${me.id})`);
 
         // Join the election chat room
         const joinedRoom = await client.joinRoom(config.chatRoomId);
@@ -398,7 +408,7 @@ import { matchNumber } from "./utils/expressions.js";
             rm_election: ["reset election"]
         });
 
-        /** @type {[m:(c:string) => boolean, b:(c:BotConfig, e:Map<number,Election>, ce:Election, t:string, u: User) => (string|Promise<string>)][]} */
+        /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
         const unprivilegedRules = [
             [isAskedForCurrentPositions, sayNumberOfPositions],
             [isAskedIfResponsesAreCanned, sayCannedResponses],
@@ -417,7 +427,8 @@ import { matchNumber } from "./utils/expressions.js";
             [isAskedWhereToFindResults, sayWhereToFindElectionResults],
             [isAskedForQuestionnaireQuestion, sayQuestionnaireQuestion],
             [isAskedAboutElectionResults, sayElectionResults],
-            [isAskedHowManyModsVoted, sayHowManyModsVoted]
+            [isAskedHowManyModsVoted, sayHowManyModsVoted],
+            [isAskedAboutElectionPhaseDuration, sayElectionPhaseDuration]
         ];
 
         // Main event listener

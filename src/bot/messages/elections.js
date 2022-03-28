@@ -1,13 +1,15 @@
 import { getRandomNow } from "../random.js";
 import { makeURL, pluralize } from "../utils.js";
-import { dateToRelativeTime } from "../utils/dates.js";
-import { matchNumber } from "../utils/expressions.js";
+import { datesToDuration, dateToRelativeTime, getSeconds } from "../utils/dates.js";
+import { matchNumber, safeCapture } from "../utils/expressions.js";
 import { formatOrdinal } from "../utils/strings.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../election").default} Election
+ * @typedef {import("../election").ElectionPhase} ElectionPhase
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  */
 
 /**
@@ -86,6 +88,48 @@ export const sayElectionResults = (_config, elections, _election, text) => {
     }
 
     return `Election #${electionNum} is in a weird state.`;
+};
+
+/**
+ * @summary builds a response to a query about election phase duration
+ * @type {MessageBuilder}
+ */
+export const sayElectionPhaseDuration = (_config, _elections, election, text) => {
+    const {
+        dateElection,
+        dateEnded,
+        dateNomination,
+        datePrimary,
+        electionNum,
+        siteName
+    } = election;
+
+    const phase = /** @type {Exclude<ElectionPhase, null|"cancelled"|"ended">} */(
+        safeCapture(/(election|nomination|primary)/, text)
+    ) || "election";
+
+    /** @type {Record<typeof phase, [string | undefined, string | undefined]>} */
+    const phaseMap = {
+        "election": [dateElection, dateEnded],
+        "nomination": [dateNomination, dateElection],
+        "primary": [datePrimary, dateElection]
+    };
+
+    const [from, to] = phaseMap[phase];
+
+    if (!from || !to) return ""; // TODO: consider what to return
+
+    const rel = datesToDuration(getSeconds(from) * 1e3, getSeconds(to) * 1e3);
+
+    const rules = [
+        [election.isActive(), "is"],
+        [election.isNotStartedYet(), "will be"],
+        [election.isEnded(), "was"]
+    ];
+
+    const [_rule, modal] = rules.find(([rule]) => rule) || [, "is"];
+
+    return `The ${formatOrdinal(electionNum || 1)} ${siteName} election "${phase}" phase ${modal} ${rel} long`;
 };
 
 /**

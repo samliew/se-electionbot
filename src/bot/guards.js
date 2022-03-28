@@ -672,3 +672,14 @@ export const isAskedAboutElectionResults = (text) => {
         /^what\s+(?:are|were)(?:\s+the)?\s+results\s+of(?:\s+the)?\s+election\s+(?:number\s+|#)(?:\d+)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking for the election phase duration
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutElectionPhaseDuration = (text) => {
+    return someMatch([
+        /^how\s+long\s+(?:does|will)(?:\s+the)?\s+(?:election|nomination|primary)\s+phase\s+lasts?/i
+    ], text);
+};
