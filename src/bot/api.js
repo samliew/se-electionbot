@@ -90,15 +90,22 @@ export const getAllNamedBadges = async (config, site, page = 1) => {
 };
 
 /**
+ * @typedef {{
+ *  from ?: string | number | Date,
+ *  page ?: number,
+ *  to ?: string | number | Date,
+ *  type ?: Badge["badge_type"] | "all"
+ * }} GetBadgesOptions
+ *
  * @summary gets badges from the API
  * @param {BotConfig} config
  * @param {number[]} userIds userId to request badges for
  * @param {string} site election site slug
- * @param {"all"|Badge["badge_type"]} type badge type
- * @param {number} [page] API response page
+ * @param {GetBadgesOptions} [options] API options
  * @returns {Promise<Badge[]>}
  */
-export const getBadges = async (config, userIds, site, type = "all", page = 1) => {
+export const getBadges = async (config, userIds, site, options = {}) => {
+    const { from, to, type = "all", page = 1 } = options;
 
     const badgeURI = new URL(`${apiBase}/${apiVer}/users/${userIds.join(";")}/badges`);
 
@@ -112,6 +119,9 @@ export const getBadges = async (config, userIds, site, type = "all", page = 1) =
         key: getStackApiKey(config.apiKeyPool)
     });
 
+    if (from) search.append("fromdate", getSeconds(from).toString());
+    if (to) search.append("todate", getSeconds(to).toString());
+
     if (type !== "all") {
         const limitMap = { named: "max", tag_based: "min" };
         search.append(limitMap[type], type);
@@ -123,10 +133,10 @@ export const getBadges = async (config, userIds, site, type = "all", page = 1) =
 
     return handleResponse(
         /** @type {ApiWrapper<Badge>} */(await fetchUrl(config, badgeURI, true)) || {},
-        () => getBadges(config, userIds, site, type, page),
+        () => getBadges(config, userIds, site, options),
         async ({ items = [], has_more }) => {
             if (has_more) {
-                const otherItems = await getBadges(config, userIds, site, type, page + 1);
+                const otherItems = await getBadges(config, userIds, site, { ...options, page: page + 1 });
                 return [...items, ...otherItems];
             }
 
