@@ -101,7 +101,8 @@ import { matchNumber } from "./utils/expressions.js";
     const accountPassword = process.env.ACCOUNT_PASSWORD?.trim();
 
     if (!electionUrl || !accountEmail || !accountPassword) {
-        console.error('FATAL - missing required environment variables.');
+        console.error(`FATAL - missing required environment variables:
+ELECTION_URL, ACCOUNT_EMAIL, ACCOUNT_PASSWORD`); // TODO: make dynamic
         return;
     }
 
