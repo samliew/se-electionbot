@@ -208,7 +208,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         // parallel scrape + API call speeds up calculation
         const [userBadges, requestedUser] = await Promise.all([
-            getBadges(config, userId, apiSlug, "named"),
+            getBadges(config, [userId], apiSlug, "named"),
             getUserInfo(config, userId, apiSlug)
         ]);
 

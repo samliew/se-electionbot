@@ -101,7 +101,7 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
         // Do not attempt to calculate valid scores
         if (userId > 0) {
             const { apiSlug } = election;
-            const userBadges = await getBadges(config, userId, apiSlug);
+            const userBadges = await getBadges(config, [userId], apiSlug);
             const user = await getUserInfo(config, userId, apiSlug);
 
             if (user) {

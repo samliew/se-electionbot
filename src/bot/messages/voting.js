@@ -207,7 +207,7 @@ export const sayUserEligibility = async (config, election, text) => {
 
     const { apiSlug } = election;
 
-    const userBadges = await getBadges(config, userId, apiSlug);
+    const userBadges = await getBadges(config, [userId], apiSlug);
 
     const requestedUser = await getUserInfo(config, userId, apiSlug);
 
