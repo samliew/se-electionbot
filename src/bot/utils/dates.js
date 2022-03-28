@@ -79,6 +79,34 @@ export const dateToRelativeTime = (date, { soonText = 'soon', justNowText = 'jus
 };
 
 /**
+ * @summary converts from/to dates to a duration string
+ * @param {Date|string|number} from
+ * @param {Date|string|number} to
+ * @returns {string}
+ */
+export const datesToDuration = (from, to) => {
+    const vfrom = validateDate(from);
+    const vto = validateDate(to);
+
+    const S_MIN = 60;
+    const S_HOUR = S_MIN * 60;
+    const S_DAY = S_HOUR * 24;
+    const diff = (vto.getTime() - vfrom.getTime()) / MS_IN_SECOND;
+
+    /** @type {[boolean, string][]} */
+    const rules = [
+        // TODO: expand to more than a month
+        [diff < S_MIN, ((x) => `${x} sec${pluralize(x)}`)(Math.floor(diff))],
+        [diff < S_HOUR, ((x) => `${x} min${pluralize(x)}`)(Math.floor(diff / S_MIN))],
+        [diff < S_DAY, ((x) => `${x} hour${pluralize(x)}`)(Math.floor(diff / S_HOUR))],
+        [true, ((x) => `${x} day${pluralize(x)}`)(Math.floor(diff / S_DAY))]
+    ];
+
+    const [, relative = ""] = rules.find(([rule]) => rule) || [];
+    return relative;
+};
+
+/**
  * @summary formats date input to UTC timestamp in Stack Exchange's format
  * @param {Date|string|number} date date to format
  * @returns {string}
