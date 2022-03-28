@@ -605,6 +605,17 @@ export const isAskedHowManyVoted = (text) => {
 };
 
 /**
+ * @summary checks if a message is asking how many mods already voted
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedHowManyModsVoted = (text) => {
+    return someMatch([
+        /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/i
+    ], text);
+};
+
+/**
  * @summary checks if a message is asking if one has voted themselves
  * @param {string} text message text
  * @returns {boolean}

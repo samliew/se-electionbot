@@ -117,6 +117,44 @@ export const sayHowManyAreEligibleToVote = async (config, _elections, election) 
 };
 
 /**
+ * @summary builds a response to a query on how many mods voted in the election
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @returns {Promise<string>}
+ */
+export const sayHowManyModsVoted = async (config, _elections, election) => {
+    const { apiSlug, currentSiteMods, siteUrl, dateElection, dateEnded } = election;
+
+    const modIds = currentSiteMods.map(({ user_id }) => user_id);
+    const { length: numMods } = modIds;
+
+    const modBadges = await getBadges(config, modIds, apiSlug, {
+        from: dateElection,
+        to: dateEnded,
+        type: "named"
+    });
+
+    const electionBadgeName = "Constituent";
+    const electionBadgeId = election.getBadgeId(electionBadgeName);
+
+    const numVoted = modBadges.reduce(
+        (a, b) => {
+            b.badge_id === electionBadgeId && console.log(b);
+            return b.badge_id === electionBadgeId ? a + 1 : a;
+        },
+        0);
+
+    const badgeLink = makeURL(electionBadgeName, `${siteUrl}/help/badges/${electionBadgeId}`);
+
+    const basePrefix = `Based on the number of ${badgeLink} badges awarded`;
+    const postfix = `moderator${pluralize(numVoted)} (out of ${numMods}) ha${pluralize(numVoted, "ve", "s")} voted in the election`;
+
+    const format = partialRight(formatNumber, [3]);
+
+    return `${basePrefix}, ${format(numVoted)} ${postfix}.`;
+};
+
+/**
  * @summary builds a response to a query if a user can vote in the election
  * @param {BotConfig} config bot configuration
  * @param {Map<number, Election>} _elections election history
