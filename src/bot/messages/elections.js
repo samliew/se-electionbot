@@ -196,3 +196,15 @@ export const sayWhereToFindElectionResults = (_config, _elections, election) => 
     const [, response = ""] = rules.find(([cond]) => cond) || [];
     return response;
 };
+
+export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chance to cast or modify your votes!";
+
+/**
+ * @summary builds a message announcing that the election is ending soon
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const sayEndingSoon = (election) => {
+    const { electionUrl } = election;
+    return `The ${makeURL('election', electionUrl)} ${ELECTION_ENDING_SOON_TEXT}`;
+};

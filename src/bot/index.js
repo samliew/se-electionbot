@@ -42,7 +42,7 @@ import {
 } from "./guards.js";
 import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
-import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
+import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
 import { sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
 import { sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
@@ -327,10 +327,12 @@ import { matchNumber } from "./utils/expressions.js";
 
         const botMessageFilter = await onlyBotMessages(me);
 
+        const electionEndingSoonExpr = new RegExp(ELECTION_ENDING_SOON_TEXT);
+
         // Check for saidElectionEndingSoon
         config.flags.saidElectionEndingSoon = transcriptMessages
             .filter(botMessageFilter)
-            .filter(({ message }) => /is ending soon. This is the final chance to cast or change your votes!/.test(message)).length > 0;
+            .filter(({ message }) => electionEndingSoonExpr.test(message)).length > 0;
 
         // Loops through messages by latest first
         transcriptMessages.reverse();
