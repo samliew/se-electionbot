@@ -119,7 +119,7 @@ export default class Rescraper {
             }
 
             // Withdrawn nominations
-            if (['nomination', 'primary', 'election'].some(phase => phase === election.phase) && election.newlyWithdrawnNominees.length > 0) {
+            if (election.isActive() && election.newlyWithdrawnNominees.length > 0) {
                 await announcement?.announceWithdrawnNominees();
                 console.log(`RESCRAPER - Withdrawn nominees announced.`);
             }
@@ -197,7 +197,7 @@ export default class Rescraper {
                 await sayBusyGreeting(config, election, room);
             }
             // The election is over
-            else if (election.phase === 'ended' || election.phase === 'cancelled' && config.scrapeIntervalMins !== 10) {
+            else if (election.isInactive() && config.scrapeIntervalMins !== 10) {
 
                 // Increase scrape interval since we don't need to scrape often
                 config.scrapeIntervalMins = 10;
