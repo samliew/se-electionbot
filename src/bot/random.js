@@ -207,6 +207,14 @@ export const getRandomWhoAmI = () => new RandomArray(
     `I'm a teapot, short and stout. Here is my handle, here is my spout.`,
 ).getRandom();
 
+export const getRandomWhyAmI = () => new RandomArray(
+    "because.",
+    "Why is anyone?",
+    "Exterminate! Exterminate!",
+    "And why are you?",
+    "42"
+).getRandom();
+
 export const getRandomThanks = () => new RandomArray(
     "Not at all!",
     "My pleasure.",

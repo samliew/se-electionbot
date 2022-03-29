@@ -683,3 +683,15 @@ export const isAskedAboutElectionPhaseDuration = (text) => {
         /^how\s+long\s+(?:does|will)(?:\s+the)?\s+(?:election|nomination|primary)\s+phase\s+lasts?/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking for why the bot is
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedWhyIsBot = (text) => {
+    return someMatch([
+        /^why\s+are\s+you(?:\?\!?|$)/i,
+        /^what\s+is\s+your\s+purpose(?:\?\!?|$)/i
+    ], text);
+};

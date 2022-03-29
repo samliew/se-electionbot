@@ -30,6 +30,7 @@ import {
     isAskedForFullHelp,
     isAskedForHelp,
     isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
+    isAskedWhyIsBot,
     isAskedWhyNominationRemoved,
     isBotMentioned,
     isHatingTheBot,
@@ -50,7 +51,7 @@ import { sayCandidateScoreFormula, sayCandidateScoreLeaderboard } from "./messag
 import { sayAboutBallotFile, sayAboutSTV } from "./messages/stv.js";
 import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowManyModsVoted, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
-import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, RandomArray } from "./random.js";
+import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI, RandomArray } from "./random.js";
 import Rescraper from "./rescraper.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
@@ -773,11 +774,8 @@ import { matchNumber } from "./utils/expressions.js";
                     else if (isAskedWhoAmI(preparedMessage)) {
                         responseText = getRandomWhoAmI();
                     }
-                    else if (/^why are you\?*$/.test(preparedMessage)) {
-                        responseText = new RandomArray(
-                            `because.`,
-                            `why what???`,
-                        ).getRandom();
+                    else if (isAskedWhyIsBot(preparedMessage)) {
+                        responseText = getRandomWhyAmI();
                     }
                     else if (/^what(?:'s| is| are) your pronouns\?*$/.test(preparedMessage)) {
                         responseText = `naturally, my pronouns are it/its/itself.`;
