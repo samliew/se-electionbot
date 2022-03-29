@@ -1,5 +1,6 @@
 import { getRandomOops, getRandomSecretPrefix, RandomArray } from "../random.js";
 import { getUsersCurrentlyInTheRoom, listify, makeURL, pluralize } from "../utils.js";
+import { sayMissingBadges } from "./badges.js";
 
 /**
  * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
@@ -89,7 +90,24 @@ export const sayCurrentMods = (election, moderators, decodeEntities) => {
  * @returns {string}
  */
 export const sayDiamondAlready = (candidateScore, isModerator, wasModerator) => {
-    const { score, maxScore } = candidateScore;
+    const {
+        score,
+        maxScore,
+        missingBadgeNames,
+        missingRequiredBadgeNames,
+        numMissingRequiredBadges,
+        numMissingBadges
+    } = candidateScore;
+
+    const missingReqBadges = numMissingRequiredBadges > 0 ? sayMissingBadges(
+        missingRequiredBadgeNames,
+        numMissingRequiredBadges, true, true
+    ) : "";
+
+    const missingBadges = numMissingBadges > 0 ? sayMissingBadges(
+        missingBadgeNames,
+        numMissingBadges, true
+    ) : "";
 
     /**
      * @type {[boolean, string][]}
@@ -100,7 +118,7 @@ export const sayDiamondAlready = (candidateScore, isModerator, wasModerator) => 
     ];
 
     const [, message] = messageMap.find(([condition]) => condition) || [];
-    return `${message || `diamonds are forever!`} Just so you know, your score is **${score}** (out of ${maxScore}).`;
+    return `${message || `diamonds are forever!`} Just so you know, your score is **${score}** (out of ${maxScore}).${missingReqBadges}${missingBadges}`;
 };
 
 /**
