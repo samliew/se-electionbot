@@ -36,13 +36,14 @@ import {
     isBotMentioned,
     isHatingTheBot,
     isLovingTheBot,
+    isLovingTheBotFun,
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
 import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
 import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
-import { sayAJoke, sayAJonSkeetJoke, sayCannedResponses, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback } from "./messages/jokes.js";
+import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
 import { sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
 import { sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
 import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayHowManyModsAreHere, sayWhatModsDo } from "./messages/moderators.js";
@@ -52,7 +53,7 @@ import { sayCandidateScoreFormula, sayCandidateScoreLeaderboard } from "./messag
 import { sayAboutBallotFile, sayAboutSTV } from "./messages/stv.js";
 import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowManyModsVoted, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
-import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomStatus, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI, RandomArray } from "./random.js";
+import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "./random.js";
 import Rescraper from "./rescraper.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
@@ -762,15 +763,11 @@ import { matchNumber } from "./utils/expressions.js";
                 // The rest below are fun mode only
                 else if (config.fun) {
 
-                    if (preparedMessage.startsWith(`i love you`)) {
-                        responseText = `I love you 3000`;
+                    if (isLovingTheBotFun(preparedMessage)) {
+                        responseText = sayLoveYou();
                     }
                     else if (isAskedHowAmI(preparedMessage)) {
-                        responseText = getRandomStatus([
-                            `I'm bored. Amuse me.`,
-                            `Why don't you come up sometime and see me?`,
-                            `Today, I consider myself the luckiest bot on the face of the earth.`,
-                        ]);
+                        responseText = sayHowIsBot();
                     }
                     else if (isAskedWhoAmI(preparedMessage)) {
                         responseText = getRandomWhoAmI();
@@ -779,12 +776,10 @@ import { matchNumber } from "./utils/expressions.js";
                         responseText = getRandomWhyAmI();
                     }
                     else if (isAskedAboutBotPronouns(preparedMessage)) {
-                        responseText = `naturally, my pronouns are it/its/itself.`;
+                        responseText = sayPreferredPronouns();
                     }
                     else if (isAskedMeaningOfLife(preparedMessage)) {
-                        responseText = new RandomArray(
-                            `The answer to life, the universe, and everything is the number 42.`,
-                        ).getRandom();
+                        responseText = sayAnswerToLifeUniverseAndEverything();
                     }
                     else if (isAskedAboutJonSkeetJokes(preparedMessage)) {
                         responseText = sayAJonSkeetJoke();

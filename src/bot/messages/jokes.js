@@ -1,4 +1,4 @@
-import { getRandomJoke, getRandomJonSkeetJoke, RandomArray } from "../random.js";
+import { getRandomJoke, getRandomJonSkeetJoke, getRandomStatus, RandomArray } from "../random.js";
 import { pluralize } from "../utils.js";
 
 /**
@@ -56,3 +56,44 @@ export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {
  * @returns {string}
  */
 export const sayInsaneComeback = () => new RandomArray("What did you just call me?", "Who isn't insane these days?", "Sanity is overrated").getRandom();
+
+/**
+ * @fun
+ * @summary builds a response to request to give an answer to life, the universe, and everything
+ * @returns {string}
+ */
+export const sayAnswerToLifeUniverseAndEverything = () => new RandomArray(
+    "The answer to life, the universe, and everything is the number 42.",
+    "I will answer only if you know the question"
+).getRandom();
+
+/**
+ * @fun
+ * @summary builds a response to request of preferred pronouns
+ * @returns {string}
+ */
+export const sayPreferredPronouns = () => new RandomArray(
+    "Naturally, my pronouns are it/its/itself."
+).getRandom();
+
+/**
+ * @fun
+ * @summary builds a response to a user expressing love for the bot
+ * @returns {string}
+ */
+export const sayLoveYou = () => new RandomArray(
+    "I love you 3000",
+    "I love you too!",
+    "What is love?"
+).getRandom();
+
+/**
+ * @fun
+ * @summary builds a response to a query on bot status
+ * @returns {string}
+ */
+export const sayHowIsBot = () => getRandomStatus([
+    `I'm bored. Amuse me.`,
+    `Why don't you come up sometime and see me?`,
+    `Today, I consider myself the luckiest bot on the face of the earth.`,
+]);

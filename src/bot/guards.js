@@ -279,6 +279,18 @@ export const isLovingTheBot = (text) => {
 };
 
 /**
+ * @fun
+ * @summary detects if someone is loving the bot in fun mode
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isLovingTheBotFun = (text) => {
+    return someMatch([
+        /^i\s+(?:love|like)\s+(?:you|bot)/i
+    ], text);
+};
+
+/**
  * @summary detects if someone hates the bot
  * @param {string} text
  * @returns {boolean}
