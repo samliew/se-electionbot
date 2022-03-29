@@ -447,6 +447,19 @@ import { matchNumber } from "./utils/expressions.js";
             [isAskedAboutElectionPhaseDuration, sayElectionPhaseDuration]
         ];
 
+        /** @type {[(t:string) => boolean, () => string][]} */
+        const funRules = [
+            [isLovingTheBotFun, sayLoveYou],
+            [isAskedHowAmI, sayHowIsBot],
+            [isAskedWhoAmI, getRandomWhoAmI],
+            [isAskedWhyIsBot, getRandomWhyAmI],
+            [isAskedAboutBotPronouns, sayPreferredPronouns],
+            [isAskedMeaningOfLife, sayAnswerToLifeUniverseAndEverything],
+            [isAskedAboutJonSkeetJokes, sayAJonSkeetJoke],
+            [isAskedAboutJokes, sayAJoke],
+        ];
+
+
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
             const encodedMessage = await msg.content;
@@ -607,8 +620,8 @@ import { matchNumber } from "./utils/expressions.js";
 
             const matched = unprivilegedRules.find(([expr]) => expr(preparedMessage));
 
-            /** @type {string | null} */
-            let responseText = null;
+            /** @type {string | undefined} */
+            let responseText;
 
             // TODO: this is the next step in refactoring the main module
             // the rest of the if...else...elseif are to be switched to reducer
@@ -762,31 +775,8 @@ import { matchNumber } from "./utils/expressions.js";
                 }
                 // The rest below are fun mode only
                 else if (config.fun) {
-
-                    if (isLovingTheBotFun(preparedMessage)) {
-                        responseText = sayLoveYou();
-                    }
-                    else if (isAskedHowAmI(preparedMessage)) {
-                        responseText = sayHowIsBot();
-                    }
-                    else if (isAskedWhoAmI(preparedMessage)) {
-                        responseText = getRandomWhoAmI();
-                    }
-                    else if (isAskedWhyIsBot(preparedMessage)) {
-                        responseText = getRandomWhyAmI();
-                    }
-                    else if (isAskedAboutBotPronouns(preparedMessage)) {
-                        responseText = sayPreferredPronouns();
-                    }
-                    else if (isAskedMeaningOfLife(preparedMessage)) {
-                        responseText = sayAnswerToLifeUniverseAndEverything();
-                    }
-                    else if (isAskedAboutJonSkeetJokes(preparedMessage)) {
-                        responseText = sayAJonSkeetJoke();
-                    }
-                    else if (isAskedAboutJokes(preparedMessage)) {
-                        responseText = sayAJoke();
-                    }
+                    const [, funHandler] = funRules.find(([g]) => g(preparedMessage)) || [];
+                    responseText = funHandler?.();
                 }
 
                 if (responseText) {
