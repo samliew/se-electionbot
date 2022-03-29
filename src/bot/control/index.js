@@ -3,7 +3,7 @@ import { echoSomething, sayFeedback } from '../commands/commands.js';
 import { isBotMentioned } from "../guards.js";
 import { sayIdleGreeting } from '../messages/greetings.js';
 import { sendMessage } from "../queue.js";
-import { getUser, roomKeepAlive } from "../utils.js";
+import { getUser, makeURL, roomKeepAlive } from "../utils.js";
 import { prepareMessageForMatching } from '../utils/chat.js';
 
 /**
@@ -97,7 +97,10 @@ export const joinControlRoom = async (config, election, client, {
 
         console.log(`joined control room: ${controlRoomId}`);
 
-        await controlRoom.sendMessage("reporting for duty, control");
+        const { id: controlledRoomId } = controlledRoom;
+        await controlRoom.sendMessage(`reporting for duty, control (room ${makeURL(controlledRoomId.toString(),
+            `https://chat.${config.chatDomain}/rooms/${controlledRoomId}/info`
+        )})`);
 
     } catch (error) {
         console.log(`failed to join control room: ${error}`);
