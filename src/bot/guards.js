@@ -456,7 +456,7 @@ export const isBotMentioned = async (text, botChatProfile) => {
  */
 export const isAskedHowManyModsInTheRoom = (text) => {
     return someMatch([
-        /^how many mod(?:erator)?s are here(?:\?|$)/i
+        /^how\s+many\s+mod(?:erator)?s\s+are\s+(?:here|in\s+th(?:e|is)\s+room)(?:\?|$)/i
     ], text);
 };
 
