@@ -50,6 +50,7 @@ export const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error 
  *  numMissingBadges: number,
  *  maxScore: number,
  *  missingRequiredBadges: ElectionBadge[],
+ *  missingBadgeNames: string[],
  *  missingRequiredBadgeNames: string[]
  * }} CandidateScore
  *
@@ -102,6 +103,9 @@ export const calculateScore = (user, userBadges, election) => {
         },
         get maxScore() {
             return maxRepScore + electionBadges.length;
+        },
+        get missingBadgeNames() {
+            return missingBadges.map(mapToName);
         },
         get missingRequiredBadges() {
             return election.isStackOverflow() ? requiredBadges.filter(({ badge_id }) => missingBadgeIds.includes(badge_id)) : [];
@@ -220,14 +224,12 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         const candidateScore = calculateScore(requestedUser, userBadges, election);
 
         const {
-            score, missing, isEligible, maxScore,
+            score, isEligible, maxScore,
             missingRequiredBadgeNames,
+            missingBadgeNames,
             numMissingRequiredBadges,
             numMissingBadges
         } = candidateScore;
-
-        const missingBadges = missing.badges.election;
-        const missingBadgeNames = missingBadges.map(mapToName);
 
         if (numMissingBadges > 0) console.log('Missing Badges: ', missingBadgeNames.join(','));
 
@@ -238,7 +240,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         if (config.verbose) {
             console.log({
                 "User site badges": userBadges,
-                missingBadges,
+                missingBadgeNames,
                 hasNominated,
             });
         }
