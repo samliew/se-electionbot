@@ -308,7 +308,7 @@ describe('Individual commands', () => {
             const election = new Election("https://stackoverflow.com/election/13");
             election.arrNominees.push(getMockNominee(election));
             election.arrWinners.push(getMockNominee(election));
-            election.currentSiteMods.push( /** @type {ApiUser} */({}));
+            election.currentSiteMods.set(-1, /** @type {ApiUser} */({}));
             election.phase = "primary";
 
             resetElection(getMockBotConfig(), election);

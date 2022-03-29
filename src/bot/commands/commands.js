@@ -215,7 +215,7 @@ export const listSiteModerators = async (config, content, entities) => {
     // Get site mods from API
     let siteMods = await getModerators(config, siteApiSlug);
 
-    if (!siteMods.length) {
+    if (!siteMods.size) {
         console.error("Error or invalid site", content, siteApiSlug, siteMods);
         return `Unknown site "${siteText}". Don't blame me, I'm just a bot.`;
     }
@@ -239,7 +239,7 @@ export const resetElection = (_config, election) => {
     // TODO: expand
     election.arrNominees.length = 0;
     election.arrWinners.length = 0;
-    election.currentSiteMods.length = 0;
+    election.currentSiteMods.clear();
     election.phase = null;
     election.updated = Date.now();
 

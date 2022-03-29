@@ -125,7 +125,7 @@ export const sayHowManyAreEligibleToVote = async (config, _elections, election) 
 export const sayHowManyModsVoted = async (config, _elections, election) => {
     const { apiSlug, currentSiteMods, siteUrl, dateElection, dateEnded } = election;
 
-    const modIds = currentSiteMods.map(({ user_id }) => user_id);
+    const modIds = [...currentSiteMods].map(([, { user_id }]) => user_id);
     const { length: numMods } = modIds;
 
     const modBadges = await getBadges(config, modIds, apiSlug, {

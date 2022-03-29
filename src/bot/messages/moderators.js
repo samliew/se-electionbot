@@ -36,7 +36,9 @@ export const sayBestModerator = (_config, _elections, election, _content, user) 
     const { currentSiteMods } = election;
     const { name } = user;
 
-    const currModNames = currentSiteMods.map(({ display_name }) => display_name);
+    const mods = [...currentSiteMods.values()];
+
+    const currModNames = mods.map(({ display_name }) => display_name);
 
     if (user.isMod() && currModNames.includes(name)) {
         return `${name} is the best mod!!!`;
@@ -45,7 +47,7 @@ export const sayBestModerator = (_config, _elections, election, _content, user) 
     const now = Date.now();
     const dayMs = 864e5;
 
-    const activeMods = currentSiteMods.filter(({ last_access_date }) => last_access_date * 1e3 + dayMs > now);
+    const activeMods = mods.filter(({ last_access_date }) => last_access_date * 1e3 + dayMs > now);
 
     const { display_name, link } = new RandomArray(...activeMods).getRandom();
     return `${getRandomSecretPrefix()} ${makeURL(display_name, link)} is the best mod!`;
@@ -62,15 +64,15 @@ export const sayCanEditDiamond = () => {
 /**
  * @summary builds current mods list response message
  * @param {Election} election current election
- * @param {ApiUser[]} moderators
+ * @param {Map<number, ApiUser>} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
 export const sayCurrentMods = (election, moderators, decodeEntities) => {
-    const { length: numMods } = moderators;
+    const { size: numMods } = moderators;
 
     const { siteUrl } = election;
-    const modNames = moderators.map(({ display_name }) => display_name);
+    const modNames = [...moderators].map(([, { display_name }]) => display_name);
     const toBe = numMods > 1 ? "are" : "is";
 
     return (numMods > 0 ?
@@ -131,15 +133,15 @@ export const sayHowManyModsAreHere = async (config, client, room) => {
 /**
  * @summary builds another site's mods list response message
  * @param {string} siteHostname
- * @param {ApiUser[]} moderators
+ * @param {Map<number, ApiUser>} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */
 export const sayOtherSiteMods = (siteHostname, moderators, decodeEntities) => {
-    const { length: numMods } = moderators;
+    const { size: numMods } = moderators;
 
     const siteUrl = 'https://' + siteHostname;
-    const modNames = moderators.map(({ display_name }) => display_name);
+    const modNames = [...moderators].map(([, { display_name }]) => display_name);
     const toBe = numMods > 1 ? "are" : "is";
 
     return (numMods > 0 ?

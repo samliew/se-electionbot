@@ -213,7 +213,7 @@ export const getNumberOfUsersEligibleToVote = async (config, election) => {
  * @param {BotConfig} config bot configuration
  * @param {string} site election site slug
  * @param {number} [page] API response page
- * @returns {Promise<User[]>}
+ * @returns {Promise<Map<number, User>>}
  */
 export const getModerators = async (config, site, page = 1) => {
     // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
@@ -237,11 +237,17 @@ export const getModerators = async (config, site, page = 1) => {
                 return [...items, ...otherItems];
             }
 
-            const nonEmployeeMods = items.filter(({ is_employee, account_id }) => !is_employee && account_id !== -1);
+            /** @type {Map<number, User>} */
+            const mods = new Map();
+            items.forEach((user) => {
+                const { account_id, is_employee, user_id } = user;
+                if (is_employee || account_id === -1) return;
+                mods.set(user_id, user);
+            });
 
-            if (config.verbose) console.log(`API - ${getModerators.name}\n`, nonEmployeeMods);
+            if (config.verbose) console.log(`API - ${getModerators.name}\n`, mods);
 
-            return nonEmployeeMods;
+            return mods;
         });
 };
 

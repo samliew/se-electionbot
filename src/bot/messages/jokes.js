@@ -37,11 +37,11 @@ export const sayCannedResponses = () => new RandomArray(
 /**
  * @fun
  * @summary builds a "how many mods it takes" response message
- * @param {ApiUser[]} moderators current moderators
+ * @param {Map<number, ApiUser>} moderators current moderators
  * @returns {string}
  */
 export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {
-    const names = moderators.map(({ display_name }) => display_name);
+    const names = [...moderators].map(([, { display_name }]) => display_name);
 
     const requires = new RandomArray(...names);
 

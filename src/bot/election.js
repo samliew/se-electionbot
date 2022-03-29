@@ -355,8 +355,8 @@ export default class Election {
     /** @type {Nominee[]} */
     arrWinners = [];
 
-    /** @type {ApiUser[]} */
-    currentSiteMods = [];
+    /** @type {Map<number, ApiUser>} */
+    currentSiteMods = new Map();
 
     /** @type {ElectionPhase|null} */
     phase = null;
@@ -558,7 +558,7 @@ export default class Election {
      */
     get numMods() {
         const { currentSiteMods } = this;
-        return currentSiteMods.length || 0;
+        return currentSiteMods.size || 0;
     }
 
     /**

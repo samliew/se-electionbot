@@ -102,16 +102,16 @@ import { matchNumber } from "./utils/expressions.js";
 
     // Check that all required environment variables are set
     if (!electionUrl || !accountEmail || !accountPassword) {
-        
+
         const requiredEnvironmentVariables = [
             'ELECTION_URL',
             'ACCOUNT_EMAIL',
             'ACCOUNT_PASSWORD'
         ];
-        
+
         // Filter the missing variables
         const missingVariables = requiredEnvironmentVariables.filter(name => !process.env[name]);
-        
+
         // Notify which variables are missing
         console.error(`FATAL - missing required environment variables:
         ${missingVariables.join(', ')}`);
