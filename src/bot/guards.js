@@ -695,3 +695,14 @@ export const isAskedWhyIsBot = (text) => {
         /^what\s+is\s+your\s+purpose(?:\?\!?|$)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking about bot pronouns
+ * @param {string} text message text
+ * @returns {boolean}
+ */
+export const isAskedAboutBotPronouns = (text) => {
+    return someMatch([
+        /^what(?:'s|\s+(?:is|are))\s+your(?:\s+preferred)?\s+pronouns(?:\?\!?|$)/i
+    ], text);
+};

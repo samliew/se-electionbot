@@ -16,6 +16,7 @@ import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSit
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
+    isAskedAboutBotPronouns,
     isAskedAboutElectionPhaseDuration,
     isAskedAboutElectionPhases,
     isAskedAboutElectionResults,
@@ -777,7 +778,7 @@ import { matchNumber } from "./utils/expressions.js";
                     else if (isAskedWhyIsBot(preparedMessage)) {
                         responseText = getRandomWhyAmI();
                     }
-                    else if (/^what(?:'s| is| are) your pronouns\?*$/.test(preparedMessage)) {
+                    else if (isAskedAboutBotPronouns(preparedMessage)) {
                         responseText = `naturally, my pronouns are it/its/itself.`;
                     }
                     else if (isAskedMeaningOfLife(preparedMessage)) {
