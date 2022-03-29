@@ -428,6 +428,24 @@ describe('Election', () => {
         });
     });
 
+    describe("isInactive", () => {
+        it("should correctly check if election is inactive", () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+
+            election.phase = "election";
+            expect(election.isInactive()).to.be.false;
+
+            election.phase = "ended";
+            expect(election.isInactive()).to.be.true;
+
+            election.phase = "cancelled";
+            expect(election.isInactive()).to.be.true;
+
+            election.phase = "nomination";
+            expect(election.isInactive()).to.be.false;
+        });
+    });
+
     describe('isNewPhase', () => {
 
         it('should correctly determine new phase', () => {

@@ -812,6 +812,15 @@ export default class Election {
     }
 
     /**
+     * @summary checks if election is in inactive state
+     * @returns {boolean}
+     */
+    isInactive() {
+        const { phase } = this;
+        return ["ended", "cancelled"].some((p) => p === phase);
+    }
+
+    /**
      * @summary checks if election phase has changed
      * @returns {boolean}
      */
