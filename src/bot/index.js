@@ -191,6 +191,9 @@ import { matchNumber } from "./utils/expressions.js";
         console.log('electionUrl:', electionUrl);
         Object.entries(config).forEach(([key, val]) => typeof val !== 'function' ? console.log(key, val) : 0);
     }
+    
+    // Create a new heroku client
+    const heroku = new HerokuClient(config);
 
     /**
      * @summary main bot function
@@ -225,16 +228,17 @@ import { matchNumber } from "./utils/expressions.js";
         if (election.isStackOverflow()) config.longIdleDurationHours = 3;
         
         // Get heroku dynos data and cache it in BotConfig
-        const heroku = new HerokuClient(config);
         config.herokuDynos = await heroku.getDynos();
+        console.log('Heroku dynos: ', config.herokuDynos?.map(({ type, size, quantity }) => `${type}: ${size.toLowerCase()} (${quantity})`).join(', '));
         
         // If is in production mode, and is an active election,
         //   scale Heroku dyno to paid if it's using free dynos only
         if (!config.debug && election.isActive()) {
-            const hasPaidDyno = config.herokuDynos?.some(dyno => /^free$/i.test(dyno.size));
+            const hasPaidDyno = config.herokuDynos?.some(({size}) => /free/i.test(size));
 
             // Scale Heroku dyno to hobby (restarts app)
             if (!hasPaidDyno) {
+                console.log('Scaling to Heroku hobby dyno...');
                 await heroku.scaleHobby();
             }
         }
