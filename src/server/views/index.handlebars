@@ -127,10 +127,10 @@
         </aside>
     </section>
 
+    {{#with botconfig}}
     <section>
         <aside>
             <h2>Bot Config</h2>
-            {{#with botconfig}}
             <table>
                 <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
                 <tr><td>scriptInitDate</td><td>{{utcTimestamp scriptInitDate}} <span class="relativetime" title="{{utcTimestamp scriptInitDate}}"></span></td></tr>
@@ -158,12 +158,26 @@
                 <tr><td>flags</td><td>{{> deep flags}}</td></tr>
                 <tr><td>herokuDynos</td><td>{{> deep herokuDynos}}</td></tr>
             </table>
-            {{/with}}
+        </aside>
+        
+        <aside>
+            <h2>Hosting (Heroku Dynos)</h2>
+            <table>
+                {{#each herokuDynos}}
+                <tr>
+                    <td>{{@key}}</td>
+                    {{#if (isObj this)}}
+                    <td>{{> deep this}}</td>
+                    {{else}}
+                    <td>{{this}}</td>
+                    {{/if}}
+                </tr>
+                {{/each}}
+            </table>
         </aside>
 
         <aside>
             <h2>Room Activity</h2>
-            {{#with botconfig}}
             <table>
                 <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} <span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
                 <tr><td>lastMessageTime</td>
@@ -210,9 +224,9 @@
                 </td></tr>
                 <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
             </table>
-            {{/with}}
         </aside>
     </section>
+    {{/with}}
 
 </main>
 
