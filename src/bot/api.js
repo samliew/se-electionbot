@@ -1,5 +1,6 @@
 import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
 import { getSeconds } from "./utils/dates.js";
+import { mergeMaps } from "./utils/maps.js";
 
 /**
  * @typedef {import("./election").default} Election
@@ -232,18 +233,20 @@ export const getModerators = async (config, site, page = 1) => {
         /** @type {ApiWrapper<User>} */(await fetchUrl(config, modURL, true)) || {},
         () => getModerators(config, site, page),
         async ({ items = [], has_more }) => {
-            if (has_more) {
-                const otherItems = await getModerators(config, site, page + 1);
-                return [...items, ...otherItems];
-            }
 
             /** @type {Map<number, User>} */
             const mods = new Map();
+
             items.forEach((user) => {
                 const { account_id, is_employee, user_id } = user;
                 if (is_employee || account_id === -1) return;
                 mods.set(user_id, user);
             });
+
+            if (has_more) {
+                const otherItems = await getModerators(config, site, page + 1);
+                return mergeMaps(mods, otherItems);
+            }
 
             if (config.verbose) console.log(`API - ${getModerators.name}\n`, mods);
 
