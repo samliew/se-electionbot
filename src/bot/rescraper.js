@@ -158,13 +158,14 @@ export default class Rescraper {
                 console.log(`RESCRAPER - Winners announced.`);
             }
 
-            // Election is over but there are no winners
+            // Election just over, there are no winners yet (waiting for CM)
             else if (election.phase === 'ended' && election.numWinners === 0) {
 
                 // Reduce scrape interval further
-                config.scrapeIntervalMins = 0.25;
+                config.scrapeIntervalMins = 0.2;
 
-                if (config.debugOrVerbose) {
+                // Log this the first time only
+                if (election.prev.phase !== 'ended' && config.debugOrVerbose) {
                     console.log(`RESCRAPER - Election ended with no results - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
                 }
             }
@@ -245,6 +246,7 @@ export default class Rescraper {
      */
     start() {
         const { config } = this;
+        
         this.timeout = setTimeout(this.rescrape.bind(this), config.scrapeIntervalMins * 60000);
 
         if (config.debugOrVerbose) {
