@@ -463,10 +463,6 @@ export const joinRoomCommand = async (config, client, content) => {
     }
 
     const status = await client.joinRoom(+roomId);
-    // https://github.com/samliew/chatexchange/pull/174
-    // TODO: remove when the PR is merged
-    if (status) { client.getRoom(+roomId); }
-
     const roomURL = makeURL(roomId, `https://chat.${config.chatDomain}/rooms/${roomId}`);
 
     return status ? `Joined room ${roomURL}` : `Failed to join room ${roomId}`;

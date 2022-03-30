@@ -10,10 +10,10 @@
 
 <main class="dashboard">
 
+    {{#with election}}
     <section>
         <aside>
             <h2>Election Info</h2>
-            {{#with election}}
             <table>
                 <tr><td>Last updated</td><td>{{utcTimestamp updated}} <span class="relativetime" title="{{utcTimestamp updated}}"></span></td></tr>
                 <tr><td>Site</td><td>{{siteName}}</td></tr>
@@ -64,32 +64,35 @@
             </table>
 
             <h2>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len arrNominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
-            <table>
-                <tr>
-                    {{#if arrNominees.length}}
-                    <td>{{> nominees arrNominees }}</td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
-            </table>
+            {{#if (len arrNominees)}}
+                {{> nominees arrNominees }}
+            {{else}}
+                <table>
+                    <tr><td></td></tr>
+                </table>
+            {{/if}}
 
             <h2>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{len withdrawnNominees}} total</span></h2>
+            {{#if (len withdrawnNominees)}}
+                {{> nominees (values withdrawnNominees) }}
+            {{else}}
+                <table>
+                    <tr><td></td></tr>
+                </table>
+            {{/if}}
+        </aside>
+    </section>
+    {{/with}}
+    
+    {{#with election}}
+    <section>
+        <aside>
+            <h2>Mods &amp; Badges</h2>
             <table>
-                <tr>
-                    {{#if (len withdrawnNominees)}}
-                    <td>{{> nominees (values withdrawnNominees) }}</td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
-            </table>
-
-            <table>
-                <tr><td>Current Mods <span class="small-count" data-prefix="(" data-suffix=")">{{currentSiteMods.length}}</span></td>
-                    {{#if currentSiteMods.length}}
+                <tr><td><a href="{{ election.hostname }}/users?tab=moderators">Current Mods</a> <span class="small-count" data-prefix="(" data-suffix=")">{{len @root/data/currentSiteMods}}</span></td>
+                    {{#if @root/data/currentSiteMods.length}}
                     <td><ul class="list">
-                        {{#each currentSiteMods}}
+                        {{#each @root/data/currentSiteMods}}
                         <li class="item"><a href="{{this.link}}">{{{this.display_name}}}</a></li>
                         {{/each}}
                     </ul></td>
@@ -123,14 +126,14 @@
                     </td>
                 </tr>
             </table>
-            {{/with}}
         </aside>
     </section>
+    {{/with}}
 
+    {{#with botconfig}}
     <section>
         <aside>
             <h2>Bot Config</h2>
-            {{#with botconfig}}
             <table>
                 <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
                 <tr><td>scriptInitDate</td><td>{{utcTimestamp scriptInitDate}} <span class="relativetime" title="{{utcTimestamp scriptInitDate}}"></span></td></tr>
@@ -144,6 +147,7 @@
                 </td></tr>
                 <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
                 <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
+                <tr><td>electionAfterpartyMins</td><td>{{electionAfterpartyMins}} mins</td></tr>
                 <tr><td>duplicateResponseText</td><td>{{duplicateResponseText}}</td></tr>
                 <tr><td>maxMessageLength</td><td>{{maxMessageLength}}</td></tr>
                 <tr><td>maxMessageParts</td><td>{{maxMessageParts}}</td></tr>
@@ -156,12 +160,32 @@
                 <tr><td>repoUrl</td><td>{{{url repoUrl}}}</td></tr>
                 <tr><td>flags</td><td>{{> deep flags}}</td></tr>
             </table>
-            {{/with}}
         </aside>
+        
+        {{#if herokuDynos.length}}
+        <aside>
+            <h2>Hosting (Heroku Dynos)</h2>
+            <table>
+                {{#each herokuDynos}}
+                <tr>
+                    <td>{{@key}}</td>
+                    {{#if (isObj this)}}
+                    <td>{{> deep this}}</td>
+                    {{else}}
+                    <td>{{this}}</td>
+                    {{/if}}
+                </tr>
+                {{/each}}
+            </table>
+        </aside>
+        {{/if}}
+    </section>
+    {{/with}}
 
+    {{#with botconfig}}
+    <section>
         <aside>
             <h2>Room Activity</h2>
-            {{#with botconfig}}
             <table>
                 <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} <span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
                 <tr><td>lastMessageTime</td>
@@ -208,9 +232,9 @@
                 </td></tr>
                 <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
             </table>
-            {{/with}}
         </aside>
     </section>
+    {{/with}}
 
 </main>
 

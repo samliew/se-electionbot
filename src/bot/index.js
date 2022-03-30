@@ -40,6 +40,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
+import { HerokuClient } from "./herokuClient.js";
 import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
 import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
@@ -190,6 +191,9 @@ import { matchNumber } from "./utils/expressions.js";
         console.log('electionUrl:', electionUrl);
         Object.entries(config).forEach(([key, val]) => typeof val !== 'function' ? console.log(key, val) : 0);
     }
+    
+    // Create a new heroku client
+    const heroku = new HerokuClient(config);
 
     /**
      * @summary main bot function
@@ -222,10 +226,30 @@ import { matchNumber } from "./utils/expressions.js";
 
         // Reduced longIdleDurationHours if it's a Stack Overflow election
         if (election.isStackOverflow()) config.longIdleDurationHours = 3;
+        
+        // Get heroku dynos data and cache it in BotConfig
+        config.herokuDynos = await heroku.getDynos();
+        console.log('Heroku dynos: ', config.herokuDynos?.map(({ type, size, quantity }) => `${type}: ${size.toLowerCase()} (${quantity})`).join(', '));
+        
+        // If is in production mode, and is an active election,
+        //   scale Heroku dyno to paid if it's using free dynos only
+        if (!config.debug && election.isActive()) {
+            const hasPaidDyno = config.herokuDynos?.some(({size}) => /free/i.test(size));
+
+            // Scale Heroku dyno to hobby (restarts app)
+            if (!hasPaidDyno) {
+                console.log('Scaling to Heroku hobby dyno...');
+                await heroku.scaleHobby();
+            }
+        }
 
         // If is in production mode, default chatroom not set, and is an active election,
         //   auto-detect and set chat domain & room to join
         if (!config.debugOrVerbose && defaultChatNotSet && election.isActive()) {
+            
+            // Store original values so we know if it's changed
+            const originalChatDomain = config.chatDomain;
+            const originalChatRoomId = config.chatRoomId;
 
             // Election chat room found on election page
             if (election.chatRoomId && election.chatDomain) {
@@ -240,10 +264,13 @@ import { matchNumber } from "./utils/expressions.js";
                     config.chatDomain = defaultRoom.chatDomain;
                 }
             }
-
-            console.log(`INIT - App is in production with active election - redirected to live room:
-            DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
-            ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
+            
+            // If chat domain or room changed, warn and log new values
+            if (originalChatDomain !== config.chatDomain || originalChatRoomId !== config.chatRoomId) {
+                console.log(`INIT - App is in production with active election - redirected to live room:
+                DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
+                ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
+            }
         }
 
         // Add non-mod room owners to list of admins (privileged users)

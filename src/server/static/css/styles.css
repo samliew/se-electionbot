@@ -30,6 +30,7 @@ h5,
 h6 {
   margin: 1.3em 0 0.5em;
 }
+
 h1:first-child {
   margin-top: 10px;
 }
@@ -38,6 +39,7 @@ h1 {
   font-size: 1.4em;
   color: var(--heading-colour);
 }
+
 h2 {
   font-size: 1.2em;
   color: var(--heading-colour);
@@ -46,9 +48,11 @@ h2 {
 nav {
   font-size: var(--smaller-font-size);
 }
+
 nav .navitem {
   text-decoration: none;
 }
+
 nav .navitem:last-child {
   font-weight: bold;
 }
@@ -58,6 +62,7 @@ ul {
   padding-inline-start: 20px;
   padding-left: 20px;
 }
+
 li {
   margin: 0.2em 0;
 }
@@ -65,6 +70,7 @@ li {
 a {
   color: var(--link-colour);
 }
+
 a:visited {
   color: var(--text-colour);
 }
@@ -74,7 +80,7 @@ blockquote {
 }
 
 h2 + table {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 table {
@@ -82,6 +88,7 @@ table {
   width: 100%;
   margin: 2em 0;
 }
+
 table.smaller-table {
   margin: 1em 0;
   font-size: var(--smaller-font-size);
@@ -121,11 +128,33 @@ td .list {
   font-size: var(--smaller-font-size);
 }
 
+/* Smaller tables */
+table.table-small {
+  font-size: var(--smaller-font-size);
+}
+
+table.table-small th,
+table.table-small td {
+  min-width: 0;
+  padding: 3px 8px;
+}
+
+table.table-small th:first-child,
+table.table-small td:first-child {
+  white-space: nowrap;
+}
+
 /* Nested tables */
 table.nested {
   width: calc(100% + 22px);
   margin: -7px -11px;
   font-size: var(--smaller-font-size);
+}
+
+table.table-small table.nested,
+table.nested table.nested {
+  width: calc(100% + 18px);
+  margin: -4px -9px;
 }
 
 table.nested th,
@@ -136,7 +165,7 @@ table.nested td {
 
 table.nested th:first-child,
 table.nested td:first-child {
-  width: 30%;
+  width: 20%;
 }
 
 table.nested th:last-child,
@@ -168,12 +197,15 @@ form {
   max-width: 800px;
   margin: 2em 0 3em;
 }
+
 form * {
   font-size: 0.9rem;
 }
+
 form label {
   font-weight: bold;
 }
+
 form input,
 form textarea {
   display: block;
@@ -183,17 +215,21 @@ form textarea {
   border-radius: 5px;
   border: 1px solid var(--border-color);
 }
+
 form input::placeholder {
   color: #ccc;
   font-size: var(--smaller-font-size);
 }
+
 form textarea {
   min-height: 130px;
 }
+
 form button {
   padding: 8px 20px;
   font-size: 1em;
 }
+
 form .form-controls {
   margin: 1.5em 0;
 }
@@ -205,14 +241,17 @@ form .form-controls {
   align-items: start;
   max-width: 1400px;
 }
+
 .dashboard section {
   flex: 1 1 calc(33% - var(--margin-size));
   max-width: 48%;
   margin-right: var(--margin-size);
 }
+
 .dashboard section:last-child {
   margin-right: 0;
 }
+
 .dashboard section aside {
   margin-bottom: var(--margin-size);
 }
@@ -223,10 +262,12 @@ form .form-controls {
   border-radius: 5px;
   font-size: 1.15em;
 }
+
 .result.success {
   color: darkgreen;
   background-color: rgb(248, 255, 238);
 }
+
 .result.error {
   color: indianred;
   background-color: rgb(255, 238, 238);
@@ -236,6 +277,7 @@ form .form-controls {
   font-weight: bold;
   color: green;
 }
+
 .falsy {
   font-weight: bold;
   color: indianred;
@@ -245,13 +287,16 @@ form .form-controls {
 .relativetime {
   white-space: nowrap;
 }
+
 .relativetime {
   font-style: italic;
 }
+
 .relativetime:not(:empty)::before {
   content: "(";
   font-style: normal;
 }
+
 .relativetime:not(:empty)::after {
   content: ")";
   font-style: normal;
@@ -271,6 +316,7 @@ form .form-controls {
 [data-prefix]:before {
   content: attr(data-prefix);
 }
+
 [data-suffix]:after {
   content: attr(data-suffix);
 }
@@ -278,9 +324,11 @@ form .form-controls {
 .mt10 {
   margin-top: 10px;
 }
+
 .mt20 {
   margin-top: 20px;
 }
+
 .mt40 {
   margin-top: 40px;
 }
@@ -326,12 +374,16 @@ form .form-controls {
     margin-bottom: 0;
   }
 
-  table.nested {
+  table.nested,
+  table.nested table.nested {
     margin: 0;
   }
+
+  table thead,
   table.nested thead {
     display: none;
   }
+
   table.nested tr {
     display: flex;
     flex-wrap: wrap;
@@ -373,6 +425,7 @@ form .form-controls {
   td:first-child {
     font-weight: bold;
   }
+
   th:last-child,
   td:last-child {
     min-width: 0;
