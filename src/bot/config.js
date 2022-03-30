@@ -63,6 +63,12 @@ export class BotConfig {
         const url = process.env.SCRIPT_HOSTNAME?.trim().replace(/\/?$/, '') || '';
         return url.startsWith('http') ? url : '';
     }
+    
+    /**
+     * @summary minutes to wait after an election to scale back dynos (which restarts bot and leaves room)
+     * @type {number}
+     */
+    electionAfterpartyMins = parseNumEnv("election_afterparty_mins", 30);
 
     /* Low activity count variables */
 

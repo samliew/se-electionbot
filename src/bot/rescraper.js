@@ -202,13 +202,19 @@ export default class Rescraper {
                 // Increase scrape interval since we don't need to scrape often
                 config.scrapeIntervalMins = 10;
 
-                // Scale Heroku dynos to free (restarts app)
-                const heroku = new HerokuClient(config);
-                await heroku.scaleFree();
-
                 if (config.debugOrVerbose) {
                     console.log(`RESCRAPER - Scrape interval increased to ${config.scrapeIntervalMins}.`);
                 }
+
+                // Stay in room a while longer
+                const stayInRoomFor = config.electionAfterpartyMins * 60 * 1000;
+                setTimeout(async function() {
+                
+                    // Scale Heroku dynos to free (restarts app)
+                    const heroku = new HerokuClient(config);
+                    await heroku.scaleFree();
+                    
+                }, stayInRoomFor);
             }
 
             this.start();
