@@ -133,10 +133,15 @@ table.table-small {
   font-size: var(--smaller-font-size);
 }
 
-table.small th,
-table.small td {
+table.table-small th,
+table.table-small td {
   min-width: 0;
   padding: 3px 8px;
+}
+
+table.table-small th:first-child,
+table.table-small td:first-child {
+  white-space: nowrap;
 }
 
 /* Nested tables */
@@ -146,6 +151,7 @@ table.nested {
   font-size: var(--smaller-font-size);
 }
 
+table.table-small table.nested,
 table.nested table.nested {
   width: calc(100% + 18px);
   margin: -4px -9px;
