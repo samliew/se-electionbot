@@ -9,5 +9,6 @@ import BotConfig from "../../src/bot/config.js";
  */
 export const getMockBotConfig = (overrides = {}) => {
     const config = new BotConfig("stackoverflow.com", 190503);
+    config.electionAfterpartyMins = 0; // Otherwise tests take too long to run
     return Object.assign(config, overrides);
 };
