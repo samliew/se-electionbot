@@ -164,7 +164,7 @@ export class HerokuClient {
     };
 
     /**
-     * @summary scale app's dynos to free
+     * @summary scale app's dynos to hobby
      * @param {"web"|"worker"} [type] process type to scale
      * @return {Promise<boolean>}
      */

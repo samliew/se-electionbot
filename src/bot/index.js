@@ -40,6 +40,7 @@ import {
     isSayingBotIsInsane,
     isThankingTheBot
 } from "./guards.js";
+import { HerokuClient } from "./herokuClient.js";
 import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
 import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
@@ -222,10 +223,31 @@ import { matchNumber } from "./utils/expressions.js";
 
         // Reduced longIdleDurationHours if it's a Stack Overflow election
         if (election.isStackOverflow()) config.longIdleDurationHours = 3;
+        
+        // If is in production mode, and is an active election,
+        //   scale Heroku dyno to paid if it's using free dynos only
+        if (!config.debug && election.isActive()) {
+            
+            // Should we cache this in memory so we don't have to make a request every time we want to check the dyno type?
+            const heroku = new HerokuClient(config);
+            
+            // Get heroku dynos
+            const dynos = await heroku.getDynos();
+            const hasPaidDyno = dynos?.some(dyno => dyno.size !== 'free');
+
+            // Scale Heroku dyno to hobby (restarts app)
+            if (!hasPaidDyno) {
+                await heroku.scaleHobby();
+            }
+        }
 
         // If is in production mode, default chatroom not set, and is an active election,
         //   auto-detect and set chat domain & room to join
         if (!config.debugOrVerbose && defaultChatNotSet && election.isActive()) {
+            
+            // Store original values so we know if it's changed
+            const originalChatDomain = config.chatDomain;
+            const originalChatRoomId = config.chatRoomId;
 
             // Election chat room found on election page
             if (election.chatRoomId && election.chatDomain) {
@@ -240,10 +262,13 @@ import { matchNumber } from "./utils/expressions.js";
                     config.chatDomain = defaultRoom.chatDomain;
                 }
             }
-
-            console.log(`INIT - App is in production with active election - redirected to live room:
-            DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
-            ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
+            
+            // If chat domain or room changed, warn and log new values
+            if (originalChatDomain !== config.chatDomain || originalChatRoomId !== config.chatRoomId) {
+                console.log(`INIT - App is in production with active election - redirected to live room:
+                DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
+                ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
+            }
         }
 
         // Add non-mod room owners to list of admins (privileged users)
