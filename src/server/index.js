@@ -180,6 +180,7 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteHostname: ELECTION.siteHostname,
                     election: ELECTION,
+                    currentSiteMods: [...ELECTION.currentSiteMods],
                     nomineesInRoom,
                     botconfig: {
                         // overrides should come after the object spread

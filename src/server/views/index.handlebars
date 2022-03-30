@@ -86,10 +86,10 @@
             </table>
 
             <table>
-                <tr><td>Current Mods <span class="small-count" data-prefix="(" data-suffix=")">{{currentSiteMods.length}}</span></td>
-                    {{#if currentSiteMods.length}}
+                <tr><td>Current Mods <span class="small-count" data-prefix="(" data-suffix=")">{{len @root/data/currentSiteMods}}</span></td>
+                    {{#if @root/data/currentSiteMods.length}}
                     <td><ul class="list">
-                        {{#each currentSiteMods}}
+                        {{#each @root/data/currentSiteMods}}
                         <li class="item"><a href="{{this.link}}">{{{this.display_name}}}</a></li>
                         {{/each}}
                     </ul></td>
