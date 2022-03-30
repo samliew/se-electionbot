@@ -10,10 +10,10 @@
 
 <main class="dashboard">
 
+    {{#with election}}
     <section>
         <aside>
             <h2>Election Info</h2>
-            {{#with election}}
             <table>
                 <tr><td>Last updated</td><td>{{utcTimestamp updated}} <span class="relativetime" title="{{utcTimestamp updated}}"></span></td></tr>
                 <tr><td>Site</td><td>{{siteName}}</td></tr>
@@ -80,9 +80,16 @@
                     <tr><td></td></tr>
                 </table>
             {{/if}}
-
+        </aside>
+    </section>
+    {{/with}}
+    
+    {{#with election}}
+    <section>
+        <aside>
+            <h2>Mods &amp; Badges</h2>
             <table>
-                <tr><td>Current Mods <span class="small-count" data-prefix="(" data-suffix=")">{{len @root/data/currentSiteMods}}</span></td>
+                <tr><td><a href="{{ election.hostname }}/users?tab=moderators">Current Mods</a> <span class="small-count" data-prefix="(" data-suffix=")">{{len @root/data/currentSiteMods}}</span></td>
                     {{#if @root/data/currentSiteMods.length}}
                     <td><ul class="list">
                         {{#each @root/data/currentSiteMods}}
@@ -119,9 +126,9 @@
                     </td>
                 </tr>
             </table>
-            {{/with}}
         </aside>
     </section>
+    {{/with}}
 
     {{#with botconfig}}
     <section>
@@ -172,7 +179,11 @@
             </table>
         </aside>
         {{/if}}
+    </section>
+    {{/with}}
 
+    {{#with botconfig}}
+    <section>
         <aside>
             <h2>Room Activity</h2>
             <table>
