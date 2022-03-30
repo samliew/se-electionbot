@@ -224,16 +224,14 @@ import { matchNumber } from "./utils/expressions.js";
         // Reduced longIdleDurationHours if it's a Stack Overflow election
         if (election.isStackOverflow()) config.longIdleDurationHours = 3;
         
+        // Get heroku dynos data and cache it in BotConfig
+        const heroku = new HerokuClient(config);
+        config.herokuDynos = await heroku.getDynos();
+        
         // If is in production mode, and is an active election,
         //   scale Heroku dyno to paid if it's using free dynos only
         if (!config.debug && election.isActive()) {
-            
-            // Should we cache this in memory so we don't have to make a request every time we want to check the dyno type?
-            const heroku = new HerokuClient(config);
-            
-            // Get heroku dynos
-            const dynos = await heroku.getDynos();
-            const hasPaidDyno = dynos?.some(dyno => dyno.size !== 'free');
+            const hasPaidDyno = config.herokuDynos?.some(dyno => dyno.size !== 'free');
 
             // Scale Heroku dyno to hobby (restarts app)
             if (!hasPaidDyno) {
