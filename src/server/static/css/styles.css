@@ -128,6 +128,12 @@ table.nested {
   font-size: var(--smaller-font-size);
 }
 
+
+table.nested table.nested {
+  width: calc(100% + 18px);
+  margin: -4px -9px;
+}
+
 table.nested th,
 table.nested td {
   min-width: 0;
@@ -136,7 +142,7 @@ table.nested td {
 
 table.nested th:first-child,
 table.nested td:first-child {
-  width: 30%;
+  width: 20%;
 }
 
 table.nested th:last-child,
