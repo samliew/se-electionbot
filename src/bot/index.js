@@ -231,7 +231,7 @@ import { matchNumber } from "./utils/expressions.js";
         // If is in production mode, and is an active election,
         //   scale Heroku dyno to paid if it's using free dynos only
         if (!config.debug && election.isActive()) {
-            const hasPaidDyno = config.herokuDynos?.some(dyno => dyno.size !== 'free');
+            const hasPaidDyno = config.herokuDynos?.some(dyno => /^free$/i.test(dyno.size));
 
             // Scale Heroku dyno to hobby (restarts app)
             if (!hasPaidDyno) {

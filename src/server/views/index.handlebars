@@ -156,10 +156,10 @@
                 <tr><td>feedbackUrl</td><td>{{{url feedbackUrl}}}</td></tr>
                 <tr><td>repoUrl</td><td>{{{url repoUrl}}}</td></tr>
                 <tr><td>flags</td><td>{{> deep flags}}</td></tr>
-                <tr><td>herokuDynos</td><td>{{> deep herokuDynos}}</td></tr>
             </table>
         </aside>
         
+        {{#if herokuDynos.length}}
         <aside>
             <h2>Hosting (Heroku Dynos)</h2>
             <table>
@@ -175,6 +175,7 @@
                 {{/each}}
             </table>
         </aside>
+        {{/if}}
 
         <aside>
             <h2>Room Activity</h2>
