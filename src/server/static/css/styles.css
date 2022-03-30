@@ -128,7 +128,6 @@ table.nested {
   font-size: var(--smaller-font-size);
 }
 
-
 table.nested table.nested {
   width: calc(100% + 18px);
   margin: -4px -9px;
@@ -332,9 +331,12 @@ form .form-controls {
     margin-bottom: 0;
   }
 
-  table.nested {
+  table.nested,
+  table.nested table.nested {
     margin: 0;
   }
+  
+  table thead,
   table.nested thead {
     display: none;
   }
