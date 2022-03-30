@@ -64,26 +64,22 @@
             </table>
 
             <h2>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len arrNominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
-            <table>
-                <tr>
-                    {{#if arrNominees.length}}
-                    <td>{{> nominees arrNominees }}</td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
-            </table>
+            {{#if (len arrNominees)}}
+                {{> nominees arrNominees }}
+            {{else}}
+                <table>
+                    <tr><td></td></tr>
+                </table>
+            {{/if}}
 
             <h2>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{len withdrawnNominees}} total</span></h2>
-            <table>
-                <tr>
-                    {{#if (len withdrawnNominees)}}
-                    <td>{{> nominees (values withdrawnNominees) }}</td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
-            </table>
+            {{#if (len withdrawnNominees)}}
+                {{> nominees (values withdrawnNominees) }}
+            {{else}}
+                <table>
+                    <tr><td></td></tr>
+                </table>
+            {{/if}}
 
             <table>
                 <tr><td>Current Mods <span class="small-count" data-prefix="(" data-suffix=")">{{len @root/data/currentSiteMods}}</span></td>
