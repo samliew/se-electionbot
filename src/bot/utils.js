@@ -62,7 +62,7 @@ export const textify = (html) => html ? entities.decode(sanitize(html)) : "";
 export const markdownify = (text, tags = {}) => {
     return Object.entries(tags)
         .reduce(
-            (acc, [tag, replacement]) => acc.replace(new RegExp(`<\\/?${tag}>`, "g"), replacement),
+            (acc, [tag, replacement]) => acc.replace(new RegExp(`<\\/?${tag}(?:\\s*?\\/)?>`, "g"), replacement),
             text
         );
 };
@@ -93,12 +93,12 @@ export const htmlToChatMarkdown = (content) => {
         markdownify(
             sanitize(
                 content.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, makeURL("$2", "$1")).trim(),
-                { allowedTags: ["b", "i", "strike"] }
+                { allowedTags: ["b", "br", "i", "strike"] }
             ), {
             "b": "**",
             "i": "*",
             "strike": "---",
-            "br": "\\n"
+            "br": "\n"
         })
     );
 };
