@@ -180,6 +180,16 @@ export class HerokuClient {
      */
     async getDynos() {
         const { _client, _appName } = this;
-        return _client.get(`/apps/${_appName}/formation`);
+
+        /** @type {Formation[]} */
+        const formations = [];
+
+        try {
+            formations.push(...await _client.get(`/apps/${_appName}/formation`));
+        } catch (error) {
+            _client.options.logger?.log(error);
+        }
+
+        return formations;
     };
 }
