@@ -40,9 +40,9 @@ export class BotConfig {
 
     /**
      * @summary cached Heroku dyno data, since it can't change while the application is running (has to restart on scale)
-     * @type {object[]}
+     * @type {import("./herokuClient.js").Formation[]}
      */
-    herokuDynos;
+    herokuDynos = [];
 
     /**
      * @param {Host} host chat host server
