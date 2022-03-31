@@ -6,6 +6,7 @@ import { JSDOM } from "jsdom";
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
 import { getUserAssociatedAccounts } from "./api.js";
+import { validateChatTranscriptURL } from "./utils/chat.js";
 import { dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "./utils/dates.js";
 import { matchNumber, safeCapture } from "./utils/expressions.js";
 import { numericNullable } from "./utils/objects.js";
@@ -294,7 +295,7 @@ export const fetchChatTranscript = async (config, url) => {
     const messages = [];
 
     // Validate chat transcript url
-    if (!/^https:\/\/chat\.stack(?:exchange|overflow)\.com\/transcript\/\d+/i.test(url)) return messages;
+    if (!validateChatTranscriptURL(url)) return messages;
 
     console.log('Fetching chat transcript:', url);
 
