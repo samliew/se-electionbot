@@ -3,6 +3,8 @@ import { allMatch, noneMatch, someMatch } from "./utils/expressions.js";
 /**
  * @typedef {import("chatexchange/dist/User").default} User
  * @typedef {import("chatexchange/dist/Browser").IProfileData} ChatProfile
+ *
+ * @typedef {(text: string) => boolean} MessageGuard
  */
 
 /**
@@ -481,6 +483,16 @@ export const isAskedHowManyCandidatesInTheRoom = (text) => {
     return someMatch([
         /^how many (?:candidate|nominee)s are\s+(?:here|in\s+th(?:e|is)\s+room)(?:\?|$)/i,
         /^are(?:\s+there\s+)?any\s+(?:candidate|nominee)s\s+(?:here|in\s+th(?:e|is)\s+room)(?:\?|$)/i
+    ], text);
+};
+
+/**
+ * @summary checks if a message is asking what the bot can do
+ * @type {MessageGuard}
+ */
+export const isAskedWhatBotCanDo = (text) => {
+    return someMatch([
+        /^what\s+can\s+(?:you|(?:the\s+)?bot)\s+(?:do|answer|help(?:\s+(?:me|us))?(?:\s+with)?)/i
     ], text);
 };
 
