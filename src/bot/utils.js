@@ -163,8 +163,8 @@ export const fetchUrl = async (_config, url, json = false) => {
 
         return data;
     }
-    catch ({ code, message, errno }) {
-        console.error(`fetch error - ${url}: ${{ code, message, errno }}`);
+    catch (error) {
+        console.error(`fetch error - ${url}:\n${error}`);
         return null;
     }
 };
