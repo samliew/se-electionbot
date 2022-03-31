@@ -89,7 +89,7 @@
         <aside>
             <h2>Mods &amp; Badges</h2>
             <table>
-                <tr><td><a href="{{ election.hostname }}/users?tab=moderators">Current Mods</a> <span class="small-count" data-prefix="(" data-suffix=")">{{len @root/data/currentSiteMods}}</span></td>
+                <tr><td><a href="{{getter @root/data/election "siteUrl"}}/users?tab=moderators">Current Mods</a> <span class="small-count" data-prefix="(" data-suffix=")">{{len @root/data/currentSiteMods}}</span></td>
                     {{#if @root/data/currentSiteMods.length}}
                     <td><ul class="list">
                         {{#each @root/data/currentSiteMods}}
