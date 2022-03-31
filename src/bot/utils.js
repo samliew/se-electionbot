@@ -97,7 +97,8 @@ export const htmlToChatMarkdown = (content) => {
             ), {
             "b": "**",
             "i": "*",
-            "strike": "---"
+            "strike": "---",
+            "br": "\\n"
         })
     );
 };
