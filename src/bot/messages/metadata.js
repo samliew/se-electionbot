@@ -8,15 +8,18 @@ import { formatOrdinal } from "../utils/strings.js";
  * @typedef {import("../election").default} Election
  * @typedef {import("chatexchange/dist/Browser").IProfileData} IProfileData
  * @typedef {import("chatexchange/dist/User").default} User
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  */
 
 /**
  * @summary builds a message for commonly-asked questions
- * @param {string} [helpCommand] help command
+ * @type {MessageBuilder}
  */
-export const sayCommonlyAskedQuestions = (helpCommand = `@ElectionBot help`) => {
+export const sayCommonlyAskedQuestions = async (_c, _es, _e, _t, _u, bot) => {
+    const name = await bot.name;
+
     // TODO: switch to Command class
-    return `I can answer ${getRandomFAQ()} about elections (type *${helpCommand}* for more info)`;
+    return `I can answer ${getRandomFAQ()} about elections (type *@${name.replace(/\s+/, "")} help* for more info)`;
 };
 
 /**

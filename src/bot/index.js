@@ -30,7 +30,7 @@ import {
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule,
     isAskedForFullHelp,
     isAskedForHelp,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
     isAskedWhyIsBot,
     isAskedWhyNominationRemoved,
     isBotMentioned,
@@ -45,7 +45,7 @@ import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
 import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
-import { sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
+import { sayCommonlyAskedQuestions, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
 import { sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
 import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayHowManyModsAreHere, sayWhatModsDo } from "./messages/moderators.js";
 import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElectionNotStartedYet, sayElectionSchedule, sayNextPhase } from "./messages/phases.js";
@@ -65,6 +65,7 @@ import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
 
 /**
+ * @typedef {import("chatexchange/dist/User").default} ChatUser
  * @typedef {import("./election").default} Election
  * @typedef {(Pick<Badge, "name"|"badge_id"> & { required?: boolean, type: string })} ElectionBadge
  * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
@@ -88,7 +89,8 @@ import { matchNumber } from "./utils/expressions.js";
  *  elections: Map<number, Election>,
  *  election: Election,
  *  text: string,
- *  u: User
+ *  user: User,
+ *  botUser: ChatUser
  * ) => string | Promise<string>} MessageBuilder
  */
 
@@ -473,7 +475,8 @@ import { matchNumber } from "./utils/expressions.js";
             [isAskedWhereToFindResults, sayWhereToFindElectionResults],
             [isAskedForQuestionnaireQuestion, sayQuestionnaireQuestion],
             [isAskedAboutElectionResults, sayElectionResults],
-            [isAskedAboutElectionPhaseDuration, sayElectionPhaseDuration]
+            [isAskedAboutElectionPhaseDuration, sayElectionPhaseDuration],
+            [isAskedWhatBotCanDo, sayCommonlyAskedQuestions]
         ];
 
         /** @type {[(t:string) => boolean, () => string][]} */
@@ -659,7 +662,7 @@ import { matchNumber } from "./utils/expressions.js";
             if (matched) {
                 const [matcher, builder] = matched;
                 if (config.debug) console.log(`Matched response: ${matcher.name}`);
-                responseText = await builder(config, elections, election, preparedMessage, user);
+                responseText = await builder(config, elections, election, preparedMessage, user, me);
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
             else if (isAskedAboutLightbulb(preparedMessage) && config.fun) {
