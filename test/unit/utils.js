@@ -1,8 +1,28 @@
 import { expect } from "chai";
 import { asyncCacheable, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/bot/utils.js";
+import { validateChatTranscriptURL } from "../../src/bot/utils/chat.js";
 import { dateToRelativeTime } from "../../src/bot/utils/dates.js";
 import { matchNumber } from "../../src/bot/utils/expressions.js";
 import { numericNullable } from "../../src/bot/utils/objects.js";
+import { AllowedHosts } from "chatexchange/dist/Client.js";
+
+describe('Chat-related utils', () => {
+    describe(validateChatTranscriptURL.name, () => {
+        it('should return true for valid URLs', () => {
+            AllowedHosts.forEach((host) => {
+                const url = `https://chat.${host}/transcript/42`;
+                expect(validateChatTranscriptURL(url)).to.be.true;
+            });
+        });
+
+        it('should return false on invalid URLs', () => {
+            AllowedHosts.forEach((host) => {
+                const url = `${host}/rooms/42`;
+                expect(validateChatTranscriptURL(url)).to.be.false;
+            })
+        });
+    });
+});
 
 describe('RegExp-related utils', () => {
     describe('matchNumber', () => {

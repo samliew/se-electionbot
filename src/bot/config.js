@@ -40,9 +40,9 @@ export class BotConfig {
 
     /**
      * @summary cached Heroku dyno data, since it can't change while the application is running (has to restart on scale)
-     * @type {object[]}
+     * @type {import("./herokuClient.js").Formation[]}
      */
-    herokuDynos;
+    herokuDynos = [];
 
     /**
      * @param {Host} host chat host server
@@ -69,7 +69,7 @@ export class BotConfig {
         const url = process.env.SCRIPT_HOSTNAME?.trim().replace(/\/?$/, '') || '';
         return url.startsWith('http') ? url : '';
     }
-    
+
     /**
      * @summary minutes to wait after an election to scale back dynos (which restarts bot and leaves room)
      * @type {number}
@@ -209,8 +209,13 @@ export class BotConfig {
     lastActivityTime = Date.now();
     // Variable to store time of last bot sent message, for throttling and muting purposes
     lastMessageTime = 0;
-    // Variable to store last message to detect duplicate responses within a short time
+
+    /**
+     * @summary last bot message to detect duplicate responses within a short time
+     * @type {string}
+     */
     lastBotMessage = "";
+
     // Variable to track activity count in the room, to see if it reached minActivityCountThreshold
     activityCounter = 0;
     // Variable of rescrape interval of election page
@@ -417,18 +422,36 @@ export class BotConfig {
         return this;
     }
 
-    // If called without params, resets active mutes (future-dated lastMessageTime)
-    // If called with a future-dated time, is considered a mute until then
+    /**
+     * @summary updates last room message time
+     * If called without params, resets active mutes (future-dated lastMessageTime)
+     * If called with a future-dated time, is considered a mute until then
+     * @param {number} lastMessageTime ms since *nix epoch of the last message
+     * @return {BotConfig}
+     */
     updateLastMessageTime(lastMessageTime = Date.now()) {
         this.lastMessageTime = lastMessageTime;
         this.lastActivityTime = lastMessageTime;
+        return this;
     }
 
+    /**
+     * @summary updates last bot message
+     * @param {string} content message content 
+     * @param {number} lastMessageTime ms since *nix epoch of the message
+     * @return {BotConfig}
+     */
     updateLastMessage(content, lastMessageTime = Date.now()) {
         this.updateLastMessageTime(lastMessageTime);
         this.lastBotMessage = content;
+        return this;
     }
 
+    /**
+     * @summary checks if new message is the same as the old one
+     * @param {string} newContent 
+     * @returns {boolean}
+     */
     checkSameResponseAsPrevious(newContent) {
         // Unable to repost same message within 30 seconds
         return this.lastBotMessage === newContent && Date.now() - 30e4 < this.lastMessageTime;

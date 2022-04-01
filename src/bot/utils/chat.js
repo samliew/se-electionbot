@@ -32,3 +32,12 @@ export const prepareMessageForMatching = (encodedMessage, username) => {
     );
     return { decodedMessage: decoded, preparedMessage: prepared };
 };
+
+/**
+ * @summary checks if a given URL is a chat transcript URL
+ * @param {string} url URL to check
+ * @returns {boolean}
+ */
+export const validateChatTranscriptURL = (url) => {
+    return /^https:\/\/chat\.(?:meta\.)?stack(?:exchange|overflow)\.com\/transcript\/\d+/i.test(url);
+};

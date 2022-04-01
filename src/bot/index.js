@@ -191,7 +191,7 @@ import { matchNumber } from "./utils/expressions.js";
         console.log('electionUrl:', electionUrl);
         Object.entries(config).forEach(([key, val]) => typeof val !== 'function' ? console.log(key, val) : 0);
     }
-    
+
     // Create a new heroku client
     const heroku = new HerokuClient(config);
 
@@ -226,15 +226,15 @@ import { matchNumber } from "./utils/expressions.js";
 
         // Reduced longIdleDurationHours if it's a Stack Overflow election
         if (election.isStackOverflow()) config.longIdleDurationHours = 3;
-        
+
         // Get heroku dynos data and cache it in BotConfig
         config.herokuDynos = await heroku.getDynos();
-        console.log('Heroku dynos: ', config.herokuDynos?.map(({ type, size, quantity }) => `${type}: ${size.toLowerCase()} (${quantity})`).join(', '));
-        
+        console.log('Heroku dynos: ', config.herokuDynos.map(({ type, size, quantity }) => `${type}: ${size.toLowerCase()} (${quantity})`).join(', '));
+
         // If is in production mode, and is an active election,
         //   scale Heroku dyno to paid if it's using free dynos only
         if (!config.debug && election.isActive()) {
-            const hasPaidDyno = config.herokuDynos?.some(({size}) => /free/i.test(size));
+            const hasPaidDyno = config.herokuDynos.some(({ size }) => /free/i.test(size));
 
             // Scale Heroku dyno to hobby (restarts app)
             if (!hasPaidDyno) {
@@ -246,7 +246,7 @@ import { matchNumber } from "./utils/expressions.js";
         // If is in production mode, default chatroom not set, and is an active election,
         //   auto-detect and set chat domain & room to join
         if (!config.debugOrVerbose && defaultChatNotSet && election.isActive()) {
-            
+
             // Store original values so we know if it's changed
             const originalChatDomain = config.chatDomain;
             const originalChatRoomId = config.chatRoomId;
@@ -264,7 +264,7 @@ import { matchNumber } from "./utils/expressions.js";
                     config.chatDomain = defaultRoom.chatDomain;
                 }
             }
-            
+
             // If chat domain or room changed, warn and log new values
             if (originalChatDomain !== config.chatDomain || originalChatRoomId !== config.chatRoomId) {
                 console.log(`INIT - App is in production with active election - redirected to live room:

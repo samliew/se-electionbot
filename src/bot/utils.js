@@ -6,6 +6,7 @@ import { JSDOM } from "jsdom";
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
 import { getUserAssociatedAccounts } from "./api.js";
+import { validateChatTranscriptURL } from "./utils/chat.js";
 import { dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "./utils/dates.js";
 import { matchNumber, safeCapture } from "./utils/expressions.js";
 import { numericNullable } from "./utils/objects.js";
@@ -61,7 +62,7 @@ export const textify = (html) => html ? entities.decode(sanitize(html)) : "";
 export const markdownify = (text, tags = {}) => {
     return Object.entries(tags)
         .reduce(
-            (acc, [tag, replacement]) => acc.replace(new RegExp(`<\\/?${tag}>`, "g"), replacement),
+            (acc, [tag, replacement]) => acc.replace(new RegExp(`<\\/?${tag}(?:\\s*?\\/)?>`, "g"), replacement),
             text
         );
 };
@@ -92,11 +93,12 @@ export const htmlToChatMarkdown = (content) => {
         markdownify(
             sanitize(
                 content.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, makeURL("$2", "$1")).trim(),
-                { allowedTags: ["b", "i", "strike"] }
+                { allowedTags: ["b", "br", "i", "strike"] }
             ), {
             "b": "**",
             "i": "*",
-            "strike": "---"
+            "strike": "---",
+            "br": "\n"
         })
     );
 };
@@ -161,8 +163,8 @@ export const fetchUrl = async (_config, url, json = false) => {
 
         return data;
     }
-    catch ({ code, message, errno }) {
-        console.error(`fetch error - ${url}: ${{ code, message, errno }}`);
+    catch (error) {
+        console.error(`fetch error - ${url}:\n${error}`);
         return null;
     }
 };
@@ -294,7 +296,7 @@ export const fetchChatTranscript = async (config, url) => {
     const messages = [];
 
     // Validate chat transcript url
-    if (!/^https:\/\/chat\.stack(?:exchange|overflow)\.com\/transcript\/\d+/i.test(url)) return messages;
+    if (!validateChatTranscriptURL(url)) return messages;
 
     console.log('Fetching chat transcript:', url);
 
