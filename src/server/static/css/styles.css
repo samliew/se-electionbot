@@ -108,13 +108,17 @@ td {
 
 th,
 td {
-  min-width: 150px;
   vertical-align: top;
+}
+
+th:first-child,
+td:first-child {
+  white-space: nowrap;
 }
 
 th:last-child,
 td:last-child {
-  min-width: 300px;
+  min-width: 200px;
   width: 80%;
 }
 
@@ -245,6 +249,7 @@ form .form-controls {
 .dashboard section {
   flex: 1 1 calc(25% - var(--margin-size));
   margin-right: var(--margin-size);
+  max-width: 50%;
 }
 
 .dashboard section:last-child {
@@ -332,13 +337,6 @@ form .form-controls {
   margin-top: 40px;
 }
 
-.minw-0 {
-  min-width: 0;
-}
-.minw-0 + td:last-child {
-  width: auto;
-}
-
 @media (max-width: 767px) {
   body {
     padding: 20px 20px;
@@ -400,7 +398,6 @@ form .form-controls {
   .nested th,
   .nested td {
     flex: 0 1 auto;
-    min-width: 0;
     padding-left: 0;
     padding-right: 3px;
   }
@@ -420,12 +417,6 @@ form .form-controls {
   .nested th:nth-child(-n + 2),
   .nested td:nth-child(-n + 2) {
     padding-left: 10px;
-  }
-
-  .nested th:first-child,
-  .nested td:first-child {
-    flex: 0 0 100%;
-    min-width: 0;
   }
 
   th:first-child,

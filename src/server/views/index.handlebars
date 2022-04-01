@@ -168,7 +168,7 @@
             <table>
                 {{#each herokuDynos}}
                 <tr>
-                    <td class="minw-0">{{@key}}</td>
+                    <td>{{@key}}</td>
                     {{#if (isObj this)}}
                     <td>{{> deep this}}</td>
                     {{else}}
