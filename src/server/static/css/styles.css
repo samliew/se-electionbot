@@ -89,7 +89,7 @@ table {
   margin: 2em 0;
 }
 
-table.smaller-table {
+.smaller-table {
   margin: 1em 0;
   font-size: var(--smaller-font-size);
 }
@@ -129,47 +129,48 @@ td .list {
 }
 
 /* Smaller tables */
-table.table-small {
+.table-small {
   font-size: var(--smaller-font-size);
 }
 
-table.table-small th,
-table.table-small td {
+.table-small th,
+.table-small td {
   min-width: 0;
   padding: 3px 8px;
 }
 
-table.table-small th:first-child,
-table.table-small td:first-child {
+.table-small th:first-child,
+.table-small td:first-child {
   white-space: nowrap;
 }
 
 /* Nested tables */
-table.nested {
+.nested {
   width: calc(100% + 22px);
   margin: -7px -11px;
   font-size: var(--smaller-font-size);
 }
 
-table.table-small table.nested,
-table.nested table.nested {
+.table-small .nested,
+.nested .nested {
   width: calc(100% + 18px);
   margin: -4px -9px;
+  font-size: 0.9em;
 }
 
-table.nested th,
-table.nested td {
-  min-width: 0;
+.nested th,
+.nested td {
+  min-width: 40px;
   padding: 3px 8px;
 }
 
-table.nested th:first-child,
-table.nested td:first-child {
+.nested th:first-child,
+.nested td:first-child {
   width: 20%;
 }
 
-table.nested th:last-child,
-table.nested td:last-child {
+.nested th:last-child,
+.nested td:last-child {
   min-width: 0;
 }
 
@@ -331,6 +332,10 @@ form .form-controls {
   margin-top: 40px;
 }
 
+.minw-0 {
+  min-width: 0;
+}
+
 @media (max-width: 767px) {
   body {
     padding: 20px 20px;
@@ -372,49 +377,50 @@ form .form-controls {
     margin-bottom: 0;
   }
 
-  table.nested,
-  table.nested table.nested {
+  .nested,
+  .nested .nested {
     margin: 0;
   }
 
   table thead,
-  table.nested thead {
+  .nested thead {
     display: none;
   }
 
-  table.nested tr {
+  .nested tr {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
     margin: initial;
   }
 
-  table.nested th,
-  table.nested td {
+  .nested th,
+  .nested td {
     flex: 0 1 auto;
+    min-width: 0;
     padding-left: 0;
     padding-right: 3px;
   }
 
-  table.nested th::after,
-  table.nested td::after {
+  .nested th::after,
+  .nested td::after {
     content: ",";
   }
 
-  table.nested th:first-child::after,
-  table.nested td:first-child::after,
-  table.nested th:last-child::after,
-  table.nested td:last-child::after {
+  .nested th:first-child::after,
+  .nested td:first-child::after,
+  .nested th:last-child::after,
+  .nested td:last-child::after {
     content: "";
   }
 
-  table.nested th:nth-child(-n + 2),
-  table.nested td:nth-child(-n + 2) {
+  .nested th:nth-child(-n + 2),
+  .nested td:nth-child(-n + 2) {
     padding-left: 10px;
   }
 
-  table.nested th:first-child,
-  table.nested td:first-child {
+  .nested th:first-child,
+  .nested td:first-child {
     flex: 0 0 100%;
     min-width: 0;
   }
