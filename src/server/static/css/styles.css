@@ -335,6 +335,9 @@ form .form-controls {
 .minw-0 {
   min-width: 0;
 }
+.minw-0 + td:last-child {
+  width: auto;
+}
 
 @media (max-width: 767px) {
   body {
