@@ -304,21 +304,23 @@ export const getModeReport = (config) => {
 /**
  * @summary makes the bot greet the room
  * @param {BotConfig} config bot config
+ * @param {Map<number, Election>} elections site elections
  * @param {Election} election current election instance
+ * @param {ChatUser} botUser current bot user
  * @param {Room} room current room
  * @param {string} content message content
  * @returns {Promise<void>}
  */
-export const greetCommand = async (config, election, room, content) => {
+export const greetCommand = async (config, elections, election, botUser, room, content) => {
     const [, type = "idle"] = /\b(idle|busy)\b/.exec(content) || [];
 
-    /** @type {Record<"idle"|"busy", (c: BotConfig, e:Election, r:Room) => Promise<void>>} */
+    /** @type {Record<"idle"|"busy", (c: BotConfig, es:Map<number, Election>, e:Election, ub:ChatUser, r:Room) => Promise<void>>} */
     const greetingMap = {
         idle: sayIdleGreeting,
         busy: sayBusyGreeting
     };
 
-    await greetingMap[type]?.(config, election, room);
+    await greetingMap[type]?.(config, elections, election, botUser, room);
 
     config.activityCounter = 0;
 };

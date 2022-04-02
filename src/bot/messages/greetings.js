@@ -1,13 +1,16 @@
 import { partialRight } from "ramda";
 import { getNumberOfUsersEligibleToVote, getNumberOfVoters } from "../api.js";
+import { User } from "../commands/user.js";
 import { sendMessage } from "../queue.js";
 import { getRandomAnnouncement, getRandomNow } from "../random.js";
 import { makeURL, pluralize, pluralizePhrase } from "../utils.js";
+import { resolveObj } from "../utils/objects.js";
 import { formatNumber, percentify } from "../utils/strings.js";
 import { sayCommonlyAskedQuestions } from "./metadata.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig
+ * @typedef {import("chatexchange/dist/User").default} ChatUser
  * @typedef {import("../election").default} Election
  * @typedef {import("chatexchange/dist/Room").default} Room
  */
@@ -15,11 +18,13 @@ import { sayCommonlyAskedQuestions } from "./metadata.js";
 /**
  * @summary makes bot remind users that they are here
  * @param {BotConfig} config bot config
+ * @param {Map<number, Election>} elections site elections
  * @param {Election} election current election
+ * @param {ChatUser} botUser current bot user
  * @param {string} [greeting] greeting prefix
  * @returns {Promise<string>}
  */
-export const sayHI = async (config, election, greeting = 'Welcome to the election chat room! ') => {
+export const sayHI = async (config, elections, election, botUser, greeting = 'Welcome to the election chat room! ') => {
     const { arrNominees, electionUrl, phase, dateElection, apiSlug } = election;
 
     const { length } = arrNominees;
@@ -54,18 +59,21 @@ export const sayHI = async (config, election, greeting = 'Welcome to the electio
 
     const phaseText = phaseMap[phase] || "";
 
-    // Update index.js as well if this message changes
-    return `${greeting}${phaseText} ${sayCommonlyAskedQuestions()}.`;
+    return `${greeting}${phaseText} ${await sayCommonlyAskedQuestions(config, elections, election, "", new User({
+        ...await resolveObj(botUser)
+    }), botUser)}.`;
 };
 
 /**
  * @summary builds a message that sends a greeting message in an idle room
  * @param {BotConfig} config bot configuration
+ * @param {Map<number, Election>} elections site elections
  * @param {Election} election current election
+ * @param {ChatUser} botUser current bot user
  * @param {Room} room current chat room
  * @returns {Promise<void>}
  */
-export const sayIdleGreeting = async (config, election, room) => {
+export const sayIdleGreeting = async (config, elections, election, botUser, room) => {
     const { activityCounter, minActivityCountThreshold } = config;
 
     console.log(`RESCRAPER - Room is inactive with ${activityCounter} messages posted so far (min ${minActivityCountThreshold})`);
@@ -73,17 +81,19 @@ export const sayIdleGreeting = async (config, election, room) => {
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, await sayHI(config, election, getRandomAnnouncement()), null, true);
+    return sendMessage(config, room, await sayHI(config, elections, election, botUser, getRandomAnnouncement()), null, true);
 };
 
 /**
  * @summary builds a message that sends a greeting message in a busy room
  * @param {BotConfig} config bot configuration
+ * @param {Map<number, Election>} elections site elections
  * @param {Election} election current election
+ * @param {ChatUser} botUser current bot user
  * @param {Room} room current chat room
  * @returns {Promise<void>}
  */
-export const sayBusyGreeting = async (config, election, room) => {
+export const sayBusyGreeting = async (config, elections, election, botUser, room) => {
     const { activityCounter, maxActivityCountThreshold } = config;
 
     console.log(`Busy room:
@@ -93,5 +103,5 @@ export const sayBusyGreeting = async (config, election, room) => {
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, await sayHI(config, election, getRandomAnnouncement()), null, true);
+    return sendMessage(config, room, await sayHI(config, elections, election, botUser, getRandomAnnouncement()), null, true);
 };

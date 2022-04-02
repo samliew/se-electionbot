@@ -8,7 +8,7 @@ import { sayAboutElectionStatus, sayElectionIsEnding, sayElectionSchedule } from
 import { calculateScore } from "../../src/bot/score.js";
 import { capitalize } from "../../src/bot/utils.js";
 import { matchesISO8601 } from "../../src/bot/utils/expressions.js";
-import { getMockBotConfig } from "../mocks/bot.js";
+import { getMockBotConfig, getMockBotUser } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
 /**
@@ -84,10 +84,11 @@ describe("Messages module", () => {
     describe('sayHI', async () => {
 
         let config = getMockBotConfig();
+        const bot = getMockBotUser();
 
         it('should not add phase info on no phase', async () => {
             const election = new Election("https://ja.stackoverflow.com/election");
-            const greeting = await sayHI(config, election);
+            const greeting = await sayHI(config, new Map([[1, election]]), election, bot);
             expect(greeting).to.not.match(/is in the.*? phase/);
         });
 
@@ -99,7 +100,7 @@ describe("Messages module", () => {
             const election = new Election(electionLink, 12);
             election.phase = phase;
 
-            const greeting = await sayHI(config, election);
+            const greeting = await sayHI(config, new Map([[12, election]]), election, bot);
             expect(greeting).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
         });
 
@@ -107,7 +108,7 @@ describe("Messages module", () => {
             const override = "Hi all!";
 
             const election = new Election("https://pt.stackoverflow.com/election");
-            const greeting = await sayHI(config, election, override);
+            const greeting = await sayHI(config, new Map([[1, election]]), election, bot, override);
 
             expect(greeting).to.match(new RegExp(`^${override}`));
         });

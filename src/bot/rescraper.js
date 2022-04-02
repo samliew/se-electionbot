@@ -7,6 +7,7 @@ import { makeURL } from "./utils.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
+ * @typedef {import("chatexchange").default} Client
  * @typedef {import("./election.js").default} Election
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("./announcement.js").default} Announcement
@@ -31,13 +32,17 @@ export default class Rescraper {
 
     /**
      * @param {BotConfig} config bot config
+     * @param {Client} client ChatExchange client
      * @param {Room} room chatroom the bot is connected to
+     * @param {Map<number, Election>} elections site elections
      * @param {Election} election current election
      * @param {Announcement} [announcement] announcer instance
      */
-    constructor(config, room, election, announcement) {
+    constructor(config, client, room, elections, election, announcement) {
+        this.client = client;
         this.config = config;
         this.election = election;
+        this.elections = elections;
         this.announcement = announcement;
         this.room = room;
     }
@@ -54,13 +59,15 @@ export default class Rescraper {
      * @summary Function to rescrape election data, and process election or chat room updates
      */
     async rescrape() {
-        const { election, config, announcement, room } = this;
+        const { client, elections, election, config, announcement, room } = this;
 
         if (config.debugOrVerbose) {
             console.log(`RESCRAPER - Rescrape function called.`);
         }
 
         try {
+            const bot = await client.getMe();
+
             const rescraped = await election.scrapeElection(config);
             const { status, errors } = election.validate();
 
@@ -192,10 +199,10 @@ export default class Rescraper {
 
             // If room is idle, remind users that bot is around to help
             else if (config.canIdleGreet) {
-                await sayIdleGreeting(config, election, room);
+                await sayIdleGreeting(config, elections, election, bot, room);
             }
             else if (config.canBusyGreet) {
-                await sayBusyGreeting(config, election, room);
+                await sayBusyGreeting(config, elections, election, bot, room);
             }
             // The election is over
             else if (election.isInactive() && config.scrapeIntervalMins !== 10) {
@@ -210,11 +217,11 @@ export default class Rescraper {
                 // Stay in room a while longer
                 const stayInRoomFor = config.electionAfterpartyMins * 60 * 1000;
                 setTimeout(async function() {
-                
+
                     // Scale Heroku dynos to free (restarts app)
                     const heroku = new HerokuClient(config);
                     await heroku.scaleFree();
-                    
+
                 }, stayInRoomFor);
             }
 
@@ -246,7 +253,7 @@ export default class Rescraper {
      */
     start() {
         const { config } = this;
-        
+
         this.timeout = setTimeout(this.rescrape.bind(this), config.scrapeIntervalMins * 60000);
 
         if (config.debugOrVerbose) {

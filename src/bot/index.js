@@ -330,7 +330,7 @@ import { matchNumber } from "./utils/expressions.js";
         room.only(ChatEventType.MESSAGE_POSTED);
 
         // Start rescraper utility, and initialise announcement cron jobs
-        const rescraper = new Rescraper(config, room, election);
+        const rescraper = new Rescraper(config, client, room, elections, election);
         const announcement = new Announcement(config, room, election, rescraper);
         announcement.setRescraper(rescraper);
         announcement.initAll();
@@ -339,7 +339,7 @@ import { matchNumber } from "./utils/expressions.js";
 
         const { controlRoomId } = config;
         if (controlRoomId) {
-            await joinControlRoom(config, election, client, {
+            await joinControlRoom(config, elections, election, client, {
                 controlRoomId,
                 controlledRoom: room,
                 botChatProfile: me,
@@ -572,7 +572,7 @@ import { matchNumber } from "./utils/expressions.js";
                     ["commands", /commands|usage/],
                     ["alive", /^(?:alive|awake|ping|uptime)/, config],
                     ["say", /say/, config, room, decodedMessage],
-                    ["greet", /^(?:greet|welcome)/, config, election, room, preparedMessage],
+                    ["greet", /^(?:greet|welcome)/, config, elections, election, me, room, preparedMessage],
                     ["get time", /^(?:get time|time)$/, election],
                     ["get cron", /get cron/, announcement],
                     ["test cron", /test cron/, announcement],

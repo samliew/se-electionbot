@@ -5,7 +5,7 @@ import sinon from "sinon";
 import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Rescraper from "../../src/bot/rescraper.js";
-import { getMockBotConfig } from "../mocks/bot.js";
+import { getMockBotConfig, getMockBotUser } from "../mocks/bot.js";
 
 describe('Rescraper', () => {
 
@@ -22,14 +22,18 @@ describe('Rescraper', () => {
     let election = new Election("https://stackoverflow.com/election/12");
     afterEach(() => election = new Election("https://stackoverflow.com/election/12"));
 
-    let scraper = new Rescraper(config, room, election);
-    afterEach(() => scraper = new Rescraper(config, room, election));
+    let scraper = new Rescraper(config, client, room, new Map([[12, election]]), election);
+    afterEach(() => scraper = new Rescraper(config, client, room, new Map([[12, election]]), election));
 
     let ann = new ScheduledAnnouncement(config, room, election, scraper);
     afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
 
     describe('rescrape', function () {
         this.timeout(10000);
+
+        this.beforeEach(() => {
+            sinon.stub(client, "getMe").resolves(getMockBotUser());
+        });
 
         beforeEach(() => sinon.stub(scraper, "start"));
         afterEach(() => sinon.restore());

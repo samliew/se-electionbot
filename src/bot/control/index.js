@@ -7,7 +7,7 @@ import { getUser, makeURL, roomKeepAlive } from "../utils.js";
 import { prepareMessageForMatching } from '../utils/chat.js';
 
 /**
- * @typedef {import("chatexchange/dist/User").default} User
+ * @typedef {import("chatexchange/dist/User").default} ChatUser
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange/dist/WebsocketEvent").default} WebsocketEvent
@@ -17,17 +17,18 @@ import { prepareMessageForMatching } from '../utils/chat.js';
  *
  * @summary makes the bot join the control room
  * @param {BotConfig} config bot configuration
+ * @param {Map<number, Election>} elections site elections
  * @param {Election} election current election
  * @param {Client} client ChatExchange client
  * @param {{
- *  botChatProfile: IProfileData|User,
+ *  botChatProfile: IProfileData|ChatUser,
  *  controlRoomId: number,
  *  controlledRoom: Room,
  *  allowSameRoom?: boolean
  * }} options
  * @returns {Promise<boolean>}
  */
-export const joinControlRoom = async (config, election, client, {
+export const joinControlRoom = async (config, elections, election, client, {
     controlRoomId,
     controlledRoom,
     botChatProfile,
@@ -74,7 +75,7 @@ export const joinControlRoom = async (config, election, client, {
             }
 
             if (isAskingToGreet) {
-                await sayIdleGreeting(config, election, controlledRoom);
+                await sayIdleGreeting(config, elections, election, await client.getMe(), controlledRoom);
                 return;
             }
 

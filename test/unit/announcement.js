@@ -29,8 +29,8 @@ describe('ScheduledAnnouncement', function () {
     let election = new Election("https://stackoverflow.com/election/12");
     afterEach(() => election = new Election("https://stackoverflow.com/election/12"));
 
-    let scraper = new Rescraper(config, room, election);
-    afterEach(() => scraper = new Rescraper(config, room, election));
+    let scraper = new Rescraper(config, client, room, new Map([[12, election]]), election);
+    afterEach(() => scraper = new Rescraper(config, client, room, new Map([[12, election]]), election));
 
     describe('announceCancelled', () => {
 
