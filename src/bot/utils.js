@@ -9,6 +9,7 @@ import { getUserAssociatedAccounts } from "./api.js";
 import { validateChatTranscriptURL } from "./utils/chat.js";
 import { dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "./utils/dates.js";
 import { matchNumber, safeCapture } from "./utils/expressions.js";
+import { constructUserAgent } from "./utils/fetch.js";
 import { numericNullable } from "./utils/objects.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
@@ -133,7 +134,7 @@ export const chatMarkdownToHtml = (content) => {
  * @summary Sends a GET request. This wrapper handles Stack Exchange's API backoff
  * @param {BotConfig} _config bot configuration
  * @param {string|URL} url the url to fetch
- * @param {boolean} json whether to return the response as a json object
+ * @param {boolean} [json] whether to return the response as a json object
  * @returns {Promise<any>}
  */
 export const fetchUrl = async (_config, url, json = false) => {
@@ -152,8 +153,8 @@ export const fetchUrl = async (_config, url, json = false) => {
             url: url.toString(),
             responseType: isStackExchangeApi || json ? "json" : "text",
             headers: {
-                'User-Agent': `Node.js/ElectionBot ver.${SOURCE_VERSION}; AccountEmail ${ACCOUNT_EMAIL}`,
-            },
+                "User-Agent": constructUserAgent(ACCOUNT_EMAIL, SOURCE_VERSION)
+            }
         });
 
         // Store backoff if SE API

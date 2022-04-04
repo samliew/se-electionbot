@@ -83,48 +83,58 @@
         </aside>
     </section>
     {{/with}}
-    
+
     {{#with election}}
     <section>
         <aside>
-            <h2>Mods &amp; Badges</h2>
+            <h2>Moderators <span class="small-count" data-prefix="(" data-suffix=")">{{len currentSiteMods}} total</span></h2>
+            {{#if (len @root/data/currentSiteMods)}}
+                <table>
+                   <thead>
+                        <tr>
+                            <th>Link</th>
+                            <th>Member for</th>
+                            <th>Election</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{#each @root/data/currentSiteMods}}
+                    <tr>
+                        <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
+                        <td>{{years this.creation_date}}</td>
+                        {{#with (get @root/data/scrapedSiteMods this.user_id)}}
+                        <td><a href="{{this.electionLink}}">{{this.election}}</a></td>
+                        {{/with}}
+                    </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            {{else}}
+                <table>
+                    <tr><td></td></tr>
+                </table>
+            {{/if}}
+
+            <h2>Badges</h2>
             <table>
-                <tr><td><a href="{{getter @root/data/election "siteUrl"}}/users?tab=moderators">Current Mods</a> <span class="small-count" data-prefix="(" data-suffix=")">{{len @root/data/currentSiteMods}}</span></td>
-                    {{#if @root/data/currentSiteMods.length}}
-                    <td><ul class="list">
-                        {{#each @root/data/currentSiteMods}}
-                        <li class="item"><a href="{{this.link}}">{{{this.display_name}}}</a></li>
-                        {{/each}}
-                    </ul></td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Link</th>
+                        <th>Id</th>
+                        <th>Type</th>
+                        {{#if (call "isStackOverflow")}}<th>Required</th>{{/if}}
+                    </tr>
+                </thead>
+                <tbody>
+                {{#each electionBadges}}
                 <tr>
-                    <td>Badges</td>
-                    <td>
-                        <table class="nested">
-                            <thead>
-                                <tr>
-                                    <th>Link</th>
-                                    <th>Id</th>
-                                    <th>Type</th>
-                                    {{#if (call "isStackOverflow")}}<th>Required</th>{{/if}}
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {{#each electionBadges}}
-                            <tr>
-                                <td><a href="{{getter @root/data/election "siteUrl"}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
-                                <td>{{this.badge_id}}</td>
-                                <td>{{this.type}}</td>
-                                {{#if (contextCall "isStackOverflow" @root/data/election)}}<td>{{{required this.required}}}</td>{{/if}}
-                            </tr>
-                            {{/each}}
-                            </tbody>
-                        </table>
-                    </td>
+                    <td><a href="{{getter @root/data/election "siteUrl"}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
+                    <td>{{this.badge_id}}</td>
+                    <td>{{this.type}}</td>
+                    {{#if (contextCall "isStackOverflow" @root/data/election)}}<td>{{{required this.required}}}</td>{{/if}}
                 </tr>
+                {{/each}}
+                </tbody>
             </table>
         </aside>
     </section>
@@ -161,7 +171,7 @@
                 <tr><td>flags</td><td>{{> deep flags}}</td></tr>
             </table>
         </aside>
-        
+
         {{#if herokuDynos.length}}
         <aside>
             <h2>Hosting (Heroku Dynos)</h2>
@@ -194,7 +204,7 @@
                         <tr><td>canSendFunResponse</td><td>{{{boolean canSendFunResponse}}}</td></tr>
                     </table>
                 </td></tr>
-                
+
                 <tr><td>Activity</td><td>
                     <table class="nested">
                         <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} <span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
@@ -205,7 +215,7 @@
                         <tr><td>roomReachedMaxActivityCount</td><td>{{{boolean roomReachedMaxActivityCount}}}</td></tr>
                     </table>
                 </td></tr>
-                
+
                 <tr><td>Room Idle</td><td>
                     <table class="nested">
                         <tr><td>shortIdleDurationMins</td><td>{{shortIdleDurationMins}} mins</td></tr>
@@ -227,7 +237,7 @@
                         <tr><td>lowActivityCheckMins</td><td>{{lowActivityCheckMins}} mins</td></tr>
                     </table>
                 </td></tr>
-                
+
                 <tr><td>Bot Idle</td><td>
                     <table class="nested">
                         <tr><td>lastMessageTime</td>

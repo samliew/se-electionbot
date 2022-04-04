@@ -18,6 +18,7 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("chatexchange/dist/User").default} BotUser
  * @typedef {import("./utils").ChatMessage} ChatMessage
  * @typedef {import("./utils").RoomUser} RoomUser
+ * @typedef {import("./utils/scraping").ScrapedModUser} ScrapedModUser
  */
 
 /**
@@ -357,6 +358,9 @@ export default class Election {
 
     /** @type {Map<number, ApiUser>} */
     currentSiteMods = new Map();
+
+    /** @type {Map<number, ScrapedModUser>} */
+    scrapedSiteMods = new Map();
 
     /** @type {ElectionPhase|null} */
     phase = null;

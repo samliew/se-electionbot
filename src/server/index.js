@@ -166,6 +166,7 @@ app.route('/')
                 nomineesInRoom.push(...nominees);
             }
 
+            const { scrapedSiteMods } = ELECTION;
 
             res.render('index', {
                 page: {
@@ -181,6 +182,7 @@ app.route('/')
                     siteHostname: ELECTION.siteHostname,
                     election: ELECTION,
                     currentSiteMods: [...ELECTION.currentSiteMods.values()],
+                    scrapedSiteMods,
                     nomineesInRoom,
                     botconfig: {
                         // overrides should come after the object spread

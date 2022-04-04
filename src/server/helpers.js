@@ -56,9 +56,8 @@ export const ifCond = function (v1, operator, v2, options) {
     }
 };
 
-export const get = function (model, attributeName) {
-    return model.get(attributeName);
-};
+/** @type {(m:{ get:(a:string) => unknown }, a:string) => unknown} */
+export const get = (model, key) => model.get(key);
 
 export const url = function (url, text = "") {
     if (!/^(https?:\/\/|\/)/.test(url)) return "";
@@ -133,3 +132,18 @@ export const len = (source) => {
 
 /** @type {(source:object[], key:string) => boolean} */
 export const someTruthy = (source, key) => source.some((obj) => !!obj[key]);
+
+/** @type {(n:number, t:string, s:string) => string} */
+export const plural = (num, text, suffix) => `${num || 0} ${text}${num === 1 ? "" : suffix}`;
+
+/** @type {(ts:number, t:string, s:string) => string} */
+export const years = (seconds) => {
+    const date = new Date(seconds * 1e3);
+    const year = date.getFullYear();
+    const diff = Date.now() - date.valueOf();
+
+    const leap = !(year % 4) && (year % 100 || !(year % 400)) ? 1 : 0;
+    const yrs = diff / (1e3 * 60 * 60 * 24 * (365 + leap));
+
+    return plural(yrs === Math.trunc(yrs) ? yrs : +yrs.toFixed(1), "year", "s");;
+};
