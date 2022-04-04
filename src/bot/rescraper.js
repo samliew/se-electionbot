@@ -177,7 +177,7 @@ export default class Rescraper {
                 }
             }
 
-            // The election is ending within the next 10 minutes or less, do once only
+            // The election is ending within the next X seconds (default 15 mins) or less, do once only
             else if (election.isEnding() && !config.flags.saidElectionEndingSoon) {
 
                 config.flags.saidElectionEndingSoon = true;
