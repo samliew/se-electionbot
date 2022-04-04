@@ -103,7 +103,13 @@
                         <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
                         <td>{{years this.creation_date}}</td>
                         {{#with (get @root/data/scrapedSiteMods this.user_id)}}
-                        <td><a href="{{this.electionLink}}">{{this.election}}</a></td>
+                            {{#if this.election}}
+                                <td><a href="{{this.electionLink}}">{{this.election}}</a></td>
+                            {{else if this.appointed}}
+                                <td>appointed ({{this.appointed}})</td>
+                            {{else}}
+                                <td></td>
+                            {{/if}}
                         {{/with}}
                     </tr>
                     {{/each}}

@@ -1,6 +1,7 @@
 import { JSDOM } from "jsdom";
 import { fetchUrl } from "../utils.js";
-import { matchNumber } from "./expressions.js";
+import { usDateToISO } from "./dates.js";
+import { matchNumber, safeCapture } from "./expressions.js";
 
 /**
  * @typedef {import("../config.js").BotConfig} BotConfig
@@ -14,7 +15,8 @@ import { matchNumber } from "./expressions.js";
  *  location: string,
  *  link: string,
  *  election?: number,
- *  electionLink?: string
+ *  electionLink?: string,
+ *  appointed?: string
  * }} ScrapedModUser
  *
  * @summary scrapes site moderators
@@ -56,11 +58,23 @@ export const scrapeModerators = async (config, siteUrl) => {
             link
         };
 
-        const electionLinkElem = /** @type {HTMLAnchorElement|null} */(el.querySelector(".user-tags a[href*='/election/']"));
-        if (electionLinkElem) {
-            const { href: electionLink } = electionLinkElem;
-            user.electionLink = electionLink;
-            user.election = matchNumber(/\/(\d+)\/?$/, electionLink);
+        const tags = el.querySelector(".user-tags");
+        if (tags) {
+            const electionLinkElem = /** @type {HTMLAnchorElement|null} */(tags.querySelector("a[href*='/election/']"));
+            if (electionLinkElem) {
+                const { href: electionLink } = electionLinkElem;
+                user.electionLink = electionLink;
+                user.election = matchNumber(/\/(\d+)\/?$/, electionLink);
+            }
+
+            const tagsText = tags.textContent || "";
+
+            if (/appointed/i.test(tagsText)) {
+                const appointedDateUS = safeCapture(/\s+(\d{1,2}\/\d{1,2}\/\d{4})/, tagsText);
+                if (appointedDateUS) {
+                    user.appointed = usDateToISO(appointedDateUS);
+                }
+            }
         }
 
         mods.set(user_id, user);
