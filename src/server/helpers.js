@@ -1,4 +1,4 @@
-import { dateToUtcTimestamp } from "../bot/utils/dates.js";
+import { dateToUtcTimestamp, validateDate } from "../bot/utils/dates.js";
 import { formatOrdinal } from "../bot/utils/strings.js";
 
 
@@ -137,6 +137,9 @@ export const someTruthy = (source, key) => source.some((obj) => !!obj[key]);
 
 /** @type {(n:number, t:string, s:string) => string} */
 export const plural = (num, text, suffix) => `${num || 0} ${text}${num === 1 ? "" : suffix}`;
+
+/** @type {(d:string|number|Date) => number} */
+export const year = (date) => validateDate(date).getFullYear();
 
 /** @type {(ts:number, t:string, s:string) => string} */
 export const years = (seconds) => {
