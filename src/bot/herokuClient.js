@@ -103,11 +103,11 @@ export class HerokuClient {
     };
 
     /**
-     * @summary restart app by updating a config variable
+     * @summary restart app by deleting all dynos
      * @return {Promise<boolean>}
      */
     async restartApp() {
-        return this.updateConfigVar("TEST", "restart-" + Math.floor(Math.random() * 99999) + 1);
+        return await this._client.delete(`/apps/${this._appName}/dynos`) && true;
     };
 
     /**
