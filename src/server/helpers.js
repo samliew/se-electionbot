@@ -1,4 +1,6 @@
 import { dateToUtcTimestamp } from "../bot/utils/dates.js";
+import { formatOrdinal } from "../bot/utils/strings.js";
+
 
 /** @type {(source: unknown) => boolean} */
 export const isObj = (source) => typeof source === "object";
@@ -147,3 +149,6 @@ export const years = (seconds) => {
 
     return plural(yrs === Math.trunc(yrs) ? yrs : +yrs.toFixed(1), "year", "s");;
 };
+
+/** @type {(n: number) => string} */
+export const ordinal = (num) => `${num}<sup>${formatOrdinal(num).replace(/^\d+/, "")}</sup>`;
