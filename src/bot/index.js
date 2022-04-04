@@ -63,6 +63,7 @@ import {
 import { mapify } from "./utils/arrays.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
+import { scrapeModerators } from "./utils/scraping.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -300,6 +301,7 @@ import { matchNumber } from "./utils/expressions.js";
 
         const currentSiteMods = await getModerators(config, election.apiSlug);
         election.currentSiteMods = currentSiteMods;
+        election.scrapedSiteMods = await scrapeModerators(config, election.siteUrl);
 
 
         // "default" is a temp fix for ChatExchange being served as CJS module
