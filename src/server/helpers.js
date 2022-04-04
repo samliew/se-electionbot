@@ -56,9 +56,8 @@ export const ifCond = function (v1, operator, v2, options) {
     }
 };
 
-export const get = function (model, attributeName) {
-    return model.get(attributeName);
-};
+/** @type {(m:{ get:(a:string) => unknown }, a:string) => unknown} */
+export const get = (model, key) => model.get(key);
 
 export const url = function (url, text = "") {
     if (!/^(https?:\/\/|\/)/.test(url)) return "";
