@@ -141,3 +141,13 @@ export const toTadParamFormat = (date) => validateDate(date).toISOString()
  * @returns {number}
  */
 export const getSeconds = (date) => new Date(date).getTime() / MS_IN_SECOND;
+
+/**
+ * @summary reformats a date string in US format to ISO 8601
+ * @param {string} datestr date string in US format (MM/dd/yyyy)
+ * @returns {string}
+ */
+export const usDateToISO = (datestr) => {
+    const [month, date, year] = datestr.split("/");
+    return `${year}-${month.padStart(2, "0")}-${date.padStart(2, "0")}`;
+};
