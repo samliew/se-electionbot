@@ -118,6 +118,7 @@ export const reverse = function (/** @type {any[]} */array) {
     return [...array].reverse();
 };
 
+/** @type {(c:object, k:string) => unknown} */
 export const getter = (ctxt, propertyName) => ctxt[propertyName];
 
 /** @type {(source: Map|Set) => any[]} */
