@@ -104,7 +104,7 @@
                         <td>{{years this.creation_date}}</td>
                         {{#with (get @root/data/scrapedSiteMods this.user_id)}}
                             {{#if this.election}}
-                                <td><a href="{{this.electionLink}}">{{this.election}}</a></td>
+                                <td>{{{ordinal this.election}}} <a href="{{this.electionLink}}">election</a> ({{year (getter (get @root/data/election/elections this.election) "dateEnded")}})</td>
                             {{else if this.appointed}}
                                 <td>appointed ({{this.appointed}})</td>
                             {{else}}
