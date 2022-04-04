@@ -225,6 +225,8 @@ import { scrapeModerators } from "./utils/scraping.js";
             return;
         }
 
+        election.elections = elections;
+
         const { electionBadges } = election;
 
         // Reduced longIdleDurationHours if it's a Stack Overflow election

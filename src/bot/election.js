@@ -362,6 +362,9 @@ export default class Election {
     /** @type {Map<number, ScrapedModUser>} */
     scrapedSiteMods = new Map();
 
+    /** @type {Map<number, Election>} */
+    elections = new Map();
+
     /** @type {ElectionPhase|null} */
     phase = null;
 
