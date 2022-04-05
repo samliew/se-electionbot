@@ -496,7 +496,7 @@ import { scrapeModerators } from "./utils/scraping.js";
             [isAskedAboutJokes, sayAJoke],
         ];
 
-        const [dashboardApp] = await startServer(client, room, config, election);
+        const dashboardApp = await startServer(client, room, config, election);
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {

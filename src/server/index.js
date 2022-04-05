@@ -384,7 +384,7 @@ export const setClient = (client) => {
  * @param {Room} room current room the bot is in
  * @param {BotConfig} config  bot configuration
  * @param {Election} election current election
- * @returns {Promise<[ExpressApp, HttpServer]>}
+ * @returns {Promise<ExpressApp>}
  */
 export const startServer = async (client, room, config, election) => {
 
@@ -406,18 +406,15 @@ export const startServer = async (client, room, config, election) => {
         port     ${port}`);
     }
 
-    /** @type {HttpServer} */
-    const server = app.get("server");
-
-    /** @param {HttpServer} server */
-    const terminate = (server) => stop(server, info).then(() => process.exit(0));
+    /** @param {ExpressApp} app */
+    const terminate = (app) => stop(app.get("server"), info).then(() => process.exit(0));
 
     const farewell = async () => {
         if (config.debug) {
             await room.sendMessage("have to go now, will be back soon...");
         }
         await room.leave();
-        terminate(server);
+        terminate(app);
     };
 
     // https://stackoverflow.com/a/67567395
@@ -429,10 +426,10 @@ export const startServer = async (client, room, config, election) => {
         });
 
         rli.on("SIGINT", farewell);
-        return [app, server];
+        return app;
     }
 
     // https://stackoverflow.com/a/14516195
     process.on('SIGINT', farewell);
-    return [app, server];
+    return app;
 };
