@@ -19,9 +19,7 @@ import { sayElectionNotStartedYet } from "./phases.js";
  * @param {Election} election
  * @returns {string}
  */
-export const sayAboutVoting = (
-    election
-) => {
+export const sayAboutVoting = (election) => {
     const { dateElection, electionUrl, phase, repVote, statVoters } = election;
 
     const comeBackFinalPhaseText = ` Don't forget to come back ${linkToRelativeTimestamp(dateElection)} to also vote in the election's final voting phase!`;
@@ -35,6 +33,14 @@ export const sayAboutVoting = (
     };
 
     return phaseMap[phase] || sayElectionNotStartedYet(election);
+};
+
+/**
+ * @summary builds a response to how to save the ranking order, or whether votes are saved automatically
+ * @returns {string}
+ */
+export const sayHowToSaveVotes = () => {
+    return `Your ranking of the candidates are saved automatically as soon as you make changes to the sort order. You can amend your vote as many times as you'd like until the end of the election.`;
 };
 
 /**
