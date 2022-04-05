@@ -449,7 +449,8 @@ describe('Message Guards', () => {
             allMatch(isAskedHowToSaveVotes, [
                 'how to save votes',
                 'how to save the votes',
-                'how to I save my vote',
+                'how to save my vote',
+                'how do I save my vote',
                 'is the vote saved automatically',
                 'are the votes saved automatically',
                 'where to click to save the vote',
@@ -458,6 +459,8 @@ describe('Message Guards', () => {
                 'where is the button to click after voting',
                 'do I have to click anything to send the votes',
                 'do I "submit" my ballot somehow or is it just saved?',
+                'I have voted. How do I save it?',
+                'I\'ve voted. How do I save the ballot?',
             ]);
             allMatch(isAskedHowToSaveVotes, [
                 ...haveIvotedMatches,

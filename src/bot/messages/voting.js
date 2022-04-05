@@ -40,7 +40,7 @@ export const sayAboutVoting = (election) => {
  * @returns {string}
  */
 export const sayHowToSaveVotes = () => {
-    return `Your ranking of the candidates are saved automatically as soon as you make changes to the sort order. You can amend your vote as many times as you'd like until the end of the election.`;
+    return `Your ranking of the candidates is saved automatically as soon changes are made to the sort order. You can amend your vote/ballot freely until the end of the election.`;
 };
 
 /**

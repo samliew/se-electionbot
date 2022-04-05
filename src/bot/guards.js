@@ -411,7 +411,7 @@ export const isAskedHowOrWhoToVote = (text) => {
 export const isAskedHowToSaveVotes = (text) => {
     return someMatch(
             [
-                /^(?:how\s+)?(?:are|can i|should i|to)\s+.*\b(?:saved?|votes?|ballot)\b.+\b(?:saved?|votes?|ballot)\b/i,
+                /(?:how\s+)?(?:are|can i|should i|do i|to)\s+.*\b(?:saved?|votes?|ballot)\b.+\b(?:it|saved?|votes?|ballot)\b/i,
                 /^(?:is|are)\s+the.+(?:votes?|voting|ballot).+(?:saved?|submitted|sen[dt]).+automatically/i,
                 /^(?:where|which)(?: button)?.+to.+click.+to.+(?:save|submit|send).+the.+(?:votes?|voting|ballot)/i,
                 /^do i(?: have to click anything to)?.+\b(?:save|submit|send)\b.+(?:the|my).+(?:votes?|voting|ballot)/i,
