@@ -5,7 +5,7 @@
 <main class="dashboard">
     <section>
         <aside>
-            <h2>Server</h2>
+            <h2>Configuration</h2>
             <table>
                 <tbody>
                     <tr>
@@ -23,6 +23,15 @@
                     <tr>
                         <td>mounted</td>
                         <td>{{> deep data/mounted}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Express Settings</h2>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>{{> deep data/settings}}</td>
                     </tr>
                 </tbody>
             </table>

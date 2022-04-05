@@ -290,7 +290,17 @@ app.route("/server")
                         static: staticPath,
                         views: viewsPath
                     },
-                    port: app.get("port")
+                    port: app.get("port"),
+                    settings: {
+                        "escape JSON": !!app.get("json escape"),
+                        "ETag": app.get("etag"),
+                        "JSONP callback": app.get("jsonp callback name"),
+                        "send x-powered-by": !!app.get("x-powered-by"),
+                        "strict routing": !!app.get("strict routing"),
+                        "subdomain offset": app.get("subdomain offset"),
+                        "view cache": !!app.get("view cache"),
+                        "view engine": app.get("view engine")
+                    }
                 }
             });
 
