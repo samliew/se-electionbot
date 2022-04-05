@@ -10,6 +10,7 @@ import { validateChatTranscriptURL } from "./utils/chat.js";
 import { dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "./utils/dates.js";
 import { matchNumber, safeCapture } from "./utils/expressions.js";
 import { constructUserAgent } from "./utils/fetch.js";
+import { htmlToChatMarkdown } from "./utils/markdown.js";
 import { numericNullable } from "./utils/objects.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
@@ -73,61 +74,6 @@ export const markdownify = (text, tags = {}) => {
  * @param {string} text text to strip
  */
 export const stripMarkdown = (text) => text.replace(/([_*]{1,2})(.+?)(?<![ _])\1(?!\1)/gm, "$2");
-
-/**
- * @summary converts HTML to chat Markdown
- * @param {string} content initial text
- * @returns {string}
- */
-export const htmlToChatMarkdown = (content) => {
-    content = content.trim();
-
-    if (!content || typeof content !== 'string') return "";
-
-    // Has <pre> fixed-font blocks
-    if (/^\s*&lt;pre class="full"&gt;/.test(content)) {
-        return unescape(content)
-            .replace(/($\s*<pre class="full">|<\/pre>$)/, '').replace(/(?:^|(?:\r\n))/gm, '    ');
-    }
-
-    return entities.decode(
-        markdownify(
-            sanitize(
-                content.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, makeURL("$2", "$1")).trim(),
-                { allowedTags: ["b", "br", "i", "strike"] }
-            ), {
-            "b": "**",
-            "i": "*",
-            "strike": "---",
-            "br": "\n"
-        })
-    );
-};
-export const chatMarkdownToHtml = (content) => {
-    if (!content) return "";
-
-    // from https://cdn-chat.sstatic.net/chat/Js/master-chat.js
-    const e = /(^|.(?=\*)|[\s,('"[{-])(?:\*\*|__)(?=\S)(.+?\S)(?:\*\*|__(?=[\s,?!.;:)\]}-]|$))/g,
-        t = /(^|.(?=\*)|[\s,('">[{-])(?:\*|_)(?=\S)(.+?\S)(?:\*|_(?=[\s,?!.;:)<\]}-]|$))/g,
-        s = /(^|[\s,('">[{-])---(?=\S)(.+?\S)---(?=[\s,?!.;:)<\]}-]|$)/g,
-        a = /(^|\W|_)(`+)(?!\s)(.*?[^`])\2(?!`)/g,
-        i = /(^|\s)\[([^\]]+)\]\(((?:https?|ftp):\/\/(?:\([^()\s]*\)|[^)\s])+?)(?:\s(?:"|&quot;)([^"]+?)(?:"|&quot;))?\)/g;
-
-    const markdownMini = function (content) {
-        // Message is a full fixed-font block
-        if (content = escape(content), /[\n\r]/.test(content)) {
-            const o = !/^ {0,3}[^ ]/m.test(content);
-            return o ? "<pre class='full'>" + content.replace(/^    /gm, "") + "</pre>" : "<div>" + content.replace(/\r\n?|\n/g, "<br/>") + "</div>";
-        }
-        // Markdown mini to HTML
-        return content = content.replace(/\\`/g, "&#96;"), content = content.replace(/\\\*/g, "&#42;"), content = content.replace(/\\_/g, "&#95;"),
-            content = content.replace(/\\\[/g, "&#91;"), content = content.replace(/\\\]/g, "&#93;"), content = content.replace(/\\\(/g, "&#40;"),
-            content = content.replace(/\\\)/g, "&#41;"), content = content.replace(a, "$1<code>$3</code>"), content = content.replace(e, "$1<b>$2</b>"),
-            content = content.replace(t, "$1<i>$2</i>"), content = content.replace(s, "$1<strike>$2</strike>"), content = content.replace(i, '$1<a href="$3" title="$4">$2</a>');
-    };
-
-    return markdownMini(content);
-};
 
 
 /**
