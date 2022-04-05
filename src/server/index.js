@@ -7,6 +7,7 @@ import { HerokuClient } from "../bot/herokuClient.js";
 import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom } from '../bot/utils.js';
 import { dateToUtcTimestamp } from '../bot/utils/dates.js';
 import * as helpers from "./helpers.js";
+import { start, stop } from './utils.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const viewsPath = join(__dirname, "views");
@@ -392,15 +393,24 @@ export const startServer = async (client, room, config, election) => {
     setElection(election);
     setClient(client);
 
-    const server = app.listen(app.get('port'), () => {
-        console.log(`SERVER
-        Node application started:
+    const port = app.get("port");
+    const info = `${config.scriptHostname || "the server"} (port ${port})`;
+
+    const started = await start(app, port, info);
+    if (started) {
+        console.log(`SERVER application started:
         dirname  ${__dirname}
         partials ${partialsPath}
         static   ${staticPath}
         views    ${viewsPath}
-        port     ${app.get('port')}`);
-    });
+        port     ${port}`);
+    }
+
+    /** @type {HttpServer} */
+    const server = app.get("server");
+
+    /** @param {HttpServer} server */
+    const terminate = (server) => stop(server, info).then(() => process.exit(0));
 
     const farewell = async () => {
         if (config.debug) {
@@ -409,12 +419,6 @@ export const startServer = async (client, room, config, election) => {
         await room.leave();
         terminate(server);
     };
-
-    /** @param {import("http").Server} server */
-    const terminate = (server) => server.close(() => {
-        console.log('SERVER - gracefully shutting down');
-        process.exit(0);
-    });
 
     // https://stackoverflow.com/a/67567395
     if (process.platform === "win32") {
