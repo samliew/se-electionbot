@@ -279,6 +279,12 @@ app.route("/server")
                 heading: "Server Control",
                 data: {
                     __dirname,
+                    mounted: {
+                        client: !!BOT_CLIENT,
+                        config: !!BOT_CONFIG,
+                        election: !!ELECTION,
+                        room: !!BOT_ROOM
+                    },
                     paths: {
                         partials: partialsPath,
                         static: staticPath,
