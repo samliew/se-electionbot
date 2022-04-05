@@ -46,18 +46,7 @@
                 <tr><td>End date</td><td>{{utcTimestamp dateEnded}} <span class="relativetime" title="{{utcTimestamp dateEnded}}"></span></td></tr>
                 <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
                 <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
-                <tr><td>Positions</td><td>{{numPositions}}</td></tr>
-                <tr><td>Winners <span class="small-count" data-prefix="(" data-suffix=")">{{arrWinners.length}}</span></td>
-                    {{#if arrWinners.length}}
-                    <td><ul class="list">
-                        {{#each arrWinners}}
-                        <li class="item"><a href="{{this.permalink}}">{{{this.userName}}}</a></li>
-                        {{/each}}
-                    </ul></td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
+                    <tr><td>Positions</td><td>{{numPositions}}</td></tr>
                 <tr><td>Opavote URL</td><td>{{{url opavoteUrl}}}</td></tr>
                 <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
                 <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
@@ -73,6 +62,13 @@
             <h2>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{len withdrawnNominees}} total</span></h2>
             {{#if (len withdrawnNominees)}}
                 {{> nominees (values withdrawnNominees) }}
+            {{else}}
+                {{> emptySmallTable }}
+            {{/if}}
+
+            <h2>Winners <span class="small-count" data-prefix="(" data-suffix=")">{{len arrWinners}} total</span></h2>
+            {{#if (len arrWinners)}}
+                {{> nominees arrWinners }}
             {{else}}
                 {{> emptySmallTable }}
             {{/if}}
