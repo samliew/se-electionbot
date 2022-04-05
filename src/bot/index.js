@@ -30,7 +30,7 @@ import {
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule,
     isAskedForFullHelp,
     isAskedForHelp,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
     isAskedWhyIsBot,
     isAskedWhyNominationRemoved,
     isBotMentioned,
@@ -52,7 +52,7 @@ import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElec
 import { sayQuestionnaireQuestion } from "./messages/questionnaire.js";
 import { sayCandidateScoreFormula, sayCandidateScoreLeaderboard } from "./messages/score.js";
 import { sayAboutBallotFile, sayAboutSTV } from "./messages/stv.js";
-import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowManyModsVoted, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
+import { sayAboutVoting, sayHowToSaveVotes, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowManyModsVoted, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -704,7 +704,10 @@ import { scrapeModerators } from "./utils/scraping.js";
             else if (isAskedHowManyVoted(preparedMessage)) {
                 responseText = await sayAlreadyVoted(config, election, preparedMessage);
             }
-            // Conflicts with isAskedAboutVoting below - should not match "how to vote"
+            else if (isAskedHowToSaveVotes(preparedMessage)) {
+                responseText = sayHowToSaveVotes();
+            }
+            // Could conflict with isAskedAboutVoting below - should not match "how to vote" - min length required
             else if (isAskedHowOrWhoToVote(preparedMessage)) {
                 if (election.phase == null) responseText = sayElectionNotStartedYet(election);
                 else responseText = sayInformedDecision();
