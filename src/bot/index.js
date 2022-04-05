@@ -61,6 +61,7 @@ import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
 import { mapify } from "./utils/arrays.js";
+import { logResponse } from "./utils/bot.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
 import { scrapeModerators } from "./utils/scraping.js";
@@ -617,17 +618,6 @@ import { scrapeModerators } from "./utils/scraping.js";
                     responseText = (await boundRunIf(name, regex, ...args)) || responseText;
                 }
 
-                if (config.debug) {
-                    console.log(`Response info -
-                response text: ${responseText}
-                response chars: ${responseText.length}
-                content: ${preparedMessage}
-                original: ${decodedMessage}
-                last message: ${config.lastMessageTime}
-                last activity: ${config.lastActivityTime}
-                `);
-                }
-
                 /* Note:
                  * Be careful if integrating this section with message queue,
                  *   since it is currently for long responses to dev/admin commands only, and does not reset active mutes.
@@ -635,7 +625,8 @@ import { scrapeModerators } from "./utils/scraping.js";
                  *   so we could possibly leave this block as it is
                  */
                 if (responseText) {
-                    await sendMultipartMessage(config, room, responseText, msg.id, true);
+                    logResponse(config, responseText, preparedMessage, decodedMessage);
+                    await sendMultipartMessage(config, room, responseText, msg.id, true, false);
                     return; // no further action
                 }
             }
@@ -836,8 +827,10 @@ import { scrapeModerators } from "./utils/scraping.js";
             } // End bot mentioned
 
 
-            // Send the message
-            if (responseText) await sendMessage(config, room, responseText, null, false);
+            if (responseText) {
+                logResponse(config, responseText, preparedMessage, decodedMessage);
+                await sendMessage(config, room, responseText, null, false, false);
+            }
 
         }); // End new message event listener
 

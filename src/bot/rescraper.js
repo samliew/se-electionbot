@@ -143,9 +143,12 @@ export default class Rescraper {
                 announcement?.initAll();
 
                 await sendMessageList(
-                    config, room, true,
-                    `The ${makeURL("election", election.electionUrl)} dates have changed:`,
-                    sayElectionSchedule(election)
+                    config, room,
+                    [
+                        `The ${makeURL("election", election.electionUrl)} dates have changed:`,
+                        sayElectionSchedule(election)
+                    ],
+                    { isPrivileged: true }
                 );
             }
 

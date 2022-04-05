@@ -5,6 +5,7 @@
  */
 
 import { wait } from "./utils.js";
+import { logResponse } from "./utils/bot.js";
 
 // TODO: implement message queue
 /**
@@ -13,34 +14,33 @@ import { wait } from "./utils.js";
  * @param {Room} room room to announce in
  * @param {string} responseText Message to send
  * @param {null|number} inResponseTo message ID to reply to
- * @returns {Promise<any>}
+ * @param {boolean} [isPrivileged] privileged user flag
+ * @param {boolean} [log] flag to log valid messages
+ * @returns {Promise<void>}
  */
-const _sendTheMessage = async function (config, room, responseText, inResponseTo = null, isPrivileged = false) {
+const _sendTheMessage = async function (config, room, responseText, inResponseTo = null, isPrivileged = false, log = true) {
 
     const { debugOrVerbose } = config;
 
     const messageLength = responseText?.length || 0;
     const isInvalid = messageLength <= 0 || messageLength > 500;
 
-    // Validate response
     if (isInvalid) {
-        if (debugOrVerbose) console.log("RESPONSE (INVALID) - ", responseText);
+        if (debugOrVerbose) console.log(`[invalid response] "${responseText}"`);
         return;
     }
 
-    // Validate bot mute
     if (!isPrivileged && config.isMuted) {
-        if (debugOrVerbose) console.log("RESPONSE (MUTED) - ", responseText);
+        if (debugOrVerbose) console.log(`[muted response] "${responseText}"`);
         return;
     }
 
-    // Always log valid message
-    console.log("RESPONSE - ", responseText);
+    if (log) logResponse(config, responseText, "", "");
 
     // Notify same previous message
     if (config.checkSameResponseAsPrevious(responseText)) {
+        if (debugOrVerbose) console.log(`[duplicate response] "${responseText}"`);
         responseText = config.duplicateResponseText;
-        if (debugOrVerbose) console.log("RESPONSE (DUPE) - ", responseText);
     }
 
     // Send the message
@@ -58,10 +58,11 @@ const _sendTheMessage = async function (config, room, responseText, inResponseTo
  * @param {string} responseText Message to send
  * @param {null|number} [inResponseTo] message ID to reply to
  * @param {boolean} [isPrivileged] privileged user flag
+ * @param {boolean} [log] flag to log valid messages
  * @returns {Promise<any>}
  */
-export const sendMessage = async function (config, room, responseText, inResponseTo = null, isPrivileged = false) {
-    return _sendTheMessage.call(this, config, room, responseText, inResponseTo, isPrivileged);
+export const sendMessage = async function (config, room, responseText, inResponseTo = null, isPrivileged = false, log = true) {
+    return _sendTheMessage.call(this, config, room, responseText, inResponseTo, isPrivileged, log);
 };
 
 /**
@@ -84,11 +85,12 @@ export const sendReply = async function (config, room, responseText, inResponseT
  * @param {string} responseText Message to send
  * @param {null|number} inResponseTo message ID to reply to
  * @param {boolean} [isPrivileged] privileged user flag
+ * @param {boolean} [log] flag to log valid messages
  * @returns {Promise<boolean>}
  */
-export const sendMultipartMessage = async (config, room, responseText, inResponseTo = null, isPrivileged = false) => {
+export const sendMultipartMessage = async (config, room, responseText, inResponseTo = null, isPrivileged = false, log = true) => {
 
-    const { debugOrVerbose, verbose } = config;
+    const { debugOrVerbose } = config;
     const { maxMessageLength, maxMessageParts, minThrottleSecs } = config;
 
     const messageLength = responseText?.length || 0;
@@ -96,7 +98,7 @@ export const sendMultipartMessage = async (config, room, responseText, inRespons
 
     // Validate response
     if (isInvalid) {
-        if (verbose) console.log("RESPONSE (INVALID) - ", responseText);
+        if (debugOrVerbose) logResponse(config, responseText, "", "", "invalid");
         return false;
     }
 
@@ -118,14 +120,11 @@ export const sendMultipartMessage = async (config, room, responseText, inRespons
         ).filter(Boolean));
     }
 
-    const { length } = responseText;
     const { length: numParts } = messages;
-
-    console.log(`RESPONSE (${length}/${numParts})`, responseText);
 
     // Respect bot mute if not a privileged response
     if (!isPrivileged && config.isMuted) {
-        if (debugOrVerbose) console.log("RESPONSE (MUTED) - ", responseText);
+        if (debugOrVerbose) logResponse(config, responseText, "", "", "muted");
         return false;
     }
 
@@ -146,7 +145,7 @@ export const sendMultipartMessage = async (config, room, responseText, inRespons
         return false; // Do not send actual response if they take too many messages
     }
 
-    await sendMessageList(config, room, isPrivileged, ...messages);
+    await sendMessageList(config, room, messages, { isPrivileged, log });
 
     if (!isPrivileged) {
         // Record last bot message and time
@@ -165,15 +164,18 @@ export const sendMultipartMessage = async (config, room, responseText, inRespons
  * @summary sends multiple throttled messages
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to send messages to
- * @param {...string} messages message text list
- * @param {boolean} [isPrivileged] privileged user flag
+ * @param {string[]} messages message text list
+ * @param {{
+ *  isPrivileged?: boolean,
+ *  log?: boolean
+ * }} options configuration
  */
-export const sendMessageList = async (config, room, isPrivileged = false, ...messages) => {
+export const sendMessageList = async (config, room, messages, { isPrivileged = false, log = true }) => {
     const { throttleSecs } = config;
 
     let sent = 1;
     for (const message of messages) {
-        await _sendTheMessage(config, room, message, null, isPrivileged);
+        await _sendTheMessage(config, room, message, null, isPrivileged, log);
         await wait(throttleSecs * sent);
         sent += 1;
     }
