@@ -495,6 +495,7 @@ import { scrapeModerators } from "./utils/scraping.js";
             [isAskedAboutJokes, sayAJoke],
         ];
 
+        const [dashboardApp, dashboardServer] = await startServer(client, room, config, election);
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
@@ -844,8 +845,6 @@ import { scrapeModerators } from "./utils/scraping.js";
         console.log(`INIT - Joined and listening in room https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`);
 
         roomKeepAlive(config, client, room);
-
-        await startServer(client, room, config, election);
 
         // Catch all handler to swallow non-crashing rejections
         process.on("unhandledRejection", (reason) => {

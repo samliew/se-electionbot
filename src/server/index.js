@@ -33,9 +33,11 @@ app
 
 /**
  * @typedef {import("../bot/config").BotConfig} BotConfig
+ * @typedef {import("express").Application} ExpressApp
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("../bot/utils").RoomUser} RoomUser
+ * @typedef {import("http").Server} HttpServer
  */
 
 /**
@@ -381,7 +383,7 @@ export const setClient = (client) => {
  * @param {Room} room current room the bot is in
  * @param {BotConfig} config  bot configuration
  * @param {Election} election current election
- * @returns {Promise<import("express").Application>}
+ * @returns {Promise<[ExpressApp, HttpServer]>}
  */
 export const startServer = async (client, room, config, election) => {
 
@@ -423,10 +425,10 @@ export const startServer = async (client, room, config, election) => {
         });
 
         rli.on("SIGINT", farewell);
-        return app;
+        return [app, server];
     }
 
     // https://stackoverflow.com/a/14516195
     process.on('SIGINT', farewell);
-    return app;
+    return [app, server];
 };
