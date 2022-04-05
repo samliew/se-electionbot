@@ -232,6 +232,7 @@ app.route('/say')
                     title: "Privileged Say"
                 },
                 heading: `${await botChatUser.name} say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+                current: "Say",
                 data: {
                     chatDomain,
                     chatRoomId,
@@ -297,6 +298,7 @@ app.route('/config')
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Config"
                 },
+                current: "Config",
                 heading: `Update ${await botChatUser.name} environment variables`,
                 data: {
                     configObject: envVars,
