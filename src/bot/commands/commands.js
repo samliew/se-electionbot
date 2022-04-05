@@ -1,3 +1,4 @@
+import { promisify } from "util";
 import { getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
@@ -9,12 +10,15 @@ import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait
 import { flat } from "../utils/arrays.js";
 import { dateToUtcTimestamp } from "../utils/dates.js";
 import { matchNumber } from "../utils/expressions.js";
+import { getPort } from "../utils/server.js";
 
 /**
  * @typedef {import("../announcement").default} Announcement
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../utils").ChatMessage} ChatMessage
  * @typedef {import("chatexchange").default} Client
+ * @typedef {import("express").Application} ExpressApp
+ * @typedef {import("http").Server} HttpServer
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../index").UserProfile} UserProfile
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -611,4 +615,39 @@ export const unmuteCommand = async (config, room) => {
     const response = `I can speak freely again.`;
     await sendMessage(config, room, response, null, true);
     config.updateLastMessage(response);
+};
+
+/**
+ * @summary restarts the dashboard server without restarting the bot
+ * @param {BotConfig} config bot config
+ * @param {ExpressApp} app Express app serving the dashboard
+ * @param {HttpServer} server the dashboard server
+ * @returns {Promise<string>}
+ */
+export const restartDashboard = async (config, app, server) => {
+    const port = getPort(server);
+
+    const stop = promisify(server.close);
+    const start = promisify(app.listen);
+
+    const { scriptHostname } = config;
+
+    const hostUrl = scriptHostname ? makeURL("the server", scriptHostname) : "the server";
+
+    try {
+
+        await stop.call(server);
+    } catch (error) {
+        console.log(error);
+        return `[error] failed to stop ${hostUrl} (port ${port})`;
+    }
+
+    try {
+        await start.call(app, app.get("port"));
+    } catch (error) {
+        console.log(error);
+        return `[error] failed to restart ${hostUrl} (port ${port})`;
+    }
+
+    return `[success] restarted ${hostUrl} (port ${port})`;
 };

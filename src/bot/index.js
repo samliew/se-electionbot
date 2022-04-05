@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -436,6 +436,7 @@ import { scrapeModerators } from "./utils/scraping.js";
             "mods voted": ["posts how many mods voted", sayHowManyModsVoted, AccessLevel.privileged],
             "post meta": ["posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged],
             "rm_election": ["resets the current election", resetElection, AccessLevel.dev],
+            "restart server": ["restarts the server", restartDashboard, AccessLevel.dev],
             "say": ["bot echoes something", echoSomething, AccessLevel.privileged],
             "set access": ["sets user's access level", setAccessCommand, AccessLevel.dev],
             "set throttle": ["set throttle value (secs)", setThrottleCommand, AccessLevel.privileged],
@@ -605,7 +606,8 @@ import { scrapeModerators } from "./utils/scraping.js";
                     ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, preparedMessage],
                     ["get modes", /^(?:get modes?\s+report|report\s+modes)/, config],
                     ["mods voted", /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, config, elections, election, preparedMessage],
-                    ["join room", /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, config, client, preparedMessage]
+                    ["join room", /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, config, client, preparedMessage],
+                    ["restart server", /^restart\s+server/, config, dashboardApp, dashboardServer]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);
