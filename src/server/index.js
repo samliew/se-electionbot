@@ -301,6 +301,10 @@ app.route("/server")
                         "view cache": !!app.get("view cache"),
                         "view engine": app.get("view engine")
                     }
+                },
+                page: {
+                    appName: process.env.HEROKU_APP_NAME,
+                    title: "Server"
                 }
             });
 
