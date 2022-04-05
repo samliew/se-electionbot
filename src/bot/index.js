@@ -496,7 +496,7 @@ import { scrapeModerators } from "./utils/scraping.js";
             [isAskedAboutJokes, sayAJoke],
         ];
 
-        const [dashboardApp, dashboardServer] = await startServer(client, room, config, election);
+        const [dashboardApp] = await startServer(client, room, config, election);
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
@@ -607,7 +607,7 @@ import { scrapeModerators } from "./utils/scraping.js";
                     ["get modes", /^(?:get modes?\s+report|report\s+modes)/, config],
                     ["mods voted", /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, config, elections, election, preparedMessage],
                     ["join room", /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, config, client, preparedMessage],
-                    ["restart server", /^restart\s+server/, config, dashboardApp, dashboardServer]
+                    ["restart server", /^restart\s+server/, config, dashboardApp]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);

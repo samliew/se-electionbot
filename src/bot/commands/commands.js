@@ -1,4 +1,4 @@
-import { promisify } from "util";
+import * as ServerUtils from "../../server/utils.js";
 import { getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
@@ -10,7 +10,6 @@ import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait
 import { flat } from "../utils/arrays.js";
 import { dateToUtcTimestamp } from "../utils/dates.js";
 import { matchNumber } from "../utils/expressions.js";
-import { getPort } from "../utils/server.js";
 
 /**
  * @typedef {import("../announcement").default} Announcement
@@ -621,33 +620,30 @@ export const unmuteCommand = async (config, room) => {
  * @summary restarts the dashboard server without restarting the bot
  * @param {BotConfig} config bot config
  * @param {ExpressApp} app Express app serving the dashboard
- * @param {HttpServer} server the dashboard server
  * @returns {Promise<string>}
  */
-export const restartDashboard = async (config, app, server) => {
-    const port = getPort(server);
-
-    const stop = promisify(server.close);
-    const start = promisify(app.listen);
-
+export const restartDashboard = async (config, app) => {
     const { scriptHostname } = config;
 
     const hostUrl = scriptHostname ? makeURL("the server", scriptHostname) : "the server";
 
-    try {
+    /** @type {number} */
+    const port = app.get("port");
 
-        await stop.call(server);
-    } catch (error) {
-        console.log(error);
-        return `[error] failed to stop ${hostUrl} (port ${port})`;
+    const info = `${hostUrl} (port ${port})`;
+
+    /** @type {HttpServer|undefined} */
+    const server = app.get("server");
+    if (!server) {
+        const started = await ServerUtils.start(app, port, info);
+        return `[${started ? "success" : "error"}] starting ${hostUrl}`
     }
 
-    try {
-        await start.call(app, app.get("port"));
-    } catch (error) {
-        console.log(error);
-        return `[error] failed to restart ${hostUrl} (port ${port})`;
-    }
+    const stopped = await ServerUtils.stop(server, info);
+    if (!stopped) return `[error] failed to stop ${info}`;
 
-    return `[success] restarted ${hostUrl} (port ${port})`;
+    const started = await ServerUtils.start(app, port, info);
+    if (!started) return `[error] failed to start ${info}`;
+
+    return `[success] started ${info}`;
 };
