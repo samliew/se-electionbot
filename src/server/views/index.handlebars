@@ -67,18 +67,14 @@
             {{#if (len arrNominees)}}
                 {{> nominees arrNominees }}
             {{else}}
-                <table>
-                    <tr><td></td></tr>
-                </table>
+                {{> emptySmallTable }}
             {{/if}}
 
             <h2>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{len withdrawnNominees}} total</span></h2>
             {{#if (len withdrawnNominees)}}
                 {{> nominees (values withdrawnNominees) }}
             {{else}}
-                <table>
-                    <tr><td></td></tr>
-                </table>
+                {{> emptySmallTable }}
             {{/if}}
         </aside>
     </section>
@@ -89,7 +85,7 @@
         <aside>
             <h2>Moderators <span class="small-count" data-prefix="(" data-suffix=")">{{len currentSiteMods}} total</span></h2>
             {{#if (len @root/data/currentSiteMods)}}
-                <table>
+                <table class="table-small">
                    <thead>
                         <tr>
                             <th>Link</th>
@@ -116,9 +112,7 @@
                     </tbody>
                 </table>
             {{else}}
-                <table>
-                    <tr><td></td></tr>
-                </table>
+                {{> emptySmallTable }}
             {{/if}}
 
             <h2>Badges</h2>
