@@ -1,0 +1,27 @@
+<h1>{{{heading}}}</h1>
+
+{{> breadcrumbs current=current }}
+
+<main class="dashboard">
+    <section>
+        <aside>
+            <h2>Server</h2>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>directory</td>
+                        <td>{{ data/__dirname }}</td>
+                    </tr>
+                    <tr>
+                        <td>port</td>
+                        <td>{{ data/port }}</td>
+                    </tr>
+                    <tr>
+                        <td>paths</td>
+                        <td>{{> deep data/paths}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </aside>
+    </section>
+</main>

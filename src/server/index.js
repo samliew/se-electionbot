@@ -270,6 +270,30 @@ app.route('/say')
         }
     });
 
+app.route("/server")
+    .get((_, res) => {
+
+        try {
+            res.render("server", {
+                current: "Server",
+                heading: "Server Control",
+                data: {
+                    __dirname,
+                    paths: {
+                        partials: partialsPath,
+                        static: staticPath,
+                        views: viewsPath
+                    },
+                    port: app.get("port")
+                }
+            });
+
+        } catch (error) {
+            console.error(`SERVER - failed to display config dashboard:`, error);
+            res.sendStatus(500);
+        }
+
+    })
 
 app.route('/config')
     .get(async ({ query }, res) => {
@@ -400,12 +424,12 @@ export const startServer = async (client, room, config, election) => {
 
     const started = await start(app, port, info);
     if (started) {
-        console.log(`SERVER application started:
-        dirname  ${__dirname}
-        partials ${partialsPath}
-        static   ${staticPath}
-        views    ${viewsPath}
-        port     ${port}`);
+        console.log(`[server] started
+dirname  ${__dirname}
+partials ${partialsPath}
+static   ${staticPath}
+views    ${viewsPath}
+port     ${port}`);
     }
 
     /** @param {ExpressApp} app */
