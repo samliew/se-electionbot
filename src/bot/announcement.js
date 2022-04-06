@@ -102,7 +102,7 @@ export default class ScheduledAnnouncement {
                 return `${prefix} ${link}`;
             });
 
-        await sendMessageList(config, _room, true, ...messages);
+        await sendMessageList(config, _room, messages, { isPrivileged: true });
 
         return true;
     }
@@ -127,7 +127,7 @@ export default class ScheduledAnnouncement {
                     } has withdrawn from the election.`;
             });
 
-        await sendMessageList(config, _room, true, ...messages);
+        await sendMessageList(config, _room, messages, { isPrivileged: true });
 
         return true;
     }

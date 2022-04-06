@@ -1,3 +1,4 @@
+import * as ServerUtils from "../../server/utils.js";
 import { getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
@@ -15,6 +16,8 @@ import { matchNumber } from "../utils/expressions.js";
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../utils").ChatMessage} ChatMessage
  * @typedef {import("chatexchange").default} Client
+ * @typedef {import("express").Application} ExpressApp
+ * @typedef {import("http").Server} HttpServer
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../index").UserProfile} UserProfile
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -611,4 +614,36 @@ export const unmuteCommand = async (config, room) => {
     const response = `I can speak freely again.`;
     await sendMessage(config, room, response, null, true);
     config.updateLastMessage(response);
+};
+
+/**
+ * @summary restarts the dashboard server without restarting the bot
+ * @param {BotConfig} config bot config
+ * @param {ExpressApp} app Express app serving the dashboard
+ * @returns {Promise<string>}
+ */
+export const restartDashboard = async (config, app) => {
+    const { scriptHostname } = config;
+
+    const hostUrl = scriptHostname ? makeURL("the server", scriptHostname) : "the server";
+
+    /** @type {number} */
+    const port = app.get("port");
+
+    const info = `${hostUrl} (port ${port})`;
+
+    /** @type {HttpServer|undefined} */
+    const server = app.get("server");
+    if (!server) {
+        const started = await ServerUtils.start(app, port, info);
+        return `[${started ? "success" : "error"}] starting ${hostUrl}`
+    }
+
+    const stopped = await ServerUtils.stop(server, info);
+    if (!stopped) return `[error] failed to stop ${info}`;
+
+    const started = await ServerUtils.start(app, port, info);
+    if (!started) return `[error] failed to start ${info}`;
+
+    return `[success] started ${info}`;
 };

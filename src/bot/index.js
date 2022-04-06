@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -52,7 +52,7 @@ import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElec
 import { sayQuestionnaireQuestion } from "./messages/questionnaire.js";
 import { sayCandidateScoreFormula, sayCandidateScoreLeaderboard } from "./messages/score.js";
 import { sayAboutBallotFile, sayAboutSTV } from "./messages/stv.js";
-import { sayAboutVoting, sayHowToSaveVotes, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowManyModsVoted, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
+import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowManyModsVoted, sayHowToSaveVotes, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -61,6 +61,7 @@ import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
 import { mapify } from "./utils/arrays.js";
+import { logResponse } from "./utils/bot.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
 import { scrapeModerators } from "./utils/scraping.js";
@@ -436,6 +437,7 @@ import { scrapeModerators } from "./utils/scraping.js";
             "mods voted": ["posts how many mods voted", sayHowManyModsVoted, AccessLevel.privileged],
             "post meta": ["posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged],
             "rm_election": ["resets the current election", resetElection, AccessLevel.dev],
+            "restart server": ["restarts the server", restartDashboard, AccessLevel.dev],
             "say": ["bot echoes something", echoSomething, AccessLevel.privileged],
             "set access": ["sets user's access level", setAccessCommand, AccessLevel.dev],
             "set throttle": ["set throttle value (secs)", setThrottleCommand, AccessLevel.privileged],
@@ -495,6 +497,7 @@ import { scrapeModerators } from "./utils/scraping.js";
             [isAskedAboutJokes, sayAJoke],
         ];
 
+        const dashboardApp = await startServer(client, room, config, election);
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
@@ -604,7 +607,8 @@ import { scrapeModerators } from "./utils/scraping.js";
                     ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, preparedMessage],
                     ["get modes", /^(?:get modes?\s+report|report\s+modes)/, config],
                     ["mods voted", /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, config, elections, election, preparedMessage],
-                    ["join room", /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, config, client, preparedMessage]
+                    ["join room", /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, config, client, preparedMessage],
+                    ["restart server", /^restart\s+server/, config, dashboardApp]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);
@@ -614,17 +618,6 @@ import { scrapeModerators } from "./utils/scraping.js";
                     responseText = (await boundRunIf(name, regex, ...args)) || responseText;
                 }
 
-                if (config.debug) {
-                    console.log(`Response info -
-                response text: ${responseText}
-                response chars: ${responseText.length}
-                content: ${preparedMessage}
-                original: ${decodedMessage}
-                last message: ${config.lastMessageTime}
-                last activity: ${config.lastActivityTime}
-                `);
-                }
-
                 /* Note:
                  * Be careful if integrating this section with message queue,
                  *   since it is currently for long responses to dev/admin commands only, and does not reset active mutes.
@@ -632,7 +625,8 @@ import { scrapeModerators } from "./utils/scraping.js";
                  *   so we could possibly leave this block as it is
                  */
                 if (responseText) {
-                    await sendMultipartMessage(config, room, responseText, msg.id, true);
+                    logResponse(config, responseText, preparedMessage, decodedMessage);
+                    await sendMultipartMessage(config, room, responseText, msg.id, true, false);
                     return; // no further action
                 }
             }
@@ -833,8 +827,10 @@ import { scrapeModerators } from "./utils/scraping.js";
             } // End bot mentioned
 
 
-            // Send the message
-            if (responseText) await sendMessage(config, room, responseText, null, false);
+            if (responseText) {
+                logResponse(config, responseText, preparedMessage, decodedMessage);
+                await sendMessage(config, room, responseText, null, false, false);
+            }
 
         }); // End new message event listener
 
@@ -844,8 +840,6 @@ import { scrapeModerators } from "./utils/scraping.js";
         console.log(`INIT - Joined and listening in room https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`);
 
         roomKeepAlive(config, client, room);
-
-        await startServer(client, room, config, election);
 
         // Catch all handler to swallow non-crashing rejections
         process.on("unhandledRejection", (reason) => {

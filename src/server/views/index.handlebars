@@ -47,17 +47,6 @@
                 <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
                 <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
                 <tr><td>Positions</td><td>{{numPositions}}</td></tr>
-                <tr><td>Winners <span class="small-count" data-prefix="(" data-suffix=")">{{arrWinners.length}}</span></td>
-                    {{#if arrWinners.length}}
-                    <td><ul class="list">
-                        {{#each arrWinners}}
-                        <li class="item"><a href="{{this.permalink}}">{{{this.userName}}}</a></li>
-                        {{/each}}
-                    </ul></td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
                 <tr><td>Opavote URL</td><td>{{{url opavoteUrl}}}</td></tr>
                 <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
                 <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
@@ -67,18 +56,21 @@
             {{#if (len arrNominees)}}
                 {{> nominees arrNominees }}
             {{else}}
-                <table>
-                    <tr><td></td></tr>
-                </table>
+                {{> emptySmallTable }}
             {{/if}}
 
             <h2>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{len withdrawnNominees}} total</span></h2>
             {{#if (len withdrawnNominees)}}
                 {{> nominees (values withdrawnNominees) }}
             {{else}}
-                <table>
-                    <tr><td></td></tr>
-                </table>
+                {{> emptySmallTable }}
+            {{/if}}
+
+            <h2>Winners <span class="small-count" data-prefix="(" data-suffix=")">{{len arrWinners}} total</span></h2>
+            {{#if (len arrWinners)}}
+                {{> nominees arrWinners }}
+            {{else}}
+                {{> emptySmallTable }}
             {{/if}}
         </aside>
     </section>
@@ -89,7 +81,7 @@
         <aside>
             <h2>Moderators <span class="small-count" data-prefix="(" data-suffix=")">{{len currentSiteMods}} total</span></h2>
             {{#if (len @root/data/currentSiteMods)}}
-                <table>
+                <table class="table-small">
                    <thead>
                         <tr>
                             <th>Link</th>
@@ -116,9 +108,7 @@
                     </tbody>
                 </table>
             {{else}}
-                <table>
-                    <tr><td></td></tr>
-                </table>
+                {{> emptySmallTable }}
             {{/if}}
 
             <h2>Badges</h2>
@@ -253,10 +243,17 @@
                             <td></td>
                             {{/if}}
                         </tr>
-                        <tr><td>lastBotMessage</td><td>
-                            <pre>{{lastBotMessage}}</pre>
-                            <div class="mt10">{{{lastBotMessageHtml}}}</div>
-                        </td></tr>
+                        <tr>
+                            <td>lastBotMessage</td>
+                            {{#if lastBotMessage}}
+                            <td>
+                                <pre>{{lastBotMessage}}</pre>
+                                <div class="mt10">{{{lastBotMessageHtml}}}</div>
+                            </td>
+                            {{else}}
+                            <td></td>
+                            {{/if}}
+                        </tr>
                         <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
                         <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}
                             {{#unless botHasBeenQuiet}}

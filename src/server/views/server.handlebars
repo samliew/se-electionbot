@@ -1,0 +1,34 @@
+<h1>{{{heading}}}</h1>
+
+{{> breadcrumbs current=current }}
+
+<main class="dashboard">
+    <section>
+        <aside>
+            <h2>Configuration</h2>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>directory</td>
+                        <td>{{ data/__dirname }}</td>
+                    </tr>
+                    <tr>
+                        <td>port</td>
+                        <td>{{ data/port }}</td>
+                    </tr>
+                    <tr>
+                        <td>paths</td>
+                        <td>{{> deep data/paths}}</td>
+                    </tr>
+                    <tr>
+                        <td>mounted</td>
+                        <td>{{> deep data/mounted}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Express Settings</h2>
+            {{> deep data/settings top=true}}
+        </aside>
+    </section>
+</main>

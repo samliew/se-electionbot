@@ -7,6 +7,7 @@ import { HerokuClient } from "../bot/herokuClient.js";
 import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom } from '../bot/utils.js';
 import { dateToUtcTimestamp } from '../bot/utils/dates.js';
 import * as helpers from "./helpers.js";
+import { start, stop } from './utils.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const viewsPath = join(__dirname, "views");
@@ -33,9 +34,11 @@ app
 
 /**
  * @typedef {import("../bot/config").BotConfig} BotConfig
+ * @typedef {import("express").Application} ExpressApp
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("../bot/utils").RoomUser} RoomUser
+ * @typedef {import("http").Server} HttpServer
  */
 
 /**
@@ -229,6 +232,7 @@ app.route('/say')
                     title: "Privileged Say"
                 },
                 heading: `${await botChatUser.name} say to <a href="https://chat.${chatDomain}/rooms/${chatRoomId}" target="_blank">${chatDomain}; room ${chatRoomId}</a>`,
+                current: "Say",
                 data: {
                     chatDomain,
                     chatRoomId,
@@ -266,6 +270,50 @@ app.route('/say')
         }
     });
 
+app.route("/server")
+    .get((_, res) => {
+
+        try {
+            res.render("server", {
+                current: "Server",
+                heading: "Server Control",
+                data: {
+                    __dirname,
+                    mounted: {
+                        client: !!BOT_CLIENT,
+                        config: !!BOT_CONFIG,
+                        election: !!ELECTION,
+                        room: !!BOT_ROOM
+                    },
+                    paths: {
+                        partials: partialsPath,
+                        static: staticPath,
+                        views: viewsPath
+                    },
+                    port: app.get("port"),
+                    settings: {
+                        "escape JSON": !!app.get("json escape"),
+                        "ETag": app.get("etag"),
+                        "JSONP callback": app.get("jsonp callback name"),
+                        "send x-powered-by": !!app.get("x-powered-by"),
+                        "strict routing": !!app.get("strict routing"),
+                        "subdomain offset": app.get("subdomain offset"),
+                        "view cache": !!app.get("view cache"),
+                        "view engine": app.get("view engine")
+                    }
+                },
+                page: {
+                    appName: process.env.HEROKU_APP_NAME,
+                    title: "Server"
+                }
+            });
+
+        } catch (error) {
+            console.error(`SERVER - failed to display config dashboard:`, error);
+            res.sendStatus(500);
+        }
+
+    })
 
 app.route('/config')
     .get(async ({ query }, res) => {
@@ -294,6 +342,7 @@ app.route('/config')
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Config"
                 },
+                current: "Config",
                 heading: `Update ${await botChatUser.name} environment variables`,
                 data: {
                     configObject: envVars,
@@ -381,7 +430,7 @@ export const setClient = (client) => {
  * @param {Room} room current room the bot is in
  * @param {BotConfig} config  bot configuration
  * @param {Election} election current election
- * @returns {Promise<import("express").Application>}
+ * @returns {Promise<ExpressApp>}
  */
 export const startServer = async (client, room, config, election) => {
 
@@ -390,29 +439,29 @@ export const startServer = async (client, room, config, election) => {
     setElection(election);
     setClient(client);
 
-    const server = app.listen(app.get('port'), () => {
-        console.log(`SERVER
-        Node application started:
-        dirname  ${__dirname}
-        partials ${partialsPath}
-        static   ${staticPath}
-        views    ${viewsPath}
-        port     ${app.get('port')}`);
-    });
+    const port = app.get("port");
+    const info = `${config.scriptHostname || "the server"} (port ${port})`;
+
+    const started = await start(app, port, info);
+    if (started) {
+        console.log(`[server] started
+dirname  ${__dirname}
+partials ${partialsPath}
+static   ${staticPath}
+views    ${viewsPath}
+port     ${port}`);
+    }
+
+    /** @param {ExpressApp} app */
+    const terminate = (app) => stop(app.get("server"), info).then(() => process.exit(0));
 
     const farewell = async () => {
         if (config.debug) {
             await room.sendMessage("have to go now, will be back soon...");
         }
         await room.leave();
-        terminate(server);
+        terminate(app);
     };
-
-    /** @param {import("http").Server} server */
-    const terminate = (server) => server.close(() => {
-        console.log('SERVER - gracefully shutting down');
-        process.exit(0);
-    });
 
     // https://stackoverflow.com/a/67567395
     if (process.platform === "win32") {

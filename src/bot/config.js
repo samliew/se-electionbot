@@ -1,4 +1,5 @@
-import { chatMarkdownToHtml, parseBoolEnv, parseIds, parseNumEnv } from "./utils.js";
+import { parseBoolEnv, parseIds, parseNumEnv } from "./utils.js";
+import { chatMarkdownToHtml } from "./utils/markdown.js";
 
 const MS_IN_SECOND = 1e3;
 const MS_IN_MINUTE = 60 * MS_IN_SECOND;
@@ -449,7 +450,7 @@ export class BotConfig {
 
     /**
      * @summary checks if new message is the same as the old one
-     * @param {string} newContent 
+     * @param {string} newContent
      * @returns {boolean}
      */
     checkSameResponseAsPrevious(newContent) {
