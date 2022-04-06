@@ -73,6 +73,13 @@ const mdLinkToHTML = (text) => text.replace(/(^|\s)\[([^\]]+)\]\(((?:https?|ftp)
 const mdStrikeToHTML = (text) => text.replace(/(^|[\s,('">[{-])---(?=\S)(.+?\S)---(?=[\s,?!.;:)<\]}-]|$)/g, "$1<strike>$2</strike>");
 
 /**
+ * @summary replaces newlines with HTML tags
+ * @param {string} text text to process
+ * @returns {string}
+ */
+const mdNewlineToHTML = (text) => text.replace(/\r\n?|\n/g, "<br/>");
+
+/**
  * @summary replaces escaped Markdown special chars with HTML entities
  * @param {string} text text to process
  * @returns {string}
@@ -104,7 +111,7 @@ export const chatMarkdownToHtml = (content) => {
     const escaped = escape(content);
     if (/[\n\r]/.test(escaped)) {
         const o = !/^ {0,3}[^ ]/m.test(escaped);
-        return o ? "<pre class='full'>" + escaped.replace(/^    /gm, "") + "</pre>" : "<div>" + escaped.replace(/\r\n?|\n/g, "<br/>") + "</div>";
+        return o ? "<pre class='full'>" + escaped.replace(/^    /gm, "") + "</pre>" : "<div>" + mdNewlineToHTML(escaped) + "</div>";
     }
 
     const handlers = [
@@ -113,7 +120,8 @@ export const chatMarkdownToHtml = (content) => {
         mdBoldToHTML,
         mdItalicToHTML,
         mdStrikeToHTML,
-        mdLinkToHTML
+        mdLinkToHTML,
+        mdNewlineToHTML
     ];
 
     return handlers.reduce((a, c) => c(a), content);
