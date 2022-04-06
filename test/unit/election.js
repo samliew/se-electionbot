@@ -407,23 +407,27 @@ describe('Election', () => {
     describe('isEnding', () => {
 
         it('should correctly check if election is ending', () => {
-            const offset = 5 * 6e5;
+            const offsetSecs = 5 * 60 * 1000; // 5 minutes
 
             const election = new Election("https://stackoverflow.com/election/12");
+            
+            // Move end date to 5 mins in the future (so it will be ending soon)
             election.phase = "election";
-            election.dateEnded = new Date().toISOString();
+            election.dateEnded = new Date(Date.now() + offsetSecs).toISOString();
 
-            const isEndedInThePast = election.isEnding(offset);
+            const isEndedInThePast = election.isEnding();
             expect(isEndedInThePast).to.be.true;
 
-            election.dateEnded = new Date(Date.now() + offset * 2).toISOString();
+            // Move end date to 5 mins in the past (so it has already ended)
+            election.phase = "ended";
+            election.dateEnded = new Date(Date.now() - offsetSecs).toISOString();
 
-            const isEndedInTheFuture = election.isEnding(offset);
+            const isEndedInTheFuture = election.isEnding();
             expect(isEndedInTheFuture).to.be.false;
 
+            // If election is still in nomination phase, it's not ending
             election.phase = "nomination";
-
-            const isEndedInNomination = election.isEnding(offset);
+            const isEndedInNomination = election.isEnding();
             expect(isEndedInNomination).to.be.false;
         });
     });

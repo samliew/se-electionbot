@@ -809,12 +809,13 @@ export default class Election {
 
     /**
      * @summary checks if the election is ending soon
-     * @param {number} [thresholdSecs] offset to consider the election ending from (15 mins by default)
+     * @param {number} [thresholdSecs] offset to consider the election ending from (30 mins by default)
      * @returns {boolean}
      */
-    isEnding(thresholdSecs = 15 * 6e5) {
+    isEnding(thresholdSecs = 30 * 60) {
         const { phase, dateEnded } = this;
-        const isUnderThreshold = new Date(dateEnded).valueOf() - thresholdSecs <= Date.now();
+        const threshold = new Date(dateEnded).valueOf() - thresholdSecs * 1000;
+        const isUnderThreshold = threshold <= Date.now();
         return phase === 'election' && isUnderThreshold;
     }
 
