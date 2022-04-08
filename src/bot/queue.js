@@ -2,6 +2,11 @@
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} WebsocketEvent
+ *
+ * @typedef {{
+ *  isPrivileged?: boolean,
+ *  log?: boolean
+ * }} MessageOptions
  */
 
 import { wait } from "./utils.js";
@@ -84,11 +89,16 @@ export const sendReply = async function (config, room, responseText, inResponseT
  * @param {Room} room room to announce in
  * @param {string} responseText Message to send
  * @param {null|number} inResponseTo message ID to reply to
- * @param {boolean} [isPrivileged] privileged user flag
- * @param {boolean} [log] flag to log valid messages
+ * @param {MessageOptions} [options] configuration
  * @returns {Promise<boolean>}
  */
-export const sendMultipartMessage = async (config, room, responseText, inResponseTo = null, isPrivileged = false, log = true) => {
+export const sendMultipartMessage = async (
+    config,
+    room,
+    responseText,
+    inResponseTo = null,
+    { isPrivileged = false, log = true } = {}
+) => {
 
     const { debugOrVerbose } = config;
     const { maxMessageLength, maxMessageParts, minThrottleSecs } = config;
@@ -165,10 +175,7 @@ export const sendMultipartMessage = async (config, room, responseText, inRespons
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to send messages to
  * @param {string[]} messages message text list
- * @param {{
- *  isPrivileged?: boolean,
- *  log?: boolean
- * }} options configuration
+ * @param {MessageOptions} options configuration
  */
 export const sendMessageList = async (config, room, messages, { isPrivileged = false, log = true }) => {
     const { throttleSecs } = config;

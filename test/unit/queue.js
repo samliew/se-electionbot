@@ -45,7 +45,7 @@ describe('Message Queue', () => {
 
             const response = "";
 
-            const status = await sendMultipartMessage(config, room, response, message.id, true);
+            const status = await sendMultipartMessage(config, room, response, message.id, { isPrivileged: true });
 
             expect(status).to.be.false;
             expect(send.calledOnce).to.be.false;
@@ -58,7 +58,7 @@ describe('Message Queue', () => {
 
             const response = "first\nfifth";
 
-            const promise = sendMultipartMessage(config, room, response, message.id, true);
+            const promise = sendMultipartMessage(config, room, response, message.id, { isPrivileged: true });
             await clock.runAllAsync();
             const status = await promise;
 
@@ -74,7 +74,7 @@ describe('Message Queue', () => {
 
             const response = "first fifth";
 
-            const promise = sendMultipartMessage(config, room, response, message.id, true);
+            const promise = sendMultipartMessage(config, room, response, message.id, { isPrivileged: true });
             await clock.runAllAsync();
             const status = await promise;
 
@@ -90,7 +90,7 @@ describe('Message Queue', () => {
 
             const response = "first second third fourth fifth";
 
-            const promise = sendMultipartMessage(config, room, response, message.id, true);
+            const promise = sendMultipartMessage(config, room, response, message.id, { isPrivileged: true });
             await clock.runAllAsync();
             const status = await promise;
 

@@ -626,7 +626,7 @@ import { scrapeModerators } from "./utils/scraping.js";
                  */
                 if (responseText) {
                     logResponse(config, responseText, preparedMessage, decodedMessage);
-                    await sendMultipartMessage(config, room, responseText, msg.id, true, false);
+                    await sendMultipartMessage(config, room, responseText, msg.id, { isPrivileged: true, log: false });
                     return; // no further action
                 }
             }
@@ -761,12 +761,12 @@ import { scrapeModerators } from "./utils/scraping.js";
             }
             else if (isPrivileged && isAskedHowManyModsInTheRoom(preparedMessage)) {
                 const modNumResponse = await sayHowManyModsAreHere(config, client, room);
-                await sendMultipartMessage(config, room, modNumResponse, msg.id, true);
+                await sendMultipartMessage(config, room, modNumResponse, msg.id, { isPrivileged: true });
                 return;
             }
             else if (isAskedHowManyCandidatesInTheRoom(preparedMessage)) {
                 const nomineeNumResponse = await sayHowManyCandidatesAreHere(config, election, client, room);
-                await sendMultipartMessage(config, room, nomineeNumResponse, msg.id, true);
+                await sendMultipartMessage(config, room, nomineeNumResponse, msg.id, { isPrivileged: true });
                 return;
             }
 
@@ -775,7 +775,7 @@ import { scrapeModerators } from "./utils/scraping.js";
 
                 if (isAskedForFullHelp(preparedMessage)) {
                     await sendMultipartMessage(config, room, "Examples of election FAQs I can help with:\n- " +
-                        helpTopics.map(({ text }) => text).join('\n- '), msg.id, true);
+                        helpTopics.map(({ text }) => text).join('\n- '), msg.id, { isPrivileged: true });
                     return; // Message sent, no need to continue
                 }
                 // Help - contain this to a single message please (<500 chars including line breaks, bullets, and whitespace)
