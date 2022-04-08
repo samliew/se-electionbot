@@ -11,7 +11,10 @@ describe('Message Queue', () => {
 
         const client = new Client["default"]("stackexchange.com");
 
-        beforeEach(() => sinon.restore());
+        beforeEach(() => {
+            sinon.restore();
+            sinon.stub(console, "log");
+        });
 
         /** @type {Room} */
         let room;
@@ -19,7 +22,10 @@ describe('Message Queue', () => {
 
         /** @type {sinon.SinonFakeTimers} */
         let clock;
-        beforeEach(() => clock = sinon.useFakeTimers());
+        beforeEach(() => {
+            clock = sinon.useFakeTimers();
+            clock.tick(1e4); // required to avoid isMuted guard kicking in
+        });
         afterEach(() => clock.restore());
 
         /** @type {ReturnType<typeof getMockBotConfig>} */
@@ -83,14 +89,14 @@ describe('Message Queue', () => {
             expect(send.secondCall.args[0]).to.equal("fifth");
         });
 
-        it('should send a warning if more than three message', async () => {
+        it('should send a warning if more than 3 messages', async () => {
             config.maxMessageLength = 6;
 
             const send = sinon.stub(room, "sendMessage");
 
             const response = "first second third fourth fifth";
 
-            const promise = sendMultipartMessage(config, room, response, message.id, { isPrivileged: true });
+            const promise = sendMultipartMessage(config, room, response, message.id);
             await clock.runAllAsync();
             const status = await promise;
 
