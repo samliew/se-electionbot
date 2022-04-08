@@ -149,7 +149,7 @@ export const sendMultipartMessage = async (
 
     config.lastActivityTime = completionDate;
 
-    if (numParts > maxMessageParts) {
+    if (numParts > maxMessageParts && !isPrivileged) {
         await room.sendMessage(`${inResponseTo ? `:${inResponseTo} ` : ""}I wrote a poem of ${numParts} messages for you!`);
         await wait(waitSecs);
         return false; // Do not send actual response if they take too many messages
