@@ -452,7 +452,7 @@ export const isAskedWhoIsTheBestCandidate = (text) => {
  */
 export const isAskedWhoIsTheBestMod = (text) => {
     return someMatch([
-        /^(?:who|which)\s+(?:is|are)(?:\s+the)?(\s+most)?\s+(?:best|coolest|loved|favou?rite)\s+(?:mod|diamond)(?:erator)?/i
+        /^(?:who|which)\s+(?:is|are|will\s+be)(?:\s+the)?(\s+most)?\s+(?:best|coolest|loved|favou?rite)\s+(?:mod|diamond)(?:erator)?/i
     ], text);
 };
 

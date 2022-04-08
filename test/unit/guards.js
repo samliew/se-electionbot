@@ -226,7 +226,8 @@ describe('Message Guards', () => {
         "who is best diamond?",
         "Who is best moderator?",
         "Which is the coolest mod",
-        "who is the most loved mod?"
+        "who is the most loved mod?",
+        "Who will be the best mod?"
     ];
 
     const bestCandidateMatches = [
@@ -478,7 +479,7 @@ describe('Message Guards', () => {
             ], false);
         });
     });
-    
+
     describe(isAskedHowOrWhoToVote.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedHowOrWhoToVote, whoToVoteMatches);
