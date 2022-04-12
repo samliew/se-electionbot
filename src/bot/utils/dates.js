@@ -143,6 +143,13 @@ export const toTadParamFormat = (date) => validateDate(date).toISOString()
 export const getSeconds = (date) => new Date(date).getTime() / MS_IN_SECOND;
 
 /**
+ * @summary gets number of milliseconds since *nix epoch
+ * @param {Date|string|number} date date to get seconds from
+ * @returns {number}
+ */
+export const getMilliseconds = (date) => validateDate(date).valueOf();
+
+/**
  * @summary reformats a date string in US format to ISO 8601
  * @param {string} datestr date string in US format (MM/dd/yyyy)
  * @returns {string}
