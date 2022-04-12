@@ -13,7 +13,7 @@
     <section>
         <aside>
             <h2>Routes</h2>
-            <table>
+            <table class="table-small">
                 <thead>
                     <tr>
                         <th>path</th>
@@ -21,10 +21,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{#each data/routes}}
+                    {{#each routes}}
                     <tr>
-                        <td>{{ path }}</td>
-                        <td>{{ methods }}</td>
+                        <td>{{ @key }}</td>
+                        <td>{{ join this/methods ", " }}</td>
                     </tr>
                     {{/each}}
                 </tbody>

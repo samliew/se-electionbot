@@ -17,6 +17,11 @@ const layoutsPath = join(viewsPath, "layouts");
 
 const app = express().set('port', process.env.PORT || 5000);
 
+// Only these paths will be non-password protected
+const publicPaths = [
+    "/", "/static", "/favicon.ico"
+];
+
 /** @type {Handlebars.ExphbsOptions} */
 const handlebarsConfig = {
     // without extname property set to .<extension>, partials will not work
@@ -95,11 +100,6 @@ app.use((req, res, next) => {
         res.redirect(`${scriptHostname}${path}${querystring ? '?' + querystring : ''}`);
         return;
     }
-
-    // Only these paths will be non-password protected
-    const publicPaths = [
-        "/", "/static", "/favicon.ico"
-    ];
 
     // Password-protect pages
     const { password: pwdFromQuery = "" } = query;
@@ -291,7 +291,6 @@ app.route("/server")
                         views: viewsPath
                     },
                     port: app.get("port"),
-                    routes: routes(app),
                     settings: {
                         "escape JSON": !!app.get("json escape"),
                         "ETag": app.get("etag"),
@@ -303,6 +302,7 @@ app.route("/server")
                         "view engine": app.get("view engine")
                     }
                 },
+                routes: routes(app),
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Server"
