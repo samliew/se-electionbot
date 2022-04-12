@@ -19,7 +19,7 @@ const app = express().set('port', process.env.PORT || 5000);
 
 // Only these paths will be non-password protected
 const publicPaths = [
-    "/", "/static", "/favicon.ico"
+    "/", "/ping", "/static", "/favicon.ico"
 ];
 
 /** @type {Handlebars.ExphbsOptions} */
@@ -390,6 +390,11 @@ app.route('/config')
             console.error(`SERVER - config submit error:`, error);
             res.redirect(`/config?password=${password}&success=false`);
         }
+    });
+
+app.route("/ping")
+    .get((_, res) => {
+        res.sendStatus(200);
     });
 
 
