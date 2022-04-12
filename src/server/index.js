@@ -401,6 +401,11 @@ app.route('/config')
         }
     });
 
+app.route("/ping")
+    .get((_, res) => {
+        res.sendStatus(200);
+    });
+
 
 /**
  * @summary sets the server's bot config
