@@ -19,7 +19,7 @@ const app = express().set('port', process.env.PORT || 5000);
 
 // Only these paths will be non-password protected
 const publicPaths = [
-    "/", "/static", "/favicon.ico"
+    "/", "/ping", "/static", "/favicon.ico"
 ];
 
 /** @type {Handlebars.ExphbsOptions} */
