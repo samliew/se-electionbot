@@ -96,9 +96,11 @@ export const boolean = function (data) {
     return `<span class="${data || data === 'true' ? 'truthy' : 'falsy'}">${data}</span>`;
 };
 
-export const yesno = function (data) {
-    return `<span class="${data || data === 'yes' ? 'yes' : 'no'}">${data || data === 'yes' ? 'yes' : 'no'}</span>`;
-};
+/** @type {(data: unknown) => string} */
+export const yesno = (data) => {
+    const isYes = typeof data === "string" ? data === 'yes' : !!data;
+    return `<span class="${isYes ? 'yes' : 'no'}">${isYes ? 'yes' : 'no'}</span>`;
+}
 
 export const required = function (data) {
     return `<span class="${data || data === 'required' ? 'required' : ''}">${data || data === 'required' ? 'required' : ''}</span>`;
