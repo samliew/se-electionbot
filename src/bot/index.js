@@ -854,7 +854,7 @@ import { scrapeModerators } from "./utils/scraping.js";
     if (config.scriptHostname && (config.keepAlive || config.scriptHostname.includes('herokuapp'))) {
 
         // Heroku free dyno will shutdown when idle for 30 mins, so keep-alive is necessary
-        keepAlive(config.scriptHostname);
+        keepAlive(`${config.scriptHostname}/ping`);
     }
 
 })();
