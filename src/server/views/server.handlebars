@@ -18,6 +18,7 @@
                     <tr>
                         <th>path</th>
                         <th>methods</th>
+                        <th>public</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,6 +26,7 @@
                     <tr>
                         <td>{{ @key }}</td>
                         <td>{{ join this/methods ", " }}</td>
+                        <td>{{{ yesno this/public }}}</td>
                     </tr>
                     {{/each}}
                 </tbody>

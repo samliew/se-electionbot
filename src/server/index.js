@@ -302,7 +302,7 @@ app.route("/server")
                         "view engine": app.get("view engine")
                     }
                 },
-                routes: routes(app),
+                routes: routes(app, publicPaths),
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Server"

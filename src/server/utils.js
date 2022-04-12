@@ -3,7 +3,7 @@
  * @typedef {import("http").Server} HttpServer
  * @typedef {import("express").IRoute} IRoute
  * @typedef {import("express").IRouter} IRouter
- * @typedef {Record<string, { methods: string[] }>} RouteInfo
+ * @typedef {Record<string, { methods: string[], public: boolean }>} RouteInfo
  */
 
 /**
@@ -45,9 +45,10 @@ export const stop = async (server, info) => {
 /**
  * @summary gets all mounted routes for an {@link ExpressApp}
  * @param {ExpressApp} app Express application
+ * @param {string[]} [publicPaths] paths that are publicly accessible
  * @returns {RouteInfo}
  */
-export const routes = (app) => {
+export const routes = (app, publicPaths = []) => {
     /** @type {RouteInfo} */
     const routes = {};
 
@@ -63,7 +64,10 @@ export const routes = (app) => {
         const methods = new Set();
         stack.forEach(({ method }) => methods.add(method.toUpperCase()));
 
-        routes[path] = { methods: [...methods] };
+        routes[path] = {
+            methods: [...methods],
+            public: publicPaths.includes(path)
+        };
     });
 
     return routes;
