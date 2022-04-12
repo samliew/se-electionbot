@@ -1,12 +1,17 @@
 import { dateToUtcTimestamp, validateDate } from "../bot/utils/dates.js";
 import { formatOrdinal } from "../bot/utils/strings.js";
 
+/** @type {(source: unknown) => boolean} */
+export const isArr = (source) => Array.isArray(source);
 
 /** @type {(source: unknown) => boolean} */
-export const isObj = (source) => typeof source === "object";
+export const isObj = (source) => !!source && typeof source === "object";
 
 /** @type {(source: unknown) => boolean} */
 export const isBool = (source) => typeof source === "boolean";
+
+/** @type {(source: unknown[], sep: string) => string} */
+export const join = (source, sep) => source.join(sep);
 
 /** @type {(source: unknown) => boolean} */
 export const isURL = (source) => {
