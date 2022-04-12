@@ -7,7 +7,7 @@ import { HerokuClient } from "../bot/herokuClient.js";
 import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom } from '../bot/utils.js';
 import { dateToUtcTimestamp } from '../bot/utils/dates.js';
 import * as helpers from "./helpers.js";
-import { start, stop } from './utils.js';
+import { routes, start, stop } from './utils.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const viewsPath = join(__dirname, "views");
@@ -16,6 +16,11 @@ const partialsPath = join(viewsPath, "partials");
 const layoutsPath = join(viewsPath, "layouts");
 
 const app = express().set('port', process.env.PORT || 5000);
+
+// Only these paths will be non-password protected
+const publicPaths = [
+    "/", "/static", "/favicon.ico"
+];
 
 /** @type {Handlebars.ExphbsOptions} */
 const handlebarsConfig = {
@@ -95,11 +100,6 @@ app.use((req, res, next) => {
         res.redirect(`${scriptHostname}${path}${querystring ? '?' + querystring : ''}`);
         return;
     }
-
-    // Only these paths will be non-password protected
-    const publicPaths = [
-        "/", "/static", "/favicon.ico"
-    ];
 
     // Password-protect pages
     const { password: pwdFromQuery = "" } = query;
@@ -274,15 +274,6 @@ app.route("/server")
     .get((_, res) => {
 
         try {
-            const routes = app._router.stack.map(({ route }) => {
-                if (!route || !route.path) return null;
-                // Map to route path and http method
-                return {
-                    path: route.path,
-                    methods: Object.keys(route.methods).join(', ').toUpperCase()
-                };
-            }).filter(Boolean);
-
             res.render("server", {
                 current: "Server",
                 heading: "Server Control",
@@ -309,9 +300,9 @@ app.route("/server")
                         "subdomain offset": app.get("subdomain offset"),
                         "view cache": !!app.get("view cache"),
                         "view engine": app.get("view engine")
-                    },
-                    routes: routes,
+                    }
                 },
+                routes: routes(app),
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Server"
