@@ -1,5 +1,5 @@
 import * as ServerUtils from "../../server/utils.js";
-import { getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
+import { getMetaResultAnnouncements, getMetaSite, getModerators, getNumberOfVoters } from "../api.js";
 import Election from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
 import { sayUptime } from "../messages/metadata.js";
@@ -8,8 +8,9 @@ import { sendMessage } from "../queue.js";
 import { RandomArray } from "../random.js";
 import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
 import { flat } from "../utils/arrays.js";
-import { dateToUtcTimestamp } from "../utils/dates.js";
-import { matchNumber } from "../utils/expressions.js";
+import { formatAsChatCode } from "../utils/chat.js";
+import { addDates, dateToUtcTimestamp, daysDiff, getMilliseconds } from "../utils/dates.js";
+import { matchISO8601, matchNumber } from "../utils/expressions.js";
 
 /**
  * @typedef {import("../announcement").default} Announcement
@@ -646,4 +647,93 @@ export const restartDashboard = async (config, app) => {
     if (!started) return `[error] failed to start ${info}`;
 
     return `[success] started ${info}`;
+};
+
+/**
+ * @summary
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election instance
+ * @param {string} content message content
+ * @returns {Promise<string>}
+ */
+export const getVotingReport = async (config, election, content) => {
+    const { apiSlug, dateEnded } = election;
+
+    const electionBadgeName = "Constituent";
+    const electionBadgeId = election.getBadgeId(electionBadgeName);
+
+    if (!electionBadgeId) return `missing ${electionBadgeName} badge id`;
+
+    const fromdate = matchISO8601(content, { preMatches: /\b(?:from|since)\s+/ });
+    const todate = matchISO8601(content, { preMatches: /\b(?:to|till)\s+/ });
+
+    if (!fromdate || !todate) return `missing report date boundary\nfrom: ${!!fromdate}\nto: ${!!todate}`;
+
+    const fromto = `from: ${dateToUtcTimestamp(fromdate)}\nto: ${dateToUtcTimestamp(todate)}`;
+
+    if (getMilliseconds(fromdate) > getMilliseconds(dateEnded)) {
+        return `report cannot start after the election end\n${fromto}\nend: ${dateEnded}`;
+    }
+
+    const days = Math.ceil(daysDiff(fromdate, todate));
+
+    if (config.debugOrVerbose) {
+        console.log(`[voting report]\n${fromto}\ndiff: ${days}`);
+    }
+
+    if (days <= 0) {
+        return `report cannot be empty (${days} day${pluralize(days)})`;
+    }
+
+    /** @type {Map<string, number>} */
+    const dailyGraph = new Map();
+
+    for (let i = 0; i < days; i++) {
+        const to = addDates(fromdate, i + 1);
+
+        const voters = await getNumberOfVoters(config, apiSlug, electionBadgeId, { from: fromdate, to });
+
+        dailyGraph.set(dateToUtcTimestamp(to), voters);
+    }
+
+    /** @type {[string,string][]} */
+    const reportLines = [];
+
+    /** @type {[number, number]} */
+    const maxLengths = [0, 0];
+
+    // first pass: find max lengths of cell data
+    dailyGraph.forEach((voters, date) => {
+        const { length: currLlen } = date;
+        const { length: currRlen } = voters.toString();
+
+        const [prevLmax, prevRmax] = maxLengths;
+
+        if (prevLmax < currLlen) maxLengths[0] = currLlen;
+        if (prevRmax < currRlen) maxLengths[1] = currRlen;
+    });
+
+    const [lMaxLen, rMaxLen] = maxLengths;
+
+    const lHeader = `| Date${" ".repeat(lMaxLen - 3 > 0 ? lMaxLen - 3 : 1)}`;
+    const rHeader = `| Voters${" ".repeat(rMaxLen - 8 > 0 ? rMaxLen - 8 : 1)}|`;
+
+    const lAddBase = lMaxLen > lHeader.length ? lMaxLen : lHeader.length;
+    const rAddBase = rMaxLen > rHeader.length ? rMaxLen : rHeader.length;
+
+    // second pass: build balanced lines
+    dailyGraph.forEach((voters, date) => {
+        const lSpacesToAdd = lAddBase - date.length - 3;
+        const rSpacesToAdd = rAddBase - voters.toString().length - 3;
+
+        const lcell = `| ${date}${" ".repeat(lSpacesToAdd > 0 ? lSpacesToAdd : 1)}|`;
+        const rcell = ` ${voters}${" ".repeat(rSpacesToAdd > 0 ? rSpacesToAdd : 1)}|`;
+        reportLines.push([lcell, rcell]);
+    });
+
+    const lines = reportLines.map(([f, l]) => `${f}${l}`);
+
+    const separator = `| ${"-".repeat(lAddBase - 3)} | ${"-".repeat(rAddBase - 4)} |`;
+
+    return formatAsChatCode([`${lHeader}${rHeader}`, separator, ...lines]);
 };

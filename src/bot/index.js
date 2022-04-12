@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, getVotingReport, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -445,6 +445,7 @@ import { scrapeModerators } from "./utils/scraping.js";
             "timetravel": ["sends bot back in time to another phase", timetravelCommand, AccessLevel.dev],
             "unmute": ["allows the bot to respond", unmuteCommand, AccessLevel.privileged],
             "verbose": ["switches verbose mode on/off", switchMode, AccessLevel.dev],
+            "voter report": ["posts a per-day report on voters", getVotingReport, AccessLevel.privileged],
             "whois": ["retrieve mods from another site", listSiteModerators, AccessLevel.privileged]
         });
 
@@ -608,7 +609,8 @@ import { scrapeModerators } from "./utils/scraping.js";
                     ["get modes", /^(?:get modes?\s+report|report\s+modes)/, config],
                     ["mods voted", /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, config, elections, election, preparedMessage],
                     ["join room", /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, config, client, preparedMessage],
-                    ["restart server", /^restart\s+server/, config, dashboardApp]
+                    ["restart server", /^restart\s+server/, config, dashboardApp],
+                    ["voter report", /^(?:post\s+)?voter\s+report/, config, election, preparedMessage]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);
