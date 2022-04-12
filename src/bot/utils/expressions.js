@@ -16,10 +16,10 @@ export const safeCapture = (expression, text) => {
  * @returns {string | undefined}
  */
 export const matchISO8601 = (text, { preMatches, postMatches } = {}) => {
-    const isoRegex = /(\d{4}-\d{2}-\d{2}(?:(?:\s+|T)\d{2}:\d{2}:\d{2}(?=Z|))?)/;
+    const isoRegex = /(\d{4}-\d{2}-\d{2}(?:(?:\s+|T)\d{2}:\d{2}:\d{2}(?=Z|))?)/i;
     const expression = new RegExp((preMatches?.source || "") + isoRegex.source + (postMatches?.source || ""), "i");
     const timestamp = safeCapture(expression, text);
-    const [toDate, toTime = "00:00:00"] = timestamp?.split(/\s+|T/) || [];
+    const [toDate, toTime = "00:00:00"] = timestamp?.split(/\s+|T/i) || [];
     return timestamp && `${toDate}T${toTime}Z`;
 };
 
