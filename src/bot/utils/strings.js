@@ -54,3 +54,10 @@ export const percentify = (numA, numB, precision, postfix = "%") => {
     const isInt = percent === Math.trunc(percent);
     return `${isInt ? percent : percent.toFixed(precision)}${postfix}`;
 };
+
+/**
+ * @summary finds the longest string length
+ * @param {string[]} strings strings to compare
+ * @returns {number}
+ */
+export const longestLength = (strings) => Math.max(...strings.map(({ length }) => length)) || 0;
