@@ -6,30 +6,7 @@
     <section>
         <aside>
             <h2>Configuration</h2>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>directory</td>
-                        <td>{{ data/__dirname }}</td>
-                    </tr>
-                    <tr>
-                        <td>port</td>
-                        <td>{{ data/port }}</td>
-                    </tr>
-                    <tr>
-                        <td>paths</td>
-                        <td>{{> deep data/paths}}</td>
-                    </tr>
-                    <tr>
-                        <td>mounted</td>
-                        <td>{{> deep data/mounted}}</td>
-                    </tr>
-                    <tr>
-                        <td>express</td>
-                        <td>{{> deep data/settings}}</td>
-                    </tr>
-                </tbody>
-            </table>
+            {{> deep data top=true}}
         </aside>
     </section>
 
