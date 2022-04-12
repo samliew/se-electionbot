@@ -75,6 +75,10 @@ a:visited {
   color: var(--text-colour);
 }
 
+sup {
+  vertical-align: top;
+}
+
 blockquote {
   margin: 2em 0 1.3em;
 }
