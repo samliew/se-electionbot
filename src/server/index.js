@@ -274,6 +274,15 @@ app.route("/server")
     .get((_, res) => {
 
         try {
+            const routes = app._router.stack.map(({ route }) => {
+                if (!route || !route.path) return null;
+                // Map to route path and http method
+                return {
+                    path: route.path,
+                    methods: Object.keys(route.methods).join(', ').toUpperCase()
+                };
+            }).filter(Boolean);
+
             res.render("server", {
                 current: "Server",
                 heading: "Server Control",
@@ -300,7 +309,8 @@ app.route("/server")
                         "subdomain offset": app.get("subdomain offset"),
                         "view cache": !!app.get("view cache"),
                         "view engine": app.get("view engine")
-                    }
+                    },
+                    routes: routes,
                 },
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
