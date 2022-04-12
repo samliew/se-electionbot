@@ -1,9 +1,9 @@
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
-import { getBadges, getUserInfo } from './api.js';
+import { getBadges, getNumberOfVoters, getUserInfo } from './api.js';
 import { calculateScore } from './score.js';
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
-import { dateToUtcTimestamp } from './utils/dates.js';
+import { addDates, dateToUtcTimestamp, daysDiff } from './utils/dates.js';
 import { findLast } from './utils/dom.js';
 import { matchNumber } from "./utils/expressions.js";
 
@@ -193,6 +193,46 @@ export const getSiteElections = async (config, siteUrl, maxElectionNumber, scrap
     }
 
     return [elections, validationErrors];
+};
+
+
+/**
+ * @summary gets a daily voting graph
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {string | number | Date} fromdate start date
+ * @param {string | number | Date} todate end date
+ * @returns {Promise<Map<string, number>>}
+ */
+export const getVotingGraph = async (config, election, fromdate, todate) => {
+    const electionBadgeName = "Constituent";
+    const electionBadgeId = election.getBadgeId(electionBadgeName);
+
+    /** @type {Map<string, number>} */
+    const dailyGraph = new Map();
+
+    if (!electionBadgeId) {
+        console.log(`[voting graph]\nmissing ${electionBadgeName} badge id`);
+        return dailyGraph;
+    }
+
+    const days = Math.ceil(daysDiff(fromdate, todate));
+
+    if (days <= 0) {
+        return dailyGraph;
+    }
+
+    const { apiSlug } = election;
+
+    for (let i = 0; i < days; i++) {
+        const to = addDates(fromdate, i + 1);
+
+        const voters = await getNumberOfVoters(config, apiSlug, electionBadgeId, { from: fromdate, to });
+
+        dailyGraph.set(dateToUtcTimestamp(to), voters);
+    }
+
+    return dailyGraph;
 };
 
 /**

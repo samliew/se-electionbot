@@ -1,6 +1,6 @@
 import * as ServerUtils from "../../server/utils.js";
-import { getMetaResultAnnouncements, getMetaSite, getModerators, getNumberOfVoters } from "../api.js";
-import Election from "../election.js";
+import { getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
+import Election, { getVotingGraph } from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
 import { sayUptime } from "../messages/metadata.js";
 import { sayOtherSiteMods } from "../messages/moderators.js";
@@ -9,7 +9,7 @@ import { RandomArray } from "../random.js";
 import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
 import { flat } from "../utils/arrays.js";
 import { formatAsChatCode } from "../utils/chat.js";
-import { addDates, dateToUtcTimestamp, daysDiff, getMilliseconds } from "../utils/dates.js";
+import { dateToUtcTimestamp, getMilliseconds } from "../utils/dates.js";
 import { matchISO8601, matchNumber } from "../utils/expressions.js";
 
 /**
@@ -657,7 +657,7 @@ export const restartDashboard = async (config, app) => {
  * @returns {Promise<string>}
  */
 export const getVotingReport = async (config, election, content) => {
-    const { apiSlug, dateEnded } = election;
+    const { dateEnded } = election;
 
     const electionBadgeName = "Constituent";
     const electionBadgeId = election.getBadgeId(electionBadgeName);
@@ -675,7 +675,9 @@ export const getVotingReport = async (config, election, content) => {
         return `report cannot start after the election end\n${fromto}\nend: ${dateEnded}`;
     }
 
-    const days = Math.ceil(daysDiff(fromdate, todate));
+    const dailyGraph = await getVotingGraph(config, election, fromdate, todate);
+
+    const { size: days } = dailyGraph;
 
     if (config.debugOrVerbose) {
         console.log(`[voting report]\n${fromto}\ndiff: ${days}`);
@@ -683,17 +685,6 @@ export const getVotingReport = async (config, election, content) => {
 
     if (days <= 0) {
         return `report cannot be empty (${days} day${pluralize(days)})`;
-    }
-
-    /** @type {Map<string, number>} */
-    const dailyGraph = new Map();
-
-    for (let i = 0; i < days; i++) {
-        const to = addDates(fromdate, i + 1);
-
-        const voters = await getNumberOfVoters(config, apiSlug, electionBadgeId, { from: fromdate, to });
-
-        dailyGraph.set(dateToUtcTimestamp(to), voters);
     }
 
     /** @type {[string,string][]} */
