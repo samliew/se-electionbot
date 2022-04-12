@@ -41,3 +41,10 @@ export const prepareMessageForMatching = (encodedMessage, username) => {
 export const validateChatTranscriptURL = (url) => {
     return /^https:\/\/chat\.(?:meta\.)?stack(?:exchange|overflow)\.com\/transcript\/\d+/i.test(url);
 };
+
+/**
+ * @summary formats several lines of text as a code block
+ * @param {string[]} lines lines of text to format
+ * @returns {string}
+ */
+export const formatAsChatCode = (lines) => lines.map((l) => `${" ".repeat(4)}${l}`).join("\n");
