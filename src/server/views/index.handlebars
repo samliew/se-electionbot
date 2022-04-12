@@ -193,11 +193,33 @@
         <aside>
             <h2>Room Activity</h2>
             <table>
-                <tr><td>Fun</td><td>
+                <tr><td>Bot</td><td>
                     <table class="nested">
-                        <tr><td>funResponseCounter</td><td>{{funResponseCounter}}</td></tr>
-                        <tr><td>maxFunResponses</td><td>{{maxFunResponses}}</td></tr>
-                        <tr><td>canSendFunResponse</td><td>{{{boolean canSendFunResponse}}}</td></tr>
+                        <tr><td>lastMessageTime</td>
+                            {{#if lastMessageTime}}
+                            <td>{{utcTimestamp lastMessageTime}} <span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td>
+                            {{else}}
+                            <td></td>
+                            {{/if}}
+                        </tr>
+                        <tr>
+                            <td>lastBotMessage</td>
+                            {{#if lastBotMessage}}
+                            <td>
+                                <pre>{{lastBotMessage}}</pre>
+                                <div class="mt10">{{{lastBotMessageHtml}}}</div>
+                            </td>
+                            {{else}}
+                            <td></td>
+                            {{/if}}
+                        </tr>
+                        <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
+                        <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}
+                            {{#unless botHasBeenQuiet}}
+                            <span class="relativetime" title="{{utcTimestamp botWillBeQuietDate}}"></span>
+                            {{/unless}}
+                        </td></tr>
+                        <tr><td>ignoreSelf</td><td>{{{boolean ignoreSelf}}}</td></tr>
                     </table>
                 </td></tr>
 
@@ -234,33 +256,11 @@
                     </table>
                 </td></tr>
 
-                <tr><td>Bot Idle</td><td>
+                <tr><td>Fun</td><td>
                     <table class="nested">
-                        <tr><td>lastMessageTime</td>
-                            {{#if lastMessageTime}}
-                            <td>{{utcTimestamp lastMessageTime}} <span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td>
-                            {{else}}
-                            <td></td>
-                            {{/if}}
-                        </tr>
-                        <tr>
-                            <td>lastBotMessage</td>
-                            {{#if lastBotMessage}}
-                            <td>
-                                <pre>{{lastBotMessage}}</pre>
-                                <div class="mt10">{{{lastBotMessageHtml}}}</div>
-                            </td>
-                            {{else}}
-                            <td></td>
-                            {{/if}}
-                        </tr>
-                        <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
-                        <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}
-                            {{#unless botHasBeenQuiet}}
-                            <span class="relativetime" title="{{utcTimestamp botWillBeQuietDate}}"></span>
-                            {{/unless}}
-                        </td></tr>
-                        <tr><td>ignoreSelf</td><td>{{{boolean ignoreSelf}}}</td></tr>
+                        <tr><td>funResponseCounter</td><td>{{funResponseCounter}}</td></tr>
+                        <tr><td>maxFunResponses</td><td>{{maxFunResponses}}</td></tr>
+                        <tr><td>canSendFunResponse</td><td>{{{boolean canSendFunResponse}}}</td></tr>
                     </table>
                 </td></tr>
             </table>
