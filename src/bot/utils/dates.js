@@ -163,4 +163,18 @@ export const addDates = (date, num = 1) => {
     dolly.setDate(dolly.getDate() + num);
     return dolly;
 };
+
+/**
+ * @summary returns the difference between two dates in days
+ * @param {Date|string|number} start start date
+ * @param {Date|string|number} end end date
+ * @param {number} [fractions] number of fractional digits to output
+ * @returns {number}
+ */
+export const daysDiff = (start, end, fractions = 1) => {
+    const snum = validateDate(start).valueOf();
+    const dnum = validateDate(end).valueOf();
+    const diffMs = dnum - snum;
+    const diffDays = (diffMs / MS_IN_SECOND / 60 / 60 / 24);
+    return +diffDays.toFixed(fractions);
 };
