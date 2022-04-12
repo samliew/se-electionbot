@@ -10,6 +10,7 @@ import { validateChatTranscriptURL } from "./utils/chat.js";
 import { dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "./utils/dates.js";
 import { matchNumber, safeCapture } from "./utils/expressions.js";
 import { constructUserAgent } from "./utils/fetch.js";
+import { getOrInit, has } from "./utils/maps.js";
 import { htmlToChatMarkdown } from "./utils/markdown.js";
 import { numericNullable } from "./utils/objects.js";
 
@@ -671,17 +672,34 @@ export const matchesOneOfChatHosts = (text, path) => {
 };
 
 /**
+ * @summary caches site user ids obtained from chat user ids
+ * @type {Map<Host, Map<number, number>>}
+ */
+const siteUserIdCache = new Map();
+
+/**
  * @description Expensive, up to three requests. Only one, if the linked account is the site we want.
  * @param {BotConfig} config bot configuration
  * @param {number} chatUserId user id
- * @param {string} chatdomain chat server domain
+ * @param {Host} chatHost chat {@link Host}
  * @param {string} hostname election site hostname
  * @param {string} [apiKey] Stack Exchange API key
  * @returns {Promise<number|null>} resolved user id
  */
-export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, chatdomain, hostname, apiKey) => {
+export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, chatHost, hostname, apiKey) => {
     try {
-        const chatUserUrl = `https://chat.${chatdomain}/users/${chatUserId}`;
+        const { debugOrVerbose } = config;
+
+        const hostCache = getOrInit(siteUserIdCache, chatHost, new Map());
+        if (has(hostCache, chatUserId)) {
+            const cached = hostCache.get(chatUserId);
+
+            if (debugOrVerbose) console.log(`[cache] ${chatHost}: ${chatUserId} => ${cached}`);
+
+            return cached;
+        }
+
+        const chatUserUrl = `https://chat.${chatHost}/users/${chatUserId}`;
         const chatUserPage = await fetchUrl(config, chatUserUrl);
         console.log(`User's chat profile: ${chatUserUrl}`);
 
@@ -743,7 +761,12 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
         //successful response from the API, but no associated account found
         if (!siteAccount && networkAccounts.length) return NO_ACCOUNT_ID;
 
-        return numericNullable(siteAccount, "user_id");
+        const siteUserId = numericNullable(siteAccount, "user_id");
+        if (siteUserId) {
+            hostCache.set(chatUserId, siteUserId);
+        }
+
+        return siteUserId;
     }
     catch (e) {
         console.error(e);
