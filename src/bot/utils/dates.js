@@ -151,3 +151,16 @@ export const usDateToISO = (datestr) => {
     const [month, date, year] = datestr.split("/");
     return `${year}-${month.padStart(2, "0")}-${date.padStart(2, "0")}`;
 };
+
+/**
+ * @summary adds a given number of dates to a date
+ * @param {Date|string|number} date date to add to
+ * @param {number} [num] number of dates to add
+ * @returns {Date}
+ */
+export const addDates = (date, num = 1) => {
+    const dolly = new Date(date);
+    dolly.setDate(dolly.getDate() + num);
+    return dolly;
+};
+};
