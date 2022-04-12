@@ -36,7 +36,22 @@
     <section>
         <aside>
             <h2>Routes</h2>
-            {{> deep data/routes top=true}}
+            <table>
+                <thead>
+                    <tr>
+                        <th>path</th>
+                        <th>methods</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each data/routes}}
+                    <tr>
+                        <td>{{ path }}</td>
+                        <td>{{ methods }}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
         </aside>
     </section>
 </main>

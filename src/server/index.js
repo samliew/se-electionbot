@@ -279,7 +279,7 @@ app.route("/server")
                 // Map to route path and http method
                 return {
                     path: route.path,
-                    method: Object.keys(route.methods)[0].toUpperCase()
+                    methods: Object.keys(route.methods).join(', ').toUpperCase()
                 };
             }).filter(Boolean);
 
