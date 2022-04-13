@@ -272,30 +272,42 @@ export const getModerators = async (config, site, options = {}) => {
 /**
  * @summary gets the user info from the API
  * @param {BotConfig} config
- * @param {number} userId userId to request info for
+ * @param {number[]} userIds list of userId to request info for
  * @param {string} site election site slug
  * @param {number} [page]
- * @returns {Promise<User|null>}
+ * @returns {Promise<Map<number, User>>}
  */
-export const getUserInfo = async (config, userId, site, page = 1) => {
+export const getUserInfo = async (config, userIds, site, page = 1) => {
 
-    const userURL = new URL(`${apiBase}/${apiVer}/users/${userId}`);
+    const userURL = new URL(`${apiBase}/${apiVer}/users/${userIds.join(";")}`);
     userURL.search = new URLSearchParams({
         site,
+        pagesize: "100",
         page: page.toString(),
         filter: "sAR)YG", // unsafe
         key: getStackApiKey(config.apiKeyPool),
     }).toString();
 
-    if (config.debug) console.log(userURL.toString());
+    return handleResponse(
+        /** @type {ApiWrapper<User>} */(await fetchUrl(config, userURL, true)) || {},
+        () => getUserInfo(config, userIds, site, page),
+        async ({ items = [], has_more }) => {
 
-    const { items = [] } = /** @type {ApiWrapper<User>} */(await fetchUrl(config, userURL, true)) || {};
+            /** @type {Map<number, User>} */
+            const users = new Map();
 
-    const [userInfo] = items;
+            items.forEach((user) => users.set(user.user_id, user));
 
-    if (config.verbose) console.log(`API - ${getUserInfo.name}\n`, userInfo || null);
+            if (has_more) {
+                const otherItems = await getUserInfo(config, userIds, site, page + 1);
+                return mergeMaps(users, otherItems);
+            }
 
-    return userInfo || null;
+            if (config.verbose) console.log(`API - ${getUserInfo.name}\n`, users);
+
+            return users;
+        }
+    );
 };
 
 /**

@@ -5,6 +5,7 @@ import { calculateScore } from "../score.js";
 import { linkToRelativeTimestamp, makeURL, pluralize, scrapeAwardedBadge } from "../utils.js";
 import { dateToShortISO8601Timestamp } from "../utils/dates.js";
 import { matchISO8601 } from "../utils/expressions.js";
+import { has } from "../utils/maps.js";
 import { formatNumber, percentify } from "../utils/strings.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
@@ -253,15 +254,17 @@ export const sayUserEligibility = async (config, election, text) => {
 
     const userBadges = await getBadges(config, [userId], apiSlug);
 
-    const requestedUser = await getUserInfo(config, userId, apiSlug);
+    const users = await getUserInfo(config, [userId], apiSlug);
 
-    if (!requestedUser) {
+    if (!has(users, userId)) {
         return `Can't answer now, please ask me about it later`;
     };
 
-    const { isEligible } = calculateScore(requestedUser, userBadges, election);
+    const user = users.get(userId);
+
+    const { isEligible } = calculateScore(user, userBadges, election);
 
     const nlp = new RandomArray("nominate", "be elected", "become a mod");
 
-    return `User ${requestedUser.display_name} is${isEligible ? "" : " not"} eligible to ${nlp.getRandom()}`;
+    return `User ${user.display_name} is${isEligible ? "" : " not"} eligible to ${nlp.getRandom()}`;
 };

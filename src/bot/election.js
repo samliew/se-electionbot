@@ -103,10 +103,10 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
         if (userId > 0) {
             const { apiSlug } = election;
             const userBadges = await getBadges(config, [userId], apiSlug);
-            const user = await getUserInfo(config, userId, apiSlug);
+            const users = await getUserInfo(config, [userId], apiSlug);
 
-            if (user) {
-                const { score } = calculateScore(user, userBadges, election);
+            if (has(users, userId)) {
+                const { score } = calculateScore(users.get(userId), userBadges, election);
                 withdrawnNominee.userScore = score;
             }
         }
