@@ -237,20 +237,25 @@ import { scrapeModerators } from "./utils/scraping.js";
         config.herokuDynos = await heroku.getDynos();
         console.log('Heroku dynos: ', config.herokuDynos.map(({ type, size, quantity }) => `${type}: ${size.toLowerCase()} (${quantity})`).join(', '));
 
-        // If is in production mode, and is an active election,
-        //   scale Heroku dyno to paid if it's using free dynos only
-        if (!config.debug && election.isActive()) {
-            const hasPaidDyno = config.herokuDynos.some(({ size }) => /free/i.test(size));
-
-            // Scale Heroku dyno to hobby (restarts app)
-            if (!hasPaidDyno) {
-                console.log('Scaling to Heroku hobby dyno...');
-                await heroku.scaleHobby();
-            }
+        /*
+         * If is in production mode, and is an active election,
+         * scale Heroku dyno to Hobby (paid) if it's using free dynos only (restarts app)
+         */
+        const hasPaidDyno = config.herokuDynos.some(({ size }) => !/free/i.test(size));
+        if (!config.debug && election.isActive() && !hasPaidDyno) {
+            console.log('Scaling up to Heroku hobby dyno...');
+            await heroku.scaleHobby();
+        }
+        // Otherwise, scale down to free dynos
+        else if (hasPaidDyno) {
+            console.log('Scaling down to Heroku free dyno...');
+            await heroku.scaleFree();
         }
 
-        // If is in production mode, default chatroom not set, and is an active election,
-        //   auto-detect and set chat domain & room to join
+        /*
+         * If is in production mode, default chatroom not set, and is an active election,
+         * auto-detect and set chat domain & room to join
+         */
         if (!config.debugOrVerbose && defaultChatNotSet && election.isActive()) {
 
             // Store original values so we know if it's changed
