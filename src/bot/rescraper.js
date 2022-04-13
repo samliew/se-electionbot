@@ -133,9 +133,9 @@ export default class Rescraper {
             }
 
             // Primary phase was activated (due to >10 candidates)
-            if (!announcement?.hasPrimary && election.datePrimary != null) {
+            if (!announcement?.hasPrimary && election.datePrimary) {
                 announcement?.initPrimary(election.datePrimary);
-                await sendMessage(config, room, `There will be a **${makeURL("primary", election.electionUrl + "?tab=primary")}** phase before the election now, as there are more than ten candidates.`);
+                await announcement?.announcePrimary();
             }
 
             // Election dates has changed (manually by CM)
