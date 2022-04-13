@@ -64,6 +64,7 @@ import { mapify } from "./utils/arrays.js";
 import { logResponse } from "./utils/bot.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
+import { filterMap } from "./utils/maps.js";
 import { scrapeModerators } from "./utils/scraping.js";
 
 /**
@@ -307,9 +308,25 @@ import { scrapeModerators } from "./utils/scraping.js";
             }
         }
 
-        const currentSiteMods = await getModerators(config, election.apiSlug);
-        election.currentSiteMods = currentSiteMods;
-        election.scrapedSiteMods = await scrapeModerators(config, election.siteUrl);
+        const [apiMods, scrapedMods] = await Promise.all([
+            getModerators(config, election.apiSlug),
+            scrapeModerators(config, election.siteUrl)
+        ]);
+
+        const { dateEnded } = election;
+
+        const currentScrapedMods = filterMap(scrapedMods, ({ election: num, appointed }) => {
+            return [
+                !num && !appointed,
+                num && num <= electionNum,
+                appointed && appointed <= dateEnded
+            ].some(Boolean);
+        });
+
+        const currentApiMods = filterMap(apiMods, (_, id) => currentScrapedMods.has(id));
+
+        election.currentSiteMods = currentApiMods;
+        election.scrapedSiteMods = currentScrapedMods;
 
 
         // "default" is a temp fix for ChatExchange being served as CJS module
@@ -671,7 +688,7 @@ import { scrapeModerators } from "./utils/scraping.js";
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
             else if (isAskedAboutLightbulb(preparedMessage) && config.fun) {
-                responseText = sayHowManyModsItTakesToFixLightbulb(currentSiteMods);
+                responseText = sayHowManyModsItTakesToFixLightbulb(currentApiMods);
             }
             else if (isAskedAboutBadgesOfType(preparedMessage)) {
                 const [, type] = /(participation|editing|moderation)/.exec(preparedMessage) || [];
@@ -714,7 +731,7 @@ import { scrapeModerators } from "./utils/scraping.js";
                 else responseText = sayInformedDecision();
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
-                responseText = sayCurrentMods(election, currentSiteMods, entities.decode);
+                responseText = sayCurrentMods(election, currentApiMods, entities.decode);
             }
             // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
             else if (isAskedForNominatingInfo(preparedMessage)) {
