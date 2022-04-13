@@ -9,6 +9,7 @@ import { sayMissingBadges } from "./badges.js";
  * @typedef {import("../score").CandidateScore} CandidateScore
  * @typedef {import("../election").default} Election
  * @typedef {import("chatexchange/dist/Room").default} Room
+ * @typedef {import("../election").ModeratorUser} ModeratorUser
  */
 
 /**
@@ -31,13 +32,13 @@ export const sayAreModsPaid = (election) => {
  * @param {Election} election current election
  * @param {string} _content message content
  * @param {BotUser} user requesting user
- * @returns {string}
+ * @returns {Promise<string>}
  */
-export const sayBestModerator = (_config, _elections, election, _content, user) => {
-    const { currentSiteMods } = election;
+export const sayBestModerator = async (_config, _elections, election, _content, user) => {
+    const { moderators } = election;
     const { name } = user;
 
-    const mods = [...currentSiteMods.values()];
+    const mods = [...moderators.values()];
 
     const currModNames = mods.map(({ display_name }) => display_name);
 
@@ -65,7 +66,7 @@ export const sayCanEditDiamond = () => {
 /**
  * @summary builds current mods list response message
  * @param {Election} election current election
- * @param {Map<number, ApiUser>} moderators
+ * @param {Map<number, ModeratorUser>} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {string}
  */

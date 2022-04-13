@@ -11,7 +11,7 @@ import { getMockNominee } from "../mocks/nominee.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
 /**
- * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
+ * @typedef {import("../../src/bot/election.js").ModeratorUser} ModeratorUser
  */
 
 
@@ -308,7 +308,7 @@ describe('Individual commands', () => {
             const election = new Election("https://stackoverflow.com/election/13");
             election.arrNominees.push(getMockNominee(election));
             election.arrWinners.push(getMockNominee(election));
-            election.currentSiteMods.set(-1, /** @type {ApiUser} */({}));
+            election.moderators.set(-1, /** @type {ModeratorUser} */({}));
             election.phase = "primary";
 
             resetElection(getMockBotConfig(), election);

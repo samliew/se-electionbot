@@ -462,11 +462,8 @@ export default class Election {
     /** @type {Nominee[]} */
     arrWinners = [];
 
-    /** @type {Map<number, ApiUser>} */
-    currentSiteMods = new Map();
-
-    /** @type {Map<number, ScrapedModUser>} */
-    scrapedSiteMods = new Map();
+    /** @type {Map<number, ModeratorUser>} */
+    moderators = new Map();
 
     /** @type {Map<number, Election>} */
     elections = new Map();
@@ -670,8 +667,8 @@ export default class Election {
      * @returns {number}
      */
     get numMods() {
-        const { currentSiteMods } = this;
-        return currentSiteMods.size || 0;
+        const { moderators } = this;
+        return moderators.size || 0;
     }
 
     /**

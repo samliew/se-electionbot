@@ -243,7 +243,7 @@ export const resetElection = (_config, election) => {
     // TODO: expand
     election.arrNominees.length = 0;
     election.arrWinners.length = 0;
-    election.currentSiteMods.clear();
+    election.moderators.clear();
     election.phase = null;
     election.updated = Date.now();
 
