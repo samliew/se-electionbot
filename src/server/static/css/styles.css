@@ -68,7 +68,6 @@ li {
 }
 
 a {
-  word-break: break-word;
   color: var(--link-colour);
 }
 
