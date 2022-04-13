@@ -5,14 +5,14 @@ import entities from 'html-entities';
 import { startServer } from "../server/index.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
-import { getAllNamedBadges, getModerators } from "./api.js";
+import { getAllNamedBadges } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
 import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, getVotingReport, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections } from './election.js';
+import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getAppointedModerators, getElectedModerators, getSiteElections } from './election.js';
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
@@ -64,8 +64,7 @@ import { mapify } from "./utils/arrays.js";
 import { logResponse } from "./utils/bot.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
-import { filterMap } from "./utils/maps.js";
-import { scrapeModerators } from "./utils/scraping.js";
+import { mergeMaps } from "./utils/maps.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -308,25 +307,14 @@ import { scrapeModerators } from "./utils/scraping.js";
             }
         }
 
-        const [apiMods, scrapedMods] = await Promise.all([
-            getModerators(config, election.apiSlug),
-            scrapeModerators(config, election.siteUrl)
+        const [electedMods, appointedMods] = await Promise.all([
+            getElectedModerators(config, election),
+            getAppointedModerators(config, election)
         ]);
 
-        const { dateEnded } = election;
+        const moderators = mergeMaps(electedMods, appointedMods);
 
-        const currentScrapedMods = filterMap(scrapedMods, ({ election: num, appointed }) => {
-            return [
-                !num && !appointed,
-                num && num <= electionNum,
-                appointed && appointed <= dateEnded
-            ].some(Boolean);
-        });
-
-        const currentApiMods = filterMap(apiMods, (_, id) => currentScrapedMods.has(id));
-
-        election.currentSiteMods = currentApiMods;
-        election.scrapedSiteMods = currentScrapedMods;
+        election.moderators = moderators;
 
 
         // "default" is a temp fix for ChatExchange being served as CJS module
@@ -688,7 +676,7 @@ import { scrapeModerators } from "./utils/scraping.js";
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
             else if (isAskedAboutLightbulb(preparedMessage) && config.fun) {
-                responseText = sayHowManyModsItTakesToFixLightbulb(currentApiMods);
+                responseText = sayHowManyModsItTakesToFixLightbulb(moderators);
             }
             else if (isAskedAboutBadgesOfType(preparedMessage)) {
                 const [, type] = /(participation|editing|moderation)/.exec(preparedMessage) || [];
@@ -731,7 +719,7 @@ import { scrapeModerators } from "./utils/scraping.js";
                 else responseText = sayInformedDecision();
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
-                responseText = sayCurrentMods(election, currentApiMods, entities.decode);
+                responseText = sayCurrentMods(election, moderators, entities.decode);
             }
             // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
             else if (isAskedForNominatingInfo(preparedMessage)) {
