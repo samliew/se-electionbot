@@ -16,7 +16,9 @@ describe('Election', () => {
             it('should correctly return all winners from election history', () => {
                 const e1 = new Election("https://stackoverflow.com/election/1");
                 const e2 = new Election("https://stackoverflow.com/election/2");
+                e1.elections.set(1, e1);
                 e2.elections.set(1, e1);
+                e2.elections.set(2, e2);
 
                 e1.arrWinners.push(getMockNominee(e1, { userId: 1 }));
                 e2.arrWinners.push(getMockNominee(e2, { userId: 2 }));
