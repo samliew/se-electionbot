@@ -213,13 +213,20 @@ export const getNumberOfUsersEligibleToVote = async (config, election) => {
  * @summary gets the network mods from the API
  * @param {BotConfig} config bot configuration
  * @param {string} site election site slug
- * @param {number} [page] API response page
+ * @param {{
+ *  from?: string|number|Date,
+ *  page?: number,
+ *  to?: string|number|Date
+ * }} [options] configuration
  * @returns {Promise<Map<number, User>>}
  */
-export const getModerators = async (config, site, page = 1) => {
+export const getModerators = async (config, site, options = {}) => {
+    const { from, page = 1, to } = options;
+
     // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
     const modURL = new URL(`${apiBase}/${apiVer}/users/moderators`);
-    modURL.search = new URLSearchParams({
+
+    const params = new URLSearchParams({
         pagesize: "100",
         order: "asc",
         sort: "name",
@@ -227,11 +234,16 @@ export const getModerators = async (config, site, page = 1) => {
         filter: "!LnNkvq0d-S*rS_0sMTDFRm",
         page: page.toString(),
         key: getStackApiKey(config.apiKeyPool)
-    }).toString();
+    });
+
+    if (from) params.append("fromdate", getSeconds(from).toString());
+    if (to) params.append("todate", getSeconds(to).toString());
+
+    modURL.search = params.toString();
 
     return handleResponse(
         /** @type {ApiWrapper<User>} */(await fetchUrl(config, modURL, true)) || {},
-        () => getModerators(config, site, page),
+        () => getModerators(config, site, options),
         async ({ items = [], has_more }) => {
 
             /** @type {Map<number, User>} */
@@ -244,7 +256,10 @@ export const getModerators = async (config, site, page = 1) => {
             });
 
             if (has_more) {
-                const otherItems = await getModerators(config, site, page + 1);
+                const otherItems = await getModerators(config, site, {
+                    ...options,
+                    page: page + 1
+                });
                 return mergeMaps(mods, otherItems);
             }
 
