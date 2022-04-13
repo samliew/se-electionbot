@@ -207,6 +207,7 @@ export default class Rescraper {
             else if (config.canBusyGreet) {
                 await sayBusyGreeting(config, elections, election, bot, room);
             }
+
             // The election is over
             else if (election.isInactive() && config.scrapeIntervalMins !== 10) {
 
@@ -219,7 +220,7 @@ export default class Rescraper {
 
                 // Stay in room a while longer
                 const stayInRoomFor = config.electionAfterpartyMins * 60 * 1000;
-                setTimeout(async function() {
+                setTimeout(async function () {
 
                     // Scale Heroku dynos to free (restarts app)
                     const heroku = new HerokuClient(config);
