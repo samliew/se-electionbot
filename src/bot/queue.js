@@ -176,14 +176,21 @@ export const sendMultipartMessage = async (
  * @param {Room} room room to send messages to
  * @param {string[]} messages message text list
  * @param {MessageOptions} options configuration
+ * @returns {Promise<void>}
  */
 export const sendMessageList = async (config, room, messages, { isPrivileged = false, log = true }) => {
     const { throttleSecs } = config;
 
+    const { length: numMessages } = messages;
+
     let sent = 1;
     for (const message of messages) {
         await _sendTheMessage(config, room, message, null, isPrivileged, log);
-        await wait(throttleSecs * sent);
+
+        if (numMessages > 1) {
+            await wait(throttleSecs * sent);
+        }
+
         sent += 1;
     }
 };
