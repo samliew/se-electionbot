@@ -341,7 +341,7 @@ export const sayFeedback = (config) => {
 
     // End in punctuation
     const randomGreet = new RandomArray(
-        "I'm scheduled for an upgrade soon.",
+        "I'm scheduled for an update.",
         "Thank you for being my test subjects.",
         "Hope you have found me useful (or not).",
     ).getRandom();
@@ -352,7 +352,7 @@ export const sayFeedback = (config) => {
         "My developers would appreciate your feedback and suggestions.",
     ).getRandom();
 
-    const feedbackForm = feedbackUrl ? `The feedback form is at ${makeURL(feedbackUrl)}` : `Feature requests can be submitted at ${makeURL(repoIssueUrl)}`;
+    const feedbackForm = feedbackUrl ? `Here is the ${makeURL('feedback form', feedbackUrl)}` : `Feature requests can be submitted on the ${makeURL('Github repo', repoIssueUrl)}`;
 
     return `${randomGreet} ${randomFeedback} ${feedbackForm}. Thanks!`;
 };
