@@ -6,6 +6,8 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
 import { addDates, dateToUtcTimestamp, daysDiff } from './utils/dates.js';
 import { findLast } from './utils/dom.js';
 import { matchNumber } from "./utils/expressions.js";
+import { filterMap, has } from './utils/maps.js';
+import { scrapeModerators } from './utils/scraping.js';
 
 /**
  * @typedef {null|"ended"|"election"|"primary"|"nomination"|"cancelled"} ElectionPhase
@@ -18,7 +20,11 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("chatexchange/dist/User").default} BotUser
  * @typedef {import("./utils").ChatMessage} ChatMessage
  * @typedef {import("./utils").RoomUser} RoomUser
- * @typedef {import("./utils/scraping").ScrapedModUser} ScrapedModUser
+ * @typedef {ApiUser & {
+ *  appointed?: string,
+ *  election?: number,
+ *  electionLink?: string
+ * }} ModeratorUser
  */
 
 /**
@@ -152,6 +158,66 @@ export const listNomineesInRoom = async (config, election, host, users) => {
         // TODO: add the heavy getSiteUserIdFromChatStackExchangeId
     }
     return nomineesInRoom;
+};
+
+/**
+ * @summary
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @returns {Promise<Map<number, ModeratorUser>>}
+ */
+export const getAppointedModerators = async (config, election) => {
+    const { apiSlug, siteUrl } = election;
+
+    const scrapedMods = await scrapeModerators(config, siteUrl);
+
+    const scrapedAppointedMods = filterMap(scrapedMods, ({ appointed }) => !!appointed);
+
+    const users = await getUserInfo(config, [...scrapedAppointedMods.keys()], apiSlug);
+
+    /** @type {Map<number, ModeratorUser>} */
+    const appointedMods = new Map();
+
+    users.forEach((user, id) => {
+        if (!has(scrapedMods, id)) return;
+
+        const { appointed } = scrapedMods.get(id);
+
+        appointedMods.set(id, { ...user, appointed });
+    });
+
+    return appointedMods;
+};
+
+/**
+ * @summary gets all elected moderators (including stepped down)
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @returns {Promise<Map<number, ModeratorUser>>}
+ */
+export const getElectedModerators = async (config, election) => {
+    const { allWinners, apiSlug } = election;
+
+    const users = await getUserInfo(config, [...allWinners.keys()], apiSlug);
+
+    /** @type {Map<number, ModeratorUser>} */
+    const elected = new Map();
+
+    users.forEach((user, id) => {
+        if (!has(allWinners, id)) return;
+
+        const { election } = allWinners.get(id);
+
+        const { electionNum, electionUrl } = election;
+
+        elected.set(id, {
+            ...user,
+            election: electionNum || 1,
+            electionLink: electionUrl
+        });
+    });
+
+    return elected;
 };
 
 /**
