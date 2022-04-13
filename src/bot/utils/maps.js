@@ -3,6 +3,26 @@
  * @template {unknown} T
  * @template {unknown} U
  *
+ * @summary filters a given map
+ * @param {Map<T, U>} map map to filter
+ * @param {(v: U, k: T, m: Map<T, U>) => boolean} callback filter
+ * @returns {Map<T, U>}
+ */
+export const filterMap = (map, callback) => {
+    const filtered = /** @type {Map<T, U>} */(new Map());
+
+    map.forEach((v, k, m) => {
+        if (callback(v, k, m)) filtered.set(k, v);
+    });
+
+    return filtered;
+};
+
+/**
+ * @pure
+ * @template {unknown} T
+ * @template {unknown} U
+ *
  * @summary merges together a list of Map instances
  * @param {...Map<T, U>} sources Maps to merge together
  * @returns {Map<T, U>}
