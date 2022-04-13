@@ -663,6 +663,23 @@ export default class Election {
     }
 
     /**
+     * @summary gets all winners throughout the election history
+     * @returns {Map<number, Nominee>}
+     */
+    get allWinners() {
+        const { elections } = this;
+
+        /** @type {Map<number, Nominee>} */
+        const allWinners = new Map();
+
+        elections.forEach(({ arrWinners }) => {
+            arrWinners.forEach((n) => allWinners.set(n.userId, n));
+        });
+
+        return allWinners;
+    }
+
+    /**
      * @summary gets a list of new Winners
      * @returns {Nominee[]}
      */

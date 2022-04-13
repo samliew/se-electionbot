@@ -12,6 +12,20 @@ describe('Election', () => {
 
     describe('getters', () => {
 
+        describe("allWinners", () => {
+            it('should correctly return all winners from election history', () => {
+                const e1 = new Election("https://stackoverflow.com/election/1");
+                const e2 = new Election("https://stackoverflow.com/election/2");
+                e2.elections.set(1, e1);
+
+                e1.arrWinners.push(getMockNominee(e1, { userId: 1 }));
+                e2.arrWinners.push(getMockNominee(e2, { userId: 2 }));
+
+                expect(e1.allWinners.size).to.equal(1);
+                expect(e2.allWinners.size).to.equal(2);
+            });
+        });
+
         describe('reachedPrimaryThreshold', () => {
 
             it('should correctly determine if threshold is reached', () => {
@@ -410,7 +424,7 @@ describe('Election', () => {
             const offsetSecs = 5 * 60 * 1000; // 5 minutes
 
             const election = new Election("https://stackoverflow.com/election/12");
-            
+
             // Move end date to 5 mins in the future (so it will be ending soon)
             election.phase = "election";
             election.dateEnded = new Date(Date.now() + offsetSecs).toISOString();
