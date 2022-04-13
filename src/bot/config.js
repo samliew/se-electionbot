@@ -248,7 +248,17 @@ export class BotConfig {
      * @summary Feedback form URL
      * @type {string}
      */
-    feedbackUrl = process.env.FEEDBACK_FORM_URL || "";
+    get feedbackUrl() {
+        const formUrl = process.env.FEEDBACK_FORM_URL || '';
+
+        // If using a Google form link ending with a prefilled field parameter, append site slug
+        if (/entry\.\d+=$/.test(formUrl)) {
+            const electionUrl = process.env.ELECTION_URL?.trim() || '';
+            const siteSlug = electionUrl.match(/https:\/\/([^.]+)\./)?.slice(1, 2).pop() || '';
+            return formUrl + encodeURIComponent(siteSlug);
+        }
+        return formUrl;
+    }
 
     /**
      * @summary Repo URL
@@ -438,7 +448,7 @@ export class BotConfig {
 
     /**
      * @summary updates last bot message
-     * @param {string} content message content 
+     * @param {string} content message content
      * @param {number} lastMessageTime ms since *nix epoch of the message
      * @return {BotConfig}
      */
