@@ -3,7 +3,8 @@ import { sayEndingSoon } from "./messages/elections.js";
 import { sayBusyGreeting, sayIdleGreeting } from "./messages/greetings.js";
 import { sayElectionSchedule } from "./messages/phases.js";
 import { sendMessage, sendMessageList } from "./queue.js";
-import { makeURL } from "./utils.js";
+import { makeURL, wait } from "./utils.js";
+import { SEC_IN_MINUTE } from "./utils/dates.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -219,14 +220,11 @@ export default class Rescraper {
                 }
 
                 // Stay in room a while longer
-                const stayInRoomFor = config.electionAfterpartyMins * 60 * 1000;
-                setTimeout(async function () {
+                await wait(config.electionAfterpartyMins * SEC_IN_MINUTE);
 
-                    // Scale Heroku dynos to free (restarts app)
-                    const heroku = new HerokuClient(config);
-                    await heroku.scaleFree();
-
-                }, stayInRoomFor);
+                // Scale Heroku dynos to free (restarts app)
+                const heroku = new HerokuClient(config);
+                await heroku.scaleFree();
             }
 
             this.start();
