@@ -1,12 +1,14 @@
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
-import { getBadges, getNumberOfVoters, getUserInfo } from './api.js';
+import { getAllNamedBadges, getBadges, getNumberOfVoters, getUserInfo } from './api.js';
 import { calculateScore } from './score.js';
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
+import { mapify } from './utils/arrays.js';
 import { addDates, dateToUtcTimestamp, daysDiff } from './utils/dates.js';
 import { findLast } from './utils/dom.js';
 import { matchNumber } from "./utils/expressions.js";
-import { filterMap, has } from './utils/maps.js';
+import { filterMap, getOrInit, has, mergeMaps, sortMap } from './utils/maps.js';
+import { clone } from './utils/objects.js';
 import { scrapeModerators } from './utils/scraping.js';
 
 /**
@@ -220,6 +222,9 @@ export const getElectedModerators = async (config, election) => {
     return elected;
 };
 
+/** @type {Map<string, Map<number, Election>>} */
+const electionsCache = new Map();
+
 /**
  * @summary gets all {@link Election}s for a given site
  * @param {BotConfig} config bot configuration
@@ -232,13 +237,17 @@ export const getElectedModerators = async (config, election) => {
  * ]>}
  */
 export const getSiteElections = async (config, siteUrl, maxElectionNumber, scrape = false) => {
-    /** @type {Map<number, Election>} */
-    const elections = new Map();
+    const elections = getOrInit(electionsCache, siteUrl, new Map());
 
     /** @type {Map<number, string[]>} */
     const validationErrors = new Map();
 
     for (let electionNum = maxElectionNumber; electionNum >= 1; electionNum--) {
+        if (elections.has(electionNum)) {
+            console.log(`[cache] ${siteUrl} election ${electionNum}`);
+            continue;
+        }
+
         const electionURL = `${siteUrl}/election/${electionNum}`;
 
         // if the election page is not reachable, it's not the bot's fault,
