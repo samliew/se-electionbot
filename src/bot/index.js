@@ -7,7 +7,7 @@ import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { getAllNamedBadges } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, getVotingReport, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, getVotingReport, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -429,6 +429,7 @@ import { mergeMaps, sortMap } from "./utils/maps.js";
             "alive": ["bot reports on its status", isAliveCommand, AccessLevel.privileged],
             "announce nominees": ["makes the bot announce nominees", announceNominees, AccessLevel.privileged],
             "announce winners": ["makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged],
+            "change election": ["switches current election", changeElection, AccessLevel.dev],
             "chatroom": ["gets election chat room link", getElectionRoomURL, AccessLevel.dev],
             "coffee": ["brews some coffee", brewCoffeeCommand, AccessLevel.privileged],
             // to reserve the keyword 'help' for normal users
@@ -593,6 +594,7 @@ import { mergeMaps, sortMap } from "./utils/maps.js";
                 const matches = [
                     ["commands", /commands|usage/],
                     ["alive", /^(?:alive|awake|ping|uptime)/, config],
+                    ["change election", /^(?:change|switch)\s+elections?/, config, election, preparedMessage],
                     ["say", /say/, config, room, decodedMessage],
                     ["greet", /^(?:greet|welcome)/, config, elections, election, me, room, preparedMessage],
                     ["get time", /^(?:get time|time)$/, election],
