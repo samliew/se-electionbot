@@ -1266,4 +1266,31 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
         }
     }
 
+    /**
+     * @summary updates election badges
+     * @param {BotConfig} config bot configuration
+     * @returns {Promise<Election>}
+     */
+    async updateElectionBadges(config) {
+        const { apiSlug, electionBadges } = this;
+
+        const allNamedBadges = await getAllNamedBadges(config, apiSlug);
+        const badgeMap = mapify(allNamedBadges, "name");
+
+        electionBadges.forEach((electionBadge) => {
+            const { name } = electionBadge;
+            const matchedBadge = badgeMap.get(name);
+
+            // Replace the badge id for badges with the same badge names
+            // TODO: Hardcode list of badges where this will not work properly (non-english sites?)
+            if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
+        });
+
+        if (config.debugOrVerbose) {
+            console.log(`[election] updated badges\n${electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n")}`);
+        }
+
+        return this;
+    }
+
 }
