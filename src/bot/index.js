@@ -64,7 +64,7 @@ import { mapify } from "./utils/arrays.js";
 import { logResponse } from "./utils/bot.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
-import { mergeMaps } from "./utils/maps.js";
+import { mergeMaps, sortMap } from "./utils/maps.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -312,7 +312,11 @@ import { mergeMaps } from "./utils/maps.js";
             getAppointedModerators(config, election)
         ]);
 
-        const moderators = mergeMaps(electedMods, appointedMods);
+        const sortedElectedMods = sortMap(electedMods, (_, v1, __, v2) => {
+            return (v1.election || 1) < (v2.election || 1) ? -1 : 1;
+        });
+
+        const moderators = mergeMaps(sortedElectedMods, appointedMods);
 
         election.moderators = moderators;
 
