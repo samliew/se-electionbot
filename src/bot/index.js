@@ -5,14 +5,13 @@ import entities from 'html-entities';
 import { startServer } from "../server/index.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
-import { getAllNamedBadges } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
 import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, getVotingReport, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getAppointedModerators, getElectedModerators, getSiteElections } from './election.js';
+import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections } from './election.js';
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
@@ -60,11 +59,9 @@ import { makeCandidateScoreCalc } from "./score.js";
 import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
-import { mapify } from "./utils/arrays.js";
 import { logResponse } from "./utils/bot.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
-import { mergeMaps, sortMap } from "./utils/maps.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -290,36 +287,10 @@ import { mergeMaps, sortMap } from "./utils/maps.js";
 
         // Get current site named badges (i.e.: non-tag badges)
         if (!election.isStackOverflow()) {
-            const allNamedBadges = await getAllNamedBadges(config, election.apiSlug);
-            const badgeMap = mapify(allNamedBadges, "name");
-
-            electionBadges.forEach((electionBadge) => {
-                const { name } = electionBadge;
-                const matchedBadge = badgeMap.get(name);
-
-                // Replace the badge id for badges with the same badge names
-                // TODO: Hardcode list of badges where this will not work properly (non-english sites?)
-                if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
-            });
-
-            if (config.debugOrVerbose) {
-                console.log('API - Site election badges\n', electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n"));
-            }
+            await election.updateElectionBadges(config);
         }
 
-        const [electedMods, appointedMods] = await Promise.all([
-            getElectedModerators(config, election),
-            getAppointedModerators(config, election)
-        ]);
-
-        const sortedElectedMods = sortMap(electedMods, (_, v1, __, v2) => {
-            return (v1.election || 1) < (v2.election || 1) ? -1 : 1;
-        });
-
-        const moderators = mergeMaps(sortedElectedMods, appointedMods);
-
-        election.moderators = moderators;
-
+        const { moderators } = await election.updateModerators(config);
 
         // "default" is a temp fix for ChatExchange being served as CJS module
         /** @type {Client} */
