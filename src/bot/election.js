@@ -1293,4 +1293,23 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
         return this;
     }
 
+    /**
+     * @summary updates election moderators
+     * @param {BotConfig} config bot configuration
+     * @returns {Promise<Election>}
+     */
+    async updateModerators(config) {
+        const [electedMods, appointedMods] = await Promise.all([
+            getElectedModerators(config, this),
+            getAppointedModerators(config, this)
+        ]);
+
+        const sortedElectedMods = sortMap(electedMods, (_, v1, __, v2) => {
+            return (v1.election || 1) < (v2.election || 1) ? -1 : 1;
+        });
+
+        this.moderators = mergeMaps(sortedElectedMods, appointedMods);
+
+        return this;
+    }
 }
