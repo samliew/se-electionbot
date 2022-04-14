@@ -848,6 +848,23 @@ export default class Election {
     }
 
     /**
+     * @summary resets the election to initial state
+     * @returns {Election}
+     */
+    reset() {
+        // TODO: expand
+        this.withdrawnNominees.clear();
+        this.arrNominees.length = 0;
+        this.arrWinners.length = 0;
+        this.questionnaire.length = 0;
+        this.moderators.clear();
+        this.phase = null;
+        this.updated = Date.now();
+        this.forget();
+        return this;
+    }
+
+    /**
      * @summary validates an instance of Election
      * @returns {{ status: boolean, errors: string[] }}
      */
