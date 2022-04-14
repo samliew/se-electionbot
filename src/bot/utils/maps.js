@@ -38,6 +38,21 @@ export const mergeMaps = (...sources) => {
 };
 
 /**
+ * @pure
+ * @template {unknown} T
+ * @template {unknown} U
+ *
+ * @summary sorts a given {@link Map}
+ * @param {Map<T, U>} map {@link Map} to sort
+ * @param {(key1:T, value1:U, key2:T, value2:U) => number} comparator comparator function
+ * @returns {Map<T, U>}
+ */
+export const sortMap = (map, comparator) => {
+    const sortedEntries = [...map].sort((a, b) => comparator(...a, ...b));
+    return new Map(sortedEntries);
+};
+
+/**
  * @template {unknown} T
  * @template {unknown} U
  *
