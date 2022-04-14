@@ -1038,6 +1038,18 @@ export default class Election {
     }
 
     /**
+     * @summary
+     * @param {cheerio.Root} $ Cheerio root element
+     * @returns {string}
+     */
+    scrapeElectionChatRoom($) {
+        const electionPost = $('#mainbar .s-prose:not(.candidate-row .s-prose)').slice(0, 2);
+        return (electionPost.find('a[href*="/rooms/"]').attr('href') || '')
+            .replace('/info/', '/')
+            .replace(/(\d+)(\/[^\/](?:\w|-)+)$/, '$1'); // trim trailing slash and/or url slug - https://regex101.com/r/FsrgPg/1/
+    }
+
+    /**
      * @summary scrapes nominee element
      * @param {cheerio.Root} $ Cheerio root element
      * @param {cheerio.Element} el nominee element
@@ -1152,8 +1164,6 @@ export default class Election {
 
             const [nominationDate, primaryDate, startDate, endDate] = metaVals;
 
-            const electionPost = $('#mainbar .s-prose').slice(0, 2);
-
             const conditionsNotice = $($('#mainbar').find('aside[role=status]').get(0));
 
             const [, minRep = "0"] = /with (?:more than )?(\d+,?\d+) reputation/m.exec(conditionsNotice.text()) || [];
@@ -1189,8 +1199,7 @@ export default class Election {
             });
 
             // Empty string if not set as environment variable, or not found on election page
-            this.chatUrl = process.env.ELECTION_CHATROOM_URL || (electionPost.find('a[href*="/rooms/"]').attr('href') || '').replace('/info/', '/')
-                .replace(/(\d+)(\/[^\/](?:\w|-)+)$/, '$1'); // trim trailing slash and/or url slug - https://regex101.com/r/FsrgPg/1/
+            this.chatUrl = process.env.ELECTION_CHATROOM_URL || this.scrapeElectionChatRoom($);
             this.chatRoomId = matchNumber(/(\d+)$/, this.chatUrl) || null;
             this.chatDomain = /** @type {Host} */(this.chatUrl?.split('/')[2]?.replace('chat.', ''));
 
