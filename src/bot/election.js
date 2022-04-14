@@ -842,6 +842,17 @@ export default class Election {
     }
 
     /**
+     * @summary clones the election
+     * @param {BotConfig} config bot configuration
+     * @returns {Promise<Election>}
+     */
+    async clone(config) {
+        const dolly = clone(this);
+        await dolly.scrapeElection(config);
+        return dolly;
+    }
+
+    /**
      * @summary forgets about previous states
      * @param {number} [states] number of states to forget
      * @returns {void}
