@@ -278,6 +278,7 @@ export const getModerators = async (config, site, options = {}) => {
  * @returns {Promise<Map<number, User>>}
  */
 export const getUserInfo = async (config, userIds, site, page = 1) => {
+    if (!userIds.length) return new Map();
 
     const userURL = new URL(`${apiBase}/${apiVer}/users/${userIds.join(";")}`);
     userURL.search = new URLSearchParams({
