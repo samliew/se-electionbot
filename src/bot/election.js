@@ -1085,8 +1085,17 @@ export default class Election {
      */
     pushHistory() {
         // Save prev values so we can compare changes after
-        this._prevObj = JSON.parse(JSON.stringify(this));
-        this._prevObj._prevObj = null;
+        const entry = JSON.parse(JSON.stringify(this));
+
+        /** {@link Map} and {@link Set} do not survive serialization */
+        Object.entries(this).forEach(([k, v]) => {
+            if (v instanceof Map) entry[k] = mergeMaps(v);
+            if (v instanceof Set) entry[k] = new Set(...v);
+        });
+
+        entry._prevObj = null;
+
+        this._prevObj = entry;
         return this;
     }
 
