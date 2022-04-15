@@ -17,9 +17,12 @@ const layoutsPath = join(viewsPath, "layouts");
 
 const app = express().set('port', process.env.PORT || 5000);
 
-// Only these paths will be non-password protected
+/*
+ * By default we want to password-protect all routes.
+ * Whitelist these public paths from password protection.
+ */
 const publicPaths = [
-    "/", "/ping", "/static", "/favicon.ico"
+    "/", "/ping", "/feedback", "/static", "/favicon.ico"
 ];
 
 /** @type {Handlebars.ExphbsOptions} */
@@ -78,10 +81,15 @@ let BOT_ROOM;
  */
 let ELECTION;
 
-
+/*
+ * Register staticPath hosting static assets
+ */
 app.use(express.static(staticPath));
 
-// see https://stackoverflow.com/a/59892173
+/*
+ * Use urlencoded() middleware to parse form data
+ * See https://stackoverflow.com/a/59892173
+ */
 app.use(express.urlencoded({ extended: true }));
 
 // Middleware
@@ -121,22 +129,12 @@ app.use((req, res, next) => {
 });
 
 
-// GET /
+// Routes
 app.route('/')
     .get(async (_req, res) => {
 
-        if (!BOT_CONFIG) {
-            console.error("SERVER - bot config missing");
-            return res.sendStatus(500);
-        }
-
-        if (!ELECTION) {
-            console.error("SERVER - election data missing");
-            return res.sendStatus(500);
-        }
-
-        if (!BOT_CLIENT) {
-            console.error("SERVER - chat client missing");
+        if (!BOT_CONFIG || !ELECTION || !BOT_CLIENT) {
+            console.error("SERVER - required config missing\n", BOT_CONFIG, ELECTION, BOT_CLIENT);
             return res.sendStatus(500);
         }
 
@@ -202,7 +200,6 @@ app.route('/')
             res.sendStatus(500);
         }
     });
-
 
 app.route('/say')
     .get(async ({ query }, res) => {
@@ -272,7 +269,6 @@ app.route('/say')
 
 app.route("/server")
     .get((_, res) => {
-
         try {
             res.render("server", {
                 current: "Server",
@@ -313,8 +309,7 @@ app.route("/server")
             console.error(`SERVER - failed to display config dashboard:`, error);
             res.sendStatus(500);
         }
-
-    })
+    });
 
 app.route('/config')
     .get(async ({ query }, res) => {
@@ -395,6 +390,11 @@ app.route('/config')
 app.route("/ping")
     .get((_, res) => {
         res.sendStatus(200);
+    });
+
+app.route("/feedback")
+    .get((_, res) => {
+        res.render('feedback');
     });
 
 
