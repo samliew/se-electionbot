@@ -22,6 +22,26 @@ export const filterMap = (map, callback) => {
  * @pure
  * @template {unknown} T
  * @template {unknown} U
+ * @template {unknown} V
+ *
+ * @summary maps a given {@link Map}
+ * @param {Map<T, U>} map  {@link Map} to map
+ * @param {(v: U, k: T, m: Map<T, U>) => V} callback mapper
+ * @returns {V[]}
+ */
+export const mapMap = (map, callback) => {
+    /** @type {V[]} */
+    const output = [];
+
+    map.forEach((v, k, m) => output.push(callback(v, k, m)));
+
+    return output;
+}
+
+/**
+ * @pure
+ * @template {unknown} T
+ * @template {unknown} U
  *
  * @summary merges together a list of {@link Map} instances
  * @param {...Map<T, U>} sources {@link Map}s to merge together
