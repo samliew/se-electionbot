@@ -18,6 +18,10 @@
                 <tr><td>Last updated</td><td>{{utcTimestamp updated}} <span class="relativetime" title="{{utcTimestamp updated}}"></span></td></tr>
                 <tr><td>Site</td><td>{{siteName}}</td></tr>
                 <tr><td>Hostname</td><td>{{{url (getter @root/data/election "siteUrl")}}}</td></tr>
+                <tr>
+                    <td>Is Stack Overflow</td>
+                    <td>{{{boolean (contextCall "isStackOverflow" this)}}}</td>
+                </tr>
                 <tr><td>Election Title</td><td>{{title}}</td></tr>
                 <tr><td>Election URL</td><td>{{{url electionUrl}}}</td></tr>
                 <tr><td>Election Chat</td>
