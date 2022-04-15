@@ -75,6 +75,19 @@ a:visited {
   color: var(--text-colour);
 }
 
+iframe.fullscreen {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100vw;
+  height: calc(100vh - 80px);
+  padding: 30px;
+  border: 0;
+  z-index: 1;
+}
+
 sup {
   vertical-align: top;
 }
