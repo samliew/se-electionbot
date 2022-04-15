@@ -395,7 +395,13 @@ app.route("/ping")
 
 app.route("/feedback")
     .get((_, res) => {
-        res.render('feedback');
+        res.render('feedback', {
+            page: {
+                appName: process.env.HEROKU_APP_NAME,
+                title: "Feedback"
+            },
+            heading: `ElectionBot Feedback`,
+        });
     });
 
 
