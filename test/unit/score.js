@@ -36,7 +36,6 @@ describe('Candidate Score', () => {
     describe(calculateScore.name, () => {
         it('should correctly determine missing required badges', () => {
             const election = new Election("https://stackoverflow.com/election/12");
-            election.chatDomain = "stackoverflow.com";
 
             const user = getMockApiUser();
 
@@ -51,7 +50,7 @@ describe('Candidate Score', () => {
             const { numMissingRequiredBadges } = score;
             expect(numMissingRequiredBadges).to.equal(3);
 
-            election.chatDomain = "stackexchange.com";
+            election.electionUrl = "https://stackexchange.com/election/12";
 
             const { numMissingRequiredBadges: noneRequired } = score;
             expect(noneRequired).to.equal(0);
