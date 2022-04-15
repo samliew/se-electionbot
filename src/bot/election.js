@@ -1,12 +1,13 @@
+import { AllowedHosts } from "chatexchange/dist/Client.js";
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
 import { getAllNamedBadges, getBadges, getNumberOfVoters, getUserInfo } from './api.js';
 import { calculateScore } from './score.js';
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
-import { mapify } from './utils/arrays.js';
+import { isOneOf, mapify } from './utils/arrays.js';
 import { addDates, dateToUtcTimestamp, daysDiff } from './utils/dates.js';
 import { findLast } from './utils/dom.js';
-import { matchNumber } from "./utils/expressions.js";
+import { matchNumber, safeCapture } from "./utils/expressions.js";
 import { filterMap, getOrInit, has, mergeMaps, sortMap } from './utils/maps.js';
 import { clone } from './utils/objects.js';
 import { scrapeModerators } from './utils/scraping.js';
@@ -455,9 +456,6 @@ export class Nominee {
 
 export default class Election {
 
-    /** @type {Host} */
-    chatDomain;
-
     /**
      * @summary map of userId to Nominee instances that has been withdrawn
      * @type {Map<number,Nominee>}
@@ -567,6 +565,29 @@ export default class Election {
 
         /** @type {Election|null} */
         this._prevObj = null;
+    }
+
+    /**
+     * @summary returns chat domain of the election
+     * @returns {Host}
+     */
+    get chatDomain() {
+        const { electionUrl } = this;
+
+        const origin = safeCapture(/https:\/\/(.+?)\/election/, electionUrl);
+        if (!origin) {
+            const { CHAT_DOMAIN } = process.env;
+            return isOneOf(AllowedHosts, CHAT_DOMAIN) ? CHAT_DOMAIN : "stackoverflow.com";
+        }
+
+        if (isOneOf(AllowedHosts, origin)) return origin;
+
+        const networkOrigin = origin.replace(/^\w+?\./, "");
+
+        if (isOneOf(AllowedHosts, networkOrigin)) return networkOrigin;
+
+        const { CHAT_DOMAIN } = process.env;
+        return isOneOf(AllowedHosts, CHAT_DOMAIN) ? CHAT_DOMAIN : "stackexchange.com";
     }
 
     /**
@@ -1205,8 +1226,6 @@ export default class Election {
             // Empty string if not set as environment variable, or not found on election page
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || this.scrapeElectionChatRoom($);
             this.chatRoomId = matchNumber(/(\d+)$/, this.chatUrl) || null;
-            this.chatDomain = /** @type {Host} */(this.chatUrl?.split('/')[2]?.replace('chat.', ''));
-
             this.phase = this.getPhase();
 
             // Detect active election number if not specified

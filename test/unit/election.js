@@ -16,6 +16,28 @@ describe(Election.name, () => {
 
     describe('getters', () => {
 
+        describe('chatDomain', () => {
+            it('should return stackoverflow.com for SO elections', () => {
+                const { chatDomain } = new Election("https://stackoverflow.com/election/1");
+                expect(chatDomain).to.equal("stackoverflow.com");
+            });
+
+            it('should return stackexchange.com for SE elections', () => {
+                const { chatDomain } = new Election("https://crypto.stackexchange.com/election/1");
+                expect(chatDomain).to.equal("stackexchange.com");
+            });
+
+            it('should return meta.stackexchange.com for MSE elections', () => {
+                const { chatDomain } = new Election("https://meta.stackexchange.com/election/3");
+                expect(chatDomain).to.equal("meta.stackexchange.com");
+            });
+
+            it('should default to stackexchange.com for network sites with non-SE domains', () => {
+                const { chatDomain } = new Election("https://askubuntu.com/election/6");
+                expect(chatDomain).to.equal("stackexchange.com");
+            });
+        });
+
         describe("allWinners", () => {
             it('should correctly return all winners from election history', () => {
                 const e1 = new Election("https://stackoverflow.com/election/1");
@@ -351,10 +373,17 @@ describe(Election.name, () => {
     });
 
     describe(Election.prototype.isStackOverflow.name, () => {
-        it('should correctly determine if the election is on SO', () => {
-            const election = new Election("https://stackoverflow.com/election/12", 12);
-            election.chatDomain = "stackoverflow.com";
+        it('should return true if the election is on SO', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
             expect(election.isStackOverflow()).to.be.true;
+        });
+
+        it('should return false if the election is not on SO', () => {
+            const rpg = new Election("https://rpg.stackexchange.com/election/1");
+            expect(rpg.isStackOverflow()).to.be.false;
+
+            const meta = new Election("https://meta.stackexchange.com/election/2");
+            expect(meta.isStackOverflow()).to.be.false;
         });
     });
 

@@ -1,4 +1,14 @@
 /**
+ * @template {unknown} T
+ *
+ * @summary checks if item is in the array
+ * @param {T[]} arr
+ * @param {unknown} item
+ * @returns {item is T}
+ */
+export const isOneOf = (arr, item) => arr.some((e) => e === item);
+
+/**
  * @template {any[]} T
  * @param {T} arr
  * @returns {T[number]|undefined}
