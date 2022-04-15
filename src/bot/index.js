@@ -361,7 +361,7 @@ import { matchNumber } from "./utils/expressions.js";
         const { currentNomineePostIds } = election;
 
         if (config.verbose) {
-            console.log(`INIT - Current nominees:`, election.arrNominees);
+            console.log(`INIT - Current nominees:`, election.nominees);
             console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
         }
 

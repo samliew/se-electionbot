@@ -4,6 +4,7 @@ import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
 import { makeURL, pluralize, wait } from "./utils.js";
 import { dateToUtcTimestamp } from "./utils/dates.js";
+import { filterMap, mapMap } from "./utils/maps.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -89,15 +90,19 @@ export default class ScheduledAnnouncement {
 
         const nominationTab = `${electionUrl}?tab=nomination`;
 
-        const messages = newlyNominatedNominees
-            .filter(({ userName, nominationLink }) => {
+        const onlyWithUsernames = filterMap(
+            newlyNominatedNominees,
+            ({ userName, nominationLink }) => {
                 if (!userName || !nominationLink) {
                     // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
                     console.log(`missing user info`, { userName, nominationLink });
                 }
                 return !!userName;
-            })
-            .map(({ nominationLink, userName }) => {
+            });
+
+        const messages = mapMap(
+            onlyWithUsernames,
+            ({ nominationLink, userName }) => {
                 const prefix = `**We have a new ${makeURL("nomination", nominationTab)}!**`;
                 const link = `Please welcome our latest candidate ${makeURL(userName, nominationLink)}!`;
                 return `${prefix} ${link}`;
@@ -115,15 +120,19 @@ export default class ScheduledAnnouncement {
     async announceWithdrawnNominees() {
         const { _room, config, _election } = this;
 
-        const messages = _election.newlyWithdrawnNominees
-            .filter(({ userName, nominationLink }) => {
+        const onlyWithUsernames = filterMap(
+            _election.newlyWithdrawnNominees,
+            ({ userName, nominationLink }) => {
                 if (!userName || !nominationLink) {
                     // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
                     console.log(`missing user info`, { userName, nominationLink });
                 }
                 return !!userName;
-            })
-            .map(({ nominationLink, userName }) => {
+            });
+
+        const messages = mapMap(
+            onlyWithUsernames,
+            ({ nominationLink, userName }) => {
                 return `**Attention:** Candidate ${nominationLink ? makeURL(userName, nominationLink) : userName
                     } has withdrawn from the election.`;
             });

@@ -129,6 +129,7 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
 };
 
 /**
+ * @summary lists {@link Nominee}s that are in the election room
  * @param {BotConfig} config bot configuration
  * @param {Election} election current {@link Election}
  * @param {Host} host chat {@link Host}
@@ -136,23 +137,21 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
  * @returns {Promise<RoomUser[]>}
  */
 export const listNomineesInRoom = async (config, election, host, users) => {
-    const { arrNominees, siteHostname } = election;
-
-    const nomineeIds = arrNominees.map(({ userId }) => userId);
+    const { nominees, siteHostname } = election;
 
     /** @type {RoomUser[]} */
     const nomineesInRoom = [];
     for (const user of users) {
         const { userId } = user;
 
-        if (host === "stackoverflow.com" && nomineeIds.includes(userId)) {
+        if (host === "stackoverflow.com" && nominees.has(userId)) {
             nomineesInRoom.push(user);
             continue;
         }
 
         const { domain, id } = await scrapeChatUserParentUserInfo(config, host, userId);
 
-        if (domain === siteHostname && id && nomineeIds.includes(id)) {
+        if (domain === siteHostname && id && nominees.has(id)) {
             nomineesInRoom.push(user);
             continue;
         }
@@ -459,9 +458,6 @@ export default class Election {
     /** @type {Host} */
     chatDomain;
 
-    /** @type {Nominee[]} */
-    arrNominees = [];
-
     /**
      * @summary map of userId to Nominee instances that has been withdrawn
      * @type {Map<number,Nominee>}
@@ -473,6 +469,9 @@ export default class Election {
 
     /** @type {Map<number, ModeratorUser>} */
     moderators = new Map();
+
+    /** @type {Map<number, Nominee>} */
+    nominees = new Map();
 
     /** @type {Map<number, Election>} */
     elections = new Map();
@@ -566,7 +565,7 @@ export default class Election {
 
         this.electionNum = electionNum ? +electionNum : +idFromURL || null;
 
-        // private
+        /** @type {Election|null} */
         this._prevObj = null;
     }
 
@@ -664,8 +663,8 @@ export default class Election {
      * @returns {number[]}
      */
     get currentNomineePostIds() {
-        const { arrNominees } = this;
-        return /** @type {number[]} */(arrNominees
+        const { nominees } = this;
+        return /** @type {number[]} */([...nominees.values()]
             .map(({ nominationLink }) => matchNumber(/(\d+)$/, nominationLink))
             .filter(Boolean)
         );
@@ -685,8 +684,8 @@ export default class Election {
      * @returns {number}
      */
     get numNominees() {
-        const { arrNominees } = this;
-        return arrNominees.length || 0;
+        const { nominees } = this;
+        return nominees.size;
     }
 
     /**
@@ -708,30 +707,26 @@ export default class Election {
     }
 
     /**
-     * @summary gets a list of new Nominees
-     * @returns {Nominee[]}
+     * @summary gets a list of new {@link Nominee}s
+     * @returns {Map<number, Nominee>}
      */
     get newlyNominatedNominees() {
-        const { prev, arrNominees } = this;
-        const prevIds = (prev?.arrNominees || []).map(({ userId }) => userId);
-        return arrNominees.filter(({ userId }) => !prevIds.includes(userId));
+        const { prev, nominees } = this;
+        const prevNominees = (prev?.nominees || new Map());
+        return filterMap(nominees, (_, id) => !prevNominees.has(id));
     }
 
     /**
-     * @summary gets a list of Nominees that has withdrawn
-     * @returns {Nominee[]}
+     * @summary gets newly withdrawn {@link Nominee}s
+     * @returns {Map<number, Nominee>}
      */
     get newlyWithdrawnNominees() {
-        const { prev, arrNominees } = this;
-        const prevNominees = prev?.arrNominees || [];
+        const { prev, nominees } = this;
+        const prevNominees = prev?.nominees || new Map();
 
-        // Validation
-        if (prevNominees.length === 0) return [];
+        if (!prevNominees.size) return new Map();
 
-        const currIds = arrNominees.map(({ userId }) => userId);
-        const missingNominees = prevNominees.filter(({ userId }) => !currIds.includes(userId));
-
-        return missingNominees;
+        return filterMap(prevNominees, (_, id) => !nominees.has(id));
     }
 
     /**
@@ -767,7 +762,7 @@ export default class Election {
      */
     get hasNewNominees() {
         const { newlyNominatedNominees } = this;
-        return !!newlyNominatedNominees.length;
+        return !!newlyNominatedNominees.size;
     }
 
     /**
@@ -874,10 +869,10 @@ export default class Election {
     reset() {
         // TODO: expand
         this.withdrawnNominees.clear();
-        this.arrNominees.length = 0;
         this.arrWinners.length = 0;
         this.questionnaire.length = 0;
         this.moderators.clear();
+        this.nominees.clear();
         this.phase = null;
         this.updated = Date.now();
         this.forget();
@@ -1000,9 +995,9 @@ export default class Election {
      * @returns {boolean}
      */
     isNominee(target) {
-        const { arrNominees } = this;
+        const { nominees } = this;
         const id = typeof target === "number" ? target : target.id;
-        return arrNominees.some(({ userId }) => userId === id);
+        return nominees.has(id);
     }
 
     /**
@@ -1031,10 +1026,11 @@ export default class Election {
     /**
      * @summary gets Nominee objects for winners
      * @param {number[]} winnerIds
-     * @returns {Nominee[]}
+     * @returns {Map<number, Nominee>}
      */
     getWinners(winnerIds) {
-        return this.arrNominees.filter(({ userId }) => winnerIds.includes(userId));
+        const { nominees } = this;
+        return filterMap(nominees, ({ userId }) => winnerIds.includes(userId));
     }
 
     /**
@@ -1105,8 +1101,8 @@ export default class Election {
      * @returns {Election}
      */
     addActiveNominee(nominee) {
-        const { arrNominees } = this;
-        arrNominees.push(nominee);
+        const { nominees } = this;
+        nominees.set(nominee.userId, nominee);
         return this;
     }
 
@@ -1199,8 +1195,7 @@ export default class Election {
             const nominees = candidateElems.map((_i, el) => this.scrapeNominee($, el, electionPageUrl)).get()
                 .sort((a, b) => a.nominationDate < b.nominationDate ? -1 : 1);
 
-            // Clear an array before rescraping
-            this.arrNominees.length = 0;
+            this.nominees.clear();
 
             nominees.forEach((nominee) => {
                 const { withdrawnDate } = nominee;
@@ -1256,7 +1251,7 @@ export default class Election {
 
                     // Get winners
                     const winnerIds = $(statsElem).find('a').map((_i, el) => +( /** @type {string} */($(el).attr('href')?.split('/')[2]))).get();
-                    this.arrWinners = this.getWinners(winnerIds);
+                    this.arrWinners = [...this.getWinners(winnerIds).values()];
                 }
             }
 

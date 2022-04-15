@@ -5,6 +5,7 @@ import { sayElectionSchedule } from "./messages/phases.js";
 import { sendMessage, sendMessageList } from "./queue.js";
 import { makeURL, wait } from "./utils.js";
 import { SEC_IN_MINUTE } from "./utils/dates.js";
+import { mapMap } from "./utils/maps.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -82,9 +83,9 @@ export default class Rescraper {
             }
 
             if (config.debugOrVerbose) {
-                const { arrNominees, arrWinners, phase } = election;
+                const { nominees, arrWinners, phase } = election;
 
-                console.log(`RESCRAPER - Candidates: ${arrNominees.map(x => x.userName).join(', ')}`);
+                console.log(`RESCRAPER - Candidates: ${mapMap(nominees, x => x.userName).join(', ')}`);
 
                 if (phase === 'ended') {
                     console.log(`RESCRAPER - Winners: ${arrWinners.map(x => x.userName).join(', ')}`);
@@ -127,7 +128,7 @@ export default class Rescraper {
             }
 
             // Withdrawn nominations
-            if (election.isActive() && election.newlyWithdrawnNominees.length > 0) {
+            if (election.isActive() && election.newlyWithdrawnNominees.size) {
                 await announcement?.announceWithdrawnNominees();
                 console.log(`RESCRAPER - Withdrawn nominees announced.`);
             }

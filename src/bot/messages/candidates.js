@@ -58,7 +58,7 @@ export const sayBestCandidate = (_config, _elections, election) => {
  * @returns {string}
  */
 export const sayCurrentCandidates = (_config, _elections, election) => {
-    const { phase, numNominees, electionUrl, arrNominees } = election;
+    const { phase, numNominees, electionUrl, nominees } = election;
 
     if (!phase) return sayElectionNotStartedYet(election);
 
@@ -79,7 +79,7 @@ export const sayCurrentCandidates = (_config, _elections, election) => {
         const prefix = election.isActive() ? `${capitalize(getRandomCurrently())}, there` : "There";
 
         // Don't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
-        return `${prefix} ${modal} ${link}: ${arrNominees.map(({ userName }) => userName).join(', ')}`;
+        return `${prefix} ${modal} ${link}: ${[...nominees.values()].map(({ userName }) => userName).join(', ')}`;
     }
 
     return `No users have nominated themselves yet. Why not be the first?`;

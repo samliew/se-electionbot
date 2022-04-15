@@ -298,8 +298,7 @@ describe('Commands', () => {
             it('should make current election forget the last state', () => {
                 const election = new Election("https://stackoverflow.com/election/13");
 
-                // TODO: remove access of a "private" property once added a setter
-                election._prevObj = JSON.parse(JSON.stringify(election));
+                election.pushHistory();
 
                 resetElection(getMockBotConfig(), election);
 
@@ -308,7 +307,7 @@ describe('Commands', () => {
 
             it('should reset current election state', () => {
                 const election = new Election("https://stackoverflow.com/election/13");
-                election.arrNominees.push(getMockNominee(election));
+                election.addActiveNominee(getMockNominee(election));
                 election.arrWinners.push(getMockNominee(election));
                 election.moderators.set(-1, /** @type {ModeratorUser} */({}));
                 election.phase = "primary";

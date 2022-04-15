@@ -25,9 +25,9 @@ import { sayCommonlyAskedQuestions } from "./metadata.js";
  * @returns {Promise<string>}
  */
 export const sayHI = async (config, elections, election, botUser, greeting = 'Welcome to the election chat room! ') => {
-    const { arrNominees, electionUrl, phase, dateElection, apiSlug } = election;
+    const { nominees, electionUrl, phase, dateElection, apiSlug } = election;
 
-    const { length } = arrNominees;
+    const { size } = nominees;
 
     const electionLink = makeURL("election", `${electionUrl}?tab=${phase}`);
     const phasePrefix = `The ${electionLink} is in the ${phase} phase`;
@@ -46,7 +46,7 @@ export const sayHI = async (config, elections, election, botUser, greeting = 'We
         alreadyVoted = `${format(numVoters)} (${eligible}) user${pluralize(numVoters)} ha${pluralize(numVoters, "ve", "s")} already voted`;
     }
 
-    const pluralCandidates = pluralizePhrase(length, `are ${length} candidates`, `is ${length} candidate`);
+    const pluralCandidates = pluralizePhrase(size, `are ${size} candidates`, `is ${size} candidate`);
 
     const phaseMap = {
         "null": `The ${electionLink} has not begun yet.`,

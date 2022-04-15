@@ -36,7 +36,8 @@ describe(Election.name, () => {
 
             it('should correctly determine if threshold is reached', () => {
                 const election = new Election("https://stackoverflow.com/election/1");
-                election.arrNominees.push(getMockNominee(election), getMockNominee(election));
+                election.addActiveNominee(getMockNominee(election, { userId: 1 }));
+                election.addActiveNominee(getMockNominee(election, { userId: 2 }));
 
                 expect(election.reachedPrimaryThreshold).to.be.false;
 
@@ -52,7 +53,8 @@ describe(Election.name, () => {
             it('should correctly return the number of nominees left to reach threshold', () => {
                 const election = new Election("https://stackoverflow.com/election/42");
                 election.primaryThreshold = 42;
-                election.arrNominees.push(getMockNominee(election), getMockNominee(election));
+                election.addActiveNominee(getMockNominee(election, { userId: 1 }));
+                election.addActiveNominee(getMockNominee(election, { userId: 2 }));
 
                 expect(election.nomineesLeftToReachPrimaryThreshold).to.equal(41);
             });
@@ -60,7 +62,8 @@ describe(Election.name, () => {
             it('should return 0 if the threshold is already reached', () => {
                 const election = new Election("https://stackoverflow.com/election/1");
                 election.primaryThreshold = 1;
-                election.arrNominees.push(getMockNominee(election), getMockNominee(election));
+                election.addActiveNominee(getMockNominee(election, { userId: 1 }));
+                election.addActiveNominee(getMockNominee(election, { userId: 2 }));
 
                 expect(election.nomineesLeftToReachPrimaryThreshold).to.equal(0);
             });
@@ -137,7 +140,8 @@ describe(Election.name, () => {
                 const nominee1 = getMockNominee(election, { userId: 1, nominationLink: "https://stackoverflow.com/election/13#post-1" });
                 const nominee2 = getMockNominee(election, { userId: 2, nominationLink: "https://stackoverflow.com/election/13#post-2" });
 
-                election.arrNominees.push(nominee1, nominee2);
+                election.addActiveNominee(nominee1);
+                election.addActiveNominee(nominee2);
 
                 const { currentNomineePostIds } = election;
 
@@ -150,11 +154,8 @@ describe(Election.name, () => {
             it('should correctly return number of Nominees', () => {
                 const election = new Election("https://stackoverflow.com/election/12");
 
-                const nominee1 = getMockNominee(election, { userId: 1 });
-                const nominee2 = getMockNominee(election, { userId: 2 });
-
-                election.arrNominees.push(nominee1);
-                election.arrNominees.push(nominee2);
+                election.addActiveNominee(getMockNominee(election, { userId: 1 }));
+                election.addActiveNominee(getMockNominee(election, { userId: 2 }));
 
                 const { numNominees } = election;
                 expect(numNominees).to.equal(2);
@@ -185,15 +186,16 @@ describe(Election.name, () => {
                 const withdrawn = getMockNominee(election, { userId: 1 });
                 const remaining = getMockNominee(election, { userId: 2 });
 
-                election.arrNominees.push(withdrawn, remaining);
+                election.addActiveNominee(withdrawn);
+                election.addActiveNominee(remaining);
                 election.pushHistory();
 
-                election.arrNominees.shift();
+                election.nominees.delete(1);
 
                 const { newlyWithdrawnNominees } = election;
 
-                expect(newlyWithdrawnNominees.length).to.equal(1);
-                expect(newlyWithdrawnNominees[0].userId).to.equal(withdrawn.userId);
+                expect(newlyWithdrawnNominees.size).to.equal(1);
+                expect(newlyWithdrawnNominees.has(1)).to.be.true;
             });
         });
 
@@ -205,14 +207,19 @@ describe(Election.name, () => {
                 const oldNominee = getMockNominee(election, { userId: 1 });
                 const newNominee = getMockNominee(election, { userId: 2 });
 
-                election._prevObj = { arrNominees: [oldNominee] };
-                election.arrNominees.push(newNominee);
+                election.addActiveNominee(oldNominee);
+
+                election.pushHistory();
+
+                election.nominees.delete(1);
+
+                election.addActiveNominee(newNominee);
 
                 const { newlyNominatedNominees } = election;
-                expect(newlyNominatedNominees).length(1);
+                expect(newlyNominatedNominees.size).to.equal(1);
 
-                const [nominee] = newlyNominatedNominees;
-                expect(nominee.userId).to.equal(2);
+                const nominee = newlyNominatedNominees.get(2);
+                expect(nominee).to.not.be.undefined;
             });
         });
 
@@ -223,7 +230,8 @@ describe(Election.name, () => {
 
                 const newWinner = getMockNominee(election, { userId: 2 });
 
-                election._prevObj = { arrWinners: [] };
+                election.pushHistory();
+
                 election.arrWinners.push(newWinner);
 
                 const { newWinners } = election;
@@ -235,7 +243,8 @@ describe(Election.name, () => {
 
             it('should return an empty array on no Winners', () => {
                 const election = new Election("https://stackoverflow.com/election/12");
-                election._prevObj = { arrWinners: [] };
+
+                election.pushHistory();
 
                 const { newWinners } = election;
                 expect(newWinners).be.empty;
@@ -246,7 +255,8 @@ describe(Election.name, () => {
 
                 const newWinner = getMockNominee(election, { userId: 42 });
 
-                election._prevObj = { arrWinners: [] };
+                election.pushHistory();
+
                 election.arrWinners.push(newWinner);
 
                 expect(election.hasNewWinners).to.be.true;
@@ -261,14 +271,18 @@ describe(Election.name, () => {
 
             it('should correctly detect if chat room has changed', () => {
                 const election = new Election("https://stackoverflow.com/election/12");
-                election._prevObj = { chatUrl: "https://old.url" };
+
+                election.chatUrl = "https://old.url";
+                election.pushHistory();
+
                 election.chatUrl = "https://new.url";
 
                 expect(election.electionChatRoomChanged).to.be.true;
 
                 // Set both urls to be same, but change chat room id
-                election._prevObj = { chatUrl: "https://new.url", chatRoomId: 1 };
+                election.chatRoomId = 1;
                 election.chatUrl = "https://new.url";
+                election.pushHistory();
                 election.chatRoomId = 2;
 
                 expect(election.electionChatRoomChanged).to.be.true;
@@ -281,16 +295,18 @@ describe(Election.name, () => {
                 const date = new Date();
 
                 const election = new Election("https://stackoverflow.com/election/12");
-                election._prevObj = { dateEnded: date };
+                election.dateEnded = dateToUtcTimestamp(date);
+
+                election.pushHistory();
 
                 date.setHours(date.getHours() + 1);
 
-                election.dateEnded = date.toISOString();
+                election.dateEnded = dateToUtcTimestamp(date);
 
                 expect(election.electionDatesChanged).to.be.true;
             });
         });
-    }); // end getters
+    });
 
     describe(Election.prototype.getPhase.name, () => {
 
@@ -349,7 +365,9 @@ describe(Election.name, () => {
 
             const election = new Election("https://stackoverflow.com/election/12", 12);
 
-            election.arrNominees.push(...testIds.map((i) => getMockNominee(election, { userId: i })));
+            testIds.forEach((userId) => {
+                election.addActiveNominee(getMockNominee(election, { userId }));
+            });
 
             expect(election.isNominee(24)).to.be.true;
             expect(election.isNominee(2048)).to.be.false;
@@ -360,7 +378,7 @@ describe(Election.name, () => {
 
             const election = new Election("https://stackoverflow.com/election/42");
 
-            election.arrNominees.push(getMockNominee(election, { userId: 42, userName: "answer" }));
+            election.addActiveNominee(getMockNominee(election, { userId: 42, userName: "answer" }));
 
             expect(election.isNominee(user));
         });
@@ -476,13 +494,15 @@ describe(Election.name, () => {
         it('should correctly determine new phase', () => {
 
             const election = new Election("https://stackoverflow.com/election/12");
-            election._prevObj = { phase: "nomination" };
+            election.phase = "nomination";
+            election.pushHistory();
             election.phase = "election";
 
             const newPhase = election.isNewPhase();
             expect(newPhase).to.be.true;
 
-            election._prevObj.phase = "election";
+            election.phase = "election";
+            election.pushHistory();
 
             const oldPhase = election.isNewPhase();
             expect(oldPhase).to.be.false;

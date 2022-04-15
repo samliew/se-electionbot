@@ -52,9 +52,9 @@
                 <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
             </table>
 
-            <h2>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len arrNominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
-            {{#if (len arrNominees)}}
-                {{> nominees arrNominees }}
+            <h2>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len nominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
+            {{#if (len nominees)}}
+                {{> nominees (values nominees) }}
             {{else}}
                 {{> emptySmallTable }}
             {{/if}}
