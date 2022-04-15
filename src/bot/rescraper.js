@@ -73,7 +73,7 @@ export default class Rescraper {
             const { status, errors } = election.validate();
 
             if (!status || !rescraped) {
-                console.error(`RESCRAPER - Invalid election data:\n${errors.join("\n")}`);
+                console.log(`RESCRAPER - Invalid election data:\n${errors.join("\n")}`);
                 return this.start();
             }
 

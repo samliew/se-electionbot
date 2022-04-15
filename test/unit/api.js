@@ -3,7 +3,7 @@ import { getStackApiKey } from "../../src/bot/api.js";
 
 describe('SE API', () => {
 
-    describe('getStackApiKey', () => {
+    describe(getStackApiKey.name, () => {
 
         it('should return empty string on empty pool', () => {
             const key = getStackApiKey([]);

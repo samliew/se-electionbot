@@ -7,7 +7,10 @@ import Election from "../../src/bot/election.js";
 import Rescraper from "../../src/bot/rescraper.js";
 import { getMockBotConfig, getMockBotUser } from "../mocks/bot.js";
 
-describe('Rescraper', () => {
+describe(Rescraper.name, () => {
+
+    beforeEach(() => sinon.stub(console, "log"));
+    afterEach(() => sinon.restore());
 
     /** @type {Client} */
     const client = new Client["default"]("stackoverflow.com");
@@ -36,7 +39,6 @@ describe('Rescraper', () => {
         });
 
         beforeEach(() => sinon.stub(scraper, "start"));
-        afterEach(() => sinon.restore());
 
         it('should return early if no previous state', async () => {
             const announceStub = sinon.stub(ann, "announceCancelled");

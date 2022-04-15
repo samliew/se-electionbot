@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { sayBadgesByType } from "../../src/bot/messages/badges.js";
 import { sayWithdrawnNominations } from "../../src/bot/messages/candidates.js";
@@ -17,6 +18,9 @@ import { getMockNominee } from "../mocks/nominee.js";
  */
 
 describe("Messages module", () => {
+
+    before(() => sinon.stub(console, "log"));
+    after(() => sinon.restore());
 
     describe("sayElectionSchedule", () => {
 

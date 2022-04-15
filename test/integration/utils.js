@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
 import { test } from "mocha";
+import sinon from "sinon";
 import {
     fetchChatTranscript,
     fetchRoomOwners,
@@ -10,6 +11,9 @@ import {
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe("Stack Exchange Chat integration", function () {
+
+    beforeEach(() => sinon.stub(console, "log"));
+    afterEach(() => sinon.restore());
 
     dotenv.config();
 

@@ -13,7 +13,9 @@ import { getMockNominee } from "../mocks/nominee.js";
  */
 
 describe(ScheduledAnnouncement.name, () => {
-    sinon.stub(console, "log");
+    
+    beforeEach(() => sinon.stub(console, "log"));
+    afterEach(() => sinon.restore());
 
     /** @type {Client} */
     const client = new Client["default"]("stackoverflow.com");

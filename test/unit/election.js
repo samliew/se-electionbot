@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { dateToUtcTimestamp } from "../../src/bot/utils/dates.js";
 import { getMockNominee } from "../mocks/nominee.js";
@@ -8,7 +9,10 @@ import { getMockUserProfile } from "../mocks/user.js";
  * @typedef { import("../../src/bot/election").ElectionPhase} ElectionPhase
  */
 
-describe('Election', () => {
+describe(Election.name, () => {
+
+    beforeEach(() => sinon.stub(console, "log"));
+    afterEach(() => sinon.restore());
 
     describe('getters', () => {
 
@@ -288,7 +292,7 @@ describe('Election', () => {
         });
     }); // end getters
 
-    describe('getPhase', () => {
+    describe(Election.prototype.getPhase.name, () => {
 
         it('should correctly determine phase', () => {
             const now = Date.now();
@@ -330,7 +334,7 @@ describe('Election', () => {
         });
     });
 
-    describe('isStackOverflow', () => {
+    describe(Election.prototype.isStackOverflow.name, () => {
         it('should correctly determine if the election is on SO', () => {
             const election = new Election("https://stackoverflow.com/election/12", 12);
             election.chatDomain = "stackoverflow.com";
@@ -338,30 +342,31 @@ describe('Election', () => {
         });
     });
 
-    describe('isNominee', () => {
+    describe(Election.prototype.isNominee.name, () => {
 
         it('should correctly determine if an id is a nominee', () => {
             const testIds = [42, 24, -9000];
 
             const election = new Election("https://stackoverflow.com/election/12", 12);
-            // @ts-expect-error
-            election.arrNominees.push(...testIds.map((i) => ({ userId: i })));
+
+            election.arrNominees.push(...testIds.map((i) => getMockNominee(election, { userId: i })));
+
             expect(election.isNominee(24)).to.be.true;
             expect(election.isNominee(2048)).to.be.false;
         });
 
         it('should accept User instance instead of an id', () => {
-            const user = /** @type {import("../../src/bot/index").UserProfile} */({ id: 42 });
+            const user = getMockUserProfile({ id: 42 });
 
             const election = new Election("https://stackoverflow.com/election/42");
-            // @ts-expect-error
-            election.arrNominees.push({ userId: 42, userName: "answer" });
+
+            election.arrNominees.push(getMockNominee(election, { userId: 42, userName: "answer" }));
 
             expect(election.isNominee(user));
         });
     });
 
-    describe('isNotStartedYet', () => {
+    describe(Election.prototype.isNotStartedYet.name, () => {
 
         it('should correctly check if election is only upcoming', () => {
             const election = new Election("https://stackoverflow.com/election/13");
@@ -378,7 +383,7 @@ describe('Election', () => {
         });
     });
 
-    describe('isActive', () => {
+    describe(Election.prototype.isActive.name, () => {
 
         it('should correctly determine active state', () => {
             const election = new Election("https://stackoverflow.com/election/12");
@@ -404,7 +409,7 @@ describe('Election', () => {
         });
     });
 
-    describe('isEnded', () => {
+    describe(Election.prototype.isEnded.name, () => {
 
         it('should corrrectly check if election has ended', () => {
             const election = new Election("https://stackoverflow.com/election/12");
@@ -420,7 +425,7 @@ describe('Election', () => {
         });
     });
 
-    describe('isEnding', () => {
+    describe(Election.prototype.isEnding.name, () => {
 
         it('should correctly check if election is ending', () => {
             const offsetSecs = 5 * 60 * 1000; // 5 minutes
@@ -448,7 +453,7 @@ describe('Election', () => {
         });
     });
 
-    describe("isInactive", () => {
+    describe(Election.prototype.isInactive.name, () => {
         it("should correctly check if election is inactive", () => {
             const election = new Election("https://stackoverflow.com/election/12");
 
@@ -466,7 +471,7 @@ describe('Election', () => {
         });
     });
 
-    describe('isNewPhase', () => {
+    describe(Election.prototype.isNewPhase.name, () => {
 
         it('should correctly determine new phase', () => {
 
@@ -484,7 +489,7 @@ describe('Election', () => {
         });
     });
 
-    describe('canVote', () => {
+    describe(Election.prototype.canVote.name, () => {
         it('should correctly determine if a user can vote', () => {
             const election = new Election("https://stackoverflow.com/election/12");
             election.repVote = 150;
