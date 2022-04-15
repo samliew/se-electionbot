@@ -24,7 +24,7 @@
                 <tbody>
                     {{#each routes}}
                     <tr>
-                        <td>{{ @key }}</td>
+                        <td>{{{ url @key }}}</td>
                         <td>{{ join this/methods ", " }}</td>
                         <td>{{{ yesno this/public }}}</td>
                     </tr>
