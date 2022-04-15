@@ -3,6 +3,7 @@ import { pluralize } from "../utils.js";
 
 /**
  * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
+ * @typedef {import("../election").ModeratorUser} ModeratorUser
  */
 
 /**
@@ -37,7 +38,7 @@ export const sayCannedResponses = () => new RandomArray(
 /**
  * @fun
  * @summary builds a "how many mods it takes" response message
- * @param {Map<number, ApiUser>} moderators current moderators
+ * @param {Map<number, ModeratorUser>} moderators current moderators
  * @returns {string}
  */
 export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {

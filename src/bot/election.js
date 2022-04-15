@@ -1,11 +1,15 @@
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
-import { getBadges, getNumberOfVoters, getUserInfo } from './api.js';
+import { getAllNamedBadges, getBadges, getNumberOfVoters, getUserInfo } from './api.js';
 import { calculateScore } from './score.js';
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
+import { mapify } from './utils/arrays.js';
 import { addDates, dateToUtcTimestamp, daysDiff } from './utils/dates.js';
 import { findLast } from './utils/dom.js';
 import { matchNumber } from "./utils/expressions.js";
+import { filterMap, getOrInit, has, mergeMaps, sortMap } from './utils/maps.js';
+import { clone } from './utils/objects.js';
+import { scrapeModerators } from './utils/scraping.js';
 
 /**
  * @typedef {null|"ended"|"election"|"primary"|"nomination"|"cancelled"} ElectionPhase
@@ -18,7 +22,11 @@ import { matchNumber } from "./utils/expressions.js";
  * @typedef {import("chatexchange/dist/User").default} BotUser
  * @typedef {import("./utils").ChatMessage} ChatMessage
  * @typedef {import("./utils").RoomUser} RoomUser
- * @typedef {import("./utils/scraping").ScrapedModUser} ScrapedModUser
+ * @typedef {ApiUser & {
+ *  appointed?: string,
+ *  election?: number,
+ *  electionLink?: string
+ * }} ModeratorUser
  */
 
 /**
@@ -103,10 +111,10 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
         if (userId > 0) {
             const { apiSlug } = election;
             const userBadges = await getBadges(config, [userId], apiSlug);
-            const user = await getUserInfo(config, userId, apiSlug);
+            const users = await getUserInfo(config, [userId], apiSlug);
 
-            if (user) {
-                const { score } = calculateScore(user, userBadges, election);
+            if (has(users, userId)) {
+                const { score } = calculateScore(users.get(userId), userBadges, election);
                 withdrawnNominee.userScore = score;
             }
         }
@@ -155,6 +163,69 @@ export const listNomineesInRoom = async (config, election, host, users) => {
 };
 
 /**
+ * @summary
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @returns {Promise<Map<number, ModeratorUser>>}
+ */
+export const getAppointedModerators = async (config, election) => {
+    const { apiSlug, siteUrl } = election;
+
+    const scrapedMods = await scrapeModerators(config, siteUrl);
+
+    const scrapedAppointedMods = filterMap(scrapedMods, ({ appointed }) => !!appointed);
+
+    const users = await getUserInfo(config, [...scrapedAppointedMods.keys()], apiSlug);
+
+    /** @type {Map<number, ModeratorUser>} */
+    const appointedMods = new Map();
+
+    users.forEach((user, id) => {
+        if (!has(scrapedMods, id)) return;
+
+        const { appointed } = scrapedMods.get(id);
+
+        appointedMods.set(id, { ...user, appointed });
+    });
+
+    return appointedMods;
+};
+
+/**
+ * @summary gets all elected moderators (including stepped down)
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @returns {Promise<Map<number, ModeratorUser>>}
+ */
+export const getElectedModerators = async (config, election) => {
+    const { allWinners, apiSlug } = election;
+
+    const users = await getUserInfo(config, [...allWinners.keys()], apiSlug);
+
+    /** @type {Map<number, ModeratorUser>} */
+    const elected = new Map();
+
+    users.forEach((user, id) => {
+        if (!has(allWinners, id)) return;
+
+        const { election } = allWinners.get(id);
+
+        const { electionNum, electionUrl } = election;
+
+        elected.set(id, {
+            ...user,
+            election: electionNum || 1,
+            electionLink: electionUrl
+        });
+    });
+
+    return elected;
+};
+
+/** @type {Map<string, Map<number, Election>>} */
+const electionsCache = new Map();
+
+/**
  * @summary gets all {@link Election}s for a given site
  * @param {BotConfig} config bot configuration
  * @param {string} siteUrl URL of the network site to get {@link Election}s for
@@ -166,13 +237,17 @@ export const listNomineesInRoom = async (config, election, host, users) => {
  * ]>}
  */
 export const getSiteElections = async (config, siteUrl, maxElectionNumber, scrape = false) => {
-    /** @type {Map<number, Election>} */
-    const elections = new Map();
+    const elections = getOrInit(electionsCache, siteUrl, new Map());
 
     /** @type {Map<number, string[]>} */
     const validationErrors = new Map();
 
     for (let electionNum = maxElectionNumber; electionNum >= 1; electionNum--) {
+        if (elections.has(electionNum)) {
+            console.log(`[cache] ${siteUrl} election ${electionNum}`);
+            continue;
+        }
+
         const electionURL = `${siteUrl}/election/${electionNum}`;
 
         // if the election page is not reachable, it's not the bot's fault,
@@ -396,11 +471,8 @@ export default class Election {
     /** @type {Nominee[]} */
     arrWinners = [];
 
-    /** @type {Map<number, ApiUser>} */
-    currentSiteMods = new Map();
-
-    /** @type {Map<number, ScrapedModUser>} */
-    scrapedSiteMods = new Map();
+    /** @type {Map<number, ModeratorUser>} */
+    moderators = new Map();
 
     /** @type {Map<number, Election>} */
     elections = new Map();
@@ -604,8 +676,8 @@ export default class Election {
      * @returns {number}
      */
     get numMods() {
-        const { currentSiteMods } = this;
-        return currentSiteMods.size || 0;
+        const { moderators } = this;
+        return moderators.size || 0;
     }
 
     /**
@@ -660,6 +732,23 @@ export default class Election {
         const missingNominees = prevNominees.filter(({ userId }) => !currIds.includes(userId));
 
         return missingNominees;
+    }
+
+    /**
+     * @summary gets all winners throughout the election history
+     * @returns {Map<number, Nominee>}
+     */
+    get allWinners() {
+        const { elections } = this;
+
+        /** @type {Map<number, Nominee>} */
+        const allWinners = new Map();
+
+        elections.forEach(({ arrWinners }) => {
+            arrWinners.forEach((n) => allWinners.set(n.userId, n));
+        });
+
+        return allWinners;
     }
 
     /**
@@ -753,6 +842,17 @@ export default class Election {
     }
 
     /**
+     * @summary clones the election
+     * @param {BotConfig} config bot configuration
+     * @returns {Promise<Election>}
+     */
+    async clone(config) {
+        const dolly = clone(this);
+        await dolly.scrapeElection(config);
+        return dolly;
+    }
+
+    /**
      * @summary forgets about previous states
      * @param {number} [states] number of states to forget
      * @returns {void}
@@ -765,6 +865,23 @@ export default class Election {
             this._prevObj = null;
             cleanups += 1;
         }
+    }
+
+    /**
+     * @summary resets the election to initial state
+     * @returns {Election}
+     */
+    reset() {
+        // TODO: expand
+        this.withdrawnNominees.clear();
+        this.arrNominees.length = 0;
+        this.arrWinners.length = 0;
+        this.questionnaire.length = 0;
+        this.moderators.clear();
+        this.phase = null;
+        this.updated = Date.now();
+        this.forget();
+        return this;
     }
 
     /**
@@ -1149,4 +1266,50 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
         }
     }
 
+    /**
+     * @summary updates election badges
+     * @param {BotConfig} config bot configuration
+     * @returns {Promise<Election>}
+     */
+    async updateElectionBadges(config) {
+        const { apiSlug, electionBadges } = this;
+
+        const allNamedBadges = await getAllNamedBadges(config, apiSlug);
+        const badgeMap = mapify(allNamedBadges, "name");
+
+        electionBadges.forEach((electionBadge) => {
+            const { name } = electionBadge;
+            const matchedBadge = badgeMap.get(name);
+
+            // Replace the badge id for badges with the same badge names
+            // TODO: Hardcode list of badges where this will not work properly (non-english sites?)
+            if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
+        });
+
+        if (config.debugOrVerbose) {
+            console.log(`[election] updated badges\n${electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n")}`);
+        }
+
+        return this;
+    }
+
+    /**
+     * @summary updates election moderators
+     * @param {BotConfig} config bot configuration
+     * @returns {Promise<Election>}
+     */
+    async updateModerators(config) {
+        const [electedMods, appointedMods] = await Promise.all([
+            getElectedModerators(config, this),
+            getAppointedModerators(config, this)
+        ]);
+
+        const sortedElectedMods = sortMap(electedMods, (_, v1, __, v2) => {
+            return (v1.election || 1) < (v2.election || 1) ? -1 : 1;
+        });
+
+        this.moderators = mergeMaps(sortedElectedMods, appointedMods);
+
+        return this;
+    }
 }

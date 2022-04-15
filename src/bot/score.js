@@ -8,6 +8,7 @@ import { sayDiamondAlready } from "./messages/moderators.js";
 import { sayHasMaximumCandidateScore, sayNoAccountToCalcScore } from "./messages/score.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID } from "./utils.js";
 import { matchNumber } from "./utils/expressions.js";
+import { has } from "./utils/maps.js";
 
 /**
  * @typedef {import("./index.js").UserProfile} UserProfile
@@ -211,15 +212,17 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         }
 
         // parallel scrape + API call speeds up calculation
-        const [userBadges, requestedUser] = await Promise.all([
+        const [userBadges, requestedUsers] = await Promise.all([
             getBadges(config, [userId], apiSlug, { type: "named" }),
-            getUserInfo(config, userId, apiSlug)
+            getUserInfo(config, [userId], apiSlug)
         ]);
 
-        if (!requestedUser) {
+        if (!has(requestedUsers, userId)) {
             console.error(`failed to get user info to calculate`);
             return sayCalcFailed(isAskingForOtherUser);
         }
+
+        const requestedUser = requestedUsers.get(userId);
 
         const candidateScore = calculateScore(requestedUser, userBadges, election);
 
@@ -251,7 +254,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         // Privileged user asking for candidate score of another user
         if (isAskingForOtherUser) {
-            const { display_name } = requestedUser || {};
+            const { display_name } = requestedUser;
 
             responseText = `The candidate score for user ${makeURL(display_name || userId.toString(),
                 `${siteUrl}/users/${userId}`)

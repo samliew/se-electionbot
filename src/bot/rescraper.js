@@ -3,7 +3,8 @@ import { sayEndingSoon } from "./messages/elections.js";
 import { sayBusyGreeting, sayIdleGreeting } from "./messages/greetings.js";
 import { sayElectionSchedule } from "./messages/phases.js";
 import { sendMessage, sendMessageList } from "./queue.js";
-import { makeURL } from "./utils.js";
+import { makeURL, wait } from "./utils.js";
+import { SEC_IN_MINUTE } from "./utils/dates.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -132,9 +133,9 @@ export default class Rescraper {
             }
 
             // Primary phase was activated (due to >10 candidates)
-            if (!announcement?.hasPrimary && election.datePrimary != null) {
+            if (!announcement?.hasPrimary && election.datePrimary) {
                 announcement?.initPrimary(election.datePrimary);
-                await sendMessage(config, room, `There will be a **${makeURL("primary", election.electionUrl + "?tab=primary")}** phase before the election now, as there are more than ten candidates.`);
+                await announcement?.announcePrimary();
             }
 
             // Election dates has changed (manually by CM)
@@ -219,14 +220,11 @@ export default class Rescraper {
                 }
 
                 // Stay in room a while longer
-                const stayInRoomFor = config.electionAfterpartyMins * 60 * 1000;
-                setTimeout(async function () {
+                await wait(config.electionAfterpartyMins * SEC_IN_MINUTE);
 
-                    // Scale Heroku dynos to free (restarts app)
-                    const heroku = new HerokuClient(config);
-                    await heroku.scaleFree();
-
-                }, stayInRoomFor);
+                // Scale Heroku dynos to free (restarts app)
+                const heroku = new HerokuClient(config);
+                await heroku.scaleFree();
             }
 
             this.start();

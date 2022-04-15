@@ -1,6 +1,6 @@
 import * as ServerUtils from "../../server/utils.js";
 import { getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
-import Election, { getVotingGraph } from "../election.js";
+import Election, { getSiteElections, getVotingGraph } from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
 import { sayUptime } from "../messages/metadata.js";
 import { sayOtherSiteMods } from "../messages/moderators.js";
@@ -11,6 +11,7 @@ import { flat } from "../utils/arrays.js";
 import { formatAsChatCode } from "../utils/chat.js";
 import { dateToUtcTimestamp, getMilliseconds } from "../utils/dates.js";
 import { matchISO8601, matchNumber } from "../utils/expressions.js";
+import { mergeMaps } from "../utils/maps.js";
 
 /**
  * @typedef {import("../announcement").default} Announcement
@@ -233,21 +234,72 @@ export const listSiteModerators = async (config, content, entities) => {
 };
 
 /**
- * @summary soft-resets the current election
- * @param {BotConfig} _config bot config
+ * TODO: account for cross-domain switches
+ * @param {BotConfig} config bot config
  * @param {Election} election current election instance
- * @returns {string}
+ * @param {string} content message content
+ * @returns {Promise<string>}
  */
-export const resetElection = (_config, election) => {
+export const changeElection = async (config, election, content) => {
+    const targetUrl = content.replace(/.*?(?=https:\/\/)/, "");
 
-    // TODO: expand
-    election.arrNominees.length = 0;
-    election.arrWinners.length = 0;
-    election.currentSiteMods.clear();
-    election.phase = null;
-    election.updated = Date.now();
+    const valid = election.validElectionUrl(targetUrl);
+    if (!valid) {
+        return `invalid target election URL (${targetUrl})`;
+    }
 
-    election.forget();
+    const targetNum = matchNumber(/\/election\/(\d+)/, targetUrl);
+    if (!targetNum) {
+        return `cannot get election number from the ${makeURL("election URL", targetUrl)}`;
+    }
+
+    const { electionNum, elections, electionUrl } = election;
+
+    if (electionNum === targetNum) {
+        return `changing to the ${makeURL("same election", targetUrl)} is a noop`;
+    }
+
+    if (!electionNum) {
+        return `current election number is missing, aborting`;
+    }
+
+    const dolly = await election.clone(config);
+    elections.set(electionNum, dolly);
+
+    election.reset();
+    election.electionUrl = targetUrl;
+    election.electionNum = targetNum;
+    elections.set(targetNum, election);
+
+    const status = await election.scrapeElection(config);
+    if (!status) {
+        return `failed to scrape the ${makeURL("target election", targetUrl)}`;
+    }
+
+    const numDiff = targetNum - electionNum;
+    if (numDiff > 1) {
+        const [updated] = await getSiteElections(config, election.siteUrl, targetNum, true);
+        election.elections = mergeMaps(updated, elections);
+    }
+
+    await election.updateElectionBadges(config);
+    await election.updateModerators(config);
+
+    return `successfully switched elections\nfrom: ${electionUrl}\nto: ${targetUrl}`;
+};
+
+/**
+ * @summary soft-resets the current election
+ * @param {BotConfig} config bot config
+ * @param {Election} election current election instance
+ * @returns {Promise<string>}
+ */
+export const resetElection = async (config, election) => {
+    election.reset();
+
+    await election.scrapeElection(config);
+    await election.updateElectionBadges(config);
+    await election.updateModerators(config);
 
     return "Successfully reset the election";
 };

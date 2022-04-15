@@ -5,9 +5,8 @@ import entities from 'html-entities';
 import { startServer } from "../server/index.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
-import { getAllNamedBadges, getModerators } from "./api.js";
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, getVotingReport, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, getVotingReport, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -60,11 +59,9 @@ import { makeCandidateScoreCalc } from "./score.js";
 import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
-import { mapify } from "./utils/arrays.js";
 import { logResponse } from "./utils/bot.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
-import { scrapeModerators } from "./utils/scraping.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -290,27 +287,10 @@ import { scrapeModerators } from "./utils/scraping.js";
 
         // Get current site named badges (i.e.: non-tag badges)
         if (!election.isStackOverflow()) {
-            const allNamedBadges = await getAllNamedBadges(config, election.apiSlug);
-            const badgeMap = mapify(allNamedBadges, "name");
-
-            electionBadges.forEach((electionBadge) => {
-                const { name } = electionBadge;
-                const matchedBadge = badgeMap.get(name);
-
-                // Replace the badge id for badges with the same badge names
-                // TODO: Hardcode list of badges where this will not work properly (non-english sites?)
-                if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
-            });
-
-            if (config.debugOrVerbose) {
-                console.log('API - Site election badges\n', electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n"));
-            }
+            await election.updateElectionBadges(config);
         }
 
-        const currentSiteMods = await getModerators(config, election.apiSlug);
-        election.currentSiteMods = currentSiteMods;
-        election.scrapedSiteMods = await scrapeModerators(config, election.siteUrl);
-
+        const { moderators } = await election.updateModerators(config);
 
         // "default" is a temp fix for ChatExchange being served as CJS module
         /** @type {Client} */
@@ -420,6 +400,7 @@ import { scrapeModerators } from "./utils/scraping.js";
             "alive": ["bot reports on its status", isAliveCommand, AccessLevel.privileged],
             "announce nominees": ["makes the bot announce nominees", announceNominees, AccessLevel.privileged],
             "announce winners": ["makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged],
+            "change election": ["switches current election", changeElection, AccessLevel.dev],
             "chatroom": ["gets election chat room link", getElectionRoomURL, AccessLevel.dev],
             "coffee": ["brews some coffee", brewCoffeeCommand, AccessLevel.privileged],
             // to reserve the keyword 'help' for normal users
@@ -584,6 +565,7 @@ import { scrapeModerators } from "./utils/scraping.js";
                 const matches = [
                     ["commands", /commands|usage/],
                     ["alive", /^(?:alive|awake|ping|uptime)/, config],
+                    ["change election", /^(?:change|switch)\s+elections?/, config, election, preparedMessage],
                     ["say", /say/, config, room, decodedMessage],
                     ["greet", /^(?:greet|welcome)/, config, elections, election, me, room, preparedMessage],
                     ["get time", /^(?:get time|time)$/, election],
@@ -671,7 +653,7 @@ import { scrapeModerators } from "./utils/scraping.js";
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
             else if (isAskedAboutLightbulb(preparedMessage) && config.fun) {
-                responseText = sayHowManyModsItTakesToFixLightbulb(currentSiteMods);
+                responseText = sayHowManyModsItTakesToFixLightbulb(moderators);
             }
             else if (isAskedAboutBadgesOfType(preparedMessage)) {
                 const [, type] = /(participation|editing|moderation)/.exec(preparedMessage) || [];
@@ -714,7 +696,7 @@ import { scrapeModerators } from "./utils/scraping.js";
                 else responseText = sayInformedDecision();
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
-                responseText = sayCurrentMods(election, currentSiteMods, entities.decode);
+                responseText = sayCurrentMods(election, moderators, entities.decode);
             }
             // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
             else if (isAskedForNominatingInfo(preparedMessage)) {

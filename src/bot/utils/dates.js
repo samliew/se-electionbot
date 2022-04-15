@@ -2,6 +2,8 @@ import { pluralize } from "../utils.js";
 
 const MS_IN_SECOND = 1000;
 
+export const SEC_IN_MINUTE = 60;
+
 /**
  * @summary validates and normalizes the Date
  * @param {Date|number|string} input

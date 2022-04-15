@@ -157,17 +157,20 @@ app.route('/')
             const chatProfile = await BOT_CLIENT.getMe();
             const chatDisplayName = await chatProfile.name;
 
-            const isBotInRoom = BOT_ROOM ? await isBotInTheRoom(BOT_CONFIG, BOT_CLIENT, BOT_ROOM) : false;
+            let isBotInRoom = false;
 
             /** @type {RoomUser[]} */
             const nomineesInRoom = [];
             if (BOT_ROOM) {
-                const users = await getUsersCurrentlyInTheRoom(BOT_CONFIG, BOT_CLIENT.host, BOT_ROOM);
-                const nominees = await listNomineesInRoom(BOT_CONFIG, ELECTION, BOT_CLIENT.host, users);
-                nomineesInRoom.push(...nominees);
-            }
+                const { host } = BOT_CLIENT;
 
-            const { scrapedSiteMods } = ELECTION;
+                const users = await getUsersCurrentlyInTheRoom(BOT_CONFIG, host, BOT_ROOM);
+
+                const nominees = await listNomineesInRoom(BOT_CONFIG, ELECTION, host, users);
+                nomineesInRoom.push(...nominees);
+
+                isBotInRoom = await isBotInTheRoom(BOT_CONFIG, BOT_CLIENT, BOT_ROOM, users);
+            }
 
             res.render('index', {
                 page: {
@@ -182,8 +185,6 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteHostname: ELECTION.siteHostname,
                     election: ELECTION,
-                    currentSiteMods: [...ELECTION.currentSiteMods.values()],
-                    scrapedSiteMods,
                     nomineesInRoom,
                     botconfig: {
                         // overrides should come after the object spread

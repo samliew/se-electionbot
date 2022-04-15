@@ -12,8 +12,8 @@ import { getMockNominee } from "../mocks/nominee.js";
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} Message
  */
 
-describe('ScheduledAnnouncement', function () {
-    this.timeout(5000);
+describe(ScheduledAnnouncement.name, () => {
+    sinon.stub(console, "log");
 
     /** @type {Client} */
     const client = new Client["default"]("stackoverflow.com");
@@ -32,23 +32,22 @@ describe('ScheduledAnnouncement', function () {
     let scraper = new Rescraper(config, client, room, new Map([[12, election]]), election);
     afterEach(() => scraper = new Rescraper(config, client, room, new Map([[12, election]]), election));
 
-    describe('announceCancelled', () => {
+    let ann = new ScheduledAnnouncement(config, room, election, scraper);
+    afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
+
+    describe(ScheduledAnnouncement.prototype.announceCancelled.name, () => {
 
         /** @type {sinon.SinonFakeTimers} */
         let clock;
         beforeEach(() => clock = sinon.useFakeTimers());
-        afterEach(() => sinon.restore());
+        afterEach(() => clock.restore());
 
         it('should return false on no Electon', async () => {
-            const ann = new ScheduledAnnouncement(config, room, election, scraper);
-
             const status = await ann.announceCancelled(room);
             expect(status).to.be.false;
         });
 
         it('should return false on no cancelledText', async () => {
-            const ann = new ScheduledAnnouncement(config, room, election, scraper);
-
             const status = await ann.announceCancelled(room);
             expect(status).to.be.false;
         });
@@ -60,7 +59,6 @@ describe('ScheduledAnnouncement', function () {
 
             const messageStub = sinon.stub(room, "sendMessage");
 
-            const ann = new ScheduledAnnouncement(config, room, election, scraper);
             const promise = ann.announceCancelled(room, election);
 
             await clock.runAllAsync();
@@ -69,16 +67,17 @@ describe('ScheduledAnnouncement', function () {
 
             const [[message]] = messageStub.args;
             expect(message).to.equal(mockReason);
+
+            messageStub.restore();
         });
     });
 
-    describe('announceNewNominees', () => {
+    describe(ScheduledAnnouncement.prototype.announceNewNominees.name, () => {
 
         /** @type {sinon.SinonFakeTimers} */
         let clock;
         beforeEach(() => clock = sinon.useFakeTimers());
-
-        afterEach(() => sinon.restore());
+        afterEach(() => clock.restore());
 
         it('should correctly announce new nominees', async () => {
             const names = ["Jane", "John"];
@@ -87,8 +86,6 @@ describe('ScheduledAnnouncement', function () {
 
             const nominees = names.map((userName) => getMockNominee(election, { userName }));
             election.arrNominees.push(...nominees);
-
-            const ann = new ScheduledAnnouncement(config, room, election, scraper);
 
             const promise = ann.announceNewNominees();
 
@@ -99,16 +96,36 @@ describe('ScheduledAnnouncement', function () {
             messageStub.args.forEach(([msg], i) => {
                 expect(msg.includes(names[i])).to.be.true;
             });
+
+            messageStub.restore();
         });
     });
 
-    describe('announceWinners', () => {
+    describe(ScheduledAnnouncement.prototype.announcePrimary.name, () => {
+        it('should not announce if primary threshold is not reached', async () => {
+            const status = await ann.announcePrimary();
+            expect(status).to.be.false;
+        });
 
-        let ann = new ScheduledAnnouncement(config, room, election, scraper);
-        afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
+        it('should correctly announce primary phase', async () => {
+            election.primaryThreshold = 0;
+            election.addActiveNominee(getMockNominee(election));
 
-        afterEach(() => sinon.restore());
+            const stubbed = sinon.stub(room, "sendMessage");
 
+            const status = await ann.announcePrimary();
+            expect(status).to.be.true;
+
+            stubbed.args.forEach(([msg]) => {
+                expect(msg).to.include("primary");
+                expect(msg).to.include("more than 0");
+            });
+
+            stubbed.restore();
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.announceWinners.name, () => {
         it('should return false on no election passed', async () => {
             const status = await ann.announceWinners(room);
             expect(status).to.be.false;
@@ -164,18 +181,16 @@ describe('ScheduledAnnouncement', function () {
             expect(message).to.match(/to the winner\*\*.+Jeanne/);
 
             clock.restore();
+            stubbed.restore();
         });
     });
 
-    describe('announceWithdrawnNominees', () => {
-        let ann = new ScheduledAnnouncement(config, room, election, scraper);
-        afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
+    describe(ScheduledAnnouncement.prototype.announceWithdrawnNominees.name, () => {
 
         /** @type {sinon.SinonFakeTimers} */
         let clock;
         beforeEach(() => clock = sinon.useFakeTimers());
-
-        afterEach(() => sinon.restore());
+        afterEach(() => clock.restore());
 
         it('should correctly announce withdrawn nominations', async () => {
             const withdrawn = getMockNominee(election, { userName: "John", nominationLink: "test", userId: 1 });

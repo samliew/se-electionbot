@@ -3,8 +3,28 @@
  * @template {unknown} T
  * @template {unknown} U
  *
- * @summary merges together a list of Map instances
- * @param {...Map<T, U>} sources Maps to merge together
+ * @summary filters a given {@link Map}
+ * @param {Map<T, U>} map  {@link Map} to filter
+ * @param {(v: U, k: T, m: Map<T, U>) => boolean} callback filter
+ * @returns {Map<T, U>}
+ */
+export const filterMap = (map, callback) => {
+    const filtered = /** @type {Map<T, U>} */(new Map());
+
+    map.forEach((v, k, m) => {
+        if (callback(v, k, m)) filtered.set(k, v);
+    });
+
+    return filtered;
+};
+
+/**
+ * @pure
+ * @template {unknown} T
+ * @template {unknown} U
+ *
+ * @summary merges together a list of {@link Map} instances
+ * @param {...Map<T, U>} sources {@link Map}s to merge together
  * @returns {Map<T, U>}
  */
 export const mergeMaps = (...sources) => {
@@ -18,14 +38,28 @@ export const mergeMaps = (...sources) => {
 };
 
 /**
- * @template {Map<unknown, unknown>} T
- * @template {T extends Map<infer U, unknown> ? U : never} U
+ * @pure
+ * @template {unknown} T
+ * @template {unknown} U
+ *
+ * @summary sorts a given {@link Map}
+ * @param {Map<T, U>} map {@link Map} to sort
+ * @param {(key1:T, value1:U, key2:T, value2:U) => number} comparator comparator function
+ * @returns {Map<T, U>}
+ */
+export const sortMap = (map, comparator) => {
+    const sortedEntries = [...map].sort((a, b) => comparator(...a, ...b));
+    return new Map(sortedEntries);
+};
+
+/**
+ * @template {unknown} T
+ * @template {unknown} U
  *
  * @summary {@link Map.has} method with a type guard
- * @param {T} map
- * @param {U} key
- *
- * @returns {map is Omit<T, "get"> & { get(key: U): T extends Map<unknown, infer V> ? V : never }}
+ * @param {Map<T, U>} map {@link Map} to guard the value from
+ * @param {T} key key to get the value by
+ * @returns {map is Omit<Map<T,U>, "get"> & { get(key: T): U }}
  */
 export const has = (map, key) => map.has(key);
 
@@ -34,9 +68,10 @@ export const has = (map, key) => map.has(key);
  * @template {T extends Map<infer U, unknown> ? U : never} U
  * @template {T extends Map<unknown, infer V> ? V : never} V
  *
- * @param {T} map
- * @param {U} key
- * @param {T extends Map<unknown, infer V> ? V : never} init
+ * @summary gets or initializes a value from a given {@link Map}
+ * @param {T} map {@link Map} to get or initialize from
+ * @param {U} key key to get the value by
+ * @param {T extends Map<unknown, infer V> ? V : never} init initializer
  * @returns {T extends Map<unknown, infer V> ? V : never}
  */
 export const getOrInit = (map, key, init) => {

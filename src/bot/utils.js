@@ -940,16 +940,17 @@ export const getUser = async (client, userId) => {
  * @param {BotConfig} config bot configuration
  * @param {Client} client ChatExchange client
  * @param {Room} room room to check bot presense in
+ * @param {RoomUser[]} [users] users currently in the room
  * @returns {Promise<boolean>}
  */
-export const isBotInTheRoom = async (config, client, room) => {
+export const isBotInTheRoom = async (config, client, room, users) => {
     const { chatDomain } = config;
 
-    const users = await getUsersCurrentlyInTheRoom(config, chatDomain, room);
+    const inRoom = users || await getUsersCurrentlyInTheRoom(config, chatDomain, room);
 
     const { id } = await client.getMe();
 
-    return users.some(({ userId }) => userId === id);
+    return inRoom.some(({ userId }) => userId === id);
 };
 
 /**

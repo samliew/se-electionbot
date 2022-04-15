@@ -79,8 +79,8 @@
     {{#with election}}
     <section>
         <aside>
-            <h2>Moderators <span class="small-count" data-prefix="(" data-suffix=")">{{len currentSiteMods}} total</span></h2>
-            {{#if (len @root/data/currentSiteMods)}}
+            <h2>Moderators <span class="small-count" data-prefix="(" data-suffix=")">{{len moderators}} total</span></h2>
+            {{#if (len moderators)}}
                 <table class="table-small">
                    <thead>
                         <tr>
@@ -90,21 +90,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {{#each @root/data/currentSiteMods}}
+                    {{#iterate moderators}}
                     <tr>
                         <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
                         <td>{{years this.creation_date}}</td>
-                        {{#with (get @root/data/scrapedSiteMods this.user_id)}}
-                            {{#if this.election}}
-                                <td>{{{ordinal this.election}}} <a href="{{this.electionLink}}">election</a> ({{year (getter (get @root/data/election/elections this.election) "dateEnded")}})</td>
-                            {{else if this.appointed}}
-                                <td>appointed ({{this.appointed}})</td>
-                            {{else}}
-                                <td></td>
-                            {{/if}}
-                        {{/with}}
+                        {{#if this.election}}
+                            <td>{{{ordinal this.election}}} <a href="{{this.electionLink}}">election</a> ({{year (getter (get @root/data/election/elections this.election) "dateEnded")}})</td>
+                        {{else if this.appointed}}
+                            <td>appointed ({{this.appointed}})</td>
+                        {{else}}
+                            <td></td>
+                        {{/if}}
                     </tr>
-                    {{/each}}
+                    {{/iterate}}
                     </tbody>
                 </table>
             {{else}}

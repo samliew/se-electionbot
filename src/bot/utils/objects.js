@@ -36,3 +36,42 @@ export const resolveObj = async (obj) => {
 
     return output;
 };
+
+/**
+ * @template {object} T
+ *
+ * @summary clones own properties of an object
+ * @param {T} source object to clone
+ * @param {object} [target] clone target
+ * @returns {T}
+ */
+export const clone = (source, target = {}) => {
+    const descriptors = Object.getOwnPropertyDescriptors(source);
+
+    Object.setPrototypeOf(target, Object.getPrototypeOf(source));
+
+    Object.entries(descriptors).forEach(([key, { value }]) => {
+        if (value instanceof Map) {
+            // shallow clone
+            return target[key] = new Map([...value.entries()]);
+        }
+
+        if (value instanceof Set) {
+            // shallow clone
+            return target[key] = new Set([...value.values()]);
+        }
+
+        if (Array.isArray(value)) {
+            // shallow clone
+            return target[key] = [...value];
+        }
+
+        if (value && typeof value === "object") {
+            return target[key] = clone(value);
+        }
+
+        target[key] = value;
+    });
+
+    return target;
+};

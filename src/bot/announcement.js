@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { sayFeedback } from "./commands/commands.js";
 import { sendMessageList } from "./queue.js";
+import { getCandidateOrNominee } from "./random.js";
 import { makeURL, pluralize, wait } from "./utils.js";
 import { dateToUtcTimestamp } from "./utils/dates.js";
 
@@ -126,6 +127,33 @@ export default class ScheduledAnnouncement {
                 return `**Attention:** Candidate ${nominationLink ? makeURL(userName, nominationLink) : userName
                     } has withdrawn from the election.`;
             });
+
+        await sendMessageList(config, _room, messages, { isPrivileged: true });
+
+        return true;
+    }
+
+    /**
+     * @summary announces the start of a primary phase
+     * @returns {Promise<boolean>}
+     */
+    async announcePrimary() {
+        const { _room, config, _election } = this;
+
+        const { electionUrl, primaryThreshold, reachedPrimaryThreshold } = _election;
+
+        if (!reachedPrimaryThreshold) {
+            console.log(`[primary] attempted to announce under threshold (${primaryThreshold})`);
+            return false;
+        }
+
+        const primaryURL = makeURL("primary", `${electionUrl}?tab=primary`);
+
+        const moreThan = `${primaryThreshold} ${getCandidateOrNominee()}${pluralize(primaryThreshold)}`;
+
+        const messages = [
+            `There will be a **${primaryURL}** phase before the election, as there are more than ${moreThan}.`
+        ];
 
         await sendMessageList(config, _room, messages, { isPrivileged: true });
 

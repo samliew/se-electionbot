@@ -213,13 +213,20 @@ export const getNumberOfUsersEligibleToVote = async (config, election) => {
  * @summary gets the network mods from the API
  * @param {BotConfig} config bot configuration
  * @param {string} site election site slug
- * @param {number} [page] API response page
+ * @param {{
+ *  from?: string|number|Date,
+ *  page?: number,
+ *  to?: string|number|Date
+ * }} [options] configuration
  * @returns {Promise<Map<number, User>>}
  */
-export const getModerators = async (config, site, page = 1) => {
+export const getModerators = async (config, site, options = {}) => {
+    const { from, page = 1, to } = options;
+
     // Have to use /users/moderators instead of /users/moderators/elected because we also want appointed mods
     const modURL = new URL(`${apiBase}/${apiVer}/users/moderators`);
-    modURL.search = new URLSearchParams({
+
+    const params = new URLSearchParams({
         pagesize: "100",
         order: "asc",
         sort: "name",
@@ -227,11 +234,16 @@ export const getModerators = async (config, site, page = 1) => {
         filter: "!LnNkvq0d-S*rS_0sMTDFRm",
         page: page.toString(),
         key: getStackApiKey(config.apiKeyPool)
-    }).toString();
+    });
+
+    if (from) params.append("fromdate", getSeconds(from).toString());
+    if (to) params.append("todate", getSeconds(to).toString());
+
+    modURL.search = params.toString();
 
     return handleResponse(
         /** @type {ApiWrapper<User>} */(await fetchUrl(config, modURL, true)) || {},
-        () => getModerators(config, site, page),
+        () => getModerators(config, site, options),
         async ({ items = [], has_more }) => {
 
             /** @type {Map<number, User>} */
@@ -244,7 +256,10 @@ export const getModerators = async (config, site, page = 1) => {
             });
 
             if (has_more) {
-                const otherItems = await getModerators(config, site, page + 1);
+                const otherItems = await getModerators(config, site, {
+                    ...options,
+                    page: page + 1
+                });
                 return mergeMaps(mods, otherItems);
             }
 
@@ -257,30 +272,42 @@ export const getModerators = async (config, site, page = 1) => {
 /**
  * @summary gets the user info from the API
  * @param {BotConfig} config
- * @param {number} userId userId to request info for
+ * @param {number[]} userIds list of userId to request info for
  * @param {string} site election site slug
  * @param {number} [page]
- * @returns {Promise<User|null>}
+ * @returns {Promise<Map<number, User>>}
  */
-export const getUserInfo = async (config, userId, site, page = 1) => {
+export const getUserInfo = async (config, userIds, site, page = 1) => {
 
-    const userURL = new URL(`${apiBase}/${apiVer}/users/${userId}`);
+    const userURL = new URL(`${apiBase}/${apiVer}/users/${userIds.join(";")}`);
     userURL.search = new URLSearchParams({
         site,
+        pagesize: "100",
         page: page.toString(),
         filter: "sAR)YG", // unsafe
         key: getStackApiKey(config.apiKeyPool),
     }).toString();
 
-    if (config.debug) console.log(userURL.toString());
+    return handleResponse(
+        /** @type {ApiWrapper<User>} */(await fetchUrl(config, userURL, true)) || {},
+        () => getUserInfo(config, userIds, site, page),
+        async ({ items = [], has_more }) => {
 
-    const { items = [] } = /** @type {ApiWrapper<User>} */(await fetchUrl(config, userURL, true)) || {};
+            /** @type {Map<number, User>} */
+            const users = new Map();
 
-    const [userInfo] = items;
+            items.forEach((user) => users.set(user.user_id, user));
 
-    if (config.verbose) console.log(`API - ${getUserInfo.name}\n`, userInfo || null);
+            if (has_more) {
+                const otherItems = await getUserInfo(config, userIds, site, page + 1);
+                return mergeMaps(users, otherItems);
+            }
 
-    return userInfo || null;
+            if (config.verbose) console.log(`API - ${getUserInfo.name}\n`, users);
+
+            return users;
+        }
+    );
 };
 
 /**

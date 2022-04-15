@@ -12,7 +12,7 @@ import { matchNumber, safeCapture } from "./expressions.js";
  *  user_id: number,
  *  display_name: string,
  *  user_type: "moderator",
- *  location: string,
+ *  location?: string,
  *  link: string,
  *  election?: number,
  *  electionLink?: string,

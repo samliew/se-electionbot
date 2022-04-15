@@ -163,3 +163,10 @@ export const years = (seconds) => {
 
 /** @type {(n: number) => string} */
 export const ordinal = (num) => `${num}<sup>${formatOrdinal(num).replace(/^\d+/, "")}</sup>`;
+
+/** @type {(source: Map<unknown, unknown> | Set<unknown> | unknown[], options: object) => any} */
+export const iterate = (source, options) => {
+    let output = "";
+    source.forEach((v) => output += options.fn(v));
+    return output;
+};
