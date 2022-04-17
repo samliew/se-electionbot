@@ -2,9 +2,10 @@
   --heading-colour: #000;
   --text-colour: #000;
   --link-colour: rgb(0, 0, 139);
-  --border-color: #999;
+  --border-colour: #999;
   --margin-size: 40px;
   --smaller-font-size: 0.85em;
+  --main-colour: rgb(242, 232, 222);
 }
 
 * {
@@ -18,7 +19,7 @@ body {
   margin: 0;
   padding: 30px;
   font-size: 1em;
-  background-color: rgb(242, 232, 222);
+  background-color: var(--main-colour);
   overflow-x: hidden;
 }
 
@@ -119,7 +120,7 @@ table,
 th,
 td {
   padding: 6px 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-colour);
   border-collapse: collapse;
 }
 
@@ -212,7 +213,7 @@ pre:empty::before {
   content: "(none)";
   font-style: italic;
   font-size: 0.9rem;
-  color: var(--border-color);
+  color: var(--border-colour);
 }
 
 form {
@@ -235,7 +236,7 @@ form textarea {
   margin-bottom: 1em;
   padding: 8px 12px;
   border-radius: 5px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-colour);
 }
 
 form input::placeholder {
@@ -369,7 +370,7 @@ form .form-controls {
     max-width: none;
     width: 100%;
     border: none;
-    border-left: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-colour);
   }
 
   tr {
