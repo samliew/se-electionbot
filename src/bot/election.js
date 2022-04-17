@@ -636,6 +636,15 @@ export default class Election {
     }
 
     /**
+     * @summary returns a list of optional election badges
+     * @returns {ElectionBadge[]}
+     */
+    get optionalBadges() {
+        const { electionBadges } = this;
+        return electionBadges.filter(({ required }) => !required);
+    }
+
+    /**
      * @summary returns a list of required badges
      * @returns {ElectionBadge[]}
      */

@@ -93,13 +93,20 @@ describe(Election.name, () => {
         });
 
         describe('requiredBadges', () => {
-
             it('should correctly return the list of required badges', () => {
                 const election = new Election("https://stackoverflow.com/election/12");
                 const { requiredBadges } = election;
                 expect(requiredBadges.length).to.equal(4);
             });
 
+        });
+
+        describe('optionalBadges', () => {
+            it('should correctly return the list of optional badges', () => {
+                const election = new Election("https://stackoverflow.com/election/12");
+                const { optionalBadges, electionBadges, requiredBadges } = election;
+                expect(optionalBadges.length).to.equal(electionBadges.length - requiredBadges.length);
+            });
         });
 
         describe('siteHostname', () => {
