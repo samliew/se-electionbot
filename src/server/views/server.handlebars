@@ -1,3 +1,5 @@
+{{> navigation routes=data/routes password=data/password path=data/path }}
+
 <h1>{{{heading}}}</h1>
 
 {{> breadcrumbs current=current }}
@@ -22,7 +24,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{#each routes}}
+                    {{#each data/routes}}
                     <tr>
                         <td>{{{ url @key }}}</td>
                         <td>{{ join this/methods ", " }}</td>

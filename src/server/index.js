@@ -41,6 +41,7 @@ app
     .set('view cache', 'false');
 
 /**
+ * @typedef {{ password?:string, success: string }} AuthQuery
  * @typedef {import("../bot/config").BotConfig} BotConfig
  * @typedef {import("express").Application} ExpressApp
  * @typedef {import("chatexchange/dist/Room").default} Room
@@ -131,7 +132,8 @@ app.use((req, res, next) => {
 
 // Routes
 app.route('/')
-    .get(async (_req, res) => {
+    .get(async ({ query, path }, res) => {
+        const { password = "" } = /** @type {AuthQuery} */(query);
 
         if (!BOT_CONFIG || !ELECTION || !BOT_CLIENT) {
             console.error("SERVER - required config missing\n", BOT_CONFIG, ELECTION, BOT_CLIENT);
@@ -185,6 +187,9 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteHostname: ELECTION.siteHostname,
                     election: ELECTION,
+                    routes: routes(app, publicPaths),
+                    path,
+                    password,
                     nomineesInRoom,
                     botconfig: {
                         // overrides should come after the object spread
@@ -203,8 +208,8 @@ app.route('/')
     });
 
 app.route('/say')
-    .get(async ({ query }, res) => {
-        const { success, password = "" } = /** @type {{ password?:string, message?:string, success: string }} */(query);
+    .get(async ({ query, path }, res) => {
+        const { success, password = "" } = /** @type {AuthQuery} */(query);
 
         if (!BOT_CONFIG || !BOT_CLIENT) {
             console.error("SERVER - Bot config missing");
@@ -234,7 +239,9 @@ app.route('/say')
                 data: {
                     chatDomain,
                     chatRoomId,
+                    path,
                     password,
+                    routes: routes(app, publicPaths),
                     statusText: statusMap[success],
                     transcriptMessages: transcriptMessages.slice(-showTranscriptMessages),
                 }
@@ -269,7 +276,9 @@ app.route('/say')
     });
 
 app.route("/server")
-    .get((_, res) => {
+    .get(({ query, path }, res) => {
+        const { password = "" } = /** @type {AuthQuery} */(query);
+
         try {
             res.render("server", {
                 current: "Server",
@@ -288,6 +297,9 @@ app.route("/server")
                         views: viewsPath
                     },
                     port: app.get("port"),
+                    path,
+                    password,
+                    routes: routes(app, publicPaths),
                     settings: {
                         "escape JSON": !!app.get("json escape"),
                         "ETag": app.get("etag"),
@@ -299,7 +311,6 @@ app.route("/server")
                         "view engine": app.get("view engine")
                     }
                 },
-                routes: routes(app, publicPaths),
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Server"
@@ -313,8 +324,8 @@ app.route("/server")
     });
 
 app.route('/config')
-    .get(async ({ query }, res) => {
-        const { success, password = "" } = /** @type {{ password?:string, success: string }} */(query);
+    .get(async ({ query, path }, res) => {
+        const { success, password = "" } = /** @type {AuthQuery} */(query);
 
         if (!BOT_CONFIG || !BOT_CLIENT) {
             console.error("SERVER - bot config missing");
@@ -343,7 +354,9 @@ app.route('/config')
                 heading: `Update ${await botChatUser.name} environment variables`,
                 data: {
                     configObject: envVars,
-                    password: password,
+                    path,
+                    password,
+                    routes: routes(app, publicPaths),
                     statusText: statusMap[success],
                 }
             });
@@ -394,13 +407,20 @@ app.route("/ping")
     });
 
 app.route("/feedback")
-    .get((_, res) => {
+    .get(({ query, path }, res) => {
+        const { password = "" } = /** @type {AuthQuery} */(query);
+
         res.render('feedback', {
             page: {
                 appName: process.env.HEROKU_APP_NAME,
                 title: "Feedback"
             },
             heading: `ElectionBot Feedback`,
+            data: {
+                path,
+                password,
+                routes: routes(app, publicPaths),
+            }
         });
     });
 
