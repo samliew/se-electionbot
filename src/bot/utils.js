@@ -127,10 +127,12 @@ export const fetchUrl = async (_config, url, json = false) => {
  */
 export const searchChat = async (config, chatDomain, query, roomId = '', pagesize = 100, page = 1) => {
 
-    console.log('Searching chat:', { chatDomain, query, roomId });
+    console.log(`[chat search] room ${roomId} (${chatDomain})\nquery: "${query}"`);
 
     const searchUrl = await fetchUrl(config, `https://chat.${chatDomain}/search?q=${query}&user=&room=${roomId}&pagesize=${pagesize}&page=${page}`);
     const $chat = cheerio.load(/** @type {string} */(searchUrl));
+
+    /** @type {ChatMessage[]} */
     const messages = [];
 
     const today = new Date();
@@ -226,6 +228,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
  *   chatUserId: number,
  *   message: string,
  *   messageMarkup: string,
+ *   messageHtml?: string,
  *   date: number,
  *   messageId: number
  * }} ChatMessage
@@ -397,7 +400,7 @@ export const fetchRoomOwners = async (config, chatDomain, chatRoomId) => {
         });
     });
 
-    console.log(`[room owners] room ${chatRoomId}\n${owners.map(({ userId, userName }) => `${userId} - ${userName}`).join("\n")}`);
+    console.log(`[room owners] room ${chatRoomId} (${chatDomain})\n${owners.map(({ userId, userName }) => `${userId} - ${userName}`).join("\n")}`);
 
     return owners;
 };

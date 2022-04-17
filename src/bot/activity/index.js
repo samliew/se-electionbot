@@ -34,7 +34,7 @@ export const countValidBotMessages = async (config, messages, botChatProfile) =>
         if (!botMessageFound && message && isFromBot) {
             botMessageFound = true;
             config.updateLastMessage(messageMarkup, date);
-            console.log(`INIT - Previous message in room was by bot at ${date}:`, messageMarkup);
+            console.log(`[bot activity] previous bot message\ntimestamp: ${date}\nmessage: "${messageMarkup}"`);
         }
 
         // Exit loop once greet message by bot
