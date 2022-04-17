@@ -63,14 +63,14 @@
                 {{> emptySmallTable }}
             {{/if}}
 
-            <h2>Withdrawn <span class="small-count" data-prefix="(" data-suffix=")">{{len withdrawnNominees}} total</span></h2>
+            {{> totalsTableHeader header="Withdrawn" collection=withdrawnNominees }}
             {{#if (len withdrawnNominees)}}
                 {{> nominees (values withdrawnNominees) }}
             {{else}}
                 {{> emptySmallTable }}
             {{/if}}
 
-            <h2>Winners <span class="small-count" data-prefix="(" data-suffix=")">{{len arrWinners}} total</span></h2>
+            {{> totalsTableHeader header="Winners" collection=arrWinners }}
             {{#if (len arrWinners)}}
                 {{> nominees arrWinners }}
             {{else}}
@@ -83,7 +83,7 @@
     {{#with election}}
     <section>
         <aside>
-            <h2>Moderators <span class="small-count" data-prefix="(" data-suffix=")">{{len moderators}} total</span></h2>
+            {{> totalsTableHeader header="Moderators" collection=moderators }}
             {{#if (len moderators)}}
                 <table class="table-small">
                    <thead>
@@ -113,23 +113,43 @@
                 {{> emptySmallTable }}
             {{/if}}
 
-            <h2>Badges</h2>
-            <table>
+            {{#if (len (getter this "requiredBadges"))}}
+            {{> totalsTableHeader header="Required Badges" collection=(getter this "requiredBadges") }}
+            <table class="table-small">
                 <thead>
                     <tr>
                         <th>Link</th>
                         <th>Id</th>
                         <th>Type</th>
-                        {{#if (call "isStackOverflow")}}<th>Required</th>{{/if}}
                     </tr>
                 </thead>
                 <tbody>
-                {{#each electionBadges}}
+                {{#each (getter this "requiredBadges")}}
                 <tr>
                     <td><a href="{{getter @root/data/election "siteUrl"}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
                     <td>{{this.badge_id}}</td>
                     <td>{{this.type}}</td>
-                    {{#if (contextCall "isStackOverflow" @root/data/election)}}<td>{{{required this.required}}}</td>{{/if}}
+                </tr>
+                {{/each}}
+                </tbody>
+            </table>
+            {{/if}}
+
+            {{> totalsTableHeader header="Election Badges" collection=(getter this "optionalBadges") }}
+            <table class="table-small">
+                <thead>
+                    <tr>
+                        <th>Link</th>
+                        <th>Id</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{#each (getter this "optionalBadges")}}
+                <tr>
+                    <td><a href="{{getter @root/data/election "siteUrl"}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
+                    <td>{{this.badge_id}}</td>
+                    <td>{{this.type}}</td>
                 </tr>
                 {{/each}}
                 </tbody>
