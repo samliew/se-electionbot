@@ -374,24 +374,30 @@ export const fetchRoomOwners = async (config, chatDomain, chatRoomId) => {
         chatRoomId = config.chatRoomId;
     }
 
-    const url = `https://chat.${chatDomain}/rooms/info/${chatRoomId}/?tab=access`;
+    const url = new URL(`https://chat.${chatDomain}/rooms/info/${chatRoomId}`);
+    url.searchParams.append("tab", "access");
 
     const html = await fetchUrl(config, url);
-    const $ = cheerio.load(/** @type {string} */(html));
 
+    const { window: { document } } = new JSDOM(html);
+
+    /** @type {RoomUser[]} */
     const owners = [];
 
-    $("#access-section-owner .username").each(function (el) {
-        const id = $(this).attr('href')?.match(/\/(\d+)\//)?.pop();
+    document.querySelectorAll("#access-section-owner .username").forEach((el) => {
+        const { href, textContent } = /** @type {HTMLAnchorElement} */(el);
+
+        const userId = matchNumber(/\/(\d+)\//, href) || NO_ACCOUNT_ID;
+
         owners.push({
-            userName: $(this).text().replace(/\s\u2666$/, ''),
-            userId: +(id || -42),
-            userLink: $(this).attr('href'),
-            isModerator: $(this).text().includes('♦')
+            userId,
+            userName: textContent?.replace(/\s\u2666$/, '') || "",
+            userLink: href,
+            isModerator: textContent?.includes('♦') || false
         });
     });
 
-    console.log(`Fetched room owners for ${url}`, owners);
+    console.log(`[room owners] room ${chatRoomId}\n${owners.map(({ userId, userName }) => `${userId} - ${userName}`).join("\n")}`);
 
     return owners;
 };
