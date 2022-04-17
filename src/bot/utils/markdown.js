@@ -1,4 +1,5 @@
 import entities from 'html-entities';
+import MIT from "markdown-it";
 import sanitize from "sanitize-html";
 import { makeURL, markdownify } from "../utils.js";
 
@@ -100,6 +101,23 @@ const mdToHTMLEntities = (text) => {
 };
 
 /**
+ * @summary replaces Markdown tables with HTML tags
+ * @param {string} text text to process
+ * @returns {string}
+ */
+const mdToTableHTML = (text) => {
+    const mit = new MIT();
+
+    return text
+        .replace(
+            // https://regex101.com/r/C9etyy/1
+            /(\s*?\|\s+.+?\s+\|(?:\s+.+?\s+\|)?\n\s*?\|\s+-+?\s+\|(?:\s+-+\s+\|)?(?:\n\s*?\|\s+.+?\s+\|(?:\s+.+?\s+\|))+)/g,
+            (_, table) => mit.render(table.replace(/^\s{4}/gm, ""))
+        )
+        .replace(/\r\n?|\n/g, "");
+};
+
+/**
  * @summary converts chat Markdown to HTML
  * @param {string} content initial text
  * @returns {string}
@@ -116,6 +134,7 @@ export const chatMarkdownToHtml = (content) => {
 
     const handlers = [
         mdToHTMLEntities,
+        mdToTableHTML,
         mdCodeToHTML,
         mdBoldToHTML,
         mdItalicToHTML,
