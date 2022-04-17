@@ -1,0 +1,18 @@
+<header>
+  <nav>
+    <ul>
+      {{#each routes}}
+        {{#unlessEquals @key ../path}}
+          {{#if (either this.public ../password)}}
+            <li>
+              <a
+                href="{{@key}}?password={{../password}}"
+                target="_blank"
+              >{{initIfFalsy (unprefix "/" @key) "home"}}</a>
+            </li>
+          {{/if}}
+        {{/unlessEquals}}
+      {{/each}}
+    </ul>
+  </nav>
+</header>
