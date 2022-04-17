@@ -169,3 +169,6 @@ export const iterate = (source, options) => {
     source.forEach((v) => output += options.fn(v));
     return output;
 };
+
+/** @type {(...sources: unknown[]) => boolean} */
+export const either = (...sources) => sources.slice(0, -1).some(Boolean);
