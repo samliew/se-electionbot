@@ -117,9 +117,8 @@ export const contextCall = function (name, ctxt, ...args) {
     return typeof ctxt[name] === "function" ? ctxt[name](...args.slice(0, -1)) : undefined;
 };
 
-export const unprefix = function (prefix, text) {
-    return text.replace(new RegExp(`^${prefix}\\s*?`), "");
-};
+/** @type {(prefix:string, text:string) => string} */
+export const unprefix = (prefix, text) => text.replace(new RegExp(`^${prefix}\\s*?`), "");
 
 export const reverse = function (/** @type {any[]} */array) {
     return [...array].reverse();
