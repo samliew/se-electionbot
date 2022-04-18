@@ -1,18 +1,16 @@
 <header>
   <nav>
-    <ul>
+    <select class="nav-dropdown" id="nav">
+      <option selected="selected">Menu</option>
       {{#each routes}}
-        {{#unlessEquals @key ../path}}
-          {{#if (either this.public ../password)}}
-            <li>
-              <a
-                href="{{@key}}{{#if ../password}}?password={{../password}}{{/if}}"
-                target="_blank"
-              >{{initIfFalsy (unprefix "/" @key) "home"}}</a>
-            </li>
-          {{/if}}
-        {{/unlessEquals}}
+      {{#unlessEquals @key ../path}}
+        {{#if (either this.public ../password)}}
+        <option value="{{@key}}{{#if ../password}}?password={{../password}}{{/if}}">
+          {{initIfFalsy (unprefix "/" @key) "home"}}
+        </option>
+        {{/if}}
+      {{/unlessEquals}}
       {{/each}}
-    </ul>
+    </select>
   </nav>
 </header>

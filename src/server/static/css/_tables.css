@@ -1,0 +1,173 @@
+table {
+  min-width: 280px;
+  width: 100%;
+  margin: 2em 0;
+}
+
+h2 + table {
+  margin-top: 0;
+}
+
+table,
+th,
+td {
+  padding: 6px 10px;
+  border: 1px solid var(--border-colour);
+  border-collapse: collapse;
+}
+
+th,
+td {
+  vertical-align: top;
+}
+
+th {
+  text-align: left;
+  white-space: nowrap;
+}
+
+th:first-child,
+td:first-child {
+  white-space: nowrap;
+}
+
+th:last-child,
+td:last-child {
+  min-width: 200px;
+  width: 80%;
+}
+
+td .list {
+  margin: 0;
+  font-size: var(--smaller-font-size);
+}
+
+/* Smaller tables */
+.table-small {
+  font-size: var(--smaller-font-size);
+}
+
+.table-small th,
+.table-small td {
+  min-width: 0;
+  padding: 3px 8px;
+}
+
+.table-small th:first-child,
+.table-small td:first-child {
+  white-space: nowrap;
+}
+
+/* Nested tables */
+.nested {
+  width: calc(100% + 22px);
+  margin: -7px -11px;
+  font-size: var(--smaller-font-size);
+}
+
+.table-small .nested,
+.nested .nested {
+  width: calc(100% + 18px);
+  margin: -4px -9px;
+  font-size: 0.9em;
+}
+
+.nested th,
+.nested td {
+  min-width: 40px;
+  padding: 3px 8px;
+}
+
+.nested th:first-child,
+.nested td:first-child {
+  width: 20%;
+}
+
+.nested th:last-child,
+.nested td:last-child {
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  table {
+    max-width: none;
+    width: 100%;
+    border: none;
+    border-left: 1px solid var(--border-colour);
+  }
+
+  tr {
+    display: flex;
+    align-content: stretch;
+    align-items: stretch;
+    flex-direction: column;
+    margin: 15px 0;
+  }
+
+  th,
+  td {
+    border: none;
+    padding: 2px 15px;
+    padding-right: 0;
+  }
+
+  tr:first-child {
+    margin-top: 0;
+  }
+
+  tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .nested,
+  .nested .nested {
+    margin: 0;
+  }
+
+  table thead,
+  .nested thead {
+    display: none;
+  }
+
+  .nested tr {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    margin: initial;
+  }
+
+  .nested th,
+  .nested td {
+    flex: 0 1 auto;
+    padding-left: 0;
+    padding-right: 3px;
+  }
+
+  .nested th::after,
+  .nested td::after {
+    content: ",";
+  }
+
+  .nested th:first-child::after,
+  .nested td:first-child::after,
+  .nested th:last-child::after,
+  .nested td:last-child::after {
+    content: "";
+  }
+
+  .nested th:nth-child(-n + 2),
+  .nested td:nth-child(-n + 2) {
+    padding-left: 10px;
+  }
+
+  th:first-child,
+  td:first-child {
+    font-weight: bold;
+  }
+
+  th:last-child,
+  td:last-child {
+    min-width: 0;
+    width: auto;
+  }
+}
