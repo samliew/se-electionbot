@@ -6,7 +6,7 @@
           {{#if (either this.public ../password)}}
             <li>
               <a
-                href="{{@key}}?password={{../password}}"
+                href="{{@key}}{{#if ../password}}?password={{../password}}{{/if}}"
                 target="_blank"
               >{{initIfFalsy (unprefix "/" @key) "home"}}</a>
             </li>
