@@ -8,8 +8,13 @@ header {
   box-shadow: 0 0.5px 2px var(--border-colour);
 }
 
-.nav-dropdown {
+.main-nav {
   position: absolute;
   top: 20px;
   right: 20px;
+}
+
+.main-nav select {
+  padding: 0.5em 1.5em 0.5em 0.6em;
+  cursor: pointer;
 }

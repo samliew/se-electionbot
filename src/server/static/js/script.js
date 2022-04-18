@@ -66,7 +66,9 @@ const updateRelativeDates = () => {
 const initMenu = () => {
     // Move to selected page
     document.getElementById('nav')?.addEventListener('change', evt => {
-        if (this.value) location.href = this.value;
+        // @ts-ignore
+        const value = evt.target.value || '';
+        if (value) window.location.href = value;
     });
 };
 

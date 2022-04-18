@@ -1,7 +1,8 @@
 <header>
-  <nav>
-    <select class="nav-dropdown" id="nav">
-      <option selected="selected">Menu</option>
+  <nav class="main-nav">
+    <label for="nav">Menu:</label>
+    <select id="nav">
+      <option selected="selected"></option>
       {{#each routes}}
       {{#unlessEquals @key ../path}}
         {{#if (either this.public ../password)}}
