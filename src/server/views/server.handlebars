@@ -10,6 +10,11 @@
             <h2>Configuration</h2>
             {{> deep data top=true}}
         </aside>
+
+        <aside>
+            <h2>Versions</h2>
+            {{> deep versions top=true}}
+        </aside>
     </section>
 
     <section>
@@ -24,7 +29,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{#each data/routes}}
+                    {{#each routes}}
                     <tr>
                         <td>{{{ url @key }}}</td>
                         <td>{{ join this/methods ", " }}</td>

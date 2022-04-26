@@ -299,7 +299,6 @@ app.route("/server")
                     port: app.get("port"),
                     path,
                     password,
-                    routes: routes(app, publicPaths),
                     settings: {
                         "escape JSON": !!app.get("json escape"),
                         "ETag": app.get("etag"),
@@ -309,8 +308,10 @@ app.route("/server")
                         "subdomain offset": app.get("subdomain offset"),
                         "view cache": !!app.get("view cache"),
                         "view engine": app.get("view engine")
-                    }
+                    },
                 },
+                routes: routes(app, publicPaths),
+                versions: process.versions,
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Server"
