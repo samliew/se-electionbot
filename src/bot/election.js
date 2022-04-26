@@ -366,67 +366,80 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
     // https://regex101.com/r/xKRRih/1
     const electionDateExpr = /on\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?$/i;
 
-    const questions = questionList.querySelectorAll(".question-container");
-    for (const container of questions) {
+    const containers = questionList.querySelectorAll(".question-container");
+
+    /** @type {Map<string, Map<number, Pick<ElectionAnnouncement, "postLink"|"postTitle">>>} */
+    const allScraped = new Map();
+
+    containers.forEach((container) => {
         /** @type {HTMLAnchorElement | null} */
         const postAnchor = container.querySelector("a.question-link");
         /** @type {HTMLAnchorElement | null} */
         const siteAnchor = container.querySelector("a.question-host");
-        if (!postAnchor || !siteAnchor) continue;
+        if (!postAnchor || !siteAnchor) return;
 
         const metaSite = siteAnchor.textContent?.trim();
         const postTitle = postAnchor.textContent?.trim();
-        if (!metaSite || !postTitle || !announcementTitleExpr.test(postTitle)) continue;
+        if (!metaSite || !postTitle || !announcementTitleExpr.test(postTitle)) return;
 
-        const electionSite = metaSite.replace("meta.", "");
-        const announcements = getOrInit(announcementsCache, electionSite, new Map());
+        const scraped = getOrInit(allScraped, metaSite, new Map());
 
         const { href: postLink } = postAnchor;
 
         const postId = matchNumber(/\/questions\/(\d+)\//, postLink);
-        if (!postId || has(announcements, postId)) continue;
+        if (!postId || has(scraped, postId)) return;
 
-        const apiSlug = metaSite.replace(/(?:\.stackexchange)?\.com/, "");
+        scraped.set(postId, { postLink, postTitle });
+    });
 
-        const [post] = await getPosts(config, [postId], { site: apiSlug });
-        if (!post) continue;
+    for (const [metaSite, scraped] of allScraped) {
+        const electionSite = metaSite.replace("meta.", "");
+        const site = metaSite.replace(/(?:\.stackexchange)?\.com/, "");
 
-        const { body, creation_date, owner } = post;
-        if (!body) {
-            console.log(`[announcements] missing post body (${electionSite})`);
-            continue;
-        }
+        const announcements = getOrInit(announcementsCache, electionSite, new Map());
 
-        if (!owner) {
-            console.log(`[announcements] missing post owner (${electionSite})`);
-            continue;
-        }
+        const postIds = [...scraped.keys()];
+        const posts = await getPosts(config, postIds, { site });
 
-        const { user_id: userId, link: userLink, display_name: userName } = owner;
-        if (!userId || !userLink || !userName) {
-            console.log(`[announcements] missing post owner fields (${electionSite})`);
-            continue;
-        }
+        postIds.forEach((postId, idx) => {
+            if (!has(scraped, postId)) return;
 
-        const postedAt = new Date(creation_date * 1000);
+            const { body, creation_date, owner } = posts[idx];
+            if (!body) {
+                console.log(`[announcements] missing post body (${site})`);
+                return;
+            }
 
-        const [_, monthday, year = postedAt.getFullYear()] = electionDateExpr.exec(body) || [];
+            if (!owner) {
+                console.log(`[announcements] missing post owner (${site})`);
+                return;
+            }
 
-        const dateElection = dateToUtcTimestamp(`${monthday}, ${year}`);
-        const dateAnnounced = dateToUtcTimestamp(postedAt);
+            const { user_id: userId, link: userLink, display_name: userName } = owner;
+            if (!userId || !userLink || !userName) {
+                console.log(`[announcements] missing post owner fields (${site})`);
+                return;
+            }
 
-        /** @type {ElectionAnnouncement} */
-        const upcomingElectionAnnouncement = {
-            dateAnnounced,
-            dateElection,
-            postLink,
-            postTitle,
-            userId,
-            userLink,
-            userName
-        };
+            const postedAt = new Date(creation_date * 1000);
 
-        announcements.set(postId, upcomingElectionAnnouncement);
+            const [_, monthday, year = postedAt.getFullYear()] = electionDateExpr.exec(body) || [];
+
+            const dateElection = dateToUtcTimestamp(`${monthday}, ${year}`);
+            const dateAnnounced = dateToUtcTimestamp(postedAt);
+
+            /** @type {ElectionAnnouncement} */
+            const upcomingElectionAnnouncement = {
+                ...scraped.get(postId),
+                dateAnnounced,
+                dateElection,
+                userId,
+                userLink,
+                userName
+            };
+
+            announcements.set(postId, upcomingElectionAnnouncement);
+        });
     }
 
     const hasMore = document.querySelector(".page-numbers.next");
