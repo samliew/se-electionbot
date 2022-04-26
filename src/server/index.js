@@ -284,34 +284,36 @@ app.route("/server")
                 current: "Server",
                 heading: "Server Control",
                 data: {
-                    __dirname,
-                    mounted: {
-                        client: !!BOT_CLIENT,
-                        config: !!BOT_CONFIG,
-                        election: !!ELECTION,
-                        room: !!BOT_ROOM
+                    configuration: {
+                        __dirname,
+                        mounted: {
+                            client: !!BOT_CLIENT,
+                            config: !!BOT_CONFIG,
+                            election: !!ELECTION,
+                            room: !!BOT_ROOM
+                        },
+                        paths: {
+                            partials: partialsPath,
+                            static: staticPath,
+                            views: viewsPath
+                        },
+                        port: app.get("port"),
+                        path,
+                        password,
+                        settings: {
+                            "escape JSON": !!app.get("json escape"),
+                            "ETag": app.get("etag"),
+                            "JSONP callback": app.get("jsonp callback name"),
+                            "send x-powered-by": !!app.get("x-powered-by"),
+                            "strict routing": !!app.get("strict routing"),
+                            "subdomain offset": app.get("subdomain offset"),
+                            "view cache": !!app.get("view cache"),
+                            "view engine": app.get("view engine")
+                        },
                     },
-                    paths: {
-                        partials: partialsPath,
-                        static: staticPath,
-                        views: viewsPath
-                    },
-                    port: app.get("port"),
-                    path,
-                    password,
-                    settings: {
-                        "escape JSON": !!app.get("json escape"),
-                        "ETag": app.get("etag"),
-                        "JSONP callback": app.get("jsonp callback name"),
-                        "send x-powered-by": !!app.get("x-powered-by"),
-                        "strict routing": !!app.get("strict routing"),
-                        "subdomain offset": app.get("subdomain offset"),
-                        "view cache": !!app.get("view cache"),
-                        "view engine": app.get("view engine")
-                    },
+                    routes: routes(app, publicPaths),
+                    versions: process.versions,
                 },
-                routes: routes(app, publicPaths),
-                versions: process.versions,
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
                     title: "Server"

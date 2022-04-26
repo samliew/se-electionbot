@@ -8,12 +8,21 @@
     <section>
         <aside>
             <h2>Configuration</h2>
-            {{> deep data top=true}}
+            {{> deep data/configuration top=true}}
         </aside>
 
         <aside>
             <h2>Versions</h2>
-            {{> deep versions top=true}}
+            <table class="table-small">
+                <tbody>
+                    {{#each data/versions}}
+                    <tr>
+                        <td>{{ @key }}</td>
+                        <td>{{ this }}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
         </aside>
     </section>
 
@@ -29,7 +38,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{#each routes}}
+                    {{#each data/routes}}
                     <tr>
                         <td>{{{ url @key }}}</td>
                         <td>{{ join this/methods ", " }}</td>
