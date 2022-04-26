@@ -44,3 +44,12 @@ export const flat = (array) => {
     });
     return flattened;
 };
+
+/**
+ * @template {unknown} T
+ *
+ * @summary truthy filter with type guard
+ * @param {T} item item to check
+ * @returns {item is Exclude<T, 0|""|null|false|undefined>}
+ */
+export const onlyTruthy = (item) => !!item;
