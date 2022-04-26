@@ -11,7 +11,7 @@ import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections } from './election.js';
+import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections, scrapeUpcomingElections } from './election.js';
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
@@ -62,6 +62,7 @@ import {
 import { logActivity, logResponse } from "./utils/bot.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
+import { getOrInit } from "./utils/maps.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -222,6 +223,9 @@ import { matchNumber } from "./utils/expressions.js";
                 }`);
             return;
         }
+
+        const electionAnnouncements = await scrapeUpcomingElections(config);
+        election.announcements = getOrInit(electionAnnouncements, election.siteHostname, new Map());
 
         election.elections = elections;
 

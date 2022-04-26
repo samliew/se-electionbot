@@ -590,6 +590,9 @@ export default class Election {
     /** @type {Map<number, Election>} */
     elections = new Map();
 
+    /** @type {Map<number, ElectionAnnouncement>} */
+    announcements = new Map();
+
     /** @type {ElectionPhase|null} */
     phase = null;
 
