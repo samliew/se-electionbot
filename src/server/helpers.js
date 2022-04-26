@@ -74,7 +74,8 @@ export const ifCond = function (v1, operator, v2, options) {
 /** @type {(m:{ get:(a:string) => unknown }, a:string) => unknown} */
 export const get = (model, key) => model.get(key);
 
-export const url = function (url, text = "") {
+/** @type {(url:string, text?: string) => string} */
+export const url = (url, text = "") => {
     if (!/^(https?:\/\/|\/)/.test(url)) return "";
     if (!text || typeof text !== 'string') text = url.replace(/^https?:\/\//, '');
     return `<a href="${url}">${text}</a>`;
