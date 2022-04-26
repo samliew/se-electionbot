@@ -39,7 +39,7 @@ export const getStackApiKey = (keyPool) => {
 /**
  * @template V
  * @template {(res: ApiWrapper<V>) => Promise<any>} T
- * @template {(res: ApiWrapper<V>) => Promise<any>} U
+ * @template {(res: ApiWrapper<V>) => any} U
  *
  * @summary handles API response
  * @param {ApiWrapper<V>} response response from the API
@@ -401,7 +401,7 @@ export const getUserAssociatedAccounts = async (config, networkId, page = 1) => 
     return handleResponse(
         /** @type {ApiWrapper<NetworkUser>} */(await fetchUrl(config, url, true)) || {},
         () => getUserAssociatedAccounts(config, networkId, page),
-        async ({ items = [] }) => items
+        ({ items = [] }) => items
     );
 };
 
@@ -424,7 +424,7 @@ export const getMetaSite = async (config, site) => {
     return handleResponse(
         /** @type {ApiWrapper<Info>} */(await fetchUrl(config, url, true)) || {},
         () => getMetaSite(config, site),
-        async ({ items = [] }) => {
+        ({ items = [] }) => {
             const [{ site: { related_sites = [] } = {} }] = items;
             return related_sites.find(({ relation }) => relation === "meta");
         }
