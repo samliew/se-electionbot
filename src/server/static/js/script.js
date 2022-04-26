@@ -28,7 +28,7 @@ const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') =
 
     // In the future
     if (diff > 0) {
-        return dayDiff > 31 ? "" : (
+        return (
             diff < 5 && soonText ||
             diff < 60 && (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}`; })(Math.floor(diff)) ||
             diff < 3600 && (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}`; })(Math.floor(diff / 60)) ||
@@ -41,7 +41,7 @@ const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') =
     diff = (Date.now() - date.getTime()) / 1000;
     dayDiff = Math.floor(diff / 86400);
 
-    return dayDiff > 31 ? "" : (
+    return (
         diff < 5 && justNowText ||
         diff < 60 && (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago`; })(Math.floor(diff)) ||
         diff < 3600 && (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago`; })(Math.floor(diff / 60)) ||
