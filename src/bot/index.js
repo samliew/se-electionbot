@@ -62,7 +62,7 @@ import {
 import { logActivity, logResponse } from "./utils/bot.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
-import { getOrInit } from "./utils/maps.js";
+import { getOrInit, sortMap } from "./utils/maps.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -225,7 +225,8 @@ import { getOrInit } from "./utils/maps.js";
         }
 
         const electionAnnouncements = await scrapeUpcomingElections(config);
-        election.announcements = getOrInit(electionAnnouncements, election.siteHostname, new Map());
+        const electionSiteAnnouncements = getOrInit(electionAnnouncements, election.siteHostname, new Map());
+        election.announcements = sortMap(electionSiteAnnouncements, (_, a, __, b) => b.dateElection > a.dateElection ? -1 : 1);
 
         election.elections = elections;
 
