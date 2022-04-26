@@ -460,3 +460,42 @@ export const getMetaResultAnnouncements = async (config, metasite, options = {})
         async ({ items = [] }) => items
     );
 };
+
+/**
+ * @summary gets a {@link StackExchangeAPI.Post} from the API
+ * @param {BotConfig} config bot configuration
+ * @param {number[]} ids post ids to fetch
+ * @param {{ page?: number, site?: string }} [options] configuration
+ * @returns {Promise<StackExchangeAPI.Post[]>}
+ */
+export const getPosts = async (config, ids, options = {}) => {
+    if (!ids.length) return [];
+
+    const { page = 1, site = "stackoverflow" } = options;
+
+    const params = new URLSearchParams({
+        site,
+        pagesize: "100",
+        page: page.toString(),
+        key: getStackApiKey(config.apiKeyPool),
+        filter: "!nKzQUR0lbv" // default + body
+    });
+
+    const url = new URL(`${apiBase}/${apiVer}/posts/${ids.join(";")}`);
+    url.search = params.toString();
+
+    return handleResponse(
+        /** @type {ApiWrapper<StackExchangeAPI.Post>} */(await fetchUrl(config, url, true)) || {},
+        () => getPosts(config, ids, options),
+        async ({ items = [], has_more, }) => {
+            if (has_more) {
+                const otherItems = await getPosts(config, ids, { ...options, page: page + 1 });
+                return [...items, ...otherItems];
+            }
+
+            if (config.verbose) console.log(`[api] ${getPosts.name}\n`, items);
+
+            return items;
+        }
+    );
+};
