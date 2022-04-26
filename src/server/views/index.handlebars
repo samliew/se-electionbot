@@ -58,6 +58,32 @@
                 <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
             </table>
 
+            <h2>Election Announcements</h2>
+            {{#if (len announcements)}}
+            <table class="table-small">
+                <thead>
+                    <tr>
+                        <th>Announced On</th>
+                        <th>Election Date</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each (values announcements)}}
+                    <tr>
+                        <td>{{utcTimestamp dateAnnounced}} <span class="relativetime" title="{{utcTimestamp dateAnnounced}}"></span></td>
+                        <td>{{utcTimestamp dateElection}} <span class="relativetime" title="{{utcTimestamp dateElection}}"></span></td>
+                        <td>{{{url postLink postTitle}}}</td>
+                        <td>{{{url userLink userName}}}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            {{else}}
+                {{> emptySmallTable }}
+            {{/if}}
+
             <h2>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len nominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
             {{#if (len nominees)}}
                 {{> nominees (values nominees) }}
