@@ -600,8 +600,7 @@ import { matchNumber } from "./utils/expressions.js";
                 const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);
 
                 for (const [name, regex, ...args] of matches) {
-                    // TODO: switch to &&= on Node.js 15+
-                    responseText = (await boundRunIf(name, regex, ...args)) || responseText;
+                    responseText ||= await boundRunIf(name, regex, ...args);
                 }
 
                 /* Note:
