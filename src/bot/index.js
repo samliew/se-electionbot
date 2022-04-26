@@ -59,7 +59,7 @@ import { makeCandidateScoreCalc } from "./score.js";
 import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
-import { logResponse } from "./utils/bot.js";
+import { logActivity, logResponse } from "./utils/bot.js";
 import { prepareMessageForMatching } from "./utils/chat.js";
 import { matchNumber } from "./utils/expressions.js";
 
@@ -532,7 +532,7 @@ import { matchNumber } from "./utils/expressions.js";
             // Ignore if message is too short or long, unless a mod was trying to use say command
             const { length } = preparedMessage;
             if ((length <= 3 || length >= 70) && !(isPrivileged && (preparedMessage.startsWith('say') || preparedMessage.includes('candidate score')))) {
-                console.log(`EVENT - Ignoring due to message length ${preparedMessage.length}: ${preparedMessage}`);
+                logActivity(config, { ignored: true });
                 return;
             }
 
@@ -540,10 +540,7 @@ import { matchNumber } from "./utils/expressions.js";
             //   since we are now ignoring all event types except MESSAGE_POSTED)
             if (eventType !== ChatEventType.MESSAGE_POSTED) return;
 
-            // Log all un-ignored events
-            console.log(`EVENT - current activity: ${config.activityCounter}; reached minimum: ${config.roomReachedMinActivityCount}; reached maximum: ${config.roomReachedMaxActivityCount};\n`,
-                JSON.stringify({ content: preparedMessage, msg, user }));
-
+            logActivity(config);
 
             /*
              * As multiple events are emitted when user is mentioned or message is replied-to,
