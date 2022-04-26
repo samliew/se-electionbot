@@ -1,7 +1,7 @@
 import { AllowedHosts } from "chatexchange/dist/Client.js";
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
-import { getAllNamedBadges, getBadges, getNumberOfVoters, getUserInfo } from './api.js';
+import { getAllNamedBadges, getBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
 import { calculateScore } from './score.js';
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
 import { isOneOf, mapify } from './utils/arrays.js';
@@ -28,6 +28,16 @@ import { scrapeModerators } from './utils/scraping.js';
  *  election?: number,
  *  electionLink?: string
  * }} ModeratorUser
+ *
+ * @typedef {{
+ *  dateAnnounced: string,
+ *  dateElection: string,
+ *  postLink: string,
+ *  postTitle: string,
+ *  userId: number,
+ *  userLink: string,
+ *  userName: string
+ * }} ElectionAnnouncement
  */
 
 /**
@@ -321,6 +331,112 @@ export const scrapeQuestionnaire = ($, el) => {
     const questions = [];
     $(el).find("blockquote ol li").each((_, e) => questions.push($(e).text()));
     return questions;
+};
+
+/** @type {Map<string, Map<number, ElectionAnnouncement>>} */
+const announcementsCache = new Map();
+
+/**
+ * @summary scrapes upcoming election announcements
+ * @param {BotConfig} config bot configuration
+ * @param {number} [page] feed page to scrape
+ * @returns {Promise<Map<string, Map<number, ElectionAnnouncement>>>}
+ */
+export const scrapeUpcomingElections = async (config, page = 1) => {
+    const url = new URL("https://stackexchange.com/filters/421979/all-elections");
+    url.searchParams.append("page", page.toString());
+
+    const html = await fetchUrl(config, url);
+    const { window: { document } } = new JSDOM(html);
+
+    const questionList = document.getElementById("question-list");
+    if (!questionList) {
+        console.log("[announcements] missing question list");
+        return announcementsCache;
+    }
+
+    // title can be one of:
+    // "Announcement: Upcoming Moderator Election Planned for May 9"
+    // "Announcing a “Graduation” election for 2022"
+    // "Announcing the first full election for Arts & Crafts!"
+    // "Announcing a Pro Tempore election for 2022"
+    // https://regex101.com/r/OTlwms/1
+    const announcementTitleExpr = /^announc(?:ing|ement).+?election.+?for/i;
+
+    // https://regex101.com/r/xKRRih/1
+    const electionDateExpr = /on\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?$/i;
+
+    const questions = questionList.querySelectorAll(".question-container");
+    for (const container of questions) {
+        /** @type {HTMLAnchorElement | null} */
+        const postAnchor = container.querySelector("a.question-link");
+        /** @type {HTMLAnchorElement | null} */
+        const siteAnchor = container.querySelector("a.question-host");
+        if (!postAnchor || !siteAnchor) continue;
+
+        const metaSite = siteAnchor.textContent?.trim();
+        const postTitle = postAnchor.textContent?.trim();
+        if (!metaSite || !postTitle || !announcementTitleExpr.test(postTitle)) continue;
+
+        const electionSite = metaSite.replace("meta.", "");
+        const announcements = getOrInit(announcementsCache, electionSite, new Map());
+
+        const { href: postLink } = postAnchor;
+
+        const postId = matchNumber(/\/questions\/(\d+)\//, postLink);
+        if (!postId || has(announcements, postId)) continue;
+
+        const apiSlug = metaSite.replace(/(?:\.stackexchange)?\.com/, "");
+
+        const [post] = await getPosts(config, [postId], { site: apiSlug });
+        if (!post) continue;
+
+        const { body, creation_date, owner } = post;
+        if (!body) {
+            console.log(`[announcements] missing post body (${electionSite})`);
+            continue;
+        }
+
+        if (!owner) {
+            console.log(`[announcements] missing post owner (${electionSite})`);
+            continue;
+        }
+
+        const { user_id: userId, link: userLink, display_name: userName } = owner;
+        if (!userId || !userLink || !userName) {
+            console.log(`[announcements] missing post owner fields (${electionSite})`);
+            continue;
+        }
+
+        const postedAt = new Date(creation_date * 1000);
+
+        const [_, monthday, year = postedAt.getFullYear()] = electionDateExpr.exec(body) || [];
+
+        const dateElection = dateToUtcTimestamp(`${monthday}, ${year}`);
+        const dateAnnounced = dateToUtcTimestamp(postedAt);
+
+        /** @type {ElectionAnnouncement} */
+        const upcomingElectionAnnouncement = {
+            dateAnnounced,
+            dateElection,
+            postLink,
+            postTitle,
+            userId,
+            userLink,
+            userName
+        };
+
+        announcements.set(postId, upcomingElectionAnnouncement);
+    }
+
+    const hasMore = document.querySelector(".page-numbers.next");
+    if (hasMore) {
+        const nextPage = page + 1;
+        console.log(`[announcements] scraping next page (${nextPage})`);
+        await scrapeUpcomingElections(config, nextPage);
+    }
+
+    return announcementsCache;
 };
 
 export class Nominee {
