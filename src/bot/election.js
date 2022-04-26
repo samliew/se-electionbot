@@ -342,7 +342,7 @@ const announcementsCache = new Map();
  * @param {number} [page] feed page to scrape
  * @returns {Promise<Map<string, Map<number, ElectionAnnouncement>>>}
  */
-export const scrapeUpcomingElections = async (config, page = 1) => {
+export const scrapeElectionAnnouncements = async (config, page = 1) => {
     const url = new URL("https://stackexchange.com/filters/421979/all-elections");
     url.searchParams.append("page", page.toString());
 
@@ -433,7 +433,7 @@ export const scrapeUpcomingElections = async (config, page = 1) => {
     if (hasMore) {
         const nextPage = page + 1;
         console.log(`[announcements] scraping next page (${nextPage})`);
-        await scrapeUpcomingElections(config, nextPage);
+        await scrapeElectionAnnouncements(config, nextPage);
     }
 
     return announcementsCache;
