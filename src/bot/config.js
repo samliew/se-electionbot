@@ -1,5 +1,5 @@
-import { parseBoolEnv, parseIds } from "./utils.js";
 import { chatMarkdownToHtml } from "../shared/utils/markdown.js";
+import { parseBoolEnv, parseIds } from "./utils.js";
 
 const MS_IN_SECOND = 1e3;
 const MS_IN_MINUTE = 60 * MS_IN_SECOND;
@@ -331,6 +331,24 @@ export class BotConfig {
     // Checks if the bot is currently muted
     get isMuted() {
         return Date.now() < this.lastMessageTime + this.throttleSecs * 1000;
+    }
+
+    /**
+     * @summary number of ms since *nix epoch for how long the bot will stay muted
+     * @type {number}
+     */
+    get mutedFor() {
+        const diff = this.lastMessageTime - Date.now();
+        return diff < 0 ? 0 : diff;
+    }
+
+    /**
+     * @summary number of ms since *nix epoch when the bot will unmute
+     * @type {number}
+     */
+    get unmutesAt() {
+        const { mutedFor, nowOverride } = this;
+        return (nowOverride?.valueOf() || Date.now()) + mutedFor;
     }
 
     // Returns if the bot posted the last message in the room
