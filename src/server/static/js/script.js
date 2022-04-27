@@ -5,7 +5,7 @@
  * @param {string} [justNowText] text to display when the election just started
  * @returns {string}
  */
-const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') => {
+const dateToRelativetime = (date, prefix = "in ", soonText = 'soon', justNowText = 'just now') => {
 
     const validateDate = (input) => {
         let output = input;
@@ -30,10 +30,10 @@ const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') =
     if (diff > 0) {
         return (
             diff < 5 && soonText ||
-            diff < 60 && (function (x) { return `in ${x} ${x === 1 ? "sec" : "secs"}`; })(Math.floor(diff)) ||
-            diff < 3600 && (function (x) { return `in ${x} ${x === 1 ? "min" : "mins"}`; })(Math.floor(diff / 60)) ||
-            diff < 86400 && (function (x) { return `in ${x} ${x === 1 ? "hour" : "hours"}`; })(Math.floor(diff / 3600)) ||
-            (function (x) { return `in ${x} ${x === 1 ? "day" : "days"}`; })(Math.floor(diff / 86400))
+            diff < 60 && (function (x) { return `${prefix}${x} ${x === 1 ? "sec" : "secs"}`; })(Math.floor(diff)) ||
+            diff < 3600 && (function (x) { return `${prefix}${x} ${x === 1 ? "min" : "mins"}`; })(Math.floor(diff / 60)) ||
+            diff < 86400 && (function (x) { return `${prefix}${x} ${x === 1 ? "hour" : "hours"}`; })(Math.floor(diff / 3600)) ||
+            (function (x) { return `${prefix}${x} ${x === 1 ? "day" : "days"}`; })(Math.floor(diff / 86400))
         );
     }
 
@@ -51,15 +51,15 @@ const dateToRelativetime = (date, soonText = 'soon', justNowText = 'just now') =
 };
 
 const updateRelativeDates = () => {
-    var spans = /** @type {NodeListOf<HTMLElement>} */(document.querySelectorAll('span.relativetime'));
-    spans.forEach(el => {
-        if (el.title) {
-            var prefix = el.dataset.prefix || "";
-            var suffix = el.dataset.suffix || "";
-            var date = dateToRelativetime(el.title);
-            if (date)
-                el.innerHTML = prefix + date + suffix;
-        }
+    const spans = /** @type {NodeListOf<HTMLElement>} */(document.querySelectorAll('span.relativetime'));
+    spans.forEach((element) => {
+        const { title, dataset } = element;
+        if (!title) return;
+
+        const prefix = dataset.prefix || "";
+        const suffix = dataset.suffix || "";
+        const date = dateToRelativetime(title, prefix);
+        if (date) element.innerHTML = `${date}${suffix}`;
     });
 };
 
