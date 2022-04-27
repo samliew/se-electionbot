@@ -158,8 +158,9 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `DEBUG`                        | boolean  | no        | `false`      | whether bot is in debug mode                                                                            |
 | `DEFAULT_ELECTION_TIME`        | string   | no        | `20:00:00`   | default election time (used for upcoming election announcements)                                        |
 | `DEV_IDS`                      | number[] | no        | -            | user chatIds to grant dev privileges (pipe-delimited)                                                   |
+| `ELECTION_CHATROOM_URL`        | string   | no        | -            | URL of the election chat room                                                                           |
 | `ELECTION_URL`                 | string   | yes       | -            | URL of election page (with ID) that the bot will scrape                                                 |
-| `FEEDBACK_FORM_URL`            | string   | no        | -            | url for users to provide feedback about the bot                                                         |
+| `FEEDBACK_FORM_URL`            | string   | no        | -            | URL for users to provide feedback about the bot                                                         |
 | `FUN_MODE`                     | boolean  | no        | `true`       | enable fun random responses                                                                             |
 | `IGNORED_USER_IDS`             | number[] | no        | -            | user chatIds to ignore messages from (pipe-delimited)                                                   |
 | `HEROKU_API_TOKEN`             | string   | no        | -            | to be used only when hosted on Heroku for bot config updates                                            |
@@ -168,7 +169,7 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `LOW_ACTIVITY_COUNT_THRESHOLD` | number   | no        | `20`         | bot can classify room as inactive only after these amount of messages have been sent                    |
 | `NODE_ENV`                     | string   | no        | `production` | whether bot is in Node debug mode                                                                       |
 | `PASSWORD`                     | string   | no        | -            | password to access bot dashboard                                                                        |
-| `REPO_URL`                     | string   | no        | -            | url of this git repository                                                                              |
+| `REPO_URL`                     | string   | no        | -            | URL of this git repository                                                                              |
 | `SCRAPE_INTERVAL_MINS`         | number   | no        | `2`          | interval (minutes) to check election page for updates                                                   |
 | `SCRIPT_HOSTNAME`              | string   | no        | -            | instance identifier, hostname for dashboard, also where keep-alive will ping                            |
 | `SHOW_PRIMARY_COUNTDOWN_AFTER` | number   | no        | `8`          | minimum number of candidates to start showing countdown to primary if the current phase is _nomination_ |
