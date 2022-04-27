@@ -503,6 +503,16 @@ export class BotConfig {
     }
 
     /**
+     * @summary gets an uparsed value from the environment
+     * @param {Lowercase<keyof BotEnvironment>} key key to lookup
+     * @param {string} [def] optional default
+     * @returns {string|undefined}
+     */
+    get(key, def = "") {
+        return this.#env[key] || def;
+    }
+
+    /**
      * @summary updates last room message time
      * If called without params, resets active mutes (future-dated lastMessageTime)
      * If called with a future-dated time, is considered a mute until then
