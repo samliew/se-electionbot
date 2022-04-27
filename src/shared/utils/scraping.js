@@ -1,10 +1,10 @@
 import { JSDOM } from "jsdom";
-import { fetchUrl } from "../utils.js";
+import { fetchUrl } from "../../bot/utils.js";
 import { usDateToISO } from "./dates.js";
 import { matchNumber, safeCapture } from "./expressions.js";
 
 /**
- * @typedef {import("../config.js").BotConfig} BotConfig
+ * @typedef {import("../../bot/config.js").BotConfig} BotConfig
  */
 
 /**

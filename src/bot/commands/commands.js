@@ -7,11 +7,11 @@ import { sayOtherSiteMods } from "../messages/moderators.js";
 import { sendMessage } from "../queue.js";
 import { RandomArray } from "../random.js";
 import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
-import { flat } from "../utils/arrays.js";
-import { formatAsChatCode } from "../utils/chat.js";
-import { dateToUtcTimestamp, getMilliseconds } from "../utils/dates.js";
-import { matchISO8601, matchNumber } from "../utils/expressions.js";
-import { mergeMaps } from "../utils/maps.js";
+import { flat } from "../../shared/utils/arrays.js";
+import { formatAsChatCode } from "../../shared/utils/chat.js";
+import { dateToUtcTimestamp, getMilliseconds } from "../../shared/utils/dates.js";
+import { matchISO8601, matchNumber } from "../../shared/utils/expressions.js";
+import { mergeMaps } from "../../shared/utils/maps.js";
 
 /**
  * @typedef {import("../announcement").default} Announcement

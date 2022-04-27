@@ -60,10 +60,10 @@ import { makeCandidateScoreCalc } from "./score.js";
 import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
-import { logActivity, logResponse } from "./utils/bot.js";
-import { prepareMessageForMatching } from "./utils/chat.js";
-import { matchNumber } from "./utils/expressions.js";
-import { getOrInit, sortMap } from "./utils/maps.js";
+import { logActivity, logResponse } from "../shared/utils/bot.js";
+import { prepareMessageForMatching } from "../shared/utils/chat.js";
+import { matchNumber } from "../shared/utils/expressions.js";
+import { getOrInit, sortMap } from "../shared/utils/maps.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser

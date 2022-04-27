@@ -1,5 +1,5 @@
 import { pluralize } from "../utils.js";
-import { safeCapture } from "../utils/expressions.js";
+import { safeCapture } from "../../shared/utils/expressions.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig

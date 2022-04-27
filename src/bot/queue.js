@@ -10,7 +10,7 @@
  */
 
 import { wait } from "./utils.js";
-import { logResponse } from "./utils/bot.js";
+import { logResponse } from "../shared/utils/bot.js";
 
 // TODO: implement message queue
 /**

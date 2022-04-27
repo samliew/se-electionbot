@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { parsePackage, parsePerson } from "../../src/bot/utils/package.js";
+import { parsePackage, parsePerson } from "../../src/shared/utils/package.js";
 
 describe('Package Parsing', () => {
 

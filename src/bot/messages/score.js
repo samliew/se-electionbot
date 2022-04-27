@@ -1,7 +1,7 @@
 import { partialRight } from "ramda";
 import { getRandomNominationSynonym } from "../random.js";
 import { listify, makeURL, pluralize } from "../utils.js";
-import { formatNumber } from "../utils/strings.js";
+import { formatNumber } from "../../shared/utils/strings.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig

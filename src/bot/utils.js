@@ -6,13 +6,13 @@ import { JSDOM } from "jsdom";
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
 import { getUserAssociatedAccounts } from "./api.js";
-import { validateChatTranscriptURL } from "./utils/chat.js";
-import { dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "./utils/dates.js";
-import { matchNumber, safeCapture } from "./utils/expressions.js";
-import { constructUserAgent } from "./utils/fetch.js";
-import { getOrInit, has } from "./utils/maps.js";
-import { htmlToChatMarkdown } from "./utils/markdown.js";
-import { numericNullable } from "./utils/objects.js";
+import { validateChatTranscriptURL } from "../shared/utils/chat.js";
+import { dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "../shared/utils/dates.js";
+import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
+import { constructUserAgent } from "../shared/utils/fetch.js";
+import { getOrInit, has } from "../shared/utils/maps.js";
+import { htmlToChatMarkdown } from "../shared/utils/markdown.js";
+import { numericNullable } from "../shared/utils/objects.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 

@@ -5,7 +5,7 @@ import { isAliveCommand, resetElection, setAccessCommand, setThrottleCommand, ti
 import { CommandManager } from "../../src/bot/commands/index.js";
 import { User } from "../../src/bot/commands/user.js";
 import Election from "../../src/bot/election.js";
-import { dateToUtcTimestamp } from "../../src/bot/utils/dates.js";
+import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 import { getMockUserProfile } from "../mocks/user.js";

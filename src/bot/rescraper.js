@@ -4,8 +4,8 @@ import { sayBusyGreeting, sayIdleGreeting } from "./messages/greetings.js";
 import { sayElectionSchedule } from "./messages/phases.js";
 import { sendMessage, sendMessageList } from "./queue.js";
 import { makeURL, wait } from "./utils.js";
-import { SEC_IN_MINUTE } from "./utils/dates.js";
-import { mapMap } from "./utils/maps.js";
+import { SEC_IN_MINUTE } from "../shared/utils/dates.js";
+import { mapMap } from "../shared/utils/maps.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig

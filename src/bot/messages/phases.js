@@ -1,6 +1,6 @@
 import { getCandidateOrNominee } from "../random.js";
 import { capitalize, linkToRelativeTimestamp, linkToUtcTimestamp, listify, makeURL, numToString, pluralize, pluralizePhrase } from "../utils.js";
-import { dateToRelativeTime } from "../utils/dates.js";
+import { dateToRelativeTime } from "../../shared/utils/dates.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig

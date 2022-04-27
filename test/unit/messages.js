@@ -8,7 +8,7 @@ import { sayDiamondAlready } from "../../src/bot/messages/moderators.js";
 import { sayAboutElectionStatus, sayElectionIsEnding, sayElectionSchedule } from "../../src/bot/messages/phases.js";
 import { calculateScore } from "../../src/bot/score.js";
 import { capitalize } from "../../src/bot/utils.js";
-import { matchesISO8601 } from "../../src/bot/utils/expressions.js";
+import { matchesISO8601 } from "../../src/shared/utils/expressions.js";
 import { getMockBotConfig, getMockBotUser } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 

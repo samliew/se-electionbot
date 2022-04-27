@@ -1,6 +1,6 @@
 import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
-import { getSeconds } from "./utils/dates.js";
-import { mergeMaps } from "./utils/maps.js";
+import { getSeconds } from "../shared/utils/dates.js";
+import { mergeMaps } from "../shared/utils/maps.js";
 
 /**
  * @typedef {import("./election").default} Election

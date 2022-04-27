@@ -1,5 +1,5 @@
-import { dateToUtcTimestamp, validateDate } from "../bot/utils/dates.js";
-import { formatOrdinal } from "../bot/utils/strings.js";
+import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
+import { formatOrdinal } from "../shared/utils/strings.js";
 
 /** @type {(source: unknown) => boolean} */
 export const isArr = (source) => Array.isArray(source);

@@ -4,8 +4,8 @@ import { User } from "../commands/user.js";
 import { sendMessage } from "../queue.js";
 import { getRandomAnnouncement, getRandomNow } from "../random.js";
 import { makeURL, pluralize, pluralizePhrase } from "../utils.js";
-import { resolveObj } from "../utils/objects.js";
-import { formatNumber, percentify } from "../utils/strings.js";
+import { resolveObj } from "../../shared/utils/objects.js";
+import { formatNumber, percentify } from "../../shared/utils/strings.js";
 import { sayCommonlyAskedQuestions } from "./metadata.js";
 
 /**

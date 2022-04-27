@@ -4,7 +4,7 @@ import { isBotMentioned } from "../guards.js";
 import { sayIdleGreeting } from '../messages/greetings.js';
 import { sendMessage } from "../queue.js";
 import { getUser, makeURL, roomKeepAlive } from "../utils.js";
-import { prepareMessageForMatching } from '../utils/chat.js';
+import { prepareMessageForMatching } from '../../shared/utils/chat.js';
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser

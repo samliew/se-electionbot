@@ -1,4 +1,4 @@
-import { allMatch, noneMatch, someMatch } from "./utils/expressions.js";
+import { allMatch, noneMatch, someMatch } from "../shared/utils/expressions.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} User

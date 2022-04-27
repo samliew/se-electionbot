@@ -1,8 +1,8 @@
 import { getRandomNow } from "../random.js";
 import { makeURL, pluralize } from "../utils.js";
-import { datesToDuration, dateToRelativeTime, getSeconds } from "../utils/dates.js";
-import { matchNumber, safeCapture } from "../utils/expressions.js";
-import { formatOrdinal } from "../utils/strings.js";
+import { datesToDuration, dateToRelativeTime, getSeconds } from "../../shared/utils/dates.js";
+import { matchNumber, safeCapture } from "../../shared/utils/expressions.js";
+import { formatOrdinal } from "../../shared/utils/strings.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
 /**

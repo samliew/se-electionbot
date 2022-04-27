@@ -1,7 +1,7 @@
 import entities from 'html-entities';
 import MIT from "markdown-it";
 import sanitize from "sanitize-html";
-import { makeURL, markdownify } from "../utils.js";
+import { makeURL, markdownify } from "../../bot/utils.js";
 
 /**
  * @summary converts HTML to chat Markdown

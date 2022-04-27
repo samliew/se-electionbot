@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import Election, { listNomineesInRoom } from '../bot/election.js';
 import { HerokuClient } from "../bot/herokuClient.js";
 import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom } from '../bot/utils.js';
-import { dateToUtcTimestamp } from '../bot/utils/dates.js';
+import { dateToUtcTimestamp } from '../shared/utils/dates.js';
 import * as helpers from "./helpers.js";
 import { routes, start, stop } from './utils.js';
 

@@ -1,5 +1,5 @@
 import { parseBoolEnv, parseIds } from "./utils.js";
-import { chatMarkdownToHtml } from "./utils/markdown.js";
+import { chatMarkdownToHtml } from "../shared/utils/markdown.js";
 
 const MS_IN_SECOND = 1e3;
 const MS_IN_MINUTE = 60 * MS_IN_SECOND;

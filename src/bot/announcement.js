@@ -3,8 +3,8 @@ import { sayFeedback } from "./commands/commands.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
 import { makeURL, pluralize, wait } from "./utils.js";
-import { dateToUtcTimestamp } from "./utils/dates.js";
-import { filterMap, mapMap } from "./utils/maps.js";
+import { dateToUtcTimestamp } from "../shared/utils/dates.js";
+import { filterMap, mapMap } from "../shared/utils/maps.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig

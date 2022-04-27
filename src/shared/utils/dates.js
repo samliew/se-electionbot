@@ -1,4 +1,4 @@
-import { pluralize } from "../utils.js";
+import { pluralize } from "../../bot/utils.js";
 
 const MS_IN_SECOND = 1000;
 

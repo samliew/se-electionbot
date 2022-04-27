@@ -7,8 +7,8 @@ import { sayLacksPrivilege } from "./messages/metadata.js";
 import { sayDiamondAlready } from "./messages/moderators.js";
 import { sayHasMaximumCandidateScore, sayNoAccountToCalcScore } from "./messages/score.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID } from "./utils.js";
-import { matchNumber } from "./utils/expressions.js";
-import { has } from "./utils/maps.js";
+import { matchNumber } from "../shared/utils/expressions.js";
+import { has } from "../shared/utils/maps.js";
 
 /**
  * @typedef {import("./index.js").UserProfile} UserProfile

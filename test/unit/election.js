@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import Election from "../../src/bot/election.js";
-import { dateToUtcTimestamp } from "../../src/bot/utils/dates.js";
+import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockNominee } from "../mocks/nominee.js";
 import { getMockUserProfile } from "../mocks/user.js";
 

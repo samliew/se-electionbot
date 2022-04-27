@@ -4,13 +4,13 @@ import { JSDOM } from 'jsdom';
 import { getAllNamedBadges, getBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
 import { calculateScore } from './score.js';
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
-import { isOneOf, mapify } from './utils/arrays.js';
-import { addDates, dateToUtcTimestamp, daysDiff } from './utils/dates.js';
-import { findLast } from './utils/dom.js';
-import { matchNumber, safeCapture } from "./utils/expressions.js";
-import { filterMap, getOrInit, has, mergeMaps, sortMap } from './utils/maps.js';
-import { clone } from './utils/objects.js';
-import { scrapeModerators } from './utils/scraping.js';
+import { isOneOf, mapify } from '../shared/utils/arrays.js';
+import { addDates, dateToUtcTimestamp, daysDiff } from '../shared/utils/dates.js';
+import { findLast } from '../shared/utils/dom.js';
+import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
+import { filterMap, getOrInit, has, mergeMaps, sortMap } from '../shared/utils/maps.js';
+import { clone } from '../shared/utils/objects.js';
+import { scrapeModerators } from '../shared/utils/scraping.js';
 
 /**
  * @typedef {null|"ended"|"election"|"primary"|"nomination"|"cancelled"} ElectionPhase

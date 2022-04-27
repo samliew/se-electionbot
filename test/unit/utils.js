@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { asyncCacheable, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/bot/utils.js";
-import { validateChatTranscriptURL } from "../../src/bot/utils/chat.js";
-import { dateToRelativeTime } from "../../src/bot/utils/dates.js";
-import { matchNumber } from "../../src/bot/utils/expressions.js";
-import { numericNullable } from "../../src/bot/utils/objects.js";
+import { validateChatTranscriptURL } from "../../src/shared/utils/chat.js";
+import { dateToRelativeTime } from "../../src/shared/utils/dates.js";
+import { matchNumber } from "../../src/shared/utils/expressions.js";
+import { numericNullable } from "../../src/shared/utils/objects.js";
 import { AllowedHosts } from "chatexchange/dist/Client.js";
 
 describe('Chat-related utils', () => {

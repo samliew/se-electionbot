@@ -1,5 +1,5 @@
 /**
- * @typedef {import("../config.js").BotConfig} BotConfig
+ * @typedef {import("../../bot/config.js").BotConfig} BotConfig
  */
 
 /**

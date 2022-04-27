@@ -1,7 +1,7 @@
 import { getRandomFAQ, getRandomStatus } from "../random.js";
 import { listify, makeURL } from "../utils.js";
-import { parsePackage } from "../utils/package.js";
-import { formatOrdinal } from "../utils/strings.js";
+import { parsePackage } from "../../shared/utils/package.js";
+import { formatOrdinal } from "../../shared/utils/strings.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig

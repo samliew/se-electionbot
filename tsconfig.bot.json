@@ -7,6 +7,6 @@
       "@utils/*": ["./src/utils/*"]
     }
   },
-  "include": ["src/bot"],
+  "include": ["src/bot", "src/shared"],
   "exclude": ["dist", "node_modules", "coverage", "test", "src/server"]
 }

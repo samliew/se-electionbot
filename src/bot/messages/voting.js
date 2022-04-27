@@ -3,10 +3,10 @@ import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserIn
 import { getCandidateOrNominee, getRandomSoFar, RandomArray } from "../random.js";
 import { calculateScore } from "../score.js";
 import { linkToRelativeTimestamp, makeURL, pluralize, scrapeAwardedBadge } from "../utils.js";
-import { dateToShortISO8601Timestamp } from "../utils/dates.js";
-import { matchISO8601 } from "../utils/expressions.js";
-import { has } from "../utils/maps.js";
-import { formatNumber, percentify } from "../utils/strings.js";
+import { dateToShortISO8601Timestamp } from "../../shared/utils/dates.js";
+import { matchISO8601 } from "../../shared/utils/expressions.js";
+import { has } from "../../shared/utils/maps.js";
+import { formatNumber, percentify } from "../../shared/utils/strings.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
 /**
