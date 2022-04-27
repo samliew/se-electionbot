@@ -17,7 +17,7 @@
         <aside>
             <h2>Election Info</h2>
             <table>
-                <tr><td>Last updated</td><td>{{utcTimestamp updated}} <span class="relativetime" title="{{utcTimestamp updated}}"></span></td></tr>
+                <tr><td>Last updated</td><td>{{> relativetime date=updated}}</td></tr>
                 <tr><td>Site</td><td>{{siteName}}</td></tr>
                 <tr><td>Hostname</td><td>{{{url (getter @root/data/election "siteUrl")}}}</td></tr>
                 <tr>
@@ -40,16 +40,10 @@
                     <td></td>
                     {{/if}}
                 </tr>
-                <tr><td>Nomination date</td><td>{{utcTimestamp dateNomination}} <span class="relativetime" title="{{utcTimestamp dateNomination}}"></span></td></tr>
-                <tr><td>Primary date</td>
-                    {{#if datePrimary}}
-                    <td>{{utcTimestamp datePrimary}} <span class="relativetime" title="{{utcTimestamp datePrimary}}"></span></td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
-                <tr><td>Election date</td><td>{{utcTimestamp dateElection}} <span class="relativetime" title="{{utcTimestamp dateElection}}"></span></td></tr>
-                <tr><td>End date</td><td>{{utcTimestamp dateEnded}} <span class="relativetime" title="{{utcTimestamp dateEnded}}"></span></td></tr>
+                <tr><td>Nomination date</td><td>{{> relativetime date=dateNomination}}</td></tr>
+                <tr><td>Primary date</td><td>{{#if datePrimary}}{{> relativetime date=datePrimary}}{{/if}}</td></tr>
+                <tr><td>Election date</td><td>{{> relativetime date=dateElection}}</td></tr>
+                <tr><td>End date</td><td>{{> relativetime date=dateEnded}}</td></tr>
                 <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
                 <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
                 <tr><td>Positions</td><td>{{numPositions}}</td></tr>
@@ -72,8 +66,8 @@
                 <tbody>
                     {{#each (values announcements)}}
                     <tr>
-                        <td>{{utcTimestamp dateAnnounced}} <span class="relativetime" title="{{utcTimestamp dateAnnounced}}"></span></td>
-                        <td>{{utcTimestamp dateElection}} <span class="relativetime" title="{{utcTimestamp dateElection}}"></span></td>
+                        <td>{{> relativetime date=dateAnnounced}}</td>
+                        <td>{{> relativetime date=dateElection}}</td>
                         <td>{{{url postLink postTitle}}}</td>
                         <td>{{{url userLink userName}}}</td>
                     </tr>
@@ -192,11 +186,10 @@
             <h2>Bot Config</h2>
             <table>
                 <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
-                <tr><td>scriptInitDate</td><td>{{utcTimestamp scriptInitDate}} <span class="relativetime" title="{{utcTimestamp scriptInitDate}}"></span></td></tr>
+                <tr><td>scriptInitDate</td><td>{{> relativetime date=scriptInitDate}}</td></tr>
                 <tr><td>Control Room</td><td>{{{url controlRoomUrl}}}</td></tr>
                 <tr><td>Display Name</td><td>{{chatDisplayName}}</td></tr>
-                <tr><td>Is Muted</td><td>{{{boolean isMuted}}}</td></tr>
-                <tr><td>Muted Till</td><td>{{#if isMuted}}{{> relativetime unmutesAt}}{{/if}}</td></tr>
+                <tr><td>Is Muted</td><td>{{{boolean isMuted}}} {{#if isMuted}}{{> relativetime date=unmutesAt short=true prefix="for "}}{{/if}}</td></tr>
                 <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
                 <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
                 <tr><td>electionAfterpartyMins</td><td>{{electionAfterpartyMins}} mins</td></tr>
@@ -241,13 +234,7 @@
             <table>
                 <tr><td>Bot</td><td>
                     <table class="nested">
-                        <tr><td>lastMessageTime</td>
-                            {{#if lastMessageTime}}
-                            <td>{{utcTimestamp lastMessageTime}} <span class="relativetime" title="{{utcTimestamp lastMessageTime}}"></span></td>
-                            {{else}}
-                            <td></td>
-                            {{/if}}
-                        </tr>
+                        <tr><td>lastMessageTime</td><td>{{#if lastMessageTime}}{{> relativetime date=lastMessageTime}}{{/if}}</td></tr>
                         <tr>
                             <td>lastBotMessage</td>
                             {{#if lastBotMessage}}
@@ -260,10 +247,9 @@
                             {{/if}}
                         </tr>
                         <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
-                        <tr><td>botHasBeenQuiet</td><td>{{{boolean botHasBeenQuiet}}}
-                            {{#unless botHasBeenQuiet}}
-                            <span class="relativetime" title="{{utcTimestamp botWillBeQuietDate}}"></span>
-                            {{/unless}}
+                        <tr><td>botHasBeenQuiet</td>
+                        <td>{{{boolean botHasBeenQuiet}}}
+                            {{#unless botHasBeenQuiet}}{{> relativetime date=botWillBeQuietDate short=true}}{{/unless}}
                         </td></tr>
                         <tr><td>ignoreSelf</td><td>{{{boolean ignoreSelf}}}</td></tr>
                     </table>
@@ -271,7 +257,7 @@
 
                 <tr><td>Activity</td><td>
                     <table class="nested">
-                        <tr><td>lastActivityTime</td><td>{{utcTimestamp lastActivityTime}} <span class="relativetime" title="{{utcTimestamp lastActivityTime}}"></span></td></tr>
+                        <tr><td>lastActivityTime</td><td>{{> relativetime date=lastActivityTime}}</td></tr>
                         <tr><td>activityCounter</td><td>{{activityCounter}}</td></tr>
                         <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>
                         <tr><td>roomReachedMinActivityCount</td><td>{{{boolean roomReachedMinActivityCount}}}</td></tr>
@@ -284,15 +270,11 @@
                     <table class="nested">
                         <tr><td>shortIdleDurationMins</td><td>{{shortIdleDurationMins}} mins</td></tr>
                         <tr><td>roomBecameIdleAWhileAgo</td><td>{{{boolean roomBecameIdleAWhileAgo}}}
-                            {{#unless roomBecameIdleAWhileAgo}}
-                            <span class="relativetime" title="{{utcTimestamp roomBecameIdleAWhileDate}}"></span>
-                            {{/unless}}
+                            {{#unless roomBecameIdleAWhileAgo}}{{> relativetime date=roomBecameIdleAWhileDate short=true}}{{/unless}}
                         </td></tr>
                         <tr><td>longIdleDurationHours</td><td>{{longIdleDurationHours}} hours</td></tr>
                         <tr><td>roomBecameIdleHoursAgo</td><td>{{{boolean roomBecameIdleHoursAgo}}}
-                            {{#unless roomBecameIdleHoursAgo}}
-                            <span class="relativetime" title="{{utcTimestamp roomBecameIdleHoursDate}}"></span>
-                            {{/unless}}
+                            {{#unless roomBecameIdleHoursAgo}}{{> relativetime date=roomBecameIdleHoursDate short=true}}{{/unless}}
                         </td></tr>
                         <tr><td>shortBusyDurationMinutes</td><td>{{shortBusyDurationMinutes}} mins</td></tr>
                         <tr><td>roomTooBusyForMinutes</td><td>{{{boolean roomTooBusyForMinutes}}}</td></tr>
