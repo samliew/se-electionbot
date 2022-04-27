@@ -195,12 +195,8 @@
                 <tr><td>scriptInitDate</td><td>{{utcTimestamp scriptInitDate}} <span class="relativetime" title="{{utcTimestamp scriptInitDate}}"></span></td></tr>
                 <tr><td>Control Room</td><td>{{{url controlRoomUrl}}}</td></tr>
                 <tr><td>Display Name</td><td>{{chatDisplayName}}</td></tr>
-                <tr><td>isMuted</td><td>
-                    {{{boolean isMuted}}}
-                    {{#if isMuted}}
-                    <span class="relativetime" title="{{utcTimestamp lastMessageTime}}" data-prefix="ends "></span>
-                    {{/if}}
-                </td></tr>
+                <tr><td>Is Muted</td><td>{{{boolean isMuted}}}</td></tr>
+                <tr><td>Muted Till</td><td>{{#if isMuted}}{{> relativetime unmutesAt}}{{/if}}</td></tr>
                 <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
                 <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
                 <tr><td>electionAfterpartyMins</td><td>{{electionAfterpartyMins}} mins</td></tr>
