@@ -1,5 +1,5 @@
-{{utcTimestamp this}}&nbsp;<span
+{{#unless short}}{{utcTimestamp date}}&nbsp;{{/unless}}<span
   class="relativetime"
-  title="{{utcTimestamp this}}"
+  title="{{utcTimestamp date}}"
   {{#if prefix}}data-prefix="{{prefix}}"{{/if}}
 ></span>
