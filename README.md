@@ -155,6 +155,7 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `STACK_API_KEYS`               | string[] | no        | -            | **recommended** Stack Exchange API key(s) (pipe-delimited)                                              |
 | `CHAT_DOMAIN`                  | string   | no        | -            | default chat domain (stackexchange.com \| stackoverflow.com)                                            |
 | `CHAT_ROOM_ID`                 | number   | no        | -            | default chat room ID that the bot will join                                                             |
+| `DEFAULT_ELECTION_TIME`        | string   | no        | `20:00:00`   | default election time (used for upcoming election announcements)                                        |
 | `ADMIN_IDS`                    | number[] | no        | -            | user chatIds to grant admin privileges (pipe-delimited) (mods and ROs are already privileged)           |
 | `DEV_IDS`                      | number[] | no        | -            | user chatIds to grant dev privileges (pipe-delimited)                                                   |
 | `LOW_ACTIVITY_CHECK_MINS`      | number   | no        | `10`         | interval (minutes) before bot can check room for inactivity                                             |

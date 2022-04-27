@@ -5,6 +5,7 @@ export interface BotEnvironment {
     CHAT_DOMAIN?: string;
     CHAT_ROOM_ID?: string;
     CONTROL_ROOM_ID?: string;
+    DEFAULT_ELECTION_TIME?: string;
     ELECTION_AFTERPARTY_MINS?: string;
     ELECTION_URL?: string;
     HIGH_ACTIVITY_COUNT_THRESHOLD?: string;

@@ -392,6 +392,8 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
         scraped.set(postId, { postLink, postTitle });
     });
 
+    const time = config.get("default_election_time", "20:00:00");
+
     for (const [metaSite, scraped] of allScraped) {
         const electionSite = metaSite.replace("meta.", "");
         const site = metaSite.replace(/(?:\.stackexchange)?\.com/, "");
@@ -425,7 +427,7 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
 
             const [_, monthday, year = postedAt.getFullYear()] = electionDateExpr.exec(body) || [];
 
-            const dateElection = dateToUtcTimestamp(`${monthday}, ${year}`);
+            const dateElection = dateToUtcTimestamp(`${monthday}, ${year} ${time}Z`);
             const dateAnnounced = dateToUtcTimestamp(postedAt);
 
             /** @type {ElectionAnnouncement} */
