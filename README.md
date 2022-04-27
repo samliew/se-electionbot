@@ -163,7 +163,8 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `FEEDBACK_FORM_URL`            | string   | no        | -            | URL for users to provide feedback about the bot                                                         |
 | `FUN_MODE`                     | boolean  | no        | `true`       | enable fun random responses                                                                             |
 | `IGNORED_USER_IDS`             | number[] | no        | -            | user chatIds to ignore messages from (pipe-delimited)                                                   |
-| `HEROKU_API_TOKEN`             | string   | no        | -            | to be used only when hosted on Heroku for bot config updates                                            |
+| `HEROKU_API_TOKEN`             | string   | no        | -            | API token to uses if hosted on Heroku for bot config updates                                            |
+| `HEROKU_APP_NAME`              | string   | no        | -            | application name if hosted on Heroku                                                                    |
 | `KEEP_ALIVE`                   | boolean  | no        | `false`      | whether bot will ping itself occasionally                                                               |
 | `LOW_ACTIVITY_CHECK_MINS`      | number   | no        | `10`         | interval (minutes) before bot can check room for inactivity                                             |
 | `LOW_ACTIVITY_COUNT_THRESHOLD` | number   | no        | `20`         | bot can classify room as inactive only after these amount of messages have been sent                    |
