@@ -1,0 +1,20 @@
+{{> navigation routes=data/routes password=data/password path=data/path }}
+
+<h1>{{{heading}}}</h1>
+
+{{> breadcrumbs current=current }}
+
+<form method="post">
+
+    {{{data/statusText}}}
+
+    {{#each data/configObject}}
+    <div><label>{{@key}} <input type="text" name="{{@key}}" aria-label="{{@key}}" value="{{this}}" placeholder="(empty)" /></label></div>
+    {{/each}}
+
+    <input type="hidden" name="password" value="{{data/password}}" />
+
+    <div class="form-controls mt20">
+        <button>Save</button>
+    </div>
+</form>

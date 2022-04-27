@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "paths": {
+      "@utils/*": ["./src/utils/*"]
+    }
+  },
+  "include": ["src/bot", "src/shared"],
+  "exclude": ["dist", "node_modules", "coverage", "test", "src/server"]
+}

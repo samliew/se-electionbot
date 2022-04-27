@@ -1,0 +1,13 @@
+{
+  "editor.tabSize": 4,
+  "editor.detectIndentation": false,
+  "git.ignoreLimitWarning": true,
+  "eslint.validate": ["javascript"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "[css]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

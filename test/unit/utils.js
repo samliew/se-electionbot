@@ -1,6 +1,144 @@
 import { expect } from "chai";
-import { asyncCacheable, fetchChatTranscript, getSiteDefaultChatroom, listify, parseIds, pluralize } from "../../src/utils.js";
-import { getMockBotConfig } from "../mocks/bot.js";
+import { asyncCacheable, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/bot/utils.js";
+import { validateChatTranscriptURL } from "../../src/shared/utils/chat.js";
+import { dateToRelativeTime } from "../../src/shared/utils/dates.js";
+import { matchNumber } from "../../src/shared/utils/expressions.js";
+import { numericNullable } from "../../src/shared/utils/objects.js";
+import { AllowedHosts } from "chatexchange/dist/Client.js";
+
+describe('Chat-related utils', () => {
+    describe(validateChatTranscriptURL.name, () => {
+        it('should return true for valid URLs', () => {
+            AllowedHosts.forEach((host) => {
+                const url = `https://chat.${host}/transcript/42`;
+                expect(validateChatTranscriptURL(url)).to.be.true;
+            });
+        });
+
+        it('should return false on invalid URLs', () => {
+            AllowedHosts.forEach((host) => {
+                const url = `${host}/rooms/42`;
+                expect(validateChatTranscriptURL(url)).to.be.false;
+            })
+        });
+    });
+});
+
+describe('RegExp-related utils', () => {
+    describe('matchNumber', () => {
+        it('should correctly match and parse a number', () => {
+            const ans = matchNumber(/^(\d+) is/, "42 is the answer");
+            expect(ans).to.equal(42);
+        });
+
+        it('should return undefined if no number matched', () => {
+            const nothing = matchNumber(/capture \d+,?/, "forgot to capture 1984, sorry");
+            expect(nothing).to.be.undefined;
+        });
+    });
+
+    describe('stripMarkdown', () => {
+        it('should correctly strip markdown', () => {
+            const stripped = stripMarkdown("testing _some_ smart **messages** from some __pesky__ users :)");
+            expect(stripped).to.equal("testing some smart messages from some pesky users :)");
+        });
+
+        it('should not strip unclosed markdown', () => {
+            const clothed = "_this should print **verbatim__";
+            const stripped = stripMarkdown(clothed);
+            expect(stripped).to.equal(clothed);
+        });
+    });
+});
+
+describe('Object-related utils', () => {
+    describe('numericOptional', () => {
+        it('should correctly parse nullable objects', () => {
+            const ans = numericNullable({ answer: "42" }, "answer");
+
+            const nullable = /** @type {{ question: string }|null|undefined} */(null);
+            const que = numericNullable(nullable, "question");
+
+            expect(ans).to.equal(42);
+            expect(que).to.equal(null);
+        });
+    });
+});
+
+describe('Boolean-related utils', () => {
+    describe('parseBoolEnv', () => {
+
+        before(() => process.env.RESISTANCE_IS_FUTILE = "true");
+        after(() => delete process.env.RESISTANCE_IS_FUTILE);
+
+        it('should correctly parse variables', () => {
+            const isFutile = parseBoolEnv("resistance_is_futile");
+            const missing = parseBoolEnv("question");
+
+            expect(isFutile).to.be.true;
+            expect(missing).to.be.false;
+        });
+
+        it('should default to provided default value if key is not found', () => {
+            const missing = parseBoolEnv("defaulted", true);
+            expect(missing).to.be.true;
+        });
+    });
+});
+
+describe('Number-related utils', () => {
+    describe('parseNumEnv', () => {
+
+        before(() => process.env.ANSWER = "42");
+        after(() => delete process.env.ANSWER);
+
+        it('should correctly parse variables', () => {
+            const existing = parseNumEnv("answer");
+            const empty = parseNumEnv("void");
+
+            expect(existing).to.equal(42);
+            expect(empty).to.equal(void 0);
+        });
+
+        it('should default to provided default value if no key found', () => {
+            const empty = parseNumEnv("defaulted", 42);
+            expect(empty).to.equal(42);
+        });
+    });
+
+    describe('numToString', () => {
+
+        it('should correctly output number as text', () => {
+
+            // Non-numeric values
+            expect(numToString(null)).to.equal('');
+            expect(numToString('abc')).to.equal('abc');
+            expect(numToString(["abc"])).to.equal('abc');
+            expect(numToString({ 'key': 'value' })).to.equal('[object Object]');
+
+            expect(numToString(-1)).to.equal('-1');
+
+            expect(numToString(0)).to.equal('zero');
+            expect(numToString(1)).to.equal('one');
+            expect(numToString(10)).to.equal('ten');
+            expect(numToString(11)).to.equal('eleven');
+            expect(numToString(12)).to.equal('twelve');
+            expect(numToString(13)).to.equal('thirteen');
+            expect(numToString(14)).to.equal('fourteen');
+            expect(numToString(15)).to.equal('fifteen');
+            expect(numToString(16)).to.equal('sixteen');
+            expect(numToString(17)).to.equal('seventeen');
+            expect(numToString(18)).to.equal('eighteen');
+            expect(numToString(19)).to.equal('nineteen');
+            expect(numToString(20)).to.equal('twenty');
+            expect(numToString(42)).to.equal('forty-two');
+            expect(numToString(69)).to.equal('sixty-nine');
+            expect(numToString(100)).to.equal('one-hundred');
+
+            expect(numToString(101)).to.equal('101');
+        });
+    });
+});
 
 describe('String-related utils', async function () {
 
@@ -15,7 +153,6 @@ describe('String-related utils', async function () {
             const list = listify("alpha", "beta", "gamma");
             expect(list).to.equal("alpha, beta, and gamma");
         });
-
     });
 
     describe('pluralize', () => {
@@ -29,7 +166,6 @@ describe('String-related utils', async function () {
             const plural = pluralize(10, "es");
             expect(plural).to.equal("es");
         });
-
     });
 
     describe('parseIds', () => {
@@ -38,40 +174,64 @@ describe('String-related utils', async function () {
             const parsed = parseIds("1234|56789|101010");
             expect(parsed).to.deep.equal([1234, 56789, 101010]);
         });
-
     });
 
-    this.timeout(10e3); // fetching transcript can be slow
+    describe(dateToRelativeTime.name, () => {
+        it('should be able to convert a date in the future correctly', () => {
+            let date, result;
 
-    describe('fetchChatTranscript', async () => {
+            date = new Date();
+            result = dateToRelativeTime(date.setSeconds(date.getSeconds() + 1));
+            expect(result).to.equal("soon");
 
-        it('should fetch chat transcript correctly', async () => {
-            const transcriptUrl = "https://chat.stackoverflow.com/transcript/190503/2019/3/20";
-            const chatMessages = await fetchChatTranscript(getMockBotConfig(), transcriptUrl);
+            result = dateToRelativeTime(date.setSeconds(date.getSeconds() + 30));
+            expect(result).to.match(/^in 3[01] secs$/); // +/- 1 sec
 
-            expect(chatMessages).to.not.be.empty;
-            expect(chatMessages[0].message).to.equal("how do I vote?");
+            result = dateToRelativeTime(date.setMinutes(date.getMinutes() + 30));
+            expect(result).to.equal("in 30 mins");
+
+            result = dateToRelativeTime(date.setMinutes(date.getMinutes() + 30));
+            expect(result).to.equal("in 1 hour");
+
+            result = dateToRelativeTime(date.setHours(date.getHours() + 1));
+            expect(result).to.equal("in 2 hours");
+
+            result = dateToRelativeTime(date.setDate(date.getDate() + 1));
+            expect(result).to.equal("in 1 day");
+
+            result = dateToRelativeTime(date.setDate(date.getDate() + 1));
+            expect(result).to.equal("in 2 days");
         });
 
-    });
+        it('should be able to convert a date in the past correctly', () => {
+            let date, result;
 
-    describe('getSiteDefaultChatroom', async () => {
+            date = new Date();
+            result = dateToRelativeTime(date.setSeconds(date.getSeconds() - 1));
+            expect(result).to.equal("just now");
 
-        it('should fetch a site\'s default chat room correctly', async () => {
-            const chatroom = await getSiteDefaultChatroom(getMockBotConfig(), "https://stackoverflow.com");
+            result = dateToRelativeTime(date.setSeconds(date.getSeconds() - 30));
+            expect(result).to.match(/^3[01] secs ago$/); // +/- 1 sec
 
-            expect(chatroom.chatRoomId).to.equal(197438);
-            expect(chatroom.chatDomain).to.equal("stackoverflow.com");
+            result = dateToRelativeTime(date.setMinutes(date.getMinutes() - 30));
+            expect(result).to.equal("30 mins ago");
 
-            const chatroom2 = await getSiteDefaultChatroom(getMockBotConfig(), "https://superuser.com");
+            result = dateToRelativeTime(date.setMinutes(date.getMinutes() - 30));
+            expect(result).to.equal("1 hour ago");
 
-            expect(chatroom2.chatRoomId).to.equal(118);
-            expect(chatroom2.chatDomain).to.equal("stackexchange.com");
+            result = dateToRelativeTime(date.setHours(date.getHours() - 1));
+            expect(result).to.equal("2 hours ago");
+
+            result = dateToRelativeTime(date.setDate(date.getDate() - 1));
+            expect(result).to.equal("1 day ago");
+
+            result = dateToRelativeTime(date.setDate(date.getDate() - 1));
+            expect(result).to.equal("2 days ago");
         });
-
     });
 
     describe('cacheable', () => {
+
         it('should use cached value if available', async () => {
             const obj = {
                 curr: 0,

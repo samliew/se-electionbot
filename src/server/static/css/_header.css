@@ -1,0 +1,25 @@
+header {
+  z-index: 9999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--main-colour);
+  box-shadow: 0 0.5px 2px var(--border-colour);
+}
+
+.main-nav {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.main-nav select {
+  padding: 0.5em 1.5em 0.5em 0.6em;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.main-nav select option[selected]:first-child {
+  display: none;
+}
