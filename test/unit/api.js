@@ -1,8 +1,9 @@
 import { expect } from "chai";
-import { getStackApiKey } from "../../src/api.js";
+import { getStackApiKey } from "../../src/bot/api.js";
 
 describe('SE API', () => {
-    describe('getStackApiKey', () => {
+
+    describe(getStackApiKey.name, () => {
 
         it('should return empty string on empty pool', () => {
             const key = getStackApiKey([]);
@@ -16,7 +17,6 @@ describe('SE API', () => {
             expect(pool[pool.length - 1]).to.equal("alpha");
             expect(pool[0]).to.equal("beta");
         });
-
     });
-});
 
+});

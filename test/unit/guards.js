@@ -1,7 +1,10 @@
 import { expect } from "chai";
 import {
-    isAskedAboutModsOrModPowers, isAskedAboutUsernameDiamond, isAskedForCurrentNominees, isAskedForElectionSchedule, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedWhoMadeMe, isHatingTheBot, isLovingTheBot, isThankingTheBot
-} from "../../src/guards.js";
+    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
+    isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyIsBot, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+} from "../../src/bot/guards.js";
+import { getMockUserProfile } from "../mocks/user.js";
 
 /**
  * @summary utility for running tests on sets of strings
@@ -17,6 +20,18 @@ const allMatch = (funcUnderTest, matches, shouldMatch = true) => matches.forEach
 
 describe('Message Guards', () => {
 
+    const pastElectionResultsMatches = [
+        "What are the results of election #2?",
+        "what were the results of election number 2",
+        "What are the election #2 results?"
+    ];
+
+    describe(isAskedAboutElectionResults.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutElectionResults, pastElectionResultsMatches);
+        });
+    });
+
     describe('isAskedForElectionSchedule', () => {
         it('should correctly match content', () => {
             allMatch(isAskedForElectionSchedule, [
@@ -29,7 +44,137 @@ describe('Message Guards', () => {
         });
     });
 
-    describe('isAskedForCurrentNominees', () => {
+    const electionStatusMatches = [
+        "election status",
+        "What is the election status?",
+        "What is the progress of election?",
+        "how is election progressing?",
+        "what is election state?"
+    ];
+
+    const nextPhaseMatches = [
+        "when is the next phase?",
+        "When does next phase start",
+        "is it starting soon?",
+        "Is it started yet?",
+        "when is the next phase",
+        "when is nomination ending?",
+        "is election starting?",
+        "is nomination ended?"
+    ];
+
+    const electionEndMatches = [
+        "When does the election end?",
+        "when the election ends?",
+        "when it ends?"
+    ];
+
+    const listPhasesMatches = [
+        //https://chat.stackoverflow.com/transcript/message/53322800#53322800
+        "What are the phases?",
+        "what are election phases",
+        "What are the election's phases?",
+        "list election phases"
+    ];
+
+    const whatIsElectionMatches = [
+        "What is an election?",
+        "what's an election?",
+        "what is election",
+        "How does election work",
+        "How do elections work?"
+    ];
+
+    describe(isAskedWhatElectionIs.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhatElectionIs, whatIsElectionMatches);
+            allMatch(isAskedWhatElectionIs, electionStatusMatches, false);
+        });
+    });
+
+    describe(isAskedWhatIsElectionStatus.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhatIsElectionStatus, electionStatusMatches);
+        });
+    });
+
+    describe(isAskedWhenIsTheNextPhase.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhenIsTheNextPhase, nextPhaseMatches);
+            allMatch(isAskedWhenIsTheNextPhase, [
+                ...listPhasesMatches,
+                ...electionEndMatches
+            ], false);
+        });
+    });
+
+    describe(isAskedWhenTheElectionEnds.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhenTheElectionEnds, electionEndMatches);
+            allMatch(isAskedWhenTheElectionEnds, [
+                ...nextPhaseMatches,
+                ...listPhasesMatches
+            ], false);
+        });
+    });
+
+    describe(isAskedAboutElectionPhases.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutElectionPhases, listPhasesMatches);
+            allMatch(isAskedAboutElectionPhases, nextPhaseMatches, false);
+        });
+    });
+
+    const howManyNomineesMatches = [
+        "how many candidates are here?",
+        "are there any nominees in the room?",
+        "how many nominees are in the room?"
+    ];
+
+    const howManyModsMatches = [
+        "How many mods are here?",
+        "how many moderators are in the room?",
+        "How many mods are in this room"
+    ];
+
+    const howManyNomineesWithdrawnMatches = [
+        "who has withdrawn",
+        "whom has been removed",
+        "who withdrew from the election",
+        "who was withdrawn from the election",
+        "who was removed from the election",
+        "which candidate has withdrawn",
+        "which candidate was withdrawn",
+        "which candidate was removed",
+        "which nominee has withdrawn",
+        "which nominee was withdrawn",
+        "which nominee was removed",
+        "which nomination has withdrawn",
+        "which nomination was withdrawn",
+        "which nomination was removed",
+        "how many candidates have withdrawn",
+        "how many nominees have withdrawn",
+        "who deleted their nomination",
+        "which candidate deleted their nomination",
+        "was a nomination removed",
+    ];
+
+    describe(isAskedHowManyModsInTheRoom.name, () => {
+        it('should correctly match content', () => {
+            allMatch(
+                isAskedHowManyModsInTheRoom,
+                howManyModsMatches
+            );
+
+            allMatch(
+                isAskedHowManyModsInTheRoom,
+                howManyNomineesMatches,
+                false
+            );
+        });
+    });
+
+    describe(isAskedForCurrentNominees.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedForCurrentNominees, [
                 "who has nominated",
@@ -39,33 +184,80 @@ describe('Message Guards', () => {
                 "what are the participants?",
                 "who is the participant?",
                 "what were the nominations",
+                "any new nominees?",
+                "is there a nomination",
+                "are there nominations?"
             ]);
-        });
 
-        it('should not match other guards', () => {
             allMatch(isAskedForCurrentNominees, [
+                ...howManyNomineesMatches,
+                ...howManyNomineesWithdrawnMatches,
                 "what is my candidate score",
                 "what is the candidate score for 245113",
             ], false);
         });
     });
 
+    describe(isAskedForWithdrawnNominees.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForWithdrawnNominees, howManyNomineesWithdrawnMatches);
+
+            allMatch(isAskedForWithdrawnNominees, [
+                ...howManyNomineesMatches,
+                "who has nominated",
+                "who has participated",
+                "who are the nominees?",
+                "who are the candidates?",
+                "what are the participants?",
+                "who is the participant?",
+                "what were the nominations",
+                "any new nominees?",
+                "is there a nomination",
+                "are there nominations?",
+                "what is my candidate score",
+                "what is the candidate score for 245113",
+            ], false);
+        });
+    });
+
+    const bestModeratorMatches = [
+        "who is the best mod",
+        "Which is the best moderator?",
+        "who is best diamond?",
+        "Who is best moderator?",
+        "Which is the coolest mod",
+        "who is the most loved mod?",
+        "Who will be the best mod?"
+    ];
+
+    const bestCandidateMatches = [
+        "who is the best candidate?",
+        "who are the best candidates?",
+        "who were the bestest candidates ever?",
+        "what is the best nomination?",
+        // https://chat.stackoverflow.com/transcript/message/53289881#53289881
+        "Who's the best candidate?"
+    ];
+
+    const moderatorDutiesMatches = [
+        "what is a moderator",
+        "what do moderators do?",
+        "what do mods do",
+        "what does mods do",
+        "what powers do mods have",
+        "what are mod responsibility",
+        "what are the mod responsibilities",
+        "what are the responsibilities of a mod",
+        "what are the responsibilities of moderators",
+        "what are the benefits of being a moderator",
+        "should i be a mod",
+        "does moderators have extra privileges",
+    ];
+
     describe('isAskedAboutModsOrModPowers', () => {
         it('should correctly match content', () => {
-            allMatch(isAskedAboutModsOrModPowers, [
-                "what is a moderator",
-                "what do moderators do?",
-                "what do mods do",
-                "what does mods do",
-                "what powers do mods have",
-                "what are mod responsibility",
-                "what are the mod responsibilities",
-                "what are the responsibilities of a mod",
-                "what are the responsibilities of moderators",
-                "what are the benefits of being a moderator",
-                "should i be a mod",
-                "does moderators have extra privileges",
-            ]);
+            allMatch(isAskedAboutModsOrModPowers, moderatorDutiesMatches);
+            allMatch(isAskedAboutModsOrModPowers, bestModeratorMatches, false);
         });
     });
 
@@ -83,72 +275,385 @@ describe('Message Guards', () => {
         });
     });
 
-    describe('isAskedWhoMadeMe', () => {
+    const whoMadeMeMatches = [
+        "who made you?",
+        "who maintains you?",
+        "who develops you?",
+        "who are your developers?",
+        "who developed you?",
+        "who owns you?",
+        "who is your developer?",
+        "who is your maintainer?",
+        "who is your owner",
+    ];
+
+    const whoAmImatches = [
+        "who are you?",
+        "are you a bot?",
+        "What are you",
+        // https://chat.stackexchange.com/transcript/message/59433679#59433679
+        "are you a daemon?",
+        "Are you a robot?",
+        "Are you bot?"
+
+    ];
+
+    const howAmImatches = [
+        "Hello, how are you?",
+        "Hi bot how are you",
+        "hello bot, how are you today?",
+        "how are you?"
+    ];
+
+    const aliveMatches = [
+        "where art thou",
+        "Where are you?",
+        "alive?",
+        "dead?",
+        "Are you alive?"
+    ];
+
+    describe(isAskedWhoAmI.name, () => {
         it('should correctly match content', () => {
-            allMatch(isAskedWhoMadeMe, [
-                "who made you?",
-                "who maintains you?",
-                "who develops you?",
-                "who are your developers?",
-                "who developed you?",
-                "who owns you?",
-                "who is your developer?",
-                "who is your maintainer?",
-                "who is your owner",
-            ]);
+            allMatch(isAskedWhoAmI, whoAmImatches);
+            allMatch(isAskedWhoAmI, [...whoMadeMeMatches, ...aliveMatches, ...whoMadeMeMatches], false);
         });
     });
 
+    describe(isAskedHowAmI.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowAmI, howAmImatches);
+            allMatch(isAskedHowAmI, [...whoAmImatches, ...aliveMatches], false);
+        });
+    });
+
+    describe(isAskedWhoMadeMe.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhoMadeMe, whoMadeMeMatches);
+            allMatch(isAskedWhoMadeMe, [...whoAmImatches, ...aliveMatches], false);
+        });
+    });
+
+    describe(isAskedAmIalive.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAmIalive, aliveMatches);
+            allMatch(isAskedAmIalive, [...whoAmImatches, ...whoMadeMeMatches], false);
+        });
+    });
+
+    const ownScoreMatches = [
+        "what is my candidate score?",
+        "what's my candidate score?",
+        "what is my score?",
+        "can i nominate myself",
+    ];
+
+    const otherScoreMatches = [
+        "what is candidate score for 007?",
+        "what is the candidate score of 42",
+        "what's the candidate score of 9000",
+        "what is candidate score for 65536", // account for a common mistake
+        "what's the candidate score of 404?",
+        "candidate score for 65535",
+        "what is the candidate score of -1?",
+        "what is the score of @42"
+    ];
+
     describe(isAskedForOwnScore.name, () => {
         it('should correctly match my score', () => {
-            allMatch(isAskedForOwnScore, [
-                "what is my candidate score?",
-                "What's my candidate score?",
-                "what is my score?",
-                "can i nominate myself",
-            ]);
+            allMatch(isAskedForOwnScore, ownScoreMatches);
 
-            allMatch(isAskedForOwnScore, [
-                "what is candidate score of 42",
+            allMatch(isAskedForOwnScore, otherScoreMatches, false);
+        });
+    });
+
+    describe(isAskedForOtherScore.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForOtherScore, otherScoreMatches);
+
+            allMatch(isAskedForOtherScore, [
+                ...ownScoreMatches,
+                "how is candidate score calculated",
+                "what is candidate score?",
             ], false);
         });
     });
 
-    describe('isAskedForOtherScore', () => {
-        it('should correctly match content', () => {
-            allMatch(isAskedForOtherScore, [
-                "what is candidate score for 007?",
-                "what is the candidate score of 42",
-                "what's the candidate score of 9000",
-                "what is candidate score for 65536", // account for a common mistake
-                "what's the candidate score of 404?",
-            ]);
-        });
-    });
+    const scoreFormulaMatches = [
+        "how is candidate score calculated",
+        "how is the candidate score calculated",
+        "what is candidate score?",
+        "what is candidate score formula?",
+        "what is the candidate score formula?",
+        "what is the formula for candidate score?",
+    ];
 
     describe('isAskedForScoreFormula', () => {
         it('should correctly match content', () => {
+            allMatch(isAskedForScoreFormula, scoreFormulaMatches);
+
             allMatch(isAskedForScoreFormula, [
-                "how is candidate score calculated",
-                "how is the candidate score calculated",
-                "what is candidate score?",
-                "what is candidate score formula?",
-                "what is the candidate score formula?",
-                "what is the formula for candidate score?",
-            ]);
+                // https://chat.stackoverflow.com/transcript/message/53271257#53271257
+                "what is the candidate score of -1?"
+            ], false);
         });
     });
 
-    describe('isAskedForNominatingInfo', () => {
+    describe(isAskedWhoIsTheBestMod.name, () => {
         it('should correctly match content', () => {
-            allMatch(isAskedForNominatingInfo, [
-                "how to nominate",
-                "where can i register",
-                "how to register someone",
-                "how to be a mod",
-                "how can i be mod",
-                "can i nominate another user",
+            allMatch(isAskedWhoIsTheBestMod, bestModeratorMatches);
+            allMatch(isAskedWhoIsTheBestMod, bestCandidateMatches, false);
+        });
+    });
+
+    describe(isAskedWhoIsTheBestCandidate.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhoIsTheBestCandidate, bestCandidateMatches);
+            allMatch(isAskedWhoIsTheBestCandidate, [
+                ...bestModeratorMatches,
+                "who are the candidates?"
+            ], false);
+        });
+    });
+
+    const whoToVoteMatches = [
+        "who to vote for?",
+        "who should i vote for",
+        "how to choose who to vote for?",
+        "who shouldn't I vote for"
+    ];
+
+    const haveIvotedMatches = [
+        "have I voted?",
+        "did I vote",
+        "Have I voted in this election?",
+        "did I vote in the election?"
+    ];
+
+    const canIvoteMatches = [
+        "Can I vote?",
+        "can I vote in the election",
+        "Can I vote in this election?"
+    ];
+
+    describe(isAskedIfOneHasVoted.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedIfOneHasVoted, haveIvotedMatches);
+            allMatch(isAskedIfOneHasVoted, [
+                ...whoToVoteMatches,
+            ], false);
+        });
+    });
+
+    describe(isAskedHowToSaveVotes.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowToSaveVotes, [
+                'how to save votes',
+                'how to save the votes',
+                'how to save my vote',
+                'how do I save my vote',
+                'is the vote saved automatically',
+                'are the votes saved automatically',
+                'where to click to save the vote',
+                'is there a button to submit the votes',
+                'is there a button to click after voting',
+                'where is the button to click after voting',
+                'do I have to click anything to send the votes',
+                'do I "submit" my ballot somehow or is it just saved?',
+                'I have voted. How do I save it?',
+                'I\'ve voted. How do I save the ballot?',
             ]);
+            allMatch(isAskedHowToSaveVotes, [
+                ...haveIvotedMatches,
+                ...whoToVoteMatches
+            ], false);
+        });
+    });
+
+    describe(isAskedIfCanVote.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedIfCanVote, canIvoteMatches);
+            allMatch(isAskedIfCanVote, [
+                ...haveIvotedMatches,
+                ...whoToVoteMatches
+            ], false);
+        });
+    });
+
+    describe(isAskedHowOrWhoToVote.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowOrWhoToVote, whoToVoteMatches);
+            allMatch(isAskedHowOrWhoToVote, [
+                ...haveIvotedMatches,
+                "We want new blood, people who are excited about moderating and have enough time available in their lives for whatever reason to devote to the site."
+            ], false);
+        });
+    });
+
+    describe('isAskedIfResponsesAreCanned', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedIfResponsesAreCanned, [
+                "hey, bot, say something canned!",
+                "Everything the bot says is canned.what do you expect from a tin box?"
+            ]);
+
+            allMatch(isAskedIfResponsesAreCanned, [
+                "I forgot, everything's canned",
+                "That sounds like a canned comment with the list dynamically generated. Am I right?",
+                "That sounds awfully canned"
+            ], false);
+        });
+    });
+
+    const listRequiredBadgesMatches = [
+        "What are required badges?",
+        "which badges are required?",
+        "What badges are necessary?",
+        "Which of the badges are mandatory?",
+        "list the mandatory badges"
+    ];
+
+    const listBadgeTypeMatches = [
+        "what are the participation badges?",
+        "list the moderation badges?",
+        "what are editing badges?"
+    ];
+
+    describe(isAskedAboutRequiredBadges.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutRequiredBadges, listRequiredBadgesMatches);
+            allMatch(isAskedAboutRequiredBadges, listBadgeTypeMatches, false);
+        });
+    });
+
+    describe('isAskedAboutBadgesOfType', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutBadgesOfType, listBadgeTypeMatches);
+        });
+    });
+
+    const userEligibilityMatches = [
+        "can user 123 be elected?",
+        "can user 456 be nominated?",
+        "can user 789 be eligible?",
+        "is user 012 eligible?"
+    ];
+
+    const eligibleUserCountMatches = [
+        "how many users can vote?",
+        "how many can vote?",
+        "how many people can vote in the election?"
+    ];
+
+    const alreadyVotedMatches = [
+        "How many users voted?",
+        "how many people have voted?",
+        "How many voters are there",
+        "how many have voted already?!",
+        "How many participated in the election?",
+        "how many users participated"
+    ];
+
+    describe(isAskedHowManyVoted.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowManyVoted, alreadyVotedMatches);
+            allMatch(isAskedHowManyVoted, eligibleUserCountMatches, false);
+        });
+    });
+
+    describe('isAskedForUserEligibility', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForUserEligibility, userEligibilityMatches);
+            allMatch(isAskedForUserEligibility, eligibleUserCountMatches, false);
+        });
+    });
+
+    describe(isAskedHowManyAreEligibleToVote.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowManyAreEligibleToVote, eligibleUserCountMatches);
+            allMatch(isAskedHowManyAreEligibleToVote, userEligibilityMatches, false);
+        });
+    });
+
+    describe('isAskedForCurrentPositions', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForCurrentPositions, [
+                // https://chat.stackoverflow.com/transcript/message/53095011#53095011
+                "how many mods are being elected this time around?",
+                "how many positions are there",
+                "how many positions are elected",
+                "how many positions will be elected",
+                "how many mods are elected today?",
+                "how many moderators are elected",
+                "how many mods will be elected?",
+                "how many mods were elected?"
+            ]);
+
+            allMatch(isAskedForCurrentPositions, [
+                "who moderators are?",
+                "who are the mods",
+                "who are the moderators",
+                "where can i find the mods",
+                "how do i find the mods",
+                "where to contact the mods",
+                "how to contact the mods",
+            ], false);
+        });
+    });
+
+    const selfNominationMatches = [
+        "how to nominate",
+        "where can i register",
+        "how to be a mod",
+        "how can i be mod"
+    ];
+
+    const otherNomiationMatches = [
+        "Can I nominate others?",
+        "How can one nominate another?",
+        "Can one user nominate another user?",
+        "can users nominate other users",
+        "how to register someone?"
+    ];
+
+    describe(isAskedForNominatingInfo.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForNominatingInfo, selfNominationMatches);
+
+            allMatch(isAskedForNominatingInfo, [
+                ...otherNomiationMatches,
+                "How doesn't it apply to your post?"
+            ], false);
+        });
+    });
+
+    describe('isAskedAboutMissingComments', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutMissingComments, [
+                "why have all the comments disappeared from the nominations",
+                "where are the comments under the nominations",
+                "where are all the comments",
+                "where are the comments on the election",
+                "did someone delete all the comments",
+                "who removed the comments",
+                "is the comments missing",
+                "are the comments missing from the election page",
+                "why are all the comments deleted",
+                "is there a bug with the comments on the election page",
+                "is there bug with comments on election",
+                "election is missing comments",
+                "how to see the comments",
+                "how to view comments",
+                "how to view election comments",
+                "i can't find the comments",
+                "i can't find the election comments",
+                "are the comments hidden",
+                "where did the comments go"
+            ]);
+
+            allMatch(isAskedForNominatingInfo, [
+                "How doesn't it apply to your post?"
+            ], false);
         });
     });
 
@@ -182,6 +687,64 @@ describe('Message Guards', () => {
                 "i love this bot already",
                 "i love electionbot",
             ]);
+
+            allMatch(isLovingTheBot, [
+                // https://chat.stackoverflow.com/transcript/message/53274725#53274725
+                "I'll not bother to edit that ... looks good as is"
+            ], false);
+        });
+    });
+
+    const whatCanDoMatches = [
+        "what can you do?",
+        "What can the bot do",
+        "what can you answer?",
+        "What can you help with"
+    ];
+
+    const whyBotMatches = [
+        "Why are you?",
+        "what is your purpose?"
+    ];
+
+    const botPronounsMatches = [
+        "What are your pronouns?",
+        "what's your pronouns",
+        "what are your preferred pronouns?"
+    ];
+
+    describe(isAskedWhatBotCanDo.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhatBotCanDo, whatCanDoMatches);
+            allMatch(isAskedWhatBotCanDo, whyBotMatches, false);
+        });
+    });
+
+    describe(isAskedWhyIsBot.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhyIsBot, whyBotMatches);
+        });
+    });
+
+    describe(isAskedAboutBotPronouns.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutBotPronouns, botPronounsMatches);
+            allMatch(isAskedAboutBotPronouns, whyBotMatches, false);
+        });
+    });
+
+    describe('isSayingBotIsInsane', () => {
+        it('should correctly match content', () => {
+            allMatch(isSayingBotIsInsane, [
+                "The Bot is insane. Don't worry.",
+                "ElectionBot is just a crazy old bot.",
+                "Insane the bot definitely is"
+            ]);
+
+            allMatch(isSayingBotIsInsane, [
+                "their body is insane!",
+                "the bot received an insanse amount of praise"
+            ], false);
         });
     });
 
@@ -200,7 +763,179 @@ describe('Message Guards', () => {
                 "i dislike this bot!",
                 "i hate this bot already",
                 "i hate electionbot",
+                "this is a terrible idea for a bot, I hate it"
+            ]);
+
+            allMatch(isHatingTheBot, [
+                "The Botswana's climate is terrible"
+            ], false);
+        });
+    });
+
+    const tellJokeMatches = [
+        "tell me a joke",
+        "tell us a joke",
+        "make us laugh",
+        "make me laugh",
+        "tell a joke"
+    ];
+
+    const tellSkeetJokeMatches = [
+        "Tell us a Jon Skeet joke!",
+        "say a Jon Skeet joke",
+        "Can you tell us a Jon Skeet joke?",
+        "Tell a Jon Skeet fact",
+        "tell us about the Jon Skeet meme"
+    ];
+
+    describe(isAskedAboutJokes.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutJokes, tellJokeMatches);
+        });
+    });
+
+    describe(isAskedAboutJonSkeetJokes.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutJonSkeetJokes, tellSkeetJokeMatches);
+            allMatch(isAskedAboutJonSkeetJokes, tellJokeMatches, false);
+        });
+    });
+
+    describe('isAskedIfModsArePaid', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedIfModsArePaid, [
+                "do moderators get paid",
+                "are mods paid",
+                "are paid mods",
+                "do compensated moderators",
+                "how paid moderators",
+                "are rewarded mods",
+                "what compensated mods",
+                "are paid mods",
+                "do moderators get compensated",
+                "how are moderators paid",
+                "are mods rewarded",
+                "what compensation do mods get",
             ]);
         });
+    });
+
+    describe('isAskedAboutSTV', () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutSTV, [
+                "what is Single Transferable Vote?",
+                "what is STV?",
+                "what is Meek STV?",
+                "how does STV work?",
+                "how STV works?",
+                "How many votes will we have in the Meek STV system?"
+            ]);
+        });
+    });
+
+    describe(isBotMentioned.name, () => {
+        it('should correctly match content', async () => {
+            const name = "HAL9000";
+
+            const status = await isBotMentioned(
+                `@${name} say why are you doing this?`
+                , getMockUserProfile({ name }));
+
+            expect(status).to.be.true;
+        });
+    });
+
+    describe(isAskedIfCanNominateOthers.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedIfCanNominateOthers, otherNomiationMatches);
+            allMatch(isAskedIfCanNominateOthers, selfNominationMatches, false);
+        });
+    });
+
+    describe(isAskedHowManyCandidatesInTheRoom.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowManyCandidatesInTheRoom, howManyNomineesMatches);
+        });
+    });
+
+    describe(isAskedForHelp.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForHelp, [
+                "Can you help me?",
+                "help me, please",
+                "can you help me please?",
+                "Can you help?",
+                "help",
+                "halp!",
+                "info",
+                "Please help me"
+            ]);
+
+            allMatch(isAskedForHelp, ["the bot is of no help", "help is on the way"], false);
+        });
+    });
+
+    const electionPageMatches = [
+        "what is the link to the election?",
+        "what is the url of the election",
+        "where is the election page?",
+        "what is election page url",
+        "election page url",
+        "election page link",
+        "election url",
+        "election link",
+    ];
+
+    describe(isAskedForElectionPage.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForElectionPage, electionPageMatches);
+            allMatch(isAskedForElectionPage, scoreFormulaMatches, false);
+        });
+    });
+
+    const ballotFileMatches = [
+        "Where can I find the ballot file?",
+        "How can the ballot file be found",
+        "where can the ballot file be found?",
+        "where is the BLT file",
+        "where can I find BLT file?",
+        "Is BLT file available?"
+    ];
+
+    describe(isAskedAboutBallotFile.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedAboutBallotFile, ballotFileMatches);
+        });
+    });
+
+    const electionResultsMatches = [
+        "Where can I find the results?",
+        "where results can be found?",
+        "How can I find election results?",
+        "where can the election results be found?"
+    ];
+
+    describe(isAskedWhereToFindResults.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhereToFindResults, electionResultsMatches);
+            allMatch(isAskedWhereToFindResults, [
+                ...ballotFileMatches,
+                "where are the results",
+                "what are the results",
+                "why are the results",
+                "who won the election",
+                "where can I find more info about the election",
+            ], false);
+        });
+    });
+
+    const meaningOfLifeMatches = [
+        "What is the meaning of life?",
+        "what is 42?",
+        "what is the answer to life"
+    ];
+
+    describe(isAskedMeaningOfLife.name, () => {
+        allMatch(isAskedMeaningOfLife, meaningOfLifeMatches);
     });
 });

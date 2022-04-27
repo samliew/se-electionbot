@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+  },
+  "include": ["server/static"],
+  "exclude": ["dist", "node_modules", "coverage", "test", "src"]
+}

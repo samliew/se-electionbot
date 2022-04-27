@@ -1,0 +1,304 @@
+{{> navigation routes=data/routes password=data/password path=data/path }}
+
+<h1>{{{heading}}}</h1>
+
+{{#with data}}
+
+<blockquote>
+    <p>I am <strong>{{{url botconfig/repoUrl "ElectionBot"}}}</strong>, a chatbot that can answer commonly-asked questions about elections for sites on the Stack Exchange network.</p>
+    <p>This instance is listening to <strong>{{{url chatRoomUrl}}}</strong>.</p>
+    <p>The bot is {{#if isBotInRoom}}{{else}}<strong>not</strong> {{/if}}in the room.</p>
+</blockquote>
+
+<main class="dashboard">
+
+    {{#with election}}
+    <section>
+        <aside>
+            <h2>Election Info</h2>
+            <table>
+                <tr><td>Last updated</td><td>{{> relativetime date=updated}}</td></tr>
+                <tr><td>Site</td><td>{{siteName}}</td></tr>
+                <tr><td>Hostname</td><td>{{{url (getter @root/data/election "siteUrl")}}}</td></tr>
+                <tr>
+                    <td>Is Stack Overflow</td>
+                    <td>{{{boolean (contextCall "isStackOverflow" this)}}}</td>
+                </tr>
+                <tr><td>Election Title</td><td>{{title}}</td></tr>
+                <tr><td>Election URL</td><td>{{{url electionUrl}}}</td></tr>
+                <tr><td>Election Chat</td>
+                    {{#if chatUrl}}
+                    <td>{{{url chatUrl}}}</td>
+                    {{else}}
+                    <td></td>
+                    {{/if}}
+                </tr>
+                <tr><td>Current phase</td>
+                    {{#if phase}}
+                    <td><strong>{{phase}}</strong></td>
+                    {{else}}
+                    <td></td>
+                    {{/if}}
+                </tr>
+                <tr><td>Nomination date</td><td>{{> relativetime date=dateNomination}}</td></tr>
+                <tr><td>Primary date</td><td>{{#if datePrimary}}{{> relativetime date=datePrimary}}{{/if}}</td></tr>
+                <tr><td>Election date</td><td>{{> relativetime date=dateElection}}</td></tr>
+                <tr><td>End date</td><td>{{> relativetime date=dateEnded}}</td></tr>
+                <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
+                <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
+                <tr><td>Positions</td><td>{{numPositions}}</td></tr>
+                <tr><td>Opavote URL</td><td>{{{url opavoteUrl}}}</td></tr>
+                <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
+                <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
+            </table>
+
+            <h2>Election Announcements</h2>
+            {{#if (len announcements)}}
+            <table class="table-small">
+                <thead>
+                    <tr>
+                        <th>Announced On</th>
+                        <th>Election Date</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each (values announcements)}}
+                    <tr>
+                        <td>{{> relativetime date=dateAnnounced}}</td>
+                        <td>{{> relativetime date=dateElection}}</td>
+                        <td>{{{url postLink postTitle}}}</td>
+                        <td>{{{url userLink userName}}}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            {{else}}
+                {{> emptySmallTable }}
+            {{/if}}
+
+            <h2>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len nominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
+            {{#if (len nominees)}}
+                {{> nominees (values nominees) }}
+            {{else}}
+                {{> emptySmallTable }}
+            {{/if}}
+
+            {{> totalsTableHeader header="Withdrawn" collection=withdrawnNominees }}
+            {{#if (len withdrawnNominees)}}
+                {{> nominees (values withdrawnNominees) }}
+            {{else}}
+                {{> emptySmallTable }}
+            {{/if}}
+
+            {{> totalsTableHeader header="Winners" collection=arrWinners }}
+            {{#if (len arrWinners)}}
+                {{> nominees arrWinners }}
+            {{else}}
+                {{> emptySmallTable }}
+            {{/if}}
+        </aside>
+    </section>
+    {{/with}}
+
+    {{#with election}}
+    <section>
+        <aside>
+            {{> totalsTableHeader header="Moderators" collection=moderators }}
+            {{#if (len moderators)}}
+                <table class="table-small">
+                   <thead>
+                        <tr>
+                            <th>Link</th>
+                            <th>Member for</th>
+                            <th>Election</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{#iterate moderators}}
+                    <tr>
+                        <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
+                        <td>{{years this.creation_date}}</td>
+                        {{#if this.election}}
+                            <td>{{{ordinal this.election}}} <a href="{{this.electionLink}}">election</a> ({{year (getter (get @root/data/election/elections this.election) "dateEnded")}})</td>
+                        {{else if this.appointed}}
+                            <td>appointed ({{this.appointed}})</td>
+                        {{else}}
+                            <td></td>
+                        {{/if}}
+                    </tr>
+                    {{/iterate}}
+                    </tbody>
+                </table>
+            {{else}}
+                {{> emptySmallTable }}
+            {{/if}}
+
+            {{#if (len (getter this "requiredBadges"))}}
+            {{> totalsTableHeader header="Required Badges" collection=(getter this "requiredBadges") }}
+            <table class="table-small">
+                <thead>
+                    <tr>
+                        <th>Link</th>
+                        <th>Id</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{#each (getter this "requiredBadges")}}
+                <tr>
+                    <td><a href="{{getter @root/data/election "siteUrl"}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
+                    <td>{{this.badge_id}}</td>
+                    <td>{{this.type}}</td>
+                </tr>
+                {{/each}}
+                </tbody>
+            </table>
+            {{/if}}
+
+            {{> totalsTableHeader header="Election Badges" collection=(getter this "optionalBadges") }}
+            <table class="table-small">
+                <thead>
+                    <tr>
+                        <th>Link</th>
+                        <th>Id</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{#each (getter this "optionalBadges")}}
+                <tr>
+                    <td><a href="{{getter @root/data/election "siteUrl"}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
+                    <td>{{this.badge_id}}</td>
+                    <td>{{this.type}}</td>
+                </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </aside>
+    </section>
+    {{/with}}
+
+    {{#with botconfig}}
+    <section>
+        <aside>
+            <h2>Bot Config</h2>
+            <table>
+                <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
+                <tr><td>scriptInitDate</td><td>{{> relativetime date=scriptInitDate}}</td></tr>
+                <tr><td>Control Room</td><td>{{{url controlRoomUrl}}}</td></tr>
+                <tr><td>Display Name</td><td>{{chatDisplayName}}</td></tr>
+                <tr><td>Is Muted</td><td>{{{boolean isMuted}}} {{#if isMuted}}{{> relativetime date=unmutesAt short=true prefix="for "}}{{/if}}</td></tr>
+                <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
+                <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
+                <tr><td>electionAfterpartyMins</td><td>{{electionAfterpartyMins}} mins</td></tr>
+                <tr><td>duplicateResponseText</td><td>{{duplicateResponseText}}</td></tr>
+                <tr><td>maxMessageLength</td><td>{{maxMessageLength}}</td></tr>
+                <tr><td>maxMessageParts</td><td>{{maxMessageParts}}</td></tr>
+                <tr>
+                    <td>showTranscriptMessages</td>
+                    <td>{{showTranscriptMessages}}</td>
+                </tr>
+                <tr><td>keepAlive</td><td>{{{boolean keepAlive}}}</td></tr>
+                <tr><td>feedbackUrl</td><td>{{{url feedbackUrl "feedback form"}}}</td></tr>
+                <tr><td>repoUrl</td><td>{{{url repoUrl}}}</td></tr>
+                <tr><td>flags</td><td>{{> deep flags}}</td></tr>
+            </table>
+        </aside>
+
+        {{#if herokuDynos.length}}
+        <aside>
+            <h2>Hosting (Heroku Dynos)</h2>
+            <table>
+                {{#each herokuDynos}}
+                <tr>
+                    <td>{{@key}}</td>
+                    {{#if (isObj this)}}
+                    <td>{{> deep this}}</td>
+                    {{else}}
+                    <td>{{this}}</td>
+                    {{/if}}
+                </tr>
+                {{/each}}
+            </table>
+        </aside>
+        {{/if}}
+    </section>
+    {{/with}}
+
+    {{#with botconfig}}
+    <section>
+        <aside>
+            <h2>Room Activity</h2>
+            <table>
+                <tr><td>Bot</td><td>
+                    <table class="nested">
+                        <tr><td>lastMessageTime</td><td>{{#if lastMessageTime}}{{> relativetime date=lastMessageTime}}{{/if}}</td></tr>
+                        <tr>
+                            <td>lastBotMessage</td>
+                            {{#if lastBotMessage}}
+                            <td>
+                                <pre>{{lastBotMessage}}</pre>
+                                <div class="mt10">{{{lastBotMessageHtml}}}</div>
+                            </td>
+                            {{else}}
+                            <td></td>
+                            {{/if}}
+                        </tr>
+                        <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
+                        <tr><td>botHasBeenQuiet</td>
+                        <td>{{{boolean botHasBeenQuiet}}}
+                            {{#unless botHasBeenQuiet}}{{> relativetime date=botWillBeQuietDate short=true}}{{/unless}}
+                        </td></tr>
+                        <tr><td>ignoreSelf</td><td>{{{boolean ignoreSelf}}}</td></tr>
+                    </table>
+                </td></tr>
+
+                <tr><td>Activity</td><td>
+                    <table class="nested">
+                        <tr><td>lastActivityTime</td><td>{{> relativetime date=lastActivityTime}}</td></tr>
+                        <tr><td>activityCounter</td><td>{{activityCounter}}</td></tr>
+                        <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>
+                        <tr><td>roomReachedMinActivityCount</td><td>{{{boolean roomReachedMinActivityCount}}}</td></tr>
+                        <tr><td>maxActivityCountThreshold</td><td>{{maxActivityCountThreshold}}</td></tr>
+                        <tr><td>roomReachedMaxActivityCount</td><td>{{{boolean roomReachedMaxActivityCount}}}</td></tr>
+                    </table>
+                </td></tr>
+
+                <tr><td>Room Idle</td><td>
+                    <table class="nested">
+                        <tr><td>shortIdleDurationMins</td><td>{{shortIdleDurationMins}} mins</td></tr>
+                        <tr><td>roomBecameIdleAWhileAgo</td><td>{{{boolean roomBecameIdleAWhileAgo}}}
+                            {{#unless roomBecameIdleAWhileAgo}}{{> relativetime date=roomBecameIdleAWhileDate short=true}}{{/unless}}
+                        </td></tr>
+                        <tr><td>longIdleDurationHours</td><td>{{longIdleDurationHours}} hours</td></tr>
+                        <tr><td>roomBecameIdleHoursAgo</td><td>{{{boolean roomBecameIdleHoursAgo}}}
+                            {{#unless roomBecameIdleHoursAgo}}{{> relativetime date=roomBecameIdleHoursDate short=true}}{{/unless}}
+                        </td></tr>
+                        <tr><td>shortBusyDurationMinutes</td><td>{{shortBusyDurationMinutes}} mins</td></tr>
+                        <tr><td>roomTooBusyForMinutes</td><td>{{{boolean roomTooBusyForMinutes}}}</td></tr>
+                        <tr><td>longBusyDurationHours</td><td>{{longBusyDurationHours}} hours</td></tr>
+                        <tr><td>roomTooBusyForHours</td><td>{{{boolean roomTooBusyForHours}}}</td></tr>
+                        <tr><td>lowActivityCheckMins</td><td>{{lowActivityCheckMins}} mins</td></tr>
+                    </table>
+                </td></tr>
+
+                <tr><td>Fun</td><td>
+                    <table class="nested">
+                        <tr><td>funResponseCounter</td><td>{{funResponseCounter}}</td></tr>
+                        <tr><td>maxFunResponses</td><td>{{maxFunResponses}}</td></tr>
+                        <tr><td>canSendFunResponse</td><td>{{{boolean canSendFunResponse}}}</td></tr>
+                    </table>
+                </td></tr>
+            </table>
+        </aside>
+    </section>
+    {{/with}}
+
+</main>
+
+{{/with}}
+
+<base target="_blank" />
+<meta http-equiv="refresh" content="{{data/autoRefreshInterval}}" />

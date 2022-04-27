@@ -1,0 +1,176 @@
+:root {
+  --heading-colour: #000;
+  --text-colour: #000;
+  --link-colour: rgb(0, 0, 139);
+  --border-colour: #999;
+  --margin-size: 40px;
+  --smaller-font-size: 0.85em;
+  --main-colour: rgb(242, 232, 222);
+}
+
+* {
+  font-family: Arial, sans-serif;
+  line-height: 1.3;
+  color: var(--text-colour);
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-size: 1em;
+  background-color: var(--main-colour);
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 2560px;
+  margin: 0 auto 1.5em;
+  padding: 0 1.5em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 1.3em 0 0.5em;
+}
+
+h1:first-child {
+  margin-top: 10px;
+}
+
+h1 {
+  font-size: 1.4em;
+  color: var(--heading-colour);
+}
+
+h2 {
+  font-size: 1.2em;
+  color: var(--heading-colour);
+}
+
+nav {
+  font-size: var(--smaller-font-size);
+}
+
+nav .navitem {
+  text-decoration: none;
+}
+
+nav .navitem:last-child {
+  font-weight: bold;
+}
+
+ol,
+ul {
+  padding-inline-start: 20px;
+  padding-left: 20px;
+}
+
+li {
+  margin: 0.2em 0;
+}
+
+a {
+  color: var(--link-colour);
+}
+
+a:visited {
+  color: var(--text-colour);
+}
+
+iframe.fullscreen {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100vw;
+  height: calc(100vh - 80px);
+  padding: 30px;
+  border: 0;
+  z-index: 1;
+}
+
+sup {
+  vertical-align: top;
+}
+
+blockquote {
+  margin: 2em 0 1.3em;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.mt10 {
+  margin-top: 10px;
+}
+
+.mt20 {
+  margin-top: 20px;
+}
+
+.mt40 {
+  margin-top: 40px;
+}
+
+[data-prefix]:before {
+  content: attr(data-prefix);
+}
+
+[data-suffix]:after {
+  content: attr(data-suffix);
+}
+
+pre {
+  max-width: 550px;
+  margin: 0;
+  overflow: auto;
+  font-size: var(--smaller-font-size);
+  font-family: monospace;
+  background: #e6e6e6;
+  padding: 3px 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+td:empty::before,
+pre:empty::before {
+  content: "(none)";
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--border-colour);
+}
+
+@media (max-width: 767px) {
+  body {
+    padding: 20px 20px;
+    font-size: var(--smaller-font-size);
+    word-break: break-word;
+  }
+
+  blockquote {
+    margin: 1.5em 0;
+  }
+
+  pre {
+    max-width: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .mobile-hidden {
+    display: none;
+  }
+
+  .dashboard section {
+    flex-basis: 100%;
+    max-width: none;
+    margin-right: 0;
+  }
+}

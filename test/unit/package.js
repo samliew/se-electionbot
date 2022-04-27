@@ -1,7 +1,8 @@
 import { expect } from "chai";
-import { parsePackage, parsePerson } from "../../src/utils/package.js";
+import { parsePackage, parsePerson } from "../../src/shared/utils/package.js";
 
 describe('Package Parsing', () => {
+
     describe('parsePerson', () => {
 
         it('should correctly parse person strings', () => {
@@ -16,14 +17,12 @@ describe('Package Parsing', () => {
             const parsed = parsePerson(info);
             expect(info).to.deep.equal(parsed);
         });
-
     });
 
     describe('parsePackage', () => {
 
         it('should correctly parse package.json info', async () => {
-            // @ts-expect-error FIXME
-            const { author, contributors } = await parsePackage("./package.json");
+            const { author, contributors } = await parsePackage("./package.json") || {};
             expect(author).to.deep.equal({
                 name: "Samuel Liew",
                 url: "https://so-user.com/584192?tab=profile",
@@ -35,6 +34,6 @@ describe('Package Parsing', () => {
             const invalid = await parsePackage("");
             expect(invalid).to.be.null;
         });
-
     });
+
 });

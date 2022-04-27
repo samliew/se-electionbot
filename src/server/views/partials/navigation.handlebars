@@ -1,0 +1,16 @@
+<header>
+  <nav class="main-nav">
+    <select id="nav">
+      <option selected="selected">Menu</option>
+      {{#each routes}}
+      {{#unlessEquals @key ../path}}
+        {{#if (either this.public ../password)}}
+        <option value="{{@key}}{{#if ../password}}?password={{../password}}{{/if}}">
+          {{initIfFalsy (unprefix "/" @key) "home"}}
+        </option>
+        {{/if}}
+      {{/unlessEquals}}
+      {{/each}}
+    </select>
+  </nav>
+</header>

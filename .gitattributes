@@ -1,0 +1,4 @@
+coverage/** linguist-generated
+dist/** linguist-generated
+node_modules/** linguist-vendored
+*.handlebars linguist-language=HTML
