@@ -161,6 +161,7 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `ELECTION_URL`                 | string   | yes       | -            | URL of election page (with ID) that the bot will scrape                                                 |
 | `FEEDBACK_FORM_URL`            | string   | no        | -            | url for users to provide feedback about the bot                                                         |
 | `FUN_MODE`                     | boolean  | no        | `true`       | enable fun random responses                                                                             |
+| `IGNORED_USER_IDS`             | number[] | no        | -            | user chatIds to ignore messages from (pipe-delimited)                                                   |
 | `HEROKU_API_TOKEN`             | string   | no        | -            | to be used only when hosted on Heroku for bot config updates                                            |
 | `KEEP_ALIVE`                   | boolean  | no        | `false`      | whether bot will ping itself occasionally                                                               |
 | `LOW_ACTIVITY_CHECK_MINS`      | number   | no        | `10`         | interval (minutes) before bot can check room for inactivity                                             |

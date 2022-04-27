@@ -420,7 +420,7 @@ export class BotConfig {
 
     devIds = new Set(parseIds(process.env.DEV_IDS || ""));
     adminIds = new Set(parseIds(process.env.ADMIN_IDS || ''));
-    ignoredUserIds = new Set(parseIds(process.env.IGNORED_USERIDS || ''));
+    ignoredUserIds = new Set(parseIds(process.env.IGNORED_USER_IDS || ''));
 
     /**
      * @type {Set<number>}
