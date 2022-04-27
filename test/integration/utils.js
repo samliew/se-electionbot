@@ -2,6 +2,7 @@ import { expect } from "chai";
 import dotenv from "dotenv";
 import { test } from "mocha";
 import sinon from "sinon";
+import BotEnv from "../../src/bot/env.js";
 import {
     fetchChatTranscript,
     fetchRoomOwners,
@@ -17,7 +18,8 @@ describe("Stack Exchange Chat integration", function () {
 
     dotenv.config();
 
-    const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
+    const env = new BotEnv(process.env);
+    const apiKeyPool = env.or("stack_api_keys");
 
     const hasCreds = apiKeyPool.length > 0;
     const testIf = hasCreds ? test : test.skip;

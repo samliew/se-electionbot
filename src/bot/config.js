@@ -1,4 +1,4 @@
-import { parseBoolEnv, parseIds, parseNumEnv } from "./utils.js";
+import { parseBoolEnv, parseIds } from "./utils.js";
 import { chatMarkdownToHtml } from "./utils/markdown.js";
 
 const MS_IN_SECOND = 1e3;
@@ -6,11 +6,16 @@ const MS_IN_MINUTE = 60 * MS_IN_SECOND;
 const MS_IN_HOUR = 60 * MS_IN_MINUTE;
 
 /**
+ * @typedef {import("./env").default<BotEnvironment>} BotEnv
+ * @typedef {import("./env").BotEnvironment} BotEnvironment
  * @typedef {import("chatexchange/dist/Client").Host} Host
  * @typedef {import("./utils").RoomUser} RoomUser
  */
 
 export class BotConfig {
+
+    /** @type {BotEnv} */
+    #env;
 
     /**
      * @summary bot chat room id
@@ -22,7 +27,9 @@ export class BotConfig {
      * @summary bot control chat room id
      * @type {number|undefined}
      */
-    controlRoomId = parseNumEnv("control_room_id");
+    get controlRoomId() {
+        return this.#env.num("control_room_id");
+    }
 
     /**
      * @summary bot control chat room url
@@ -48,10 +55,12 @@ export class BotConfig {
     /**
      * @param {Host} host chat host server
      * @param {number} roomId room id this configuration is for
+     * @param {BotEnv} env bot environment
      */
-    constructor(host, roomId) {
+    constructor(host, roomId, env) {
         this.chatDomain = host;
         this.chatRoomId = roomId;
+        this.#env = env;
     }
 
     scriptInitDate = new Date();
@@ -62,7 +71,13 @@ export class BotConfig {
      */
     nowOverride;
 
-    keepAlive = process.env.KEEP_ALIVE === 'true';
+    /**
+     * @summary /ping the bot server periodically?
+     * @type {boolean}
+     */
+    get keepAlive() {
+        return this.#env.bool("keep_alive");
+    }
 
     // Bot instance identifier, base hostname for dashboard, also where keep-alive will ping
     // Ensure url starts with http and does not end with a slash, or keep it empty
@@ -75,21 +90,28 @@ export class BotConfig {
      * @summary minutes to wait after an election to scale back dynos (which restarts bot and leaves room)
      * @type {number}
      */
-    electionAfterpartyMins = parseNumEnv("election_afterparty_mins", 30);
-
-    /* Low activity count variables */
+    get electionAfterpartyMins() {
+        return this.#env.num("election_afterparty_mins", 30);
+    }
+    set electionAfterpartyMins(v) {
+        this.#env.set("election_afterparty_mins", v);
+    }
 
     /**
      * @summary lower bound of activity (only after this amount of minimum messages)
      * @type {number}
      */
-    minActivityCountThreshold = parseNumEnv("low_activity_count_threshold", 30);
+    get minActivityCountThreshold() {
+        return this.#env.num("low_activity_count_threshold", 30);
+    }
 
     /**
      * @summary upper bound of activity
      * @type {number}
      */
-    maxActivityCountThreshold = parseNumEnv("high_activity_count_threshold", 300);
+    get maxActivityCountThreshold() {
+        return this.#env.num("high_activity_count_threshold", 300);
+    }
 
     /**
      * @summary checks if room has reached minimum activity count
@@ -113,40 +135,55 @@ export class BotConfig {
      * @summary determines when to start showing the primary phase countdown
      * @type {number}
      */
-    showPrimaryCountdownAfter = parseNumEnv("show_primary_countdown_after", 8);
+    get showPrimaryCountdownAfter() {
+        return this.#env.num("show_primary_countdown_after", 8);
+    }
 
     /**
      * @summary Variable to determine how long the room needs to be quiet to be idle
      * @type {number}
      * {@link BotConfg#roomBecameIdleAWhileAgo}
      */
-    shortIdleDurationMins = parseNumEnv("short_idle_duration_mins", 3);
+    get shortIdleDurationMins() {
+        return this.#env.num("short_idle_duration_mins", 3);
+    }
 
     /**
      * @summary Variable to determine how long the room needs to be quiet to be idle
      * @type {number}
      * {@link BotConfg#roomBecameIdleHoursAgo}
      */
-    longIdleDurationHours = parseNumEnv("long_idle_duration_hours", 12);
+    get longIdleDurationHours() {
+        return this.#env.num("long_idle_duration_hours", 12);
+    }
+    set longIdleDurationHours(v) {
+        this.#env.set("long_idle_duration_hours", v);
+    }
 
     /**
      * @summary Variable to trigger greeting only after this time of inactivity
      * @type {number}
      * {@link BotConfig#botHasBeenQuiet}
      */
-    lowActivityCheckMins = parseNumEnv("low_activity_check_mins", 5);
+    get lowActivityCheckMins() {
+        return this.#env.num("low_activity_check_mins", 5);
+    }
 
     /**
      * @summary lower bound of busy room status
      * @type {number}
      */
-    shortBusyDurationMinutes = parseNumEnv("short_busy_duration_mins", 5);
+    get shortBusyDurationMinutes() {
+        return this.#env.num("short_busy_duration_mins", 5);
+    }
 
     /**
      * @summary upper bound of busy room status
      * @type {number}
      */
-    longBusyDurationHours = parseNumEnv("long_busy_duration_hours", 1);
+    get longBusyDurationHours() {
+        return this.#env.num("long_busy_duration_hours", 1);
+    }
 
     /**
      * @summary checks if the room became idle minutes ago
@@ -203,8 +240,13 @@ export class BotConfig {
         this._throttleSecs = newValue > this.minThrottleSecs ? newValue : this.minThrottleSecs;
     }
 
-    // Determines if the bot will ignore messages from self
-    ignoreSelf = JSON.parse(process.env.IGNORE_SELF?.toLowerCase() || "true");
+    /**
+     * @summary ignore messages from self?
+     * @type {boolean}
+     */
+    get ignoreSelf() {
+        return this.#env.bool("ignore_self", true);
+    }
 
     // Variable to store time of last message in the room (by anyone, including bot), for idle checking purposes
     lastActivityTime = Date.now();
@@ -219,8 +261,18 @@ export class BotConfig {
 
     // Variable to track activity count in the room, to see if it reached minActivityCountThreshold
     activityCounter = 0;
-    // Variable of rescrape interval of election page
-    scrapeIntervalMins = parseNumEnv("scrape_interval_mins", 2);
+
+    /**
+     * @summary periodic election rescrape interval
+     * @type {number}
+     */
+    get scrapeIntervalMins() {
+        return this.#env.num("scrape_interval_mins", 2);
+    }
+    set scrapeIntervalMins(v) {
+        this.#env.set("scrape_interval_mins", v);
+    }
+
     // Response when bot tries to post the exact same response again
     duplicateResponseText = "Please read my previous message...";
 
@@ -261,13 +313,20 @@ export class BotConfig {
     }
 
     /**
-     * @summary Repo URL
+     * @summary source code repository URL
      * @type {string}
      */
-    repoUrl = process.env.REPO_URL || "https://github.com/samliew/se-electionbot";
+    get repoUrl() {
+        return this.#env.str("repo_url", "https://github.com/samliew/se-electionbot");
+    }
 
-    // Pool of API keys
-    apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
+    /**
+     * @summary pool of SE API keys to rotate
+     * @type {string[]}
+     */
+    get apiKeyPool() {
+        return this.#env.or("stack_api_keys");
+    }
 
     // Checks if the bot is currently muted
     get isMuted() {
@@ -317,7 +376,14 @@ export class BotConfig {
 
     // Keep track of fun responses so we can impose a limit
     funResponseCounter = 0;
-    maxFunResponses = parseNumEnv("max_fun_responses", 2);
+
+    /**
+     * @summary max number of fun mode bot responses in a row
+     * @type {number}
+     */
+    get maxFunResponses() {
+        return this.#env.num("max_fun_responses", 2);
+    }
 
     get canSendFunResponse() {
         return this.funResponseCounter < this.maxFunResponses;
@@ -404,8 +470,11 @@ export class BotConfig {
 
     /**
      * @summary controls how many transcript messages will be shown in the dashboard
+     * @type {number}
      */
-    showTranscriptMessages = parseNumEnv("transcript_size", 20);
+    get showTranscriptMessages() {
+        return this.#env.num("transcript_size", 20);
+    }
 
     /**
      * @summary adds a user as a bot administrator

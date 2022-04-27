@@ -1,6 +1,7 @@
 import Client from "chatexchange";
 import User from "chatexchange/dist/User.js";
 import BotConfig from "../../src/bot/config.js";
+import BotEnv from "../../src/bot/env.js";
 
 /**
  * @template T
@@ -10,7 +11,7 @@ import BotConfig from "../../src/bot/config.js";
  * @returns {BotConfig}
  */
 export const getMockBotConfig = (overrides = {}) => {
-    const config = new BotConfig("stackoverflow.com", 190503);
+    const config = new BotConfig("stackoverflow.com", 190503, new BotEnv({}));
     config.electionAfterpartyMins = 0; // Otherwise tests take too long to run
     return Object.assign(config, overrides);
 };

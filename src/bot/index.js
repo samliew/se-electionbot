@@ -12,6 +12,7 @@ import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
 import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections, scrapeElectionAnnouncements } from './election.js';
+import BotEnv from "./env.js";
 import {
     isAskedAboutBadgesOfType,
     isAskedAboutBallotFile,
@@ -92,6 +93,8 @@ import { getOrInit, sortMap } from "./utils/maps.js";
  *  user: User,
  *  botUser: ChatUser
  * ) => string | Promise<string>} MessageBuilder
+ *
+ * @typedef {import("./env.js").BotEnvironment} BotEnvironment
  */
 
 (async () => {
@@ -101,14 +104,17 @@ import { getOrInit, sortMap } from "./utils/maps.js";
         dotenv.config({ debug: process.env.DEBUG === 'true' });
     }
 
+    const env = new BotEnv(/** @type {BotEnvironment} */(process.env));
+
     // Required environment variables
-    const electionUrl = process.env.ELECTION_URL?.trim();
-    const accountEmail = process.env.ACCOUNT_EMAIL?.trim();
-    const accountPassword = process.env.ACCOUNT_PASSWORD?.trim();
+    const electionUrl = env.str("election_url");
+    const accountEmail = env.str("account_email");
+    const accountPassword = env.str("account_password");
 
     // Check that all required environment variables are set
     if (!electionUrl || !accountEmail || !accountPassword) {
 
+        /** @type {Array<keyof BotEnvironment>} */
         const requiredEnvironmentVariables = [
             'ELECTION_URL',
             'ACCOUNT_EMAIL',
@@ -125,8 +131,8 @@ import { getOrInit, sortMap } from "./utils/maps.js";
     }
 
     // Other environment variables
-    const defaultChatDomain = /** @type {Host} */ (process.env.CHAT_DOMAIN || "stackexchange.com");
-    const defaultChatRoomId = +(process.env.CHAT_ROOM_ID || 92073);
+    const defaultChatDomain = /** @type {Host} */(env.str("chat_domain", "stackexchange.com"));
+    const defaultChatRoomId = env.num("chat_room_id", 92073);
     const defaultChatNotSet = !process.env.CHAT_DOMAIN || !process.env.CHAT_ROOM_ID;
 
     /** @type {{ ChatEventType: EventType }} */
@@ -185,7 +191,7 @@ import { getOrInit, sortMap } from "./utils/maps.js";
 
 
     // Init bot config with defaults
-    const config = new BotConfig(defaultChatDomain, defaultChatRoomId);
+    const config = new BotConfig(defaultChatDomain, defaultChatRoomId, env);
 
     // Debug mode is on, warn and log initial BotConfig
     if (config.debug) {
