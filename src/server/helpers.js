@@ -38,7 +38,7 @@ export const ifEquals = function (arg1, arg2, options) {
 /** @type {(a1:unknown, a2:unknown, options:object) => unknown} */
 export const unlessEquals = function (a1, a2, options) {
     return a1 != a2 ? options.fn(this) : options.inverse(this);
-}
+};
 
 export const ifNotEmpty = function (value, options) {
     return value > 0 || value.length ? options.fn(this) : options.inverse(this);
@@ -81,57 +81,47 @@ export const url = (url, text = "") => {
     return `<a href="${url}">${text}</a>`;
 };
 
-export const utcTimestamp = function (date) {
-    if (typeof date === 'number' && date < 0) return "";
+export { dateToUtcTimestamp as utcTimestamp };
 
-    const validateDate = (input) => {
-        let output = input;
-        if (typeof input === 'string' || typeof input === 'number') {
-            output = new Date(input);
-        }
-        return output instanceof Date ? output : null;
-    };
-    date = validateDate(date);
-    return date?.toISOString().replace('T', ' ').replace(/\.\d+/, '') || "";
-};
-
-export const json = function (data) {
-    // JSON.stringify(undefined) === undefined
+/** @type {(data: string) => string} */
+export const json = (data) => {
     if (typeof data !== "string") data = JSON.stringify(data || []);
-    return data.replace(/},\s*/g, "},\n").replace(/,"/g, `, "`).replace(/(^\[|\]$)/g, "").replace(/\[/g, "[\n").replace(/\]/g, "\n]");
+    return data
+        .replace(/},\s*/g, "},\n")
+        .replace(/,"/g, `, "`)
+        .replace(/(^\[|\]$)/g, "")
+        .replace(/\[/g, "[\n")
+        .replace(/\]/g, "\n]");
 };
 
-export const boolean = function (data) {
-    return `<span class="${data || data === 'true' ? 'truthy' : 'falsy'}">${data}</span>`;
-};
+/** @type {(data: unknown) => string} */
+export const boolean = (data) => `<span class="${data || data === 'true' ? 'truthy' : 'falsy'}">${data}</span>`;
 
 /** @type {(data: unknown) => string} */
 export const yesno = (data) => {
     const isYes = typeof data === "string" ? data === 'yes' : !!data;
     return `<span class="${isYes ? 'yes' : 'no'}">${isYes ? 'yes' : 'no'}</span>`;
-}
-
-export const required = function (data) {
-    return `<span class="${data || data === 'required' ? 'required' : ''}">${data || data === 'required' ? 'required' : ''}</span>`;
 };
+
+/** @type {(data: unknown) => string} */
+export const required = (data) => `<span class="${data || data === 'required' ? 'required' : ''}">${data || data === 'required' ? 'required' : ''}</span>`;
 
 /** @type {(date:Date) => string} */
 export const withRelativeDT = (date) => `<span class="mobile-hidden">${dateToUtcTimestamp(date)}</span> <span class="relativetime" title="${dateToUtcTimestamp(date)}"></span>`;
 
+/** @type {(name: string, ...args: unknown[]) => unknown} */
 export const call = function (name, ...args) {
-    return typeof this[name] === "function" ? this[name](...args.slice(0, -1)) : undefined;
+    return typeof this[name] === "function" ? this[name](...args.slice(0, -1)) : void 0;
 };
 
-export const contextCall = function (name, ctxt, ...args) {
-    return typeof ctxt[name] === "function" ? ctxt[name](...args.slice(0, -1)) : undefined;
-};
+/** @type {(name: string, ctxt: object, ...args: unknown[]) => unknown} */
+export const contextCall = (name, ctxt, ...args) => typeof ctxt[name] === "function" ? ctxt[name](...args.slice(0, -1)) : void 0;
 
 /** @type {(prefix:string, text:string) => string} */
 export const unprefix = (prefix, text) => text.replace(new RegExp(`^${prefix}\\s*?`), "");
 
-export const reverse = function (/** @type {any[]} */array) {
-    return [...array].reverse();
-};
+/** @type {<T>(array: T[]) => T[]} */
+export const reverse = (array) => [...array].reverse();
 
 /** @type {(c:object, k:string) => unknown} */
 export const getter = (ctxt, propertyName) => ctxt[propertyName];
