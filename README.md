@@ -169,7 +169,7 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `LOW_ACTIVITY_CHECK_MINS`      | number   | no        | `10`         | interval (minutes) before bot can check room for inactivity                                             |
 | `LOW_ACTIVITY_COUNT_THRESHOLD` | number   | no        | `20`         | bot can classify room as inactive only after these amount of messages have been sent                    |
 | `NODE_ENV`                     | string   | no        | `production` | whether bot is in Node debug mode                                                                       |
-| `PASSWORD`                     | string   | no        | -            | password to access bot dashboard                                                                        |
+| `PASSWORD`                     | string   | no        | -            | password to access non-public routes of the bot dashboard                                               |
 | `REPO_URL`                     | string   | no        | -            | URL of this git repository                                                                              |
 | `SCRAPE_INTERVAL_MINS`         | number   | no        | `2`          | interval (minutes) to check election page for updates                                                   |
 | `SCRIPT_HOSTNAME`              | string   | no        | -            | instance identifier, hostname for dashboard, also where keep-alive will ping                            |
