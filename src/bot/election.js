@@ -1100,6 +1100,15 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election has been cancelled
+     * @returns {boolean}
+     */
+    isCancelled() {
+        const { phase } = this;
+        return phase === "cancelled";
+    }
+
+    /**
      * @summary checks if the election is a Stack Overflow election
      *  @returns {boolean}
      */
