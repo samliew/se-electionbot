@@ -1,9 +1,6 @@
 import { AllowedHosts } from "chatexchange/dist/Client.js";
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
-import { getAllNamedBadges, getBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
-import { calculateScore } from './score.js';
-import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
 import { isOneOf, mapify } from '../shared/utils/arrays.js';
 import { addDates, dateToUtcTimestamp, daysDiff } from '../shared/utils/dates.js';
 import { findLast } from '../shared/utils/dom.js';
@@ -11,6 +8,9 @@ import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { filterMap, getOrInit, has, mergeMaps, sortMap } from '../shared/utils/maps.js';
 import { clone } from '../shared/utils/objects.js';
 import { scrapeModerators } from '../shared/utils/scraping.js';
+import { getAllNamedBadges, getBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
+import { calculateScore } from './score.js';
+import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
 
 /**
  * @typedef {null|"ended"|"election"|"primary"|"nomination"|"cancelled"} ElectionPhase
@@ -1213,6 +1213,34 @@ export default class Election {
     }
 
     /**
+     * @summary scrapes election cancellation status
+     * @param {cheerio.Root} $ Cheerio root element
+     * @returns {boolean}
+     */
+    scrapeCancellation($) {
+        const [, statusElem] = $("#mainbar aside[role=status]");
+        const notice = $(statusElem).html();
+        if (!statusElem || !notice) return false;
+
+        if (!$(statusElem).text().includes('cancelled')) return false;
+
+        // https://regex101.com/r/UOGdTo/1
+        const cancellationDateExpr = /\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
+        const [, monthday, year] = cancellationDateExpr.exec(notice) || [];
+
+        this.dateCancelled = dateToUtcTimestamp(`${monthday}, ${year} 20:00:00Z`);
+
+        // Convert link to chat-friendly markup
+        this.cancelledText = notice
+            ?.replace(/<a href="/g, 'See [meta](')
+            .replace(/">.+/g, ') for details.')
+            .trim();
+
+        this.phase = 'cancelled';
+        return true;
+    }
+
+    /**
      * @summary
      * @param {cheerio.Root} $ Cheerio root element
      * @returns {string}
@@ -1401,7 +1429,7 @@ export default class Election {
 
                 const resultsWrapper = $($('#mainbar').find('aside[role=status]').get(1));
 
-                const [statusElem, resultsElem, statsElem] = resultsWrapper.find(".flex--item").get();
+                const [, resultsElem, statsElem] = resultsWrapper.find(".flex--item").get();
 
                 const resultsUrl = $(resultsElem).find('a').first().attr('href') || "";
 
@@ -1410,17 +1438,10 @@ export default class Election {
                 // Validate opavote URL
                 if (!/^https:\/\/www\.opavote\.com\/results\/\d+$/.test(resultsUrl)) this.opavoteUrl = '';
 
-                // Check if election was cancelled?
-                if ($(statusElem).text().includes('cancelled')) {
-                    this.phase = 'cancelled';
+                const isCancelled = this.scrapeCancellation($);
 
-                    // Convert link to chat-friendly markup
-                    this.cancelledText = $(statusElem).html()
-                        ?.replace(/<a href="/g, 'See [meta](')
-                        .replace(/">.+/g, ') for details.').trim();
-                }
                 // Election ended
-                else {
+                if (!isCancelled) {
                     // Get election stats
                     this.statVoters = $(statsElem).contents().map((_i, { data, type }) =>
                         type === 'text' ? data?.trim() : ""
