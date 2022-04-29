@@ -31,8 +31,9 @@ export const isURL = (source) => {
 /** @type {<T>(source: T, init: T) => T} */
 export const initIfFalsy = (source, init) => source || init;
 
-export const ifEquals = function (arg1, arg2, options) {
-    return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+/** @type {(a1:unknown, a2:unknown, options:object) => unknown} */
+export const ifEquals = function (a1, a2, options) {
+    return (a1 == a2) ? options.fn(this) : options.inverse(this);
 };
 
 /** @type {(a1:unknown, a2:unknown, options:object) => unknown} */
@@ -95,7 +96,10 @@ export const json = (data) => {
 };
 
 /** @type {(data: unknown) => string} */
-export const boolean = (data) => `<span class="${data || data === 'true' ? 'truthy' : 'falsy'}">${data}</span>`;
+export const boolean = (data) => {
+    const isTrue = typeof data === "string" ? data === "true" : !!data;
+    return `<span class="${isTrue ? 'truthy' : 'falsy'}">${isTrue}</span>`;
+}
 
 /** @type {(data: unknown) => string} */
 export const yesno = (data) => {
