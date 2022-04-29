@@ -651,6 +651,12 @@ export default class Election {
     ];
 
     /**
+     * @summary date of the cancellation of the election
+     * @type {string|undefined}
+     */
+    dateCancellation;
+
+    /**
      * @summary date of the start of the nomination phase
      * @type {string}
      */
@@ -1435,6 +1441,7 @@ phase             ${this.phase};
 primary date      ${this.datePrimary};
 election date     ${this.dateElection};
 ended date        ${this.dateEnded};
+cancelled date    ${this.dateCancelled};
 candidates        ${this.numNominees};
 withdrawals       ${this.numWithdrawals}
 winners           ${this.numWinners};
