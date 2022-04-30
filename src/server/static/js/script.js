@@ -1,4 +1,30 @@
 /**
+ * @summary pluralizes a noun
+ * @param {number} num number of {@param signular}
+ * @param {string} singular singular form of a noun
+ * @param {string} [suffix] plural suffix
+ * @returns {string}
+ */
+const pluralize = (num, singular, suffix = "s") => `${singular}${num === 1 ? "" : suffix}`;
+
+/**
+ * @summary validates and normalizes the Date
+ * @param {Date|number|string} input
+ * @returns {Date}
+ */
+const validateDate = (input) => {
+    let output = input;
+
+    if (typeof input === 'string' || typeof input === 'number') {
+        output = new Date(input);
+    };
+
+    // use instanceof, as normal objects will pass `typeof !== "object"` validation
+    return output instanceof Date ? output : new Date();
+};
+
+
+/**
  * @summary converts a given Date to relative datetime string
  * @param {Date|string|number} date date to format
  * @param {string} [soonText] text to display when the election starts soon
@@ -6,18 +32,6 @@
  * @returns {string}
  */
 const dateToRelativetime = (date, prefix = "in ", soonText = 'soon', justNowText = 'just now') => {
-
-    const validateDate = (input) => {
-        let output = input;
-
-        if (typeof input === 'string' || typeof input === 'number') {
-            output = new Date(input);
-        };
-
-        // use instanceof, as normal objects will pass `typeof !== "object"` validation
-        return output instanceof Date ? output : new Date();
-    };
-
     date = validateDate(date);
 
     if (date === null) return soonText;
@@ -30,10 +44,12 @@ const dateToRelativetime = (date, prefix = "in ", soonText = 'soon', justNowText
     if (diff > 0) {
         return (
             diff < 5 && soonText ||
-            diff < 60 && (function (x) { return `${prefix}${x} ${x === 1 ? "sec" : "secs"}`; })(Math.floor(diff)) ||
-            diff < 3600 && (function (x) { return `${prefix}${x} ${x === 1 ? "min" : "mins"}`; })(Math.floor(diff / 60)) ||
-            diff < 86400 && (function (x) { return `${prefix}${x} ${x === 1 ? "hour" : "hours"}`; })(Math.floor(diff / 3600)) ||
-            (function (x) { return `${prefix}${x} ${x === 1 ? "day" : "days"}`; })(Math.floor(diff / 86400))
+            diff < 60 && ((x) => `${prefix}${x} ${pluralize(x, "sec")}`)(Math.floor(diff)) ||
+            diff < 3600 && ((x) => `${prefix}${x} ${pluralize(x, "min")}`)(Math.floor(diff / 60)) ||
+            diff < 86400 && ((x) => `${prefix}${x} ${pluralize(x, "hour")}`)(Math.floor(diff / 3600)) ||
+            diff < 31 && ((x) => `${prefix}${x} ${pluralize(x, "day")}`)(dayDiff) ||
+            diff < 366 && ((x) => `${prefix}${x} ${pluralize(x, "month")}`)(dayDiff / 31) ||
+            ((x) => `${prefix}${x} ${pluralize(x, "year")}`)(Math.floor(dayDiff / 366))
         );
     }
 
@@ -43,10 +59,12 @@ const dateToRelativetime = (date, prefix = "in ", soonText = 'soon', justNowText
 
     return (
         diff < 5 && justNowText ||
-        diff < 60 && (function (x) { return `${x} ${x === 1 ? "sec" : "secs"} ago`; })(Math.floor(diff)) ||
-        diff < 3600 && (function (x) { return `${x} ${x === 1 ? "min" : "mins"} ago`; })(Math.floor(diff / 60)) ||
-        diff < 86400 && (function (x) { return `${x} ${x === 1 ? "hour" : "hours"} ago`; })(Math.floor(diff / 3600)) ||
-        (function (x) { return `${x} ${x === 1 ? "day" : "days"} ago`; })(Math.floor(diff / 86400))
+        diff < 60 && ((x) => `${x} ${pluralize(x, "sec")} ago`)(Math.floor(diff)) ||
+        diff < 3600 && ((x) => `${x} ${pluralize(x, "min")} ago`)(Math.floor(diff / 60)) ||
+        diff < 86400 && ((x) => `${x} ${pluralize(x, "hour")} ago`)(Math.floor(diff / 3600)) ||
+        diff < 31 && ((x) => `${x} ${pluralize(x, "day")} ago`)(dayDiff) ||
+        diff < 366 && ((x) => `${x} ${pluralize(x, "month")} ago`)(dayDiff / 31) ||
+        ((x) => `${x} ${pluralize(x, "year")} ago`)(Math.floor(dayDiff / 366))
     );
 };
 
