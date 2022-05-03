@@ -131,7 +131,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
     }
 
     // Other environment variables
-    const defaultChatDomain = /** @type {Host} */(env.str("chat_domain", "stackexchange.com")) ?? "stackexchange.com";
+    const defaultChatDomain = /** @type {Host} */(env.str("chat_domain", "stackexchange.com") ?? "stackexchange.com");
     const defaultChatRoomId = env.num("chat_room_id", 92073);
     const defaultChatNotSet = !process.env.CHAT_DOMAIN || !process.env.CHAT_ROOM_ID;
 
@@ -255,7 +255,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
             await heroku.scaleHobby();
         }
         // Otherwise, scale down to free dynos
-        else if (hasPaidDyno) {
+        else if (!election.isActive() && hasPaidDyno) {
             console.log('Scaling down to Heroku free dyno...');
             await heroku.scaleFree();
         }
@@ -264,7 +264,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
          * If is in production mode, default chatroom not set, and is an active election,
          * auto-detect and set chat domain & room to join
          */
-        if (!config.debugOrVerbose && defaultChatNotSet && election.isActive()) {
+        if (!config.debug && defaultChatNotSet && election.isActive()) {
 
             // Store original values so we know if it's changed
             const originalChatDomain = config.chatDomain;
