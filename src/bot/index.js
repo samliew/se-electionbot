@@ -131,7 +131,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
     }
 
     // Other environment variables
-    const defaultChatDomain = /** @type {Host} */(env.str("chat_domain", "stackexchange.com"));
+    const defaultChatDomain = /** @type {Host} */(env.str("chat_domain", "stackexchange.com")) ?? "stackexchange.com";
     const defaultChatRoomId = env.num("chat_room_id", 92073);
     const defaultChatNotSet = !process.env.CHAT_DOMAIN || !process.env.CHAT_ROOM_ID;
 
