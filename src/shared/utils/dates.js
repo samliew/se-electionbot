@@ -119,9 +119,9 @@ export const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
 
 /**
  * @summary formates date input to ISO 8601 format without milliseconds
- * @param {Date} date date to format
+ * @param {Date|string|number} date date to format
  */
-export const dateToShortISO8601Timestamp = (date) => date.toISOString().replace(/\.\d{3}/, "");
+export const dateToShortISO8601Timestamp = (date) => validateDate(date).toISOString().replace(/\.\d{3}/, "");
 
 /**
 * @summary formats date input into ISO 8601 format
