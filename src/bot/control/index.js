@@ -1,10 +1,10 @@
 import { ChatEventType } from 'chatexchange';
+import { prepareMessageForMatching } from '../../shared/utils/chat.js';
 import { echoSomething, sayFeedback } from '../commands/commands.js';
 import { isBotMentioned } from "../guards.js";
 import { sayIdleGreeting } from '../messages/greetings.js';
 import { sendMessage } from "../queue.js";
 import { getUser, makeURL, roomKeepAlive } from "../utils.js";
-import { prepareMessageForMatching } from '../../shared/utils/chat.js';
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -70,7 +70,7 @@ export const joinControlRoom = async (config, elections, election, client, {
             if (!canSend || !fromControlRoom || !isAtMentionedMe) return;
 
             if (isAskingToSay) {
-                await echoSomething(config, controlledRoom, decodedMessage);
+                await echoSomething({ config, room: controlledRoom, content: decodedMessage });
                 return;
             }
 
@@ -80,7 +80,7 @@ export const joinControlRoom = async (config, elections, election, client, {
             }
 
             if (isAskingToFeedback) {
-                await sendMessage(config, controlledRoom, sayFeedback(config));
+                await sendMessage(config, controlledRoom, sayFeedback({ config }));
                 return;
             }
 

@@ -1,12 +1,12 @@
 import { partialRight } from "ramda";
-import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "../api.js";
-import { getCandidateOrNominee, getRandomSoFar, RandomArray } from "../random.js";
-import { calculateScore } from "../score.js";
-import { linkToRelativeTimestamp, makeURL, pluralize, scrapeAwardedBadge } from "../utils.js";
 import { dateToShortISO8601Timestamp } from "../../shared/utils/dates.js";
 import { matchISO8601 } from "../../shared/utils/expressions.js";
 import { has } from "../../shared/utils/maps.js";
 import { formatNumber, percentify } from "../../shared/utils/strings.js";
+import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "../api.js";
+import { getCandidateOrNominee, getRandomSoFar, RandomArray } from "../random.js";
+import { calculateScore } from "../score.js";
+import { linkToRelativeTimestamp, makeURL, pluralize, scrapeAwardedBadge } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
 /**
@@ -121,44 +121,6 @@ export const sayHowManyAreEligibleToVote = async (config, _elections, election) 
     const modal = phaseMap[phase] || isAre;
 
     return `${formatNumber(numEligible, 3)} user${pluralize(numEligible)} ${modal} eligible to vote in the election.`;
-};
-
-/**
- * @summary builds a response to a query on how many mods voted in the election
- * @param {BotConfig} config bot configuration
- * @param {Election} election current election
- * @returns {Promise<string>}
- */
-export const sayHowManyModsVoted = async (config, _elections, election) => {
-    const { apiSlug, moderators, siteUrl, dateElection, dateEnded } = election;
-
-    const modIds = [...moderators.keys()];
-    const { length: numMods } = modIds;
-
-    const modBadges = await getBadges(config, modIds, apiSlug, {
-        from: dateElection,
-        to: dateEnded,
-        type: "named"
-    });
-
-    const electionBadgeName = "Constituent";
-    const electionBadgeId = election.getBadgeId(electionBadgeName);
-
-    const numVoted = modBadges.reduce(
-        (a, b) => {
-            b.badge_id === electionBadgeId && console.log(b);
-            return b.badge_id === electionBadgeId ? a + 1 : a;
-        },
-        0);
-
-    const badgeLink = makeURL(electionBadgeName, `${siteUrl}/help/badges/${electionBadgeId}`);
-
-    const basePrefix = `Based on the number of ${badgeLink} badges awarded`;
-    const postfix = `moderator${pluralize(numVoted)} (out of ${numMods}) ha${pluralize(numVoted, "ve", "s")} voted in the election`;
-
-    const format = partialRight(formatNumber, [3]);
-
-    return `${basePrefix}, ${format(numVoted)} ${postfix}.`;
 };
 
 /**

@@ -10,7 +10,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, getVotingReport, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -56,7 +56,7 @@ import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElec
 import { sayQuestionnaireQuestion } from "./messages/questionnaire.js";
 import { sayCandidateScoreFormula, sayCandidateScoreLeaderboard } from "./messages/score.js";
 import { sayAboutBallotFile, sayAboutSTV } from "./messages/stv.js";
-import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowManyModsVoted, sayHowToSaveVotes, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
+import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowToSaveVotes, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -95,6 +95,8 @@ import {
  * ) => string | Promise<string>} MessageBuilder
  *
  * @typedef {import("./env.js").BotEnvironment} BotEnvironment
+ *
+ * @typedef {import("./commands/commands.js").CommandArguments} CommandArguments
  */
 
 (async () => {
@@ -390,7 +392,7 @@ import {
         // TODO: check if not posted yet
         const metaAnnouncements = await searchChat(config, config.chatDomain, "moderator election results", config.chatRoomId);
         if (election.isEnded() && config.canAnnounceMetaPost && !metaAnnouncements.length) {
-            await postMetaAnnouncement(config, election, room, "");
+            await postMetaAnnouncement({ config, election, room, content: "" });
             console.log(`INIT - posted meta announcement`);
         }
 
@@ -426,15 +428,15 @@ import {
             "get throttle": ["get throttle value (secs)", getThrottleCommand, /get throttle/, AccessLevel.privileged],
             "get time": ["gets current UTC time", getTimeCommand, /^(?:get time|time)$/, AccessLevel.privileged],
             "greet": ["makes the bot welcome everyone", greetCommand, /^(?:greet|welcome)/, AccessLevel.privileged],
-            "ignore": ["stop bot from responding to a user", ignoreUser, /^ignore \d+/, AccessLevel.privileged],
-            "impersonate": ["impersonates a user", impersonateUser, /^impersonate \d+/, AccessLevel.dev],
+            "ignore": ["stop bot from responding to a user", ignoreUserCommand, /^ignore \d+/, AccessLevel.privileged],
+            "impersonate": ["impersonates a user", impersonateUserCommand, /^impersonate \d+/, AccessLevel.dev],
             "join room": ["joins a given room", joinRoomCommand, /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, AccessLevel.dev],
             "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, /leave(?:\s+this)?\s+room/, AccessLevel.dev],
             "mute": ["stop bot from responding for N mins", muteCommand, /^(?:mute|timeout|sleep)/, AccessLevel.privileged],
-            "mods voted": ["posts how many mods voted", sayHowManyModsVoted, /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, AccessLevel.privileged],
+            "mods voted": ["posts how many mods voted", getModsVotedCommand, /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, AccessLevel.privileged],
             "post meta": ["posts an official Meta announcement", postMetaAnnouncement, /^post meta(?:\s+announcement)?/, AccessLevel.privileged],
             "rm_election": ["resets the current election", resetElection, /^reset election/, AccessLevel.dev],
-            "restart server": ["restarts the server", restartDashboard, /^restart\s+server/, AccessLevel.dev],
+            "restart server": ["restarts the server", restartServerCommand, /^restart\s+server/, AccessLevel.dev],
             "say": ["bot echoes something", echoSomething, /say/, AccessLevel.privileged],
             "set access": ["sets user's access level", setAccessCommand, /set (?:access|level)/, AccessLevel.dev],
             "set throttle": ["set throttle value (secs)", setThrottleCommand, /set throttle/, AccessLevel.privileged],
@@ -442,7 +444,7 @@ import {
             "timetravel": ["sends bot back in time to another phase", timetravelCommand, /88 miles|delorean|timetravel/, AccessLevel.dev],
             "unmute": ["allows the bot to respond", unmuteCommand, /unmute|clear timeout/, AccessLevel.privileged],
             "verbose": ["switches verbose mode on/off", switchMode, /^(?:verbose|chatty)/, AccessLevel.dev],
-            "voter report": ["posts a per-day report on voters", getVotingReport, /^(?:post\s+)?voter\s+report/, AccessLevel.privileged],
+            "voter report": ["posts a per-day report on voters", getVoterReportCommand, /^(?:post\s+)?voter\s+report/, AccessLevel.privileged],
             "whois": ["retrieve mods from another site", listSiteModerators, /^whois/, AccessLevel.privileged]
         });
 
@@ -570,46 +572,23 @@ import {
             if (isPrivileged && botMentioned) {
                 let responseText = "";
 
-                const commandArgs = {
-                    "alive": [config],
-                    "change election": [config, election, preparedMessage],
-                    "say": [config, room, decodedMessage],
-                    "greet": [config, elections, election, me, room, preparedMessage],
-                    "get time": [election],
-                    "get cron": [announcement],
-                    "test cron": [announcement],
-                    "get throttle": [config],
-                    "set throttle": [preparedMessage, config],
-                    "chatroom": [election],
-                    "get rooms": [config, client],
-                    "leave room": [client, room, preparedMessage],
-                    "mute": [config, room, preparedMessage],
-                    "unmute": [config, room],
-                    "coffee": [config, decodedMessage, user],
-                    "timetravel": [config, election, preparedMessage],
-                    "fun": [config, preparedMessage],
-                    "debug": [config, preparedMessage],
-                    "verbose": [config, preparedMessage],
-                    "die": [room],
-                    "set access": [config, user, preparedMessage],
-                    "announce nominees": [config, election, announcement],
-                    "announce winners": [config, election, room, announcement],
-                    "feedback": [config],
-                    "list moderators": [config, preparedMessage, entities],
-                    "reset election": [config, election],
-                    "ignore": [config, room, preparedMessage],
-                    "impersonate": [config, preparedMessage],
-                    "post meta": [config, election, room, preparedMessage],
-                    "get modes": [config],
-                    "mods voted": [config, elections, election, preparedMessage],
-                    "join room": [config, client, preparedMessage],
-                    "restart server": [config, dashboardApp],
-                    "voter report": [config, election, preparedMessage]
+                /** @type {CommandArguments} */
+                const commandArguments = {
+                    announcement,
+                    app: dashboardApp,
+                    bot: me,
+                    client,
+                    config,
+                    content: preparedMessage,
+                    election,
+                    elections,
+                    room,
+                    user
                 };
 
                 const command = commander.findMatching(preparedMessage);
                 if (command && commander.canRun(command)) {
-                    responseText ||= await command.run(preparedMessage, ...commandArgs[command.name] || []);
+                    responseText ||= await command.run(commandArguments);
                 }
 
                 /* Note:

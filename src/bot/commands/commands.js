@@ -1,5 +1,13 @@
+import entities from "html-entities";
+import { partialRight } from "ramda";
 import * as ServerUtils from "../../server/utils.js";
-import { getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
+import { flat } from "../../shared/utils/arrays.js";
+import { formatAsChatCode } from "../../shared/utils/chat.js";
+import { dateToUtcTimestamp, getMilliseconds } from "../../shared/utils/dates.js";
+import { matchISO8601, matchNumber } from "../../shared/utils/expressions.js";
+import { mergeMaps } from "../../shared/utils/maps.js";
+import { formatNumber } from "../../shared/utils/strings.js";
+import { getBadges, getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election, { getSiteElections, getVotingGraph } from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
 import { sayUptime } from "../messages/metadata.js";
@@ -7,11 +15,6 @@ import { sayOtherSiteMods } from "../messages/moderators.js";
 import { sendMessage } from "../queue.js";
 import { RandomArray } from "../random.js";
 import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
-import { flat } from "../../shared/utils/arrays.js";
-import { formatAsChatCode } from "../../shared/utils/chat.js";
-import { dateToUtcTimestamp, getMilliseconds } from "../../shared/utils/dates.js";
-import { matchISO8601, matchNumber } from "../../shared/utils/expressions.js";
-import { mergeMaps } from "../../shared/utils/maps.js";
 
 /**
  * @typedef {import("../announcement").default} Announcement
@@ -24,16 +27,29 @@ import { mergeMaps } from "../../shared/utils/maps.js";
  * @typedef {import("../index").UserProfile} UserProfile
  * @typedef {import("chatexchange/dist/User").default} ChatUser
  * @typedef {import("./user").User} User
+ *
+ * @typedef {{
+ *  announcement: Announcement,
+ *  app: ExpressApp,
+ *  bot: ChatUser,
+ *  client: Client,
+ *  config: BotConfig,
+ *  content: string,
+ *  election: Election,
+ *  elections: Map<number, Election>,
+ *  room: Room,
+ *  user: User
+ * }} CommandArguments
  */
 
 /**
  * @summary changes user access level (can only de-elevate)
- * @param {BotConfig} config bot config
- * @param {UserProfile} user message author
- * @param {string} content incoming message content
+ * @param {Pick<CommandArguments, "config"|"content"|"user">} args command arguments
  * @returns {string}
  */
-export const setAccessCommand = (config, user, content) => {
+export const setAccessCommand = (args) => {
+    const { config, content, user } = args;
+
     const [, userId, level] = /set (?:access|level)\s+(\d+|me)\s+(user|admin|dev)/.exec(content) || [];
     if (!level) return "Please provide access level";
 
@@ -62,12 +78,12 @@ export const setAccessCommand = (config, user, content) => {
 
 /**
  * @summary changes internal bot clock to a given day
- * @param {BotConfig} config bot config
- * @param {Election} election current election instance
- * @param {string} content incoming message content
+ * @param {Pick<CommandArguments, "config"|"content"|"election">} args command arguments
  * @returns {string}
  */
-export const timetravelCommand = (config, election, content) => {
+export const timetravelCommand = (args) => {
+    const { config, election, content } = args;
+
     const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
 
     if (!today && (!yyyy || !MM || !dd)) return "Sorry, Doc! Invalid coordinates";
@@ -102,11 +118,12 @@ export const timetravelCommand = (config, election, content) => {
 
 /**
  * @summary sets message throttle (in seconds)
- * @param {string} content incoming message content
- * @param {BotConfig} config bot config
+ * @param {Pick<CommandArguments, "config"|"content">} args command arguments
  * @returns {string}
  */
-export const setThrottleCommand = (content, config) => {
+export const setThrottleCommand = (args) => {
+    const { config, content } = args;
+
     const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
     const newThrottle = +match;
 
@@ -122,10 +139,11 @@ export const setThrottleCommand = (content, config) => {
 
 /**
  * @summary pings the bot for uptime
- * @param {BotConfig} config bot config
+ * @param {Pick<CommandArguments, "config"> & Partial<CommandArguments>} args command arguments
  * @returns {string}
  */
-export const isAliveCommand = (config) => {
+export const isAliveCommand = (args) => {
+    const { config } = args;
 
     const { debug, verbose, scriptInitDate, scriptHostname, debugOrVerbose } = config;
 
@@ -143,12 +161,11 @@ export const isAliveCommand = (config) => {
 
 /**
  * @summary manually announces winners
- * @param {BotConfig} config bot config
- * @param {Election} election current election instance
- * @param {Announcement} announcement instance of ScheduledAnnouncement
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
-export const announceNominees = async (config, election, announcement) => {
+export const announceNominees = async (args) => {
+    const { announcement, config, election } = args;
     await election.scrapeElection(config);
     const status = await announcement.announceNewNominees();
     return status ? "" : "There are no nominees yet.";
@@ -156,13 +173,11 @@ export const announceNominees = async (config, election, announcement) => {
 
 /**
  * @summary manually announces winners
- * @param {BotConfig} config bot config
- * @param {Election} election current election instance
- * @param {Room} room room to announce in
- * @param {Announcement} announcement instance of ScheduledAnnouncement
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
-export const announceWinners = async (config, election, room, announcement) => {
+export const announceWinners = async (args) => {
+    const { announcement, config, election, room } = args;
     await election.scrapeElection(config);
     const status = await announcement.announceWinners(room, election);
     return status ? "" : "There are no winners yet.";
@@ -170,12 +185,12 @@ export const announceWinners = async (config, election, room, announcement) => {
 
 /**
  * @summary lists site moderators
- * @param {BotConfig} config bot config
- * @param {string} content incoming message content
- * @param {import("html-entities")} entities
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
-export const listSiteModerators = async (config, content, entities) => {
+export const listSiteModerators = async (args) => {
+    const { config, content } = args;
+
     const [, siteText] = /whois ([\w.-]+) mod(?:erator)?s/.exec(content) || [];
 
     // Compile list of aliases and common misspellings here
@@ -235,12 +250,12 @@ export const listSiteModerators = async (config, content, entities) => {
 
 /**
  * TODO: account for cross-domain switches
- * @param {BotConfig} config bot config
- * @param {Election} election current election instance
- * @param {string} content message content
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
-export const changeElection = async (config, election, content) => {
+export const changeElection = async (args) => {
+    const { config, election, content } = args;
+
     const targetUrl = content.replace(/.*?(?=https:\/\/)/, "");
 
     const valid = election.validElectionUrl(targetUrl);
@@ -290,11 +305,12 @@ export const changeElection = async (config, election, content) => {
 
 /**
  * @summary soft-resets the current election
- * @param {BotConfig} config bot config
- * @param {Election} election current election instance
+ * @param {Pick<CommandArguments, "config"|"election">} args command arguments
  * @returns {Promise<string>}
  */
-export const resetElection = async (config, election) => {
+export const resetElection = async (args) => {
+    const { config, election } = args;
+
     election.reset();
 
     await election.scrapeElection(config);
@@ -306,13 +322,14 @@ export const resetElection = async (config, election) => {
 
 /**
  * @summary ignores messages from a user
- * @param {BotConfig} _config bot config
- * @param {Room} room current room
- * @param {string} content message content
+ * @param {CommandArguments} args command arguments
+ * @returns {string}
  */
-export const ignoreUser = (_config, room, content) => {
+export const ignoreUserCommand = (args) => {
+    const { content, room } = args;
+
     const userId = matchNumber(/\s+(\d+)$/, content);
-    if (!userId) return;
+    if (!userId) return "";
 
     room.block(userId);
 
@@ -321,11 +338,11 @@ export const ignoreUser = (_config, room, content) => {
 
 /**
  * @summary impersonates a user
- * @param {BotConfig} config bot config
- * @param {string} content message content
+ * @param {CommandArguments} args command arguments
  * @returns {string}
  */
-export const impersonateUser = (config, content) => {
+export const impersonateUserCommand = (args) => {
+    const { config, content } = args;
     const userId = matchNumber(/\s+(\d+)$/, content);
     config.impersonatingUserId = userId;
     return userId ? `messages are now considered to be from ${userId}` : "not impersonating anyone";
@@ -333,11 +350,11 @@ export const impersonateUser = (config, content) => {
 
 /**
  * @summary switches bot mode
- * @param {BotConfig} config bot config
- * @param {string} content message content
+ * @param {CommandArguments} args command arguments
  * @returns {string}
  */
-export const switchMode = (config, content) => {
+export const switchMode = (args) => {
+    const { config, content } = args;
     const [, mode = "debug", state = "on"] = /(debug|verbose|fun)(?:\s+mode)?\s+(on|off)/.exec(content) || [];
     config[mode] = state === "on";
     return `${capitalize(mode)} mode ${state}`;
@@ -345,11 +362,11 @@ export const switchMode = (config, content) => {
 
 /**
  * @summary gets a report on the current bot modes
- * @param {BotConfig} config bot config
+ * @param {Pick<CommandArguments, "config">} args command arguments
  * @returns {string}
  */
-export const getModeReport = (config) => {
-    const { debug, verbose, fun } = config;
+export const getModeReport = (args) => {
+    const { debug, verbose, fun } = args.config;
     return `    | Mode    | State |
     | ------- | ----- |
     | Debug   | ${debug ? "on " : "off"}   |
@@ -359,15 +376,12 @@ export const getModeReport = (config) => {
 
 /**
  * @summary makes the bot greet the room
- * @param {BotConfig} config bot config
- * @param {Map<number, Election>} elections site elections
- * @param {Election} election current election instance
- * @param {ChatUser} botUser current bot user
- * @param {Room} room current room
- * @param {string} content message content
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<void>}
  */
-export const greetCommand = async (config, elections, election, botUser, room, content) => {
+export const greetCommand = async (args) => {
+    const { config, elections, election, bot, room, content } = args;
+
     const [, type = "idle"] = /\b(idle|busy)\b/.exec(content) || [];
 
     /** @type {Record<"idle"|"busy", (c: BotConfig, es:Map<number, Election>, e:Election, ub:ChatUser, r:Room) => Promise<void>>} */
@@ -376,18 +390,18 @@ export const greetCommand = async (config, elections, election, botUser, room, c
         busy: sayBusyGreeting
     };
 
-    await greetingMap[type]?.(config, elections, election, botUser, room);
+    await greetingMap[type]?.(config, elections, election, bot, room);
 
     config.activityCounter = 0;
 };
 
 /**
- * @summary
- * @param {BotConfig} config bot config
+ * @summary asks users of the {@link Room} to give feedback
+ * @param {Pick<CommandArguments, "config">} args command arguments
  * @returns {string}
  */
-export const sayFeedback = (config) => {
-    const { feedbackUrl, repoUrl } = config;
+export const sayFeedback = (args) => {
+    const { feedbackUrl, repoUrl } = args.config;
 
     const repoIssueUrl = `${repoUrl}/issues/new?labels=feature&template=feature_request.md`;
 
@@ -411,13 +425,12 @@ export const sayFeedback = (config) => {
 
 /**
  * @summary posts a meta announcement in the room
- * @param {BotConfig} config bot config
- * @param {Election} election current election instance
- * @param {Room} room current room
- * @param {string} content message content
+ * @param {Pick<CommandArguments, "config"|"content"|"election"|"room">} args command arguments
  * @returns {Promise<void>}
  */
-export const postMetaAnnouncement = async (config, election, room, content) => {
+export const postMetaAnnouncement = async (args) => {
+    const { config, content, election, room } = args;
+
     const { apiSlug, dateEnded } = election;
 
     const { api_site_parameter } = await getMetaSite(config, apiSlug) || {};
@@ -468,33 +481,33 @@ export const postWinnersAnnouncement = async (config, room, election, announceme
 
 /**
  * @summary makes the bot echo a message
- * @param {BotConfig} config bot config
- * @param {Room} room current room
- * @param {string} content message content
+ * @param {Pick<CommandArguments, "config"|"room"|"content">} args command arguments
  * @returns {Promise<void>}
  */
-export const echoSomething = async (config, room, content) => {
+export const echoSomething = async (args) => {
+    const { config, room, content } = args;
     const normalized = content.replace(/^@\S+\s+say /i, '');
     await sendMessage(config, room, normalized, null, true);
 };
 
 /**
  * @summary gets the current throttle value
- * @param {BotConfig} config bot config
+ * @param {Pick<CommandArguments, "config">} args command arguments
  * @returns {string}
  */
-export const getThrottleCommand = (config) => {
-    const { throttleSecs } = config;
+export const getThrottleCommand = (args) => {
+    const { throttleSecs } = args.config;
     return `Reply throttle is currently ${throttleSecs} seconds. Use \`set throttle X\` (seconds) to set a new value.`;
 };
 
 /**
  * @summary lists rooms the bot is currently in
- * @param {BotConfig} config bot config
- * @param {Client} client ChatExchange package client
+ * @param {CommandArguments} args command arguments
  * @returns {string}
  */
-export const listRoomsCommand = (config, client) => {
+export const listRoomsCommand = (args) => {
+    const { config, client } = args;
+
     const rooms = client.getRoomsAsArray();
 
     const roomURLs = rooms.map(({ id }) => `${makeURL(id.toString(),
@@ -508,12 +521,12 @@ export const listRoomsCommand = (config, client) => {
 
 /**
  * @summary forces the bot to join a chat room
- * @param {BotConfig} config bot config
- * @param {Client} client ChatExchange package client
- * @param {string} content message content
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
-export const joinRoomCommand = async (config, client, content) => {
+export const joinRoomCommand = async (args) => {
+    const { client, config, content } = args;
+
     const [, preId, postId] = /(\d+|)\s+room(?:\s+(\d+)|)/.exec(content) || [];
     const roomId = preId || postId;
     if (!roomId) {
@@ -528,12 +541,12 @@ export const joinRoomCommand = async (config, client, content) => {
 
 /**
  * @summary forces the bot to leave a chat room
- * @param {Client} client ChatExchange package client
- * @param {Room} room current room
- * @param {string} content message content
+ * @param {CommandArguments} args command arguments=
  * @returns {Promise<string>}
  */
-export const leaveRoomCommand = async (client, room, content) => {
+export const leaveRoomCommand = async (args) => {
+    const { client, room, content } = args;
+
     if (/(?:this|current)\s+room/.test(content)) {
         await room.leave();
         return "";
@@ -546,11 +559,12 @@ export const leaveRoomCommand = async (client, room, content) => {
 
 /**
  * @summary forces the bot to shut down
- * @param {Room} room current room
+ * @param {Pick<CommandArguments, "room">} args command arguments
+ * @returns {string}
  */
-export const dieCommand = async (room) => {
+export const dieCommand = (args) => {
     wait(3).then(() => {
-        room.leave();
+        args.room.leave();
         process.exit(0);
     });
     return "initiating shutdown sequence";
@@ -558,11 +572,11 @@ export const dieCommand = async (room) => {
 
 /**
  * @summary gets a list of currently scheduled announcements
- * @param {Announcement} announcement announcement controller
+ * @param {Pick<CommandArguments, "announcement">} args command arguments
  * @returns {string}
  */
-export const getCronCommand = (announcement) => {
-    const { schedules } = announcement;
+export const getCronCommand = (args) => {
+    const { schedules } = args.announcement;
 
     const entries = Object.entries(schedules);
 
@@ -584,31 +598,31 @@ ${lines.join("\n")}`;
 
 /**
  * @summary gets a list of currently scheduled announcements
- * @param {Announcement} announcement announcement controller
+ * @param {Pick<CommandArguments, "announcement">} args command arguments
  * @returns {string}
  */
-export const scheduleTestCronCommand = (announcement) => {
-    const schedule = announcement.initTest();
+export const scheduleTestCronCommand = (args) => {
+    const schedule = args.announcement.initTest();
     return `setting up test cron job: ${schedule}`;
 };
 
 /**
  * @summary gets the current election chat room URL
- * @param {Election} election current election
+ * @param {Pick<CommandArguments, "election">} args command arguments
  * @returns {string}
  */
-export const getElectionRoomURL = (election) => {
-    const { chatUrl } = election;
+export const getElectionRoomURL = (args) => {
+    const { chatUrl } = args.election;
     return `The election chat room is at ${chatUrl || "the platform 9 3/4"}`;
 };
 
 /**
  * @summary gets current time in UTC
- * @param {Election} election current election
+ * @param {Pick<CommandArguments, "election">} args command arguments
  * @returns {string}
  */
-export const getTimeCommand = (election) => {
-    const { phase, dateElection } = election;
+export const getTimeCommand = (args) => {
+    const { phase, dateElection } = args.election;
 
     const current = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
     if (!['election', 'ended', 'cancelled'].includes(phase || "")) {
@@ -620,12 +634,12 @@ export const getTimeCommand = (election) => {
 
 /**
  * @summary brews coffee for a user
- * @param {BotConfig} config bot config
- * @param {string} content message content
- * @param {User} user user messaging the bot
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
-export const brewCoffeeCommand = async (config, content, { name = "you" }) => {
+export const brewCoffeeCommand = async (args) => {
+    const { config, content, user: { name = "you" } } = args;
+
     const [, otherUser = ""] = / for ((?:\w+\s?){1,2})/i.exec(content) || [];
 
     const coffee = /** @type {{ [type:string]: { title: string }[] }} */ (await fetchUrl(
@@ -640,12 +654,12 @@ export const brewCoffeeCommand = async (config, content, { name = "you" }) => {
 
 /**
  * @summary mutes the bot temporarily
- * @param {BotConfig} config bot config
- * @param {Room} room current room
- * @param {string} content message content
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<void>}
  */
-export const muteCommand = async (config, room, content) => {
+export const muteCommand = async (args) => {
+    const { config, content, room } = args;
+
     const { throttleSecs } = config;
 
     const [, num = "5"] = /\s+(\d+)$/.exec(content) || [];
@@ -659,11 +673,11 @@ export const muteCommand = async (config, room, content) => {
 
 /**
  * @summary unmutes the bot
- * @param {BotConfig} config bot config
- * @param {Room} room current room
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<void>}
  */
-export const unmuteCommand = async (config, room) => {
+export const unmuteCommand = async (args) => {
+    const { config, room } = args;
     const response = `I can speak freely again.`;
     await sendMessage(config, room, response, null, true);
     config.updateLastMessage(response);
@@ -671,11 +685,12 @@ export const unmuteCommand = async (config, room) => {
 
 /**
  * @summary restarts the dashboard server without restarting the bot
- * @param {BotConfig} config bot config
- * @param {ExpressApp} app Express app serving the dashboard
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
-export const restartDashboard = async (config, app) => {
+export const restartServerCommand = async (args) => {
+    const { config, app } = args;
+
     const { scriptHostname } = config;
 
     const hostUrl = scriptHostname ? makeURL("the server", scriptHostname) : "the server";
@@ -702,13 +717,13 @@ export const restartDashboard = async (config, app) => {
 };
 
 /**
- * @summary
- * @param {BotConfig} config bot configuration
- * @param {Election} election current election instance
- * @param {string} content message content
+ * @summary gets a daily voting report
+ * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
-export const getVotingReport = async (config, election, content) => {
+export const getVoterReportCommand = async (args) => {
+    const { content, config, election } = args;
+
     const { dateEnded } = election;
 
     const electionBadgeName = "Constituent";
@@ -779,4 +794,43 @@ export const getVotingReport = async (config, election, content) => {
     const separator = `| ${"-".repeat(lAddBase - 3)} | ${"-".repeat(rAddBase - 4)} |`;
 
     return formatAsChatCode([`${lHeader}${rHeader}`, separator, ...lines]);
+};
+
+/**
+ * @summary builds a response to a query on how many mods voted in the election
+ * @param {CommandArguments} args command arguments
+ * @returns {Promise<string>}
+ */
+export const getModsVotedCommand = async (args) => {
+    const { config, election } = args;
+
+    const { apiSlug, moderators, siteUrl, dateElection, dateEnded } = election;
+
+    const modIds = [...moderators.keys()];
+    const { length: numMods } = modIds;
+
+    const modBadges = await getBadges(config, modIds, apiSlug, {
+        from: dateElection,
+        to: dateEnded,
+        type: "named"
+    });
+
+    const electionBadgeName = "Constituent";
+    const electionBadgeId = election.getBadgeId(electionBadgeName);
+
+    const numVoted = modBadges.reduce(
+        (a, b) => {
+            b.badge_id === electionBadgeId && console.log(b);
+            return b.badge_id === electionBadgeId ? a + 1 : a;
+        },
+        0);
+
+    const badgeLink = makeURL(electionBadgeName, `${siteUrl}/help/badges/${electionBadgeId}`);
+
+    const basePrefix = `Based on the number of ${badgeLink} badges awarded`;
+    const postfix = `moderator${pluralize(numVoted)} (out of ${numMods}) ha${pluralize(numVoted, "ve", "s")} voted in the election`;
+
+    const format = partialRight(formatNumber, [3]);
+
+    return `${basePrefix}, ${format(numVoted)} ${postfix}.`;
 };

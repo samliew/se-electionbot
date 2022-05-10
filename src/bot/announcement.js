@@ -1,10 +1,10 @@
 import cron from "node-cron";
+import { dateToUtcTimestamp } from "../shared/utils/dates.js";
+import { filterMap, mapMap } from "../shared/utils/maps.js";
 import { sayFeedback } from "./commands/commands.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
 import { makeURL, pluralize, wait } from "./utils.js";
-import { dateToUtcTimestamp } from "../shared/utils/dates.js";
-import { filterMap, mapMap } from "../shared/utils/maps.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -225,7 +225,7 @@ export default class ScheduledAnnouncement {
         // Will always be true because repoUrl has a default value, for now
         if (config.feedbackUrl || config.repoUrl) {
             await wait(60);
-            await room.sendMessage(sayFeedback(config));
+            await room.sendMessage(sayFeedback({ config }));
         }
 
         return true;

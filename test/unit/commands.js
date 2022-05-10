@@ -8,7 +8,7 @@ import Election from "../../src/bot/election.js";
 import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
-import { getMockUserProfile } from "../mocks/user.js";
+import { getMockCommandUser, getMockUserProfile } from "../mocks/user.js";
 
 /**
  * @typedef {import("../../src/bot/election.js").ModeratorUser} ModeratorUser
@@ -152,7 +152,7 @@ describe('Commands', () => {
                 const config = getMockBotConfig();
                 const election = new Election("https://stackoverflow.com/election/12");
 
-                const response = timetravelCommand(config, election, "take me to the moon");
+                const response = timetravelCommand({ config, election, content: "take me to the moon" });
                 expect(response).to.match(/invalid/i);
             });
 
@@ -178,7 +178,7 @@ describe('Commands', () => {
 
                 const isoDate = futureDate.toISOString().slice(0, 10);
 
-                const response = timetravelCommand(config, election, `timetravel to ${isoDate}`);
+                const response = timetravelCommand({ config, election, content: `timetravel to ${isoDate}` });
                 expect(response).to.match(/phase.+?ended/);
 
                 expect(election.phase).to.equal("ended");
@@ -187,7 +187,7 @@ describe('Commands', () => {
 
                 election.dateEnded = "";
 
-                const noDate = timetravelCommand(config, election, `timetravel to ${isoDate}`);
+                const noDate = timetravelCommand({ config, election, content: `timetravel to ${isoDate}` });
                 expect(noDate).to.contain("no phase");
             });
 
@@ -196,32 +196,32 @@ describe('Commands', () => {
         describe(setAccessCommand.name, () => {
 
             it('should fail if access level is not valid', () => {
-                const user = getMockUserProfile();
+                const user = getMockCommandUser();
                 const config = getMockBotConfig();
                 config.adminIds.clear();
 
-                const response = setAccessCommand(config, user, "make me the Emperor of Bots");
+                const response = setAccessCommand({ config, user, content: "make me the Emperor of Bots" });
                 expect(response).to.contain("provide access");
                 expect(config.adminIds).to.be.empty;
             });
 
             it('should deelevate privileges correctly', () => {
-                const user = getMockUserProfile();
+                const user = getMockCommandUser();
                 const config = getMockBotConfig({ adminIds: new Set([user.id]) });
 
-                const response = setAccessCommand(config, user, `set access ${user.id} user`);
+                const response = setAccessCommand({ config, user, content: `set access ${user.id} user` });
                 expect(response).to.match(/changed access/i);
                 expect(config.adminIds).to.be.empty;
             });
 
             it('should allow special value "me"', () => {
-                const user = getMockUserProfile();
+                const user = getMockCommandUser();
                 const config = getMockBotConfig();
                 config.adminIds.clear();
                 config.devIds.clear();
                 config.devIds.add(user.id);
 
-                const response = setAccessCommand(config, user, `set access me admin`);
+                const response = setAccessCommand({ config, user, content: `set access me admin` });
                 expect(response).to.match(/changed access/i);
                 expect(config.devIds).to.be.empty;
                 expect(config.adminIds).to.include(user.id);
@@ -236,7 +236,10 @@ describe('Commands', () => {
 
                 const config = getMockBotConfig({ throttleSecs });
 
-                const status = setThrottleCommand("oupsy-daisy, forgot the throttle", config);
+                const status = setThrottleCommand({
+                    config,
+                    content: "oupsy-daisy, forgot the throttle",
+                });
 
                 expect(status).to.contain("invalid");
                 expect(config.throttleSecs).to.equal(5);
@@ -247,7 +250,10 @@ describe('Commands', () => {
 
                 const config = getMockBotConfig({ throttleSecs });
 
-                const status = setThrottleCommand("set throttle to 10", config);
+                const status = setThrottleCommand({
+                    config,
+                    content: "set throttle to 10",
+                });
 
                 expect(status).to.contain("throttle set");
                 expect(config.throttleSecs).to.equal(10);
@@ -266,33 +272,35 @@ describe('Commands', () => {
 
                 hostStub.get(sinon.stub().onFirstCall().returns(void 0).onSecondCall().returns(mockHost));
 
-                const notHosted = isAliveCommand(config);
+                const args = { config };
+
+                const notHosted = isAliveCommand(args);
                 expect(notHosted).to.contain("planet Earth");
 
-                const hosted = isAliveCommand(config);
+                const hosted = isAliveCommand(args);
                 expect(hosted).to.contain(mockHost);
 
                 const dateStub = sinon.stub(config, "scriptInitDate");
                 dateStub.get(() => mockStart);
 
-                const started = isAliveCommand(config);
+                const started = isAliveCommand(args);
                 expect(started).to.contain(dateToUtcTimestamp(mockStart));
                 expect(started).to.match(/\b\d+ seconds of uptime/);
 
                 config.flags.debug = true;
-                const debug = isAliveCommand(config);
+                const debug = isAliveCommand(args);
                 expect(debug).to.contain("debug mode");
 
                 config.flags.debug = false;
-                const noDebug = isAliveCommand(config);
+                const noDebug = isAliveCommand(args);
                 expect(noDebug).to.not.contain("debug mode");
 
                 config.flags.verbose = true;
-                const verbose = isAliveCommand(config);
+                const verbose = isAliveCommand(args);
                 expect(verbose).to.contain("verbose ");
 
                 config.flags.verbose = false;
-                const noVerbose = isAliveCommand(config);
+                const noVerbose = isAliveCommand(args);
                 expect(noVerbose).to.not.contain("verbose ");
             });
 
@@ -305,7 +313,7 @@ describe('Commands', () => {
 
                 election.pushHistory();
 
-                resetElection(getMockBotConfig(), election);
+                resetElection({ config: getMockBotConfig(), election });
 
                 expect(election.prev).to.be.null;
             });
@@ -317,7 +325,7 @@ describe('Commands', () => {
                 election.moderators.set(-1, /** @type {ModeratorUser} */({}));
                 election.phase = "primary";
 
-                resetElection(getMockBotConfig(), election);
+                resetElection({ config: getMockBotConfig(), election });
 
                 expect(election.numNominees).to.equal(0);
                 expect(election.numWinners).to.equal(0);
