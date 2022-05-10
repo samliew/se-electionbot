@@ -221,7 +221,7 @@ export default class Rescraper {
                 }
 
                 // Stay in room a while longer
-                await wait(config.electionAfterpartyMins * SEC_IN_MINUTE);
+                await wait(config.electionAfterpartyMins * SEC_IN_MINUTE * 1e3);
 
                 // Scale Heroku dynos to free (restarts app)
                 const heroku = new HerokuClient(config);
