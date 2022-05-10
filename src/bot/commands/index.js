@@ -180,22 +180,14 @@ export class CommandManager {
     }
 
     /**
-     * @summary gets a command that matches a regular expression
-     * @param {RegExp} regex
-     * @returns {Command|null}
+     * @summary finds a command only if text matches regex
+     * @param {string} text text to match against
+     * @returns {Command | null}
      */
-    getMatching(regex) {
-        const [, command] = Object.entries(this.commands).find(([name]) => regex.test(name)) || [];
-        return this.canRun(command) && command || null;
-    }
-
-    /**
-     * @summary runs a command that matches a regular expression
-     * @param {RegExp} regex
-     * @param {...any} args
-     */
-    runMatching(regex, ...args) {
-        return this.getMatching(regex)?.run(...args);
+    findMatching(text) {
+        return Object.values(this.commands).find(
+            ({ matches }) => matches?.test(text)
+        ) || null;
     }
 
     /**
