@@ -45,7 +45,7 @@ export class Command {
 
     /**
      * @summary runs the command
-     * @param {...Parameters<T>} args
+     * @param {Parameters<T>} args
      * @returns {ReturnType<T>}
      */
     run(...args) {
@@ -66,6 +66,15 @@ export class Command {
             access,
             matches
         });
+    }
+
+    /**
+     * @summary runs a command only if text matches its regex
+     * @param {string} text text to match against
+     * @param {Parameters<T>} args aguments to pass to the command
+     */
+    runIfMatches(text, ...args) {
+        return this.matches?.test(text) ? this.run(...args) : void 0;
     }
 }
 
