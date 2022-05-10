@@ -198,9 +198,8 @@ export class CommandManager {
      */
     runIfMatches(text, name, ...args) {
         const command = this.commands[name];
-        return this.canRun(command) && command?.matches?.test(text) ?
-            command?.run(...args) :
-            void 0;
+        if (!this.canRun(command)) return;
+        return command.runIfMatches(text, ...args);
     }
 
     /**
