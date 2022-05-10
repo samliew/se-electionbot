@@ -27,8 +27,8 @@ describe('Commands', () => {
 
                 const commander = new CommandManager(user);
                 commander.bulkAdd({
-                    build: ["builds something", () => void 0],
-                    test: ["tests something", () => true]
+                    build: ["builds something", () => void 0, void 0],
+                    test: ["tests something", () => true, void 0]
                 });
 
                 expect(commander.run("build")).to.be.undefined;
@@ -41,7 +41,12 @@ describe('Commands', () => {
                 const user = new User(getMockUserProfile());
 
                 const commander = new CommandManager(user);
-                commander.add("bark", "barks, what else?", () => "bark!", AccessLevel.all);
+                commander.add({
+                    name: "bark",
+                    description: "barks, what else?",
+                    handler: () => "bark!",
+                    access: AccessLevel.all
+                });
                 commander.alias("bark", ["say"]);
 
                 expect(commander.commands.bark.aliases).length(1);
@@ -52,8 +57,8 @@ describe('Commands', () => {
                 const user = new User(getMockUserProfile());
 
                 const commander = new CommandManager(user);
-                commander.add("♦", "gets a diamond", () => "♦");
-                commander.add("gold", "gets some gold", () => "#FFD700");
+                commander.add({ name: "♦", description: "gets a diamond", handler: () => "♦" });
+                commander.add({ name: "gold", description: "gets some gold", handler: () => "#FFD700" });
 
                 const goldAliases = ["aurum"];
                 const diamondAliases = ["diamond", "mod"];
@@ -76,8 +81,8 @@ describe('Commands', () => {
                 const user = new User(getMockUserProfile());
 
                 const commander = new CommandManager(user);
-                commander.add("alive", "pings the bot", () => "I am alive", AccessLevel.all);
-                commander.add("stop", "stops the bot", () => "stopping...", AccessLevel.dev);
+                commander.add({ name: "alive", description: "pings the bot", handler: () => "I am alive", access: AccessLevel.all });
+                commander.add({ name: "stop", description: "stops the bot", handler: () => "stopping...", access: AccessLevel.dev });
 
                 const aliveRegex = /\[alive\] pings the bot/;
                 const stopRegex = /\[stop\] stops the bot/;
@@ -97,7 +102,7 @@ describe('Commands', () => {
                 const user = new User(getMockUserProfile());
 
                 const commander = new CommandManager(user);
-                commander.add("bark", "barks, what else?", () => "bark!", AccessLevel.all);
+                commander.add({ name: "bark", description: "barks, what else?", handler: () => "bark!", access: AccessLevel.all });
                 commander.alias("bark", ["say"]);
 
                 const help = commander.help();
@@ -109,9 +114,9 @@ describe('Commands', () => {
             const user = new User(getMockUserProfile());
 
             const commander = new CommandManager(user);
-            commander.add("destroy", "Destroys the universe", () => "💥", AccessLevel.dev);
-            commander.add("restart", "Restarts the bot", () => true, AccessLevel.privileged);
-            commander.add("pet", "Pets the bot", () => "good bot! Who's a good bot?", AccessLevel.all);
+            commander.add({ name: "destroy", description: "Destroys the universe", handler: () => "💥", access: AccessLevel.dev });
+            commander.add({ name: "restart", description: "Restarts the bot", handler: () => true, access: AccessLevel.privileged });
+            commander.add({ name: "pet", description: "Pets the bot", handler: () => "good bot! Who's a good bot?", access: AccessLevel.all });
 
             it('should allow privileged commands for privileged users', () => {
                 user.access = AccessLevel.dev;

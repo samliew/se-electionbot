@@ -3,6 +3,10 @@ import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { startServer } from "../server/index.js";
+import { logActivity, logResponse } from "../shared/utils/bot.js";
+import { prepareMessageForMatching } from "../shared/utils/chat.js";
+import { matchNumber } from "../shared/utils/expressions.js";
+import { getOrInit, sortMap } from "../shared/utils/maps.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
@@ -60,10 +64,6 @@ import { makeCandidateScoreCalc } from "./score.js";
 import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
-import { logActivity, logResponse } from "../shared/utils/bot.js";
-import { prepareMessageForMatching } from "../shared/utils/chat.js";
-import { matchNumber } from "../shared/utils/expressions.js";
-import { getOrInit, sortMap } from "../shared/utils/maps.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -408,42 +408,42 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
 
         const commander = new CommandManager();
         commander.bulkAdd({
-            "alive": ["bot reports on its status", isAliveCommand, AccessLevel.privileged],
-            "announce nominees": ["makes the bot announce nominees", announceNominees, AccessLevel.privileged],
-            "announce winners": ["makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged],
-            "change election": ["switches current election", changeElection, AccessLevel.dev],
-            "chatroom": ["gets election chat room link", getElectionRoomURL, AccessLevel.dev],
-            "coffee": ["brews some coffee", brewCoffeeCommand, AccessLevel.privileged],
+            "alive": ["bot reports on its status", isAliveCommand, /^(?:alive|awake|ping|uptime)/, AccessLevel.privileged],
+            "announce nominees": ["makes the bot announce nominees", announceNominees, /^announce nominees/, AccessLevel.privileged],
+            "announce winners": ["makes the bot fetch and announce winners", announceWinners, /^announce winners/, AccessLevel.privileged],
+            "change election": ["switches current election", changeElection, /^(?:change|switch)\s+elections?/, AccessLevel.dev],
+            "chatroom": ["gets election chat room link", getElectionRoomURL, /chatroom/, AccessLevel.dev],
+            "coffee": ["brews some coffee", brewCoffeeCommand, /(?:brew|make).+coffee/, AccessLevel.privileged],
             // to reserve the keyword 'help' for normal users
-            "commands": ["Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged],
-            "debug": ["switches debugging on/off", switchMode, AccessLevel.dev],
-            "die": ["stops the bot in case of emergency", dieCommand, AccessLevel.privileged],
-            "feedback": ["bot says how to provide feedback", sayFeedback, AccessLevel.dev],
-            "fun": ["switches fun mode on/off", switchMode, AccessLevel.privileged],
-            "get cron": ["lists scheduled announcements", getCronCommand, AccessLevel.dev],
-            "get modes": ["gets the current state of modes", getModeReport, AccessLevel.dev],
-            "get rooms": ["get list of rooms where bot is in", listRoomsCommand, AccessLevel.dev],
-            "get throttle": ["get throttle value (secs)", getThrottleCommand, AccessLevel.privileged],
-            "get time": ["gets current UTC time", getTimeCommand, AccessLevel.privileged],
-            "greet": ["makes the bot welcome everyone", greetCommand, AccessLevel.privileged],
-            "ignore": ["stop bot from responding to a user", ignoreUser, AccessLevel.privileged],
-            "impersonate": ["impersonates a user", impersonateUser, AccessLevel.dev],
-            "join room": ["joins a given room", joinRoomCommand, AccessLevel.dev],
-            "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, AccessLevel.dev],
-            "mute": ["stop bot from responding for N mins", muteCommand, AccessLevel.privileged],
-            "mods voted": ["posts how many mods voted", sayHowManyModsVoted, AccessLevel.privileged],
-            "post meta": ["posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged],
-            "rm_election": ["resets the current election", resetElection, AccessLevel.dev],
-            "restart server": ["restarts the server", restartDashboard, AccessLevel.dev],
-            "say": ["bot echoes something", echoSomething, AccessLevel.privileged],
-            "set access": ["sets user's access level", setAccessCommand, AccessLevel.dev],
-            "set throttle": ["set throttle value (secs)", setThrottleCommand, AccessLevel.privileged],
-            "test cron": ["sets up a test cron job", scheduleTestCronCommand, AccessLevel.dev],
-            "timetravel": ["sends bot back in time to another phase", timetravelCommand, AccessLevel.dev],
-            "unmute": ["allows the bot to respond", unmuteCommand, AccessLevel.privileged],
-            "verbose": ["switches verbose mode on/off", switchMode, AccessLevel.dev],
-            "voter report": ["posts a per-day report on voters", getVotingReport, AccessLevel.privileged],
-            "whois": ["retrieve mods from another site", listSiteModerators, AccessLevel.privileged]
+            "commands": ["Prints usage info", () => commander.help("moderator commands (requires mention):"), /commands|usage/, AccessLevel.privileged],
+            "debug": ["switches debugging on/off", switchMode, /debug(?:ing)?/, AccessLevel.dev],
+            "die": ["stops the bot in case of emergency", dieCommand, /die|shutdown|turn off/, AccessLevel.privileged],
+            "feedback": ["bot says how to provide feedback", sayFeedback, /^feedback/, AccessLevel.dev],
+            "fun": ["switches fun mode on/off", switchMode, /fun/, AccessLevel.privileged],
+            "get cron": ["lists scheduled announcements", getCronCommand, /get cron/, AccessLevel.dev],
+            "get modes": ["gets the current state of modes", getModeReport, /^(?:get modes?\s+report|report\s+modes)/, AccessLevel.dev],
+            "get rooms": ["get list of rooms where bot is in", listRoomsCommand, /get rooms/, AccessLevel.dev],
+            "get throttle": ["get throttle value (secs)", getThrottleCommand, /get throttle/, AccessLevel.privileged],
+            "get time": ["gets current UTC time", getTimeCommand, /^(?:get time|time)$/, AccessLevel.privileged],
+            "greet": ["makes the bot welcome everyone", greetCommand, /^(?:greet|welcome)/, AccessLevel.privileged],
+            "ignore": ["stop bot from responding to a user", ignoreUser, /^ignore \d+/, AccessLevel.privileged],
+            "impersonate": ["impersonates a user", impersonateUser, /^impersonate \d+/, AccessLevel.dev],
+            "join room": ["joins a given room", joinRoomCommand, /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, AccessLevel.dev],
+            "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, /leave(?:\s+this)?\s+room/, AccessLevel.dev],
+            "mute": ["stop bot from responding for N mins", muteCommand, /^(?:mute|timeout|sleep)/, AccessLevel.privileged],
+            "mods voted": ["posts how many mods voted", sayHowManyModsVoted, /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, AccessLevel.privileged],
+            "post meta": ["posts an official Meta announcement", postMetaAnnouncement, /^post meta(?:\s+announcement)?/, AccessLevel.privileged],
+            "rm_election": ["resets the current election", resetElection, /^reset election/, AccessLevel.dev],
+            "restart server": ["restarts the server", restartDashboard, /^restart\s+server/, AccessLevel.dev],
+            "say": ["bot echoes something", echoSomething, /say/, AccessLevel.privileged],
+            "set access": ["sets user's access level", setAccessCommand, /set (?:access|level)/, AccessLevel.dev],
+            "set throttle": ["set throttle value (secs)", setThrottleCommand, /set throttle/, AccessLevel.privileged],
+            "test cron": ["sets up a test cron job", scheduleTestCronCommand, /test cron/, AccessLevel.dev],
+            "timetravel": ["sends bot back in time to another phase", timetravelCommand, /88 miles|delorean|timetravel/, AccessLevel.dev],
+            "unmute": ["allows the bot to respond", unmuteCommand, /unmute|clear timeout/, AccessLevel.privileged],
+            "verbose": ["switches verbose mode on/off", switchMode, /^(?:verbose|chatty)/, AccessLevel.dev],
+            "voter report": ["posts a per-day report on voters", getVotingReport, /^(?:post\s+)?voter\s+report/, AccessLevel.privileged],
+            "whois": ["retrieve mods from another site", listSiteModerators, /^whois/, AccessLevel.privileged]
         });
 
         commander.aliases({
@@ -570,48 +570,48 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
             if (isPrivileged && botMentioned) {
                 let responseText = "";
 
-                const matches = [
-                    ["commands", /commands|usage/],
-                    ["alive", /^(?:alive|awake|ping|uptime)/, config],
-                    ["change election", /^(?:change|switch)\s+elections?/, config, election, preparedMessage],
-                    ["say", /say/, config, room, decodedMessage],
-                    ["greet", /^(?:greet|welcome)/, config, elections, election, me, room, preparedMessage],
-                    ["get time", /^(?:get time|time)$/, election],
-                    ["get cron", /get cron/, announcement],
-                    ["test cron", /test cron/, announcement],
-                    ["get throttle", /get throttle/, config],
-                    ["set throttle", /set throttle/, preparedMessage, config],
-                    ["chatroom", /chatroom/, election],
-                    ["get rooms", /get rooms/, config, client],
-                    ["leave room", /leave(?:\s+this)?\s+room/, client, room, preparedMessage],
-                    ["mute", /^(?:mute|timeout|sleep)/, config, room, preparedMessage],
-                    ["unmute", /unmute|clear timeout/, config, room],
-                    ["coffee", /(?:brew|make).+coffee/, config, decodedMessage, user],
-                    ["timetravel", /88 miles|delorean|timetravel/, config, election, preparedMessage],
-                    ["fun", /fun/, config, preparedMessage],
-                    ["debug", /debug(?:ing)?/, config, preparedMessage],
-                    ["verbose", /^(?:verbose|chatty)/, config, preparedMessage],
-                    ["die", /die|shutdown|turn off/, room],
-                    ["set access", /set (?:access|level)/, config, user, preparedMessage],
-                    ["announce nominees", /^announce nominees/, config, election, announcement],
-                    ["announce winners", /^announce winners/, config, election, room, announcement],
-                    ["feedback", /^feedback/, config],
-                    ["list moderators", /^whois/, config, preparedMessage, entities],
-                    ["reset election", /^reset election/, config, election],
-                    ["ignore", /^ignore \d+/, config, room, preparedMessage],
-                    ["impersonate", /^impersonate \d+/, config, preparedMessage],
-                    ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, preparedMessage],
-                    ["get modes", /^(?:get modes?\s+report|report\s+modes)/, config],
-                    ["mods voted", /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, config, elections, election, preparedMessage],
-                    ["join room", /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, config, client, preparedMessage],
-                    ["restart server", /^restart\s+server/, config, dashboardApp],
-                    ["voter report", /^(?:post\s+)?voter\s+report/, config, election, preparedMessage]
+                const commandArgs = [
+                    ["commands"],
+                    ["alive", config],
+                    ["change election", config, election, preparedMessage],
+                    ["say", config, room, decodedMessage],
+                    ["greet", config, elections, election, me, room, preparedMessage],
+                    ["get time", election],
+                    ["get cron", announcement],
+                    ["test cron", announcement],
+                    ["get throttle", config],
+                    ["set throttle", preparedMessage, config],
+                    ["chatroom", election],
+                    ["get rooms", config, client],
+                    ["leave room", client, room, preparedMessage],
+                    ["mute", config, room, preparedMessage],
+                    ["unmute", config, room],
+                    ["coffee", config, decodedMessage, user],
+                    ["timetravel", config, election, preparedMessage],
+                    ["fun", config, preparedMessage],
+                    ["debug", config, preparedMessage],
+                    ["verbose", config, preparedMessage],
+                    ["die", room],
+                    ["set access", config, user, preparedMessage],
+                    ["announce nominees", config, election, announcement],
+                    ["announce winners", config, election, room, announcement],
+                    ["feedback", config],
+                    ["list moderators", config, preparedMessage, entities],
+                    ["reset election", config, election],
+                    ["ignore", config, room, preparedMessage],
+                    ["impersonate", config, preparedMessage],
+                    ["post meta", config, election, room, preparedMessage],
+                    ["get modes", config],
+                    ["mods voted", config, elections, election, preparedMessage],
+                    ["join room", config, client, preparedMessage],
+                    ["restart server", config, dashboardApp],
+                    ["voter report", config, election, preparedMessage]
                 ];
 
                 const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);
 
-                for (const [name, regex, ...args] of matches) {
-                    responseText ||= await boundRunIf(name, regex, ...args);
+                for (const [name, ...args] of commandArgs) {
+                    responseText ||= await boundRunIf(name, ...args);
                 }
 
                 /* Note:
