@@ -570,48 +570,46 @@ import {
             if (isPrivileged && botMentioned) {
                 let responseText = "";
 
-                const commandArgs = [
-                    ["commands"],
-                    ["alive", config],
-                    ["change election", config, election, preparedMessage],
-                    ["say", config, room, decodedMessage],
-                    ["greet", config, elections, election, me, room, preparedMessage],
-                    ["get time", election],
-                    ["get cron", announcement],
-                    ["test cron", announcement],
-                    ["get throttle", config],
-                    ["set throttle", preparedMessage, config],
-                    ["chatroom", election],
-                    ["get rooms", config, client],
-                    ["leave room", client, room, preparedMessage],
-                    ["mute", config, room, preparedMessage],
-                    ["unmute", config, room],
-                    ["coffee", config, decodedMessage, user],
-                    ["timetravel", config, election, preparedMessage],
-                    ["fun", config, preparedMessage],
-                    ["debug", config, preparedMessage],
-                    ["verbose", config, preparedMessage],
-                    ["die", room],
-                    ["set access", config, user, preparedMessage],
-                    ["announce nominees", config, election, announcement],
-                    ["announce winners", config, election, room, announcement],
-                    ["feedback", config],
-                    ["list moderators", config, preparedMessage, entities],
-                    ["reset election", config, election],
-                    ["ignore", config, room, preparedMessage],
-                    ["impersonate", config, preparedMessage],
-                    ["post meta", config, election, room, preparedMessage],
-                    ["get modes", config],
-                    ["mods voted", config, elections, election, preparedMessage],
-                    ["join room", config, client, preparedMessage],
-                    ["restart server", config, dashboardApp],
-                    ["voter report", config, election, preparedMessage]
-                ];
+                const commandArgs = {
+                    "alive": [config],
+                    "change election": [config, election, preparedMessage],
+                    "say": [config, room, decodedMessage],
+                    "greet": [config, elections, election, me, room, preparedMessage],
+                    "get time": [election],
+                    "get cron": [announcement],
+                    "test cron": [announcement],
+                    "get throttle": [config],
+                    "set throttle": [preparedMessage, config],
+                    "chatroom": [election],
+                    "get rooms": [config, client],
+                    "leave room": [client, room, preparedMessage],
+                    "mute": [config, room, preparedMessage],
+                    "unmute": [config, room],
+                    "coffee": [config, decodedMessage, user],
+                    "timetravel": [config, election, preparedMessage],
+                    "fun": [config, preparedMessage],
+                    "debug": [config, preparedMessage],
+                    "verbose": [config, preparedMessage],
+                    "die": [room],
+                    "set access": [config, user, preparedMessage],
+                    "announce nominees": [config, election, announcement],
+                    "announce winners": [config, election, room, announcement],
+                    "feedback": [config],
+                    "list moderators": [config, preparedMessage, entities],
+                    "reset election": [config, election],
+                    "ignore": [config, room, preparedMessage],
+                    "impersonate": [config, preparedMessage],
+                    "post meta": [config, election, room, preparedMessage],
+                    "get modes": [config],
+                    "mods voted": [config, elections, election, preparedMessage],
+                    "join room": [config, client, preparedMessage],
+                    "restart server": [config, dashboardApp],
+                    "voter report": [config, election, preparedMessage]
+                };
 
-                const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);
-
-                for (const [name, ...args] of commandArgs) {
-                    responseText ||= await boundRunIf(name, ...args);
+                const command = commander.findMatching(preparedMessage);
+                if (command && commander.canRun(command)) {
+                    responseText ||= await command.run(preparedMessage, ...commandArgs[command.name] || []);
                 }
 
                 /* Note:
