@@ -1,4 +1,5 @@
 import { AccessLevel } from "../../src/bot/commands/access.js";
+import { User } from "../../src/bot/commands/user.js";
 
 /**
  * @typedef {import("../../src/bot/index.js").UserProfile} UserProfile
@@ -57,4 +58,13 @@ export const getMockApiUser = (overrides = {}) => {
         user_type: "registered",
     };
     return Object.assign(defaults, overrides);
+};
+
+/**
+ * @summary factory for getting a mock bot user
+ * @param {Partial<UserProfile>} [overrides]
+ * @returns {User}
+ */
+export const getMockCommandUser = (overrides = {}) => {
+    return new User(getMockUserProfile(overrides));
 };
