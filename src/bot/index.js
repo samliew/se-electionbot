@@ -41,6 +41,7 @@ import {
     isLovingTheBot,
     isLovingTheBotFun,
     isSayingBotIsInsane,
+    isSayingHappyBirthday,
     isThankingTheBot
 } from "./guards.js";
 import { HerokuClient } from "./herokuClient.js";
@@ -49,7 +50,7 @@ import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sa
 import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
 import { sayCommonlyAskedQuestions, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
-import { sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
+import { sayHappyBirthday, sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
 import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayFormerMods, sayHowManyModsAreHere, sayWhatModsDo } from "./messages/moderators.js";
 import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElectionNotStartedYet, sayElectionSchedule, sayNextPhase } from "./messages/phases.js";
 import { sayQuestionnaireQuestion } from "./messages/questionnaire.js";
@@ -490,7 +491,8 @@ use defaults ${defaultChatNotSet}`
             [isAskedAboutElectionPhaseDuration, sayElectionPhaseDuration],
             [isAskedWhatBotCanDo, sayCommonlyAskedQuestions],
             [isLovingTheBot, getRandomGoodThanks],
-            [isHatingTheBot, getRandomNegative]
+            [isHatingTheBot, getRandomNegative],
+            [isSayingHappyBirthday, sayHappyBirthday]
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
@@ -726,9 +728,6 @@ use defaults ${defaultChatNotSet}`
             }
             else if (isAskedAboutMissingComments(preparedMessage)) {
                 responseText = sayMissingComments(config, election);
-            }
-            else if (/^happy birth\s?day,? .*!*$/.test(preparedMessage)) {
-                responseText = `Happy birthday!`;
             }
             else if (isPrivileged && isAskedForUserEligibility(preparedMessage)) {
                 responseText = await sayUserEligibility(config, election, preparedMessage);

@@ -293,6 +293,17 @@ export const isLovingTheBot = (text) => {
 };
 
 /**
+ * @summary detects if someone is saying happy birthday
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isSayingHappyBirthday = (text) => {
+    return [
+        /^happy\s+birth\s?day,?\s+.*!*$/i
+    ].some((expression) => expression.test(text));
+};
+
+/**
  * @fun
  * @summary detects if someone is loving the bot in fun mode
  * @param {string} text
