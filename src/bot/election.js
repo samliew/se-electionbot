@@ -9,6 +9,7 @@ import { filterMap, getOrInit, has, mergeMaps, sortMap } from '../shared/utils/m
 import { clone } from '../shared/utils/objects.js';
 import { scrapeModerators } from '../shared/utils/scraping.js';
 import { getAllNamedBadges, getBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
+import History from "./history.js";
 import { calculateScore } from './score.js';
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
 
@@ -693,6 +694,12 @@ export default class Election {
     questionnaire = [];
 
     /**
+     * @summary election scrape history
+     * @type {History<number, Election>}
+     */
+    history = new History();
+
+    /**
      * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
      * @param {string|number|null} [electionNum] number of election, can be a numeric string
      */
@@ -708,9 +715,6 @@ export default class Election {
         const idFromURL = /** @type {string} */(electionUrl.split('/').pop());
 
         this.electionNum = electionNum ? +electionNum : +idFromURL || null;
-
-        /** @type {Election|null} */
-        this._prevObj = null;
     }
 
     /**
@@ -819,10 +823,10 @@ export default class Election {
 
     /**
      * @summary returns previous Election state
-     * @returns {{ [P in keyof Election as Election[P] extends Function ? never : P ]: Election[P]} | null}
+     * @returns {Election | null}
      */
     get prev() {
-        return this._prevObj;
+        return this.history.last() || null;
     }
 
     /**
@@ -1047,11 +1051,12 @@ export default class Election {
      * @returns {void}
      */
     forget(states = 1) {
-        // TODO: rework once moved away from _prevObj
+        const { history } = this;
+
         let cleanups = 0;
         while (this.prev) {
             if (cleanups >= states) return;
-            this._prevObj = null;
+            history.shift();
             cleanups += 1;
         }
     }
@@ -1306,23 +1311,21 @@ export default class Election {
     }
 
     /**
-     * TODO: make an abstract History class
      * @summary pushes an election state to history
      * @returns {Election}
      */
     pushHistory() {
-        // Save prev values so we can compare changes after
-        const entry = JSON.parse(JSON.stringify(this));
+        const entry = new Election(this.electionUrl);
 
-        /** {@link Map} and {@link Set} do not survive serialization */
+        /** {@link Map}, {@link Set}, and {@link Array} should be copied */
         Object.entries(this).forEach(([k, v]) => {
-            if (v instanceof Map) entry[k] = mergeMaps(v);
-            if (v instanceof Set) entry[k] = new Set(...v);
+            if (v instanceof Map) return entry[k] = mergeMaps(v);
+            if (v instanceof Set) return entry[k] = new Set(...v);
+            if (Array.isArray(v)) return entry[k] = [...v];
+            entry[k] = v;
         });
 
-        entry._prevObj = null;
-
-        this._prevObj = entry;
+        this.history.push(entry);
         return this;
     }
 
