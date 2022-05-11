@@ -60,9 +60,7 @@
                     <tr>
                         <th>Link</th>
                         <th>Year</th>
-                        <th>Rep. Nominate</th>
-                        <th>Rep. Vote</th>
-                        <th>Had Primary</th>
+                        <th>Primary</th>
                         <th>Cancelled</th>
                         <th>Positions</th>
                         <th>Nominees</th>
@@ -73,10 +71,11 @@
                 <tbody>
                 {{#iterate elections}}
                 <tr>
-                    <td><a href="{{electionUrl}}">{{electionNum}}</a>{{#ifEquals electionNum @root/data/election/electionNum}} (current){{/ifEquals}}</td>
+                    <td>
+                        <a href="{{electionUrl}}">{{electionNum}}</a>
+                        {{#ifEquals electionNum @root/data/election/electionNum}}<span title="Current Election">*</span>{{/ifEquals}}
+                    </td>
                     <td>{{year dateNomination}}</td>
-                    <td>{{repNominate}}</td>
-                    <td>{{repVote}}</td>
                     <td>{{{yesno datePrimary}}}</td>
                     <td>{{{yesno (contextCall "isCancelled" this)}}}</td>
                     <td>{{numPositions}}</td>
