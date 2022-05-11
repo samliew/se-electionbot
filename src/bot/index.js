@@ -680,7 +680,7 @@ import {
                 else responseText = sayInformedDecision();
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
-                responseText = sayCurrentMods(election, moderators, entities.decode);
+                responseText = await sayCurrentMods(config, election, moderators, entities.decode);
             }
             // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
             else if (isAskedForNominatingInfo(preparedMessage)) {
