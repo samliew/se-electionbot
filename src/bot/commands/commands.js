@@ -718,7 +718,7 @@ export const restartServerCommand = async (args) => {
 
 /**
  * @summary gets a daily voting report
- * @param {CommandArguments} args command arguments
+ * @param {Pick<CommandArguments, "config"|"content"|"election">} args command arguments
  * @returns {Promise<string>}
  */
 export const getVoterReportCommand = async (args) => {
