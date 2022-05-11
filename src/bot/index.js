@@ -488,7 +488,9 @@ use defaults ${defaultChatNotSet}`
             [isAskedForQuestionnaireQuestion, sayQuestionnaireQuestion],
             [isAskedAboutElectionResults, sayElectionResults],
             [isAskedAboutElectionPhaseDuration, sayElectionPhaseDuration],
-            [isAskedWhatBotCanDo, sayCommonlyAskedQuestions]
+            [isAskedWhatBotCanDo, sayCommonlyAskedQuestions],
+            [isLovingTheBot, getRandomGoodThanks],
+            [isHatingTheBot, getRandomNegative]
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
@@ -727,12 +729,6 @@ use defaults ${defaultChatNotSet}`
             }
             else if (/^happy birth\s?day,? .*!*$/.test(preparedMessage)) {
                 responseText = `Happy birthday!`;
-            }
-            else if (isLovingTheBot(preparedMessage)) {
-                responseText = getRandomGoodThanks();
-            }
-            else if (isHatingTheBot(preparedMessage)) {
-                responseText = getRandomNegative();
             }
             else if (isPrivileged && isAskedForUserEligibility(preparedMessage)) {
                 responseText = await sayUserEligibility(config, election, preparedMessage);
