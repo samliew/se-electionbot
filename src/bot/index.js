@@ -589,18 +589,19 @@ import {
                 const command = commander.findMatching(preparedMessage);
                 if (command && commander.canRun(command)) {
                     responseText ||= await command.run(commandArguments);
-                }
 
-                /* Note:
-                 * Be careful if integrating this section with message queue,
-                 *   since it is currently for long responses to dev/admin commands only, and does not reset active mutes.
-                 * We should also avoid long responses for normal users and continue to contain them within a single message,
-                 *   so we could possibly leave this block as it is
-                 */
-                if (responseText) {
-                    logResponse(config, responseText, preparedMessage, decodedMessage);
-                    await sendMultipartMessage(config, room, responseText, msg.id, { isPrivileged: true, log: false });
-                    return; // no further action
+                    /* Note:
+                     * Be careful if integrating this section with message queue,
+                     *   since it is currently for long responses to dev/admin commands only, and does not reset active mutes.
+                     * We should also avoid long responses for normal users and continue to contain them within a single message,
+                     *   so we could possibly leave this block as it is
+                     */
+                    if (responseText) {
+                        logResponse(config, responseText, preparedMessage, decodedMessage);
+                        await sendMultipartMessage(config, room, responseText, msg.id, { isPrivileged: true, log: false });
+                    }
+
+                    return; // no further action since we matched a privileged bot command
                 }
             }
 
