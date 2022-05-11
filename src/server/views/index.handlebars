@@ -104,8 +104,8 @@
                 <tbody>
                     {{#each (values announcements)}}
                     <tr>
-                        <td>{{> relativetime date=dateAnnounced}}</td>
-                        <td>{{> relativetime date=dateElection}}</td>
+                        <td>{{utcTimestamp dateAnnounced}}</td>
+                        <td>{{utcTimestamp dateElection}}</td>
                         <td>{{{url userLink userName}}}</td>
                         <td>{{{url postLink postTitle}}}</td>
                     </tr>
