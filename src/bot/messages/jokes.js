@@ -4,6 +4,7 @@ import { pluralize } from "../utils.js";
 /**
  * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
  * @typedef {import("../election").ModeratorUser} ModeratorUser
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  */
 
 /**
@@ -38,11 +39,12 @@ export const sayCannedResponses = () => new RandomArray(
 /**
  * @fun
  * @summary builds a "how many mods it takes" response message
- * @param {Map<number, ModeratorUser>} moderators current moderators
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayHowManyModsItTakesToFixLightbulb = (moderators) => {
-    const names = [...moderators].map(([, { display_name }]) => display_name);
+export const sayHowManyModsItTakesToFixLightbulb = (_config, _elections, election) => {
+    const { currentModerators } = election;
+
+    const names = [...currentModerators].map(([, { display_name }]) => display_name);
 
     const requires = new RandomArray(...names);
 

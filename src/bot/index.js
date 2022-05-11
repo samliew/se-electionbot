@@ -308,7 +308,7 @@ use defaults ${defaultChatNotSet}`
             await election.updateElectionBadges(config);
         }
 
-        const { moderators } = await election.updateModerators(config);
+        await election.updateModerators(config);
 
         // "default" is a temp fix for ChatExchange being served as CJS module
         /** @type {Client} */
@@ -491,7 +491,7 @@ use defaults ${defaultChatNotSet}`
             [isAskedWhatBotCanDo, sayCommonlyAskedQuestions]
         ];
 
-        /** @type {[(t:string) => boolean, () => string][]} */
+        /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
         const funRules = [
             [isLovingTheBotFun, sayLoveYou],
             [isAskedHowAmI, sayHowIsBot],
@@ -501,6 +501,7 @@ use defaults ${defaultChatNotSet}`
             [isAskedMeaningOfLife, sayAnswerToLifeUniverseAndEverything],
             [isAskedAboutJonSkeetJokes, sayAJonSkeetJoke],
             [isAskedAboutJokes, sayAJoke],
+            [isAskedAboutLightbulb, sayHowManyModsItTakesToFixLightbulb]
         ];
 
         const dashboardApp = await startServer(client, room, config, election);
@@ -642,9 +643,6 @@ use defaults ${defaultChatNotSet}`
                 if (config.debug) console.log(`Matched response: ${matcher.name}`);
                 responseText = await builder(config, elections, election, preparedMessage, user, me);
                 if (config.verbose) console.log(`Built response: ${responseText}`);
-            }
-            else if (isAskedAboutLightbulb(preparedMessage) && config.fun) {
-                responseText = sayHowManyModsItTakesToFixLightbulb(moderators);
             }
             else if (isAskedAboutBadgesOfType(preparedMessage)) {
                 const [, type] = /(participation|editing|moderation)/.exec(preparedMessage) || [];
@@ -789,7 +787,7 @@ use defaults ${defaultChatNotSet}`
                 // The rest below are fun mode only
                 else if (config.fun) {
                     const [, funHandler] = funRules.find(([g]) => g(preparedMessage)) || [];
-                    responseText = funHandler?.();
+                    responseText = await funHandler?.(config, elections, election, preparedMessage, user, me);
                 }
 
                 if (responseText) {
