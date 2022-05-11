@@ -98,8 +98,8 @@
                     <tr>
                         <th>Announced On</th>
                         <th>Election Date</th>
-                        <th>Title</th>
                         <th>Author</th>
+                        <th>Title</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -107,8 +107,8 @@
                     <tr>
                         <td>{{> relativetime date=dateAnnounced}}</td>
                         <td>{{> relativetime date=dateElection}}</td>
-                        <td>{{{url postLink postTitle}}}</td>
                         <td>{{{url userLink userName}}}</td>
+                        <td>{{{url postLink postTitle}}}</td>
                     </tr>
                     {{/each}}
                 </tbody>
