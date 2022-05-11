@@ -89,9 +89,21 @@ export const isAskedForCurrentMods = (text, apiSlug = null) => {
         /^how many mod(?:erator)?s? (are there|do we have)/,
         /^how.*\bcontact\b.*mod(?:erator)?s?/
     ], text);
+};
 
-
-
+/**
+ * @summary checks if the message asked to tell who the former mods are
+ * @param {string} text message text
+ * @param {string|null} apiSlug current site's apiSlug
+ * @returns {boolean}
+ */
+export const isAskedForFormerMods = (text, apiSlug = null) => {
+    return someMatch([
+        new RegExp(`^whois\\s+${apiSlug}\\s+former\\s+mod(?:erator)?s$`),
+        /^who(?: are| is|'s) the\s+former\s+mod(?:erator)?s?/i,
+        /^how many\s+former\s+mod(?:erator)?s? (are there|do we have)/i,
+        /^(?:who|which\s+mod(?:erator)?s?)(?:\s+have)?\s+(?:stepped\s+down|resigned)/i
+    ], text);
 };
 
 /**

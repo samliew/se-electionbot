@@ -1,3 +1,4 @@
+import entities from 'html-entities';
 import { getRandomOops, getRandomSecretPrefix, RandomArray } from "../random.js";
 import { getUsersCurrentlyInTheRoom, listify, makeURL, pluralize } from "../utils.js";
 import { sayMissingBadges } from "./badges.js";
@@ -10,6 +11,8 @@ import { sayMissingBadges } from "./badges.js";
  * @typedef {import("../election").default} Election
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../election").ModeratorUser} ModeratorUser
+ *
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  */
 
 /**
@@ -81,6 +84,27 @@ export const sayCurrentMods = async (election, decodeEntities) => {
     return (numMods > 0 ?
         `The current ${numMods} ${makeURL(`moderator${pluralize(numMods)}`, `${siteUrl}/users?tab=moderators`)} ${toBe}: ${decodeEntities(modNames.join(', '))}` :
         `The current moderators can be found on ${makeURL("this page", `${siteUrl}/users?tab=moderators`)}`
+    );
+};
+
+/**
+ * @summary builds former mods list response message
+ * @type {MessageBuilder}
+ */
+export const sayFormerMods = async (_config, _elections, election) => {
+    const { formerModerators } = election;
+
+    const { size: numMods } = formerModerators;
+
+    const { siteUrl, siteName = "" } = election;
+    const modNames = [...formerModerators].map(([, { display_name }]) => display_name);
+    const toBe = numMods > 1 ? "are" : "is";
+
+    const modURL = makeURL(`moderator${pluralize(numMods)}`, `${siteUrl}/users?tab=moderators`);
+
+    return (numMods > 0 ?
+        `The ${numMods} former ${modURL} ${toBe}: ${entities.decode(modNames.join(', '))}.` :
+        `There are no former ${siteName} moderators.`
     );
 };
 

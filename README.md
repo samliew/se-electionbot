@@ -59,7 +59,7 @@ About moderators/moderating:
 - what are the responsibilities of a moderator
 - why should I be a moderator
 - do moderators get paid
-- who are the current moderators
+- who are the `<current\|former>` moderators
 - who is the best moderator
 - could we just insert a diamond into our username
 
