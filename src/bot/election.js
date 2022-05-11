@@ -25,6 +25,7 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
  * @typedef {import("./utils").RoomUser} RoomUser
  * @typedef {ApiUser & {
  *  appointed?: string,
+ *  former: boolean,
  *  election?: number,
  *  electionLink?: string
  * }} ModeratorUser
@@ -173,7 +174,7 @@ export const listNomineesInRoom = async (config, election, host, users) => {
 };
 
 /**
- * @summary
+ * @summary gets all appointed moderators (including stepped down)
  * @param {BotConfig} config bot configuration
  * @param {Election} election current election
  * @returns {Promise<Map<number, ModeratorUser>>}
@@ -195,7 +196,11 @@ export const getAppointedModerators = async (config, election) => {
 
         const { appointed } = scrapedMods.get(id);
 
-        appointedMods.set(id, { ...user, appointed });
+        appointedMods.set(id, {
+            ...user,
+            former: user.user_type !== "moderator",
+            appointed
+        });
     });
 
     return appointedMods;
@@ -225,7 +230,8 @@ export const getElectedModerators = async (config, election) => {
         elected.set(id, {
             ...user,
             election: electionNum || 1,
-            electionLink: electionUrl
+            electionLink: electionUrl,
+            former: user.user_type !== "moderator"
         });
     });
 
@@ -705,6 +711,24 @@ export default class Election {
 
         /** @type {Election|null} */
         this._prevObj = null;
+    }
+
+    /**
+     * @summary returns only current moderators
+     * @returns {Map<number, ModeratorUser>}
+     */
+    get currentModerators() {
+        const { moderators } = this;
+        return filterMap(moderators, (m) => !m.former);
+    }
+
+    /**
+     * @summary returns only former moderators
+     * @returns {Map<number, ModeratorUser>}
+     */
+    get formerModerators() {
+        const { moderators } = this;
+        return filterMap(moderators, (m) => m.former);
     }
 
     /**

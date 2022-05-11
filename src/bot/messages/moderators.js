@@ -1,5 +1,3 @@
-import { filterMap } from "../../shared/utils/maps.js";
-import { getModerators } from "../api.js";
 import { getRandomOops, getRandomSecretPrefix, RandomArray } from "../random.js";
 import { getUsersCurrentlyInTheRoom, listify, makeURL, pluralize } from "../utils.js";
 import { sayMissingBadges } from "./badges.js";
@@ -67,20 +65,17 @@ export const sayCanEditDiamond = () => {
 
 /**
  * @summary builds current mods list response message
- * @param {BotConfig} config bot configuration
  * @param {Election} election current election
- * @param {Map<number, ModeratorUser>} moderators
  * @param {import("html-entities")["decode"]} decodeEntities
  * @returns {Promise<string>}
  */
-export const sayCurrentMods = async (config, election, moderators, decodeEntities) => {
-    const apiMods = await getModerators(config, election.apiSlug);
+export const sayCurrentMods = async (election, decodeEntities) => {
+    const { currentModerators } = election;
 
-    const onlyCurrent = filterMap(moderators, ({ user_id }) => apiMods.has(user_id));
-    const { size: numMods } = onlyCurrent;
+    const { size: numMods } = currentModerators;
 
     const { siteUrl } = election;
-    const modNames = [...onlyCurrent].map(([, { display_name }]) => display_name);
+    const modNames = [...currentModerators].map(([, { display_name }]) => display_name);
     const toBe = numMods > 1 ? "are" : "is";
 
     return (numMods > 0 ?

@@ -3,7 +3,7 @@ import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockNominee } from "../mocks/nominee.js";
-import { getMockUserProfile } from "../mocks/user.js";
+import { getMockApiUser, getMockUserProfile } from "../mocks/user.js";
 
 /**
  * @typedef { import("../../src/bot/election").ElectionPhase} ElectionPhase
@@ -15,6 +15,44 @@ describe(Election.name, () => {
     afterEach(() => sinon.restore());
 
     describe('getters', () => {
+
+        describe('currentModerators', () => {
+            const election = new Election("https://stackoverflow.com/election/1");
+
+            const { moderators } = election;
+            moderators.set(1, {
+                ...getMockApiUser({ user_id: 1 }),
+                former: true
+            });
+            moderators.set(2, {
+                ...getMockApiUser({ user_id: 2 }),
+                former: false
+            });
+
+            const { currentModerators } = election;
+
+            expect(currentModerators.size).to.equal(1);
+            expect(currentModerators.has(2)).to.be.true;
+        });
+
+        describe('formerModerators', () => {
+            const election = new Election("https://stackoverflow.com/election/1");
+
+            const { moderators } = election;
+            moderators.set(1, {
+                ...getMockApiUser({ user_id: 1 }),
+                former: true
+            });
+            moderators.set(2, {
+                ...getMockApiUser({ user_id: 2 }),
+                former: false
+            });
+
+            const { formerModerators } = election;
+
+            expect(formerModerators.size).to.equal(1);
+            expect(formerModerators.has(1)).to.be.true;
+        });
 
         describe('chatDomain', () => {
             it('should return stackoverflow.com for SO elections', () => {

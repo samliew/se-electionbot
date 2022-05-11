@@ -687,7 +687,7 @@ use defaults ${defaultChatNotSet}`
                 else responseText = sayInformedDecision();
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
-                responseText = await sayCurrentMods(config, election, moderators, entities.decode);
+                responseText = await sayCurrentMods(election, entities.decode);
             }
             // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
             else if (isAskedForNominatingInfo(preparedMessage)) {

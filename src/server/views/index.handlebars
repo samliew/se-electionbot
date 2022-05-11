@@ -143,8 +143,8 @@
     {{#with election}}
     <section>
         <aside>
-            {{> totalsTableHeader header="Moderators" collection=moderators }}
-            {{#if (len moderators)}}
+            {{> totalsTableHeader header="Current Moderators" collection=(getter this "currentModerators") }}
+            {{#if (len (getter this "currentModerators"))}}
                 <table class="table-small">
                    <thead>
                         <tr>
@@ -154,7 +154,37 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {{#iterate moderators}}
+                    {{#iterate (getter this "currentModerators")}}
+                    <tr>
+                        <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
+                        <td>{{years this.creation_date}}</td>
+                        {{#if this.election}}
+                            <td>{{{ordinal this.election}}} <a href="{{this.electionLink}}">election</a> ({{year (getter (get @root/data/election/elections this.election) "dateEnded")}})</td>
+                        {{else if this.appointed}}
+                            <td>appointed ({{this.appointed}})</td>
+                        {{else}}
+                            <td></td>
+                        {{/if}}
+                    </tr>
+                    {{/iterate}}
+                    </tbody>
+                </table>
+            {{else}}
+                {{> emptySmallTable }}
+            {{/if}}
+
+            {{> totalsTableHeader header="Former Moderators" collection=(getter this "formerModerators") }}
+            {{#if (len (getter this "formerModerators"))}}
+                <table class="table-small">
+                   <thead>
+                        <tr>
+                            <th>Link</th>
+                            <th>Member for</th>
+                            <th>Election</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{#iterate (getter this "formerModerators")}}
                     <tr>
                         <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
                         <td>{{years this.creation_date}}</td>
