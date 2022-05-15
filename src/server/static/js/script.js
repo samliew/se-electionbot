@@ -37,8 +37,8 @@ const dateToRelativetime = (date, prefix = "in ", soonText = 'soon', justNowText
     if (date === null) return soonText;
 
     // Try future date
-    let diff = (date.getTime() - Date.now()) / 1000;
-    let dayDiff = Math.floor(diff / 86400);
+    const diff = (date.getTime() - Date.now()) / 1000;
+    const dayDiff = Math.floor(diff / 86400);
 
     // In the future
     if (diff > 0) {
@@ -47,24 +47,24 @@ const dateToRelativetime = (date, prefix = "in ", soonText = 'soon', justNowText
             diff < 60 && ((x) => `${prefix}${x} ${pluralize(x, "sec")}`)(Math.floor(diff)) ||
             diff < 3600 && ((x) => `${prefix}${x} ${pluralize(x, "min")}`)(Math.floor(diff / 60)) ||
             diff < 86400 && ((x) => `${prefix}${x} ${pluralize(x, "hour")}`)(Math.floor(diff / 3600)) ||
-            diff < 31 && ((x) => `${prefix}${x} ${pluralize(x, "day")}`)(dayDiff) ||
-            diff < 366 && ((x) => `${prefix}${x} ${pluralize(x, "month")}`)(dayDiff / 31) ||
+            dayDiff < 31 && ((x) => `${prefix}${x} ${pluralize(x, "day")}`)(dayDiff) ||
+            dayDiff < 366 && ((x) => `${prefix}${x} ${pluralize(x, "month")}`)(dayDiff / 31) ||
             ((x) => `${prefix}${x} ${pluralize(x, "year")}`)(Math.floor(dayDiff / 366))
         );
     }
 
-    // In the past
-    diff = (Date.now() - date.getTime()) / 1000;
-    dayDiff = Math.floor(diff / 86400);
+    const pastDiff = Math.abs(diff);
+    const pstDayDiff = Math.abs(dayDiff);
 
+    // In the past
     return (
-        diff < 5 && justNowText ||
-        diff < 60 && ((x) => `${x} ${pluralize(x, "sec")} ago`)(Math.floor(diff)) ||
-        diff < 3600 && ((x) => `${x} ${pluralize(x, "min")} ago`)(Math.floor(diff / 60)) ||
-        diff < 86400 && ((x) => `${x} ${pluralize(x, "hour")} ago`)(Math.floor(diff / 3600)) ||
-        diff < 31 && ((x) => `${x} ${pluralize(x, "day")} ago`)(dayDiff) ||
-        diff < 366 && ((x) => `${x} ${pluralize(x, "month")} ago`)(dayDiff / 31) ||
-        ((x) => `${x} ${pluralize(x, "year")} ago`)(Math.floor(dayDiff / 366))
+        pastDiff < 5 && justNowText ||
+        pastDiff < 60 && ((x) => `${x} ${pluralize(x, "sec")} ago`)(Math.floor(pastDiff)) ||
+        pastDiff < 3600 && ((x) => `${x} ${pluralize(x, "min")} ago`)(Math.floor(pastDiff / 60)) ||
+        pastDiff < 86400 && ((x) => `${x} ${pluralize(x, "hour")} ago`)(Math.floor(pastDiff / 3600)) ||
+        pstDayDiff < 31 && ((x) => `${x} ${pluralize(x, "day")} ago`)(pstDayDiff) ||
+        pstDayDiff < 366 && ((x) => `${x} ${pluralize(x, "month")} ago`)(pstDayDiff / 31) ||
+        ((x) => `${x} ${pluralize(x, "year")} ago`)(Math.floor(pstDayDiff / 366))
     );
 };
 
@@ -74,10 +74,10 @@ const updateRelativeDates = () => {
         const { title, dataset } = element;
         if (!title) return;
 
-        const prefix = dataset.prefix || "";
-        const suffix = dataset.suffix || "";
+        const prefix = dataset.prefix;
+        const suffix = dataset.suffix;
         const date = dateToRelativetime(title, prefix);
-        if (date) element.innerHTML = `${date}${suffix}`;
+        if (date) element.innerHTML = `${date}${suffix || ""}`;
     });
 };
 
