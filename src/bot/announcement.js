@@ -276,11 +276,12 @@ export default class ScheduledAnnouncement {
     /**
      * @summary formats date as a cron expression
      * @param {string | number | Date} date date to format
+     * @param {number} [minute] minute override
      * @returns {string}
      */
-    getCronExpression(date) {
+    getCronExpression(date, minute = 0) {
         const validated = validateDate(date);
-        return `0 ${validated.getHours()} ${validated.getDate()} ${validated.getMonth() + 1} *`;
+        return `${minute} ${validated.getHours()} ${validated.getDate()} ${validated.getMonth() + 1} *`;
     }
 
     initElectionEnd(date) {
@@ -373,7 +374,8 @@ export default class ScheduledAnnouncement {
      */
     initTest() {
         const dNow = new Date();
-        const cs = `${dNow.getMinutes() + 2} ${dNow.getHours()} ${dNow.getDate()} ${dNow.getMonth() + 1} *`;
+        const cs = this.getCronExpression(dNow, dNow.getMinutes() + 2);
+
         cron.schedule(
             cs,
             async () => {
@@ -384,6 +386,7 @@ export default class ScheduledAnnouncement {
             },
             { timezone: "Etc/UTC" }
         );
+
         console.log('CRON - testing cron     - ', cs);
         return cs;
     }
