@@ -139,18 +139,7 @@ export default class Rescraper {
             // Election dates has changed (manually by CM)
             if (election.electionDatesChanged) {
                 console.log(`[rescraper] election dates changed`);
-
-                announcement?.stopAll();
-                announcement?.initAll();
-
-                await sendMessageList(
-                    config, room,
-                    [
-                        `The ${makeURL("election", election.electionUrl)} dates have changed:`,
-                        sayElectionSchedule(election)
-                    ],
-                    { isPrivileged: true }
-                );
+                await announcement?.announceDatesChanged();
             }
 
             // The election was cancelled
