@@ -417,6 +417,26 @@ describe(Election.name, () => {
         });
     });
 
+    describe(Election.prototype.isExtensionEligible.name, () => {
+        it('should correctly determine extension eligibility', () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.phase = "nomination";
+            election.numPositions = 2;
+
+            // < number of positions
+            election.addActiveNominee(getMockNominee(election, { userId: 1 }));
+            expect(election.isExtensionEligible()).to.be.true;
+
+            // = number of positions
+            election.addActiveNominee(getMockNominee(election, { userId: 2 }));
+            expect(election.isExtensionEligible()).to.be.true;
+
+            // > number of positions
+            election.addActiveNominee(getMockNominee(election, { userId: 3 }));
+            expect(election.isExtensionEligible()).to.be.false;
+        });
+    });
+
     describe(Election.prototype.isStackOverflow.name, () => {
         it('should return true if the election is on SO', () => {
             const election = new Election("https://stackoverflow.com/election/12");

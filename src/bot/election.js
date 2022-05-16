@@ -1144,6 +1144,18 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election nomination period can be extended
+     * @returns {boolean}
+     */
+    isExtensionEligible() {
+        const { numNominees, phase, numPositions = 1 } = this;
+        return [
+            phase === "nomination",
+            numNominees <= numPositions
+        ].every(Boolean);
+    }
+
+    /**
      * @summary checks if the election is a Stack Overflow election
      *  @returns {boolean}
      */
