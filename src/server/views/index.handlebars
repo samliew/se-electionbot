@@ -255,6 +255,10 @@
             <table>
                 <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
                 <tr><td>scriptInitDate</td><td>{{> relativetime date=scriptInitDate}}</td></tr>
+                <tr>
+                    <td>SE API quota</td>
+                    <td id="api-quota"></td>
+                </tr>
                 <tr><td>Control Room</td><td>{{{url controlRoomUrl}}}</td></tr>
                 <tr><td>Display Name</td><td>{{chatDisplayName}}</td></tr>
                 <tr><td>Is Muted</td><td>{{{boolean isMuted}}} {{#if isMuted}}{{> relativetime date=unmutesAt short=true prefix="for "}}{{/if}}</td></tr>
@@ -370,3 +374,22 @@
 
 <base target="_blank" />
 <meta http-equiv="refresh" content="{{data/autoRefreshInterval}}" />
+
+<script>
+    (() => {
+        const realtime = new EventSource(`${location.origin}/realtime?type=quota`);
+        realtime.addEventListener("quota", (event) => {
+            const { data } = event;
+
+            const quotaCell = document.getElementById("api-quota");
+            if(quotaCell) {
+                quotaCell.textContent = data;
+            }
+        });
+
+        realtime.addEventListener("error", (event) => {
+            console.debug(event);
+            realtime.close();
+        });
+    })();
+</script>
