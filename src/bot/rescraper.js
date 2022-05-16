@@ -1,11 +1,10 @@
+import { SEC_IN_MINUTE } from "../shared/utils/dates.js";
+import { mapMap } from "../shared/utils/maps.js";
 import { HerokuClient } from "./herokuClient.js";
 import { sayEndingSoon } from "./messages/elections.js";
 import { sayBusyGreeting, sayIdleGreeting } from "./messages/greetings.js";
-import { sayElectionSchedule } from "./messages/phases.js";
-import { sendMessage, sendMessageList } from "./queue.js";
-import { makeURL, wait } from "./utils.js";
-import { SEC_IN_MINUTE } from "../shared/utils/dates.js";
-import { mapMap } from "../shared/utils/maps.js";
+import { sendMessage } from "./queue.js";
+import { wait } from "./utils.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
