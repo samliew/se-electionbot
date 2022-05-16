@@ -284,8 +284,18 @@ export default class ScheduledAnnouncement {
         return `${minute} ${validated.getHours()} ${validated.getDate()} ${validated.getMonth() + 1} *`;
     }
 
+    /**
+     * @summary checks if the task is already initialized
+     * @param {TaskType} type type of the task
+     * @returns {boolean}
+     */
+    isTaskInitialized(type) {
+        const { schedules, tasks } = this;
+        return schedules.has(type) || tasks.has(type);
+    }
+
     initElectionEnd(date) {
-        if (this.schedules.has("end") || this.tasks.has("end") || typeof date == 'undefined') return false;
+        if (this.isTaskInitialized("end") || typeof date == 'undefined') return false;
 
         const _endedDate = new Date(date);
         if (_endedDate.valueOf() > Date.now()) {
@@ -306,7 +316,7 @@ export default class ScheduledAnnouncement {
     }
 
     initElectionStart(date) {
-        if (this.schedules.has("start") || this.tasks.has("start") || typeof date == 'undefined') return false;
+        if (this.isTaskInitialized("start") || typeof date == 'undefined') return false;
 
         const _electionDate = new Date(date);
         if (_electionDate.valueOf() > Date.now()) {
@@ -327,7 +337,7 @@ export default class ScheduledAnnouncement {
     }
 
     initPrimary(date) {
-        if (this.schedules.has("primary") || this.tasks.has("primary") || typeof date == 'undefined') return false;
+        if (this.isTaskInitialized("primary") || typeof date == 'undefined') return false;
 
         const _primaryDate = new Date(date);
         if (_primaryDate.valueOf() > Date.now()) {
@@ -348,7 +358,7 @@ export default class ScheduledAnnouncement {
     }
 
     initNomination(date) {
-        if (this.schedules.has("nomination") || this.tasks.has("nomination") || typeof date == 'undefined') return false;
+        if (this.isTaskInitialized("nomination") || typeof date == 'undefined') return false;
 
         const _nominationDate = new Date(date);
         if (_nominationDate.valueOf() > Date.now()) {
