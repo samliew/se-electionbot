@@ -138,6 +138,8 @@ export default class Rescraper {
 
             // Election dates has changed (manually by CM)
             if (election.electionDatesChanged) {
+                console.log(`[rescraper] election dates changed`);
+
                 announcement?.stopAll();
                 announcement?.initAll();
 
