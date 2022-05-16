@@ -106,11 +106,8 @@ export default class Rescraper {
 
             // No previous scrape results yet, do not proceed (prev can be null)
             if (!election.prev) {
-
-                if (config.debug) {
-                    console.log(`RESCRAPER - No previous scrape.`);
-                }
-                return;
+                console.log(`[rescraper] no previous scrape`);
+                return this.start();
             }
 
             if (election.electionChatRoomChanged) {
