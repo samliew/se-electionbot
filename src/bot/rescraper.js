@@ -126,8 +126,8 @@ export default class Rescraper {
 
             // Withdrawn nominations
             if (election.isActive() && election.newlyWithdrawnNominees.size) {
-                await announcement?.announceWithdrawnNominees();
-                console.log(`RESCRAPER - Withdrawn nominees announced.`);
+                const status = await announcement?.announceWithdrawnNominees();
+                console.log(`[rescraper] announced withdrawn: ${status}`);
             }
 
             // Primary phase was activated (due to >10 candidates)
