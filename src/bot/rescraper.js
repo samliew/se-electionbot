@@ -142,10 +142,9 @@ export default class Rescraper {
                 await announcement?.announceDatesChanged();
             }
 
-            // The election was cancelled
             if (election.phase === 'cancelled' && election.isNewPhase()) {
-                await announcement?.announceCancelled(room, election);
-                console.log(`RESCRAPER - Election was cancelled.`);
+                const status = await announcement?.announceCancelled(room, election);
+                console.log(`[rescraper] announced cancellation: ${status}`);
 
                 // Scale Heroku dynos to free (restarts app)
                 const heroku = new HerokuClient(config);
