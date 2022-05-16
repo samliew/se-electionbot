@@ -132,7 +132,8 @@ export default class Rescraper {
             // Primary phase was activated (due to >10 candidates)
             if (!announcement?.hasPrimary && election.datePrimary) {
                 announcement?.initPrimary(election.datePrimary);
-                await announcement?.announcePrimary();
+                const status = await announcement?.announcePrimary();
+                console.log(`[rescraper] announced primary: ${status}`);
             }
 
             // Election dates has changed (manually by CM)
