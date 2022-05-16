@@ -153,9 +153,9 @@ export default class Rescraper {
             }
 
             // Official results out
-            if (election.phase === 'ended' && election.hasNewWinners) {
-                await announcement?.announceWinners(room, election);
-                console.log(`RESCRAPER - Winners announced.`);
+            if (election.isEnded() && election.hasNewWinners) {
+                const status = await announcement?.announceWinners(room, election);
+                console.log(`[rescraper] announced winners: ${status}`);
             }
 
             // Election just over, there are no winners yet (waiting for CM)
