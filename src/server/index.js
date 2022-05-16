@@ -452,6 +452,9 @@ app.route("/realtime")
         const server = app.get("server");
 
         const key = `${ip}_${Date.now()}`;
+
+        res.on("close", () => connections.delete(key));
+
         connections.set(key, res);
 
         res.writeHead(200, {

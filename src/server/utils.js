@@ -15,8 +15,10 @@
  */
 export const start = async (app, port, info) => {
     try {
+        /** @type {HttpServer} */
         const server = await new Promise((r) => r(app.listen(port)));
         app.set("server", server);
+
         console.log(`[success] started ${info}`);
         return true;
     } catch (error) {
