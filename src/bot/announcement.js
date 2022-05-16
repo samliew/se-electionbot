@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { dateToUtcTimestamp } from "../shared/utils/dates.js";
+import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { filterMap, mapMap } from "../shared/utils/maps.js";
 import { sayFeedback } from "./commands/commands.js";
 import { sayElectionSchedule } from "./messages/phases.js";
