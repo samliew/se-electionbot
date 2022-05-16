@@ -1,6 +1,6 @@
-import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
 import { getSeconds } from "../shared/utils/dates.js";
 import { mergeMaps } from "../shared/utils/maps.js";
+import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
 
 /**
  * @typedef {import("./election").default} Election
@@ -23,6 +23,10 @@ import { mergeMaps } from "../shared/utils/maps.js";
  * @type {Site[]}
  */
 export let allNetworkSites = [];
+
+let currentQuota = 10000;
+
+export const getCurrentAPIQuota = () => currentQuota;
 
 /**
 * @summary Get the next API key from a rotating set
@@ -47,11 +51,13 @@ export const getStackApiKey = (keyPool) => {
  * @param {U} successCallback function to call on success
  */
 export const handleResponse = async (response, backoffCallback, successCallback) => {
-    const { backoff } = response;
+    const { backoff, quota_remaining } = response;
     if (backoff) {
         await wait(backoff);
         return backoffCallback(response);
     }
+
+    currentQuota = quota_remaining;
 
     return successCallback(response);
 };
