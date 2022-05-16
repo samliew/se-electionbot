@@ -113,8 +113,8 @@ export default class Rescraper {
                 return;
             }
 
-            // Election chat room has changed
             if (election.electionChatRoomChanged) {
+                console.log(`[rescraper] election chat room changed`);
 
                 // Restart Heroku dyno via API
                 const heroku = new HerokuClient(config);
