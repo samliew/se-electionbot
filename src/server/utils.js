@@ -27,14 +27,23 @@ export const start = async (app, port, info) => {
 
 /**
  * @summary stops the server
- * @param {HttpServer} server server to stop
- * @param {string} info information about the server
+ * @param {ExpressApp} app Express application
  * @returns {Promise<boolean>}
  */
-export const stop = async (server, info) => {
+export const stop = async (app) => {
     try {
-        await new Promise((r, j) => server.close((e) => e ? j(e) : r(e)));
-        console.log(`[success] stopped ${info}`);
+        /** @type {HttpServer} */
+        const server = app.get("server");
+
+        await new Promise((r, j) => {
+            server.close((e) => e ? j(e) : r(e));
+
+            /** @type {Map<string, import("express").Response<any, Record<string, any>, number>>} */
+            const connections = app.get("keep-alive-connections");
+            connections.forEach((res) => res.destroy());
+            connections.clear();
+        });
+
         return true;
     } catch (error) {
         console.log(error);

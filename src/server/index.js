@@ -4,7 +4,7 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from "url";
 import Election, { listNomineesInRoom } from '../bot/election.js';
 import { HerokuClient } from "../bot/herokuClient.js";
-import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom } from '../bot/utils.js';
+import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom, wait } from '../bot/utils.js';
 import { dateToUtcTimestamp } from '../shared/utils/dates.js';
 import * as helpers from "./helpers.js";
 import { routes, start, stop } from './utils.js';
@@ -22,7 +22,12 @@ const app = express().set('port', process.env.PORT || 5000);
  * Whitelist these public paths from password protection.
  */
 const publicPaths = [
-    "/", "/ping", "/feedback", "/static", "/favicon.ico"
+    "/",
+    "/favicon.ico",
+    "/feedback",
+    "/ping",
+    "/realtime",
+    "/static",
 ];
 
 /** @type {Handlebars.ExphbsOptions} */
@@ -44,6 +49,7 @@ app
  * @typedef {{ password?:string, success: string }} AuthQuery
  * @typedef {import("../bot/config").BotConfig} BotConfig
  * @typedef {import("express").Application} ExpressApp
+ * @typedef {import("express").Response} ExpressRes
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("../bot/utils").RoomUser} RoomUser
@@ -427,6 +433,47 @@ app.route("/feedback")
         });
     });
 
+const EVENT_SEPARATOR = "\n\n";
+
+/** @type {Map<string, ExpressRes>} */
+const connections = new Map();
+
+app.set("keep-alive-connections", connections);
+
+app.route("/realtime")
+    .get(async ({ ip }, res) => {
+        if (!BOT_CONFIG || !BOT_ROOM) {
+            console.error("[server] bot misconfiguration");
+            return res.sendStatus(500);
+        }
+
+        /** @type {HttpServer} */
+        const server = app.get("server");
+
+        const key = `${ip}_${Date.now()}`;
+        connections.set(key, res);
+
+        res.writeHead(200, {
+            "Content-Type": "text/event-stream",
+        });
+
+        const eventType = "message";
+
+        const sent = new Map();
+
+        while (server.listening && res.writable) {
+            const transcriptMessages = await fetchChatTranscript(BOT_CONFIG, BOT_ROOM.transcriptURL); // FIXME: cache internally
+
+            transcriptMessages.forEach((message) => {
+                const { messageId } = message;
+                if (sent.has(messageId)) return;
+                res.write(`event: ${eventType}\ndata: ${JSON.stringify(message)}${EVENT_SEPARATOR}`);
+                sent.set(messageId, message);
+            });
+
+            await wait(30);
+        }
+    });
 
 /**
  * @summary sets the server's bot config
@@ -489,7 +536,7 @@ port     ${port}`);
     }
 
     /** @param {ExpressApp} app */
-    const terminate = (app) => stop(app.get("server"), info).then(() => process.exit(0));
+    const terminate = (app) => stop(app).then(() => process.exit(0));
 
     const farewell = async () => {
         if (config.debug) {

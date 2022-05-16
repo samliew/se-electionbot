@@ -707,7 +707,7 @@ export const restartServerCommand = async (args) => {
         return `[${started ? "success" : "error"}] starting ${hostUrl}`
     }
 
-    const stopped = await ServerUtils.stop(server, info);
+    const stopped = await ServerUtils.stop(app);
     if (!stopped) return `[error] failed to stop ${info}`;
 
     const started = await ServerUtils.start(app, port, info);
