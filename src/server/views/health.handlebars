@@ -13,9 +13,28 @@
             <tbody>
                 <tr>
                     <td>Connected</td>
-                    <td>{{data/numConnections}}</td>
+                    <td id="connections">{{data/numConnections}}</td>
                 </tr>
             </tbody>
         </table>
     </section>
 </main>
+
+<script>
+    (() => {
+        const realtime = new EventSource(`${location.origin}/realtime?type=health`);
+        realtime.addEventListener("connections", (event) => {
+            const { data } = event;
+
+            const connCell = document.getElementById("connections");
+            if(connCell) {
+                connCell.textContent = data;
+            }
+        });
+
+        realtime.addEventListener("error", (event) => {
+            console.debug(event);
+            realtime.close();
+        });
+    })();
+</script>

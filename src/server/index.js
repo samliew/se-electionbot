@@ -471,6 +471,14 @@ app.route("/realtime")
 
         const sent = new Map();
 
+        // TODO: restrict
+        if (type === "health") {
+            while (server.listening && res.writable) {
+                res.write(`event: connections\ndata: ${connections.size}${EVENT_SEPARATOR}`);
+                await wait(30);
+            }
+        }
+
         if (type === "message") {
             while (server.listening && res.writable) {
                 const transcriptMessages = await fetchChatTranscript(BOT_CONFIG, BOT_ROOM.transcriptURL); // FIXME: cache internally
