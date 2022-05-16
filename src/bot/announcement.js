@@ -280,12 +280,22 @@ export default class ScheduledAnnouncement {
         this._election = election;
     }
 
+    /**
+     * @summary formats date as a cron expression
+     * @param {string | number | Date} date date to format
+     * @returns {string}
+     */
+    getCronExpression(date) {
+        const validated = validateDate(date);
+        return `0 ${validated.getHours()} ${validated.getDate()} ${validated.getMonth() + 1} *`;
+    }
+
     initElectionEnd(date) {
         if (this._electionEndSchedule != null || this._electionEndTask != null) return false;
 
         const _endedDate = new Date(date);
         if (_endedDate.valueOf() > Date.now()) {
-            const cs = `0 ${_endedDate.getHours()} ${_endedDate.getDate()} ${_endedDate.getMonth() + 1} *`;
+            const cs = this.getCronExpression(_endedDate);
             this._electionEndTask = cron.schedule(
                 cs,
                 async () => {
@@ -304,7 +314,7 @@ export default class ScheduledAnnouncement {
 
         const _electionDate = new Date(date);
         if (_electionDate.valueOf() > Date.now()) {
-            const cs = `0 ${_electionDate.getHours()} ${_electionDate.getDate()} ${_electionDate.getMonth() + 1} *`;
+            const cs = this.getCronExpression(_electionDate);
             this._electionStartTask = cron.schedule(
                 cs,
                 async () => {
@@ -323,7 +333,7 @@ export default class ScheduledAnnouncement {
 
         const _primaryDate = new Date(date);
         if (_primaryDate.valueOf() > Date.now()) {
-            const cs = `0 ${_primaryDate.getHours()} ${_primaryDate.getDate()} ${_primaryDate.getMonth() + 1} *`;
+            const cs = this.getCronExpression(_primaryDate);
             this._primaryTask = cron.schedule(
                 cs,
                 async () => {
