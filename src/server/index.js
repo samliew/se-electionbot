@@ -2,6 +2,7 @@ import express from 'express';
 import Handlebars from 'express-handlebars';
 import { dirname, join } from 'path';
 import { fileURLToPath } from "url";
+import { getCurrentAPIQuota } from '../bot/api.js';
 import Election, { listNomineesInRoom } from '../bot/election.js';
 import { HerokuClient } from "../bot/herokuClient.js";
 import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom, wait } from '../bot/utils.js';
@@ -441,7 +442,7 @@ const connections = new Map();
 app.set("keep-alive-connections", connections);
 
 app.route("/realtime")
-    .get(async ({ ip }, res) => {
+    .get(async ({ ip, query }, res) => {
         if (!BOT_CONFIG || !BOT_ROOM) {
             console.error("[server] bot misconfiguration");
             return res.sendStatus(500);
@@ -457,21 +458,36 @@ app.route("/realtime")
             "Content-Type": "text/event-stream",
         });
 
-        const eventType = "message";
+        const { type } = query;
+        if (!type) {
+            res.end();
+            return;
+        }
+
+        console.log(`[${ip}] subscribed to ${type} realtime`);
 
         const sent = new Map();
 
-        while (server.listening && res.writable) {
-            const transcriptMessages = await fetchChatTranscript(BOT_CONFIG, BOT_ROOM.transcriptURL); // FIXME: cache internally
+        if (type === "message") {
+            while (server.listening && res.writable) {
+                const transcriptMessages = await fetchChatTranscript(BOT_CONFIG, BOT_ROOM.transcriptURL); // FIXME: cache internally
 
-            transcriptMessages.forEach((message) => {
-                const { messageId } = message;
-                if (sent.has(messageId)) return;
-                res.write(`event: ${eventType}\ndata: ${JSON.stringify(message)}${EVENT_SEPARATOR}`);
-                sent.set(messageId, message);
-            });
+                transcriptMessages.forEach((message) => {
+                    const { messageId } = message;
+                    if (sent.has(messageId)) return;
+                    res.write(`event: message\ndata: ${JSON.stringify(message)}${EVENT_SEPARATOR}`);
+                    sent.set(messageId, message);
+                });
 
-            await wait(30);
+                await wait(30);
+            }
+        }
+
+        if (type === "quota") {
+            while (server.listening && res.writable) {
+                res.write(`event: quota\ndata: ${getCurrentAPIQuota()}${EVENT_SEPARATOR}`);
+                await wait(1);
+            }
         }
     });
 

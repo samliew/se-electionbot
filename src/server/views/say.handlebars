@@ -43,7 +43,7 @@
         msgField.value = `:${messageId} ${msgField.value.replace(/^:\d+\s*/, '')}`;
     }, false);
 
-    const realtime = new EventSource(`${location.origin}/realtime`);
+    const realtime = new EventSource(`${location.origin}/realtime?type=message`);
     realtime.addEventListener("message", (event) => {
         const { data } = event;
         const message = JSON.parse(data);
