@@ -120,8 +120,8 @@ export default class Rescraper {
 
             // New nominations
             if (election.phase === 'nomination' && election.hasNewNominees) {
-                await announcement?.announceNewNominees();
-                console.log(`RESCRAPER - New nominees announced.`);
+                const status = await announcement?.announceNewNominees();
+                console.log(`[rescraper] announced nomination: ${status}`);
             }
 
             // Withdrawn nominations
