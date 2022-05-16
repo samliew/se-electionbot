@@ -351,7 +351,7 @@ export default class ScheduledAnnouncement {
 
         const _nominationDate = new Date(date);
         if (_nominationDate.valueOf() > Date.now()) {
-            const cs = `0 ${_nominationDate.getHours()} ${_nominationDate.getDate()} ${_nominationDate.getMonth() + 1} *`;
+            const cs = this.getCronExpression(_nominationDate);
 
             this.tasks.set("nomination", cron.schedule(
                 cs,
