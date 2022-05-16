@@ -5,6 +5,7 @@ import sinon from "sinon";
 import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Rescraper from "../../src/bot/rescraper.js";
+import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
@@ -202,6 +203,32 @@ describe(ScheduledAnnouncement.name, () => {
             const [[message]] = stubbed.args;
 
             expect(message).to.match(/John\b.+?\bwithdrawn/);
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.announceDatesChanged.name, () => {
+        it('should correctly announce election date changes', async () => {
+            const now = dateToUtcTimestamp(Date.now());
+
+            election.siteName = "Stack Overflow";
+            election.phase = "nomination";
+            election.dateElection = now;
+            election.pushHistory();
+
+            const stubbed = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announceDatesChanged();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[change], [schedule]] = stubbed.args;
+
+            console.debug({ schedule });
+
+            expect(change).to.match(/dates\s+have\s+changed:/);
+            expect(schedule).to.match(new RegExp(`\\b${now}\\b`, "m"));
         });
     });
 });

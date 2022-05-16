@@ -2,6 +2,7 @@ import cron from "node-cron";
 import { dateToUtcTimestamp } from "../shared/utils/dates.js";
 import { filterMap, mapMap } from "../shared/utils/maps.js";
 import { sayFeedback } from "./commands/commands.js";
+import { sayElectionSchedule } from "./messages/phases.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
 import { makeURL, pluralize, wait } from "./utils.js";
@@ -51,6 +52,30 @@ export default class ScheduledAnnouncement {
             election: this._electionStartSchedule,
             ended: this._electionEndSchedule
         };
+    }
+
+    /**
+     * @summary Election dates changed
+     * @returns {Promise<boolean>}
+     */
+    async announceDatesChanged() {
+        const { config, _room, _election } = this;
+
+        if (!_election) return false;
+
+        this.stopAll();
+        this.initAll();
+
+        await sendMessageList(
+            config, _room,
+            [
+                `The ${makeURL("election", _election.electionUrl)} dates have changed:`,
+                sayElectionSchedule(_election)
+            ],
+            { isPrivileged: true }
+        );
+
+        return true;
     }
 
     /**
