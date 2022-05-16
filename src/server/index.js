@@ -494,6 +494,25 @@ app.route("/realtime")
         }
     });
 
+app.route("/health")
+    .get(({ query, path }, res) => {
+        const { password = "" } = /** @type {AuthQuery} */(query);
+
+        res.render("health", {
+            page: {
+                appName: process.env.HEROKU_APP_NAME,
+                title: "Health"
+            },
+            heading: `Server Health Check`,
+            data: {
+                path,
+                password,
+                routes: routes(app, publicPaths),
+                numConnections: connections.size
+            }
+        });
+    });
+
 /**
  * @summary sets the server's bot config
  * @param {BotConfig} config bot configuration
