@@ -1,5 +1,5 @@
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
-import { formatOrdinal } from "../shared/utils/strings.js";
+import { formatOrdinal, prettify } from "../shared/utils/strings.js";
 
 /** @type {(source: unknown) => boolean} */
 export const isArr = (source) => Array.isArray(source);
@@ -82,7 +82,7 @@ export const url = (url, text = "") => {
     return `<a href="${url}">${text}</a>`;
 };
 
-export { dateToUtcTimestamp as utcTimestamp };
+export { dateToUtcTimestamp as utcTimestamp, prettify };
 
 /** @type {(data: string) => string} */
 export const json = (data) => {

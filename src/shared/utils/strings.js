@@ -1,3 +1,5 @@
+import { capitalize } from "../../bot/utils.js";
+
 /**
  * @summary formats a number accorting to the number of didits to group and a separator
  * @param {number} num number to format
@@ -54,6 +56,12 @@ export const percentify = (numA, numB, precision, postfix = "%") => {
     const isInt = percent === Math.trunc(percent);
     return `${isInt ? percent : percent.toFixed(precision)}${postfix}`;
 };
+
+/**
+ * @summary pretty-prints a string
+ * @param {string} text string to prettify
+ */
+export const prettify = (text) => text.split("-").map(capitalize).join(" ");
 
 /**
  * @summary finds the longest string length
