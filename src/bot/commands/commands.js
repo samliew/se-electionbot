@@ -578,7 +578,7 @@ export const dieCommand = (args) => {
 export const getCronCommand = (args) => {
     const { schedules } = args.announcement;
 
-    const entries = Object.entries(schedules);
+    const entries = [...schedules];
 
     const maxPhaseNameLen = Math.max(...entries.map(([{ length }]) => length));
     const maxPhaseCronLen = Math.max(...entries.map(([, v]) => (v || "").length));

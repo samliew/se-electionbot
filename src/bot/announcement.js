@@ -19,6 +19,12 @@ import { makeURL, pluralize, wait } from "./utils.js";
 export default class ScheduledAnnouncement {
 
     /**
+     * @summary task cron expressions
+     * @type {Map<TaskType, string>}
+     */
+    schedules = new Map();
+
+    /**
      * @summary scheduled cron tasks
      * @type {Map<TaskType, cron.ScheduledTask>}
      */
@@ -35,25 +41,10 @@ export default class ScheduledAnnouncement {
         this._election = election;
         this.rescraper = rescraper;
         this.config = config;
-
-        // Run the sub-functions once only
-        this._nominationSchedule = null;
-        this._primarySchedule = null;
-        this._electionStartSchedule = null;
-        this._electionEndSchedule = null;
     }
 
     get hasPrimary() {
-        return !this._primarySchedule;
-    }
-
-    get schedules() {
-        return {
-            nomination: this._nominationSchedule,
-            primary: this._primarySchedule,
-            election: this._electionStartSchedule,
-            ended: this._electionEndSchedule
-        };
+        return !this.schedules.has("primary");
     }
 
     /**
@@ -293,7 +284,7 @@ export default class ScheduledAnnouncement {
     }
 
     initElectionEnd(date) {
-        if (this._electionEndSchedule != null || this.tasks.has("end")) return false;
+        if (this.schedules.has("end") || this.tasks.has("end") || typeof date == 'undefined') return false;
 
         const _endedDate = new Date(date);
         if (_endedDate.valueOf() > Date.now()) {
@@ -309,12 +300,12 @@ export default class ScheduledAnnouncement {
             ));
 
             console.log('CRON - election end     - ', cs);
-            this._electionEndSchedule = cs;
+            this.schedules.set("end", cs);
         }
     }
 
     initElectionStart(date) {
-        if (this._electionStartSchedule != null || this.tasks.has("start") || typeof date == 'undefined') return false;
+        if (this.schedules.has("start") || this.tasks.has("start") || typeof date == 'undefined') return false;
 
         const _electionDate = new Date(date);
         if (_electionDate.valueOf() > Date.now()) {
@@ -330,12 +321,12 @@ export default class ScheduledAnnouncement {
             ));
 
             console.log('CRON - election start   - ', cs);
-            this._electionStartSchedule = cs;
+            this.schedules.set("start", cs);
         }
     }
 
     initPrimary(date) {
-        if (this._primarySchedule != null || this.tasks.has("primary") || typeof date == 'undefined') return false;
+        if (this.schedules.has("primary") || this.tasks.has("primary") || typeof date == 'undefined') return false;
 
         const _primaryDate = new Date(date);
         if (_primaryDate.valueOf() > Date.now()) {
@@ -351,12 +342,12 @@ export default class ScheduledAnnouncement {
             ));
 
             console.log('CRON - primary start    - ', cs);
-            this._primarySchedule = cs;
+            this.schedules.set("primary", cs);
         }
     }
 
     initNomination(date) {
-        if (this._nominationSchedule != null || this.tasks.has("nomination") || typeof date == 'undefined') return false;
+        if (this.schedules.has("nomination") || this.tasks.has("nomination") || typeof date == 'undefined') return false;
 
         const _nominationDate = new Date(date);
         if (_nominationDate.valueOf() > Date.now()) {
@@ -372,7 +363,7 @@ export default class ScheduledAnnouncement {
             ));
 
             console.log('CRON - nomination start - ', cs);
-            this._nominationSchedule = cs;
+            this.schedules.set("nomination", cs);
         }
     }
 
@@ -406,25 +397,25 @@ export default class ScheduledAnnouncement {
 
     stopElectionEnd() {
         this.tasks.get("end")?.stop();
-        this._electionEndSchedule = null;
+        this.schedules.delete("end");
         console.log('CRON - stopped election end cron job');
     }
 
     stopElectionStart() {
         this.tasks.get("start")?.stop();
-        this._electionStartSchedule = null;
+        this.schedules.delete("start");
         console.log('CRON - stopped election start cron job');
     }
 
     stopPrimary() {
         this.tasks.get("primary")?.stop();
-        this._primarySchedule = null;
+        this.schedules.delete("primary");
         console.log('CRON - stopped primary phase cron job');
     }
 
     stopNomination() {
         this.tasks.get("nomination")?.stop();
-        this._nominationSchedule = null;
+        this.schedules.delete("nomination");
         console.log('CRON - stopped nomination phase cron job');
     }
 
