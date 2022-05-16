@@ -771,3 +771,13 @@ export const isAskedAboutBotPronouns = (text) => {
         /^what(?:'s|\s+(?:is|are))\s+your(?:\s+preferred)?\s+pronouns(?:\?\!?|$)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking about why are elections cancelled
+ * @type {MessageGuard}
+ */
+export const isAskedWhyAreElectionsCancelled = (text) => {
+    return someMatch([
+        /^why\s+(?:are|would)(?:\s+(?:some|an))?\s+elections?(?:\s+be)?\s+cancell?ed(?:\?\!?|$)/i
+    ], text);
+};
