@@ -5,7 +5,7 @@ import sinon from "sinon";
 import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Rescraper from "../../src/bot/rescraper.js";
-import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
+import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
@@ -51,6 +51,27 @@ describe(ScheduledAnnouncement.name, () => {
             expect(cron).to.be.equal(
                 `0 ${may6th2022.getUTCHours()} ${may6th2022.getUTCDate()} ${may6th2022.getUTCMonth() + 1} *`
             );
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.isTaskInitialized.name, () => {
+        it('should correctly check if the task is initialized', () => {
+            const now = new Date(2022, 8, 3, 0, 0, 0, 0);
+            election.dateNomination = dateToUtcTimestamp(now);
+            election.datePrimary = dateToUtcTimestamp(addDates(now, 7));
+            election.dateElection = dateToUtcTimestamp(addDates(now, 14));
+            election.dateEnded = dateToUtcTimestamp(addDates(now, 21));
+
+            /** @type {import("../../src/bot/announcement").TaskType[]} */
+            const taskTypes = ["start", "end", "nomination", "primary"];
+
+            taskTypes.forEach((type) => expect(ann.isTaskInitialized(type)).to.be.false);
+
+            ann.initAll();
+            taskTypes.forEach((type) => expect(ann.isTaskInitialized(type)).to.be.true);
+
+            ann.stopAll();
+            taskTypes.forEach((type) => expect(ann.isTaskInitialized(type)).to.be.false);
         });
     });
 
