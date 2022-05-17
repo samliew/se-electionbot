@@ -274,14 +274,14 @@ export default class ScheduledAnnouncement {
     }
 
     /**
-     * @summary formats date as a cron expression
+     * @summary formats date as a cron expression (UTC)
      * @param {string | number | Date} date date to format
      * @param {number} [minute] minute override
      * @returns {string}
      */
     getCronExpression(date, minute = 0) {
         const validated = validateDate(date);
-        return `${minute} ${validated.getHours()} ${validated.getDate()} ${validated.getMonth() + 1} *`;
+        return `${minute} ${validated.getUTCHours()} ${validated.getUTCDate()} ${validated.getUTCMonth() + 1} *`;
     }
 
     /**
