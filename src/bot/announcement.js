@@ -282,6 +282,21 @@ export default class ScheduledAnnouncement {
     }
 
     /**
+     * @summary formats cron expression (UTC) as UTC timestamp
+     * @param {string} cronExpression cron expression (UTC)
+     * @returns {string}
+     */
+    getUTCfromCronExpression(cronExpression) {
+        const [m, h, d, M] = cronExpression.split(" ");
+
+        const now = new Date();
+
+        return dateToUtcTimestamp(
+            new Date(now.getFullYear(), +M - 1, +d, +h, +m, 0, 0)
+        );
+    }
+
+    /**
      * @summary checks if the task is already initialized
      * @param {TaskType} type type of the task
      * @returns {boolean}
