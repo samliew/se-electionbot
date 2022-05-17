@@ -279,6 +279,20 @@
             </table>
         </aside>
 
+        <aside>
+            <h2>Scheduled Announcements</h2>
+            <table class="table-small">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>cron</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="cron"></tbody>
+            </table>
+        </aside>
+
         {{#if herokuDynos.length}}
         <aside>
             <h2>Hosting (Heroku Dynos)</h2>
@@ -377,8 +391,8 @@
 
 <script>
     (() => {
-        const realtime = new EventSource(`${location.origin}/realtime?type=quota`);
-        realtime.addEventListener("quota", (event) => {
+        const qtyRealtime = new EventSource(`${location.origin}/realtime?type=quota`);
+        qtyRealtime.addEventListener("quota", (event) => {
             const { data } = event;
 
             const quotaCell = document.getElementById("api-quota");
@@ -387,9 +401,46 @@
             }
         });
 
-        realtime.addEventListener("error", (event) => {
+        const schRealtime = new EventSource(`${location.origin}/realtime?type=cron`);
+        schRealtime.addEventListener("schedules", (event) => {
+            const { data } = event;
+
+            /** @type {[type:string, cronexpr:string][]} */
+            const schedules = JSON.parse(data);
+
+            /** @type {HTMLTableSectionElement|undefined} */
+            const cronTbody = document.getElementById("cron");
+            if(!cronTbody) return;
+
+            const rows = schedules.map(([type, cron, date]) => {
+                const row = document.createElement("tr");
+
+                const typeCell = document.createElement("td");
+                typeCell.textContent = type;
+
+                const cronCell = document.createElement("td");
+                cronCell.textContent = cron;
+
+                const dateCell = document.createElement("td");
+                dateCell.textContent = date;
+
+                row.append(typeCell, cronCell, dateCell);
+                return row;
+            });
+
+            for(const row of cronTbody.rows) row.remove();
+
+            cronTbody.append(...rows);
+        });
+
+        schRealtime.addEventListener("error", (event) => {
             console.debug(event);
-            realtime.close();
+            schRealtime.close();
+        });
+
+        qtyRealtime.addEventListener("error", (event) => {
+            console.debug(event);
+            qtyRealtime.close();
         });
     })();
 </script>
