@@ -56,9 +56,6 @@ export default class ScheduledAnnouncement {
 
         if (!_election) return false;
 
-        this.stopAll();
-        this.initAll();
-
         await sendMessageList(
             config, _room,
             [
@@ -475,6 +472,15 @@ export default class ScheduledAnnouncement {
             primary: this.initPrimary(_election.datePrimary),
             start: this.initElectionStart(_election.dateElection),
         };
+    }
+
+    /**
+     * @summary reinitializes all tasks
+     * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
+     */
+    reinitialize() {
+        this.stopAll(); // TODO: check status
+        return this.initAll();
     }
 
     /**

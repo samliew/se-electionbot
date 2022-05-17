@@ -138,6 +138,7 @@ export default class Rescraper {
 
             // Election dates has changed (manually by CM)
             if (election.electionDatesChanged) {
+                announcement?.reinitialize();
                 const status = await announcement?.announceDatesChanged();
                 console.log(`[rescraper] announced dates change: ${status}`);
             }
