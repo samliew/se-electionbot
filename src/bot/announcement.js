@@ -459,11 +459,19 @@ export default class ScheduledAnnouncement {
         return cs;
     }
 
+    /**
+     * @summary initializes all tasks
+     * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
+     */
     initAll() {
-        this.initNomination(this._election.dateNomination);
-        this.initPrimary(this._election.datePrimary);
-        this.initElectionStart(this._election.dateElection);
-        this.initElectionEnd(this._election.dateEnded);
+        const { _election } = this;
+
+        return {
+            end: this.initElectionEnd(_election.dateEnded),
+            nomination: this.initNomination(_election.dateNomination),
+            primary: this.initPrimary(_election.datePrimary),
+            start: this.initElectionStart(_election.dateElection),
+        };
     }
 
     stopElectionEnd() {
