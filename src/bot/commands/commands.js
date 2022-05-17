@@ -254,7 +254,7 @@ export const listSiteModerators = async (args) => {
  * @returns {Promise<string>}
  */
 export const changeElection = async (args) => {
-    const { config, election, content } = args;
+    const { announcement, config, election, content } = args;
 
     const targetUrl = content.replace(/.*?(?=https:\/\/)/, "");
 
@@ -299,6 +299,8 @@ export const changeElection = async (args) => {
 
     await election.updateElectionBadges(config);
     await election.updateModerators(config);
+
+    announcement.reinitialize();
 
     return `successfully switched elections\nfrom: ${electionUrl}\nto: ${targetUrl}`;
 };
