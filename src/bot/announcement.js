@@ -381,6 +381,9 @@ export default class ScheduledAnnouncement {
 
         if (_endedDate.valueOf() <= Date.now()) return false;
 
+        // ensure the task is stopped before rescheduling
+        this.#stop(type);
+
         const cs = this.getCronExpression(_endedDate);
 
         this.tasks.set(type, cron.schedule(cs, handler.bind(this), { timezone: "Etc/UTC" }));
