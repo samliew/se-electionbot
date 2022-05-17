@@ -286,4 +286,23 @@ describe(ScheduledAnnouncement.name, () => {
             expect(message).to.match(/vote\s+on\s+the\s+candidates.+?posts/);
         });
     });
+
+    describe(ScheduledAnnouncement.prototype.announceElectionEnd.name, () => {
+        it('should correctly announce election phase start', async () => {
+            sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
+
+            const stubbed = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announceElectionEnd();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[message]] = stubbed.args;
+
+            expect(message).to.match(/has\s+now\s+ended/);
+            expect(message).to.match(/winners\s+will\s+be\s+announced/);
+        });
+    });
 });
