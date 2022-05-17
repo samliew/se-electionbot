@@ -67,6 +67,22 @@ export default class Rescraper {
         }
 
         try {
+            // Should happen before scrape call to ensure the announcement is unscheduled,
+            // otherwise we may report new phase when in reality the dates are being changed.
+            // Stops election phase start announcement if phase is eligible for extension.
+            if (announcement?.isTaskInitialized("start") && election.isExtensionEligible()) {
+                const status = announcement.stopElectionStart();
+                console.log(`[rescraper] election start task stop: ${status}`);
+            }
+
+            // Starts election phase announcement if phase is no longer eligible for extension.
+            // TODO: it is possible to have a last-minute nomination in the extended period,
+            // which can bypass the rescraper - in this case, election start can't be announced
+            if (!announcement?.isTaskInitialized("start") && !election.isExtensionEligible()) {
+                const status = announcement?.initElectionStart(election.dateElection);
+                console.log(`[rescraper] election start task start: ${status}`);
+            }
+
             const bot = await client.getMe();
 
             const rescraped = await election.scrapeElection(config);
