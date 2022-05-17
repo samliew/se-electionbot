@@ -295,6 +295,54 @@ export default class ScheduledAnnouncement {
     }
 
     /**
+     * @summary announces nomination phase start
+     */
+    announceNominationStart() {
+        return this.#announcePhaseChange(
+            "nomination",
+            "nomination phase",
+            "is now open",
+            "Users may now nominate themselves for the election. **You cannot vote yet.**"
+        );
+    }
+
+    /**
+     * @summary announces election phase start
+     */
+    announceElectionStart() {
+        return this.#announcePhaseChange(
+            "election",
+            "election's final voting phase",
+            "is now open",
+            "You may now rank the candidates in your preferred order. Good luck to all candidates!"
+        );
+    }
+
+    /**
+     * @summary announces election end
+     */
+    announceElectionEnd() {
+        return this.#announcePhaseChange(
+            "election",
+            "election",
+            "has now ended",
+            "The winners will be announced shortly"
+        );
+    }
+
+    /**
+     * @summary announces primary phase start
+     */
+    announcePrimaryStart() {
+        return this.#announcePhaseChange(
+            "primary",
+            "primary phase",
+            "is now open",
+            "You can now vote on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!"
+        );
+    }
+
+    /**
      * @summary announces an {@link Election} phase change
      * @param {"nomination"|"election"|"primary"} tab tab of the election to open
      * @param {string} label label of the election URL markdown
@@ -326,12 +374,7 @@ export default class ScheduledAnnouncement {
 
             this.tasks.set("end", cron.schedule(
                 cs,
-                () => this.#announcePhaseChange(
-                    "election",
-                    "election",
-                    "has now ended",
-                    "The winners will be announced shortly"
-                ),
+                this.announceElectionEnd.bind(this),
                 { timezone: "Etc/UTC" }
             ));
 
@@ -349,12 +392,7 @@ export default class ScheduledAnnouncement {
 
             this.tasks.set("start", cron.schedule(
                 cs,
-                () => this.#announcePhaseChange(
-                    "election",
-                    "election's final voting phase",
-                    "is now open",
-                    "You may now rank the candidates in your preferred order. Good luck to all candidates!"
-                ),
+                this.announceElectionStart.bind(this),
                 { timezone: "Etc/UTC" }
             ));
 
@@ -372,12 +410,7 @@ export default class ScheduledAnnouncement {
 
             this.tasks.set("primary", cron.schedule(
                 cs,
-                () => this.#announcePhaseChange(
-                    "primary",
-                    "primary phase",
-                    "is now open",
-                    "You can now vote on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!"
-                ),
+                this.announcePrimaryStart.bind(this),
                 { timezone: "Etc/UTC" }
             ));
 
@@ -395,12 +428,7 @@ export default class ScheduledAnnouncement {
 
             this.tasks.set("nomination", cron.schedule(
                 cs,
-                () => this.#announcePhaseChange(
-                    "nomination",
-                    "nomination phase",
-                    "is now open",
-                    "Users may now nominate themselves for the election. **You cannot vote yet.**"
-                ),
+                this.initNomination.bind(this),
                 { timezone: "Etc/UTC" }
             ));
 
