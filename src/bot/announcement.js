@@ -291,7 +291,7 @@ export default class ScheduledAnnouncement {
      */
     isTaskInitialized(type) {
         const { schedules, tasks } = this;
-        return schedules.has(type) || tasks.has(type);
+        return schedules.has(type) && tasks.has(type);
     }
 
     /**
