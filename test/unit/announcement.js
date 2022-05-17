@@ -43,6 +43,17 @@ describe(ScheduledAnnouncement.name, () => {
     let ann = new ScheduledAnnouncement(config, room, election, scraper);
     afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
 
+    describe(ScheduledAnnouncement.prototype.getCronExpression.name, () => {
+        it('should correctly format cron from dates (in UTC)', () => {
+            const may6th2022 = new Date(2022, 4, 6, 0, 0, 0, 0);
+
+            const cron = ann.getCronExpression(may6th2022);
+            expect(cron).to.be.equal(
+                `0 ${may6th2022.getUTCHours()} ${may6th2022.getUTCDate()} ${may6th2022.getUTCMonth() + 1} *`
+            );
+        });
+    });
+
     describe(ScheduledAnnouncement.prototype.announceCancelled.name, () => {
 
         it('should return false on no Electon', async () => {
