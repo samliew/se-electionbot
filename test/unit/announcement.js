@@ -267,4 +267,23 @@ describe(ScheduledAnnouncement.name, () => {
             expect(message).to.match(/may\s+now\s+rank\s+the\s+candidates/);
         });
     });
+
+    describe(ScheduledAnnouncement.prototype.announcePrimaryStart.name, () => {
+        it('should correctly announce election phase start', async () => {
+            sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
+
+            const stubbed = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announcePrimaryStart();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[message]] = stubbed.args;
+
+            expect(message).to.match(/primary\s+phase/);
+            expect(message).to.match(/vote\s+on\s+the\s+candidates.+?posts/);
+        });
+    });
 });
