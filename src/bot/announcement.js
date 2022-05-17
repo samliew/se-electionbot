@@ -478,30 +478,40 @@ export default class ScheduledAnnouncement {
         this.tasks.get("end")?.stop();
         this.schedules.delete("end");
         console.log('CRON - stopped election end cron job');
+        return true;
     }
 
     stopElectionStart() {
         this.tasks.get("start")?.stop();
         this.schedules.delete("start");
         console.log('CRON - stopped election start cron job');
+        return true;
     }
 
     stopPrimary() {
         this.tasks.get("primary")?.stop();
         this.schedules.delete("primary");
         console.log('CRON - stopped primary phase cron job');
+        return true;
     }
 
     stopNomination() {
         this.tasks.get("nomination")?.stop();
         this.schedules.delete("nomination");
         console.log('CRON - stopped nomination phase cron job');
+        return true;
     }
 
+    /**
+     * @summary stops all tasks
+     * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
+     */
     stopAll() {
-        this.stopElectionEnd();
-        this.stopElectionStart();
-        this.stopPrimary();
-        this.stopNomination();
+        return {
+            end: this.stopElectionEnd(),
+            nomination: this.stopNomination(),
+            primary: this.stopPrimary(),
+            start: this.stopElectionStart(),
+        };
     }
 }
