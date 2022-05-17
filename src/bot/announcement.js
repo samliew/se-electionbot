@@ -365,76 +365,65 @@ export default class ScheduledAnnouncement {
         return true;
     }
 
+    /**
+     * @this {ScheduledAnnouncement}
+     *
+     * @summary initializes a scheduled task
+     * @param {TaskType} type task type
+     * @param {string | number | Date | undefined} date date at which to make the announcement
+     * @param {(t:string, l:string,c:string,d:string) => Promise<boolean>} handler announcement handler
+     * @returns {boolean}
+     */
+    #initializeTask(type, date, handler) {
+        if (this.isTaskInitialized(type) || typeof date == 'undefined') return false;
+
+        const _endedDate = validateDate(date);
+
+        if (_endedDate.valueOf() <= Date.now()) return false;
+
+        const cs = this.getCronExpression(_endedDate);
+
+        this.tasks.set(type, cron.schedule(cs, handler.bind(this), { timezone: "Etc/UTC" }));
+
+        console.log(`[cron] initialized ${type} task`, cs);
+        this.schedules.set(type, cs);
+        return true;
+    }
+
+    /**
+     * @summary initializes task for election end
+     * @param {string | number | Date | undefined} date date at which to make the announcement
+     * @returns {boolean}
+     */
     initElectionEnd(date) {
-        if (this.isTaskInitialized("end") || typeof date == 'undefined') return false;
-
-        const _endedDate = new Date(date);
-        if (_endedDate.valueOf() > Date.now()) {
-            const cs = this.getCronExpression(_endedDate);
-
-            this.tasks.set("end", cron.schedule(
-                cs,
-                this.announceElectionEnd.bind(this),
-                { timezone: "Etc/UTC" }
-            ));
-
-            console.log('CRON - election end     - ', cs);
-            this.schedules.set("end", cs);
-        }
+        return this.#initializeTask("end", date, this.announceElectionEnd);
     }
 
+    /**
+     * @summary initializes task for election phase start
+     * @param {string | number | Date | undefined} date date at which to make the announcement
+     * @returns {boolean}
+     */
     initElectionStart(date) {
-        if (this.isTaskInitialized("start") || typeof date == 'undefined') return false;
-
-        const _electionDate = new Date(date);
-        if (_electionDate.valueOf() > Date.now()) {
-            const cs = this.getCronExpression(_electionDate);
-
-            this.tasks.set("start", cron.schedule(
-                cs,
-                this.announceElectionStart.bind(this),
-                { timezone: "Etc/UTC" }
-            ));
-
-            console.log('CRON - election start   - ', cs);
-            this.schedules.set("start", cs);
-        }
+        return this.#initializeTask("start", date, this.announceElectionStart);
     }
 
+    /**
+     * @summary initializes task for primary phase start
+     * @param {string | number | Date | undefined} date date at which to make the announcement
+     * @returns {boolean}
+     */
     initPrimary(date) {
-        if (this.isTaskInitialized("primary") || typeof date == 'undefined') return false;
-
-        const _primaryDate = new Date(date);
-        if (_primaryDate.valueOf() > Date.now()) {
-            const cs = this.getCronExpression(_primaryDate);
-
-            this.tasks.set("primary", cron.schedule(
-                cs,
-                this.announcePrimaryStart.bind(this),
-                { timezone: "Etc/UTC" }
-            ));
-
-            console.log('CRON - primary start    - ', cs);
-            this.schedules.set("primary", cs);
-        }
+        return this.#initializeTask("primary", date, this.announcePrimaryStart);
     }
 
+    /**
+     * @summary initializes task for nomination phase start
+     * @param {string | number | Date | undefined} date date at which to make the announcement
+     * @returns {boolean}
+     */
     initNomination(date) {
-        if (this.isTaskInitialized("nomination") || typeof date == 'undefined') return false;
-
-        const _nominationDate = new Date(date);
-        if (_nominationDate.valueOf() > Date.now()) {
-            const cs = this.getCronExpression(_nominationDate);
-
-            this.tasks.set("nomination", cron.schedule(
-                cs,
-                this.initNomination.bind(this),
-                { timezone: "Etc/UTC" }
-            ));
-
-            console.log('CRON - nomination start - ', cs);
-            this.schedules.set("nomination", cs);
-        }
+        return this.#initializeTask("nomination", date, this.announceNominationStart);
     }
 
     /**
