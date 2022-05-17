@@ -343,7 +343,15 @@ use defaults ${defaultChatNotSet}`
         const rescraper = new Rescraper(config, client, room, elections, election);
         const announcement = new Announcement(config, room, election, rescraper);
         announcement.setRescraper(rescraper);
-        announcement.initAll();
+
+        const initStatus = announcement.initAll();
+
+        console.log(`[init] scheduled tasks init:\n${Object.keys(initStatus).map(
+            ([type]) => `${type}: ${announcement.schedules.get(
+                /** @type {import("./announcement").TaskType} */(type)
+            ) || "not initialized"}`
+        ).join("\n")}`);
+
         rescraper.setAnnouncement(announcement);
         rescraper.start();
 
