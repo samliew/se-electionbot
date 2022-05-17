@@ -294,6 +294,29 @@ export default class ScheduledAnnouncement {
         return schedules.has(type) || tasks.has(type);
     }
 
+    /**
+     * @summary announces an {@link Election} phase change
+     * @param {"nomination"|"election"|"primary"} tab tab of the election to open
+     * @param {string} label label of the election URL markdown
+     * @param {string} changeDesc description of the change
+     * @param {string} actionDesc description of the call to action
+     * @returns {Promise<boolean>}
+     */
+    async #announcePhaseChange(tab, label, changeDesc, actionDesc) {
+        const { config, _election, _room } = this;
+
+        const status = await _election.scrapeElection(config);
+        if (!status) return false;
+
+        const messages = [
+            `**The ${makeURL(label, `${_election.electionUrl}?tab=${tab}`)} ${changeDesc}.** ${actionDesc}.`
+        ];
+
+        await sendMessageList(config, _room, messages, { isPrivileged: true });
+
+        return true;
+    }
+
     initElectionEnd(date) {
         if (this.isTaskInitialized("end") || typeof date == 'undefined') return false;
 
@@ -303,10 +326,12 @@ export default class ScheduledAnnouncement {
 
             this.tasks.set("end", cron.schedule(
                 cs,
-                async () => {
-                    await this._election.scrapeElection(this.config);
-                    await this._room.sendMessage(`**The [election](${this._election.electionUrl}?tab=election) has now ended.** The winners will be announced shortly.`);
-                },
+                () => this.#announcePhaseChange(
+                    "election",
+                    "election",
+                    "has now ended",
+                    "The winners will be announced shortly"
+                ),
                 { timezone: "Etc/UTC" }
             ));
 
@@ -324,10 +349,12 @@ export default class ScheduledAnnouncement {
 
             this.tasks.set("start", cron.schedule(
                 cs,
-                async () => {
-                    await this._election.scrapeElection(this.config);
-                    await this._room.sendMessage(`**The [election's final voting phase](${this._election.electionUrl}?tab=election) is now open.** You may now rank the candidates in your preferred order. Good luck to all candidates!`);
-                },
+                () => this.#announcePhaseChange(
+                    "election",
+                    "election's final voting phase",
+                    "is now open",
+                    "You may now rank the candidates in your preferred order. Good luck to all candidates!"
+                ),
                 { timezone: "Etc/UTC" }
             ));
 
@@ -345,10 +372,12 @@ export default class ScheduledAnnouncement {
 
             this.tasks.set("primary", cron.schedule(
                 cs,
-                async () => {
-                    await this._election.scrapeElection(this.config);
-                    await this._room.sendMessage(`**The [primary phase](${this._election.electionUrl}?tab=primary) is now open.** You can now vote on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!`);
-                },
+                () => this.#announcePhaseChange(
+                    "primary",
+                    "primary phase",
+                    "is now open",
+                    "You can now vote on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!"
+                ),
                 { timezone: "Etc/UTC" }
             ));
 
@@ -366,10 +395,12 @@ export default class ScheduledAnnouncement {
 
             this.tasks.set("nomination", cron.schedule(
                 cs,
-                async () => {
-                    await this._election.scrapeElection(this.config);
-                    await this._room.sendMessage(`**The [nomination phase](${this._election.electionUrl}?tab=nomination) is now open.** Users may now nominate themselves for the election. **You cannot vote yet.**`);
-                },
+                () => this.#announcePhaseChange(
+                    "nomination",
+                    "nomination phase",
+                    "is now open",
+                    "Users may now nominate themselves for the election. **You cannot vote yet.**"
+                ),
                 { timezone: "Etc/UTC" }
             ));
 
