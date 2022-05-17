@@ -518,7 +518,7 @@ use defaults ${defaultChatNotSet}`
             [isAskedAboutLightbulb, sayHowManyModsItTakesToFixLightbulb]
         ];
 
-        const dashboardApp = await startServer(client, room, config, election);
+        const dashboardApp = await startServer(client, room, config, election, announcement);
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {

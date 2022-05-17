@@ -55,7 +55,16 @@ app
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("../bot/utils").RoomUser} RoomUser
  * @typedef {import("http").Server} HttpServer
+ * @typedef {import("../bot/announcement").default} Announcement
  */
+
+/**
+ * @private
+ *
+ * @summary internal announcement reference
+ * @type {Announcement | undefined}
+ */
+let BOT_ANNOUNCER;
 
 /**
  * @private
@@ -472,6 +481,23 @@ app.route("/realtime")
         const sent = new Map();
 
         // TODO: restrict
+        if (type === "cron") {
+            while (server.listening && res.writable) {
+                if (BOT_ANNOUNCER) {
+                    const { schedules } = BOT_ANNOUNCER;
+
+                    const data = [...schedules] // FIXME: type narrowing of BOT_ANNOUNCER breaks unexpectedly
+                        .map(([type, cron]) => [type, cron, BOT_ANNOUNCER?.getUTCfromCronExpression(cron) || ""])
+                        .sort(([, , adate], [, , bdate]) => adate < bdate ? -1 : 1);
+
+                    res.write(`event: schedules\ndata: ${JSON.stringify(data)}${EVENT_SEPARATOR}`);
+                }
+
+                await wait(5 * 60);
+            }
+        }
+
+        // TODO: restrict
         if (type === "health") {
             while (server.listening && res.writable) {
                 res.write(`event: connections\ndata: ${connections.size}${EVENT_SEPARATOR}`);
@@ -522,6 +548,14 @@ app.route("/health")
     });
 
 /**
+ * @summary sets the server's announcer
+ * @param {Announcement} announcement announcer
+ */
+export const setAnnouncer = (announcement) => {
+    BOT_ANNOUNCER = announcement;
+};
+
+/**
  * @summary sets the server's bot config
  * @param {BotConfig} config bot configuration
  */
@@ -559,10 +593,12 @@ export const setClient = (client) => {
  * @param {Room} room current room the bot is in
  * @param {BotConfig} config  bot configuration
  * @param {Election} election current election
+ * @param {Announcement} announcement announcement
  * @returns {Promise<ExpressApp>}
  */
-export const startServer = async (client, room, config, election) => {
+export const startServer = async (client, room, config, election, announcement) => {
 
+    setAnnouncer(announcement);
     setBot(config);
     setRoom(room);
     setElection(election);
