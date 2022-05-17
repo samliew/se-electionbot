@@ -13,7 +13,7 @@ import { makeURL, pluralize, wait } from "./utils.js";
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("./rescraper.js").default} Rescraper
  *
- * @typedef {"start"|"end"|"primary"|"nomination"} TaskType
+ * @typedef {"start"|"end"|"primary"|"nomination"|"test"} TaskType
  */
 
 export default class ScheduledAnnouncement {
@@ -427,6 +427,25 @@ export default class ScheduledAnnouncement {
     }
 
     /**
+     * @summary announces that the test task has completed
+     * @returns {Promise<boolean>}
+     */
+    async announceTestTask() {
+        const { config, _election, _room } = this;
+
+        const status = await _election.scrapeElection(config);
+        if (!status) return false;
+
+        const messages = [
+            `Test cron job succesfully completed at ${dateToUtcTimestamp(/**  @type {number} */(_election.updated))}.`
+        ];
+
+        await sendMessageList(config, _room, messages, { isPrivileged: true });
+
+        return true;
+    }
+
+    /**
      * @summary schedules a test cron job rescraping the {@link Election}
      * @returns {string}
      */
@@ -434,18 +453,9 @@ export default class ScheduledAnnouncement {
         const dNow = new Date();
         const cs = this.getCronExpression(dNow, dNow.getMinutes() + 2);
 
-        cron.schedule(
-            cs,
-            async () => {
-                console.log('TEST CRON STARTED');
-                await this._election.scrapeElection(this.config);
-                await this._room.sendMessage(`Test cron job succesfully completed at ${dateToUtcTimestamp(/**  @type {number} */(this._election.updated))}.`);
-                console.log('TEST CRON ENDED', this._election, '\n', this._room);
-            },
-            { timezone: "Etc/UTC" }
-        );
+        cron.schedule(cs, () => this.announceTestTask(), { timezone: "Etc/UTC" });
 
-        console.log('CRON - testing cron     - ', cs);
+        console.log('[cron] initialized test task', cs);
         return cs;
     }
 
