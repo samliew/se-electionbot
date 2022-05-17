@@ -225,10 +225,27 @@ describe(ScheduledAnnouncement.name, () => {
 
             const [[change], [schedule]] = stubbed.args;
 
-            console.debug({ schedule });
-
             expect(change).to.match(/dates\s+have\s+changed:/);
             expect(schedule).to.match(new RegExp(`\\b${now}\\b`, "m"));
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.announceNominationStart.name, () => {
+        it('should correctly announce nomination phase start', async () => {
+            sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
+
+            const stubbed = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announceNominationStart();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[message]] = stubbed.args;
+
+            expect(message).to.match(/nomination\s+phase/);
+            expect(message).to.match(/may\s+now\s+nominate/);
         });
     });
 });
