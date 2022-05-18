@@ -1,7 +1,7 @@
 /**
  * Pluralise
- * @param {string} word 
- * @param {number} count 
+ * @param {string} word
+ * @param {number} count
  */
 function pluralise(word, count) {
     if (count === 1) return word;
@@ -12,11 +12,13 @@ function pluralise(word, count) {
 }
 
 export default class TextReport {
+
+    /** @type {string[]} */
+    out = [];
+
     constructor(results) {
         this.results = results;
         this.maxWidth = 79;
-        /** @type string[] */
-        this.out = [];
     }
 
     /** Pretty print election results in text format. */

@@ -15,12 +15,21 @@ export default class MeekSTV {
 
     keepFactor = [];
 
+    /** @type {number[]} */
     surplus = [];
+
+    /** @type {number[]} */
     thresh = [];
 
+    /** @type {string[]} */
     messages = [];
+
+
     roundInfo = [];
+
     count = [];
+
+    /** @type {number[]} */
     exhausted = [];
 
     round = 0;

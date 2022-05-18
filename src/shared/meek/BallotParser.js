@@ -18,8 +18,7 @@ export default class BallotParser {
      * @returns {ElectionInfo}
      */
     parse(fileContent) {
-        /** @type {ElectionInfo} */
-        // @ts-ignore
+        /** @type {Pick<ElectionInfo, "uniqueBallots"|"uniqueBallotsWeight"|"names"> & Partial<ElectionInfo>} */
         const info = {
             /** @type string[] */ uniqueBallots: [],
             /** @type number[] */ uniqueBallotsWeight: [],
@@ -64,7 +63,7 @@ export default class BallotParser {
 
         info.dirtyBallotsCount = info.uniqueBallotsWeight.reduce((a, b) => a + b);
 
-        return this.clean(/** @type {ElectionInfo} */ info);
+        return this.clean(/** @type {ElectionInfo} */(info));
     }
 
     /**
