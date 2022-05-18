@@ -1,8 +1,8 @@
-import { getRandomNow } from "../random.js";
-import { makeURL, pluralize } from "../utils.js";
 import { datesToDuration, dateToRelativeTime, getSeconds } from "../../shared/utils/dates.js";
 import { matchNumber, safeCapture } from "../../shared/utils/expressions.js";
 import { formatOrdinal } from "../../shared/utils/strings.js";
+import { getRandomNow } from "../random.js";
+import { makeURL, pluralize } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
 /**
@@ -208,3 +208,29 @@ export const sayEndingSoon = (election) => {
     const { electionUrl } = election;
     return `The ${makeURL('election', electionUrl)} ${ELECTION_ENDING_SOON_TEXT}`;
 };
+
+/**
+ * @summary builds a response to a query on why an election can be cancelled
+ * @type {MessageBuilder}
+ */
+export const sayWhenAreElectionsCancelled = () => {
+    const extensionDays = 7;
+
+    const extension = `after a ${extensionDays}-day extension`;
+
+    const proTemURL = makeURL("pro tempore", "https://meta.stackexchange.com/q/314459");
+
+    const proTemCond = `${proTemURL} and *nobody* nominated`;
+
+    const fullCond = `the number of *nominees* is less than or equal to the number of *positions*`;
+
+    return `An election is cancelled ${extension} if it is ${proTemCond} or if ${fullCond} otherwise.`;
+};
+
+// /**
+//  * @see https://chat.stackexchange.com/transcript/message/61134223#61134223
+//  *
+//  * @summary builds a response to a query on what happens if election is cancelled
+//  * @type {MessageBuilder}
+//  */
+// export const sayWhatHappensIfElectionIsCancelled = () => { };

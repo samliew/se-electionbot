@@ -254,7 +254,7 @@ export const listSiteModerators = async (args) => {
  * @returns {Promise<string>}
  */
 export const changeElection = async (args) => {
-    const { config, election, content } = args;
+    const { announcement, config, election, content } = args;
 
     const targetUrl = content.replace(/.*?(?=https:\/\/)/, "");
 
@@ -299,6 +299,8 @@ export const changeElection = async (args) => {
 
     await election.updateElectionBadges(config);
     await election.updateModerators(config);
+
+    announcement.reinitialize();
 
     return `successfully switched elections\nfrom: ${electionUrl}\nto: ${targetUrl}`;
 };
@@ -578,7 +580,7 @@ export const dieCommand = (args) => {
 export const getCronCommand = (args) => {
     const { schedules } = args.announcement;
 
-    const entries = Object.entries(schedules);
+    const entries = [...schedules];
 
     const maxPhaseNameLen = Math.max(...entries.map(([{ length }]) => length));
     const maxPhaseCronLen = Math.max(...entries.map(([, v]) => (v || "").length));
@@ -707,7 +709,7 @@ export const restartServerCommand = async (args) => {
         return `[${started ? "success" : "error"}] starting ${hostUrl}`
     }
 
-    const stopped = await ServerUtils.stop(server, info);
+    const stopped = await ServerUtils.stop(app);
     if (!stopped) return `[error] failed to stop ${info}`;
 
     const started = await ServerUtils.start(app, port, info);

@@ -1,11 +1,10 @@
+import { SEC_IN_MINUTE } from "../shared/utils/dates.js";
+import { mapMap } from "../shared/utils/maps.js";
 import { HerokuClient } from "./herokuClient.js";
 import { sayEndingSoon } from "./messages/elections.js";
 import { sayBusyGreeting, sayIdleGreeting } from "./messages/greetings.js";
-import { sayElectionSchedule } from "./messages/phases.js";
-import { sendMessage, sendMessageList } from "./queue.js";
-import { makeURL, wait } from "./utils.js";
-import { SEC_IN_MINUTE } from "../shared/utils/dates.js";
-import { mapMap } from "../shared/utils/maps.js";
+import { sendMessage } from "./queue.js";
+import { wait } from "./utils.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -68,6 +67,22 @@ export default class Rescraper {
         }
 
         try {
+            // Should happen before scrape call to ensure the announcement is unscheduled,
+            // otherwise we may report new phase when in reality the dates are being changed.
+            // Stops election phase start announcement if phase is eligible for extension.
+            if (announcement?.isTaskInitialized("start") && election.isExtensionEligible()) {
+                const status = announcement.stopElectionStart();
+                console.log(`[rescraper] election start task stop: ${status}`);
+            }
+
+            // Starts election phase announcement if phase is no longer eligible for extension.
+            // TODO: it is possible to have a last-minute nomination in the extended period,
+            // which can bypass the rescraper - in this case, election start can't be announced
+            if (!announcement?.isTaskInitialized("start") && !election.isExtensionEligible()) {
+                const status = announcement?.initElectionStart(election.dateElection);
+                console.log(`[rescraper] election start task start: ${status}`);
+            }
+
             const bot = await client.getMe();
 
             const rescraped = await election.scrapeElection(config);
@@ -106,15 +121,12 @@ export default class Rescraper {
 
             // No previous scrape results yet, do not proceed (prev can be null)
             if (!election.prev) {
-
-                if (config.debug) {
-                    console.log(`RESCRAPER - No previous scrape.`);
-                }
-                return;
+                console.log(`[rescraper] no previous scrape`);
+                return this.start();
             }
 
-            // Election chat room has changed
             if (election.electionChatRoomChanged) {
+                console.log(`[rescraper] election chat room changed`);
 
                 // Restart Heroku dyno via API
                 const heroku = new HerokuClient(config);
@@ -123,41 +135,33 @@ export default class Rescraper {
 
             // New nominations
             if (election.phase === 'nomination' && election.hasNewNominees) {
-                await announcement?.announceNewNominees();
-                console.log(`RESCRAPER - New nominees announced.`);
+                const status = await announcement?.announceNewNominees();
+                console.log(`[rescraper] announced nomination: ${status}`);
             }
 
             // Withdrawn nominations
             if (election.isActive() && election.newlyWithdrawnNominees.size) {
-                await announcement?.announceWithdrawnNominees();
-                console.log(`RESCRAPER - Withdrawn nominees announced.`);
+                const status = await announcement?.announceWithdrawnNominees();
+                console.log(`[rescraper] announced withdrawn: ${status}`);
             }
 
             // Primary phase was activated (due to >10 candidates)
             if (!announcement?.hasPrimary && election.datePrimary) {
                 announcement?.initPrimary(election.datePrimary);
-                await announcement?.announcePrimary();
+                const status = await announcement?.announcePrimary();
+                console.log(`[rescraper] announced primary: ${status}`);
             }
 
             // Election dates has changed (manually by CM)
             if (election.electionDatesChanged) {
-                announcement?.stopAll();
-                announcement?.initAll();
-
-                await sendMessageList(
-                    config, room,
-                    [
-                        `The ${makeURL("election", election.electionUrl)} dates have changed:`,
-                        sayElectionSchedule(election)
-                    ],
-                    { isPrivileged: true }
-                );
+                announcement?.reinitialize();
+                const status = await announcement?.announceDatesChanged();
+                console.log(`[rescraper] announced dates change: ${status}`);
             }
 
-            // The election was cancelled
             if (election.phase === 'cancelled' && election.isNewPhase()) {
-                await announcement?.announceCancelled(room, election);
-                console.log(`RESCRAPER - Election was cancelled.`);
+                const status = await announcement?.announceCancelled(room, election);
+                console.log(`[rescraper] announced cancellation: ${status}`);
 
                 // Scale Heroku dynos to free (restarts app)
                 const heroku = new HerokuClient(config);
@@ -165,9 +169,9 @@ export default class Rescraper {
             }
 
             // Official results out
-            if (election.phase === 'ended' && election.hasNewWinners) {
-                await announcement?.announceWinners(room, election);
-                console.log(`RESCRAPER - Winners announced.`);
+            if (election.isEnded() && election.hasNewWinners) {
+                const status = await announcement?.announceWinners(room, election);
+                console.log(`[rescraper] announced winners: ${status}`);
             }
 
             // Election just over, there are no winners yet (waiting for CM)

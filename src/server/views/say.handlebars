@@ -28,22 +28,12 @@
                 <th>Message</th>
             </tr>
         </thead>
-        <tbody>
-        {{#each (reverse data/transcriptMessages)}}
-        <tr>
-            <td data-message-id="{{this.messageId}}" class="cursor-pointer" title="click to reply to this message">{{this.messageId}}</td>
-            <td title="click to open the message"><a href="https://chat.{{@root/data/chatDomain}}/transcript/message/{{this.messageId}}" target="_blank">{{utcTimestamp this.date}}</a></td>
-            <td><a href="https://chat.{{@root/data/chatDomain}}/users/{{this.chatUserId}}" target="_blank">{{this.username}}</a></td>
-            <td>{{{this.messageHtml}}}</td>
-        </tr>
-        {{/each}}
-        </tbody>
+        <tbody id="transcript-messages"></tbody>
     </table>
 </div>
 
 <script>
 (() => {
-
     const msgField = document.getElementById('message');
     document.body.addEventListener('click', ({ target }) => {
         const { dataset: { messageId } } = target;
@@ -53,14 +43,60 @@
         msgField.value = `:${messageId} ${msgField.value.replace(/^:\d+\s*/, '')}`;
     }, false);
 
-    const scheduleReload = () => setTimeout(() =>  window.location.reload(), 5 * 60 * 1e3);
+    const realtime = new EventSource(`${location.origin}/realtime?type=message`);
+    realtime.addEventListener("message", (event) => {
+        const { data } = event;
+        const message = JSON.parse(data);
 
-    let timeout = scheduleReload();
+        /** @type {HTMLTableSectionElement|undefined} */
+        const messagesTableBody = document.getElementById("transcript-messages");
+        if(!messagesTableBody) return;
 
-    msgField.addEventListener("input", () => {
-        clearTimeout(timeout);
-        timeout = scheduleReload();
+        const {
+            chatDomain,
+            chatUserId,
+            date,
+            messageId,
+            messageHtml,
+            username
+        } = message;
+
+        const row = document.createElement("tr");
+
+        const idCell = document.createElement("td");
+        idCell.classList.add("cursor-pointer");
+        idCell.dataset.messageId = messageId;
+        idCell.title = "click to reply to this message";
+        idCell.textContent = messageId;
+
+        const dateCell = document.createElement("td");
+        dateCell.title = "click to open the message";
+
+        const dateLink = document.createElement("a");
+        dateLink.href = `https://chat.${chatDomain}/transcript/message/${messageId}`;
+        dateLink.target = "_blank";
+        dateLink.textContent = dateToRelativetime(date);
+
+        const userCell = document.createElement("td");
+
+        const userLink = document.createElement("a");
+        userLink.href = `https://chat.${chatDomain}/users/${chatUserId}`;
+        userLink.target = "_blank";
+        userLink.textContent = username;
+
+        const msgCell = document.createElement("td");
+        msgCell.innerHTML = messageHtml;
+
+        dateCell.append(dateLink);
+        userCell.append(userLink);
+        row.append(idCell, dateCell, userCell, msgCell);
+
+        messagesTableBody.prepend(row);
     });
 
+    realtime.addEventListener("error", (event) => {
+        console.debug(event);
+        realtime.close();
+    });
 })();
 </script>

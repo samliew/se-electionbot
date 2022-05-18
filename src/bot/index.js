@@ -34,6 +34,7 @@ import {
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp,
     isAskedForHelp,
     isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
+    isAskedWhyAreElectionsCancelled,
     isAskedWhyIsBot,
     isAskedWhyNominationRemoved,
     isBotMentioned,
@@ -47,7 +48,7 @@ import {
 import { HerokuClient } from "./herokuClient.js";
 import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
-import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
+import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults } from "./messages/elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
 import { sayCommonlyAskedQuestions, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
 import { sayHappyBirthday, sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
@@ -342,7 +343,15 @@ use defaults ${defaultChatNotSet}`
         const rescraper = new Rescraper(config, client, room, elections, election);
         const announcement = new Announcement(config, room, election, rescraper);
         announcement.setRescraper(rescraper);
-        announcement.initAll();
+
+        const initStatus = announcement.initAll();
+
+        console.log(`[init] scheduled tasks init:\n${Object.keys(initStatus).map(
+            ([type]) => `${type}: ${announcement.schedules.get(
+                /** @type {import("./announcement").TaskType} */(type)
+            ) || "not initialized"}`
+        ).join("\n")}`);
+
         rescraper.setAnnouncement(announcement);
         rescraper.start();
 
@@ -492,7 +501,8 @@ use defaults ${defaultChatNotSet}`
             [isAskedWhatBotCanDo, sayCommonlyAskedQuestions],
             [isLovingTheBot, getRandomGoodThanks],
             [isHatingTheBot, getRandomNegative],
-            [isSayingHappyBirthday, sayHappyBirthday]
+            [isSayingHappyBirthday, sayHappyBirthday],
+            [isAskedWhyAreElectionsCancelled, sayWhenAreElectionsCancelled],
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
@@ -508,7 +518,7 @@ use defaults ${defaultChatNotSet}`
             [isAskedAboutLightbulb, sayHowManyModsItTakesToFixLightbulb]
         ];
 
-        const dashboardApp = await startServer(client, room, config, election);
+        const dashboardApp = await startServer(client, room, config, election, announcement);
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {

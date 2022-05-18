@@ -20,6 +20,7 @@ General election help:
 - **what is my candidate score** _(calculates if ownself is eligible for nomination)_
 - where is the election page
 - can I vote in the election
+- why are elections cancelled
 
 Election badges:
 

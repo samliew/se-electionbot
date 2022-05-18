@@ -5,7 +5,6 @@ import { get } from 'https';
 import { JSDOM } from "jsdom";
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
-import { getUserAssociatedAccounts } from "./api.js";
 import { validateChatTranscriptURL } from "../shared/utils/chat.js";
 import { dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "../shared/utils/dates.js";
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
@@ -13,6 +12,7 @@ import { constructUserAgent } from "../shared/utils/fetch.js";
 import { getOrInit, has } from "../shared/utils/maps.js";
 import { htmlToChatMarkdown } from "../shared/utils/markdown.js";
 import { numericNullable } from "../shared/utils/objects.js";
+import { getUserAssociatedAccounts } from "./api.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
@@ -207,6 +207,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
             username: userlink.text(),
             // @ts-expect-error
             chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
+            chatDomain,
             message: messageText,
             messageMarkup: messageMarkup,
             messageHtml: messageHtml,
@@ -226,6 +227,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
  * @typedef {{
  *   username: string,
  *   chatUserId: number,
+ *   chatDomain: string,
  *   message: string,
  *   messageMarkup: string,
  *   messageHtml?: string,
@@ -244,12 +246,16 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
  * If a exact timestamps are required, use fetchLatestChatEvents
  */
 export const fetchChatTranscript = async (config, url) => {
+    /** @type {ChatMessage[]} */
     const messages = [];
 
     // Validate chat transcript url
     if (!validateChatTranscriptURL(url)) return messages;
 
     console.log('Fetching chat transcript:', url);
+
+    // https://regex101.com/r/pMzAk7/2
+    const chatDomain = safeCapture(/((?:meta\.)?stack(?:overflow|exchange)\.com)/, url) || "stackoverflow.com";
 
     const chatTranscript = await fetchUrl(config, url);
     const $chat = cheerio.load(/** @type {string} */(chatTranscript));
@@ -296,6 +302,7 @@ export const fetchChatTranscript = async (config, url) => {
             username: userlink.text(),
             // @ts-expect-error
             chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
+            chatDomain,
             message: messageText,
             messageMarkup: messageMarkup,
             messageHtml: messageHtml,

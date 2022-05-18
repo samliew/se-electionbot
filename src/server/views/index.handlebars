@@ -255,6 +255,10 @@
             <table>
                 <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
                 <tr><td>scriptInitDate</td><td>{{> relativetime date=scriptInitDate}}</td></tr>
+                <tr>
+                    <td>SE API quota</td>
+                    <td id="api-quota"></td>
+                </tr>
                 <tr><td>Control Room</td><td>{{{url controlRoomUrl}}}</td></tr>
                 <tr><td>Display Name</td><td>{{chatDisplayName}}</td></tr>
                 <tr><td>Is Muted</td><td>{{{boolean isMuted}}} {{#if isMuted}}{{> relativetime date=unmutesAt short=true prefix="for "}}{{/if}}</td></tr>
@@ -272,6 +276,20 @@
                 <tr><td>feedbackUrl</td><td>{{{url feedbackUrl "feedback form"}}}</td></tr>
                 <tr><td>repoUrl</td><td>{{{url repoUrl}}}</td></tr>
                 <tr><td>flags</td><td>{{> deep flags}}</td></tr>
+            </table>
+        </aside>
+
+        <aside>
+            <h2>Scheduled Announcements</h2>
+            <table class="table-small">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>cron</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="cron"></tbody>
             </table>
         </aside>
 
@@ -370,3 +388,59 @@
 
 <base target="_blank" />
 <meta http-equiv="refresh" content="{{data/autoRefreshInterval}}" />
+
+<script>
+    (() => {
+        const qtyRealtime = new EventSource(`${location.origin}/realtime?type=quota`);
+        qtyRealtime.addEventListener("quota", (event) => {
+            const { data } = event;
+
+            const quotaCell = document.getElementById("api-quota");
+            if(quotaCell) {
+                quotaCell.textContent = data;
+            }
+        });
+
+        const schRealtime = new EventSource(`${location.origin}/realtime?type=cron`);
+        schRealtime.addEventListener("schedules", (event) => {
+            const { data } = event;
+
+            /** @type {[type:string, cronexpr:string][]} */
+            const schedules = JSON.parse(data);
+
+            /** @type {HTMLTableSectionElement|undefined} */
+            const cronTbody = document.getElementById("cron");
+            if(!cronTbody) return;
+
+            const rows = schedules.map(([type, cron, date]) => {
+                const row = document.createElement("tr");
+
+                const typeCell = document.createElement("td");
+                typeCell.textContent = type;
+
+                const cronCell = document.createElement("td");
+                cronCell.textContent = cron;
+
+                const dateCell = document.createElement("td");
+                dateCell.textContent = date;
+
+                row.append(typeCell, cronCell, dateCell);
+                return row;
+            });
+
+            for(const row of cronTbody.rows) row.remove();
+
+            cronTbody.append(...rows);
+        });
+
+        schRealtime.addEventListener("error", (event) => {
+            console.debug(event);
+            schRealtime.close();
+        });
+
+        qtyRealtime.addEventListener("error", (event) => {
+            console.debug(event);
+            qtyRealtime.close();
+        });
+    })();
+</script>
