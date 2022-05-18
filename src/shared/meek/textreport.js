@@ -11,14 +11,22 @@ function pluralise(word, count) {
     else return `${word}s`;
 }
 
+/**
+ * @typedef {import("./meekstv").default} MeekSTV
+ */
+
 export default class TextReport {
+
+    maxWidth = 79;
 
     /** @type {string[]} */
     out = [];
 
+    /**
+     * @param {MeekSTV} results
+     */
     constructor(results) {
         this.results = results;
-        this.maxWidth = 79;
     }
 
     /** Pretty print election results in text format. */
@@ -138,11 +146,11 @@ export default class TextReport {
         const dirtyCount = numCandidates + (withdrawn?.length || 0);
 
         return `Ballot file contains ${dirtyCount} candidates and ${dirtyBCount} ballots.\n`
-             + `${this.generateWithdrawnText(withdrawn)}\n`
-             + `Ballot file contains ${numBallots} non-empty ballots.\n`
-             + '\n'
-             + `Counting votes for ${title} using Meek STV.\n`
-             + `${numCandidates} candidates running for ${numSeats} ${pluralise('seat', numSeats)}.\n\n`;
+            + `${this.generateWithdrawnText(withdrawn)}\n`
+            + `Ballot file contains ${numBallots} non-empty ballots.\n`
+            + '\n'
+            + `Counting votes for ${title} using Meek STV.\n`
+            + `${numCandidates} candidates running for ${numSeats} ${pluralise('seat', numSeats)}.\n\n`;
     }
 
     generateWithdrawnText(withdrawn) {
@@ -195,8 +203,8 @@ export default class TextReport {
         count[round].forEach((numVotes, candidate) => {
             // If candidate has lost and has no votes, leave blank
             if (losers.has(candidate)
-             && lostAtRound[candidate] <= round
-             && numVotes === 0
+                && lostAtRound[candidate] <= round
+                && numVotes === 0
             ) {
                 values.push('');
             } else { // otherwise print the total.

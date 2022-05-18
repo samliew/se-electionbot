@@ -10,6 +10,10 @@ function arrayEqual(array1, array2) {
     return array1.length === array2.length && array1.every((value, index) => value === array2[index]);
 }
 
+/**
+ * @typedef {import("./ballotparser").ElectionInfo} ElectionInfo
+ */
+
 export default class MeekSTV {
     tree = {};
 
@@ -46,6 +50,9 @@ export default class MeekSTV {
     losers = new Set();
     continuing = new Set();
 
+    /**
+     * @param {ElectionInfo} electionInfo
+     */
     constructor(electionInfo) {
         this.numCandidates = electionInfo.numCandidates;
         this.numSeats = electionInfo.numSeats;
