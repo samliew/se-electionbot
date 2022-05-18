@@ -17,6 +17,7 @@ function arrayEqual(array1, array2) {
 export default class MeekSTV {
     tree = {};
 
+    /** @type {number[][]} */
     keepFactor = [];
 
     /** @type {number[]} */
@@ -28,7 +29,14 @@ export default class MeekSTV {
     /** @type {string[]} */
     messages = [];
 
-
+    /**
+     * @type {{
+     *  action?: [string, any[]];
+     *  eliminate?: string;
+     *  surplus?: string;
+     *  winners?: string;
+     * }[]}
+     */
     roundInfo = [];
 
     count = [];
@@ -320,7 +328,7 @@ export default class MeekSTV {
         const roundInfo = this.roundInfo[this.round];
         let text;
 
-        switch (roundInfo.action[0]) {
+        switch (roundInfo.action?.[0]) {
             case 'first':
                 text = 'Count of first choices. ';
                 break;
@@ -332,11 +340,13 @@ export default class MeekSTV {
                 break;
         }
 
-        if (roundInfo.hasOwnProperty('winners')) {
+        if (roundInfo.winners) {
             text += roundInfo.winners;
         }
 
-        this.messages[this.round] = text;
+        if (text) {
+            this.messages[this.round] = text;
+        }
     }
 
     /** Determine whether the election is over. */
@@ -473,7 +483,7 @@ export default class MeekSTV {
         const candidateList = this.continuingAndWinners.sort((a, b) => a - b);
         for (const candidate of candidateList) {
             if (this.count[this.round - 1][candidate] > this.thresh[this.round - 1]) {
-                this.roundInfo[this.round].action[1].push(candidate);
+                this.roundInfo[this.round].action?.[1].push(candidate);
 
                 const prevKeep = this.keepFactor[this.round - 1][candidate];
                 const prevThresh = this.thresh[this.round - 1];
@@ -520,7 +530,10 @@ export default class MeekSTV {
         return `Count after eliminating ${this.joinList(sorted)} and transferring votes. `;
     }
 
-    /** Eliminate any losing candidates. */
+    /**
+     * @summary Eliminate any losing candidates.
+     * @returns {[number[], string]}
+     */
     selectCandidatesToEliminate() {
 
         if (this.inInfiniteLoop()) {
