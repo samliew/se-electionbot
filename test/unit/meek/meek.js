@@ -3,9 +3,9 @@ import { readdir, readFile } from "fs/promises";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
-import MeekSTV from "../../../src/shared/meek/MeekSTV.js";
-import BallotParser from "../../../src/shared/meek/BallotParser.js";
-import TextReport from "../../../src/shared/meek/TextReport.js";
+import MeekSTV from "../../../src/shared/meek/meekstv.js";
+import BallotParser from "../../../src/shared/meek/ballotparser.js";
+import TextReport from "../../../src/shared/meek/textreport.js";
 
 // Downloading blt files and then parsing is not possible,
 // since ballots are bound to change
