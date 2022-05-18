@@ -580,10 +580,17 @@ export default class MeekSTV {
         }
     }
 
-    /** Update the candidate keep factors. */
+    /**
+     * @summary Update the candidate keep factors.
+     * @returns {void}
+     */
     copyKeepFactors() {
-        this.continuingAndWinners.forEach(c => {
-            this.keepFactor[this.round][c] = this.keepFactor[this.round - 1][c];
+        const { keepFactor, round } = this;
+
+        const prevRound = round - 1;
+
+        this.continuingAndWinners.forEach((c) => {
+            keepFactor[round][c] = keepFactor[prevRound][c];
         });
     }
 
