@@ -98,6 +98,7 @@ import {
  * @typedef {import("./env.js").BotEnvironment} BotEnvironment
  *
  * @typedef {import("./commands/commands.js").CommandArguments} CommandArguments
+ * @typedef {import("./announcement").TaskType} TaskType
  */
 
 (async () => {
@@ -347,8 +348,8 @@ use defaults ${defaultChatNotSet}`
         const initStatus = announcement.initAll();
 
         console.log(`[init] scheduled tasks init:\n${Object.keys(initStatus).map(
-            ([type]) => `${type}: ${announcement.schedules.get(
-                /** @type {import("./announcement").TaskType} */(type)
+            (type) => `${type}: ${announcement.schedules.get(
+                /** @type {TaskType} */(type)
             ) || "not initialized"}`
         ).join("\n")}`);
 
