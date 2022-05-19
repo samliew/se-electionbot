@@ -29,7 +29,10 @@ export default class TextReport {
         this.results = results;
     }
 
-    /** Pretty print election results in text format. */
+    /**
+     * @summary Pretty print election results in text format.
+     * @returns {string} The text report
+     */
     generate() {
         const {
             numCandidates,
@@ -101,7 +104,7 @@ export default class TextReport {
         const rSubRow = maxNameLen % colWidth;
         if (rSubRow > 0) nSubRow += 1;
 
-        const topText = this.generateHeader(dirtyBallotsCount, withdrawn, numBallots, title, numCandidates, numSeats);
+        const topText = this.generateHeader(dirtyBallotsCount, withdrawn || [], numBallots, title, numCandidates, numSeats);
         this.out.push(topText);
 
         // table header
@@ -142,6 +145,16 @@ export default class TextReport {
         return this.out.join('');
     }
 
+    /**
+     * @summary Generate the report header
+     * @param {number} dirtyBCount The count of dirty ballots (including withdrawn candidates)
+     * @param {number[]} withdrawn A list of withdrawn candidates
+     * @param {number} numBallots The count of clean ballots (excluding withdrawn candidates)
+     * @param {string} title The title of the election
+     * @param {number} numCandidates The number of candidates running
+     * @param {number} numSeats The seats available
+     * @returns {string} the header
+     */
     generateHeader(dirtyBCount, withdrawn, numBallots, title, numCandidates, numSeats) {
         const dirtyCount = numCandidates + (withdrawn?.length || 0);
 
@@ -153,8 +166,14 @@ export default class TextReport {
             + `${numCandidates} candidates running for ${numSeats} ${pluralise('seat', numSeats)}.\n\n`;
     }
 
+    /**
+     * @summary Generate text for withdrawn candidates
+     * @param {number[]} withdrawn A list of withdrawn candidates
+     * @returns {string} the text
+     */
     generateWithdrawnText(withdrawn) {
         let withdrawnText;
+
         if (!withdrawn?.length) {
             withdrawnText = 'No candidates have withdrawn.';
         } else if (withdrawn.length === 1) {
@@ -167,6 +186,13 @@ export default class TextReport {
         return withdrawnText;
     }
 
+    /**
+     * @summary Generate info for the given round
+     * @param {number} R The round to look
+     * @param {number} width The actual width of the table
+     * @param {number} nSubCol The number of columns per row
+     * @param {number} colWidth The width of a column
+     */
     generateTextRoundResults(R, width, nSubCol, colWidth) {
         const values = this.getValuesForRound(R);
         this.printTableRow(values, width, nSubCol, colWidth);
@@ -185,6 +211,11 @@ export default class TextReport {
         this.out.push(complete + "\n");
     }
 
+    /**
+     * @summary Obtain the values required to generate round info
+     * @param {number} round The given round
+     * @returns {(number | "")[]} The wanted values
+     */
     getValuesForRound(round) {
         const {
             count,
@@ -220,20 +251,27 @@ export default class TextReport {
         return values;
     }
 
+    /**
+     * @summary Create a table row
+     * @param {(number | "")[]} values The values required to create the row
+     * @param {number} width The actual width of the table
+     * @param {number} nSubCol The number of columns per row
+     * @param {number} colWidth The width of a column
+     */
     printTableRow(values, width, nSubCol, colWidth) {
         // separator line
         this.out.push('='.repeat(width) + '\n');
 
-        let line = values.shift().toString().padStart(2, ' '); // round number
+        let line = values.shift()?.toString().padStart(2, ' ') || ''; // round number
         values.forEach((value, index) => {
             if (index % nSubCol === 0 && index > 0) {
                 line += '\n  ';
             }
 
-            let field = value;
+            let field = value.toString();
             // convert to specified precision (6)
             if (typeof value === 'number') {
-                field = value.toFixed(this.results.prec);
+                field = Number(value).toFixed(this.results.prec);
             }
 
             line += `|${field.padStart(colWidth)}`;
@@ -243,6 +281,11 @@ export default class TextReport {
         this.out.push(line);
     }
 
+    /**
+     * @summary Get the bottom text announcing final winners
+     * @param {Set<number>} winners The list of final winners
+     * @returns {string} The wanted text
+     */
     getWinnerText(winners) {
         const sorted = [...winners].sort((a, b) => a - b);
 
