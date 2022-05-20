@@ -1,0 +1,233 @@
+Ballot file contains 5 candidates and 164 ballots.
+No candidates have withdrawn.
+Ballot file contains 164 non-empty ballots.
+
+Counting votes for Mathematics Stack Exchange Moderator Election 2010 using Meek STV.
+5 candidates running for 3 seats.
+
+ R|Robin Chapman     |Akhil Mathew      |Willie Wong       |Qiaochu Yuan      
+  |------------------+------------------+------------------+------------------
+  |Timothy Wagner    |Exhausted         |Surplus           |Threshold         
+==============================================================================
+ 1|         25.000000|         18.000000|         16.000000|         93.000000
+  |         12.000000|          0.000000|         51.999999|         41.000001
+  |---------------------------------------------------------------------------
+  | Count of first choices. Candidate Qiaochu Yuan has reached the threshold
+  | and is elected.
+==============================================================================
+ 2|         42.892448|         33.096753|         25.505363|         41.000073
+  |         16.473112|          5.032251|          4.408645|         39.741938
+  |---------------------------------------------------------------------------
+  | Count after transferring surplus votes. Keep factors of candidates who
+  | have exceeded the threshold: Qiaochu Yuan, 0.440861. Candidate Robin
+  | Chapman has reached the threshold and is elected.
+==============================================================================
+ 3|         49.688143|         33.655892|         33.182780|         41.440934
+  |                  |          6.032251|         12.145201|         39.491938
+  |---------------------------------------------------------------------------
+  | Count after eliminating Timothy Wagner and transferring votes. All losing
+  | candidates are eliminated.
+==============================================================================
+ 4|         40.101721|         36.485148|         36.732534|         40.785107
+  |                  |          9.895490|          3.834572|         38.526128
+  |---------------------------------------------------------------------------
+  | Count after transferring surplus votes. Keep factors of candidates who
+  | have exceeded the threshold: Robin Chapman, 0.794797 and Qiaochu Yuan,
+  | 0.420127.
+==============================================================================
+ 5|         39.183552|         37.544896|         37.763020|         38.712089
+  |                  |         10.796443|          1.293861|         38.300890
+  |---------------------------------------------------------------------------
+  | Count after transferring surplus votes. Keep factors of candidates who
+  | have exceeded the threshold: Robin Chapman, 0.763570 and Qiaochu Yuan,
+  | 0.396858.
+==============================================================================
+ 6|         38.417312|         37.869032|         38.133608|         38.402232
+  |                  |         11.177816|          0.408450|         38.205547
+  |---------------------------------------------------------------------------
+  | Count after transferring surplus votes. Keep factors of candidates who
+  | have exceeded the threshold: Robin Chapman, 0.746370 and Qiaochu Yuan,
+  | 0.392643.
+==============================================================================
+ 7|         38.260785|         37.978000|         38.246784|         38.229653
+  |                  |         11.284778|          0.200804|         38.178806
+  |---------------------------------------------------------------------------
+  | Count after transferring surplus votes. Keep factors of candidates who
+  | have exceeded the threshold: Robin Chapman, 0.742256 and Qiaochu Yuan,
+  | 0.390632. Candidate Willie Wong has reached the threshold and is elected.
+
+Winners are Robin Chapman, Willie Wong, and Qiaochu Yuan.
+
+
+5 3
+1 1 2 3 0
+1 1 2 3 0
+1 1 2 3 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 1 0
+1 1 0
+1 1 0
+1 4 2 3 0
+1 4 2 3 0
+1 4 2 3 0
+1 4 2 3 0
+1 1 4 5 0
+1 4 2 3 0
+1 4 2 3 0
+1 4 2 3 0
+1 4 0
+1 4 0
+1 4 0
+1 4 0
+1 4 0
+1 4 0
+1 4 0
+1 4 0
+1 4 0
+1 4 2 0
+1 4 2 0
+1 4 1 0
+1 4 1 0
+1 4 1 0
+1 1 4 0
+1 1 4 0
+1 2 5 0
+1 1 3 0
+1 4 3 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 2 1 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 1 4 3 0
+1 1 4 3 0
+1 4 2 5 0
+1 4 2 5 0
+1 4 2 5 0
+1 1 4 3 0
+1 1 4 3 0
+1 4 2 5 0
+1 4 2 5 0
+1 5 0
+1 4 1 2 0
+1 4 1 2 0
+1 4 1 2 0
+1 4 1 2 0
+1 4 1 2 0
+1 4 1 2 0
+1 4 1 2 0
+1 4 1 2 0
+1 1 4 2 0
+1 1 4 2 0
+1 1 4 2 0
+1 1 4 2 0
+1 4 3 2 0
+1 4 3 2 0
+1 4 3 2 0
+1 4 3 2 0
+1 4 3 2 0
+1 4 3 2 0
+1 2 5 4 0
+1 4 3 1 0
+1 4 3 1 0
+1 4 3 1 0
+1 4 3 1 0
+1 4 3 1 0
+1 4 3 1 0
+1 1 3 4 0
+1 1 3 4 0
+1 1 3 4 0
+1 4 3 5 0
+1 4 3 5 0
+1 4 3 5 0
+1 4 3 5 0
+1 2 4 1 0
+1 2 4 1 0
+1 2 4 1 0
+1 2 4 1 0
+1 2 4 1 0
+1 2 1 4 0
+1 2 1 4 0
+1 2 1 3 0
+1 2 1 3 0
+1 2 4 3 0
+1 2 4 5 0
+1 2 1 5 0
+1 2 3 5 0
+1 5 1 0
+1 4 5 2 0
+1 2 3 4 0
+1 2 3 1 0
+1 2 3 1 0
+1 1 5 4 0
+1 1 5 4 0
+1 4 5 1 0
+1 4 5 1 0
+1 4 5 1 0
+1 4 5 1 0
+1 4 5 1 0
+1 4 5 3 0
+1 4 5 3 0
+1 1 5 3 0
+1 1 5 3 0
+1 3 5 1 0
+1 3 4 2 0
+1 3 4 2 0
+1 3 4 2 0
+1 3 4 2 0
+1 3 1 4 0
+1 3 1 4 0
+1 3 1 4 0
+1 3 4 1 0
+1 3 2 5 0
+1 3 2 4 0
+1 3 2 4 0
+1 3 2 4 0
+1 3 2 4 0
+1 3 1 5 0
+1 3 4 5 0
+1 5 3 2 0
+1 5 3 4 0
+1 5 3 4 0
+1 5 3 4 0
+1 5 3 1 0
+1 5 3 1 0
+1 5 4 3 0
+1 5 1 4 0
+1 5 1 4 0
+1 5 1 2 0
+0
+"Robin Chapman" # Candidate 1
+"Akhil Mathew" # Candidate 2
+"Willie Wong" # Candidate 3
+"Qiaochu Yuan" # Candidate 4
+"Timothy Wagner" # Candidate 5
+"Mathematics Stack Exchange Moderator Election 2010"
