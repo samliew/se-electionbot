@@ -1,7 +1,7 @@
 import { datesToDuration, dateToRelativeTime, getSeconds } from "../../shared/utils/dates.js";
 import { matchNumber, safeCapture } from "../../shared/utils/expressions.js";
 import { formatOrdinal } from "../../shared/utils/strings.js";
-import { getRandomNow } from "../random.js";
+import { getCandidateOrNominee, getRandomNow } from "../random.js";
 import { makeURL, pluralize } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
@@ -225,6 +225,37 @@ export const sayWhenAreElectionsCancelled = () => {
     const fullCond = `the number of *nominees* is less than or equal to the number of *positions*`;
 
     return `An election is cancelled ${extension} if it is ${proTemCond} or if ${fullCond} otherwise.`;
+};
+
+/**
+ * @summary builds a response to a query on will the election be cancelled
+ * @type {MessageBuilder}
+ */
+export const sayWillElectionBeCancelled = (config, _es, election) => {
+    const { dateCancelled, dateEnded, electionNum, siteName, electionUrl, numPositions = 1, numNominees } = election;
+
+    const possiblyWillBeCancelled = numNominees <= numPositions;
+    const leftToNominateToSustain = numPositions + 1 - numNominees;
+
+    const electionName = `The ${formatOrdinal(electionNum || 1)} ${siteName} election`;
+
+    const phase = election.getPhase(config.nowOverride);
+    if (!phase) {
+        return `${electionName} hasn't even started yet!`;
+    }
+
+    /** @type {Record<Exclude<ElectionPhase, null>, string>} */
+    const responses = {
+        cancelled: `has already been cancelled at ${dateCancelled}`,
+        ended: `has already ended at ${dateEnded}`,
+        nomination: possiblyWillBeCancelled ?
+            `will be cancelled unless ${leftToNominateToSustain} more user${pluralize(leftToNominateToSustain)} nominate${pluralize(leftToNominateToSustain)}` :
+            `has enough ${getCandidateOrNominee()}s (${numNominees} to ${numPositions + 1} minimum) to not be cancelled`,
+        election: `has already passed the nomination phase and is currently in the ${makeURL("election", `${electionUrl}?tab=election`)} phase`,
+        primary: `has already passed the nomination phase and is currently in the ${makeURL("election", `${electionUrl}?tab=primary`)} phase`,
+    };
+
+    return `${electionName} ${responses[phase]}.`;
 };
 
 // /**
