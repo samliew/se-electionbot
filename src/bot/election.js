@@ -2,7 +2,7 @@ import { AllowedHosts } from "chatexchange/dist/Client.js";
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
 import { isOneOf, mapify } from '../shared/utils/arrays.js';
-import { addDates, dateToUtcTimestamp, daysDiff } from '../shared/utils/dates.js';
+import { addDates, dateToUtcTimestamp, daysDiff, getMilliseconds } from '../shared/utils/dates.js';
 import { findLast } from '../shared/utils/dom.js';
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { filterMap, getOrInit, has, mergeMaps, sortMap } from '../shared/utils/maps.js';
@@ -1226,7 +1226,7 @@ export default class Election {
      * @returns {ElectionPhase}
      */
     getPhase(today = new Date()) {
-        const { dateNomination, dateElection, datePrimary, dateEnded } = this;
+        const { dateNomination, dateElection, datePrimary, dateEnded, dateCancelled } = this;
 
         const now = today.valueOf();
 
@@ -1238,7 +1238,11 @@ export default class Election {
             [dateNomination, "nomination"]
         ];
 
-        const [, phase = null] = phaseMap.find(([d]) => !!d && new Date(d).valueOf() <= now) || [];
+        const [, phase = null] = phaseMap.find(([d]) => !!d && getMilliseconds(d) <= now) || [];
+
+        if (dateCancelled && now >= getMilliseconds(dateElection)) {
+            return "cancelled";
+        }
 
         return phase;
     }
