@@ -249,7 +249,7 @@ export const sayWillElectionBeCancelled = (config, _es, election) => {
         cancelled: `has already been cancelled at ${dateCancelled}`,
         ended: `has already ended at ${dateEnded}`,
         nomination: possiblyWillBeCancelled ?
-            `will be cancelled unless ${leftToNominateToSustain} more user${pluralize(leftToNominateToSustain)} nominate${pluralize(leftToNominateToSustain)}` :
+            `will be cancelled unless ${leftToNominateToSustain} more user${pluralize(leftToNominateToSustain)} nominate${pluralize(leftToNominateToSustain, "", "s")}` :
             `has enough ${getCandidateOrNominee()}s (${numNominees} to ${numPositions + 1} minimum) to not be cancelled`,
         election: `has already passed the nomination phase and is currently in the ${makeURL("election", `${electionUrl}?tab=election`)} phase`,
         primary: `has already passed the nomination phase and is currently in the ${makeURL("election", `${electionUrl}?tab=primary`)} phase`,
