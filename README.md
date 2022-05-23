@@ -21,6 +21,7 @@ General election help:
 - where is the election page
 - can I vote in the election
 - why are elections cancelled
+- will the election be cancelled
 
 Election badges:
 

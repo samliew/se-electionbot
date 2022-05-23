@@ -37,6 +37,7 @@ import {
     isAskedWhyAreElectionsCancelled,
     isAskedWhyIsBot,
     isAskedWhyNominationRemoved,
+    isAskedWillElectionBeCancelled,
     isBotMentioned,
     isHatingTheBot,
     isLovingTheBot,
@@ -48,7 +49,7 @@ import {
 import { HerokuClient } from "./herokuClient.js";
 import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
-import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults } from "./messages/elections.js";
+import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults, sayWillElectionBeCancelled } from "./messages/elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
 import { sayCommonlyAskedQuestions, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
 import { sayHappyBirthday, sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
@@ -504,6 +505,7 @@ use defaults ${defaultChatNotSet}`
             [isHatingTheBot, getRandomNegative],
             [isSayingHappyBirthday, sayHappyBirthday],
             [isAskedWhyAreElectionsCancelled, sayWhenAreElectionsCancelled],
+            [isAskedWillElectionBeCancelled, sayWillElectionBeCancelled]
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
