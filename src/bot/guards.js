@@ -781,3 +781,13 @@ export const isAskedWhyAreElectionsCancelled = (text) => {
         /^why\s+(?:are|would)(?:\s+(?:some|an))?\s+elections?(?:\s+be)?\s+cancell?ed(?:\?\!?|$)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking about will the election be cancelled
+ * @type {MessageGuard}
+ */
+export const isAskedWillElectionBeCancelled = (text) => {
+    return someMatch([
+        /^(?:is|will|would)(?:\s+th(?:e|is))?\s+election(?:\s+going\s+to)?\s+be\s+cancell?ed(?:\?\!?|$)/i
+    ], text);
+};
