@@ -14,10 +14,9 @@ import { sayElectionNotStartedYet } from "./phases.js";
 
 /**
  * @summary builds current winners message
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayCurrentWinners = (election) => {
+export const sayCurrentWinners = (_c, _es, election) => {
     const { phase, arrWinners = [], siteUrl, electionUrl } = election;
 
     const phaseMap = {
@@ -38,10 +37,7 @@ export const sayCurrentWinners = (election) => {
 
 /**
  * @summary builds a response on where is the election page
- * @param {BotConfig} config bot configuration
- * @param {Map<number, Election>} _elections election history
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
 export const sayElectionPage = (config, _elections, election) => {
     const { electionUrl, electionNum, siteName } = election;
@@ -60,11 +56,7 @@ export const sayElectionPage = (config, _elections, election) => {
 
 /**
  * @summary builds a response to a query to post specific election results
- * @param {BotConfig} _config bot configuration
- * @param {Map<number, Election>} elections election history
- * @param {Election} _election current election
- * @param {string} text message content
- * @returns {string}
+ * @type {MessageBuilder}
  */
 export const sayElectionResults = (_config, elections, _election, text) => {
     const electionNum = matchNumber(/(?:number\s+|#)(\d+)/i, text) || 1;
@@ -134,11 +126,7 @@ export const sayElectionPhaseDuration = (_config, _elections, election, text) =>
 
 /**
  * @summary builds a "number of positions" message
- * @param {BotConfig} _config bot configuration
- * @param {Map<number, Election>} _elections election history
- * @param {Election} election current election
- * @param {string} _text message content
- * @returns {string}
+ * @type {MessageBuilder}
  */
 export const sayNumberOfPositions = (_config, _elections, election, _text) => {
     const { numPositions = 0 } = election;
@@ -161,10 +149,9 @@ export const sayNumberOfPositions = (_config, _elections, election, _text) => {
 
 /**
  * @summary builds an election definition message
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayWhatIsAnElection = (election) => {
+export const sayWhatIsAnElection = (_c, _es, election) => {
     const { repVote } = election;
 
     const diamondURL = makeURL("diamond ♦ moderator", "https://meta.stackexchange.com/q/75189");
@@ -176,10 +163,7 @@ export const sayWhatIsAnElection = (election) => {
 
 /**
  * @summary builds a response to a query where to find results
- * @param {BotConfig} _config bot configuration
- * @param {Map<number, Election>} _elections election history
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
 export const sayWhereToFindElectionResults = (_config, _elections, election) => {
     const { opavoteUrl, siteName, electionNum, dateEnded } = election;

@@ -8,7 +8,7 @@ import { prepareMessageForMatching } from "../shared/utils/chat.js";
 import { matchNumber } from "../shared/utils/expressions.js";
 import { getOrInit, sortMap } from "../shared/utils/maps.js";
 import { countValidBotMessages } from "./activity/index.js";
-import Announcement from './announcement.js';
+import Announcement, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
 import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
@@ -49,7 +49,7 @@ import {
 import { HerokuClient } from "./herokuClient.js";
 import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
-import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults, sayWillElectionBeCancelled } from "./messages/elections.js";
+import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults, sayWillElectionBeCancelled } from "./messages/elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
 import { sayCommonlyAskedQuestions, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
 import { sayHappyBirthday, sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
@@ -492,6 +492,7 @@ use defaults ${defaultChatNotSet}`
             [isAskedAboutBallotFile, sayAboutBallotFile],
             [isAskedWhoIsTheBestMod, sayBestModerator],
             [isAskedForCurrentNominees, sayCurrentCandidates],
+            [isAskedForCurrentWinners, sayCurrentWinners],
             [isAskedForFormerMods, sayFormerMods],
             [isAskedAboutElectionPhases, sayAboutThePhases],
             [isAskedIfOneHasVoted, sayIfOneHasVoted],
@@ -505,7 +506,8 @@ use defaults ${defaultChatNotSet}`
             [isHatingTheBot, getRandomNegative],
             [isSayingHappyBirthday, sayHappyBirthday],
             [isAskedWhyAreElectionsCancelled, sayWhenAreElectionsCancelled],
-            [isAskedWillElectionBeCancelled, sayWillElectionBeCancelled]
+            [isAskedWillElectionBeCancelled, sayWillElectionBeCancelled],
+            [isAskedWhatElectionIs, sayWhatIsAnElection],
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
@@ -727,14 +729,8 @@ use defaults ${defaultChatNotSet}`
             else if (isAskedAboutVoting(preparedMessage)) {
                 responseText = sayAboutVoting(election);
             }
-            else if (isAskedForCurrentWinners(preparedMessage)) {
-                responseText = sayCurrentWinners(election);
-            }
             else if (isAskedForElectionSchedule(preparedMessage)) {
                 responseText = sayElectionSchedule(election);
-            }
-            else if (isAskedWhatElectionIs(preparedMessage)) {
-                responseText = sayWhatIsAnElection(election);
             }
             else if (isAskedAboutUsernameDiamond(preparedMessage)) {
                 responseText = sayCanEditDiamond();
