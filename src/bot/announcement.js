@@ -7,6 +7,8 @@ import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
 import { makeURL, pluralize, wait } from "./utils.js";
 
+export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chance to cast or modify your votes!";
+
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./election.js").default} Election
@@ -90,6 +92,24 @@ export default class ScheduledAnnouncement {
 
         // Announce
         await room.sendMessage(cancelledText);
+
+        return true;
+    }
+
+    /**
+     * @summary announces new nominees arrival
+     * @returns {Promise<boolean>}
+     */
+    async announceElectionEndingSoon() {
+        const { _room, config, _election } = this;
+
+        const { electionUrl } = _election;
+
+        const messages = [
+            `The ${makeURL('election', electionUrl)} ${ELECTION_ENDING_SOON_TEXT}`
+        ];
+
+        await sendMessageList(config, _room, messages, { isPrivileged: true });
 
         return true;
     }

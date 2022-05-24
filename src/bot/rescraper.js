@@ -1,9 +1,7 @@
 import { SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { mapMap } from "../shared/utils/maps.js";
 import { HerokuClient } from "./herokuClient.js";
-import { sayEndingSoon } from "./messages/elections.js";
 import { sayBusyGreeting, sayIdleGreeting } from "./messages/greetings.js";
-import { sendMessage } from "./queue.js";
 import { wait } from "./utils.js";
 
 /**
@@ -198,11 +196,11 @@ export default class Rescraper {
                 const heroku = new HerokuClient(config);
                 await heroku.scaleHobby();
 
-                // Announce election ending soon
-                await sendMessage(config, room, sayEndingSoon(election));
+                const status = await announcement?.announceElectionEndingSoon();
+                console.log(`[rescraper] announced ending soon: ${status}`);
 
                 if (config.debugOrVerbose) {
-                    console.log(`RESCRAPER - Election ending - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
+                    console.log(`[rescraper] scrape interval reduced to ${config.scrapeIntervalMins}`);
                 }
             }
 

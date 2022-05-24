@@ -107,6 +107,21 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
+    describe(ScheduledAnnouncement.prototype.announceElectionEndingSoon.name, () => {
+        it('should correctly announce that election is ending soon', async () => {
+            const messageStub = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announceElectionEndingSoon();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[message]] = messageStub.args;
+            expect(message).to.match(/is ending soon/);
+        });
+    });
+
     describe(ScheduledAnnouncement.prototype.announceNewNominees.name, () => {
 
         it('should correctly announce new nominees', async () => {
