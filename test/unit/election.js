@@ -36,6 +36,12 @@ describe(Election.name, () => {
             expect(currentModerators.has(2)).to.be.true;
         });
 
+        describe("electionOrdinalName", () => {
+            const election = new Election("https://stackoverflow.com/election/2");
+            election.siteName = "Stack Overflow";
+            expect(election.electionOrdinalName).to.equal("2nd Stack Overflow election");
+        });
+
         describe("electionPhaseDuration", () => {
             const election = new Election("https://stackoverflow.com/election/1");
 

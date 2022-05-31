@@ -8,6 +8,7 @@ import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { filterMap, getOrInit, has, mergeMaps, sortMap } from '../shared/utils/maps.js';
 import { clone } from '../shared/utils/objects.js';
 import { scrapeModerators } from '../shared/utils/scraping.js';
+import { formatOrdinal } from "../shared/utils/strings.js";
 import { getAllNamedBadges, getBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
 import History from "./history.js";
 import { calculateScore } from './score.js';
@@ -729,6 +730,15 @@ export default class Election {
         const idFromURL = /** @type {string} */(electionUrl.split('/').pop());
 
         this.electionNum = electionNum ? +electionNum : +idFromURL || null;
+    }
+
+    /**
+     * @summary formats election number as 'N<oridnal suffix> <site name> election';
+     * @returns {string}
+     */
+    get electionOrdinalName() {
+        const { electionNum, siteName } = this;
+        return `${formatOrdinal(electionNum || 1)} ${siteName} election`;
     }
 
     /**
