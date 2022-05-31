@@ -35,6 +35,16 @@ describe(Election.name, () => {
             expect(currentModerators.has(2)).to.be.true;
         });
 
+        describe("electionPhaseDuration", () => {
+            const election = new Election("https://stackoverflow.com/election/1");
+
+            expect(election.electionPhaseDuration).to.equal(election.durations.electionWithoutPrimary);
+
+            election.datePrimary = dateToUtcTimestamp(Date.now());
+
+            expect(election.electionPhaseDuration).to.equal(election.durations.electionWithPrimary);
+        });
+
         describe('formerModerators', () => {
             const election = new Election("https://stackoverflow.com/election/1");
 

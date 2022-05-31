@@ -15,6 +15,7 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
 
 /**
  * @typedef {null|"ended"|"election"|"primary"|"nomination"|"cancelled"} ElectionPhase
+ * @typedef {"electionWithPrimary"|"electionWithoutPrimary"|"nomination"|"primary"|"announcement"} ElectionPhaseDuration
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import('chatexchange/dist/Client').Host} Host
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -631,6 +632,19 @@ export default class Election {
     repVote = 150;
 
     /**
+     * @see https://meta.stackexchange.com/a/135361
+     * @summary election phase durations
+     * @type {Record<ElectionPhaseDuration, number>}
+     */
+    durations = {
+        announcement: 7,
+        electionWithPrimary: 4,
+        electionWithoutPrimary: 8,
+        nomination: 7,
+        primary: 4,
+    };
+
+    /**
      * @description Site election badges, defaults to Stack Overflow's
      * @type {ElectionBadge[]}
      */
@@ -724,6 +738,17 @@ export default class Election {
     get currentModerators() {
         const { moderators } = this;
         return filterMap(moderators, (m) => !m.former);
+    }
+
+    /**
+     * @summary gets the 'election' phase duration
+     * @returns {number}
+     */
+    get electionPhaseDuration() {
+        const { durations, datePrimary } = this;
+        return datePrimary ?
+            durations.electionWithPrimary :
+            durations.electionWithoutPrimary;
     }
 
     /**
