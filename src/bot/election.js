@@ -1170,13 +1170,15 @@ export default class Election {
 
     /**
      * @summary checks if the election nomination period can be extended
+     * @param {BotConfig} config bot configuration
      * @returns {boolean}
      */
-    isExtensionEligible() {
+    isExtensionEligible(config) {
         const { numNominees, phase, numPositions = 1 } = this;
         return [
             phase === "nomination",
-            numNominees <= numPositions
+            numNominees <= numPositions,
+            !this.isNominationExtended(config)
         ].every(Boolean);
     }
 

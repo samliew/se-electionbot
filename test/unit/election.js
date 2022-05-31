@@ -430,21 +430,23 @@ describe(Election.name, () => {
 
     describe(Election.prototype.isExtensionEligible.name, () => {
         it('should correctly determine extension eligibility', () => {
+            const config = getMockBotConfig();
+
             const election = new Election("https://stackoverflow.com/election/12");
             election.phase = "nomination";
             election.numPositions = 2;
 
             // < number of positions
             election.addActiveNominee(getMockNominee(election, { userId: 1 }));
-            expect(election.isExtensionEligible()).to.be.true;
+            expect(election.isExtensionEligible(config)).to.be.true;
 
             // = number of positions
             election.addActiveNominee(getMockNominee(election, { userId: 2 }));
-            expect(election.isExtensionEligible()).to.be.true;
+            expect(election.isExtensionEligible(config)).to.be.true;
 
             // > number of positions
             election.addActiveNominee(getMockNominee(election, { userId: 3 }));
-            expect(election.isExtensionEligible()).to.be.false;
+            expect(election.isExtensionEligible(config)).to.be.false;
         });
     });
 
