@@ -1,7 +1,8 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import Election from "../../src/bot/election.js";
-import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
+import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
+import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 import { getMockApiUser, getMockUserProfile } from "../mocks/user.js";
 
@@ -444,6 +445,24 @@ describe(Election.name, () => {
             // > number of positions
             election.addActiveNominee(getMockNominee(election, { userId: 3 }));
             expect(election.isExtensionEligible()).to.be.false;
+        });
+    });
+
+    describe(Election.prototype.isNominationExtended.name, () => {
+        it('should correctly determine if the nomination phase was extended', () => {
+            const config = getMockBotConfig();
+
+            const now = Date.now();
+
+            const election = new Election("https://stackoverflow.com/election/1");
+            election.phase = "nomination";
+            election.dateNomination = dateToUtcTimestamp(now);
+
+            expect(election.isNominationExtended(config)).to.be.false;
+
+            config.nowOverride = addDates(now, election.durations.nomination + 1);
+
+            expect(election.isNominationExtended(config)).to.be.true;
         });
     });
 

@@ -1181,6 +1181,22 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the nomination period was extended
+     * @param {BotConfig} config bot configuration
+     * @returns {boolean}
+     */
+    isNominationExtended(config) {
+        const { durations: { nomination }, phase, dateNomination } = this;
+
+        const now = config.nowOverride || new Date();
+
+        return [
+            phase === "nomination",
+            daysDiff(dateNomination, now) > nomination
+        ].every(Boolean);
+    }
+
+    /**
      * @summary checks if the election is a Stack Overflow election
      *  @returns {boolean}
      */
