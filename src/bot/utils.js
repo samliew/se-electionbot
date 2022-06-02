@@ -696,7 +696,7 @@ const siteUserIdCache = new Map();
 /**
  * @description Expensive, up to three requests. Only one, if the linked account is the site we want.
  * @param {BotConfig} config bot configuration
- * @param {number} chatUserId user id
+ * @param {string | number} chatUserId user id
  * @param {Host} chatHost chat {@link Host}
  * @param {string} hostname election site hostname
  * @param {string} [apiKey] Stack Exchange API key
@@ -779,7 +779,7 @@ export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, c
 
         const siteUserId = numericNullable(siteAccount, "user_id");
         if (siteUserId) {
-            hostCache.set(chatUserId, siteUserId);
+            hostCache.set(+chatUserId, siteUserId);
         }
 
         return siteUserId;
