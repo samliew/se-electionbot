@@ -149,38 +149,39 @@ By default, the bot will post a one-boxed link to the Meta post.
 
 All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 
-| Variable                       | Type     | Required? | Default      | Description                                                                                             |
-| ------------------------------ | -------- | --------- | ------------ | ------------------------------------------------------------------------------------------------------- |
-| `ACCOUNT_EMAIL`                | string   | yes       | -            | email of bot account                                                                                    |
-| `ACCOUNT_PASSWORD`             | string   | yes       | -            | password of bot account                                                                                 |
-| `ADMIN_IDS`                    | number[] | no        | -            | user chatIds to grant admin privileges (pipe-delimited) (mods and ROs are already privileged)           |
-| `CHAT_DOMAIN`                  | string   | no        | -            | default chat domain (stackexchange.com \| stackoverflow.com)                                            |
-| `CHAT_ROOM_ID`                 | number   | no        | -            | default chat room ID that the bot will join                                                             |
-| `CONTROL_ROOM_ID`              | number   | no        | -            | flight control room for the bot to join                                                                 |
-| `DEBUG`                        | boolean  | no        | `false`      | whether bot is in debug mode                                                                            |
-| `DEFAULT_ELECTION_TIME`        | string   | no        | `20:00:00`   | default election time (used for upcoming election announcements)                                        |
-| `DEV_IDS`                      | number[] | no        | -            | user chatIds to grant dev privileges (pipe-delimited)                                                   |
-| `ELECTION_CHATROOM_URL`        | string   | no        | -            | URL of the election chat room                                                                           |
-| `ELECTION_URL`                 | string   | yes       | -            | URL of election page (with ID) that the bot will scrape                                                 |
-| `FEEDBACK_FORM_URL`            | string   | no        | -            | URL for users to provide feedback about the bot                                                         |
-| `FUN_MODE`                     | boolean  | no        | `true`       | enable fun random responses                                                                             |
-| `IGNORED_USER_IDS`             | number[] | no        | -            | user chatIds to ignore messages from (pipe-delimited)                                                   |
-| `HEROKU_API_TOKEN`             | string   | no        | -            | API token to uses if hosted on Heroku for bot config updates                                            |
-| `HEROKU_APP_NAME`              | string   | no        | -            | application name if hosted on Heroku                                                                    |
-| `KEEP_ALIVE`                   | boolean  | no        | `false`      | whether bot will ping itself occasionally                                                               |
-| `LOW_ACTIVITY_CHECK_MINS`      | number   | no        | `10`         | interval (minutes) before bot can check room for inactivity                                             |
-| `LOW_ACTIVITY_COUNT_THRESHOLD` | number   | no        | `20`         | bot can classify room as inactive only after these amount of messages have been sent                    |
-| `NODE_ENV`                     | string   | no        | `production` | whether bot is in Node debug mode                                                                       |
-| `PASSWORD`                     | string   | no        | -            | password to access non-public routes of the bot dashboard                                               |
-| `REPO_URL`                     | string   | no        | -            | URL of this git repository                                                                              |
-| `SCRAPE_INTERVAL_MINS`         | number   | no        | `2`          | interval (minutes) to check election page for updates                                                   |
-| `SCRIPT_HOSTNAME`              | string   | no        | -            | instance identifier, hostname for dashboard, also where keep-alive will ping                            |
-| `SHOW_PRIMARY_COUNTDOWN_AFTER` | number   | no        | `8`          | minimum number of candidates to start showing countdown to primary if the current phase is _nomination_ |
-| `SOURCE_VERSION`               | string   | no        | `1.0.0`      | added to the `User-Agent` header when the bot makes HTTP requests                                       |
-| `STACK_API_KEYS`               | string[] | no        | -            | **recommended** Stack Exchange API key(s) (pipe-delimited)                                              |
-| `THROTTLE_SECS`                | number   | no        | `1`          | seconds before bot can send another response                                                            |
-| `TRANSCRIPT_SIZE`              | number   | no        | `20`         | number of latest messages to show in the dashboard                                                      |
-| `VERBOSE`                      | boolean  | no        | `false`      | a debug variable                                                                                        |
+| Variable                       | Type     | Required? | Default                    | Description                                                                                             |
+| ------------------------------ | -------- | --------- | -------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ACCOUNT_EMAIL`                | string   | yes       | -                          | email of bot account                                                                                    |
+| `ACCOUNT_PASSWORD`             | string   | yes       | -                          | password of bot account                                                                                 |
+| `ADMIN_IDS`                    | number[] | no        | -                          | user chatIds to grant admin privileges (pipe-delimited) (mods and ROs are already privileged)           |
+| `CHAT_DOMAIN`                  | string   | no        | -                          | default chat domain (stackexchange.com \| stackoverflow.com)                                            |
+| `CHAT_ROOM_ID`                 | number   | no        | -                          | default chat room ID that the bot will join                                                             |
+| `CONTROL_ROOM_ID`              | number   | no        | -                          | flight control room for the bot to join                                                                 |
+| `DEBUG`                        | boolean  | no        | `false`                    | whether bot is in debug mode                                                                            |
+| `DEFAULT_ELECTION_TIME`        | string   | no        | `20:00:00`                 | default election time (used for upcoming election announcements)                                        |
+| `DEV_IDS`                      | number[] | no        | -                          | user chatIds to grant dev privileges (pipe-delimited)                                                   |
+| `ELECTION_CHATROOM_URL`        | string   | no        | -                          | URL of the election chat room                                                                           |
+| `ELECTION_URL`                 | string   | yes       | -                          | URL of election page (with ID) that the bot will scrape                                                 |
+| `FEEDBACK_FORM_URL`            | string   | no        | -                          | URL for users to provide feedback about the bot                                                         |
+| `FUN_MODE`                     | boolean  | no        | `true`                     | enable fun random responses                                                                             |
+| `IGNORED_USER_IDS`             | number[] | no        | -                          | user chatIds to ignore messages from (pipe-delimited)                                                   |
+| `HEROKU_API_TOKEN`             | string   | no        | -                          | API token to uses if hosted on Heroku for bot config updates                                            |
+| `HEROKU_APP_NAME`              | string   | no        | -                          | application name if hosted on Heroku                                                                    |
+| `KEEP_ALIVE`                   | boolean  | no        | `false`                    | whether bot will ping itself occasionally                                                               |
+| `LOW_ACTIVITY_CHECK_MINS`      | number   | no        | `10`                       | interval (minutes) before bot can check room for inactivity                                             |
+| `LOW_ACTIVITY_COUNT_THRESHOLD` | number   | no        | `20`                       | bot can classify room as inactive only after these amount of messages have been sent                    |
+| `MAINTAINERS`                  | JSON     | no        | `{"stackoverflow.com":[]}` | JSON map of chat domains to lists of maintainer ids                                                      |
+| `NODE_ENV`                     | string   | no        | `production`               | whether bot is in Node debug mode                                                                       |
+| `PASSWORD`                     | string   | no        | -                          | password to access non-public routes of the bot dashboard                                               |
+| `REPO_URL`                     | string   | no        | -                          | URL of this git repository                                                                              |
+| `SCRAPE_INTERVAL_MINS`         | number   | no        | `2`                        | interval (minutes) to check election page for updates                                                   |
+| `SCRIPT_HOSTNAME`              | string   | no        | -                          | instance identifier, hostname for dashboard, also where keep-alive will ping                            |
+| `SHOW_PRIMARY_COUNTDOWN_AFTER` | number   | no        | `8`                        | minimum number of candidates to start showing countdown to primary if the current phase is _nomination_ |
+| `SOURCE_VERSION`               | string   | no        | `1.0.0`                    | added to the `User-Agent` header when the bot makes HTTP requests                                       |
+| `STACK_API_KEYS`               | string[] | no        | -                          | **recommended** Stack Exchange API key(s) (pipe-delimited)                                              |
+| `THROTTLE_SECS`                | number   | no        | `1`                        | seconds before bot can send another response                                                            |
+| `TRANSCRIPT_SIZE`              | number   | no        | `20`                       | number of latest messages to show in the dashboard                                                      |
+| `VERBOSE`                      | boolean  | no        | `false`                    | a debug variable                                                                                        |
 
 ## Flags
 
