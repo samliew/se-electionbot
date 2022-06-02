@@ -9,7 +9,7 @@ import { filterMap, getOrInit, has, mergeMaps, sortMap } from '../shared/utils/m
 import { clone } from '../shared/utils/objects.js';
 import { scrapeModerators } from '../shared/utils/scraping.js';
 import { formatOrdinal } from "../shared/utils/strings.js";
-import { getAllNamedBadges, getBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
+import { getBadges, getNamedBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
 import History from "./history.js";
 import { calculateScore } from './score.js';
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
@@ -1582,7 +1582,7 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
     async updateElectionBadges(config) {
         const { apiSlug, electionBadges } = this;
 
-        const allNamedBadges = await getAllNamedBadges(config, apiSlug);
+        const allNamedBadges = await getNamedBadges(config, apiSlug);
         const badgeMap = mapify(allNamedBadges, "name");
 
         electionBadges.forEach((electionBadge) => {

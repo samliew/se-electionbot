@@ -69,7 +69,7 @@ export const handleResponse = async (response, backoffCallback, successCallback)
  * @param {{ page?: number, name?: string }} options request options
  * @returns {Promise<Badge[]>}
  */
-export const getAllNamedBadges = async (config, site, options = {}) => {
+export const getNamedBadges = async (config, site, options = {}) => {
     const { page = 1, name } = options;
 
     const params = new URLSearchParams({
@@ -89,17 +89,17 @@ export const getAllNamedBadges = async (config, site, options = {}) => {
 
     return handleResponse(
        /** @type {ApiWrapper<Badge>} */(await fetchUrl(config, badgeURI, true)) || {},
-        () => getAllNamedBadges(config, site, options),
+        () => getNamedBadges(config, site, options),
         async ({ items = [], has_more }) => {
             if (has_more) {
-                const otherItems = await getAllNamedBadges(config, site, {
+                const otherItems = await getNamedBadges(config, site, {
                     ...options,
                     page: page + 1,
                 });
                 return [...items, ...otherItems];
             }
 
-            if (config.verbose) console.log(`[api] ${getAllNamedBadges.name}\n`, items);
+            if (config.verbose) console.log(`[api] ${getNamedBadges.name}\n`, items);
 
             return items;
         });
