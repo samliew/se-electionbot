@@ -1,7 +1,9 @@
-import { datesToDuration, dateToRelativeTime, getSeconds } from "../../shared/utils/dates.js";
-import { matchNumber, safeCapture } from "../../shared/utils/expressions.js";
+import { datesToDuration, dateToRelativeTime, dateToShortISO8601Timestamp, getSeconds } from "../../shared/utils/dates.js";
+import { matchISO8601, matchNumber, safeCapture } from "../../shared/utils/expressions.js";
 import { formatOrdinal } from "../../shared/utils/strings.js";
+import { getAwardedBadges, getNamedBadges } from "../api.js";
 import { getCandidateOrNominee, getRandomNow } from "../random.js";
+import { pingDevelopers } from "../reports.js";
 import { makeURL, pluralize } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
@@ -248,6 +250,59 @@ export const sayWillElectionBeCancelled = (config, _es, election) => {
     };
 
     return `${electionName} ${responses[phase]}.`;
+};
+
+/**
+ * @summary builds a response to a query on how many users visited the election page
+ * @type {MessageBuilder}
+ */
+export const sayHowManyVisitedElection = async (config, _es, election, text, _u, _b, room) => {
+    const { apiSlug, dateNomination, repVote, siteUrl } = election;
+
+    // Badge that is awarded for visiting the election page
+    const electionBadgeName = "Caucus";
+
+    const [badge] = await getNamedBadges(config, apiSlug, { name: electionBadgeName });
+
+    if (!badge) {
+        await pingDevelopers(`Sorry, couldn't identify the "${electionBadgeName}" badge`, config, room);
+        return "";
+    }
+
+    const now = config.nowOverride || new Date();
+
+    const { electionOrdinalName } = election;
+
+    const phase = election.getPhase(now);
+    if (!phase) {
+        return `The ${electionOrdinalName} hasn't even started yet!`;
+    }
+
+    const to = matchISO8601(text, { preMatches: /\b(?:to|till)\s+/ }) ||
+        dateToShortISO8601Timestamp(now);
+
+    const { badge_id } = badge;
+
+    const { length: numAwarded } = await getAwardedBadges(
+        config, apiSlug, [badge_id],
+        { from: dateNomination, to }
+    );
+
+    /** @type {Partial<Record<Exclude<ElectionPhase, null>, string>>} */
+    const responses = {
+        cancelled: "before it was cancelled",
+        ended: "before it ended",
+    };
+
+    const badgeLink = makeURL(electionBadgeName, `${siteUrl}/help/badges/${badge_id}`);
+
+    const basePrefix = `Based on the number of ${badgeLink} badges awarded`;
+
+    const visited = `${numAwarded} user${pluralize(numAwarded)} visited ${electionOrdinalName}`;
+
+    const enoughRep = `and had enough reputation (${repVote})`;
+
+    return `${basePrefix}, ${visited} ${enoughRep} to vote ${responses[phase] || "so far"}.`;
 };
 
 // /**
