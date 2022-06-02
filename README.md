@@ -40,6 +40,7 @@ Current election info:
 - who are the winners/new moderators
 - how many positions are there
 - how many `<mods\|users>` `<voted\|participated>`
+- how many users visited the election
 - how many users are eligible to vote
 - why was a nomination removed
 - where are the nomination comments
