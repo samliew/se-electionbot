@@ -154,6 +154,53 @@ export const getBadges = async (config, userIds, site, options = {}) => {
 };
 
 /**
+ * @see https://api.stackexchange.com/docs/badge-recipients-by-ids
+ *
+ * @summary gets awarded badges from the API by id
+ * @param {BotConfig} config
+ * @param {string} site election site slug
+ * @param {number[]} badgeIds badge ids
+ * @param {{
+ *  from?: Date|string|number,
+ *  to?: Date|string|number,
+ *  page?: number,
+ * }} options configuration
+ * @returns {Promise<Badge[]>}
+ */
+export const getAwardedBadges = async (config, site, badgeIds, options) => {
+    const { from, to, page = 1 } = options;
+
+    const params = new URLSearchParams({
+        key: getStackApiKey(config.apiKeyPool),
+        page: page.toString(),
+        site,
+    });
+
+    if (from) params.append("fromdate", getSeconds(from).toString());
+    if (to) params.append("todate", getSeconds(to).toString());
+
+    const badgeURI = new URL(`${apiBase}/${apiVer}/badges/${badgeIds.join(";")}/recipients`);
+    badgeURI.search = params.toString();
+
+    return handleResponse(
+        /**@type {ApiWrapper<User>} */(await fetchUrl(config, badgeURI, true)) || {},
+        () => getAwardedBadges(config, site, badgeIds, options),
+        async ({ items = [], has_more }) => {
+            if (has_more) {
+                const otherItems = await getAwardedBadges(config, site, badgeIds, {
+                    ...options,
+                    page: page + 1
+                });
+                return [...items, ...otherItems];
+            }
+
+            if (config.verbose) console.log(`[api] ${getAwardedBadges.name}\n`, items);
+
+            return items;
+        });
+};
+
+/**
  * @summary gets number of awarded Constituent badges from the API for current election
  * @param {BotConfig} config
  * @param {string} site election site slug
