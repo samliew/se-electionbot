@@ -47,6 +47,16 @@ export default class BotEnv<T extends BotEnvironment | NodeJS.ProcessEnv> {
     }
 
     /**
+     * @summary parses a given env {@link key} as a JSON object
+     * @param key key to parse
+     * @param def default value
+     */
+    json<U extends object>(key: Lowercase<keyof T & string>, def?: U): U {
+        const v = this.#env[key.toUpperCase()];
+        return v !== void 0 ? JSON.parse(v) : def;
+    }
+
+    /**
      * @summary parses a given env {@link key} as a number
      * @param key key to parse
      * @param def default value
