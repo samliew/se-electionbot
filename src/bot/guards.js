@@ -791,3 +791,13 @@ export const isAskedWillElectionBeCancelled = (text) => {
         /^(?:is|will|would)(?:\s+th(?:e|is))?\s+election(?:\s+going\s+to)?\s+be\s+cancell?ed(?:\?\!?|$)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking about how many users visited the election page
+ * @type {MessageGuard}
+ */
+export const isAskedHowManyVisitedElection = (text) => {
+    return someMatch([
+        /^how\s+many(?:\s+users)?(?:\s+have)?\s+visited(?:\s+th[ei]s?)?\s+election(?:\s+page)?(?:\?\!?|$)/i
+    ], text);
+};
