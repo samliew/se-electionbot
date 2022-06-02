@@ -66,12 +66,13 @@ export const handleResponse = async (response, backoffCallback, successCallback)
  * @summary gets all named badges from the API
  * @param {BotConfig} config
  * @param {string} site election site slug
- * @param {number} [page] API response page
+ * @param {{ page?: number, name?: string }} options request options
  * @returns {Promise<Badge[]>}
  */
-export const getAllNamedBadges = async (config, site, page = 1) => {
-    const badgeURI = new URL(`${apiBase}/${apiVer}/badges/name`);
-    badgeURI.search = new URLSearchParams({
+export const getAllNamedBadges = async (config, site, options = {}) => {
+    const { page = 1, name } = options;
+
+    const params = new URLSearchParams({
         site,
         order: "asc",
         sort: "name",
@@ -79,18 +80,26 @@ export const getAllNamedBadges = async (config, site, page = 1) => {
         filter: ")j(RnCyiVMe7YpW4a2x",
         page: page.toString(),
         key: getStackApiKey(config.apiKeyPool)
-    }).toString();
+    });
+
+    if (name) params.set("inname", name);
+
+    const badgeURI = new URL(`${apiBase}/${apiVer}/badges/name`);
+    badgeURI.search = params.toString();
 
     return handleResponse(
        /** @type {ApiWrapper<Badge>} */(await fetchUrl(config, badgeURI, true)) || {},
-        () => getAllNamedBadges(config, site, page),
+        () => getAllNamedBadges(config, site, options),
         async ({ items = [], has_more }) => {
             if (has_more) {
-                const otherItems = await getAllNamedBadges(config, site, page + 1);
+                const otherItems = await getAllNamedBadges(config, site, {
+                    ...options,
+                    page: page + 1,
+                });
                 return [...items, ...otherItems];
             }
 
-            if (config.verbose) console.log(`API - ${getAllNamedBadges.name}\n`, items);
+            if (config.verbose) console.log(`[api] ${getAllNamedBadges.name}\n`, items);
 
             return items;
         });
