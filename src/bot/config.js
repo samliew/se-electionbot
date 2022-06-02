@@ -72,6 +72,15 @@ export class BotConfig {
     nowOverride;
 
     /**
+     * @summary gets a list of maintainer ids for the current {@link BotConfig.chatDomain}
+     * @returns {string[]}
+     */
+    get maintainerChatIds() {
+        const allIds = this.#env.json("maintainers");
+        return allIds[this.chatDomain];
+    }
+
+    /**
      * @summary /ping the bot server periodically?
      * @type {boolean}
      */
