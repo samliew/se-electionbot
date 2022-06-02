@@ -76,6 +76,7 @@ import {
  * @typedef {typeof import("chatexchange/dist/WebsocketEvent").ChatEventType} EventType
  * @typedef {import("chatexchange/dist/Client").Host} Host
  * @typedef {import("./utils").APIListResponse} APIListResponse
+ * @typedef {import("chatexchange/dist/Room").default} Room
  *
  * @typedef {{
  *  eventType: number,
@@ -93,7 +94,8 @@ import {
  *  election: Election,
  *  text: string,
  *  user: User,
- *  botUser: ChatUser
+ *  botUser: ChatUser,
+ *  room: Room
  * ) => string | Promise<string>} MessageBuilder
  *
  * @typedef {import("./env.js").BotEnvironment} BotEnvironment
@@ -660,7 +662,7 @@ use defaults ${defaultChatNotSet}`
             if (matched) {
                 const [matcher, builder] = matched;
                 if (config.debug) console.log(`Matched response: ${matcher.name}`);
-                responseText = await builder(config, elections, election, preparedMessage, user, me);
+                responseText = await builder(config, elections, election, preparedMessage, user, me, room);
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
             else if (isAskedAboutBadgesOfType(preparedMessage)) {
@@ -791,7 +793,7 @@ use defaults ${defaultChatNotSet}`
                 // The rest below are fun mode only
                 else if (config.fun) {
                     const [, funHandler] = funRules.find(([g]) => g(preparedMessage)) || [];
-                    responseText = await funHandler?.(config, elections, election, preparedMessage, user, me);
+                    responseText = await funHandler?.(config, elections, election, preparedMessage, user, me, room);
                 }
 
                 if (responseText) {
