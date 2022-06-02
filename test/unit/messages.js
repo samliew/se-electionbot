@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import CE from "chatexchange";
 import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { sayBadgesByType } from "../../src/bot/messages/badges.js";
@@ -89,10 +90,12 @@ describe("Messages module", () => {
 
         let config = getMockBotConfig();
         const bot = getMockBotUser();
+        const client = new CE["default"]("stackoverflow.com");
+        const room = client.getRoom(42);
 
         it('should not add phase info on no phase', async () => {
             const election = new Election("https://ja.stackoverflow.com/election");
-            const greeting = await sayHI(config, new Map([[1, election]]), election, bot);
+            const greeting = await sayHI(config, new Map([[1, election]]), election, bot, room);
             expect(greeting).to.not.match(/is in the.*? phase/);
         });
 
@@ -104,7 +107,7 @@ describe("Messages module", () => {
             const election = new Election(electionLink, 12);
             election.phase = phase;
 
-            const greeting = await sayHI(config, new Map([[12, election]]), election, bot);
+            const greeting = await sayHI(config, new Map([[12, election]]), election, bot, room);
             expect(greeting).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
         });
 
@@ -112,7 +115,7 @@ describe("Messages module", () => {
             const override = "Hi all!";
 
             const election = new Election("https://pt.stackoverflow.com/election");
-            const greeting = await sayHI(config, new Map([[1, election]]), election, bot, override);
+            const greeting = await sayHI(config, new Map([[1, election]]), election, bot, room, override);
 
             expect(greeting).to.match(new RegExp(`^${override}`));
         });
