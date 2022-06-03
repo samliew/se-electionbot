@@ -793,6 +793,17 @@ export default class Election {
     }
 
     /**
+     * @summary returns election chat room id from {@link Election.chatUrl}
+     * @returns {number|undefined}
+     */
+    get chatRoomId() {
+        const { chatUrl } = this;
+        return chatUrl ?
+            matchNumber(/(\d+)$/, chatUrl) :
+            void 0;
+    }
+
+    /**
      * @summary returns dateNomination time value in milliseconds
      * @returns {number}
      */
@@ -1011,14 +1022,13 @@ export default class Election {
      * @returns {boolean}
      */
     get electionChatRoomChanged() {
-        const { prev, chatUrl, chatDomain, chatRoomId } = this;
+        const { prev, chatUrl, chatDomain } = this;
 
         if (!prev) return false;
 
         const chatUrlChanged = prev.chatUrl !== chatUrl;
         const chatDomainChanged = prev.chatDomain !== chatDomain;
-        const chatRoomIdChanged = prev.chatRoomId !== chatRoomId;
-        return chatUrlChanged || chatDomainChanged || chatRoomIdChanged;
+        return chatUrlChanged || chatDomainChanged;
     }
 
     /**
@@ -1506,7 +1516,6 @@ export default class Election {
 
             // Empty string if not set as environment variable, or not found on election page
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || this.scrapeElectionChatRoom($);
-            this.chatRoomId = matchNumber(/(\d+)$/, this.chatUrl) || null;
             this.phase = this.getPhase();
 
             // Detect active election number if not specified

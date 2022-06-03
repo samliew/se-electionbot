@@ -362,14 +362,6 @@ describe(Election.name, () => {
                 election.chatUrl = "https://new.url";
 
                 expect(election.electionChatRoomChanged).to.be.true;
-
-                // Set both urls to be same, but change chat room id
-                election.chatRoomId = 1;
-                election.chatUrl = "https://new.url";
-                election.pushHistory();
-                election.chatRoomId = 2;
-
-                expect(election.electionChatRoomChanged).to.be.true;
             });
         });
 
