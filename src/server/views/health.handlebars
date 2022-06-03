@@ -1,0 +1,40 @@
+{{> navigation routes=data/routes password=data/password path=data/path }}
+
+<main class="dashboard">
+    <section>
+        <h2>Clients</h2>
+        <table class="table-small">
+            <thead>
+                <tr>
+                    <th>Stat</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Connected</td>
+                    <td id="connections">{{data/numConnections}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<script>
+    (() => {
+        const realtime = new EventSource(`${location.origin}/realtime?type=health`);
+        realtime.addEventListener("connections", (event) => {
+            const { data } = event;
+
+            const connCell = document.getElementById("connections");
+            if(connCell) {
+                connCell.textContent = data;
+            }
+        });
+
+        realtime.addEventListener("error", (event) => {
+            console.debug(event);
+            realtime.close();
+        });
+    })();
+</script>

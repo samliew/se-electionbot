@@ -1,9 +1,10 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import Election from "../../src/bot/election.js";
-import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
+import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
+import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
-import { getMockUserProfile } from "../mocks/user.js";
+import { getMockApiUser, getMockUserProfile } from "../mocks/user.js";
 
 /**
  * @typedef { import("../../src/bot/election").ElectionPhase} ElectionPhase
@@ -15,6 +16,60 @@ describe(Election.name, () => {
     afterEach(() => sinon.restore());
 
     describe('getters', () => {
+
+        describe('currentModerators', () => {
+            const election = new Election("https://stackoverflow.com/election/1");
+
+            const { moderators } = election;
+            moderators.set(1, {
+                ...getMockApiUser({ user_id: 1 }),
+                former: true
+            });
+            moderators.set(2, {
+                ...getMockApiUser({ user_id: 2 }),
+                former: false
+            });
+
+            const { currentModerators } = election;
+
+            expect(currentModerators.size).to.equal(1);
+            expect(currentModerators.has(2)).to.be.true;
+        });
+
+        describe("electionOrdinalName", () => {
+            const election = new Election("https://stackoverflow.com/election/2");
+            election.siteName = "Stack Overflow";
+            expect(election.electionOrdinalName).to.equal("2nd Stack Overflow election");
+        });
+
+        describe("electionPhaseDuration", () => {
+            const election = new Election("https://stackoverflow.com/election/1");
+
+            expect(election.electionPhaseDuration).to.equal(election.durations.electionWithoutPrimary);
+
+            election.datePrimary = dateToUtcTimestamp(Date.now());
+
+            expect(election.electionPhaseDuration).to.equal(election.durations.electionWithPrimary);
+        });
+
+        describe('formerModerators', () => {
+            const election = new Election("https://stackoverflow.com/election/1");
+
+            const { moderators } = election;
+            moderators.set(1, {
+                ...getMockApiUser({ user_id: 1 }),
+                former: true
+            });
+            moderators.set(2, {
+                ...getMockApiUser({ user_id: 2 }),
+                former: false
+            });
+
+            const { formerModerators } = election;
+
+            expect(formerModerators.size).to.equal(1);
+            expect(formerModerators.has(1)).to.be.true;
+        });
 
         describe('chatDomain', () => {
             it('should return stackoverflow.com for SO elections', () => {
@@ -376,6 +431,46 @@ describe(Election.name, () => {
             expect(ended).to.equal("ended");
             expect(status).to.be.true;
             expect(errors).to.be.empty;
+        });
+    });
+
+    describe(Election.prototype.isExtensionEligible.name, () => {
+        it('should correctly determine extension eligibility', () => {
+            const config = getMockBotConfig();
+
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.phase = "nomination";
+            election.numPositions = 2;
+
+            // < number of positions
+            election.addActiveNominee(getMockNominee(election, { userId: 1 }));
+            expect(election.isExtensionEligible(config)).to.be.true;
+
+            // = number of positions
+            election.addActiveNominee(getMockNominee(election, { userId: 2 }));
+            expect(election.isExtensionEligible(config)).to.be.true;
+
+            // > number of positions
+            election.addActiveNominee(getMockNominee(election, { userId: 3 }));
+            expect(election.isExtensionEligible(config)).to.be.false;
+        });
+    });
+
+    describe(Election.prototype.isNominationExtended.name, () => {
+        it('should correctly determine if the nomination phase was extended', () => {
+            const config = getMockBotConfig();
+
+            const now = Date.now();
+
+            const election = new Election("https://stackoverflow.com/election/1");
+            election.phase = "nomination";
+            election.dateNomination = dateToUtcTimestamp(now);
+
+            expect(election.isNominationExtended(config)).to.be.false;
+
+            config.nowOverride = addDates(now, election.durations.nomination + 1);
+
+            expect(election.isNominationExtended(config)).to.be.true;
         });
     });
 

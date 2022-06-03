@@ -16,6 +16,7 @@ export interface BotEnvironment {
     LOW_ACTIVITY_CHECK_MINS?: string;
     LOW_ACTIVITY_COUNT_THRESHOLD?: string;
     MAX_FUN_RESPONSES?: string;
+    MAINTAINERS?: string;
     REPO_URL?: string;
     SCRAPE_INTERVAL_MINS?: string;
     SHORT_IDLE_DURATION_MINS?: string;
@@ -44,6 +45,16 @@ export default class BotEnv<T extends BotEnvironment | NodeJS.ProcessEnv> {
     bool(key: Lowercase<keyof T & string>, def?: boolean) {
         const v = this.#env[key.toUpperCase()];
         return v === void 0 ? !!def : v === "true" ? true : v === "false" ? false : !!v;
+    }
+
+    /**
+     * @summary parses a given env {@link key} as a JSON object
+     * @param key key to parse
+     * @param def default value
+     */
+    json<U extends object>(key: Lowercase<keyof T & string>, def?: U): U {
+        const v = this.#env[key.toUpperCase()];
+        return v !== void 0 ? JSON.parse(v) : def;
     }
 
     /**

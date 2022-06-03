@@ -1,19 +1,22 @@
 import { AllowedHosts } from "chatexchange/dist/Client.js";
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
-import { getAllNamedBadges, getBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
-import { calculateScore } from './score.js';
-import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
 import { isOneOf, mapify } from '../shared/utils/arrays.js';
-import { addDates, dateToUtcTimestamp, daysDiff } from '../shared/utils/dates.js';
+import { addDates, dateToUtcTimestamp, daysDiff, getMilliseconds } from '../shared/utils/dates.js';
 import { findLast } from '../shared/utils/dom.js';
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { filterMap, getOrInit, has, mergeMaps, sortMap } from '../shared/utils/maps.js';
 import { clone } from '../shared/utils/objects.js';
 import { scrapeModerators } from '../shared/utils/scraping.js';
+import { formatOrdinal } from "../shared/utils/strings.js";
+import { getBadges, getNamedBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
+import History from "./history.js";
+import { calculateScore } from './score.js';
+import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
 
 /**
  * @typedef {null|"ended"|"election"|"primary"|"nomination"|"cancelled"} ElectionPhase
+ * @typedef {"electionWithPrimary"|"electionWithoutPrimary"|"nomination"|"primary"|"announcement"} ElectionPhaseDuration
  * @typedef {import("./index").ElectionBadge} ElectionBadge
  * @typedef {import('chatexchange/dist/Client').Host} Host
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -25,6 +28,7 @@ import { scrapeModerators } from '../shared/utils/scraping.js';
  * @typedef {import("./utils").RoomUser} RoomUser
  * @typedef {ApiUser & {
  *  appointed?: string,
+ *  former: boolean,
  *  election?: number,
  *  electionLink?: string
  * }} ModeratorUser
@@ -173,7 +177,7 @@ export const listNomineesInRoom = async (config, election, host, users) => {
 };
 
 /**
- * @summary
+ * @summary gets all appointed moderators (including stepped down)
  * @param {BotConfig} config bot configuration
  * @param {Election} election current election
  * @returns {Promise<Map<number, ModeratorUser>>}
@@ -195,7 +199,11 @@ export const getAppointedModerators = async (config, election) => {
 
         const { appointed } = scrapedMods.get(id);
 
-        appointedMods.set(id, { ...user, appointed });
+        appointedMods.set(id, {
+            ...user,
+            former: user.user_type !== "moderator",
+            appointed
+        });
     });
 
     return appointedMods;
@@ -225,7 +233,8 @@ export const getElectedModerators = async (config, election) => {
         elected.set(id, {
             ...user,
             election: electionNum || 1,
-            electionLink: electionUrl
+            electionLink: electionUrl,
+            former: user.user_type !== "moderator"
         });
     });
 
@@ -624,6 +633,19 @@ export default class Election {
     repVote = 150;
 
     /**
+     * @see https://meta.stackexchange.com/a/135361
+     * @summary election phase durations
+     * @type {Record<ElectionPhaseDuration, number>}
+     */
+    durations = {
+        announcement: 7,
+        electionWithPrimary: 4,
+        electionWithoutPrimary: 8,
+        nomination: 7,
+        primary: 4,
+    };
+
+    /**
      * @description Site election badges, defaults to Stack Overflow's
      * @type {ElectionBadge[]}
      */
@@ -649,6 +671,12 @@ export default class Election {
         { name: 'Tag Editor', required: false, type: 'editing', badge_id: 254 },
         { name: 'Yearling', required: false, type: 'participation', badge_id: 13 },
     ];
+
+    /**
+     * @summary date of the cancellation of the election
+     * @type {string|undefined}
+     */
+    dateCancellation;
 
     /**
      * @summary date of the start of the nomination phase
@@ -681,6 +709,12 @@ export default class Election {
     questionnaire = [];
 
     /**
+     * @summary election scrape history
+     * @type {History<number, Election>}
+     */
+    history = new History();
+
+    /**
      * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
      * @param {string|number|null} [electionNum] number of election, can be a numeric string
      */
@@ -696,9 +730,44 @@ export default class Election {
         const idFromURL = /** @type {string} */(electionUrl.split('/').pop());
 
         this.electionNum = electionNum ? +electionNum : +idFromURL || null;
+    }
 
-        /** @type {Election|null} */
-        this._prevObj = null;
+    /**
+     * @summary formats election number as 'N<oridnal suffix> <site name> election';
+     * @returns {string}
+     */
+    get electionOrdinalName() {
+        const { electionNum, siteName } = this;
+        return `${formatOrdinal(electionNum || 1)} ${siteName} election`;
+    }
+
+    /**
+     * @summary returns only current moderators
+     * @returns {Map<number, ModeratorUser>}
+     */
+    get currentModerators() {
+        const { moderators } = this;
+        return filterMap(moderators, (m) => !m.former);
+    }
+
+    /**
+     * @summary gets the 'election' phase duration
+     * @returns {number}
+     */
+    get electionPhaseDuration() {
+        const { durations, datePrimary } = this;
+        return datePrimary ?
+            durations.electionWithPrimary :
+            durations.electionWithoutPrimary;
+    }
+
+    /**
+     * @summary returns only former moderators
+     * @returns {Map<number, ModeratorUser>}
+     */
+    get formerModerators() {
+        const { moderators } = this;
+        return filterMap(moderators, (m) => m.former);
     }
 
     /**
@@ -720,8 +789,7 @@ export default class Election {
 
         if (isOneOf(AllowedHosts, networkOrigin)) return networkOrigin;
 
-        const { CHAT_DOMAIN } = process.env;
-        return isOneOf(AllowedHosts, CHAT_DOMAIN) ? CHAT_DOMAIN : "stackexchange.com";
+        return "stackexchange.com";
     }
 
     /**
@@ -789,10 +857,10 @@ export default class Election {
 
     /**
      * @summary returns previous Election state
-     * @returns {{ [P in keyof Election as Election[P] extends Function ? never : P ]: Election[P]} | null}
+     * @returns {Election | null}
      */
     get prev() {
-        return this._prevObj;
+        return this.history.last() || null;
     }
 
     /**
@@ -1017,11 +1085,12 @@ export default class Election {
      * @returns {void}
      */
     forget(states = 1) {
-        // TODO: rework once moved away from _prevObj
+        const { history } = this;
+
         let cleanups = 0;
         while (this.prev) {
             if (cleanups >= states) return;
-            this._prevObj = null;
+            history.shift();
             cleanups += 1;
         }
     }
@@ -1100,6 +1169,45 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election has been cancelled
+     * @returns {boolean}
+     */
+    isCancelled() {
+        const { phase } = this;
+        return phase === "cancelled";
+    }
+
+    /**
+     * @summary checks if the election nomination period can be extended
+     * @param {BotConfig} config bot configuration
+     * @returns {boolean}
+     */
+    isExtensionEligible(config) {
+        const { numNominees, phase, numPositions = 1 } = this;
+        return [
+            phase === "nomination",
+            numNominees <= numPositions,
+            !this.isNominationExtended(config)
+        ].every(Boolean);
+    }
+
+    /**
+     * @summary checks if the nomination period was extended
+     * @param {BotConfig} config bot configuration
+     * @returns {boolean}
+     */
+    isNominationExtended(config) {
+        const { durations: { nomination }, phase, dateNomination } = this;
+
+        const now = config.nowOverride || new Date();
+
+        return [
+            phase === "nomination",
+            daysDiff(dateNomination, now) > nomination
+        ].every(Boolean);
+    }
+
+    /**
      * @summary checks if the election is a Stack Overflow election
      *  @returns {boolean}
      */
@@ -1170,7 +1278,7 @@ export default class Election {
      * @returns {ElectionPhase}
      */
     getPhase(today = new Date()) {
-        const { dateNomination, dateElection, datePrimary, dateEnded } = this;
+        const { dateNomination, dateElection, datePrimary, dateEnded, dateCancelled } = this;
 
         const now = today.valueOf();
 
@@ -1182,7 +1290,11 @@ export default class Election {
             [dateNomination, "nomination"]
         ];
 
-        const [, phase = null] = phaseMap.find(([d]) => !!d && new Date(d).valueOf() <= now) || [];
+        const [, phase = null] = phaseMap.find(([d]) => !!d && getMilliseconds(d) <= now) || [];
+
+        if (dateCancelled && now >= getMilliseconds(dateElection)) {
+            return "cancelled";
+        }
 
         return phase;
     }
@@ -1195,6 +1307,34 @@ export default class Election {
     getWinners(winnerIds) {
         const { nominees } = this;
         return filterMap(nominees, ({ userId }) => winnerIds.includes(userId));
+    }
+
+    /**
+     * @summary scrapes election cancellation status
+     * @param {cheerio.Root} $ Cheerio root element
+     * @returns {boolean}
+     */
+    scrapeCancellation($) {
+        const [, statusElem] = $("#mainbar aside[role=status]");
+        const notice = $(statusElem).html();
+        if (!statusElem || !notice) return false;
+
+        if (!$(statusElem).text().includes('cancelled')) return false;
+
+        // https://regex101.com/r/UOGdTo/1
+        const cancellationDateExpr = /\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
+        const [, monthday, year] = cancellationDateExpr.exec(notice) || [];
+
+        this.dateCancelled = dateToUtcTimestamp(`${monthday}, ${year} 20:00:00Z`);
+
+        // Convert link to chat-friendly markup
+        this.cancelledText = notice
+            ?.replace(/<a href="/g, 'See [meta](')
+            .replace(/">.+/g, ') for details.')
+            .trim();
+
+        this.phase = 'cancelled';
+        return true;
     }
 
     /**
@@ -1239,23 +1379,21 @@ export default class Election {
     }
 
     /**
-     * TODO: make an abstract History class
      * @summary pushes an election state to history
      * @returns {Election}
      */
     pushHistory() {
-        // Save prev values so we can compare changes after
-        const entry = JSON.parse(JSON.stringify(this));
+        const entry = new Election(this.electionUrl);
 
-        /** {@link Map} and {@link Set} do not survive serialization */
+        /** {@link Map}, {@link Set}, and {@link Array} should be copied */
         Object.entries(this).forEach(([k, v]) => {
-            if (v instanceof Map) entry[k] = mergeMaps(v);
-            if (v instanceof Set) entry[k] = new Set(...v);
+            if (v instanceof Map) return entry[k] = mergeMaps(v);
+            if (v instanceof Set) return entry[k] = new Set(...v);
+            if (Array.isArray(v)) return entry[k] = [...v];
+            entry[k] = v;
         });
 
-        entry._prevObj = null;
-
-        this._prevObj = entry;
+        this.history.push(entry);
         return this;
     }
 
@@ -1386,7 +1524,7 @@ export default class Election {
 
                 const resultsWrapper = $($('#mainbar').find('aside[role=status]').get(1));
 
-                const [statusElem, resultsElem, statsElem] = resultsWrapper.find(".flex--item").get();
+                const [, resultsElem, statsElem] = resultsWrapper.find(".flex--item").get();
 
                 const resultsUrl = $(resultsElem).find('a').first().attr('href') || "";
 
@@ -1395,17 +1533,10 @@ export default class Election {
                 // Validate opavote URL
                 if (!/^https:\/\/www\.opavote\.com\/results\/\d+$/.test(resultsUrl)) this.opavoteUrl = '';
 
-                // Check if election was cancelled?
-                if ($(statusElem).text().includes('cancelled')) {
-                    this.phase = 'cancelled';
+                const isCancelled = this.scrapeCancellation($);
 
-                    // Convert link to chat-friendly markup
-                    this.cancelledText = $(statusElem).html()
-                        ?.replace(/<a href="/g, 'See [meta](')
-                        .replace(/">.+/g, ') for details.').trim();
-                }
                 // Election ended
-                else {
+                if (!isCancelled) {
                     // Get election stats
                     this.statVoters = $(statsElem).contents().map((_i, { data, type }) =>
                         type === 'text' ? data?.trim() : ""
@@ -1426,6 +1557,7 @@ phase             ${this.phase};
 primary date      ${this.datePrimary};
 election date     ${this.dateElection};
 ended date        ${this.dateEnded};
+cancelled date    ${this.dateCancelled};
 candidates        ${this.numNominees};
 withdrawals       ${this.numWithdrawals}
 winners           ${this.numWinners};
@@ -1449,7 +1581,7 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
     async updateElectionBadges(config) {
         const { apiSlug, electionBadges } = this;
 
-        const allNamedBadges = await getAllNamedBadges(config, apiSlug);
+        const allNamedBadges = await getNamedBadges(config, apiSlug);
         const badgeMap = mapify(allNamedBadges, "name");
 
         electionBadges.forEach((electionBadge) => {

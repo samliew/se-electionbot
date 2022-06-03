@@ -1,11 +1,11 @@
 import { partialRight } from "ramda";
+import { resolveObj } from "../../shared/utils/objects.js";
+import { formatNumber, percentify } from "../../shared/utils/strings.js";
 import { getNumberOfUsersEligibleToVote, getNumberOfVoters } from "../api.js";
 import { User } from "../commands/user.js";
 import { sendMessage } from "../queue.js";
 import { getRandomAnnouncement, getRandomNow } from "../random.js";
 import { makeURL, pluralize, pluralizePhrase } from "../utils.js";
-import { resolveObj } from "../../shared/utils/objects.js";
-import { formatNumber, percentify } from "../../shared/utils/strings.js";
 import { sayCommonlyAskedQuestions } from "./metadata.js";
 
 /**
@@ -21,10 +21,11 @@ import { sayCommonlyAskedQuestions } from "./metadata.js";
  * @param {Map<number, Election>} elections site elections
  * @param {Election} election current election
  * @param {ChatUser} botUser current bot user
+ * @param {Room} room current bot room
  * @param {string} [greeting] greeting prefix
  * @returns {Promise<string>}
  */
-export const sayHI = async (config, elections, election, botUser, greeting = 'Welcome to the election chat room! ') => {
+export const sayHI = async (config, elections, election, botUser, room, greeting = 'Welcome to the election chat room! ') => {
     const { nominees, electionUrl, phase, dateElection, apiSlug } = election;
 
     const { size } = nominees;
@@ -61,7 +62,7 @@ export const sayHI = async (config, elections, election, botUser, greeting = 'We
 
     return `${greeting}${phaseText} ${await sayCommonlyAskedQuestions(config, elections, election, "", new User({
         ...await resolveObj(botUser)
-    }), botUser)}.`;
+    }), botUser, room)}.`;
 };
 
 /**
@@ -81,7 +82,7 @@ export const sayIdleGreeting = async (config, elections, election, botUser, room
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, await sayHI(config, elections, election, botUser, getRandomAnnouncement()), null, true);
+    return sendMessage(config, room, await sayHI(config, elections, election, botUser, room, getRandomAnnouncement()), null, true);
 };
 
 /**
@@ -103,5 +104,5 @@ export const sayBusyGreeting = async (config, elections, election, botUser, room
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, await sayHI(config, elections, election, botUser, getRandomAnnouncement()), null, true);
+    return sendMessage(config, room, await sayHI(config, elections, election, botUser, room, getRandomAnnouncement()), null, true);
 };

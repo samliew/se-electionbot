@@ -1,7 +1,7 @@
-import { getRandomFAQ, getRandomStatus } from "../random.js";
-import { listify, makeURL } from "../utils.js";
 import { parsePackage } from "../../shared/utils/package.js";
 import { formatOrdinal } from "../../shared/utils/strings.js";
+import { getRandomFAQ, getRandomStatus } from "../random.js";
+import { listify, makeURL } from "../utils.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig
@@ -15,11 +15,15 @@ import { formatOrdinal } from "../../shared/utils/strings.js";
  * @summary builds a message for commonly-asked questions
  * @type {MessageBuilder}
  */
-export const sayCommonlyAskedQuestions = async (_c, _es, _e, _t, _u, bot) => {
+export const sayCommonlyAskedQuestions = async (config, _es, _e, _t, _u, bot) => {
+    const { repoUrl } = config;
+
     const name = await bot.name;
 
+    const faqURL = makeURL(getRandomFAQ(), `${repoUrl}/blob/master/README.md`);
+
     // TODO: switch to Command class
-    return `I can answer ${getRandomFAQ()} about elections (type *@${name.replace(/\s+/, "")} help* for more info)`;
+    return `I can answer ${faqURL} about elections (type *@${name.replace(/\s+/, "")} help* for more info)`;
 };
 
 /**

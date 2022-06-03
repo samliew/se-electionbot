@@ -53,3 +53,12 @@ export const flat = (array) => {
  * @returns {item is Exclude<T, 0|""|null|false|undefined>}
  */
 export const onlyTruthy = (item) => !!item;
+
+/**
+ * @template {unknown} T
+ *
+ * @summary returns only unique array elements
+ * @param {Array<T>} array {@link Array} to uniquify
+ * @returns {Array<T>}
+ */
+export const uniquify = (array) => [...new Set(array)];

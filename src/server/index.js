@@ -2,12 +2,13 @@ import express from 'express';
 import Handlebars from 'express-handlebars';
 import { dirname, join } from 'path';
 import { fileURLToPath } from "url";
+import { getCurrentAPIQuota } from '../bot/api.js';
 import Election, { listNomineesInRoom } from '../bot/election.js';
 import { HerokuClient } from "../bot/herokuClient.js";
-import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom } from '../bot/utils.js';
+import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom, wait } from '../bot/utils.js';
 import { dateToUtcTimestamp } from '../shared/utils/dates.js';
 import * as helpers from "./helpers.js";
-import { routes, start, stop } from './utils.js';
+import { farewell, routes, start } from './utils.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const viewsPath = join(__dirname, "views");
@@ -22,7 +23,12 @@ const app = express().set('port', process.env.PORT || 5000);
  * Whitelist these public paths from password protection.
  */
 const publicPaths = [
-    "/", "/ping", "/feedback", "/static", "/favicon.ico"
+    "/",
+    "/favicon.ico",
+    "/feedback",
+    "/ping",
+    "/realtime",
+    "/static",
 ];
 
 /** @type {Handlebars.ExphbsOptions} */
@@ -44,11 +50,21 @@ app
  * @typedef {{ password?:string, success: string }} AuthQuery
  * @typedef {import("../bot/config").BotConfig} BotConfig
  * @typedef {import("express").Application} ExpressApp
+ * @typedef {import("express").Response} ExpressRes
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("../bot/utils").RoomUser} RoomUser
  * @typedef {import("http").Server} HttpServer
+ * @typedef {import("../bot/announcement").default} Announcement
  */
+
+/**
+ * @private
+ *
+ * @summary internal announcement reference
+ * @type {Announcement | undefined}
+ */
+let BOT_ANNOUNCER;
 
 /**
  * @private
@@ -427,6 +443,117 @@ app.route("/feedback")
         });
     });
 
+const EVENT_SEPARATOR = "\n\n";
+
+/** @type {Map<string, ExpressRes>} */
+const connections = new Map();
+
+app.set("keep-alive-connections", connections);
+
+app.route("/realtime")
+    .get(async ({ ip, query }, res) => {
+        if (!BOT_CONFIG || !BOT_ROOM) {
+            console.error("[server] bot misconfiguration");
+            return res.sendStatus(500);
+        }
+
+        /** @type {HttpServer} */
+        const server = app.get("server");
+
+        const key = `${ip}_${Date.now()}`;
+
+        res.on("close", () => connections.delete(key));
+
+        connections.set(key, res);
+
+        res.writeHead(200, {
+            "Content-Type": "text/event-stream",
+        });
+
+        const { type } = query;
+        if (!type) {
+            res.end();
+            return;
+        }
+
+        console.log(`[${ip}] subscribed to ${type} realtime`);
+
+        const sent = new Map();
+
+        // TODO: restrict
+        if (type === "cron") {
+            while (server.listening && res.writable) {
+                if (BOT_ANNOUNCER) {
+                    const { schedules } = BOT_ANNOUNCER;
+
+                    const data = [...schedules] // FIXME: type narrowing of BOT_ANNOUNCER breaks unexpectedly
+                        .map(([type, cron]) => [type, cron, BOT_ANNOUNCER?.getUTCfromCronExpression(cron) || ""])
+                        .sort(([, , adate], [, , bdate]) => adate < bdate ? -1 : 1);
+
+                    res.write(`event: schedules\ndata: ${JSON.stringify(data)}${EVENT_SEPARATOR}`);
+                }
+
+                await wait(5 * 60);
+            }
+        }
+
+        // TODO: restrict
+        if (type === "health") {
+            while (server.listening && res.writable) {
+                res.write(`event: connections\ndata: ${connections.size}${EVENT_SEPARATOR}`);
+                await wait(30);
+            }
+        }
+
+        if (type === "message") {
+            while (server.listening && res.writable) {
+                const transcriptMessages = await fetchChatTranscript(BOT_CONFIG, BOT_ROOM.transcriptURL); // FIXME: cache internally
+
+                transcriptMessages.forEach((message) => {
+                    const { messageId } = message;
+                    if (sent.has(messageId)) return;
+                    res.write(`event: message\ndata: ${JSON.stringify(message)}${EVENT_SEPARATOR}`);
+                    sent.set(messageId, message);
+                });
+
+                await wait(30);
+            }
+        }
+
+        if (type === "quota") {
+            while (server.listening && res.writable) {
+                res.write(`event: quota\ndata: ${getCurrentAPIQuota()}${EVENT_SEPARATOR}`);
+                await wait(1);
+            }
+        }
+    });
+
+app.route("/health")
+    .get(({ query, path }, res) => {
+        const { password = "" } = /** @type {AuthQuery} */(query);
+
+        res.render("health", {
+            page: {
+                appName: process.env.HEROKU_APP_NAME,
+                title: "Health"
+            },
+            heading: `Server Health Check`,
+            data: {
+                path,
+                password,
+                routes: routes(app, publicPaths),
+                numConnections: connections.size
+            }
+        });
+    });
+
+/**
+ * @summary sets the server's announcer
+ * @param {Announcement} announcement announcer
+ */
+export const setAnnouncer = (announcement) => {
+    BOT_ANNOUNCER = announcement;
+};
 
 /**
  * @summary sets the server's bot config
@@ -466,10 +593,13 @@ export const setClient = (client) => {
  * @param {Room} room current room the bot is in
  * @param {BotConfig} config  bot configuration
  * @param {Election} election current election
+ * @param {Announcement} announcement announcement
+ * @param {boolean} [graceful] exit gracefully?
  * @returns {Promise<ExpressApp>}
  */
-export const startServer = async (client, room, config, election) => {
+export const startServer = async (client, room, config, election, announcement, graceful = true) => {
 
+    setAnnouncer(announcement);
     setBot(config);
     setRoom(room);
     setElection(election);
@@ -488,16 +618,7 @@ views    ${viewsPath}
 port     ${port}`);
     }
 
-    /** @param {ExpressApp} app */
-    const terminate = (app) => stop(app.get("server"), info).then(() => process.exit(0));
-
-    const farewell = async () => {
-        if (config.debug) {
-            await room.sendMessage("have to go now, will be back soon...");
-        }
-        await room.leave();
-        terminate(app);
-    };
+    if (!graceful) return app;
 
     // https://stackoverflow.com/a/67567395
     if (process.platform === "win32") {

@@ -89,9 +89,21 @@ export const isAskedForCurrentMods = (text, apiSlug = null) => {
         /^how many mod(?:erator)?s? (are there|do we have)/,
         /^how.*\bcontact\b.*mod(?:erator)?s?/
     ], text);
+};
 
-
-
+/**
+ * @summary checks if the message asked to tell who the former mods are
+ * @param {string} text message text
+ * @param {string|null} apiSlug current site's apiSlug
+ * @returns {boolean}
+ */
+export const isAskedForFormerMods = (text, apiSlug = null) => {
+    return someMatch([
+        new RegExp(`^whois\\s+${apiSlug}\\s+former\\s+mod(?:erator)?s$`),
+        /^who(?: are| is|'s) the\s+former\s+mod(?:erator)?s?/i,
+        /^how many\s+former\s+mod(?:erator)?s? (are there|do we have)/i,
+        /^(?:who|which\s+mod(?:erator)?s?)(?:\s+have)?\s+(?:stepped\s+down|resigned)/i
+    ], text);
 };
 
 /**
@@ -278,6 +290,17 @@ export const isLovingTheBot = (text) => {
         /\b(?:awesome|brilliant|clever|correct|excellent|good|great|impressive|like|love|legit|marvell?ous|nice|neat|perfect|praise|right|smart|super|superb|swell|wise|wonderful)\b/,
         /\b(?:is|the|this|bot|electionbot|wow|pretty|very)\b/
     ].every((expression) => expression.test(text));
+};
+
+/**
+ * @summary detects if someone is saying happy birthday
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const isSayingHappyBirthday = (text) => {
+    return [
+        /^happy\s+birth\s?day,?\s+.*!*$/i
+    ].some((expression) => expression.test(text));
 };
 
 /**
@@ -746,5 +769,35 @@ export const isAskedWhyIsBot = (text) => {
 export const isAskedAboutBotPronouns = (text) => {
     return someMatch([
         /^what(?:'s|\s+(?:is|are))\s+your(?:\s+preferred)?\s+pronouns(?:\?\!?|$)/i
+    ], text);
+};
+
+/**
+ * @summary checks if a message is asking about why are elections cancelled
+ * @type {MessageGuard}
+ */
+export const isAskedWhyAreElectionsCancelled = (text) => {
+    return someMatch([
+        /^why\s+(?:are|would)(?:\s+(?:some|an))?\s+elections?(?:\s+be)?\s+cancell?ed(?:\?\!?|$)/i
+    ], text);
+};
+
+/**
+ * @summary checks if a message is asking about will the election be cancelled
+ * @type {MessageGuard}
+ */
+export const isAskedWillElectionBeCancelled = (text) => {
+    return someMatch([
+        /^(?:is|will|would)(?:\s+th(?:e|is))?\s+election(?:\s+going\s+to)?\s+be\s+cancell?ed(?:\?\!?|$)/i
+    ], text);
+};
+
+/**
+ * @summary checks if a message is asking about how many users visited the election page
+ * @type {MessageGuard}
+ */
+export const isAskedHowManyVisitedElection = (text) => {
+    return someMatch([
+        /^how\s+many(?:\s+users)?(?:\s+have)?\s+visited(?:\s+th[ei]s?)?\s+election(?:\s+page)?(?:\?\!?|$)/i
     ], text);
 };

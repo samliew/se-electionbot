@@ -4,6 +4,16 @@ import { User } from "./user.js";
 
 /**
  * @template {(...args:any[]) => any} T
+ * @typedef {object} CommandOptions<T>
+ * @property {RegExp} [matches] expression that the command matches
+ * @property {string} name command primary name
+ * @property {string} description command description
+ * @property {T} handler command handler to invoke
+ * @property {number} [access] required privilege level
+ */
+
+/**
+ * @template {(...args:any[]) => any} T
  */
 export class Command {
 
@@ -15,22 +25,27 @@ export class Command {
 
     access = AccessLevel.user;
 
+    /** @type {RegExp|undefined} */
+    matches;
+
     /**
-     * @param {string} name command primary name
-     * @param {string} description command description
-     * @param {T} handler command handler to invoke
-     * @param {number} [access] required privilege level
+     * @param {CommandOptions<T>} options command configuration
      */
-    constructor(name, description, handler, access = AccessLevel.user) {
+    constructor(options) {
+        const {
+            name, description, handler, matches, access = AccessLevel.user
+        } = options;
+
         this.name = name;
         this.description = description;
         this.handler = handler;
         this.access = access;
+        this.matches = matches;
     }
 
     /**
      * @summary runs the command
-     * @param {...Parameters<T>} args
+     * @param {Parameters<T>} args
      * @returns {ReturnType<T>}
      */
     run(...args) {
@@ -43,8 +58,23 @@ export class Command {
      * @param {string} [newName]
      */
     static fromCommand(command, newName) {
-        const { name, description, handler, access } = command;
-        return new Command(newName || name, description, handler, access);
+        const { name, description, handler, access, matches } = command;
+        return new Command({
+            name: newName || name,
+            description,
+            handler,
+            access,
+            matches
+        });
+    }
+
+    /**
+     * @summary runs a command only if text matches its regex
+     * @param {string} text text to match against
+     * @param {Parameters<T>} args aguments to pass to the command
+     */
+    runIfMatches(text, ...args) {
+        return this.matches?.test(text) ? this.run(...args) : void 0;
     }
 }
 
@@ -79,20 +109,21 @@ export class CommandManager {
      * @template {(...args:any[]) => unknown} T
      *
      * @summary adds a command to manager
-     * @param {string} name
-     * @param {string} description
-     * @param {T} handler
-     * @param {number} [access]
+     * @param {CommandOptions<T>} options command configuration
      */
-    add(name, description, handler, access = AccessLevel.user) {
-        this.commands[name] = new Command(name, description, handler, access);
+    add(options) {
+        const { name } = options;
+        this.commands[name] = new Command(options);
+        return this;
     }
 
     /**
+     * @summary adds new {@link Command}s in bulk
      * @param {{
      *  [name: string]: [
      *      description: string,
      *      handler: (...args:any[]) => unknown,
+     *      matches: RegExp | undefined,
      *      access?: number
      * ]
      * }} newCommands commands to add
@@ -100,7 +131,15 @@ export class CommandManager {
     bulkAdd(newCommands) {
         const { commands } = this;
         Object.entries(newCommands).forEach(([name, config]) => {
-            commands[name] = new Command(name, ...config);
+            const [description, handler, matches, access] = config;
+
+            commands[name] = new Command({
+                access,
+                description,
+                handler,
+                matches,
+                name,
+            });
         });
         return this;
     }
@@ -141,32 +180,26 @@ export class CommandManager {
     }
 
     /**
-     * @summary gets a command that matches a regular expression
-     * @param {RegExp} regex
-     * @returns {Command|null}
+     * @summary finds a command only if text matches regex
+     * @param {string} text text to match against
+     * @returns {Command | null}
      */
-    getMatching(regex) {
-        const [, command] = Object.entries(this.commands).find(([name]) => regex.test(name)) || [];
-        return this.canRun(command) && command || null;
-    }
-
-    /**
-     * @summary runs a command that matches a regular expression
-     * @param {RegExp} regex
-     * @param {...any} args
-     */
-    runMatching(regex, ...args) {
-        return this.getMatching(regex)?.run(...args);
+    findMatching(text) {
+        return Object.values(this.commands).find(
+            ({ matches }) => matches?.test(text)
+        ) || null;
     }
 
     /**
      * @summary runs a command only if text matches regex
      * @param {string} text text to match against
      * @param {string} name name of the command to run
-     * @param {RegExp} regex regular expression to match
+     * @param {...any} args aguments to pass to the command
      */
-    runIfMatches(text, name, regex, ...args) {
-        return regex.test(text) && this.run(name, ...args);
+    runIfMatches(text, name, ...args) {
+        const command = this.commands[name];
+        if (!this.canRun(command)) return;
+        return command.runIfMatches(text, ...args);
     }
 
     /**

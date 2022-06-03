@@ -44,6 +44,7 @@
                 <tr><td>Primary date</td><td>{{#if datePrimary}}{{> relativetime date=datePrimary}}{{/if}}</td></tr>
                 <tr><td>Election date</td><td>{{> relativetime date=dateElection}}</td></tr>
                 <tr><td>End date</td><td>{{> relativetime date=dateEnded}}</td></tr>
+                <tr><td>Cancelled date</td><td>{{#if dateCancelled}}{{> relativetime date=dateCancelled}}{{/if}}</td></tr>
                 <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
                 <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
                 <tr><td>Positions</td><td>{{numPositions}}</td></tr>
@@ -52,6 +53,43 @@
                 <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
             </table>
 
+            <h2>Election History</h2>
+            {{#if (len elections)}}
+            <table class="table-small">
+                <thead>
+                    <tr>
+                        <th>Link</th>
+                        <th>Year</th>
+                        <th>Primary</th>
+                        <th>Cancelled</th>
+                        <th>Positions</th>
+                        <th>Nominees</th>
+                        <th>Withdrawn</th>
+                        <th>Winners</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{#iterate elections}}
+                <tr>
+                    <td>
+                        <a href="{{electionUrl}}">{{electionNum}}</a>
+                        {{#ifEquals electionNum @root/data/election/electionNum}}<span title="Current Election">*</span>{{/ifEquals}}
+                    </td>
+                    <td>{{year dateNomination}}</td>
+                    <td>{{{yesno datePrimary}}}</td>
+                    <td>{{{yesno (contextCall "isCancelled" this)}}}</td>
+                    <td>{{numPositions}}</td>
+                    <td>{{len nominees}}</td>
+                    <td>{{len withdrawnNominees}}</td>
+                    <td>{{len arrWinners}}</td>
+                </tr>
+                {{/iterate}}
+                </tbody>
+            </table>
+            {{else}}
+                {{> emptySmallTable }}
+            {{/if}}
+
             <h2>Election Announcements</h2>
             {{#if (len announcements)}}
             <table class="table-small">
@@ -59,17 +97,17 @@
                     <tr>
                         <th>Announced On</th>
                         <th>Election Date</th>
-                        <th>Title</th>
                         <th>Author</th>
+                        <th>Title</th>
                     </tr>
                 </thead>
                 <tbody>
                     {{#each (values announcements)}}
                     <tr>
-                        <td>{{> relativetime date=dateAnnounced}}</td>
-                        <td>{{> relativetime date=dateElection}}</td>
-                        <td>{{{url postLink postTitle}}}</td>
+                        <td>{{utcTimestamp dateAnnounced}}</td>
+                        <td>{{utcTimestamp dateElection}}</td>
                         <td>{{{url userLink userName}}}</td>
+                        <td>{{{url postLink postTitle}}}</td>
                     </tr>
                     {{/each}}
                 </tbody>
@@ -105,8 +143,8 @@
     {{#with election}}
     <section>
         <aside>
-            {{> totalsTableHeader header="Moderators" collection=moderators }}
-            {{#if (len moderators)}}
+            {{> totalsTableHeader header="Current Moderators" collection=(getter this "currentModerators") }}
+            {{#if (len (getter this "currentModerators"))}}
                 <table class="table-small">
                    <thead>
                         <tr>
@@ -116,7 +154,37 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {{#iterate moderators}}
+                    {{#iterate (getter this "currentModerators")}}
+                    <tr>
+                        <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
+                        <td>{{years this.creation_date}}</td>
+                        {{#if this.election}}
+                            <td>{{{ordinal this.election}}} <a href="{{this.electionLink}}">election</a> ({{year (getter (get @root/data/election/elections this.election) "dateEnded")}})</td>
+                        {{else if this.appointed}}
+                            <td>appointed ({{this.appointed}})</td>
+                        {{else}}
+                            <td></td>
+                        {{/if}}
+                    </tr>
+                    {{/iterate}}
+                    </tbody>
+                </table>
+            {{else}}
+                {{> emptySmallTable }}
+            {{/if}}
+
+            {{> totalsTableHeader header="Former Moderators" collection=(getter this "formerModerators") }}
+            {{#if (len (getter this "formerModerators"))}}
+                <table class="table-small">
+                   <thead>
+                        <tr>
+                            <th>Link</th>
+                            <th>Member for</th>
+                            <th>Election</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{#iterate (getter this "formerModerators")}}
                     <tr>
                         <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
                         <td>{{years this.creation_date}}</td>
@@ -187,6 +255,10 @@
             <table>
                 <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
                 <tr><td>scriptInitDate</td><td>{{> relativetime date=scriptInitDate}}</td></tr>
+                <tr>
+                    <td>SE API quota</td>
+                    <td id="api-quota"></td>
+                </tr>
                 <tr><td>Control Room</td><td>{{{url controlRoomUrl}}}</td></tr>
                 <tr><td>Display Name</td><td>{{chatDisplayName}}</td></tr>
                 <tr><td>Is Muted</td><td>{{{boolean isMuted}}} {{#if isMuted}}{{> relativetime date=unmutesAt short=true prefix="for "}}{{/if}}</td></tr>
@@ -204,6 +276,20 @@
                 <tr><td>feedbackUrl</td><td>{{{url feedbackUrl "feedback form"}}}</td></tr>
                 <tr><td>repoUrl</td><td>{{{url repoUrl}}}</td></tr>
                 <tr><td>flags</td><td>{{> deep flags}}</td></tr>
+            </table>
+        </aside>
+
+        <aside>
+            <h2>Scheduled Announcements</h2>
+            <table class="table-small">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>cron</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="cron"></tbody>
             </table>
         </aside>
 
@@ -302,3 +388,60 @@
 
 <base target="_blank" />
 <meta http-equiv="refresh" content="{{data/autoRefreshInterval}}" />
+
+<script>
+    (() => {
+        const qtyRealtime = new EventSource(`${location.origin}/realtime?type=quota`);
+        qtyRealtime.addEventListener("quota", (event) => {
+            const { data } = event;
+
+            const quotaCell = document.getElementById("api-quota");
+            if(quotaCell) {
+                quotaCell.textContent = data;
+            }
+        });
+
+        const schRealtime = new EventSource(`${location.origin}/realtime?type=cron`);
+        schRealtime.addEventListener("schedules", (event) => {
+            const { data } = event;
+
+            /** @type {[type:string, cronexpr:string][]} */
+            const schedules = JSON.parse(data);
+
+            /** @type {HTMLTableSectionElement|undefined} */
+            const cronTbody = document.getElementById("cron");
+            if(!cronTbody) return;
+
+            const rows = schedules.map(([type, cron, date]) => {
+                const row = document.createElement("tr");
+
+                const typeCell = document.createElement("td");
+                typeCell.textContent = type;
+
+                const cronCell = document.createElement("td");
+                cronCell.textContent = cron;
+                cronCell.classList.add('nowrap');
+
+                const dateCell = document.createElement("td");
+                dateCell.textContent = date;
+
+                row.append(typeCell, cronCell, dateCell);
+                return row;
+            });
+
+            for(const row of cronTbody.rows) row.remove();
+
+            cronTbody.append(...rows);
+        });
+
+        schRealtime.addEventListener("error", (event) => {
+            console.debug(event);
+            schRealtime.close();
+        });
+
+        qtyRealtime.addEventListener("error", (event) => {
+            console.debug(event);
+            qtyRealtime.close();
+        });
+    })();
+</script>

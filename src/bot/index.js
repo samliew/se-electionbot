@@ -3,10 +3,14 @@ import WE from "chatexchange/dist/WebsocketEvent.js";
 import dotenv from "dotenv";
 import entities from 'html-entities';
 import { startServer } from "../server/index.js";
+import { logActivity, logResponse } from "../shared/utils/bot.js";
+import { prepareMessageForMatching } from "../shared/utils/chat.js";
+import { matchNumber } from "../shared/utils/expressions.js";
+import { getOrInit, sortMap } from "../shared/utils/maps.js";
 import { countValidBotMessages } from "./activity/index.js";
-import Announcement from './announcement.js';
+import Announcement, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getThrottleCommand, getTimeCommand, getVotingReport, greetCommand, ignoreUser, impersonateUser, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartDashboard, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -27,32 +31,34 @@ import {
     isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting,
     isAskedAmIalive,
     isAskedForCurrentMods,
-    isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule,
-    isAskedForFullHelp,
+    isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp,
     isAskedForHelp,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
+    isAskedWhyAreElectionsCancelled,
     isAskedWhyIsBot,
     isAskedWhyNominationRemoved,
+    isAskedWillElectionBeCancelled,
     isBotMentioned,
     isHatingTheBot,
     isLovingTheBot,
     isLovingTheBotFun,
     isSayingBotIsInsane,
+    isSayingHappyBirthday,
     isThankingTheBot
 } from "./guards.js";
 import { HerokuClient } from "./herokuClient.js";
 import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
-import { ELECTION_ENDING_SOON_TEXT, sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayNumberOfPositions, sayWhatIsAnElection, sayWhereToFindElectionResults } from "./messages/elections.js";
+import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayHowManyVisitedElection, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults, sayWillElectionBeCancelled } from "./messages/elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
 import { sayCommonlyAskedQuestions, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
-import { sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
-import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayHowManyModsAreHere, sayWhatModsDo } from "./messages/moderators.js";
+import { sayHappyBirthday, sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
+import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayFormerMods, sayHowManyModsAreHere, sayWhatModsDo } from "./messages/moderators.js";
 import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElectionNotStartedYet, sayElectionSchedule, sayNextPhase } from "./messages/phases.js";
 import { sayQuestionnaireQuestion } from "./messages/questionnaire.js";
 import { sayCandidateScoreFormula, sayCandidateScoreLeaderboard } from "./messages/score.js";
 import { sayAboutBallotFile, sayAboutSTV } from "./messages/stv.js";
-import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowManyModsVoted, sayHowToSaveVotes, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
+import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowToSaveVotes, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "./random.js";
 import Rescraper from "./rescraper.js";
@@ -60,10 +66,6 @@ import { makeCandidateScoreCalc } from "./score.js";
 import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
-import { logActivity, logResponse } from "../shared/utils/bot.js";
-import { prepareMessageForMatching } from "../shared/utils/chat.js";
-import { matchNumber } from "../shared/utils/expressions.js";
-import { getOrInit, sortMap } from "../shared/utils/maps.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -74,6 +76,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
  * @typedef {typeof import("chatexchange/dist/WebsocketEvent").ChatEventType} EventType
  * @typedef {import("chatexchange/dist/Client").Host} Host
  * @typedef {import("./utils").APIListResponse} APIListResponse
+ * @typedef {import("chatexchange/dist/Room").default} Room
  *
  * @typedef {{
  *  eventType: number,
@@ -91,10 +94,14 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
  *  election: Election,
  *  text: string,
  *  user: User,
- *  botUser: ChatUser
+ *  botUser: ChatUser,
+ *  room: Room
  * ) => string | Promise<string>} MessageBuilder
  *
  * @typedef {import("./env.js").BotEnvironment} BotEnvironment
+ *
+ * @typedef {import("./commands/commands.js").CommandArguments} CommandArguments
+ * @typedef {import("./announcement").TaskType} TaskType
  */
 
 (async () => {
@@ -131,9 +138,15 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
     }
 
     // Other environment variables
-    const defaultChatDomain = /** @type {Host} */(env.str("chat_domain", "stackexchange.com"));
+    const defaultChatDomain = /** @type {Host} */(env.str("chat_domain", "stackexchange.com") || "stackexchange.com");
     const defaultChatRoomId = env.num("chat_room_id", 92073);
     const defaultChatNotSet = !process.env.CHAT_DOMAIN || !process.env.CHAT_ROOM_ID;
+
+    console.log(`[defaults]
+chat domain  ${defaultChatDomain};
+char room    ${defaultChatRoomId};
+use defaults ${defaultChatNotSet}`
+    );
 
     /** @type {{ ChatEventType: EventType }} */
     //@ts-expect-error
@@ -255,7 +268,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
             await heroku.scaleHobby();
         }
         // Otherwise, scale down to free dynos
-        else if (hasPaidDyno) {
+        else if (!election.isActive() && hasPaidDyno) {
             console.log('Scaling down to Heroku free dyno...');
             await heroku.scaleFree();
         }
@@ -264,7 +277,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
          * If is in production mode, default chatroom not set, and is an active election,
          * auto-detect and set chat domain & room to join
          */
-        if (!config.debugOrVerbose && defaultChatNotSet && election.isActive()) {
+        if (!config.debug && defaultChatNotSet && election.isActive()) {
 
             // Store original values so we know if it's changed
             const originalChatDomain = config.chatDomain;
@@ -301,7 +314,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
             await election.updateElectionBadges(config);
         }
 
-        const { moderators } = await election.updateModerators(config);
+        await election.updateModerators(config);
 
         // "default" is a temp fix for ChatExchange being served as CJS module
         /** @type {Client} */
@@ -334,7 +347,15 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
         const rescraper = new Rescraper(config, client, room, elections, election);
         const announcement = new Announcement(config, room, election, rescraper);
         announcement.setRescraper(rescraper);
-        announcement.initAll();
+
+        const initStatus = announcement.initAll();
+
+        console.log(`[init] scheduled tasks init:\n${Object.keys(initStatus).map(
+            (type) => `${type}: ${announcement.schedules.get(
+                /** @type {TaskType} */(type)
+            ) || "not initialized"}`
+        ).join("\n")}`);
+
         rescraper.setAnnouncement(announcement);
         rescraper.start();
 
@@ -390,7 +411,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
         // TODO: check if not posted yet
         const metaAnnouncements = await searchChat(config, config.chatDomain, "moderator election results", config.chatRoomId);
         if (election.isEnded() && config.canAnnounceMetaPost && !metaAnnouncements.length) {
-            await postMetaAnnouncement(config, election, room, "");
+            await postMetaAnnouncement({ config, election, room, content: "" });
             console.log(`INIT - posted meta announcement`);
         }
 
@@ -408,42 +429,42 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
 
         const commander = new CommandManager();
         commander.bulkAdd({
-            "alive": ["bot reports on its status", isAliveCommand, AccessLevel.privileged],
-            "announce nominees": ["makes the bot announce nominees", announceNominees, AccessLevel.privileged],
-            "announce winners": ["makes the bot fetch and announce winners", announceWinners, AccessLevel.privileged],
-            "change election": ["switches current election", changeElection, AccessLevel.dev],
-            "chatroom": ["gets election chat room link", getElectionRoomURL, AccessLevel.dev],
-            "coffee": ["brews some coffee", brewCoffeeCommand, AccessLevel.privileged],
+            "alive": ["bot reports on its status", isAliveCommand, /^(?:alive|awake|ping|uptime)/, AccessLevel.privileged],
+            "announce nominees": ["makes the bot announce nominees", announceNominees, /^announce nominees/, AccessLevel.privileged],
+            "announce winners": ["makes the bot fetch and announce winners", announceWinners, /^announce winners/, AccessLevel.privileged],
+            "change election": ["switches current election", changeElection, /^(?:change|switch)\s+elections?/, AccessLevel.dev],
+            "chatroom": ["gets election chat room link", getElectionRoomURL, /chatroom/, AccessLevel.dev],
+            "coffee": ["brews some coffee", brewCoffeeCommand, /(?:brew|make).+coffee/, AccessLevel.privileged],
             // to reserve the keyword 'help' for normal users
-            "commands": ["Prints usage info", () => commander.help("moderator commands (requires mention):"), AccessLevel.privileged],
-            "debug": ["switches debugging on/off", switchMode, AccessLevel.dev],
-            "die": ["stops the bot in case of emergency", dieCommand, AccessLevel.privileged],
-            "feedback": ["bot says how to provide feedback", sayFeedback, AccessLevel.dev],
-            "fun": ["switches fun mode on/off", switchMode, AccessLevel.privileged],
-            "get cron": ["lists scheduled announcements", getCronCommand, AccessLevel.dev],
-            "get modes": ["gets the current state of modes", getModeReport, AccessLevel.dev],
-            "get rooms": ["get list of rooms where bot is in", listRoomsCommand, AccessLevel.dev],
-            "get throttle": ["get throttle value (secs)", getThrottleCommand, AccessLevel.privileged],
-            "get time": ["gets current UTC time", getTimeCommand, AccessLevel.privileged],
-            "greet": ["makes the bot welcome everyone", greetCommand, AccessLevel.privileged],
-            "ignore": ["stop bot from responding to a user", ignoreUser, AccessLevel.privileged],
-            "impersonate": ["impersonates a user", impersonateUser, AccessLevel.dev],
-            "join room": ["joins a given room", joinRoomCommand, AccessLevel.dev],
-            "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, AccessLevel.dev],
-            "mute": ["stop bot from responding for N mins", muteCommand, AccessLevel.privileged],
-            "mods voted": ["posts how many mods voted", sayHowManyModsVoted, AccessLevel.privileged],
-            "post meta": ["posts an official Meta announcement", postMetaAnnouncement, AccessLevel.privileged],
-            "rm_election": ["resets the current election", resetElection, AccessLevel.dev],
-            "restart server": ["restarts the server", restartDashboard, AccessLevel.dev],
-            "say": ["bot echoes something", echoSomething, AccessLevel.privileged],
-            "set access": ["sets user's access level", setAccessCommand, AccessLevel.dev],
-            "set throttle": ["set throttle value (secs)", setThrottleCommand, AccessLevel.privileged],
-            "test cron": ["sets up a test cron job", scheduleTestCronCommand, AccessLevel.dev],
-            "timetravel": ["sends bot back in time to another phase", timetravelCommand, AccessLevel.dev],
-            "unmute": ["allows the bot to respond", unmuteCommand, AccessLevel.privileged],
-            "verbose": ["switches verbose mode on/off", switchMode, AccessLevel.dev],
-            "voter report": ["posts a per-day report on voters", getVotingReport, AccessLevel.privileged],
-            "whois": ["retrieve mods from another site", listSiteModerators, AccessLevel.privileged]
+            "commands": ["Prints usage info", () => commander.help("moderator commands (requires mention):"), /commands|usage/, AccessLevel.privileged],
+            "debug": ["switches debugging on/off", switchMode, /debug(?:ing)?/, AccessLevel.dev],
+            "die": ["stops the bot in case of emergency", dieCommand, /die|shutdown|turn off/, AccessLevel.privileged],
+            "feedback": ["bot says how to provide feedback", sayFeedback, /^feedback/, AccessLevel.dev],
+            "fun": ["switches fun mode on/off", switchMode, /fun/, AccessLevel.privileged],
+            "get cron": ["lists scheduled announcements", getCronCommand, /get cron/, AccessLevel.dev],
+            "get modes": ["gets the current state of modes", getModeReport, /^(?:get modes?\s+report|report\s+modes)/, AccessLevel.dev],
+            "get rooms": ["get list of rooms where bot is in", listRoomsCommand, /get rooms/, AccessLevel.dev],
+            "get throttle": ["get throttle value (secs)", getThrottleCommand, /get throttle/, AccessLevel.privileged],
+            "get time": ["gets current UTC time", getTimeCommand, /^(?:get time|time)$/, AccessLevel.privileged],
+            "greet": ["makes the bot welcome everyone", greetCommand, /^(?:greet|welcome)/, AccessLevel.privileged],
+            "ignore": ["stop bot from responding to a user", ignoreUserCommand, /^ignore \d+/, AccessLevel.privileged],
+            "impersonate": ["impersonates a user", impersonateUserCommand, /^impersonate \d+/, AccessLevel.dev],
+            "join room": ["joins a given room", joinRoomCommand, /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, AccessLevel.dev],
+            "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, /leave(?:\s+this)?\s+room/, AccessLevel.dev],
+            "mute": ["stop bot from responding for N mins", muteCommand, /^(?:mute|timeout|sleep)/, AccessLevel.privileged],
+            "mods voted": ["posts how many mods voted", getModsVotedCommand, /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, AccessLevel.privileged],
+            "post meta": ["posts an official Meta announcement", postMetaAnnouncement, /^post meta(?:\s+announcement)?/, AccessLevel.privileged],
+            "rm_election": ["resets the current election", resetElection, /^reset election/, AccessLevel.dev],
+            "restart server": ["restarts the server", restartServerCommand, /^restart\s+server/, AccessLevel.dev],
+            "say": ["bot echoes something", echoSomething, /say/, AccessLevel.privileged],
+            "set access": ["sets user's access level", setAccessCommand, /set (?:access|level)/, AccessLevel.dev],
+            "set throttle": ["set throttle value (secs)", setThrottleCommand, /set throttle/, AccessLevel.privileged],
+            "test cron": ["sets up a test cron job", scheduleTestCronCommand, /test cron/, AccessLevel.dev],
+            "timetravel": ["sends bot back in time to another phase", timetravelCommand, /88 miles|delorean|timetravel/, AccessLevel.dev],
+            "unmute": ["allows the bot to respond", unmuteCommand, /unmute|clear timeout/, AccessLevel.privileged],
+            "verbose": ["switches verbose mode on/off", switchMode, /^(?:verbose|chatty)/, AccessLevel.dev],
+            "voter report": ["posts a per-day report on voters", getVoterReportCommand, /^(?:post\s+)?voter\s+report/, AccessLevel.privileged],
+            "whois": ["retrieve mods from another site", listSiteModerators, /^whois/, AccessLevel.privileged]
         });
 
         commander.aliases({
@@ -473,6 +494,8 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
             [isAskedAboutBallotFile, sayAboutBallotFile],
             [isAskedWhoIsTheBestMod, sayBestModerator],
             [isAskedForCurrentNominees, sayCurrentCandidates],
+            [isAskedForCurrentWinners, sayCurrentWinners],
+            [isAskedForFormerMods, sayFormerMods],
             [isAskedAboutElectionPhases, sayAboutThePhases],
             [isAskedIfOneHasVoted, sayIfOneHasVoted],
             [isAskedIfCanVote, sayIfOneCanVote],
@@ -480,10 +503,17 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
             [isAskedForQuestionnaireQuestion, sayQuestionnaireQuestion],
             [isAskedAboutElectionResults, sayElectionResults],
             [isAskedAboutElectionPhaseDuration, sayElectionPhaseDuration],
-            [isAskedWhatBotCanDo, sayCommonlyAskedQuestions]
+            [isAskedWhatBotCanDo, sayCommonlyAskedQuestions],
+            [isLovingTheBot, getRandomGoodThanks],
+            [isHatingTheBot, getRandomNegative],
+            [isSayingHappyBirthday, sayHappyBirthday],
+            [isAskedWhyAreElectionsCancelled, sayWhenAreElectionsCancelled],
+            [isAskedWillElectionBeCancelled, sayWillElectionBeCancelled],
+            [isAskedWhatElectionIs, sayWhatIsAnElection],
+            [isAskedHowManyVisitedElection, sayHowManyVisitedElection]
         ];
 
-        /** @type {[(t:string) => boolean, () => string][]} */
+        /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
         const funRules = [
             [isLovingTheBotFun, sayLoveYou],
             [isAskedHowAmI, sayHowIsBot],
@@ -493,9 +523,10 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
             [isAskedMeaningOfLife, sayAnswerToLifeUniverseAndEverything],
             [isAskedAboutJonSkeetJokes, sayAJonSkeetJoke],
             [isAskedAboutJokes, sayAJoke],
+            [isAskedAboutLightbulb, sayHowManyModsItTakesToFixLightbulb]
         ];
 
-        const dashboardApp = await startServer(client, room, config, election);
+        const dashboardApp = await startServer(client, room, config, election, announcement);
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
@@ -570,60 +601,36 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
             if (isPrivileged && botMentioned) {
                 let responseText = "";
 
-                const matches = [
-                    ["commands", /commands|usage/],
-                    ["alive", /^(?:alive|awake|ping|uptime)/, config],
-                    ["change election", /^(?:change|switch)\s+elections?/, config, election, preparedMessage],
-                    ["say", /say/, config, room, decodedMessage],
-                    ["greet", /^(?:greet|welcome)/, config, elections, election, me, room, preparedMessage],
-                    ["get time", /^(?:get time|time)$/, election],
-                    ["get cron", /get cron/, announcement],
-                    ["test cron", /test cron/, announcement],
-                    ["get throttle", /get throttle/, config],
-                    ["set throttle", /set throttle/, preparedMessage, config],
-                    ["chatroom", /chatroom/, election],
-                    ["get rooms", /get rooms/, config, client],
-                    ["leave room", /leave(?:\s+this)?\s+room/, client, room, preparedMessage],
-                    ["mute", /^(?:mute|timeout|sleep)/, config, room, preparedMessage],
-                    ["unmute", /unmute|clear timeout/, config, room],
-                    ["coffee", /(?:brew|make).+coffee/, config, decodedMessage, user],
-                    ["timetravel", /88 miles|delorean|timetravel/, config, election, preparedMessage],
-                    ["fun", /fun/, config, preparedMessage],
-                    ["debug", /debug(?:ing)?/, config, preparedMessage],
-                    ["verbose", /^(?:verbose|chatty)/, config, preparedMessage],
-                    ["die", /die|shutdown|turn off/, room],
-                    ["set access", /set (?:access|level)/, config, user, preparedMessage],
-                    ["announce nominees", /^announce nominees/, config, election, announcement],
-                    ["announce winners", /^announce winners/, config, election, room, announcement],
-                    ["feedback", /^feedback/, config],
-                    ["list moderators", /^whois/, config, preparedMessage, entities],
-                    ["reset election", /^reset election/, config, election],
-                    ["ignore", /^ignore \d+/, config, room, preparedMessage],
-                    ["impersonate", /^impersonate \d+/, config, preparedMessage],
-                    ["post meta", /^post meta(?:\s+announcement)?/, config, election, room, preparedMessage],
-                    ["get modes", /^(?:get modes?\s+report|report\s+modes)/, config],
-                    ["mods voted", /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, config, elections, election, preparedMessage],
-                    ["join room", /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, config, client, preparedMessage],
-                    ["restart server", /^restart\s+server/, config, dashboardApp],
-                    ["voter report", /^(?:post\s+)?voter\s+report/, config, election, preparedMessage]
-                ];
+                /** @type {CommandArguments} */
+                const commandArguments = {
+                    announcement,
+                    app: dashboardApp,
+                    bot: me,
+                    client,
+                    config,
+                    content: preparedMessage,
+                    election,
+                    elections,
+                    room,
+                    user
+                };
 
-                const boundRunIf = commander.runIfMatches.bind(commander, preparedMessage);
+                const command = commander.findMatching(preparedMessage);
+                if (command && commander.canRun(command)) {
+                    responseText ||= await command.run(commandArguments);
 
-                for (const [name, regex, ...args] of matches) {
-                    responseText ||= await boundRunIf(name, regex, ...args);
-                }
+                    /* Note:
+                     * Be careful if integrating this section with message queue,
+                     *   since it is currently for long responses to dev/admin commands only, and does not reset active mutes.
+                     * We should also avoid long responses for normal users and continue to contain them within a single message,
+                     *   so we could possibly leave this block as it is
+                     */
+                    if (responseText) {
+                        logResponse(config, responseText, preparedMessage, decodedMessage);
+                        await sendMultipartMessage(config, room, responseText, msg.id, { isPrivileged: true, log: false });
+                    }
 
-                /* Note:
-                 * Be careful if integrating this section with message queue,
-                 *   since it is currently for long responses to dev/admin commands only, and does not reset active mutes.
-                 * We should also avoid long responses for normal users and continue to contain them within a single message,
-                 *   so we could possibly leave this block as it is
-                 */
-                if (responseText) {
-                    logResponse(config, responseText, preparedMessage, decodedMessage);
-                    await sendMultipartMessage(config, room, responseText, msg.id, { isPrivileged: true, log: false });
-                    return; // no further action
+                    return; // no further action since we matched a privileged bot command
                 }
             }
 
@@ -656,11 +663,8 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
             if (matched) {
                 const [matcher, builder] = matched;
                 if (config.debug) console.log(`Matched response: ${matcher.name}`);
-                responseText = await builder(config, elections, election, preparedMessage, user, me);
+                responseText = await builder(config, elections, election, preparedMessage, user, me, room);
                 if (config.verbose) console.log(`Built response: ${responseText}`);
-            }
-            else if (isAskedAboutLightbulb(preparedMessage) && config.fun) {
-                responseText = sayHowManyModsItTakesToFixLightbulb(moderators);
             }
             else if (isAskedAboutBadgesOfType(preparedMessage)) {
                 const [, type] = /(participation|editing|moderation)/.exec(preparedMessage) || [];
@@ -703,7 +707,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
                 else responseText = sayInformedDecision();
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
-                responseText = sayCurrentMods(election, moderators, entities.decode);
+                responseText = await sayCurrentMods(election, entities.decode);
             }
             // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
             else if (isAskedForNominatingInfo(preparedMessage)) {
@@ -728,29 +732,14 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
             else if (isAskedAboutVoting(preparedMessage)) {
                 responseText = sayAboutVoting(election);
             }
-            else if (isAskedForCurrentWinners(preparedMessage)) {
-                responseText = sayCurrentWinners(election);
-            }
             else if (isAskedForElectionSchedule(preparedMessage)) {
                 responseText = sayElectionSchedule(election);
-            }
-            else if (isAskedWhatElectionIs(preparedMessage)) {
-                responseText = sayWhatIsAnElection(election);
             }
             else if (isAskedAboutUsernameDiamond(preparedMessage)) {
                 responseText = sayCanEditDiamond();
             }
             else if (isAskedAboutMissingComments(preparedMessage)) {
                 responseText = sayMissingComments(config, election);
-            }
-            else if (/^happy birth\s?day,? .*!*$/.test(preparedMessage)) {
-                responseText = `Happy birthday!`;
-            }
-            else if (isLovingTheBot(preparedMessage)) {
-                responseText = getRandomGoodThanks();
-            }
-            else if (isHatingTheBot(preparedMessage)) {
-                responseText = getRandomNegative();
             }
             else if (isPrivileged && isAskedForUserEligibility(preparedMessage)) {
                 responseText = await sayUserEligibility(config, election, preparedMessage);
@@ -805,7 +794,7 @@ import { getOrInit, sortMap } from "../shared/utils/maps.js";
                 // The rest below are fun mode only
                 else if (config.fun) {
                     const [, funHandler] = funRules.find(([g]) => g(preparedMessage)) || [];
-                    responseText = funHandler?.();
+                    responseText = await funHandler?.(config, elections, election, preparedMessage, user, me, room);
                 }
 
                 if (responseText) {

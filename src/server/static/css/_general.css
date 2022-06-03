@@ -4,7 +4,7 @@
   --link-colour: rgb(0, 0, 139);
   --border-colour: #999;
   --margin-size: 40px;
-  --smaller-font-size: 0.85em;
+  --smaller-font-size: 0.85rem;
   --main-colour: rgb(242, 232, 222);
 }
 
@@ -145,6 +145,18 @@ pre:empty::before {
   font-style: italic;
   font-size: 0.9rem;
   color: var(--border-colour);
+}
+
+.equal-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1vw;
+}
+
+.equal-columns > * {
+  flex-basis: calc(50% - 1vw - 3em);
+  min-width: 256px;
+  max-width: 512px;
 }
 
 @media (max-width: 767px) {

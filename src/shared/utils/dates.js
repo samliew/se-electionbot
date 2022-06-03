@@ -1,8 +1,10 @@
 import { pluralize } from "../../bot/utils.js";
 
-const MS_IN_SECOND = 1000;
-
+export const MS_IN_SECOND = 1000;
 export const SEC_IN_MINUTE = 60;
+export const MIN_IN_HOUR = 60;
+export const HOUR_IN_DAY = 24;
+export const MS_IN_DAY = MS_IN_SECOND * SEC_IN_MINUTE * MIN_IN_HOUR * HOUR_IN_DAY;
 
 /**
  * @summary validates and normalizes the Date
@@ -24,6 +26,7 @@ export const validateDate = (input) => {
 /**
  * @typedef {{
  *  soonText ?: string,
+ *  now?: Date,
  *  justNowText?: string
  * }} RelativeTimeOptions
  *
@@ -32,18 +35,24 @@ export const validateDate = (input) => {
  * @param {RelativeTimeOptions} [options]
  * @returns {string}
  */
-export const dateToRelativeTime = (date, { soonText = 'soon', justNowText = 'just now' } = {}) => {
+export const dateToRelativeTime = (date, options = {}) => {
+    const {
+        justNowText = 'just now',
+        now = new Date(),
+        soonText = 'soon',
+    } = options;
 
     date = validateDate(date);
 
     if (date === null) return soonText;
 
-    const S_MIN = 60;
-    const S_HOUR = S_MIN * 60;
-    const S_DAY = S_HOUR * 24;
+    const S_HOUR = SEC_IN_MINUTE * MIN_IN_HOUR;
+    const S_DAY = S_HOUR * HOUR_IN_DAY;
+
+    const nowMs = getMilliseconds(now);
 
     // Try future date
-    let diff = (date.getTime() - Date.now()) / MS_IN_SECOND;
+    let diff = (date.getTime() - nowMs) / MS_IN_SECOND;
     let dayDiff = Math.floor(diff / S_DAY);
 
     // In the future
@@ -52,8 +61,8 @@ export const dateToRelativeTime = (date, { soonText = 'soon', justNowText = 'jus
         const rules = [
             [dayDiff > 31, ""],
             [diff < 5, soonText],
-            [diff < S_MIN, ((x) => `in ${x} sec${pluralize(x)}`)(Math.floor(diff))],
-            [diff < S_HOUR, ((x) => `in ${x} min${pluralize(x)}`)(Math.floor(diff / S_MIN))],
+            [diff < SEC_IN_MINUTE, ((x) => `in ${x} sec${pluralize(x)}`)(Math.floor(diff))],
+            [diff < S_HOUR, ((x) => `in ${x} min${pluralize(x)}`)(Math.floor(diff / SEC_IN_MINUTE))],
             [diff < S_DAY, ((x) => `in ${x} hour${pluralize(x)}`)(Math.floor(diff / S_HOUR))],
             [true, ((x) => `in ${x} day${pluralize(x)}`)(Math.floor(diff / S_DAY))]
         ];
@@ -63,15 +72,15 @@ export const dateToRelativeTime = (date, { soonText = 'soon', justNowText = 'jus
     }
 
     // In the past
-    diff = (Date.now() - date.getTime()) / MS_IN_SECOND;
+    diff = (nowMs - date.getTime()) / MS_IN_SECOND;
     dayDiff = Math.floor(diff / S_DAY);
 
     /** @type {[boolean, string][]} */
     const rules = [
         [dayDiff > 31, ""],
         [diff < 5, justNowText],
-        [diff < S_MIN, ((x) => `${x} sec${pluralize(x)} ago`)(Math.floor(diff))],
-        [diff < S_HOUR, ((x) => `${x} min${pluralize(x)} ago`)(Math.floor(diff / S_MIN))],
+        [diff < SEC_IN_MINUTE, ((x) => `${x} sec${pluralize(x)} ago`)(Math.floor(diff))],
+        [diff < S_HOUR, ((x) => `${x} min${pluralize(x)} ago`)(Math.floor(diff / SEC_IN_MINUTE))],
         [diff < S_DAY, ((x) => `${x} hour${pluralize(x)} ago`)(Math.floor(diff / S_HOUR))],
         [true, ((x) => `${x} day${pluralize(x)} ago`)(Math.floor(diff / S_DAY))]
     ];
@@ -119,9 +128,9 @@ export const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
 
 /**
  * @summary formates date input to ISO 8601 format without milliseconds
- * @param {Date} date date to format
+ * @param {Date|string|number} date date to format
  */
-export const dateToShortISO8601Timestamp = (date) => date.toISOString().replace(/\.\d{3}/, "");
+export const dateToShortISO8601Timestamp = (date) => validateDate(date).toISOString().replace(/\.\d{3}/, "");
 
 /**
 * @summary formats date input into ISO 8601 format

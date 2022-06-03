@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
-    isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyIsBot, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isThankingTheBot
+    isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyIsBot, isAskedWillElectionBeCancelled, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot
 } from "../../src/bot/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -84,6 +84,35 @@ describe('Message Guards', () => {
         "How does election work",
         "How do elections work?"
     ];
+
+    const whyAreElectionsCancelledMatches = [
+        "Why are elections cancelled?",
+        "why would an election be cancelled?!",
+        "Why are some elections cancelled",
+        "Why are elections canceled" // intentional typo
+    ];
+
+    const willElectionBeCancelledMatches = [
+        "Will the election be cancelled?",
+        "would election be canceled?!", // intentional typo
+        "Is the election going to be cancelled?",
+        "Would this election be cancelled?"
+    ];
+
+    describe(isAskedWhyAreElectionsCancelled.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWhyAreElectionsCancelled, whyAreElectionsCancelledMatches);
+            allMatch(isAskedWhyAreElectionsCancelled, whatIsElectionMatches, false);
+            allMatch(isAskedWhyAreElectionsCancelled, willElectionBeCancelledMatches, false);
+        });
+    });
+
+    describe(isAskedWillElectionBeCancelled.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedWillElectionBeCancelled, willElectionBeCancelledMatches);
+            allMatch(isAskedWillElectionBeCancelled, whyAreElectionsCancelledMatches, false);
+        });
+    });
 
     describe(isAskedWhatElectionIs.name, () => {
         it('should correctly match content', () => {
@@ -171,6 +200,18 @@ describe('Message Guards', () => {
                 howManyNomineesMatches,
                 false
             );
+        });
+    });
+
+    describe(isAskedForFormerMods.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedForFormerMods, [
+                "who are the former mods?",
+                "How many former moderators are there?",
+                "How many former mods do we have?",
+                "which mods stepped down",
+                "which moderators resigned?"
+            ]);
         });
     });
 
@@ -554,6 +595,20 @@ describe('Message Guards', () => {
         "how many users participated"
     ];
 
+    const howManyVisitedMatches = [
+        "How many visited the election?",
+        "how many users have visited this election?",
+        "How many visited election page?"
+    ];
+
+    describe(isAskedHowManyVisitedElection.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isAskedHowManyVisitedElection, howManyVisitedMatches);
+            allMatch(isAskedHowManyVisitedElection, userEligibilityMatches, false);
+            allMatch(isAskedHowManyVisitedElection, eligibleUserCountMatches, false);
+        });
+    });
+
     describe(isAskedHowManyVoted.name, () => {
         it('should correctly match content', () => {
             allMatch(isAskedHowManyVoted, alreadyVotedMatches);
@@ -692,6 +747,17 @@ describe('Message Guards', () => {
                 // https://chat.stackoverflow.com/transcript/message/53274725#53274725
                 "I'll not bother to edit that ... looks good as is"
             ], false);
+        });
+    });
+
+    const happyBirthdayMatches = [
+        "Happy Birthday, Andy!!",
+        "happy birthday, bot"
+    ];
+
+    describe(isSayingHappyBirthday.name, () => {
+        it('should correctly match content', () => {
+            allMatch(isSayingHappyBirthday, happyBirthdayMatches);
         });
     });
 

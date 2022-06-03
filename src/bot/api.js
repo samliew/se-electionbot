@@ -1,6 +1,6 @@
-import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
 import { getSeconds } from "../shared/utils/dates.js";
 import { mergeMaps } from "../shared/utils/maps.js";
+import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
 
 /**
  * @typedef {import("./election").default} Election
@@ -23,6 +23,10 @@ import { mergeMaps } from "../shared/utils/maps.js";
  * @type {Site[]}
  */
 export let allNetworkSites = [];
+
+let currentQuota = 10000;
+
+export const getCurrentAPIQuota = () => currentQuota;
 
 /**
 * @summary Get the next API key from a rotating set
@@ -47,11 +51,13 @@ export const getStackApiKey = (keyPool) => {
  * @param {U} successCallback function to call on success
  */
 export const handleResponse = async (response, backoffCallback, successCallback) => {
-    const { backoff } = response;
+    const { backoff, quota_remaining } = response;
     if (backoff) {
         await wait(backoff);
         return backoffCallback(response);
     }
+
+    currentQuota = quota_remaining;
 
     return successCallback(response);
 };
@@ -60,12 +66,13 @@ export const handleResponse = async (response, backoffCallback, successCallback)
  * @summary gets all named badges from the API
  * @param {BotConfig} config
  * @param {string} site election site slug
- * @param {number} [page] API response page
+ * @param {{ page?: number, name?: string }} options request options
  * @returns {Promise<Badge[]>}
  */
-export const getAllNamedBadges = async (config, site, page = 1) => {
-    const badgeURI = new URL(`${apiBase}/${apiVer}/badges/name`);
-    badgeURI.search = new URLSearchParams({
+export const getNamedBadges = async (config, site, options = {}) => {
+    const { page = 1, name } = options;
+
+    const params = new URLSearchParams({
         site,
         order: "asc",
         sort: "name",
@@ -73,18 +80,26 @@ export const getAllNamedBadges = async (config, site, page = 1) => {
         filter: ")j(RnCyiVMe7YpW4a2x",
         page: page.toString(),
         key: getStackApiKey(config.apiKeyPool)
-    }).toString();
+    });
+
+    if (name) params.set("inname", name);
+
+    const badgeURI = new URL(`${apiBase}/${apiVer}/badges/name`);
+    badgeURI.search = params.toString();
 
     return handleResponse(
        /** @type {ApiWrapper<Badge>} */(await fetchUrl(config, badgeURI, true)) || {},
-        () => getAllNamedBadges(config, site, page),
+        () => getNamedBadges(config, site, options),
         async ({ items = [], has_more }) => {
             if (has_more) {
-                const otherItems = await getAllNamedBadges(config, site, page + 1);
+                const otherItems = await getNamedBadges(config, site, {
+                    ...options,
+                    page: page + 1,
+                });
                 return [...items, ...otherItems];
             }
 
-            if (config.verbose) console.log(`API - ${getAllNamedBadges.name}\n`, items);
+            if (config.verbose) console.log(`[api] ${getNamedBadges.name}\n`, items);
 
             return items;
         });
@@ -142,6 +157,53 @@ export const getBadges = async (config, userIds, site, options = {}) => {
             }
 
             if (config.verbose) console.log(`API - ${getBadges.name}\n`, items);
+
+            return items;
+        });
+};
+
+/**
+ * @see https://api.stackexchange.com/docs/badge-recipients-by-ids
+ *
+ * @summary gets awarded badges from the API by id
+ * @param {BotConfig} config
+ * @param {string} site election site slug
+ * @param {number[]} badgeIds badge ids
+ * @param {{
+ *  from?: Date|string|number,
+ *  to?: Date|string|number,
+ *  page?: number,
+ * }} options configuration
+ * @returns {Promise<Badge[]>}
+ */
+export const getAwardedBadges = async (config, site, badgeIds, options) => {
+    const { from, to, page = 1 } = options;
+
+    const params = new URLSearchParams({
+        key: getStackApiKey(config.apiKeyPool),
+        page: page.toString(),
+        site,
+    });
+
+    if (from) params.append("fromdate", getSeconds(from).toString());
+    if (to) params.append("todate", getSeconds(to).toString());
+
+    const badgeURI = new URL(`${apiBase}/${apiVer}/badges/${badgeIds.join(";")}/recipients`);
+    badgeURI.search = params.toString();
+
+    return handleResponse(
+        /**@type {ApiWrapper<User>} */(await fetchUrl(config, badgeURI, true)) || {},
+        () => getAwardedBadges(config, site, badgeIds, options),
+        async ({ items = [], has_more }) => {
+            if (has_more) {
+                const otherItems = await getAwardedBadges(config, site, badgeIds, {
+                    ...options,
+                    page: page + 1
+                });
+                return [...items, ...otherItems];
+            }
+
+            if (config.verbose) console.log(`[api] ${getAwardedBadges.name}\n`, items);
 
             return items;
         });

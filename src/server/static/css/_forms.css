@@ -1,5 +1,4 @@
 form {
-  max-width: 800px;
   margin: 2em 0 3em;
 }
 
@@ -37,4 +36,8 @@ form button {
 
 form .form-controls {
   margin: 1.5em 0;
+}
+
+form.equal-columns .form-controls {
+  max-width: unset;
 }

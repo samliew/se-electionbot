@@ -13,7 +13,6 @@
 .dashboard section {
   flex: 1 1 calc(25% - var(--margin-size));
   margin-right: var(--margin-size);
-  max-width: 50%;
 }
 
 .dashboard section:last-child {

@@ -1,0 +1,230 @@
+Ballot file contains 10 candidates and 175 ballots.
+No candidates have withdrawn.
+Ballot file contains 175 non-empty ballots.
+
+Counting votes for Ask Ubuntu Moderator Election 2012 using Meek STV.
+10 candidates running for 3 seats.
+
+ R|RolandiXor|Octavian A|jrg       |fossfreedo|Bruno Pere|Amith KK  |jokerdino 
+  |          |. Damiean |          |m         |ira       |          |          
+  |----------+----------+----------+----------+----------+----------+----------
+  |William   |gajdipajti|UAdapter  |Exhausted |Surplus   |Threshold 
+  |          |          |          |          |          |          
+===============================================================================
+ 1| 22.000000| 11.000000| 32.000000| 69.000000| 26.000000|  5.000000|  7.000000
+  |  2.000000|  1.000000|  0.000000|  0.000000| 25.249999| 43.750001
+  |----------------------------------------------------------------------------
+  | Count of first choices. Candidate fossfreedom has reached the threshold and
+  | is elected.
+===============================================================================
+ 2| 31.880434| 13.561594| 35.293478| 43.750002| 33.318840|  5.000000|  7.731884
+  |  2.000000|  1.365942|  0.000000|  1.097826|  0.274458| 43.475544
+  |----------------------------------------------------------------------------
+  | Count after transferring surplus votes. Keep factors of candidates who have
+  | exceeded the threshold: fossfreedom, 0.634058.
+===============================================================================
+ 3| 38.978260|          | 43.855072| 48.188408| 41.148550|          |          
+  |          |          |          |  2.829710|  5.958334| 43.042573
+  |----------------------------------------------------------------------------
+  | Count after eliminating Octavian A. Damiean, Amith KK, jokerdino, William,
+  | gajdipajti, and UAdapter and transferring votes. All losing candidates are
+  | eliminated. Candidate jrg has reached the threshold and is elected.
+===============================================================================
+ 4| 41.311489|          | 44.105871| 43.116045| 43.040116|          |          
+  |          |          |          |  3.426479|  1.581889| 42.893381
+  |----------------------------------------------------------------------------
+  | Count after transferring surplus votes. Keep factors of candidates who have
+  | exceeded the threshold: jrg, 0.981474 and fossfreedom, 0.566350. Candidate
+  | Bruno Pereira has reached the threshold and is elected.
+
+Winners are jrg, fossfreedom, and Bruno Pereira.
+
+
+10 3
+1 1 0
+1 2 0
+1 3 0
+1 1 3 4 0
+1 1 3 4 0
+1 1 3 4 0
+1 1 3 2 0
+1 2 1 0
+1 2 4 5 0
+1 1 2 5 0
+1 4 0
+1 4 0
+1 4 0
+1 1 3 5 0
+1 2 4 1 0
+1 1 3 6 0
+1 1 3 6 0
+1 5 0
+1 5 0
+1 3 4 0
+1 1 2 4 0
+1 3 7 5 0
+1 2 3 8 0
+1 4 5 0
+1 1 4 3 0
+1 1 4 3 0
+1 1 4 3 0
+1 2 1 4 0
+1 2 3 5 0
+1 1 4 2 0
+1 2 1 5 0
+1 1 4 6 0
+1 3 5 4 0
+1 3 7 1 0
+1 3 5 2 0
+1 3 5 2 0
+1 3 5 2 0
+1 3 7 2 0
+1 3 7 2 0
+1 4 3 0
+1 1 4 5 0
+1 1 4 5 0
+1 2 5 4 0
+1 3 1 7 0
+1 3 1 7 0
+1 3 1 5 0
+1 3 1 5 0
+1 3 1 5 0
+1 3 1 5 0
+1 3 2 6 0
+1 3 2 5 0
+1 3 2 5 0
+1 2 8 4 0
+1 3 1 4 0
+1 3 1 4 0
+1 3 1 4 0
+1 3 2 1 0
+1 3 1 2 0
+1 3 1 2 0
+1 3 2 4 0
+1 3 2 4 0
+1 6 5 0
+1 4 9 5 0
+1 3 4 2 0
+1 3 4 2 0
+1 7 4 0
+1 1 5 4 0
+1 1 5 4 0
+1 1 5 4 0
+1 2 6 5 0
+1 3 4 5 0
+1 3 4 7 0
+1 1 5 3 0
+1 4 5 3 0
+1 4 5 3 0
+1 4 5 3 0
+1 4 5 3 0
+1 4 5 3 0
+1 4 5 3 0
+1 4 5 1 0
+1 4 5 1 0
+1 4 5 1 0
+1 4 5 1 0
+1 4 5 1 0
+1 4 5 1 0
+1 4 5 1 0
+1 4 7 1 0
+1 4 5 2 0
+1 4 5 2 0
+1 4 5 2 0
+1 1 9 5 0
+1 4 5 7 0
+1 4 5 7 0
+1 4 7 5 0
+1 4 5 9 0
+1 4 1 9 0
+1 3 9 1 0
+1 4 3 9 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 3 0
+1 4 1 2 0
+1 4 1 2 0
+1 4 1 2 0
+1 4 2 1 0
+1 4 3 7 0
+1 4 3 5 0
+1 4 3 5 0
+1 4 3 5 0
+1 4 2 3 0
+1 4 2 3 0
+1 4 2 3 0
+1 4 2 3 0
+1 4 2 5 0
+1 4 2 5 0
+1 4 1 6 0
+1 4 3 1 0
+1 4 3 1 0
+1 4 3 1 0
+1 4 1 8 0
+1 4 1 8 0
+1 4 1 7 0
+1 4 1 7 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 4 1 5 0
+1 6 1 7 0
+1 5 9 6 0
+1 6 3 7 0
+1 6 4 3 0
+1 5 3 2 0
+1 5 3 1 0
+1 5 3 1 0
+1 7 3 1 0
+1 5 3 4 0
+1 5 3 4 0
+1 5 3 4 0
+1 7 1 5 0
+1 6 9 5 0
+1 5 2 4 0
+1 5 2 4 0
+1 5 2 3 0
+1 5 2 3 0
+1 7 3 5 0
+1 5 1 4 0
+1 5 1 4 0
+1 5 1 4 0
+1 8 6 1 0
+1 5 4 10 0
+1 5 4 3 0
+1 5 4 3 0
+1 5 4 1 0
+1 5 4 1 0
+1 5 4 1 0
+1 5 4 2 0
+1 5 4 2 0
+1 5 4 2 0
+1 7 4 3 0
+1 7 4 3 0
+1 8 3 7 0
+1 5 8 4 0
+1 7 5 2 0
+1 9 5 2 0
+0
+"RolandiXor" # Candidate 1
+"Octavian A. Damiean" # Candidate 2
+"jrg" # Candidate 3
+"fossfreedom" # Candidate 4
+"Bruno Pereira" # Candidate 5
+"Amith KK" # Candidate 6
+"jokerdino" # Candidate 7
+"William" # Candidate 8
+"gajdipajti" # Candidate 9
+"UAdapter" # Candidate 10
+"Ask Ubuntu Moderator Election 2012"

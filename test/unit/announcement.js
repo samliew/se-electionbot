@@ -5,6 +5,7 @@ import sinon from "sinon";
 import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Rescraper from "../../src/bot/rescraper.js";
+import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
@@ -42,6 +43,38 @@ describe(ScheduledAnnouncement.name, () => {
     let ann = new ScheduledAnnouncement(config, room, election, scraper);
     afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
 
+    describe(ScheduledAnnouncement.prototype.getCronExpression.name, () => {
+        it('should correctly format cron from dates (in UTC)', () => {
+            const may6th2022 = new Date(2022, 4, 6, 0, 0, 0, 0);
+
+            const cron = ann.getCronExpression(may6th2022);
+            expect(cron).to.be.equal(
+                `0 ${may6th2022.getUTCHours()} ${may6th2022.getUTCDate()} ${may6th2022.getUTCMonth() + 1} *`
+            );
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.isTaskInitialized.name, () => {
+        it('should correctly check if the task is initialized', () => {
+            const now = new Date(2022, 8, 3, 0, 0, 0, 0);
+            election.dateNomination = dateToUtcTimestamp(now);
+            election.datePrimary = dateToUtcTimestamp(addDates(now, 7));
+            election.dateElection = dateToUtcTimestamp(addDates(now, 14));
+            election.dateEnded = dateToUtcTimestamp(addDates(now, 21));
+
+            /** @type {import("../../src/bot/announcement").TaskType[]} */
+            const taskTypes = ["start", "end", "nomination", "primary"];
+
+            taskTypes.forEach((type) => expect(ann.isTaskInitialized(type)).to.be.false);
+
+            ann.initAll();
+            taskTypes.forEach((type) => expect(ann.isTaskInitialized(type)).to.be.true);
+
+            ann.stopAll();
+            taskTypes.forEach((type) => expect(ann.isTaskInitialized(type)).to.be.false);
+        });
+    });
+
     describe(ScheduledAnnouncement.prototype.announceCancelled.name, () => {
 
         it('should return false on no Electon', async () => {
@@ -71,6 +104,21 @@ describe(ScheduledAnnouncement.name, () => {
             expect(message).to.equal(mockReason);
 
             messageStub.restore();
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.announceElectionEndingSoon.name, () => {
+        it('should correctly announce that election is ending soon', async () => {
+            const messageStub = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announceElectionEndingSoon();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[message]] = messageStub.args;
+            expect(message).to.match(/is ending soon/);
         });
     });
 
@@ -202,6 +250,106 @@ describe(ScheduledAnnouncement.name, () => {
             const [[message]] = stubbed.args;
 
             expect(message).to.match(/John\b.+?\bwithdrawn/);
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.announceDatesChanged.name, () => {
+        it('should correctly announce election date changes', async () => {
+            const now = dateToUtcTimestamp(Date.now());
+
+            election.siteName = "Stack Overflow";
+            election.phase = "nomination";
+            election.dateElection = now;
+            election.pushHistory();
+
+            const stubbed = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announceDatesChanged();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[change], [schedule]] = stubbed.args;
+
+            expect(change).to.match(/dates\s+have\s+changed:/);
+            expect(schedule).to.match(new RegExp(`\\b${now}\\b`, "m"));
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.announceNominationStart.name, () => {
+        it('should correctly announce nomination phase start', async () => {
+            sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
+
+            const stubbed = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announceNominationStart();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[message]] = stubbed.args;
+
+            expect(message).to.match(/nomination\s+phase/);
+            expect(message).to.match(/may\s+now\s+nominate/);
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.announceElectionStart.name, () => {
+        it('should correctly announce election phase start', async () => {
+            sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
+
+            const stubbed = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announceElectionStart();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[message]] = stubbed.args;
+
+            expect(message).to.match(/final\s+voting\s+phase/);
+            expect(message).to.match(/may\s+now\s+rank\s+the\s+candidates/);
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.announcePrimaryStart.name, () => {
+        it('should correctly announce election phase start', async () => {
+            sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
+
+            const stubbed = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announcePrimaryStart();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[message]] = stubbed.args;
+
+            expect(message).to.match(/primary\s+phase/);
+            expect(message).to.match(/vote\s+on\s+the\s+candidates.+?posts/);
+        });
+    });
+
+    describe(ScheduledAnnouncement.prototype.announceElectionEnd.name, () => {
+        it('should correctly announce election phase start', async () => {
+            sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
+
+            const stubbed = sinon.stub(room, "sendMessage");
+
+            const promise = ann.announceElectionEnd();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[message]] = stubbed.args;
+
+            expect(message).to.match(/has\s+now\s+ended/);
+            expect(message).to.match(/winners\s+will\s+be\s+announced/);
         });
     });
 });

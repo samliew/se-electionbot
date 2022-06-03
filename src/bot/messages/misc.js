@@ -3,6 +3,7 @@ import { makeURL } from "../utils.js";
 /**
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../election").default} Election
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  */
 
 /**
@@ -34,4 +35,12 @@ export const sayOffTopicMessage = (election, asked) => {
 
     // Reply to specific message if valid message id
     return +messageId ? `:${messageId} ${text}` : text;
+};
+
+/**
+ * @summary builds a response to someone congratulating someone with HB
+ * @type {MessageBuilder}
+ */
+export const sayHappyBirthday = () => {
+    return `Happy birthday!`;
 };
