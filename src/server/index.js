@@ -594,9 +594,10 @@ export const setClient = (client) => {
  * @param {BotConfig} config  bot configuration
  * @param {Election} election current election
  * @param {Announcement} announcement announcement
+ * @param {boolean} [graceful] exit gracefully?
  * @returns {Promise<ExpressApp>}
  */
-export const startServer = async (client, room, config, election, announcement) => {
+export const startServer = async (client, room, config, election, announcement, graceful = true) => {
 
     setAnnouncer(announcement);
     setBot(config);
@@ -616,6 +617,8 @@ static   ${staticPath}
 views    ${viewsPath}
 port     ${port}`);
     }
+
+    if (!graceful) return app;
 
     // https://stackoverflow.com/a/67567395
     if (process.platform === "win32") {
