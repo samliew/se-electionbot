@@ -173,7 +173,7 @@ export default class Rescraper {
             }
 
             // Election just over, there are no winners yet (waiting for CM)
-            else if (election.phase === 'ended' && election.numWinners === 0) {
+            else if (election.isEnded() && election.numWinners === 0) {
 
                 // Reduce scrape interval further
                 config.scrapeIntervalMins = 0.2;
