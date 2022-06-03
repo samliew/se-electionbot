@@ -106,6 +106,12 @@ import {
 
 (async () => {
 
+    // Overrides console.log/error to insert newlines
+    const _origLog = console.log;
+    const _origErr = console.error;
+    console.log = (...args) => _origLog.call(console, ...args, '\n');
+    console.error = (...args) => _origErr.call(console, ...args, '\n');
+
     // If running locally, load environment variables from .env file
     if (process.env.NODE_ENV !== 'production') {
         dotenv.config({ debug: process.env.DEBUG === 'true' });
@@ -144,7 +150,7 @@ import {
 
     console.log(`[defaults]
 chat domain  ${defaultChatDomain};
-char room    ${defaultChatRoomId};
+chat room    ${defaultChatRoomId};
 use defaults ${defaultChatNotSet}`
     );
 
@@ -193,15 +199,6 @@ use defaults ${defaultChatNotSet}`
         { short: false, text: "What is the link to the election" },
         { short: false, text: "What is the Nth question of the questionnaire" }
     ];
-
-    // Overrides console.log/error to insert newlines
-    (function () {
-        const _origLog = console.log;
-        const _origErr = console.error;
-        console.log = (...args) => _origLog.call(console, ...args, '\n');
-        console.error = (...args) => _origErr.call(console, ...args, '\n');
-    })();
-
 
     // Init bot config with defaults
     const config = new BotConfig(defaultChatDomain, defaultChatRoomId, env);

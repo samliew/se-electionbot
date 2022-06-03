@@ -1551,15 +1551,15 @@ export default class Election {
             this.newlyWithdrawnNominees.forEach((nominee) => this.addWithdrawnNominee(nominee));
 
             console.log(
-                `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.` +
-                (config.debugOrVerbose ? `\n--------
+                `[election] scraped ${this.electionUrl} at ${dateToUtcTimestamp(this.updated)}.` +
+                (config.debugOrVerbose ? `
 phase             ${this.phase};
 primary date      ${this.datePrimary};
 election date     ${this.dateElection};
 ended date        ${this.dateEnded};
 cancelled date    ${this.dateCancelled};
 candidates        ${this.numNominees};
-withdrawals       ${this.numWithdrawals}
+withdrawals       ${this.numWithdrawals};
 winners           ${this.numWinners};
 chat URL          ${this.chatUrl}
 primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; winners: ${this.numWinners}; withdrawals: ${this.numWithdrawals}`)
