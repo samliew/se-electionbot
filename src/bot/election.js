@@ -673,12 +673,6 @@ export default class Election {
     ];
 
     /**
-     * @summary date of the cancellation of the election
-     * @type {string|undefined}
-     */
-    dateCancellation;
-
-    /**
      * @summary date of the start of the nomination phase
      * @type {string}
      */
