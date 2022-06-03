@@ -218,12 +218,12 @@ export default class ScheduledAnnouncement {
 
         const { arrWinners, phase, opavoteUrl, siteUrl } = election;
 
-        const { length } = arrWinners;
+        const { size } = arrWinners;
 
         if (config.debug) console.log('announceWinners() called: ', arrWinners);
 
         // Needs to have ended and have winners
-        if (phase !== 'ended' || length === 0) {
+        if (phase !== 'ended' || size === 0) {
             console.log("announceWinners - called but no winners to announce?", config.verbose ? election : "");
             return false;
         }
@@ -242,10 +242,10 @@ export default class ScheduledAnnouncement {
         config.flags.announcedWinners = true;
         config.scrapeIntervalMins = 10;
 
-        const winnerList = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
+        const winnerList = mapMap(arrWinners, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
 
         // Build the message
-        let msg = `**Congratulations to the winner${pluralize(length)}** ${winnerList.join(', ')}!`;
+        let msg = `**Congratulations to the winner${pluralize(size)}** ${winnerList.join(', ')}!`;
 
         if (opavoteUrl) {
             msg += ` You can ${makeURL("view the results online via OpaVote", opavoteUrl)}.`;

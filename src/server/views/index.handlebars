@@ -132,7 +132,7 @@
 
             {{> totalsTableHeader header="Winners" collection=arrWinners }}
             {{#if (len arrWinners)}}
-                {{> nominees arrWinners }}
+                {{> nominees (values arrWinners) }}
             {{else}}
                 {{> emptySmallTable }}
             {{/if}}

@@ -1,5 +1,6 @@
 import { datesToDuration, dateToRelativeTime, dateToShortISO8601Timestamp, getSeconds } from "../../shared/utils/dates.js";
 import { matchISO8601, matchNumber, safeCapture } from "../../shared/utils/expressions.js";
+import { mapMap } from "../../shared/utils/maps.js";
 import { formatOrdinal } from "../../shared/utils/strings.js";
 import { getAwardedBadges, getNamedBadges } from "../api.js";
 import { getCandidateOrNominee, getRandomNow } from "../random.js";
@@ -19,7 +20,7 @@ import { sayElectionNotStartedYet } from "./phases.js";
  * @type {MessageBuilder}
  */
 export const sayCurrentWinners = (_c, _es, election) => {
-    const { phase, arrWinners = [], siteUrl, electionUrl } = election;
+    const { phase, arrWinners, siteUrl, electionUrl } = election;
 
     const phaseMap = {
         "default": `The election is not over yet. Stay tuned for the winners!`,
@@ -27,11 +28,11 @@ export const sayCurrentWinners = (_c, _es, election) => {
         "ended": `The winners can be found on the ${makeURL("election page", electionUrl)}.`
     };
 
-    const { length } = arrWinners;
+    const { size } = arrWinners;
 
-    if (phase === 'ended' && length > 0) {
-        const winnerNames = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
-        return `The winner${pluralize(length)} ${length > 1 ? 'are' : 'is'}: ${winnerNames.join(', ')}.`;
+    if (phase === 'ended' && size > 0) {
+        const winnerNames = mapMap(arrWinners, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
+        return `The winner${pluralize(size)} ${size > 1 ? 'are' : 'is'}: ${winnerNames.join(', ')}.`;
     }
 
     return phaseMap[phase] || phaseMap.default;

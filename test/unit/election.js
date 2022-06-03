@@ -101,8 +101,8 @@ describe(Election.name, () => {
                 e2.elections.set(1, e1);
                 e2.elections.set(2, e2);
 
-                e1.arrWinners.push(getMockNominee(e1, { userId: 1 }));
-                e2.arrWinners.push(getMockNominee(e2, { userId: 2 }));
+                e1.arrWinners.set(1, getMockNominee(e1, { userId: 1 }));
+                e2.arrWinners.set(2, getMockNominee(e2, { userId: 2 }));
 
                 expect(e1.allWinners.size).to.equal(1);
                 expect(e2.allWinners.size).to.equal(2);
@@ -254,8 +254,8 @@ describe(Election.name, () => {
                 const nominee1 = getMockNominee(election, { userId: 1 });
                 const nominee2 = getMockNominee(election, { userId: 2 });
 
-                election.arrWinners.push(nominee1);
-                election.arrWinners.push(nominee2);
+                election.arrWinners.set(1, nominee1);
+                election.arrWinners.set(2, nominee2);
 
                 const { numWinners } = election;
                 expect(numWinners).to.equal(2);
@@ -316,13 +316,13 @@ describe(Election.name, () => {
 
                 election.pushHistory();
 
-                election.arrWinners.push(newWinner);
+                election.arrWinners.set(2, newWinner);
 
                 const { newWinners } = election;
                 expect(newWinners).length(1);
 
-                const [nominee] = newWinners;
-                expect(nominee.userId).to.equal(2);
+                const nominee = newWinners.get(2);
+                expect(nominee).to.not.be.undefined;
             });
 
             it('should return an empty array on no Winners', () => {
@@ -341,11 +341,11 @@ describe(Election.name, () => {
 
                 election.pushHistory();
 
-                election.arrWinners.push(newWinner);
+                election.arrWinners.set(42, newWinner);
 
                 expect(election.hasNewWinners).to.be.true;
 
-                election.arrWinners.pop();
+                election.arrWinners.delete(42);
 
                 expect(election.hasNewWinners).to.be.false;
             });

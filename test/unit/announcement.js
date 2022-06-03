@@ -200,7 +200,7 @@ describe(ScheduledAnnouncement.name, () => {
                 }
             });
 
-            election.arrWinners.push(getMockNominee(election));
+            election.arrWinners.set(42, getMockNominee(election));
             election.phase = "ended";
 
             const status = await ann.announceWinners(room, election);
@@ -208,7 +208,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
 
         it('should correctly announce winners', async () => {
-            election.arrWinners.push(getMockNominee(election, { userName: "Jeanne" }));
+            election.arrWinners.set(42, getMockNominee(election, { userName: "Jeanne" }));
             election.phase = "ended";
 
             const stubbed = sinon.stub(room, "sendMessage");

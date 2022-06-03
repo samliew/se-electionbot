@@ -1,6 +1,7 @@
+import { dateToRelativeTime } from "../../shared/utils/dates.js";
+import { mapMap } from "../../shared/utils/maps.js";
 import { getCandidateOrNominee } from "../random.js";
 import { capitalize, linkToRelativeTimestamp, linkToUtcTimestamp, listify, makeURL, numToString, pluralize, pluralizePhrase } from "../utils.js";
-import { dateToRelativeTime } from "../../shared/utils/dates.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig
@@ -109,7 +110,7 @@ export const sayElectionIsOver = (election) => {
     let responseText = `The ${makeURL("election", electionUrl)} is over. See you next time!`;
 
     if (numWinners > 0) {
-        responseText = `The [election](${electionUrl}) has ended. The ${pluralizePhrase(numWinners, "winners are:", "winner is")} ${arrWinners.map(v => `[${v.userName}](${siteUrl + '/users/' + v.userId})`).join(', ')}.`;
+        responseText = `The [election](${electionUrl}) has ended. The ${pluralizePhrase(numWinners, "winners are:", "winner is")} ${mapMap(arrWinners, v => `[${v.userName}](${siteUrl + '/users/' + v.userId})`).join(', ')}.`;
 
         if (opavoteUrl) {
             responseText += ` You can [view the results online via OpaVote](${opavoteUrl}).`;
