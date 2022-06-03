@@ -76,7 +76,13 @@ export class BotConfig {
      * @returns {string[]}
      */
     get maintainerChatIds() {
-        const allIds = this.#env.json("maintainers");
+        /** @type {Record<Host,string[]>} */
+        const allIds = this.#env.json("maintainers", {
+            "stackoverflow.com": [],
+            "stackexchange.com": [],
+            "meta.stackexchange.com": []
+        });
+
         return allIds[this.chatDomain];
     }
 
