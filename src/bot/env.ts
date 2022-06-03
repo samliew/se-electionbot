@@ -54,7 +54,7 @@ export default class BotEnv<T extends BotEnvironment | NodeJS.ProcessEnv> {
      */
     json<U extends object>(key: Lowercase<keyof T & string>, def?: U): U {
         const v = this.#env[key.toUpperCase()];
-        return v !== void 0 ? JSON.parse(v) : def;
+        return v !== void 0 && v !== "" ? JSON.parse(v) : def;
     }
 
     /**
@@ -66,7 +66,7 @@ export default class BotEnv<T extends BotEnvironment | NodeJS.ProcessEnv> {
     num(key: Lowercase<keyof T & string>): number | undefined;
     num(key: Lowercase<keyof T & string>, def?: number) {
         const v = this.#env[key.toUpperCase()];
-        return v !== void 0 ? +v : def;
+        return v !== void 0 && v !== "" ? +v : def;
     }
 
     /**
@@ -78,7 +78,7 @@ export default class BotEnv<T extends BotEnvironment | NodeJS.ProcessEnv> {
     str(key: Lowercase<keyof T & string>): string | undefined;
     str(key: Lowercase<keyof T & string>, def?: string) {
         const v = this.#env[key.toUpperCase()];
-        return v !== void 0 ? v.toString().trim() : def;
+        return v !== void 0 && v !== "" ? v.toString().trim() : def;
     }
 
     /**
