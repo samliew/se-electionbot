@@ -31,6 +31,7 @@ describe("Dashboard", () => {
     /** @type {ExpressApp} */
     let app;
     before(async () => {
+        sinon.stub(console, "log")
         await election.scrapeElection(config);
         app = await startServer(client, room, config, election, announcement);
     });
