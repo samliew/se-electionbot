@@ -8,7 +8,7 @@ import { HerokuClient } from "../bot/herokuClient.js";
 import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom, wait } from '../bot/utils.js';
 import { dateToUtcTimestamp } from '../shared/utils/dates.js';
 import * as helpers from "./helpers.js";
-import { routes, start, stop } from './utils.js';
+import { farewell, routes, start } from './utils.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const viewsPath = join(__dirname, "views");
@@ -616,17 +616,6 @@ static   ${staticPath}
 views    ${viewsPath}
 port     ${port}`);
     }
-
-    /** @param {ExpressApp} app */
-    const terminate = (app) => stop(app).then(() => process.exit(0));
-
-    const farewell = async () => {
-        if (config.debug) {
-            await room.sendMessage("have to go now, will be back soon...");
-        }
-        await room.leave();
-        terminate(app);
-    };
 
     // https://stackoverflow.com/a/67567395
     if (process.platform === "win32") {

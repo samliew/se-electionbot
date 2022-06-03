@@ -1,8 +1,10 @@
 /**
+ * @typedef {import("../bot/config").BotConfig} BotConfig
  * @typedef {import("express").Application} ExpressApp
  * @typedef {import("http").Server} HttpServer
  * @typedef {import("express").IRoute} IRoute
  * @typedef {import("express").IRouter} IRouter
+ * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {Record<string, { methods: string[], public: boolean }>} RouteInfo
  */
 
@@ -82,4 +84,29 @@ export const routes = (app, publicPaths = []) => {
     });
 
     return routes;
+};
+
+/**
+ * @summary terminates an Express app and exits the process
+ * @param {ExpressApp} app Express app to stop
+ * @returns {Promise<void>}
+ */
+export const terminate = async (app) => {
+    await stop(app);
+    process.exit(0);
+};
+
+/**
+ * @summary sends a farewell message and stops the server
+ * @param {ExpressApp} app Express app to stop
+ * @param {BotConfig} config  bot configuration
+ * @param {Room} room current room the bot is in
+ * @returns {Promise<void>}
+ */
+export const farewell = async (app, config, room) => {
+    if (config.debug) {
+        await room.sendMessage("have to go now, will be back soon...");
+    }
+    await room.leave();
+    terminate(app);
 };
