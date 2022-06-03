@@ -204,12 +204,11 @@ export default class Rescraper {
                 }
             }
 
-            // If room is idle, remind users that bot is around to help
-            else if (config.canIdleGreet) {
-                await sayIdleGreeting(config, elections, election, bot, room);
-            }
-            else if (config.canBusyGreet) {
-                await sayBusyGreeting(config, elections, election, bot, room);
+            else if (election.isActive()) {
+                const { canIdleGreet, canBusyGreet } = config;
+                if (canIdleGreet) await sayIdleGreeting(config, elections, election, bot, room);
+                if (canBusyGreet) await sayBusyGreeting(config, elections, election, bot, room);
+                console.log(`[rescraper] said activity greeting`);
             }
 
             // The election is over
