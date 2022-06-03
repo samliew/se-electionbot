@@ -8,6 +8,7 @@ import Election from "../../src/bot/election.js";
 import Rescraper from "../../src/bot/rescraper.js";
 import { fetchUrl } from "../../src/bot/utils.js";
 import { startServer } from "../../src/server/index.js";
+import { stop } from "../../src/server/utils.js";
 import { getHostnamesFromIP } from "../../src/shared/utils/server.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
@@ -36,7 +37,7 @@ describe("Dashboard", () => {
         app = await startServer(client, room, config, election, announcement);
     });
 
-    after(() => process.kill(process.pid, "SIGINT"));
+    after(() => stop(app));
 
     afterEach(() => sinon.restore());
 
