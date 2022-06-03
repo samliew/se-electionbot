@@ -173,14 +173,14 @@ export default class Rescraper {
             }
 
             // Election just over, there are no winners yet (waiting for CM)
-            else if (election.isEnded() && election.numWinners === 0) {
+            if (election.isEnded() && election.numWinners === 0) {
 
                 // Reduce scrape interval further
                 config.scrapeIntervalMins = 0.2;
 
                 // Log this the first time only
-                if (election.prev.phase !== 'ended' && config.debugOrVerbose) {
-                    console.log(`RESCRAPER - Election ended with no results - Scrape interval reduced to ${config.scrapeIntervalMins}.`);
+                if (election.isNewPhase() && config.debugOrVerbose) {
+                    console.log(`[rescraper] no results, scrape interval reduced to ${config.scrapeIntervalMins}.`);
                 }
             }
 
