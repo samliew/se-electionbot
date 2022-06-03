@@ -628,11 +628,11 @@ port     ${port}`);
             output: process.stdout
         });
 
-        rli.on("SIGINT", farewell);
+        rli.on("SIGINT", () => farewell(app, config, room));
         return app;
     }
 
     // https://stackoverflow.com/a/14516195
-    process.on('SIGINT', farewell);
+    process.on('SIGINT', () => farewell(app, config, room));
     return app;
 };
