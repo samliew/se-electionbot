@@ -5,6 +5,7 @@
     "main": "dist/bot/index.js",
     "scripts": {
         "build": "rimraf dist && tsc --project tsconfig.bot.json && npm run copy-files",
+        "heroku:all": "sh ./heroku-deploy.sh",
         "typecheck": "tsc --noEmit -p ./tsconfig.bot.json",
         "typecheck:tests": "tsc --noEmit -p ./tsconfig.test.json",
         "start": "node dist/bot/index.js",
