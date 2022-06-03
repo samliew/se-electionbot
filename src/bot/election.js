@@ -789,8 +789,7 @@ export default class Election {
 
         if (isOneOf(AllowedHosts, networkOrigin)) return networkOrigin;
 
-        const { CHAT_DOMAIN } = process.env;
-        return isOneOf(AllowedHosts, CHAT_DOMAIN) ? CHAT_DOMAIN : "stackexchange.com";
+        return "stackexchange.com";
     }
 
     /**
