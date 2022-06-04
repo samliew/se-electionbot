@@ -1,13 +1,15 @@
+import { boldify } from "../../shared/utils/markdown.js";
 import { listNomineesInRoom } from "../election.js";
 import { getCandidateOrNominee, getRandomCurrently, RandomArray } from "../random.js";
 import { getScoreText } from "../score.js";
-import { capitalize, getUsersCurrentlyInTheRoom, listify, makeURL, mapToName, mapToRequired, pluralize } from "../utils.js";
+import { capitalize, getUsersCurrentlyInTheRoom, listify, makeURL, mapToName, pluralize } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../score").CandidateScore} CandidateScore
  * @typedef {import("../election").default} Election
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  * @typedef {import("chatexchange/dist/Room").default} Room
  */
 
@@ -139,27 +141,37 @@ export const sayHowManyCandidatesAreHere = async (config, election, client, room
 
 /**
  * @summary builds a response on how to nominate self or others
- * @param {Election} election current election
- * @param {object} electionBadges list of election badges
- * @param {boolean} mentionsAnother if user asks about nominating others
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayHowToNominate = (election, electionBadges, mentionsAnother = false) => {
+export const sayHowToNominate = (_c, _es, election) => {
+    const { siteHostname, repNominate, requiredBadges, siteUrl, electionUrl } = election;
 
-    const requiredBadges = electionBadges.filter(mapToRequired);
-    const requiredBadgeNames = requiredBadges.map(mapToName);
+    const requiredBadgeLinks = requiredBadges.map(mapToName);
 
-    const { siteHostname } = election;
+    const requirements = [
+        `at least ${repNominate} reputation`,
+        "be at least 18 years old"
+    ];
 
-    // Markup to bold additional text if talking about nominating others
-    const mentionsAnotherBold = mentionsAnother ? '**' : '';
+    if (election.isStackOverflow()) {
+        requirements.push(`have ${listify(...requiredBadgeLinks)} ${makeURL("badges", `${siteUrl}/help/badges`)}`);
+    }
 
-    let requirements = [`at least ${election.repNominate} reputation`, 'at least 18 years of age'];
-    if (election.isStackOverflow()) requirements.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
-    if (siteHostname && /askubuntu\.com$/.test(siteHostname)) requirements.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
-    requirements.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
+    if (siteHostname && /askubuntu\.com$/.test(siteHostname)) {
+        requirements.push(`${makeURL("sign the Ubuntu Code of Conduct", "https://askubuntu.com/q/100275")}`);
+    }
 
-    return `You can only nominate yourself as a candidate during the nomination phase. You'll need ${requirements.join(', ')}. ${mentionsAnotherBold}You cannot nominate another user.${mentionsAnotherBold}`;
+    const networkURL = makeURL("Stack Exchange network", "https://stackexchange.com/sites?view=list#traffic");
+
+    requirements.push(`can't have been suspended anywhere on the ${networkURL} within the past year`);
+
+    const anotherUserClause = "You can't nominate others.";
+
+    return [
+        `You can only nominate during the ${makeURL("nomination", `${electionUrl}?tab=nomination`)} phase.`,
+        `You'll need ${listify(...requirements)}.`,
+        boldify(anotherUserClause),
+    ].join(" ");
 };
 
 /**

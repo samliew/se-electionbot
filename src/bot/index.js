@@ -507,7 +507,9 @@ use defaults ${defaultChatNotSet}`
             [isAskedWhyAreElectionsCancelled, sayWhenAreElectionsCancelled],
             [isAskedWillElectionBeCancelled, sayWillElectionBeCancelled],
             [isAskedWhatElectionIs, sayWhatIsAnElection],
-            [isAskedHowManyVisitedElection, sayHowManyVisitedElection]
+            [isAskedHowManyVisitedElection, sayHowManyVisitedElection],
+            // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
+            [isAskedForNominatingInfo, sayHowToNominate],
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
@@ -705,11 +707,6 @@ use defaults ${defaultChatNotSet}`
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
                 responseText = await sayCurrentMods(election, entities.decode);
-            }
-            // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
-            else if (isAskedForNominatingInfo(preparedMessage)) {
-                const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => preparedMessage.includes(x));
-                responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
             }
             else if (isAskedWhyNominationRemoved(preparedMessage)) {
                 responseText = sayWhyNominationRemoved();
