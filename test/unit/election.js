@@ -17,6 +17,16 @@ describe(Election.name, () => {
 
     describe('getters', () => {
 
+        describe("electionNum", () => {
+            it('should correctly extract election number from URL', () => {
+                const election = new Election("https://stackoverflow.com/election/5");
+                expect(election.electionNum).to.equal(5);
+
+                election.electionUrl = "https://stackoverflow.com/election";
+                expect(election.electionNum).to.be.undefined;
+            });
+        });
+
         describe('currentModerators', () => {
             const election = new Election("https://stackoverflow.com/election/1");
 
@@ -392,7 +402,7 @@ describe(Election.name, () => {
             const tomorrow = dateToUtcTimestamp(new Date(now + 864e5));
             const yesterday = dateToUtcTimestamp(new Date(now - 864e5));
 
-            const election = new Election("https://stackoverflow.com/election/12", 12);
+            const election = new Election("https://stackoverflow.com/election/12");
             election.dateElection = tomorrow;
             election.dateEnded = tomorrow;
             election.datePrimary = tomorrow;
@@ -486,7 +496,7 @@ describe(Election.name, () => {
         it('should correctly determine if an id is a nominee', () => {
             const testIds = [42, 24, -9000];
 
-            const election = new Election("https://stackoverflow.com/election/12", 12);
+            const election = new Election("https://stackoverflow.com/election/12");
 
             testIds.forEach((userId) => {
                 election.addActiveNominee(getMockNominee(election, { userId }));

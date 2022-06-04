@@ -28,7 +28,7 @@ describe("Messages module", () => {
         it('should correctly set arrow to the current phase', () => {
             const date = new Date().toLocaleString("en-US");
 
-            const election = new Election("stackoverflow.com", 1);
+            const election = new Election("stackoverflow.com/election/1");
             election.siteName = "Stack Overflow";
             election.dateElection = date;
             election.dateEnded = date;
@@ -94,7 +94,7 @@ describe("Messages module", () => {
         const room = client.getRoom(42);
 
         it('should not add phase info on no phase', async () => {
-            const election = new Election("https://ja.stackoverflow.com/election");
+            const election = new Election("https://ja.stackoverflow.com/election/1");
             const greeting = await sayHI(config, new Map([[1, election]]), election, bot, room);
             expect(greeting).to.not.match(/is in the.*? phase/);
         });
@@ -104,7 +104,7 @@ describe("Messages module", () => {
 
             const phase = "cancelled";
 
-            const election = new Election(electionLink, 12);
+            const election = new Election(electionLink);
             election.phase = phase;
 
             const greeting = await sayHI(config, new Map([[12, election]]), election, bot, room);
@@ -114,7 +114,7 @@ describe("Messages module", () => {
         it('should override greeting if provided', async () => {
             const override = "Hi all!";
 
-            const election = new Election("https://pt.stackoverflow.com/election");
+            const election = new Election("https://pt.stackoverflow.com/election/1");
             const greeting = await sayHI(config, new Map([[1, election]]), election, bot, room, override);
 
             expect(greeting).to.match(new RegExp(`^${override}`));
@@ -124,7 +124,7 @@ describe("Messages module", () => {
     describe('sayDiamondAlready', () => {
 
         it('should return correct version of the message based on mod status', () => {
-            const election = new Election("https://pt.stackoverflow.com/election");
+            const election = new Election("https://pt.stackoverflow.com/election/1");
 
             const user =/** @type {ApiUser} */({ reputation: 42 });
 

@@ -274,7 +274,7 @@ export const getSiteElections = async (config, siteUrl, maxElectionNumber, scrap
         const data = await fetchUrl(config, electionURL);
         if (!data) continue;
 
-        const election = new Election(electionURL, electionNum);
+        const election = new Election(electionURL);
         elections.set(electionNum, election);
 
         if (scrape) {
@@ -713,9 +713,8 @@ export default class Election {
 
     /**
      * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
-     * @param {string|number|null} [electionNum] number of election, can be a numeric string
      */
-    constructor(electionUrl, electionNum = null) {
+    constructor(electionUrl) {
 
         // electionUrl at minimum, needs to end with /election/ before we can scrape it
         if (!this.validElectionUrl(electionUrl)) {
@@ -723,10 +722,15 @@ export default class Election {
         }
 
         this.electionUrl = electionUrl;
+    }
 
-        const idFromURL = /** @type {string} */(electionUrl.split('/').pop());
-
-        this.electionNum = electionNum ? +electionNum : +idFromURL || null;
+    /**
+     * @summary returns current election number
+     * @returns {number|undefined}
+     */
+    get electionNum() {
+        const { electionUrl } = this;
+        return matchNumber(/\/election\/(\d+)/, electionUrl);
     }
 
     /**
@@ -1458,8 +1462,7 @@ export default class Election {
                 }
 
                 // Set next election number and url
-                this.electionNum = $('a[href^="/election/"]').length + 1;
-                this.electionUrl = this.electionUrl + this.electionNum;
+                this.electionUrl = this.electionUrl + ($('a[href^="/election/"]').length + 1);
 
                 console.log(`Retrying with election number ${this.electionNum} - ${this.electionUrl}`);
 
@@ -1471,7 +1474,6 @@ export default class Election {
 
             const metaElems = content.find(".flex--item.mt4 .d-flex.gs4 .flex--item:nth-child(2)");
             const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
-            const metaPhaseElems = $('#mainbar .js-filter-btn a');
 
             const [_numCandidates, numPositions] = metaVals.slice(-2, metaVals.length);
 
@@ -1516,16 +1518,6 @@ export default class Election {
             // Empty string if not set as environment variable, or not found on election page
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || this.scrapeElectionChatRoom($);
             this.phase = this.getPhase();
-
-            // Detect active election number if not specified
-            if (this.isActive() && !this.electionNum) {
-                this.electionNum = matchNumber(/(\d+)/, metaPhaseElems.attr('href') || "") || null;
-
-                // Append to electionUrl
-                this.electionUrl += this.electionNum;
-
-                if (config.debugOrVerbose) console.log('INFO  - Election is active and number was auto-detected:', this.electionNum);
-            }
 
             // If election has ended (or cancelled)
             if (this.phase === 'ended') {

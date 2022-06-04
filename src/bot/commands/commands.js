@@ -283,7 +283,6 @@ export const changeElection = async (args) => {
 
     election.reset();
     election.electionUrl = targetUrl;
-    election.electionNum = targetNum;
     elections.set(targetNum, election);
 
     const status = await election.scrapeElection(config);
