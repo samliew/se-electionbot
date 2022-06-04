@@ -145,3 +145,10 @@ export const chatMarkdownToHtml = (content) => {
 
     return handlers.reduce((a, c) => c(a), content);
 };
+
+/**
+ * @summary wraps {@link text} into bold Markdown
+ * @param {string} text text to boldify
+ * @returns {string}
+ */
+export const boldify = (text) => `**${text}**`;
