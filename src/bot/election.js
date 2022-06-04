@@ -606,7 +606,7 @@ export default class Election {
      * @summary map of userId to {@link Nominee} that won the election
      * @type {Map<number,Nominee>}
      */
-    arrWinners = new Map();
+    winners = new Map();
 
     /** @type {Map<number, ModeratorUser>} */
     moderators = new Map();
@@ -933,8 +933,8 @@ export default class Election {
      * @returns {number}
      */
     get numWinners() {
-        const { arrWinners } = this;
-        return arrWinners.size;
+        const { winners } = this;
+        return winners.size;
     }
 
     /**
@@ -979,8 +979,8 @@ export default class Election {
         /** @type {Map<number, Nominee>} */
         const allWinners = new Map();
 
-        elections.forEach(({ arrWinners }) => {
-            arrWinners.forEach((n) => allWinners.set(n.userId, n));
+        elections.forEach(({ winners }) => {
+            winners.forEach((n) => allWinners.set(n.userId, n));
         });
 
         return allWinners;
@@ -991,11 +991,11 @@ export default class Election {
      * @returns {Map<number, Nominee>}
      */
     get newWinners() {
-        const { prev, arrWinners } = this;
+        const { prev, winners } = this;
 
-        const prevWinners = prev?.arrWinners || new Map();
+        const prevWinners = prev?.winners || new Map();
 
-        return filterMap(arrWinners, ({ userId }) => !prevWinners.has(userId));
+        return filterMap(winners, ({ userId }) => !prevWinners.has(userId));
     }
 
     /**
@@ -1111,7 +1111,7 @@ export default class Election {
     reset() {
         // TODO: expand
         this.withdrawnNominees.clear();
-        this.arrWinners.clear();
+        this.winners.clear();
         this.questionnaire.length = 0;
         this.moderators.clear();
         this.nominees.clear();
@@ -1552,7 +1552,7 @@ export default class Election {
 
                     // Get winners
                     const winnerIds = $(statsElem).find('a').map((_i, el) => +( /** @type {string} */($(el).attr('href')?.split('/')[2]))).get();
-                    this.arrWinners = this.getWinners(winnerIds);
+                    this.winners = this.getWinners(winnerIds);
                 }
             }
 

@@ -216,11 +216,11 @@ export default class ScheduledAnnouncement {
         // No election
         if (!election) return false;
 
-        const { arrWinners, phase, opavoteUrl, siteUrl } = election;
+        const { winners, phase, opavoteUrl, siteUrl } = election;
 
-        const { size } = arrWinners;
+        const { size } = winners;
 
-        if (config.debug) console.log('announceWinners() called: ', arrWinners);
+        if (config.debug) console.log('announceWinners() called: ', winners);
 
         // Needs to have ended and have winners
         if (phase !== 'ended' || size === 0) {
@@ -242,7 +242,7 @@ export default class ScheduledAnnouncement {
         config.flags.announcedWinners = true;
         config.scrapeIntervalMins = 10;
 
-        const winnerList = mapMap(arrWinners, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
+        const winnerList = mapMap(winners, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
 
         // Build the message
         let msg = `**Congratulations to the winner${pluralize(size)}** ${winnerList.join(', ')}!`;

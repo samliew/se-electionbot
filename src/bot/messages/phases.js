@@ -105,12 +105,12 @@ export const sayElectionIsRunning = (election) => {
  * @returns {string}
  */
 export const sayElectionIsOver = (election) => {
-    const { electionUrl, numWinners, arrWinners, siteUrl, opavoteUrl } = election;
+    const { electionUrl, numWinners, winners, siteUrl, opavoteUrl } = election;
 
     let responseText = `The ${makeURL("election", electionUrl)} is over. See you next time!`;
 
     if (numWinners > 0) {
-        responseText = `The [election](${electionUrl}) has ended. The ${pluralizePhrase(numWinners, "winners are:", "winner is")} ${mapMap(arrWinners, v => `[${v.userName}](${siteUrl + '/users/' + v.userId})`).join(', ')}.`;
+        responseText = `The [election](${electionUrl}) has ended. The ${pluralizePhrase(numWinners, "winners are:", "winner is")} ${mapMap(winners, v => `[${v.userName}](${siteUrl + '/users/' + v.userId})`).join(', ')}.`;
 
         if (opavoteUrl) {
             responseText += ` You can [view the results online via OpaVote](${opavoteUrl}).`;

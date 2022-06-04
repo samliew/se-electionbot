@@ -96,12 +96,12 @@ export default class Rescraper {
             }
 
             if (config.debugOrVerbose) {
-                const { nominees, arrWinners, phase } = election;
+                const { nominees, winners, phase } = election;
 
                 console.log(`RESCRAPER - Candidates: ${mapMap(nominees, x => x.userName).join(', ')}`);
 
                 if (phase === 'ended') {
-                    console.log(`RESCRAPER - Winners: ${mapMap(arrWinners, x => x.userName).join(', ')}`);
+                    console.log(`RESCRAPER - Winners: ${mapMap(winners, x => x.userName).join(', ')}`);
                 }
 
                 const {

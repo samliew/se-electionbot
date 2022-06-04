@@ -321,7 +321,7 @@ describe('Commands', () => {
             it('should reset current election state', () => {
                 const election = new Election("https://stackoverflow.com/election/13");
                 election.addActiveNominee(getMockNominee(election));
-                election.arrWinners.set(42, getMockNominee(election));
+                election.winners.set(42, getMockNominee(election));
                 election.moderators.set(-1, /** @type {ModeratorUser} */({}));
                 election.phase = "primary";
 

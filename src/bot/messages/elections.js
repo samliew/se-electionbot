@@ -20,7 +20,7 @@ import { sayElectionNotStartedYet } from "./phases.js";
  * @type {MessageBuilder}
  */
 export const sayCurrentWinners = (_c, _es, election) => {
-    const { phase, arrWinners, siteUrl, electionUrl } = election;
+    const { phase, winners, siteUrl, electionUrl } = election;
 
     const phaseMap = {
         "default": `The election is not over yet. Stay tuned for the winners!`,
@@ -28,10 +28,10 @@ export const sayCurrentWinners = (_c, _es, election) => {
         "ended": `The winners can be found on the ${makeURL("election page", electionUrl)}.`
     };
 
-    const { size } = arrWinners;
+    const { size } = winners;
 
     if (phase === 'ended' && size > 0) {
-        const winnerNames = mapMap(arrWinners, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
+        const winnerNames = mapMap(winners, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
         return `The winner${pluralize(size)} ${size > 1 ? 'are' : 'is'}: ${winnerNames.join(', ')}.`;
     }
 

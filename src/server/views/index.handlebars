@@ -81,7 +81,7 @@
                     <td>{{numPositions}}</td>
                     <td>{{len nominees}}</td>
                     <td>{{len withdrawnNominees}}</td>
-                    <td>{{len arrWinners}}</td>
+                    <td>{{len winners}}</td>
                 </tr>
                 {{/iterate}}
                 </tbody>
@@ -130,9 +130,9 @@
                 {{> emptySmallTable }}
             {{/if}}
 
-            {{> totalsTableHeader header="Winners" collection=arrWinners }}
-            {{#if (len arrWinners)}}
-                {{> nominees (values arrWinners) }}
+            {{> totalsTableHeader header="Winners" collection=winners }}
+            {{#if (len winners)}}
+                {{> nominees (values winners) }}
             {{else}}
                 {{> emptySmallTable }}
             {{/if}}
