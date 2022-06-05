@@ -5,6 +5,7 @@ import entities from 'html-entities';
 import { startServer } from "../server/index.js";
 import { logActivity, logResponse } from "../shared/utils/bot.js";
 import { prepareMessageForMatching } from "../shared/utils/chat.js";
+import { MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { matchNumber } from "../shared/utils/expressions.js";
 import { getOrInit, sortMap } from "../shared/utils/maps.js";
 import { countValidBotMessages } from "./activity/index.js";
@@ -807,9 +808,13 @@ use defaults ${defaultChatNotSet}`
                 if (config.fun && config.canSendFunResponse) {
                     responseText = getRandomFunResponse();
                     config.funResponseCounter++;
-                } // End random response
 
-            } // End bot mentioned
+                    setTimeout(
+                        () => config.funResponseCounter = 0,
+                        10 * MS_IN_SECOND * SEC_IN_MINUTE
+                    );
+                }
+            }
 
 
             if (responseText) {
