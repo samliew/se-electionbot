@@ -61,6 +61,7 @@ import { sayAboutBallotFile, sayAboutSTV } from "./messages/stv.js";
 import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowToSaveVotes, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "./random.js";
+import { pingDevelopers } from "./reports.js";
 import Rescraper from "./rescraper.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
@@ -795,6 +796,11 @@ use defaults ${defaultChatNotSet}`
                     // TODO: msg.id might be undefined
                     await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
                     return; // stop here since we are using a different default response method
+                }
+
+                // bot mentioned, no response, not fun mode or can't have fun - we might be interested
+                if (!(config.canSendFunResponse && config.fun)) {
+                    await pingDevelopers("You might want to take a look at this,", config, room);
                 }
 
                 // Bot was mentioned and did not match any previous guards - return a random response
