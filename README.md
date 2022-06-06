@@ -44,6 +44,7 @@ Current election info:
 - how many users are eligible to vote
 - why was a nomination removed
 - where are the nomination comments
+- will the election be cancelled
 
 **Voting stats calculation**
 
@@ -171,7 +172,7 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `KEEP_ALIVE`                   | boolean  | no        | `false`                    | whether bot will ping itself occasionally                                                               |
 | `LOW_ACTIVITY_CHECK_MINS`      | number   | no        | `10`                       | interval (minutes) before bot can check room for inactivity                                             |
 | `LOW_ACTIVITY_COUNT_THRESHOLD` | number   | no        | `20`                       | bot can classify room as inactive only after these amount of messages have been sent                    |
-| `MAINTAINERS`                  | JSON     | no        | `{"stackoverflow.com":[]}` | JSON map of chat domains to lists of maintainer ids                                                      |
+| `MAINTAINERS`                  | JSON     | no        | `{"stackoverflow.com":[]}` | JSON map of chat domains to lists of maintainer ids                                                     |
 | `NODE_ENV`                     | string   | no        | `production`               | whether bot is in Node debug mode                                                                       |
 | `PASSWORD`                     | string   | no        | -                          | password to access non-public routes of the bot dashboard                                               |
 | `REPO_URL`                     | string   | no        | -                          | URL of this git repository                                                                              |
