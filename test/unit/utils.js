@@ -1,10 +1,10 @@
 import { expect } from "chai";
+import { AllowedHosts } from "chatexchange/dist/Client.js";
 import { asyncCacheable, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/bot/utils.js";
 import { validateChatTranscriptURL } from "../../src/shared/utils/chat.js";
-import { dateToRelativeTime } from "../../src/shared/utils/dates.js";
+import { addDates, addHours, addMinutes, addSeconds, dateToRelativeTime } from "../../src/shared/utils/dates.js";
 import { matchNumber } from "../../src/shared/utils/expressions.js";
 import { numericNullable } from "../../src/shared/utils/objects.js";
-import { AllowedHosts } from "chatexchange/dist/Client.js";
 
 describe('Chat-related utils', () => {
     describe(validateChatTranscriptURL.name, () => {
@@ -178,55 +178,25 @@ describe('String-related utils', async function () {
 
     describe(dateToRelativeTime.name, () => {
         it('should be able to convert a date in the future correctly', () => {
-            let date, result;
-
-            date = new Date();
-            result = dateToRelativeTime(date.setSeconds(date.getSeconds() + 1));
-            expect(result).to.equal("soon");
-
-            result = dateToRelativeTime(date.setSeconds(date.getSeconds() + 30));
-            expect(result).to.match(/^in 3[01] secs$/); // +/- 1 sec
-
-            result = dateToRelativeTime(date.setMinutes(date.getMinutes() + 30));
-            expect(result).to.equal("in 30 mins");
-
-            result = dateToRelativeTime(date.setMinutes(date.getMinutes() + 30));
-            expect(result).to.equal("in 1 hour");
-
-            result = dateToRelativeTime(date.setHours(date.getHours() + 1));
-            expect(result).to.equal("in 2 hours");
-
-            result = dateToRelativeTime(date.setDate(date.getDate() + 1));
-            expect(result).to.equal("in 1 day");
-
-            result = dateToRelativeTime(date.setDate(date.getDate() + 1));
-            expect(result).to.equal("in 2 days");
+            const now = new Date();
+            expect(dateToRelativeTime(addSeconds(now, 1), { now })).to.equal("soon");
+            expect(dateToRelativeTime(addSeconds(now, 30), { now })).to.match(/^in 3[01] secs$/); // +/- 1 sec
+            expect(dateToRelativeTime(addMinutes(now, 30), { now })).to.equal("in 30 mins");
+            expect(dateToRelativeTime(addHours(now, 1), { now })).to.equal("in 1 hour");
+            expect(dateToRelativeTime(addHours(now, 2), { now })).to.equal("in 2 hours");
+            expect(dateToRelativeTime(addDates(now, 1), { now })).to.equal("in 1 day");
+            expect(dateToRelativeTime(addDates(now, 2), { now })).to.equal("in 2 days");
         });
 
         it('should be able to convert a date in the past correctly', () => {
-            let date, result;
-
-            date = new Date();
-            result = dateToRelativeTime(date.setSeconds(date.getSeconds() - 1));
-            expect(result).to.equal("just now");
-
-            result = dateToRelativeTime(date.setSeconds(date.getSeconds() - 30));
-            expect(result).to.match(/^3[01] secs ago$/); // +/- 1 sec
-
-            result = dateToRelativeTime(date.setMinutes(date.getMinutes() - 30));
-            expect(result).to.equal("30 mins ago");
-
-            result = dateToRelativeTime(date.setMinutes(date.getMinutes() - 30));
-            expect(result).to.equal("1 hour ago");
-
-            result = dateToRelativeTime(date.setHours(date.getHours() - 1));
-            expect(result).to.equal("2 hours ago");
-
-            result = dateToRelativeTime(date.setDate(date.getDate() - 1));
-            expect(result).to.equal("1 day ago");
-
-            result = dateToRelativeTime(date.setDate(date.getDate() - 1));
-            expect(result).to.equal("2 days ago");
+            const now = new Date();
+            expect(dateToRelativeTime(addSeconds(now, -1), { now })).to.equal("just now");
+            expect(dateToRelativeTime(addSeconds(now, -30), { now })).to.match(/^3[01] secs ago$/); // +/- 1 sec
+            expect(dateToRelativeTime(addMinutes(now, -30), { now })).to.equal("30 mins ago");
+            expect(dateToRelativeTime(addHours(now, -1), { now })).to.equal("1 hour ago");
+            expect(dateToRelativeTime(addHours(now, -2), { now })).to.equal("2 hours ago");
+            expect(dateToRelativeTime(addDates(now, -1), { now })).to.equal("1 day ago");
+            expect(dateToRelativeTime(addDates(now, -2), { now })).to.equal("2 days ago");
         });
     });
 
