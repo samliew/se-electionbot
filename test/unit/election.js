@@ -3,11 +3,12 @@ import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
+import { getMockElectionAnnouncement } from "../mocks/election.js";
 import { getMockNominee } from "../mocks/nominee.js";
 import { getMockApiUser, getMockUserProfile } from "../mocks/user.js";
 
 /**
- * @typedef { import("../../src/bot/election").ElectionPhase} ElectionPhase
+ * @typedef {import("../../src/bot/election").ElectionPhase} ElectionPhase
  */
 
 describe(Election.name, () => {
@@ -24,6 +25,18 @@ describe(Election.name, () => {
 
                 election.electionUrl = "https://stackoverflow.com/election";
                 expect(election.electionNum).to.be.undefined;
+            });
+        });
+
+        describe("electionType", () => {
+            it('should correctly determine election type', () => {
+                const election = new Election("https://stackoverflow.com/election/5");
+
+                election.announcements.set(5, getMockElectionAnnouncement({ type: "pro-tempore" }));
+                expect(election.electionType).to.equal("pro-tempore");
+
+                election.announcements.set(5, getMockElectionAnnouncement({ type: "full" }));
+                expect(election.electionType).to.equal("full");
             });
         });
 
