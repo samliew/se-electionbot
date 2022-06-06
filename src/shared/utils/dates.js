@@ -215,6 +215,30 @@ export const addDates = (date, num = 1) => {
 };
 
 /**
+ * @summary adds a given number of months to a date
+ * @param {Date|string|number} date date to add to
+ * @param {number} [num] number of months to add
+ * @returns {Date}
+ */
+export const addMonths = (date, num = 1) => {
+    const dolly = validateDate(date);
+    dolly.setMonth(dolly.getMonth() + num);
+    return dolly;
+};
+
+/**
+ * @summary adds a given number of years to a date
+ * @param {Date|string|number} date date to add to
+ * @param {number} [num] number of years to add
+ * @returns {Date}
+ */
+export const addYears = (date, num = 1) => {
+    const dolly = validateDate(date);
+    dolly.setFullYear(dolly.getFullYear() + num);
+    return dolly;
+};
+
+/**
  * @summary returns the difference between two dates in days
  * @param {Date|string|number} start start date
  * @param {Date|string|number} end end date
