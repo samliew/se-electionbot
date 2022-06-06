@@ -46,19 +46,20 @@ export const dateToRelativeTime = (date, options = {}) => {
     const nowMs = getMilliseconds(now);
 
     // Try future date
-    let diff = (date.getTime() - nowMs) / MS_IN_SECOND;
-    let dayDiff = Math.floor(diff / S_DAY);
+    const diff = (date.getTime() - nowMs) / MS_IN_SECOND;
+    const dayDiff = Math.floor(diff / S_DAY);
 
     // In the future
     if (diff > 0) {
         /** @type {[boolean, string][]} */
         const rules = [
-            [dayDiff > 31, ""],
             [diff < 5, soonText],
             [diff < SEC_IN_MINUTE, ((x) => `in ${x} sec${pluralize(x)}`)(Math.floor(diff))],
             [diff < S_HOUR, ((x) => `in ${x} min${pluralize(x)}`)(Math.floor(diff / SEC_IN_MINUTE))],
             [diff < S_DAY, ((x) => `in ${x} hour${pluralize(x)}`)(Math.floor(diff / S_HOUR))],
-            [true, ((x) => `in ${x} day${pluralize(x)}`)(Math.floor(diff / S_DAY))]
+            [dayDiff < 31, ((x) => `in ${x} day${pluralize(x)}`)(dayDiff)],
+            [dayDiff < 365, ((x) => `in ${x} month${pluralize(x)}`)(Math.floor(dayDiff / 12))],
+            [true, ((x) => `in ${x} year${pluralize(x)}`)(Math.floor(dayDiff / 365))],
         ];
 
         const [, relative = ""] = rules.find(([rule]) => rule) || [];
@@ -66,17 +67,18 @@ export const dateToRelativeTime = (date, options = {}) => {
     }
 
     // In the past
-    diff = (nowMs - date.getTime()) / MS_IN_SECOND;
-    dayDiff = Math.floor(diff / S_DAY);
+    const pastDiff = Math.abs(diff);
+    const pastDayDiff = Math.abs(dayDiff);
 
     /** @type {[boolean, string][]} */
     const rules = [
-        [dayDiff > 31, ""],
-        [diff < 5, justNowText],
-        [diff < SEC_IN_MINUTE, ((x) => `${x} sec${pluralize(x)} ago`)(Math.floor(diff))],
-        [diff < S_HOUR, ((x) => `${x} min${pluralize(x)} ago`)(Math.floor(diff / SEC_IN_MINUTE))],
-        [diff < S_DAY, ((x) => `${x} hour${pluralize(x)} ago`)(Math.floor(diff / S_HOUR))],
-        [true, ((x) => `${x} day${pluralize(x)} ago`)(Math.floor(diff / S_DAY))]
+        [pastDiff < 5, justNowText],
+        [pastDiff < SEC_IN_MINUTE, ((x) => `${x} sec${pluralize(x)} ago`)(Math.floor(pastDiff))],
+        [pastDiff < S_HOUR, ((x) => `${x} min${pluralize(x)} ago`)(Math.floor(pastDiff / SEC_IN_MINUTE))],
+        [pastDiff < S_DAY, ((x) => `${x} hour${pluralize(x)} ago`)(Math.floor(pastDiff / S_HOUR))],
+        [pastDayDiff < 31, ((x) => `${x} day${pluralize(x)} ago`)(pastDayDiff)],
+        [pastDayDiff < 365, ((x) => `${x} month${pluralize(x)} ago`)(Math.floor(pastDayDiff / 12))],
+        [true, ((x) => `${x} year${pluralize(x)} ago`)(Math.floor(pastDayDiff / 365))],
     ];
 
     const [, relative = ""] = rules.find(([rule]) => rule) || [];
