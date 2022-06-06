@@ -512,6 +512,9 @@ use defaults ${defaultChatNotSet}`
             [isAskedHowManyVisitedElection, sayHowManyVisitedElection],
             // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
             [isAskedForNominatingInfo, sayHowToNominate],
+            [isAskedWhatIsElectionStatus, sayAboutElectionStatus],
+            [isAskedWhenIsTheNextPhase, sayNextPhase],
+            [isAskedWhenTheElectionEnds, sayElectionIsEnding],
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
@@ -715,15 +718,6 @@ use defaults ${defaultChatNotSet}`
             }
             else if (isAskedIfModsArePaid(preparedMessage)) {
                 responseText = sayAreModsPaid(election);
-            }
-            else if (isAskedWhatIsElectionStatus(preparedMessage)) {
-                responseText = sayAboutElectionStatus(config, election);
-            }
-            else if (isAskedWhenIsTheNextPhase(preparedMessage)) {
-                responseText = sayNextPhase(config, election);
-            }
-            else if (isAskedWhenTheElectionEnds(preparedMessage)) {
-                responseText = sayElectionIsEnding(election);
             }
             else if (isAskedAboutVoting(preparedMessage)) {
                 responseText = sayAboutVoting(election);
