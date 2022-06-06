@@ -12,18 +12,43 @@ import { capitalize } from "../../src/bot/utils.js";
 import { matchesISO8601 } from "../../src/shared/utils/expressions.js";
 import { getMockBotConfig, getMockBotUser } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
+import { getMockApiUser, getMockCommandUser } from "../mocks/user.js";
 
 /**
  * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
- * @typedef { import("../../src/bot/election").ElectionPhase} ElectionPhase
+ * @typedef {import("../../src/bot/commands/user").User} CommandUser
+ * @typedef {import("../../src/bot/election").ElectionPhase} ElectionPhase
+ * @typedef {import("chatexchange/dist/Room").default} Room
  */
 
-describe("Messages module", () => {
+describe("Messages", () => {
 
     before(() => sinon.stub(console, "log"));
     after(() => sinon.restore());
 
-    describe("sayElectionSchedule", () => {
+    /** @type {ReturnType<typeof getMockBotConfig>} */
+    let config;
+    beforeEach(() => config = getMockBotConfig());
+
+    let client;
+    beforeEach(() => client = new CE["default"]("stackoverflow.com"));
+
+    /** @type {Room} */
+    let room;
+    beforeEach(() => room = client.getRoom(42));
+
+    let bot;
+    beforeEach(() => bot = getMockBotUser());
+
+    /** @type {CommandUser} */
+    let user;
+    beforeEach(() => user = getMockCommandUser());
+
+    /** @type {ApiUser} */
+    let apiUser;
+    beforeEach(() => apiUser = getMockApiUser());
+
+    describe(sayElectionSchedule.name, () => {
 
         it('should correctly set arrow to the current phase', () => {
             const date = new Date().toLocaleString("en-US");
@@ -48,7 +73,7 @@ describe("Messages module", () => {
         });
     });
 
-    describe('sayBadgesByType', () => {
+    describe(sayBadgesByType.name, () => {
 
         /** @type {import("../../src/bot/index").ElectionBadge[]} */
         const badges = [{
@@ -86,13 +111,7 @@ describe("Messages module", () => {
         });
     });
 
-    describe('sayHI', async () => {
-
-        let config = getMockBotConfig();
-        const bot = getMockBotUser();
-        const client = new CE["default"]("stackoverflow.com");
-        const room = client.getRoom(42);
-
+    describe('sayHI', () => {
         it('should not add phase info on no phase', async () => {
             const election = new Election("https://ja.stackoverflow.com/election/1");
             const greeting = await sayHI(config, new Map([[1, election]]), election, bot, room);
@@ -121,14 +140,11 @@ describe("Messages module", () => {
         });
     });
 
-    describe('sayDiamondAlready', () => {
-
+    describe(sayDiamondAlready.name, () => {
         it('should return correct version of the message based on mod status', () => {
             const election = new Election("https://pt.stackoverflow.com/election/1");
 
-            const user =/** @type {ApiUser} */({ reputation: 42 });
-
-            const score = calculateScore(user, [], election);
+            const score = calculateScore(apiUser, [], election);
 
             const isModMessage = sayDiamondAlready(score, true, false);
             const wasModMessage = sayDiamondAlready(score, false, true);
@@ -141,15 +157,11 @@ describe("Messages module", () => {
     });
 
     describe(sayWithdrawnNominations.name, () => {
-        /** @type {ReturnType<typeof getMockBotConfig>} */
-        let config;
-        beforeEach(() => config = getMockBotConfig());
-
         it('should correctly determine if no nominees withdrawn', () => {
             const election = new Election("https://stackoverflow.com/election/12");
             election.phase = "ended";
 
-            const message = sayWithdrawnNominations(config, election);
+            const message = sayWithdrawnNominations(config, election.elections, election, "", user, bot, room);
             expect(message).to.match(/no.+?withdrawn/i);
         });
 
@@ -157,7 +169,7 @@ describe("Messages module", () => {
             const election = new Election("https://stackoverflow.com/election/12");
             election.dateNomination = new Date(Date.now() + 864e5 * 7).toISOString();
 
-            const message = sayWithdrawnNominations(config, election);
+            const message = sayWithdrawnNominations(config, election.elections, election, "", user, bot, room);
             expect(message).to.match(/not started/i);
         });
 
@@ -172,7 +184,7 @@ describe("Messages module", () => {
             election.phase = "election";
             nominees.forEach((nominee) => election.addWithdrawnNominee(nominee));
 
-            const message = sayWithdrawnNominations(config, election);
+            const message = sayWithdrawnNominations(config, election.elections, election, "", user, bot, room);
             expect(message).to.include(nominees.length);
 
             nominees.forEach(({ userName }) => {
@@ -190,7 +202,7 @@ describe("Messages module", () => {
             const election = new Election("https://stackoverflow.com/election/12");
             election.dateNomination = new Date(Date.now() + 864e5 * 7).toISOString();
 
-            const message = sayAboutElectionStatus(config, election);
+            const message = sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
             expect(message).to.match(/not started/i);
         });
 
@@ -198,7 +210,7 @@ describe("Messages module", () => {
             const election = new Election("https://stackoverflow.com/election/12");
             election.phase = "ended";
 
-            const message = sayAboutElectionStatus(config, election);
+            const message = sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
             expect(message).to.match(/is over/i);
         });
 
@@ -209,7 +221,7 @@ describe("Messages module", () => {
             election.phase = "cancelled";
             election.statVoters = statVoters;
 
-            const message = sayAboutElectionStatus(config, election);
+            const message = sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
             expect(message).to.include(statVoters);
         });
 
@@ -217,15 +229,15 @@ describe("Messages module", () => {
             const election = new Election("https://stackoverflow.com/election/42");
             election.phase = "election";
 
-            const message = sayAboutElectionStatus(config, election);
+            const message = sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
             expect(message).to.include("final voting phase");
         });
 
-        it('shoudl build correct message for the primary phase', () => {
+        it('shoudl build correct message for the primary phase', async () => {
             const election = new Election("https://stackoverflow.com/election/42");
             election.phase = "primary";
 
-            const message = sayAboutElectionStatus(config, election);
+            const message = await sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
             expect(message).to.include(`is in the ${election.phase} phase`);
             expect(message).to.match(/come back.+?to vote/);
         });
@@ -236,23 +248,23 @@ describe("Messages module", () => {
             const election = new Election("https://stackoverflow.com/election/12");
             election.phase = "ended";
 
-            const message = sayElectionIsEnding(election);
+            const message = sayElectionIsEnding(config, election.elections, election, "", user, bot, room);
             expect(message).to.match(/is over/i);
         });
 
-        it('should build correct message for normal phases', () => {
+        it('should build correct message for normal phases', async () => {
             const election = new Election("https://stackoverflow.com/election/12");
 
             /** @type {Exclude<ElectionPhase, "ended">[]} */
             const phases = ["cancelled", "election", "primary", "nomination"];
 
-            phases.forEach((phase) => {
+            for (const phase of phases) {
                 election.phase = phase;
 
-                const message = sayElectionIsEnding(election);
+                const message = await sayElectionIsEnding(config, election.elections, election, "", user, bot, room);
                 expect(message).to.include("ends at");
                 expect(matchesISO8601(message)).to.be.true;
-            });
+            }
         });
     });
 });
