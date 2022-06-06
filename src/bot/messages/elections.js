@@ -19,12 +19,12 @@ import { sayElectionNotStartedYet } from "./phases.js";
  * @summary builds current winners message
  * @type {MessageBuilder}
  */
-export const sayCurrentWinners = (_c, _es, election) => {
+export const sayCurrentWinners = (_c, _es, election, ...rest) => {
     const { phase, winners, siteUrl, electionUrl } = election;
 
     const phaseMap = {
         "default": `The election is not over yet. Stay tuned for the winners!`,
-        "null": sayElectionNotStartedYet(election),
+        "null": sayElectionNotStartedYet(_c, _es, election, ...rest),
         "ended": `The winners can be found on the ${makeURL("election page", electionUrl)}.`
     };
 
@@ -168,15 +168,15 @@ export const sayWhatIsAnElection = (_c, _es, election) => {
  * @summary builds a response to a query where to find results
  * @type {MessageBuilder}
  */
-export const sayWhereToFindElectionResults = (_config, _elections, election) => {
+export const sayWhereToFindElectionResults = (_c, _es, election, ...rest) => {
     const { opavoteUrl, siteName, electionNum, dateEnded } = election;
 
     const resultsLocation = opavoteUrl ? ` The results can be found online via ${makeURL("OpaVote", opavoteUrl)}.` : "";
 
-    /** @type {[boolean,string][]} */
+    /** @type {[boolean,ReturnType<MessageBuilder>][]} */
     const rules = [
         [election.isActive(), `The election is ${getRandomNow()} — the results will become available after it ends ${dateToRelativeTime(dateEnded)}.`],
-        [election.isNotStartedYet(), sayElectionNotStartedYet(election)],
+        [election.isNotStartedYet(), sayElectionNotStartedYet(_c, _es, election, ...rest)],
         [election.isEnded(), `The ${formatOrdinal(electionNum || 1)} ${siteName} election has ended.${resultsLocation}`]
     ];
 

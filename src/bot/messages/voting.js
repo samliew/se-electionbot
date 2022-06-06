@@ -13,14 +13,14 @@ import { sayElectionNotStartedYet } from "./phases.js";
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../commands/user").User} BotUser
  * @typedef {import("../election").default} Election
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  */
 
 /**
  * @summary builds a response to voting info query
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayAboutVoting = (election) => {
+export const sayAboutVoting = (_c, _es, election, ...rest) => {
     const { dateElection, electionUrl, phase, repVote, statVoters } = election;
 
     const comeBackFinalPhaseText = ` Don't forget to come back ${linkToRelativeTimestamp(dateElection)} to also vote in the election's final voting phase!`;
@@ -33,7 +33,7 @@ export const sayAboutVoting = (election) => {
         primary: `If you have at least ${repVote} reputation, you can freely ${makeURL("vote for the candidates", `${electionUrl}?tab=primary`)}. ${sayInformedDecision()}${comeBackFinalPhaseText}`
     };
 
-    return phaseMap[phase] || sayElectionNotStartedYet(election);
+    return phaseMap[phase] || sayElectionNotStartedYet(_c, _es, election, ...rest);
 };
 
 /**

@@ -17,7 +17,7 @@ import { capitalize, linkToRelativeTimestamp, linkToUtcTimestamp, listify, makeU
 export const sayAboutElectionStatus = (_c, _es, election, ...rest) => {
     const { phase, numNominees, electionUrl, statVoters = "", repVote, dateElection } = election;
 
-    if (election.isNotStartedYet()) return sayElectionNotStartedYet(election);
+    if (election.isNotStartedYet()) return sayElectionNotStartedYet(_c, _es, election, ...rest);
     if (election.isEnded()) return sayElectionIsOver(_c, _es, election, ...rest);
     if (phase === 'cancelled') return statVoters;
 
@@ -59,10 +59,12 @@ export const sayAboutThePhases = (_config, _elections, election) => {
 /**
  * TODO: do not add nomination phase if not started
  * @summary Default election message
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayElectionNotStartedYet = ({ dateNomination, electionUrl }) => `The ${makeURL("election", electionUrl)} has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativeTime(dateNomination)}).`;
+export const sayElectionNotStartedYet = (_c, _es, election) => {
+    const { dateNomination, electionUrl } = election;
+    return `The ${makeURL("election", electionUrl)} has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativeTime(dateNomination)}).`;
+};
 
 /**
  * @summary builds a response to when does election end query
@@ -167,7 +169,7 @@ export const sayNextPhase = (config, _es, election, ...rest) => {
         "cancelled": statVoters,
         "election": sayElectionIsRunning(election),
         "ended": sayElectionIsOver(config, _es, election, ...rest),
-        "null": sayElectionNotStartedYet(election),
+        "null": sayElectionNotStartedYet(config, _es, election, ...rest),
         "nomination": `The next phase is the ${datePrimary && reachedPrimaryThreshold ?
             `**primary** at ${linkToUtcTimestamp(datePrimary)} (${dateToRelativeTime(datePrimary)}).` :
             `**election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativeTime(dateElection)})${needsMoreForPrimary}.`}`,

@@ -515,6 +515,8 @@ use defaults ${defaultChatNotSet}`
             [isAskedWhatIsElectionStatus, sayAboutElectionStatus],
             [isAskedWhenIsTheNextPhase, sayNextPhase],
             [isAskedWhenTheElectionEnds, sayElectionIsEnding],
+            [isAskedForWithdrawnNominees, sayWithdrawnNominations],
+            [isAskedAboutVoting, sayAboutVoting],
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
@@ -696,9 +698,6 @@ use defaults ${defaultChatNotSet}`
             else if (isAskedForScoreLeaderboard(preparedMessage)) {
                 responseText = sayCandidateScoreLeaderboard(election.apiSlug);
             }
-            else if (isAskedForWithdrawnNominees(preparedMessage)) {
-                responseText = sayWithdrawnNominations(config, election);
-            }
             else if (isAskedHowManyVoted(preparedMessage)) {
                 responseText = await sayAlreadyVoted(config, election, preparedMessage);
             }
@@ -707,7 +706,7 @@ use defaults ${defaultChatNotSet}`
             }
             // Could conflict with isAskedAboutVoting below - should not match "how to vote" - min length required
             else if (isAskedHowOrWhoToVote(preparedMessage)) {
-                if (election.phase == null) responseText = sayElectionNotStartedYet(election);
+                if (election.phase == null) responseText = await sayElectionNotStartedYet(config, elections, election, preparedMessage, user, me, room);
                 else responseText = sayInformedDecision();
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
@@ -718,9 +717,6 @@ use defaults ${defaultChatNotSet}`
             }
             else if (isAskedIfModsArePaid(preparedMessage)) {
                 responseText = sayAreModsPaid(election);
-            }
-            else if (isAskedAboutVoting(preparedMessage)) {
-                responseText = sayAboutVoting(election);
             }
             else if (isAskedForElectionSchedule(preparedMessage)) {
                 responseText = sayElectionSchedule(election);

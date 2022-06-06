@@ -54,15 +54,12 @@ export const sayBestCandidate = (_config, _elections, election) => {
 
 /**
  * @summary builds current nominees list response message
- * @param {BotConfig} _config bot configuration
- * @param {Map<number, Election>} _elections election history
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayCurrentCandidates = (_config, _elections, election) => {
+export const sayCurrentCandidates = (_c, _es, election, ...rest) => {
     const { phase, numNominees, electionUrl, nominees } = election;
 
-    if (!phase) return sayElectionNotStartedYet(election);
+    if (!phase) return sayElectionNotStartedYet(_c, _es, election, ...rest);
 
     if (numNominees > 0) {
         const pastBe = pluralize(numNominees, "were", "was");
@@ -198,14 +195,12 @@ export const sayWhyNominationRemoved = () => {
 
 /**
  * @summary builds a response to who are the withdrawn nominees
- * @param {BotConfig} _config bot configuration
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayWithdrawnNominations = (_config, election) => {
+export const sayWithdrawnNominations = (_c, _es, election, ...rest) => {
     const { withdrawnNominees, numWithdrawals } = election;
 
-    if (election.isNotStartedYet()) return sayElectionNotStartedYet(election);
+    if (election.isNotStartedYet()) return sayElectionNotStartedYet(_c, _es, election, ...rest);
 
     if (numWithdrawals > 0) {
         const isAre = pluralize(numWithdrawals, "are", "is");
