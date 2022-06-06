@@ -4,7 +4,7 @@ import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { sayBadgesByType } from "../../src/bot/messages/badges.js";
 import { sayWithdrawnNominations } from "../../src/bot/messages/candidates.js";
-import { sayHI } from "../../src/bot/messages/greetings.js";
+import { sayGreeting } from "../../src/bot/messages/greetings.js";
 import { sayDiamondAlready } from "../../src/bot/messages/moderators.js";
 import { sayAboutElectionStatus, sayElectionIsEnding, sayElectionSchedule } from "../../src/bot/messages/phases.js";
 import { calculateScore } from "../../src/bot/score.js";
@@ -39,7 +39,7 @@ describe("Messages", () => {
     beforeEach(() => room = client.getRoom(42));
 
     let bot;
-    beforeEach(() => bot = getMockBotUser());
+    beforeEach(() => bot = getMockBotUser({ name: "Boterator" }));
 
     /** @type {CommandUser} */
     let user;
@@ -130,10 +130,10 @@ describe("Messages", () => {
         });
     });
 
-    describe('sayHI', () => {
+    describe(sayGreeting.name, () => {
         it('should not add phase info on no phase', async () => {
             const election = new Election("https://ja.stackoverflow.com/election/1");
-            const greeting = await sayHI(config, new Map([[1, election]]), election, bot, room);
+            const greeting = await sayGreeting(config, new Map([[1, election]]), election, bot, room);
             expect(greeting).to.not.match(/is in the.*? phase/);
         });
 
@@ -145,7 +145,7 @@ describe("Messages", () => {
             const election = new Election(electionLink);
             election.phase = phase;
 
-            const greeting = await sayHI(config, new Map([[12, election]]), election, bot, room);
+            const greeting = await sayGreeting(config, new Map([[12, election]]), election, bot, room);
             expect(greeting).to.match(new RegExp(`The \\[election\\]\\(${electionLink}\\?tab=${phase}\\) has been cancelled.`));
         });
 
@@ -153,7 +153,7 @@ describe("Messages", () => {
             const override = "Hi all!";
 
             const election = new Election("https://pt.stackoverflow.com/election/1");
-            const greeting = await sayHI(config, new Map([[1, election]]), election, bot, room, override);
+            const greeting = await sayGreeting(config, new Map([[1, election]]), election, bot, room, override);
 
             expect(greeting).to.match(new RegExp(`^${override}`));
         });

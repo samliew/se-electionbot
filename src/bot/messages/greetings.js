@@ -5,6 +5,7 @@ import { getNumberOfUsersEligibleToVote, getNumberOfVoters } from "../api.js";
 import { User } from "../commands/user.js";
 import { sendMessage } from "../queue.js";
 import { getRandomAnnouncement, getRandomNow } from "../random.js";
+import { pingDevelopers } from "../reports.js";
 import { makeURL, pluralize, pluralizePhrase } from "../utils.js";
 import { sayCommonlyAskedQuestions } from "./metadata.js";
 
@@ -25,20 +26,19 @@ import { sayCommonlyAskedQuestions } from "./metadata.js";
  * @param {string} [greeting] greeting prefix
  * @returns {Promise<string>}
  */
-export const sayHI = async (config, elections, election, botUser, room, greeting = 'Welcome to the election chat room! ') => {
+export const sayGreeting = async (config, elections, election, botUser, room, greeting = 'Welcome to the election chat room! ') => {
     const { nominees, electionUrl, phase, dateElection, apiSlug } = election;
-
-    const { size } = nominees;
-
-    const electionLink = makeURL("election", `${electionUrl}?tab=${phase}`);
-    const phasePrefix = `The ${electionLink} is in the ${phase} phase`;
 
     // Badge that is awarded for voting in elections
     const electionBadgeName = "Constituent";
     const electionBadgeId = election.getBadgeId(electionBadgeName);
+    if (!electionBadgeId) {
+        await pingDevelopers(`Sorry, couldn't identify the "${electionBadgeName}" badge, cc`, config, room);
+        return "";
+    }
 
     let alreadyVoted = "";
-    if (phase === 'election' && electionBadgeId) {
+    if (election.getPhase(config.nowOverride) === "election") {
         const numEligible = await getNumberOfUsersEligibleToVote(config, election);
         const numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, { from: dateElection });
 
@@ -47,6 +47,10 @@ export const sayHI = async (config, elections, election, botUser, room, greeting
         alreadyVoted = `${format(numVoters)} (${eligible}) user${pluralize(numVoters)} ha${pluralize(numVoters, "ve", "s")} already voted`;
     }
 
+    const { size } = nominees;
+
+    const electionLink = makeURL("election", `${electionUrl}?tab=${phase}`);
+    const phasePrefix = `The ${electionLink} is in the ${phase} phase`;
     const pluralCandidates = pluralizePhrase(size, `are ${size} candidates`, `is ${size} candidate`);
 
     const phaseMap = {
@@ -60,9 +64,11 @@ export const sayHI = async (config, elections, election, botUser, room, greeting
 
     const phaseText = phaseMap[phase] || "";
 
-    return `${greeting}${phaseText} ${await sayCommonlyAskedQuestions(config, elections, election, "", new User({
-        ...await resolveObj(botUser)
-    }), botUser, room)}.`;
+    const user = new User({ ...await resolveObj(botUser) });
+
+    const common = await sayCommonlyAskedQuestions(config, elections, election, "", user, botUser, room);
+
+    return `${greeting}${phaseText} ${common}.`;
 };
 
 /**
@@ -82,7 +88,7 @@ export const sayIdleGreeting = async (config, elections, election, botUser, room
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, await sayHI(config, elections, election, botUser, room, getRandomAnnouncement()), null, true);
+    return sendMessage(config, room, await sayGreeting(config, elections, election, botUser, room, getRandomAnnouncement()), null, true);
 };
 
 /**
@@ -104,5 +110,5 @@ export const sayBusyGreeting = async (config, elections, election, botUser, room
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, await sayHI(config, elections, election, botUser, room, getRandomAnnouncement()), null, true);
+    return sendMessage(config, room, await sayGreeting(config, elections, election, botUser, room, getRandomAnnouncement()), null, true);
 };
