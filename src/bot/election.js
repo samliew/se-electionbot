@@ -379,8 +379,8 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
     // https://regex101.com/r/GKcR6r/2
     const proTemporeTitleExpr = /\bpro(?:\s+|-)tem(?:pore)?\b/i;
 
-    // https://regex101.com/r/uXY3xB/1
-    const electionDateExpr = /on\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
+    // https://regex101.com/r/uXY3xB/2
+    const electionDateExpr = /(?<!beta\s+)on\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
 
     const containers = questionList.querySelectorAll(".question-container");
 
