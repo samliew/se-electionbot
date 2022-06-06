@@ -774,7 +774,9 @@ use defaults ${defaultChatNotSet}`
                     return; // stop here since we are using a different default response method
                 }
                 else if (config.awaitingConfirmation.has(userId)) {
-                    responseText = await config.awaitingConfirmation.get(userId)?.() || "";
+                    responseText = await config.awaitingConfirmation.get(userId)?.(
+                        config, elections, election, preparedMessage, user, me, room
+                    ) || "";
                     config.awaitingConfirmation.delete(userId);
                 }
                 // The rest below are fun mode only
