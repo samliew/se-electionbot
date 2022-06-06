@@ -72,8 +72,8 @@
                 {{#iterate elections}}
                 <tr>
                     <td>
-                        <a href="{{electionUrl}}">{{electionNum}}</a>
-                        {{#ifEquals electionNum @root/data/election/electionNum}}<span title="Current Election">*</span>{{/ifEquals}}
+                        <a href="{{electionUrl}}">{{getter this "electionNum"}}</a>
+                        {{#ifEquals (getter this "electionNum") (getter @root/data/election "electionNum")}}<span title="Current Election">*</span>{{/ifEquals}}
                     </td>
                     <td>{{year dateNomination}}</td>
                     <td>{{{yesno datePrimary}}}</td>
