@@ -19,6 +19,10 @@
             <table>
                 <tr><td>Last updated</td><td>{{> relativetime date=updated}}</td></tr>
                 <tr><td>Site</td><td>{{siteName}}</td></tr>
+                <tr>
+                    <td>Type</td>
+                    <td>{{getter this "electionType"}}</td>
+                </tr>
                 <tr><td>Hostname</td><td>{{{url (getter @root/data/election "siteUrl")}}}</td></tr>
                 <tr>
                     <td>Is Stack Overflow</td>
