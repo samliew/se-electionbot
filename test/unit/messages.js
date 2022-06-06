@@ -76,38 +76,56 @@ describe("Messages", () => {
 
     describe(sayBadgesByType.name, () => {
 
-        /** @type {import("../../src/bot/index").ElectionBadge[]} */
-        const badges = [{
-            badge_id: 1, name: "Badge1", type: "moderation"
-        },
-        {
-            badge_id: 11, name: "Badge11", type: "moderation"
-        },
-        { badge_id: 2, name: "Badge2", type: "participation" },
-        { badge_id: 3, name: "Badge3", type: "editing" }
-        ];
+        /** @type {Election} */
+        let election;
+        beforeEach(() => election = new Election("https://stackoverflow.com/election/13"));
 
-        it('should correctly list moderation badges', () => {
-            const modBadges = sayBadgesByType(badges, "moderation");
-            expect(modBadges.includes("2 moderation badges are")).to.be.true;
-            expect(modBadges.includes("[Badge1]")).to.be.true;
-            expect(modBadges.includes("[Badge11]")).to.be.true;
+        it('should correctly list moderation badges', async () => {
+            const modBadges = await sayBadgesByType(
+                config, election.elections, election, "moderation", user, bot, room
+            );
+
+            const badges = election.electionBadges.filter((b) => b.type === "moderation");
+            const { length: numBadges } = badges;
+            const [{ name }] = badges;
+
+            expect(modBadges.includes(`${numBadges} moderation badge`)).to.be.true;
+            expect(modBadges.includes(`[${name}]`)).to.be.true;
         });
 
-        it('should correctly list participation badges', () => {
-            const partBadges = sayBadgesByType(badges, "participation");
-            expect(partBadges.includes("1 participation badge is")).to.be.true;
-            expect(partBadges.includes("[Badge2]")).to.be.true;
+        it('should correctly list participation badges', async () => {
+            const partBadges = await sayBadgesByType(
+                config, election.elections, election, "participation", user, bot, room
+            );
+
+            const badges = election.electionBadges.filter((b) => b.type === "participation");
+            const { length: numBadges } = badges;
+            const [{ name }] = badges;
+
+            expect(partBadges.includes(`${numBadges} participation badge`)).to.be.true;
+            expect(partBadges.includes(`[${name}]`)).to.be.true;
         });
 
-        it('should correctly list editing badges', () => {
-            const editBadges = sayBadgesByType(badges, "editing");
-            expect(editBadges.includes("1 editing badge is")).to.be.true;
-            expect(editBadges.includes("[Badge3]")).to.be.true;
+        it('should correctly list editing badges', async () => {
+            const editBadges = await sayBadgesByType(
+                config, election.elections, election, "editing", user, bot, room
+            );
+
+            const badges = election.electionBadges.filter((b) => b.type === "editing");
+            const { length: numBadges } = badges;
+            const [{ name }] = badges;
+
+            expect(editBadges.includes(`${numBadges} editing badge`)).to.be.true;
+            expect(editBadges.includes(`[${name}]`)).to.be.true;
         });
 
-        it('should not create links is not Stack Overflow', () => {
-            const modBadges = sayBadgesByType(badges, "moderation", false);
+        it('should not create links is not Stack Overflow', async () => {
+            election.electionUrl = "https://meta.stackexchange.com/election/2";
+
+            const modBadges = await sayBadgesByType(
+                config, election.elections, election, "moderation", user, bot, room
+            );
+
             expect(modBadges.search(/\[\w+\]\(.+\)/)).to.equal(-1);
         });
     });

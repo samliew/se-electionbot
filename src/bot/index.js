@@ -248,8 +248,6 @@ use defaults ${defaultChatNotSet}`
 
         election.elections = elections;
 
-        const { electionBadges } = election;
-
         // Reduced longIdleDurationHours if it's a Stack Overflow election
         if (election.isStackOverflow()) config.longIdleDurationHours = 3;
 
@@ -673,8 +671,7 @@ use defaults ${defaultChatNotSet}`
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
             else if (isAskedAboutBadgesOfType(preparedMessage)) {
-                const [, type] = /(participation|editing|moderation)/.exec(preparedMessage) || [];
-                responseText = sayBadgesByType(electionBadges, type, election.isStackOverflow());
+                responseText = await sayBadgesByType(config, elections, election, preparedMessage, user, me, room);
             }
             else if (isAskedAboutRequiredBadges(preparedMessage)) {
                 responseText = sayRequiredBadges(election);
