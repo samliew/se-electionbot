@@ -298,6 +298,7 @@ export const changeElection = async (args) => {
 
     await election.updateElectionBadges(config);
     await election.updateModerators(config);
+    await election.updateElectionAnnouncements(config);
 
     announcement.reinitialize();
 

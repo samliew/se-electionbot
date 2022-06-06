@@ -7,7 +7,6 @@ import { logActivity, logResponse } from "../shared/utils/bot.js";
 import { prepareMessageForMatching } from "../shared/utils/chat.js";
 import { MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { matchNumber } from "../shared/utils/expressions.js";
-import { getOrInit, sortMap } from "../shared/utils/maps.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
@@ -16,7 +15,7 @@ import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections, scrapeElectionAnnouncements } from './election.js';
+import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections } from './election.js';
 import BotEnv from "./env.js";
 import {
     isAskedAboutBadgesOfType,
@@ -242,9 +241,7 @@ use defaults ${defaultChatNotSet}`
             return;
         }
 
-        const electionAnnouncements = await scrapeElectionAnnouncements(config);
-        const electionSiteAnnouncements = getOrInit(electionAnnouncements, election.siteHostname, new Map());
-        election.announcements = sortMap(electionSiteAnnouncements, (_, a, __, b) => b.dateElection > a.dateElection ? -1 : 1);
+        await election.updateElectionAnnouncements(config);
 
         election.elections = elections;
 
