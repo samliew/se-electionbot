@@ -209,7 +209,7 @@ export const addHours = (date, num = 1) => {
  * @returns {Date}
  */
 export const addDates = (date, num = 1) => {
-    const dolly = new Date(date);
+    const dolly = validateDate(date);
     dolly.setDate(dolly.getDate() + num);
     return dolly;
 };
