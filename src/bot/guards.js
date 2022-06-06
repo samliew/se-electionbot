@@ -42,6 +42,16 @@ export const isAskedWhyNominationRemoved = (text) => {
 };
 
 /**
+ * @summary checks if the message asked why would one want to be a mod
+ * @type {MessageGuard}
+ */
+export const isAskedWhyBeAMod = (text) => {
+    return someMatch([
+        /^why(?:\s+would\s+(?:i|(?:any|some)(?:body|one))\s+(?:want|wish)\s+to)?\s+be(?:come)?\s+a\s+mod(?:erator)?/i
+    ], text);
+};
+
+/**
  * @summary checks if the message asked if mods are paid
  * @param {string} text
  * @returns {boolean}

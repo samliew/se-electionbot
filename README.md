@@ -62,6 +62,7 @@ About moderators/moderating:
 
 - what are the responsibilities of a moderator
 - why should I be a moderator
+- why would anyone want to be a moderator
 - do moderators get paid
 - who are the `<current\|former>` moderators
 - who is the best moderator

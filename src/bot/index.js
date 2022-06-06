@@ -35,6 +35,7 @@ import {
     isAskedForHelp,
     isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
     isAskedWhyAreElectionsCancelled,
+    isAskedWhyBeAMod,
     isAskedWhyIsBot,
     isAskedWhyNominationRemoved,
     isAskedWillElectionBeCancelled,
@@ -53,7 +54,7 @@ import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElecti
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
 import { sayCommonlyAskedQuestions, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
 import { sayHappyBirthday, sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
-import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayFormerMods, sayHowManyModsAreHere, sayWhatModsDo } from "./messages/moderators.js";
+import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayFormerMods, sayHowManyModsAreHere, sayWhatModsDo, sayWhyBeAMod } from "./messages/moderators.js";
 import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElectionNotStartedYet, sayElectionSchedule, sayNextPhase } from "./messages/phases.js";
 import { sayQuestionnaireQuestion } from "./messages/questionnaire.js";
 import { sayCandidateScoreFormula, sayCandidateScoreLeaderboard } from "./messages/score.js";
@@ -512,6 +513,7 @@ use defaults ${defaultChatNotSet}`
             [isAskedWhenTheElectionEnds, sayElectionIsEnding],
             [isAskedForWithdrawnNominees, sayWithdrawnNominations],
             [isAskedAboutVoting, sayAboutVoting],
+            [isAskedWhyBeAMod, sayWhyBeAMod],
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
