@@ -33,12 +33,14 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
  *  electionLink?: string
  * }} ModeratorUser
  *
+ * @typedef {"full" | "pro-tempore"} ElectionType
+ *
  * @typedef {{
  *  dateAnnounced: string,
  *  dateElection: string,
  *  postLink: string,
  *  postTitle: string,
- *  type: "full" | "pro-tempore",
+ *  type: ElectionType,
  *  userId: number,
  *  userLink: string,
  *  userName: string
@@ -740,6 +742,17 @@ export default class Election {
     get electionNum() {
         const { electionUrl } = this;
         return matchNumber(/\/election\/(\d+)/, electionUrl);
+    }
+
+    /**
+     * @summary returns election type
+     * @returns {ElectionType}
+     */
+    get electionType() {
+        const { announcements, electionNum } = this;
+        return electionNum ?
+            announcements.get(electionNum)?.type || "full" :
+            "full";
     }
 
     /**
