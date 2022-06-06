@@ -30,12 +30,21 @@ describe(Election.name, () => {
 
         describe("electionType", () => {
             it('should correctly determine election type', () => {
-                const election = new Election("https://stackoverflow.com/election/5");
+                const dateNomination = dateToUtcTimestamp(Date.now());
 
-                election.announcements.set(5, getMockElectionAnnouncement({ type: "pro-tempore" }));
+                const election = new Election("https://stackoverflow.com/election/5");
+                election.dateNomination = dateNomination;
+
+                election.announcements.set(123, getMockElectionAnnouncement({
+                    dateNomination,
+                    type: "pro-tempore",
+                }));
                 expect(election.electionType).to.equal("pro-tempore");
 
-                election.announcements.set(5, getMockElectionAnnouncement({ type: "full" }));
+                election.announcements.set(123, getMockElectionAnnouncement({
+                    dateNomination,
+                    type: "full",
+                }));
                 expect(election.electionType).to.equal("full");
             });
         });

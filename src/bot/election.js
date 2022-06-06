@@ -749,10 +749,14 @@ export default class Election {
      * @returns {ElectionType}
      */
     get electionType() {
-        const { announcements, electionNum } = this;
-        return electionNum ?
-            announcements.get(electionNum)?.type || "full" :
-            "full";
+        const { announcements, dateNomination } = this;
+
+        const [announcement] = filterMap(
+            announcements,
+            (v) => v.dateNomination === dateNomination
+        ).values();
+
+        return announcement?.type || "full";
     }
 
     /**
