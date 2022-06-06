@@ -167,6 +167,42 @@ export const usDateToISO = (datestr) => {
 };
 
 /**
+ * @summary adds a given number of seconds to a date
+ * @param {Date|string|number} date date to add to
+ * @param {number} [num] number of seconds to add
+ * @returns {Date}
+ */
+export const addSeconds = (date, num = 1) => {
+    const dolly = validateDate(date);
+    dolly.setSeconds(dolly.getSeconds() + num);
+    return dolly;
+};
+
+/**
+ * @summary adds a given number of minutes to a date
+ * @param {Date|string|number} date date to add to
+ * @param {number} [num] number of minutes to add
+ * @returns {Date}
+ */
+export const addMinutes = (date, num = 1) => {
+    const dolly = validateDate(date);
+    dolly.setMinutes(dolly.getMinutes() + num);
+    return dolly;
+};
+
+/**
+ * @summary adds a given number of hours to a date
+ * @param {Date|string|number} date date to add to
+ * @param {number} [num] number of hours to add
+ * @returns {Date}
+ */
+export const addHours = (date, num = 1) => {
+    const dolly = validateDate(date);
+    dolly.setHours(dolly.getHours() + num);
+    return dolly;
+};
+
+/**
  * @summary adds a given number of dates to a date
  * @param {Date|string|number} date date to add to
  * @param {number} [num] number of dates to add
