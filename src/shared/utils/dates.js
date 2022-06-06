@@ -7,19 +7,13 @@ export const HOUR_IN_DAY = 24;
 export const MS_IN_DAY = MS_IN_SECOND * SEC_IN_MINUTE * MIN_IN_HOUR * HOUR_IN_DAY;
 
 /**
- * @summary validates and normalizes the Date
- * @param {Date|number|string} input
+ * @summary validates and normalizes a given date-like value
+ * @param {Date|number|string} input date-like value to validate
  * @returns {Date}
  */
 export const validateDate = (input) => {
-    let output = input;
-
-    if (typeof input === 'string' || typeof input === 'number') {
-        output = new Date(input);
-    };
-
-    // use instanceof, as normal objects will pass `typeof !== "object"` validation
-    return output instanceof Date ? output : new Date();
+    const output = new Date(input);
+    return Number.isNaN(output) ? new Date() : output;
 };
 
 
