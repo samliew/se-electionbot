@@ -9,6 +9,7 @@ import { sayDiamondAlready } from "../../src/bot/messages/moderators.js";
 import { sayAboutElectionStatus, sayElectionIsEnding, sayElectionSchedule } from "../../src/bot/messages/phases.js";
 import { calculateScore } from "../../src/bot/score.js";
 import { capitalize } from "../../src/bot/utils.js";
+import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { matchesISO8601 } from "../../src/shared/utils/expressions.js";
 import { getMockBotConfig, getMockBotUser } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
@@ -167,7 +168,7 @@ describe("Messages", () => {
 
         it('should correctly determine if election has not started yet', () => {
             const election = new Election("https://stackoverflow.com/election/12");
-            election.dateNomination = new Date(Date.now() + 864e5 * 7).toISOString();
+            election.dateNomination = dateToUtcTimestamp(addDates(Date.now(), 7));
 
             const message = sayWithdrawnNominations(config, election.elections, election, "", user, bot, room);
             expect(message).to.match(/not started/i);
@@ -200,7 +201,7 @@ describe("Messages", () => {
 
         it('should correctly determine if election has not started yet', () => {
             const election = new Election("https://stackoverflow.com/election/12");
-            election.dateNomination = new Date(Date.now() + 864e5 * 7).toISOString();
+            election.dateNomination = dateToUtcTimestamp(addDates(Date.now(), 7));
 
             const message = sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
             expect(message).to.match(/not started/i);
@@ -233,8 +234,10 @@ describe("Messages", () => {
             expect(message).to.include("final voting phase");
         });
 
-        it('shoudl build correct message for the primary phase', async () => {
+        it('should build correct message for the primary phase', async () => {
             const election = new Election("https://stackoverflow.com/election/42");
+            election.dateElection = dateToUtcTimestamp(addDates(Date.now(), 4));
+            election.datePrimary = dateToUtcTimestamp(Date.now());
             election.phase = "primary";
 
             const message = await sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
@@ -253,7 +256,13 @@ describe("Messages", () => {
         });
 
         it('should build correct message for normal phases', async () => {
+            const now = new Date();
+
             const election = new Election("https://stackoverflow.com/election/12");
+            election.dateNomination = dateToUtcTimestamp(now);
+            election.datePrimary = dateToUtcTimestamp(addDates(now, 7));
+            election.dateElection = dateToUtcTimestamp(addDates(now, 11));
+            election.dateEnded = dateToUtcTimestamp(addDates(now, 18));
 
             /** @type {Exclude<ElectionPhase, "ended">[]} */
             const phases = ["cancelled", "election", "primary", "nomination"];
