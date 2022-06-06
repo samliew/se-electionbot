@@ -520,6 +520,13 @@ app.route("/realtime")
             }
         }
 
+        if (type === "refresh") {
+            while (server.listening && res.writable) {
+                await wait(BOT_CONFIG.scrapeIntervalMins * 60);
+                res.write(`data: refresh${EVENT_SEPARATOR}`);
+            }
+        }
+
         if (type === "quota") {
             while (server.listening && res.writable) {
                 res.write(`event: quota\ndata: ${getCurrentAPIQuota()}${EVENT_SEPARATOR}`);
