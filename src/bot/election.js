@@ -1596,6 +1596,25 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
     }
 
     /**
+     * @summary updates election announcements
+     * @param {BotConfig} config bot configuration
+     * @returns {Promise<Election>}
+     */
+    async updateElectionAnnouncements(config) {
+        const { siteHostname } = this;
+
+        const electionAnnouncements = await scrapeElectionAnnouncements(config);
+        const electionSiteAnnouncements = getOrInit(electionAnnouncements, siteHostname, new Map());
+
+        this.announcements = sortMap(
+            electionSiteAnnouncements,
+            (_, a, __, b) => b.dateElection > a.dateElection ? -1 : 1
+        );
+
+        return this;
+    }
+
+    /**
      * @summary updates election badges
      * @param {BotConfig} config bot configuration
      * @returns {Promise<Election>}
