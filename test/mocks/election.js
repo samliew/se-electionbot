@@ -12,7 +12,7 @@ import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 export const getMockElectionAnnouncement = (overrides = {}) => {
     return {
         dateAnnounced: dateToUtcTimestamp(Date.now()),
-        dateElection: dateToUtcTimestamp(Date.now()),
+        dateNomination: dateToUtcTimestamp(Date.now()),
         postLink: "https://meta.stackoverflow.com/q/123",
         postTitle: "Announcement: Upcoming Moderator Election Planned",
         type: "full",

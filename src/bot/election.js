@@ -37,7 +37,7 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
  *
  * @typedef {{
  *  dateAnnounced: string,
- *  dateElection: string,
+ *  dateNomination: string,
  *  postLink: string,
  *  postTitle: string,
  *  type: ElectionType,
@@ -454,7 +454,7 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
             const upcomingElectionAnnouncement = {
                 ...scraped.get(postId),
                 dateAnnounced,
-                dateElection,
+                dateNomination: dateElection,
                 userId,
                 userLink,
                 userName
@@ -1608,7 +1608,7 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
 
         this.announcements = sortMap(
             electionSiteAnnouncements,
-            (_, a, __, b) => b.dateElection > a.dateElection ? -1 : 1
+            (_, a, __, b) => b.dateNomination > a.dateNomination ? -1 : 1
         );
 
         return this;
