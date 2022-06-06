@@ -1,5 +1,6 @@
 import { dateToRelativeTime } from "../../shared/utils/dates.js";
 import { mapMap } from "../../shared/utils/maps.js";
+import { boldify } from "../../shared/utils/markdown.js";
 import { getCandidateOrNominee } from "../random.js";
 import { capitalize, linkToRelativeTimestamp, linkToUtcTimestamp, listify, makeURL, numToString, pluralize, pluralizePhrase } from "../utils.js";
 
@@ -57,13 +58,15 @@ export const sayAboutThePhases = (_config, _elections, election) => {
 };
 
 /**
- * TODO: do not add nomination phase if not started
  * @summary Default election message
  * @type {MessageBuilder}
  */
 export const sayElectionNotStartedYet = (_c, _es, election) => {
     const { dateNomination, electionUrl } = election;
-    return `The ${makeURL("election", electionUrl)} has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativeTime(dateNomination)}).`;
+
+    const startsIn = `The ${boldify("nomination")} phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativeTime(dateNomination)}).`;
+
+    return `The ${makeURL("election", electionUrl)} has not started yet. ${startsIn}`;
 };
 
 /**
