@@ -594,10 +594,13 @@ export const setClient = (client) => {
  * @param {BotConfig} config  bot configuration
  * @param {Election} election current election
  * @param {Announcement} announcement announcement
- * @param {boolean} [graceful] exit gracefully?
+ * @param {{
+ *  graceful?: boolean,
+ *  portOverride?: number,
+ * }} [options] server startup options
  * @returns {Promise<ExpressApp>}
  */
-export const startServer = async (client, room, config, election, announcement, graceful = true) => {
+export const startServer = async (client, room, config, election, announcement, options = {}) => {
 
     setAnnouncer(announcement);
     setBot(config);
@@ -605,7 +608,9 @@ export const startServer = async (client, room, config, election, announcement, 
     setElection(election);
     setClient(client);
 
-    const port = app.get("port");
+    const { graceful = true, portOverride } = options;
+
+    const port = portOverride !== void 0 ? portOverride : app.get("port");
     const info = `${config.scriptHostname || "the server"} (port ${port})`;
 
     const started = await start(app, port, info);

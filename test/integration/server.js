@@ -34,7 +34,10 @@ describe("Dashboard", () => {
     before(async () => {
         sinon.stub(console, "log")
         await election.scrapeElection(config);
-        app = await startServer(client, room, config, election, announcement);
+        app = await startServer(client, room, config, election, announcement, {
+            graceful: false,
+            portOverride: 0,
+        });
     });
 
     after(() => stop(app));
