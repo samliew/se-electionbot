@@ -38,6 +38,7 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
  *  dateElection: string,
  *  postLink: string,
  *  postTitle: string,
+ *  type: "full" | "pro-tempore",
  *  userId: number,
  *  userLink: string,
  *  userName: string
@@ -369,15 +370,19 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
     // "Announcing a “Graduation” election for 2022"
     // "Announcing the first full election for Arts & Crafts!"
     // "Announcing a Pro Tempore election for 2022"
-    // https://regex101.com/r/OTlwms/1
-    const announcementTitleExpr = /^announc(?:ing|ement).+?election.+?for/i;
+    // "Leaving Private Beta, and Initial Pro-Tem Moderator Election!"
+    // https://regex101.com/r/OTlwms/2
+    const announcementTitleExpr = /^announc(?:ing|ement).+?election.+?for|initial(?:\s+pro(?:\s+|-)tem(?:pore)?)\s+moderator\s+election/i;
+
+    // https://regex101.com/r/GKcR6r/2
+    const proTemporeTitleExpr = /\bpro(?:\s+|-)tem(?:pore)?\b/i;
 
     // https://regex101.com/r/uXY3xB/1
     const electionDateExpr = /on\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
 
     const containers = questionList.querySelectorAll(".question-container");
 
-    /** @type {Map<string, Map<number, Pick<ElectionAnnouncement, "postLink"|"postTitle">>>} */
+    /** @type {Map<string, Map<number, Pick<ElectionAnnouncement, "postLink"|"postTitle"|"type">>>} */
     const allScraped = new Map();
 
     containers.forEach((container) => {
@@ -398,7 +403,11 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
         const postId = matchNumber(/\/questions\/(\d+)\//, postLink);
         if (!postId || has(scraped, postId)) return;
 
-        scraped.set(postId, { postLink, postTitle });
+        scraped.set(postId, {
+            postLink,
+            postTitle,
+            type: proTemporeTitleExpr.test(postTitle) ? "pro-tempore" : "full"
+        });
     });
 
     const time = config.get("default_election_time", "20:00:00");

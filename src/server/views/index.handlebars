@@ -95,6 +95,7 @@
             <table class="table-small">
                 <thead>
                     <tr>
+                        <th>Type</th>
                         <th>Announced On</th>
                         <th>Election Date</th>
                         <th>Author</th>
@@ -104,6 +105,7 @@
                 <tbody>
                     {{#each (values announcements)}}
                     <tr>
+                        <td>{{type}}</td>
                         <td>{{utcTimestamp dateAnnounced}}</td>
                         <td>{{utcTimestamp dateElection}}</td>
                         <td>{{{url userLink userName}}}</td>
