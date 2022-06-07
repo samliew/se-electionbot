@@ -4,40 +4,40 @@ form {
   * {
     font-size: 0.9rem;
   }
-}
 
-form label {
-  font-weight: bold;
-}
+  label {
+    font-weight: bold;
+  }
 
-form input,
-form textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 1em;
-  padding: 8px 12px;
-  border-radius: 5px;
-  border: 1px solid var(--border-colour);
-}
+  input,
+  textarea {
+    display: block;
+    width: 100%;
+    margin-bottom: 1em;
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-colour);
+  }
 
-form input::placeholder {
-  color: #ccc;
-  font-size: var(--smaller-font-size);
-}
+  input::placeholder {
+    color: #ccc;
+    font-size: var(--smaller-font-size);
+  }
 
-form textarea {
-  min-height: 130px;
-}
+  textarea {
+    min-height: 130px;
+  }
 
-form button {
-  padding: 8px 20px;
-  font-size: 1em;
-}
+  button {
+    padding: 8px 20px;
+    font-size: 1em;
+  }
 
-form .form-controls {
-  margin: 1.5em 0;
-}
+  .form-controls {
+    margin: 1.5em 0;
+  }
 
-form.equal-columns .form-controls {
-  max-width: unset;
+  &.equal-columns .form-controls {
+    max-width: unset;
+  }
 }

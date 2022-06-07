@@ -54,14 +54,14 @@ h2 {
 
 nav {
   font-size: var(--smaller-font-size);
-}
 
-nav .navitem {
-  text-decoration: none;
-}
+  .navitem {
+    text-decoration: none;
+  }
 
-nav .navitem:last-child {
-  font-weight: bold;
+  .navitem:last-child {
+    font-weight: bold;
+  }
 }
 
 ol,
@@ -76,10 +76,10 @@ li {
 
 a {
   color: var(--link-colour);
-}
 
-a:visited {
-  color: var(--text-colour);
+  &:visited {
+    color: var(--text-colour);
+  }
 }
 
 iframe.fullscreen {
