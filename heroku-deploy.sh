@@ -14,7 +14,7 @@ git remote set-url --add --push heroku_temp https://git.heroku.com/se-electionbo
 git remote set-url --add --push heroku_temp https://git.heroku.com/se-electionbot5.git
 
 # Push to all remote repos
-git push heroku_temp master
+git push -f heroku_temp master
 
 # Remove temp remote when complete
 git remote remove heroku_temp

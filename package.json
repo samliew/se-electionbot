@@ -5,7 +5,7 @@
     "main": "dist/bot/index.js",
     "scripts": {
         "build": "rimraf dist && tsc --project tsconfig.bot.json && npm run copy-files && npm run compile-scss",
-        "compile-scss": "node-sass --output-style compressed -q -o dist/server/static/css src/server/static/css/app.scss",
+        "compile-scss": "node-sass --importer node_modules/node-sass-package-importer/dist/cli.js --output-style compressed -q -o dist/server/static/css src/server/static/css/app.scss",
         "heroku:all": "sh ./heroku-deploy.sh",
         "typecheck": "tsc --noEmit -p ./tsconfig.bot.json",
         "typecheck:tests": "tsc --noEmit -p ./tsconfig.test.json",
@@ -77,6 +77,7 @@
         "copyfiles": "^2.4.1",
         "mocha": "^9.2.2",
         "node-sass": "^7.0.1",
+        "node-sass-package-importer": "^5.3.2",
         "rimraf": "^3.0.2",
         "sinon": "^11.1.2",
         "ts-node": "^10.8.0",
