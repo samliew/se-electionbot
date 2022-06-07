@@ -198,12 +198,12 @@
             {{/if}}
 
             {{#if (len (getter this "requiredBadges"))}}
-                {{> totalsTableHeader header="Required Badges" collection=(getter this "requiredBadges") }}
-                {{> badgesTable election=@root/data/election key="requiredBadges" }}
+            {{> badgesTable election=@root/data/election status="required" type="all" header="Required Badges" }}
             {{/if}}
 
-            {{> totalsTableHeader header="Election Badges" collection=(getter this "optionalBadges") }}
-            {{> badgesTable election=@root/data/election key="optionalBadges" }}
+            {{> badgesTable election=@root/data/election status="all" type="editing" header="Editing Badges" }}
+            {{> badgesTable election=@root/data/election status="all" type="moderation" header="Moderation Badges" }}
+            {{> badgesTable election=@root/data/election status="all" type="participation" header="Participation Badges" }}
         </aside>
     </section>
     {{/with}}
