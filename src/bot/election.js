@@ -1108,6 +1108,29 @@ export default class Election {
     }
 
     /**
+     * @summary gets a list of {@link ElectionBadge}s by type
+     * @param {"all"|"editing"|"moderation"|"participation"} type badge type
+     * @param {"all"|"optional"|"required"} [status] badge status
+     * @returns {ElectionBadge[]}
+     */
+    getElectionBadges(type, status = "all") {
+        const { electionBadges } = this;
+
+        const all = type === "all";
+
+        const badgesByType = all ?
+            electionBadges :
+            electionBadges.filter((b) => b.type === type);
+
+        if (status !== "all") {
+            const invert = status === "optional";
+            return badgesByType.filter((b) => b.required !== invert);
+        }
+
+        return badgesByType;
+    }
+
+    /**
      * @summary clones the election
      * @param {BotConfig} config bot configuration
      * @returns {Promise<Election>}

@@ -416,6 +416,38 @@ describe(Election.name, () => {
         });
     });
 
+    describe(Election.prototype.getElectionBadges.name, () => {
+        const election = new Election("https://stackoverflow.com/election/1");
+
+        it("should correctly filter by type", () => {
+            const editingBadges = election.getElectionBadges("editing");
+            expect(editingBadges.length).to.equal(6);
+            expect(editingBadges[0].type).to.equal("editing");
+        });
+
+        it("should correctly filter by status", () => {
+            const requiredBadges = election.getElectionBadges("all", "required");
+            expect(requiredBadges.length).to.equal(4);
+            expect(requiredBadges[1].required).to.be.true;
+        });
+
+        it("should equal requiredBadges on status=required type=all", () => {
+            const badges = new Set(election.requiredBadges.map((b) => b.badge_id));
+            const required = election.getElectionBadges("all", "required");
+
+            expect(badges.size).to.equal(required.length);
+            expect(required.every((b) => badges.has(b.badge_id))).to.be.true;
+        });
+
+        it("should equal optionalBadges on status=optional type=all", () => {
+            const badges = new Set(election.optionalBadges.map((b) => b.badge_id));
+            const optional = election.getElectionBadges("all", "optional");
+
+            expect(badges.size).to.equal(optional.length);
+            expect(optional.every((b) => badges.has(b.badge_id))).to.be.true;
+        });
+    });
+
     describe(Election.prototype.getPhase.name, () => {
 
         it('should correctly determine phase', () => {
