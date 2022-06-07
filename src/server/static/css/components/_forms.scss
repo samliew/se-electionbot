@@ -1,0 +1,43 @@
+form {
+  margin: 2em 0 3em;
+
+  * {
+    font-size: 0.9rem;
+  }
+
+  label {
+    font-weight: bold;
+  }
+
+  input,
+  textarea {
+    display: block;
+    width: 100%;
+    margin-bottom: 1em;
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-colour);
+  }
+
+  input::placeholder {
+    color: #ccc;
+    font-size: var(--smaller-font-size);
+  }
+
+  textarea {
+    min-height: 130px;
+  }
+
+  button {
+    padding: 8px 20px;
+    font-size: 1em;
+  }
+
+  .form-controls {
+    margin: 1.5em 0;
+  }
+
+  &.equal-columns .form-controls {
+    max-width: unset;
+  }
+}

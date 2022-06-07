@@ -1,0 +1,72 @@
+.dashboard {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: start;
+
+  section {
+    min-width: 500px;
+    max-width: 100%;
+
+    @media screen and (max-width: 767px) {
+      min-width: none;
+    }
+  }
+
+  aside {
+    margin-bottom: var(--bs-gutter-y);
+  }
+}
+
+.result {
+  margin: 30px 0px;
+  padding: 12px 14px;
+  border-radius: 5px;
+  font-size: 1.15em;
+
+  &.success {
+    color: darkgreen;
+    background-color: rgb(248, 255, 238);
+  }
+
+  &.error {
+    color: indianred;
+    background-color: rgb(255, 238, 238);
+  }
+}
+
+.truthy {
+  font-weight: bold;
+  color: green;
+}
+
+.falsy {
+  font-weight: bold;
+  color: indianred;
+}
+
+.small-count {
+  position: relative;
+  top: -1px;
+  font-size: var(--smaller-font-size);
+  font-style: italic;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.relativetime {
+  white-space: nowrap;
+  font-style: italic;
+
+  &:not(:empty)::before {
+    content: "(";
+    font-style: normal;
+  }
+
+  &:not(:empty)::after {
+    content: ")";
+    font-style: normal;
+  }
+}
