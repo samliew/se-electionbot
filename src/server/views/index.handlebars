@@ -288,7 +288,7 @@
         <aside>
             <h2>Scheduled Announcements</h2>
             <table class="table-small">
-                <thead>
+                <thead hidden>
                     <tr>
                         <th>Type</th>
                         <th>cron</th>
@@ -421,6 +421,8 @@
             const cronTbody = document.getElementById("cron");
             if(!cronTbody) return;
 
+            const cronThead = cronTbody.previousElementSibling;
+
             const rows = schedules.map(([type, cron, date]) => {
                 const row = document.createElement("tr");
 
@@ -440,6 +442,19 @@
 
             for(const row of cronTbody.rows) row.remove();
 
+            if(!rows.length) {
+                cronThead.hidden = true;
+
+                const emptyRow = document.createElement("tr");
+                const emptyCell = document.createElement("td");
+                emptyCell.colSpan = 3;
+
+                emptyRow.append(emptyCell);
+                cronTbody.append(emptyRow);
+                return;
+            }
+
+            cronThead.hidden = false;
             cronTbody.append(...rows);
         });
 
