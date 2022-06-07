@@ -154,7 +154,6 @@ pre:empty::before {
 
 @media (max-width: 767px) {
   body {
-    padding: 20px 20px;
     font-size: var(--smaller-font-size);
     word-break: break-word;
   }
@@ -175,6 +174,7 @@ pre:empty::before {
 
   .dashboard section {
     flex-basis: 100%;
+    min-width: 0;
     max-width: none;
     margin-right: 0;
   }

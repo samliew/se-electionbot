@@ -440,7 +440,12 @@
 
             for(const row of cronTbody.rows) row.remove();
 
-            cronTbody.append(...rows);
+            if(rows.length) {
+                cronTbody.append(...rows);
+            }
+            else {
+                cronTbody.innerHTML = `<tr><td colspan="3"></td></tr>`;
+            }
         });
 
         schRealtime.addEventListener("error", (event) => {
