@@ -6,6 +6,7 @@
     "scripts": {
         "build": "rimraf dist && tsc --project tsconfig.bot.json && npm run copy-files && npm run compile-scss",
         "compile-scss": "node-sass --importer node_modules/node-sass-package-importer/dist/cli.js --output-style compressed -q -o dist/server/static/css src/server/static/css/app.scss",
+        "scss:dev": "node-sass --importer node_modules/node-sass-package-importer/dist/cli.js --output-style compressed -q -o src/server/static/css src/server/static/css/app.scss",
         "heroku:all": "sh ./heroku-deploy.sh",
         "typecheck": "tsc --noEmit -p ./tsconfig.bot.json",
         "typecheck:tests": "tsc --noEmit -p ./tsconfig.test.json",
