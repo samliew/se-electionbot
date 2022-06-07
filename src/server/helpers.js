@@ -41,6 +41,11 @@ export const unlessEquals = function (a1, a2, options) {
     return a1 != a2 ? options.fn(this) : options.inverse(this);
 };
 
+/** @type {(value:unknown, options:object) => unknown} */
+export const ifTruthy = function (value, options) {
+    return !!value ? options.fn(this) : options.inverse(this);
+};
+
 export const ifNotEmpty = function (value, options) {
     return value > 0 || value.length ? options.fn(this) : options.inverse(this);
 };
@@ -175,3 +180,9 @@ export const iterate = (source, options) => {
 
 /** @type {(...sources: unknown[]) => boolean} */
 export const either = (...sources) => sources.slice(0, -1).some(Boolean);
+
+/** @type {(a:unknown,b:unknown) => boolean} */
+export const eq = (a, b) => a === b;
+
+/** @type {(a:unknown,b:unknown) => boolean} */
+export const neq = (a, b) => a !== b;
