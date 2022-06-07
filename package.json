@@ -4,7 +4,8 @@
     "description": "ElectionBot - a chatbot that answers commonly-asked questions in chat rooms about elections for sites on the Stack Exchange network.",
     "main": "dist/bot/index.js",
     "scripts": {
-        "build": "rimraf dist && tsc --project tsconfig.bot.json && npm run copy-files",
+        "build": "rimraf dist && tsc --project tsconfig.bot.json && npm run copy-files && npm run compile-scss",
+        "compile-scss": "node-sass --output-style compressed -q -o dist/src/server/static/css src/server/static/css/app.scss",
         "heroku:all": "sh ./heroku-deploy.sh",
         "typecheck": "tsc --noEmit -p ./tsconfig.bot.json",
         "typecheck:tests": "tsc --noEmit -p ./tsconfig.test.json",
@@ -74,6 +75,7 @@
         "chai-as-promised": "^7.1.1",
         "copyfiles": "^2.4.1",
         "mocha": "^9.2.2",
+        "node-sass": "^7.0.1",
         "rimraf": "^3.0.2",
         "sinon": "^11.1.2",
         "ts-node": "^10.8.0",
