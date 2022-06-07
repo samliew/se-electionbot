@@ -5,16 +5,16 @@
   align-items: start;
 
   section {
-    flex: 1 1 calc(25% - var(--margin-size));
-    margin-right: var(--margin-size);
+    min-width: 500px;
+    max-width: 100%;
 
-    &:last-child {
-      margin-right: 0;
+    @media screen and (max-width: 767px) {
+      min-width: none;
     }
+  }
 
-    aside {
-      margin-bottom: var(--margin-size);
-    }
+  aside {
+    margin-bottom: var(--bs-gutter-y);
   }
 }
 

@@ -1,25 +1,22 @@
 :root {
+  --body-bg-colour: rgb(222, 222, 222);
   --heading-colour: #000;
   --text-colour: #000;
   --link-colour: rgb(0, 0, 139);
   --border-colour: #999;
-  --margin-size: 40px;
-  --smaller-font-size: 0.85rem;
-  --main-colour: rgb(242, 232, 222);
+  --smaller-font-size: 0.9em;
+
+  --bs-gutter-x: 2em;
+  --bs-gutter-y: 2em;
 }
 
 * {
-  font-family: Arial, sans-serif;
   line-height: 1.3;
   color: var(--text-colour);
-  box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  font-size: 1em;
-  background-color: var(--main-colour);
+  background-color: var(--body-bg-colour);
   overflow-x: hidden;
 }
 
@@ -78,7 +75,7 @@ a {
   color: var(--link-colour);
 
   &:visited {
-    color: var(--text-colour);
+    color: var(--link-colour);
   }
 }
 
@@ -93,10 +90,6 @@ iframe.fullscreen {
   padding: 30px;
   border: 0;
   z-index: 1;
-}
-
-sup {
-  vertical-align: top;
 }
 
 blockquote {

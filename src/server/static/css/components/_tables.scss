@@ -2,9 +2,9 @@ table {
   min-width: 280px;
   width: 100%;
   margin: 2em 0;
-  padding: 6px 10px;
   border: 1px solid var(--border-colour);
   border-collapse: collapse;
+  background-color: rgb(240, 240, 240);
 }
 
 h2 + table {

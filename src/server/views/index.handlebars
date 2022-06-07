@@ -10,10 +10,10 @@
     <p>The bot is {{#if isBotInRoom}}{{else}}<strong>not</strong> {{/if}}in the room.</p>
 </blockquote>
 
-<main class="dashboard">
+<main class="dashboard row">
 
     {{#with election}}
-    <section>
+    <section class="col-auto">
         <aside>
             <h2>Election Info</h2>
             <table>
@@ -147,7 +147,7 @@
     {{/with}}
 
     {{#with election}}
-    <section>
+    <section class="col-auto">
         <aside>
             {{> totalsTableHeader header="Current Moderators" collection=(getter this "currentModerators") }}
             {{#if (len (getter this "currentModerators"))}}
@@ -255,7 +255,7 @@
     {{/with}}
 
     {{#with botconfig}}
-    <section>
+    <section class="col-auto">
         <aside>
             <h2>Bot Config</h2>
             <table>
@@ -291,7 +291,7 @@
                 <thead>
                     <tr>
                         <th>Type</th>
-                        <th>cron</th>
+                        <th>Cron</th>
                         <th>Date</th>
                     </tr>
                 </thead>
@@ -320,7 +320,7 @@
     {{/with}}
 
     {{#with botconfig}}
-    <section>
+    <section class="col-auto">
         <aside>
             <h2>Room Activity</h2>
             <table>
