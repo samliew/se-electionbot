@@ -123,25 +123,13 @@
             {{/if}}
 
             <h2>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len nominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
-            {{#if (len nominees)}}
-                {{> nominees (values nominees) }}
-            {{else}}
-                {{> emptySmallTable }}
-            {{/if}}
+            {{> nominees (values nominees) }}
 
             {{> totalsTableHeader header="Withdrawn" collection=withdrawnNominees }}
-            {{#if (len withdrawnNominees)}}
-                {{> nominees (values withdrawnNominees) }}
-            {{else}}
-                {{> emptySmallTable }}
-            {{/if}}
+            {{> nominees (values withdrawnNominees) }}
 
             {{> totalsTableHeader header="Winners" collection=winners }}
-            {{#if (len winners)}}
-                {{> nominees (values winners) }}
-            {{else}}
-                {{> emptySmallTable }}
-            {{/if}}
+            {{> nominees (values winners) }}
         </aside>
     </section>
     {{/with}}
