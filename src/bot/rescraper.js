@@ -224,6 +224,10 @@ export default class Rescraper {
                 // Stay in room a while longer
                 await wait(config.electionAfterpartyMins * SEC_IN_MINUTE * 1e3);
 
+                // otherwise we sometimes leave an afterimage
+                const status = await room.leave();
+                console.log(`[rescraper] left election room: ${status}`);
+
                 // Scale Heroku dynos to free (restarts app)
                 const heroku = new HerokuClient(config);
                 await heroku.scaleFree();
