@@ -1411,11 +1411,14 @@ export default class Election {
             this.dateCancelled = dateToUtcTimestamp(cancellationDate);
         }
 
+        const prettyText = notice.replace(/<a href="/g, 'See [meta](');
+
         // Convert link to chat-friendly markup
-        this.cancelledText = notice
-            ?.replace(/<a href="/g, 'See [meta](')
-            .replace(/">.+/g, ') for details.')
-            .trim();
+        // SE can use a truncated notice
+        this.cancelledText = (prettyText === notice ?
+            $(statusElem).text().replace(/(\s){2,}/gm, " ") :
+            prettyText.replace(/">.+/g, ') for details.')
+        ).trim();
 
         this.phase = 'cancelled';
         return true;
