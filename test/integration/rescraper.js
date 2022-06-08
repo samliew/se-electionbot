@@ -16,8 +16,8 @@ describe(Rescraper.name, () => {
     const client = new Client["default"]("stackoverflow.com");
     const room = new Room["default"](client, -1);
 
-    const oldSendMessage = Room["default"].prototype.sendMessage;
-    afterEach(() => Room["default"].prototype.sendMessage = oldSendMessage);
+    beforeEach(() => sinon.stub(Room["default"].prototype, "leave"));
+    beforeEach(() => sinon.stub(Room["default"].prototype, "sendMessage"));
 
     let config = getMockBotConfig();
     afterEach(() => config = getMockBotConfig());
@@ -31,7 +31,7 @@ describe(Rescraper.name, () => {
     let ann = new ScheduledAnnouncement(config, room, election, scraper);
     afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
 
-    describe('rescrape', function () {
+    describe(Rescraper.prototype.rescrape.name, function () {
         this.timeout(10000);
 
         this.beforeEach(() => {
