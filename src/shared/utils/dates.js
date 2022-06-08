@@ -252,3 +252,16 @@ export const daysDiff = (start, end, fractions = 1) => {
     const diffDays = (diffMs / MS_IN_SECOND / 60 / 60 / 24);
     return +diffDays.toFixed(fractions);
 };
+
+/**
+ * @summary map of date units to handlers manipulating date values
+ * @type {Map<string, (date:number, num:number) => Date>}
+ */
+export const dateUnitHandlers = new Map([
+    ["second", addSeconds],
+    ["minute", addMinutes],
+    ["hour", addHours],
+    ["day", addDates],
+    ["month", addMonths],
+    ["year", addYears],
+]);
