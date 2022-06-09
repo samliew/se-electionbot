@@ -53,6 +53,8 @@ export const dateToRelativeTime = (date, options = {}) => {
 
     const S_HOUR = SEC_IN_MINUTE * MIN_IN_HOUR;
     const S_DAY = S_HOUR * HOUR_IN_DAY;
+    const DAY_IN_MONTH = 31; // TODO: make precise;
+    const DAY_IN_YEAR = getNumDaysInYear(date.getFullYear());
 
     const nowMs = getMilliseconds(now);
 
@@ -68,9 +70,9 @@ export const dateToRelativeTime = (date, options = {}) => {
             [diff < SEC_IN_MINUTE, ((x) => `in ${x} sec${pluralize(x)}`)(Math.floor(diff))],
             [diff < S_HOUR, ((x) => `in ${x} min${pluralize(x)}`)(Math.floor(diff / SEC_IN_MINUTE))],
             [diff < S_DAY, ((x) => `in ${x} hour${pluralize(x)}`)(Math.floor(diff / S_HOUR))],
-            [dayDiff < 31, ((x) => `in ${x} day${pluralize(x)}`)(dayDiff)],
-            [dayDiff < 365, ((x) => `in ${x} month${pluralize(x)}`)(Math.floor(dayDiff / 12))],
-            [true, ((x) => `in ${x} year${pluralize(x)}`)(Math.floor(dayDiff / 365))],
+            [dayDiff < DAY_IN_MONTH, ((x) => `in ${x} day${pluralize(x)}`)(dayDiff)],
+            [dayDiff < DAY_IN_YEAR, ((x) => `in ${x} month${pluralize(x)}`)(Math.floor(dayDiff / DAY_IN_MONTH))],
+            [true, ((x) => `in ${x} year${pluralize(x)}`)(Math.floor(dayDiff / DAY_IN_YEAR))],
         ];
 
         const [, relative = ""] = rules.find(([rule]) => rule) || [];
@@ -87,9 +89,9 @@ export const dateToRelativeTime = (date, options = {}) => {
         [pastDiff < SEC_IN_MINUTE, ((x) => `${x} sec${pluralize(x)} ago`)(Math.floor(pastDiff))],
         [pastDiff < S_HOUR, ((x) => `${x} min${pluralize(x)} ago`)(Math.floor(pastDiff / SEC_IN_MINUTE))],
         [pastDiff < S_DAY, ((x) => `${x} hour${pluralize(x)} ago`)(Math.floor(pastDiff / S_HOUR))],
-        [pastDayDiff < 31, ((x) => `${x} day${pluralize(x)} ago`)(pastDayDiff)],
-        [pastDayDiff < 365, ((x) => `${x} month${pluralize(x)} ago`)(Math.floor(pastDayDiff / 12))],
-        [true, ((x) => `${x} year${pluralize(x)} ago`)(Math.floor(pastDayDiff / 365))],
+        [pastDayDiff < DAY_IN_MONTH, ((x) => `${x} day${pluralize(x)} ago`)(pastDayDiff)],
+        [pastDayDiff < DAY_IN_YEAR, ((x) => `${x} month${pluralize(x)} ago`)(Math.floor(pastDayDiff / DAY_IN_MONTH))],
+        [true, ((x) => `${x} year${pluralize(x)} ago`)(Math.floor(pastDayDiff / DAY_IN_YEAR))],
     ];
 
     const [, relative = ""] = rules.find(([rule]) => rule) || [];
