@@ -216,13 +216,10 @@ export default class Rescraper {
 
                 // Increase scrape interval since we don't need to scrape often
                 config.scrapeIntervalMins = 10;
-
-                if (config.debugOrVerbose) {
-                    console.log(`RESCRAPER - Scrape interval increased to ${config.scrapeIntervalMins}.`);
-                }
+                console.log(`[rescraper] scrape interval increased to ${config.scrapeIntervalMins}.`);
 
                 // Stay in room a while longer
-                await wait(config.electionAfterpartyMins * SEC_IN_MINUTE * 1e3);
+                await wait(config.electionAfterpartyMins * SEC_IN_MINUTE);
 
                 // otherwise we sometimes leave an afterimage
                 const status = await room.leave();
