@@ -234,8 +234,8 @@ app.route('/say')
 
         try {
             const statusMap = {
-                true: `<div class="result success">Message sent to room.</div>`,
-                false: `<div class="result error">Error. Could not send message.</div>`,
+                true: `<div class="alert alert-success fs-5" role="alert">Message sent to room.</div>`,
+                false: `<div class="alert alert-danger fs-5" role="alert">Error. Could not send message.</div>`,
                 undefined: ""
             };
 
@@ -353,8 +353,8 @@ app.route('/config')
 
         try {
             const statusMap = {
-                true: `<div class="result success">Success! Bot will restart with updated environment variables.</div>`,
-                false: `<div class="result error">Error. Could not save new values.</div>`,
+                true: `<div class="alert alert-success fs-5" role="alert">Success! Bot will restart with updated environment variables.</div>`,
+                false: `<div class="alert alert-danger fs-5" role="alert">Error. Could not save new values.</div>`,
                 undefined: ""
             };
 

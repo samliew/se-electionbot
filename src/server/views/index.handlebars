@@ -15,7 +15,7 @@
     {{#with election}}
     <section class="col-auto">
         <aside>
-            <h2>Election Info</h2>
+            <h2 class="fs-4">Election Info</h2>
             <table>
                 <tr><td>Last updated</td><td>{{> relativetime date=updated}}</td></tr>
                 <tr><td>Site</td><td>{{siteName}}</td></tr>
@@ -58,7 +58,7 @@
                 <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
             </table>
 
-            <h2>Election History</h2>
+            <h2 class="fs-4">Election History</h2>
             {{#if (len elections)}}
             <table class="table-small">
                 <thead>
@@ -95,7 +95,7 @@
                 {{> emptySmallTable }}
             {{/if}}
 
-            <h2>Election Announcements</h2>
+            <h2 class="fs-4">Election Announcements</h2>
             {{#if (len announcements)}}
             <table class="table-small">
                 <thead>
@@ -123,7 +123,7 @@
                 {{> emptySmallTable }}
             {{/if}}
 
-            <h2>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len nominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
+            <h2 class="fs-4">Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len nominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
             {{> nominees (values nominees) }}
 
             {{> totalsTableHeader header="Withdrawn" collection=withdrawnNominees }}
@@ -155,7 +155,7 @@
     {{#with botconfig}}
     <section class="col-auto">
         <aside>
-            <h2>Bot Config</h2>
+            <h2 class="fs-4">Bot Config</h2>
             <table>
                 <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
                 <tr><td>scriptInitDate</td><td>{{> relativetime date=scriptInitDate}}</td></tr>
@@ -184,7 +184,7 @@
         </aside>
 
         <aside>
-            <h2>Scheduled Announcements</h2>
+            <h2 class="fs-4">Scheduled Announcements</h2>
             <table class="table-small">
                 <thead hidden>
                     <tr>
@@ -199,7 +199,7 @@
 
         {{#if herokuDynos.length}}
         <aside>
-            <h2>Hosting (Heroku Dynos)</h2>
+            <h2 class="fs-4">Hosting (Heroku Dynos)</h2>
             <table>
                 {{#each herokuDynos}}
                 <tr>
@@ -220,7 +220,7 @@
     {{#with botconfig}}
     <section class="col-auto">
         <aside>
-            <h2>Room Activity</h2>
+            <h2 class="fs-4">Room Activity</h2>
             <table>
                 <tr><td>Bot</td><td>
                     <table class="nested">
@@ -329,7 +329,7 @@
 
                 const cronCell = document.createElement("td");
                 cronCell.textContent = cron;
-                cronCell.classList.add('nowrap');
+                cronCell.classList.add('text-nowrap');
 
                 const dateCell = document.createElement("td");
                 dateCell.textContent = date;
