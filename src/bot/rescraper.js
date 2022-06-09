@@ -1,4 +1,4 @@
-import { SEC_IN_MINUTE } from "../shared/utils/dates.js";
+import { MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { mapMap } from "../shared/utils/maps.js";
 import { HerokuClient } from "./herokuClient.js";
 import { sayBusyGreeting, sayIdleGreeting } from "./messages/greetings.js";
@@ -259,10 +259,10 @@ export default class Rescraper {
     start() {
         const { config } = this;
 
-        this.timeout = setTimeout(this.rescrape.bind(this), config.scrapeIntervalMins * 60000);
+        this.timeout = setTimeout(this.rescrape.bind(this), config.scrapeIntervalMins * SEC_IN_MINUTE * MS_IN_SECOND);
 
         if (config.debugOrVerbose) {
-            console.log(`RESCRAPER - Next rescrape scheduled in ${config.scrapeIntervalMins} mins.`);
+            console.log(`[rescraper] rescrape scheduled in ${config.scrapeIntervalMins} mins.`);
         }
     }
 }
