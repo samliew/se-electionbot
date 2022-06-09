@@ -16,6 +16,17 @@ export const validateDate = (input) => {
     return Number.isNaN(output) ? new Date() : output;
 };
 
+/**
+ * @summary gets number of days in a year, accounting for leap years
+ * @param {number} year full year to get the number of days for
+ * @returns {number}
+ */
+export const getNumDaysInYear = (year) => {
+    if (year % 4) return 365;
+    if (year % 100) return 366;
+    if (year % 400) return 365;
+    return 366;
+};
 
 /**
  * @typedef {{
