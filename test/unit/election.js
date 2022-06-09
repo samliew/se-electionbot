@@ -46,6 +46,12 @@ describe(Election.name, () => {
                     type: "full",
                 }));
                 expect(election.electionType).to.equal("full");
+
+                election.announcements.set(123, getMockElectionAnnouncement({
+                    dateNomination,
+                    type: "graduation",
+                }));
+                expect(election.electionType).to.equal("graduation");
             });
         });
 

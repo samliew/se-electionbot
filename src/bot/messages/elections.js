@@ -313,7 +313,7 @@ export const sayHowManyVisitedElection = async (config, _es, election, text, _u,
 export const sayElectionType = (config, _es, election, text) => {
     const { announcements, electionType, dateNomination } = election;
 
-    const type = electionType !== "full" ?
+    const type = ["full", "graduation"].every((t) => t !== electionType) ?
         makeURL(electionType, "https://meta.stackexchange.com/q/314459") :
         electionType;
 

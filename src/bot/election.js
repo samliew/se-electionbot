@@ -33,7 +33,7 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
  *  electionLink?: string
  * }} ModeratorUser
  *
- * @typedef {"full" | "pro-tempore"} ElectionType
+ * @typedef {"full" | "graduation" | "pro-tempore"} ElectionType
  *
  * @typedef {{
  *  dateAnnounced: string,
@@ -379,6 +379,15 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
     // https://regex101.com/r/GKcR6r/2
     const proTemporeTitleExpr = /\bpro(?:\s+|-)tem(?:pore)?\b/i;
 
+    // graduation title can be one of:
+    // July Graduation Moderator Election - Might you stand?
+    // Announcing the first full election for Arts & Crafts!
+    // Announcing a “Graduation” election for 2022
+    // 2022 Graduation Election: Community Interest Check
+    // Announcing a “Graduation” election for 2022
+    // https://regex101.com/r/Qb8pB1/1
+    const graduationTitleExpr = /\bgraduation|(?:first|1st)\s+full\b/i;
+
     // https://regex101.com/r/uXY3xB/4
     const electionDateExpr = /(?<!beta\s+)on\s+(?:<(?:strong|em|i)>)?(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
 
@@ -408,7 +417,11 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
         scraped.set(postId, {
             postLink,
             postTitle,
-            type: proTemporeTitleExpr.test(postTitle) ? "pro-tempore" : "full"
+            type: proTemporeTitleExpr.test(postTitle) ?
+                "pro-tempore" :
+                graduationTitleExpr.test(postTitle) ?
+                    "graduation" :
+                    "full"
         });
     });
 
