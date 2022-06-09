@@ -3,7 +3,7 @@
   --heading-colour: #000;
   --text-colour: #000;
   --link-colour: rgb(0, 0, 139);
-  --border-colour: #999;
+  --border-colour: #aaa;
   --smaller-font-size: 0.9em;
 
   --bs-gutter-x: 2em;
@@ -33,20 +33,11 @@ h4,
 h5,
 h6 {
   margin: 1.3em 0 0.5em;
+  color: var(--heading-colour);
 }
 
 h1:first-child {
   margin-top: 10px;
-}
-
-h1 {
-  font-size: 1.4em;
-  color: var(--heading-colour);
-}
-
-h2 {
-  font-size: 1.2em;
-  color: var(--heading-colour);
 }
 
 nav {
@@ -126,18 +117,6 @@ pre:empty::before {
   font-style: italic;
   font-size: 0.9rem;
   color: var(--border-colour);
-}
-
-.equal-columns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1vw;
-}
-
-.equal-columns > * {
-  flex-basis: calc(50% - 1vw - 3em);
-  min-width: 256px;
-  max-width: 512px;
 }
 
 @media (max-width: 767px) {

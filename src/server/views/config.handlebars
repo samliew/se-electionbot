@@ -1,6 +1,6 @@
 {{> navigation routes=data/routes password=data/password path=data/path }}
 
-<h1>{{{heading}}}</h1>
+<h1 class="fs-4">{{{heading}}}</h1>
 
 {{> breadcrumbs current=current }}
 
@@ -12,7 +12,7 @@
 
     <div class="row mt-4">
         {{#each data/configObject}}
-        <div class="col col-6 col-lg-4">
+        <div class="col-12 col-md-6 col-xl-4">
             <div class="form-group">
                 <label for="{{@key}}">{{@key}}</label>
                 <input type="text" class="form-control" name="{{@key}}" id="{{@key}}" value="{{this}}" aria-label="{{@key}}" placeholder="(empty)" />

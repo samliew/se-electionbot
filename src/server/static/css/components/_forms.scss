@@ -35,9 +35,10 @@ form {
 
   .form-controls {
     margin: 1.5em 0;
-  }
+    text-align: center;
 
-  &.equal-columns .form-controls {
-    max-width: unset;
+    button {
+      min-width: 80px;
+    }
   }
 }
