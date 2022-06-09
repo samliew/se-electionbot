@@ -3,6 +3,24 @@
  * @template {unknown} T
  * @template {unknown} U
  *
+ * @summary {@link Array.prototype.every} analog for {@link Map}s
+ * @param {Map<T, U>} map {@link Map} to check
+ * @param {(v: U, k: T, m: Map<T, U>) => boolean} callback predicate
+ * @returns {boolean}
+ */
+export const everyInMap = (map, callback) => {
+    for (const [k, v] of map) {
+        if (!callback(v, k, map)) return false;
+    }
+    
+    return true;
+};
+
+/**
+ * @pure
+ * @template {unknown} T
+ * @template {unknown} U
+ *
  * @summary filters a given {@link Map}
  * @param {Map<T, U>} map  {@link Map} to filter
  * @param {(v: U, k: T, m: Map<T, U>) => boolean} callback filter
