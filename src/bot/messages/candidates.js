@@ -1,3 +1,5 @@
+import { dateToRelativeTime } from "../../shared/utils/dates.js";
+import { filterMap, mapMap } from "../../shared/utils/maps.js";
 import { boldify } from "../../shared/utils/markdown.js";
 import { listNomineesInRoom } from "../election.js";
 import { getCandidateOrNominee, getRandomCurrently, RandomArray } from "../random.js";
@@ -216,4 +218,70 @@ export const sayWithdrawnNominations = (_c, _es, election, ...rest) => {
     }
 
     return `No ${getCandidateOrNominee()}s have withdrawn from the election yet.`;
+};
+
+/**
+ * @summary builds a response to who are the withdrawn nominees
+ * @type {MessageBuilder}
+ */
+export const sayWhatModsAreRunning = (config, _es, election) => {
+    const { nowOverride } = config;
+
+    const { currentModerators, electionUrl, electionType, nominees, siteUrl } = election;
+
+    const phase = election.getPhase(nowOverride);
+
+    const nominatedMods = filterMap(currentModerators, (m) => nominees.has(m.user_id));
+    const nominatedModNames = mapMap(nominatedMods, (m) => m.display_name);
+
+    const names = listify(...nominatedModNames);
+
+    const { size: numNominatedMods } = nominatedMods;
+
+    const nominationPhaseURL = makeURL("nominated", `${electionUrl}?tab=nomination`);
+
+    const runningPrefix = `${names} ${pluralize(numNominatedMods, "have", "has")} ${nominationPhaseURL}.`;
+
+    const { electionOrdinalName } = election;
+
+    if (!phase) {
+        const { dateNomination } = election;
+        const startsIn = dateToRelativeTime(dateNomination, { now: nowOverride });
+        return `Nobody nominated as the ${electionOrdinalName} hasn't even started yet (${startsIn}).`;
+    }
+
+    if (phase === "ended") {
+        const { winners } = election;
+
+        const wonMods = filterMap(winners, (n) => nominatedMods.has(n.userId));
+
+        const wonModNames = listify(...mapMap(wonMods, (n) => n.userName));
+
+        const { size: numWonMods } = wonMods;
+
+        const allNominatedModsWon = wonMods.size === numNominatedMods;
+
+        /** @type {Map<boolean, string>} */
+        const pfxs = new Map();
+        pfxs.set(!numWonMods, "Not one of them");
+        pfxs.set(numWonMods > 0, wonModNames);
+        pfxs.set(allNominatedModsWon, "And they");
+        pfxs.set(allNominatedModsWon && numWonMods > 1, "All of them");
+
+        const wonSuffix = `${pfxs.get(true)} ${pluralize(numWonMods, "have", "has")}`;
+
+        return `${runningPrefix} ${wonSuffix} won the ${electionOrdinalName}.`;
+    }
+
+    const runningText = numNominatedMods ?
+        runningPrefix :
+        `No ${makeURL("current moderators", `${siteUrl}/users?tab=moderators`)} have ${nominationPhaseURL}.`;
+
+    if (electionType === "graduation" && phase === "nomination" && numNominatedMods < currentModerators.size) {
+        const notNominatedMods = filterMap(currentModerators, (m) => !nominatedMods.has(m.user_id));
+        const notNominatedNames = listify(...mapMap(notNominatedMods, (m) => m.display_name));
+        return `${runningText} As it is a graduation election, ${notNominatedNames} will have to step down unless they nominate.`;
+    }
+
+    return runningText;
 };

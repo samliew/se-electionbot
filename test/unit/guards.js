@@ -2,7 +2,7 @@ import { expect } from "chai";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore,
-    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWillElectionBeCancelled, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot
+    isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWillElectionBeCancelled, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot
 } from "../../src/bot/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -205,6 +205,23 @@ describe('Message Guards', () => {
         "which candidate deleted their nomination",
         "was a nomination removed",
     ];
+
+    const whichModsNominatedMatches = [
+        "Who of the current moderators is running?",
+        "list moderators that nominated",
+        "What moderators have nominated?",
+        "who of the mods nominated?",
+        "Which of the current mods have nominated",
+    ];
+
+    describe(isAskedWhatModsAreRunning.name, () => {
+        it("should correctly match content", () => {
+            allMatch(isAskedWhatModsAreRunning, whichModsNominatedMatches);
+            allMatch(isAskedWhatModsAreRunning, howManyModsMatches, false);
+            allMatch(isAskedWhatModsAreRunning, howManyNomineesMatches, false);
+            allMatch(isAskedWhatModsAreRunning, howManyNomineesWithdrawnMatches, false);
+        });
+    });
 
     describe(isAskedHowManyModsInTheRoom.name, () => {
         it('should correctly match content', () => {

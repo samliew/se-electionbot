@@ -822,3 +822,13 @@ export const isAskedWhatIsElectionType = (text) => {
         /^is\s+th[ei]s?(?:\s+election)?(?:\s+a)?\s+pro[- ]tem(?:p[ou]re)?(?:\s+election)?/i,
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking who of the current mods is running
+ * @type {MessageGuard}
+ */
+export const isAskedWhatModsAreRunning = (text) => {
+    return someMatch([
+        /^(?:list|what|which|who)(?:\s+of)?(?:\s+the)?(?:\s+current)?\s+mod(?:erator)?s?(?:\s+that)?\s+(?:(?:are|is)\s+running|(?:ha[sv]e?\s+)?nominated)/i
+    ], text);
+};

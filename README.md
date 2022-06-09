@@ -46,6 +46,7 @@ Current election info:
 - where are the nomination comments
 - will the election be cancelled
 - what is the election type
+- who of the moderators is running
 
 **Voting stats calculation**
 
