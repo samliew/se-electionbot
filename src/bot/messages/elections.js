@@ -1,11 +1,11 @@
 import { datesToDuration, dateToRelativeTime, dateToShortISO8601Timestamp, getSeconds } from "../../shared/utils/dates.js";
 import { matchISO8601, matchNumber, safeCapture } from "../../shared/utils/expressions.js";
-import { mapMap } from "../../shared/utils/maps.js";
+import { findInMap, mapMap } from "../../shared/utils/maps.js";
 import { formatOrdinal } from "../../shared/utils/strings.js";
 import { getAwardedBadges, getNamedBadges } from "../api.js";
 import { getCandidateOrNominee, getRandomNow } from "../random.js";
 import { pingDevelopers } from "../reports.js";
-import { makeURL, pluralize } from "../utils.js";
+import { listify, makeURL, pluralize } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
 /**
@@ -304,6 +304,33 @@ export const sayHowManyVisitedElection = async (config, _es, election, text, _u,
     const enoughRep = `and had enough reputation (${repVote})`;
 
     return `${basePrefix}, ${visited} ${enoughRep} to vote ${responses[phase] || "so far"}.`;
+};
+
+/**
+ * @summary builds a response to a query on what is the type of the election
+ * @type {MessageBuilder}
+ */
+export const sayElectionType = (config, _es, election, text) => {
+    const { announcements, electionType, dateNomination } = election;
+
+    const type = electionType !== "full" ?
+        makeURL(electionType, "https://meta.stackexchange.com/q/314459") :
+        electionType;
+
+    const announcement = findInMap(announcements, (a) => a.dateNomination === dateNomination);
+
+    const announcementNote = announcement ?
+        ` (see ${makeURL("the announcement", announcement.postLink)})` :
+        "";
+
+    const prefix = `This is a ${type} election${announcementNote}.`;
+
+    // famous in-joke: https://meta.stackexchange.com/a/323902
+    if (config.fun && /tempur[ea]/.test(text)) {
+        return `${prefix} Don't forget to add ${listify("eggs", "flour", "water")} to the ${getCandidateOrNominee()}s!`;
+    }
+
+    return prefix;
 };
 
 // /**

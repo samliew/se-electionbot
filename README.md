@@ -45,6 +45,7 @@ Current election info:
 - why was a nomination removed
 - where are the nomination comments
 - will the election be cancelled
+- what is the election type
 
 **Voting stats calculation**
 

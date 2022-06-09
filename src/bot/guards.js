@@ -811,3 +811,14 @@ export const isAskedHowManyVisitedElection = (text) => {
         /^how\s+many(?:\s+users)?(?:\s+have)?\s+visited(?:\s+th[ei]s?)?\s+election(?:\s+page)?(?:\?\!?|$)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking what is the type of the election
+ * @type {MessageGuard}
+ */
+export const isAskedWhatIsElectionType = (text) => {
+    return someMatch([
+        /^what\s+is(?:\s+th[ei]s?)?(?:\s+election(?:'?s)?)?\s+type(?:\s+of(?:\s+th[ei]s?)?\s+election)?/i,
+        /^is\s+th[ei]s?(?:\s+election)?(?:\s+a)?\s+pro[- ]tem(?:p[ou]re)?(?:\s+election)?/i,
+    ], text);
+};
