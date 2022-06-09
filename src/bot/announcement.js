@@ -240,7 +240,7 @@ export default class ScheduledAnnouncement {
 
         config.flags.saidElectionEndingSoon = true;
         config.flags.announcedWinners = true;
-        config.scrapeIntervalMins = 10;
+        config.scrapeIntervalMins = 5;
 
         const winnerList = mapMap(winners, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
 

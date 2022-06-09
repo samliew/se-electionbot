@@ -212,16 +212,16 @@ export default class Rescraper {
             }
 
             // The election is over
-            else if (election.isInactive() && config.scrapeIntervalMins !== 10) {
+            else if (election.isInactive() && config.scrapeIntervalMins < 5) {
 
-                // Increase scrape interval since we don't need to scrape often
-                config.scrapeIntervalMins = 10;
+                // Set scrape interval to 5 mins since we no longer need to scrape frequently
+                config.scrapeIntervalMins = 5;
                 console.log(`[rescraper] scrape interval increased to ${config.scrapeIntervalMins}.`);
 
                 // Stay in room a while longer
                 await wait(config.electionAfterpartyMins * SEC_IN_MINUTE);
 
-                // otherwise we sometimes leave an afterimage
+                // Otherwise we sometimes leave an afterimage
                 const status = await room.leave();
                 console.log(`[rescraper] left election room: ${status}`);
 
