@@ -249,7 +249,7 @@ export const listSiteModerators = async (args) => {
 };
 
 /**
- * TODO: account for cross-domain switches
+ * @summary switches elections without restarting the bot
  * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
@@ -270,7 +270,7 @@ export const changeElection = async (args) => {
 
     const { electionNum, elections, electionUrl } = election;
 
-    if (electionNum === targetNum) {
+    if (electionUrl === targetUrl) {
         return `changing to the ${makeURL("same election", targetUrl)} is a noop`;
     }
 
@@ -284,6 +284,10 @@ export const changeElection = async (args) => {
     election.reset();
     election.electionUrl = targetUrl;
     elections.set(targetNum, election);
+
+    if (election.chatDomain !== config.chatDomain) {
+        config.chatDomain = election.chatDomain;
+    }
 
     const status = await election.scrapeElection(config);
     if (!status) {
