@@ -4,8 +4,8 @@
 
 {{> breadcrumbs current=current }}
 
-<main class="dashboard">
-    <section>
+<main class="dashboard row">
+    <section class="col-auto">
         <aside>
             <h2>Configuration</h2>
             {{> deep data/configuration top=true}}
@@ -26,7 +26,7 @@
         </aside>
     </section>
 
-    <section>
+    <section class="col-auto">
         <aside>
             <h2>Routes</h2>
             <table class="table-small">

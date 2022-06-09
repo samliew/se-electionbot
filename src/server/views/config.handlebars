@@ -4,17 +4,26 @@
 
 {{> breadcrumbs current=current }}
 
-<form method="post" class="equal-columns">
+<form method="post">
 
-    {{{data/statusText}}}
+    <div class="mt-4">
+        {{{data/statusText}}}
+    </div>
 
-    {{#each data/configObject}}
-    <div><label>{{@key}} <input type="text" name="{{@key}}" aria-label="{{@key}}" value="{{this}}" placeholder="(empty)" /></label></div>
-    {{/each}}
+    <div class="row mt-4">
+        {{#each data/configObject}}
+        <div class="col col-6 col-lg-4">
+            <div class="form-group">
+                <label for="{{@key}}">{{@key}}</label>
+                <input type="text" class="form-control" name="{{@key}}" id="{{@key}}" value="{{this}}" aria-label="{{@key}}" placeholder="(empty)" />
+            </div>
+        </div>
+        {{/each}}
+    </div>
 
     <input type="hidden" name="password" value="{{data/password}}" />
 
-    <div class="form-controls mt20">
-        <button>Save</button>
+    <div class="form-controls text-center mt-4">
+        <button class="btn btn-primary">Save</button>
     </div>
 </form>

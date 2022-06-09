@@ -70,3 +70,13 @@
     font-style: normal;
   }
 }
+
+.chat-transcript {
+
+  th,
+  td {
+    &:not(:last-child) {
+      white-space: nowrap;
+    }
+  }
+}
