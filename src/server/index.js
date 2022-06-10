@@ -329,6 +329,7 @@ app.route("/server")
                     },
                     routes: routes(app, publicPaths),
                     versions: process.versions,
+                    password,
                 },
                 page: {
                     appName: process.env.HEROKU_APP_NAME,
