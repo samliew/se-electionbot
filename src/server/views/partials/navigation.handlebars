@@ -1,6 +1,7 @@
 <header>
   <nav class="main-nav">
     <select class="form-select" id="nav">
+        <option selected="selected">Menu</option>
         <optgroup label="Menu">
         {{#each routes}}
         {{#unlessEquals @key ../path}}
@@ -13,11 +14,11 @@
         {{/each}}
         </optgroup>
         <optgroup label="Instances">
-            <option value="https://electionbot1.samliew.com"></option>
-            <option value="https://electionbot2.samliew.com"></option>
-            <option value="https://electionbot3.samliew.com"></option>
-            <option value="https://electionbot4.samliew.com"></option>
-            <option value="https://electionbot5.samliew.com"></option>
+            <option value="https://electionbot1.samliew.com">ElectionBot 1</option>
+            <option value="https://electionbot2.samliew.com">ElectionBot 2</option>
+            <option value="https://electionbot3.samliew.com">ElectionBot 3</option>
+            <option value="https://electionbot4.samliew.com">ElectionBot 4</option>
+            <option value="https://electionbot5.samliew.com">ElectionBot 5</option>
         </optgroup>
     </select>
   </nav>
