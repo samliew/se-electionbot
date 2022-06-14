@@ -6,47 +6,45 @@
 
 <main class="dashboard row">
     <section class="col-auto">
-        <aside>
-            <h2 class="fs-4">Configuration</h2>
-            {{> deep data/configuration top=true}}
-        </aside>
 
-        <aside>
-            <h2 class="fs-4">Versions</h2>
-            <table class="table-small">
-                <tbody>
-                    {{#each data/versions}}
-                    <tr>
-                        <td>{{ @key }}</td>
-                        <td>{{ this }}</td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </aside>
+        <h2 class="fs-4">Configuration</h2>
+        {{> deep data/configuration top=true}}
+
+        <h2 class="fs-4">Versions</h2>
+        <table class="table-small">
+            <tbody>
+                {{#each data/versions}}
+                <tr>
+                    <td>{{ @key }}</td>
+                    <td>{{ this }}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
     </section>
 
     <section class="col-auto">
-        <aside>
-            <h2 class="fs-4">Routes</h2>
-            <table class="table-small">
-                <thead>
-                    <tr>
-                        <th>path</th>
-                        <th>methods</th>
-                        <th>public</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each data/routes}}
-                    <tr>
-                        <td>{{{ url @key }}}</td>
-                        <td>{{ join this/methods ", " }}</td>
-                        <td>{{{ yesno this/public }}}</td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </aside>
+
+        <h2 class="fs-4">Routes</h2>
+        <table class="table-small">
+            <thead>
+                <tr>
+                    <th>path</th>
+                    <th>methods</th>
+                    <th>public</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each data/routes}}
+                <tr>
+                    <td>{{{ url @key }}}</td>
+                    <td>{{ join this/methods ", " }}</td>
+                    <td>{{{ yesno this/public }}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
     </section>
 </main>
