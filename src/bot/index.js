@@ -809,7 +809,7 @@ use defaults ${defaultChatNotSet}`
 
             if (responseText) {
                 logResponse(config, responseText, preparedMessage, decodedMessage);
-                await sendMessage(config, room, responseText, null, false, false);
+                await sendMultipartMessage(config, room, responseText, msg.id, { log: false });
             }
 
         }); // End new message event listener
