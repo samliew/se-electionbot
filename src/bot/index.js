@@ -52,7 +52,7 @@ import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhatModsAreRunning, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
 import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayElectionType, sayHowManyVisitedElection, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults, sayWillElectionBeCancelled } from "./messages/elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
-import { sayCommonlyAskedQuestions, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
+import { sayCommonlyAskedQuestions, sayFullHelp, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
 import { sayHappyBirthday, sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
 import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayFormerMods, sayHowManyModsAreHere, sayWhatModsDo, sayWhyBeAMod } from "./messages/moderators.js";
 import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElectionNotStartedYet, sayElectionSchedule, sayNextPhase } from "./messages/phases.js";
@@ -166,40 +166,6 @@ use defaults ${defaultChatNotSet}`
         298479, 19679, 16587, 246246, 707111, 168175, 208809, 59303, 237838, 426671, 716216, 256196,
         1114, 100297, 229044, 1252759, 444991, 871050, 2057919, 3093387, 1849664, 2193767, 4099593,
         541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
-    ];
-
-    /** @type {{ short: boolean, text: string }[]} */
-    const helpTopics = [
-        { short: true, text: "What is an election" },
-        { short: true, text: "How to nominate myself" },
-        { short: true, text: "How to vote" },
-        { short: true, text: "Who should I vote for" },
-        { short: true, text: "How is the candidate score calculated" },
-        { short: true, text: "What is my candidate score" },
-        { short: false, text: "Who has the highest candidate score" },
-        { short: true, text: "What are the moderation/participation/editing badges" },
-        { short: false, text: "What is the election schedule" },
-        { short: true, text: "What is the election status" },
-        { short: false, text: "When is the election starting/ending" },
-        { short: true, text: "When is the next phase" },
-        { short: false, text: "How many users have voted?" },
-        { short: true, text: "How many users are eligible to vote?" },
-        { short: false, text: "How many positions are there" },
-        { short: true, text: "Who are the candidates" },
-        { short: false, text: "Who is the best candidate" },
-        { short: false, text: "Which candidates have withdrawn" },
-        { short: false, text: "Why was a nomination removed" },
-        { short: false, text: "Who are the winners" },
-        { short: true, text: "Who are the current mods" },
-        { short: false, text: "Who is the best mod" },
-        { short: false, text: "Do moderators get paid" },
-        { short: true, text: "What are the responsibilities of a moderator" },
-        { short: false, text: "Can we edit a diamond into our username" },
-        { short: true, text: "What is Single Transferable Vote (STV)" },
-        { short: false, text: "What is Meek STV" },
-        { short: false, text: "Where can the ballot file be found" },
-        { short: false, text: "What is the link to the election" },
-        { short: false, text: "What is the Nth question of the questionnaire" }
     ];
 
     // Init bot config with defaults
@@ -516,6 +482,8 @@ use defaults ${defaultChatNotSet}`
             [isAskedWhyBeAMod, sayWhyBeAMod],
             [isAskedWhatIsElectionType, sayElectionType],
             [isAskedWhatModsAreRunning, sayWhatModsAreRunning],
+            [isAskedForHelp, sayShortHelp],
+            [isAskedForFullHelp, sayFullHelp],
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
@@ -741,17 +709,7 @@ use defaults ${defaultChatNotSet}`
 
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
-
-                if (isAskedForFullHelp(preparedMessage)) {
-                    await sendMultipartMessage(config, room, "Examples of election FAQs I can help with:\n- " +
-                        helpTopics.map(({ text }) => text).join('\n- '), msg.id, { isPrivileged: true });
-                    return; // Message sent, no need to continue
-                }
-                // Help - contain this to a single message please (<500 chars including line breaks, bullets, and whitespace)
-                if (isAskedForHelp(preparedMessage)) {
-                    responseText = sayShortHelp(helpTopics);
-                }
-                else if (isAskedWhoAmI(preparedMessage)) {
+                if (isAskedWhoAmI(preparedMessage)) {
                     responseText = await sayWhoAmI(me, preparedMessage);
                 }
                 else if (isAskedAmIalive(preparedMessage)) {
