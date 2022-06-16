@@ -278,3 +278,9 @@ export const dateUnitHandlers = new Map([
     ["month", addMonths],
     ["year", addYears],
 ]);
+
+/**
+ * @summary returns the current UTC year
+ * @returns {number}
+ */
+export const getCurrentUTCyear = () => new Date().getUTCFullYear();
