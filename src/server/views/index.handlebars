@@ -1,7 +1,5 @@
 {{> navigation routes=data/routes password=data/password path=data/path }}
 
-<base target="_blank" />
-
 <h1 class="fs-4">{{{heading}}}</h1>
 
 {{#with data}}
@@ -285,6 +283,11 @@
 
 </main>
 {{/with}}
+
+<base target="_blank" />
+<noscript>
+    <meta http-equiv="refresh" content="{{data/autoRefreshInterval}}" />
+</noscript>
 
 <script>
 (() => {
