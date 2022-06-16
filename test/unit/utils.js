@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { AllowedHosts } from "chatexchange/dist/Client.js";
 import { asyncCacheable, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/bot/utils.js";
 import { validateChatTranscriptURL } from "../../src/shared/utils/chat.js";
-import { addDates, addHours, addMinutes, addSeconds, dateToRelativeTime } from "../../src/shared/utils/dates.js";
+import { addDates, addHours, addMinutes, addSeconds, dateToRelativeTime, getNumDaysInMonth } from "../../src/shared/utils/dates.js";
 import { matchNumber } from "../../src/shared/utils/expressions.js";
 import { numericNullable } from "../../src/shared/utils/objects.js";
 
@@ -197,6 +197,15 @@ describe('String-related utils', async function () {
             expect(dateToRelativeTime(addHours(now, -2), { now })).to.equal("2 hours ago");
             expect(dateToRelativeTime(addDates(now, -1), { now })).to.equal("1 day ago");
             expect(dateToRelativeTime(addDates(now, -2), { now })).to.equal("2 days ago");
+        });
+    });
+
+    describe(getNumDaysInMonth.name, () => {
+        it('should account for leap years', () => {
+            const nonLeapFeb = getNumDaysInMonth(2, 2022);
+            const leapFeb = getNumDaysInMonth(2, 2020);
+            expect(nonLeapFeb).to.equal(28);
+            expect(leapFeb).to.equal(29);
         });
     });
 

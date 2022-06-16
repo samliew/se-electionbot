@@ -17,6 +17,23 @@ export const validateDate = (input) => {
 };
 
 /**
+ * @summary gets number of days in a month, accounting for leap years
+ * @param {number} month 1-based month number (1-12)
+ * @param {number} year for leap year purposes
+ */
+export const getNumDaysInMonth = (month, year) => {
+    const febDays = getNumDaysInYear(year) === 366 ? 29 : 28;
+    const days = [31, febDays, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    const daysInMonth = days[month - 1];
+    if (!daysInMonth) {
+        throw new RangeError(`Invalid month number: ${month}`);
+    }
+
+    return daysInMonth;
+};
+
+/**
  * @summary gets number of days in a year, accounting for leap years
  * @param {number} year full year to get the number of days for
  * @returns {number}
