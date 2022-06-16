@@ -70,7 +70,7 @@ export const dateToRelativeTime = (date, options = {}) => {
 
     const S_HOUR = SEC_IN_MINUTE * MIN_IN_HOUR;
     const S_DAY = S_HOUR * HOUR_IN_DAY;
-    const DAY_IN_MONTH = 31; // TODO: make precise;
+    const DAY_IN_MONTH = getNumDaysInMonth(date.getMonth() + 1, date.getFullYear());
     const DAY_IN_YEAR = getNumDaysInYear(date.getFullYear());
 
     const nowMs = getMilliseconds(now);
