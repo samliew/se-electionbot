@@ -87,7 +87,7 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
         // Invalid, or still a nominee based on nomination post ids
         if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) continue;
 
-        if (config.debugOrVerbose) {
+        if (config.verbose) {
             console.log(`Nomination announcement:`, messageMarkup, { currentNomineePostIds, userName, nominationLink, postId });
         }
 
