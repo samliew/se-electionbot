@@ -2,7 +2,7 @@ import { AllowedHosts } from "chatexchange/dist/Client.js";
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
 import { isOneOf, mapify } from '../shared/utils/arrays.js';
-import { addDates, dateToUtcTimestamp, dateUnitHandlers, daysDiff, getMilliseconds } from '../shared/utils/dates.js';
+import { addDates, dateToUtcTimestamp, dateUnitHandlers, daysDiff, getCurrentUTCyear, getMilliseconds } from '../shared/utils/dates.js';
 import { findLast } from '../shared/utils/dom.js';
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { filterMap, getOrInit, has, mergeMaps, sortMap } from '../shared/utils/maps.js';
@@ -1396,18 +1396,16 @@ export default class Election {
 
         if (!$(statusElem).text().includes('cancelled')) return false;
 
-        // https://regex101.com/r/UOGdTo/1
-        const cancellationDateExpr = /\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
-        const [, monthday, year] = cancellationDateExpr.exec(notice) || [];
+        // start with checking if the date is relative
+        // https://regex101.com/r/7azemG/2
+        const [, num, unit] = /\b(\d+)\s+(second|minute|hour|day|month|year)s?\s+ago\b/i.exec(notice) || [];
 
-        if (year) {
+        if (!unit) {
+            // https://regex101.com/r/UOGdTo/1
+            const cancellationDateExpr = /\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
+            const [, monthday, year = getCurrentUTCyear()] = cancellationDateExpr.exec(notice) || [];
             this.dateCancelled = dateToUtcTimestamp(`${monthday}, ${year} 20:00:00Z`);
-        }
-
-        if (!year) {
-            // https://regex101.com/r/7azemG/2
-            const [, num, unit] = /\b(\d+)\s+(second|minute|hour|day|month|year)s?\s+ago\b/i.exec(notice) || [];
-
+        } else {
             const cancellationDate = dateUnitHandlers.get(unit)?.(Date.now(), -+num);
             if (!cancellationDate) return false;
 
