@@ -75,3 +75,17 @@ export const clone = (source, target = {}) => {
 
     return target;
 };
+
+/**
+ * @template {Record<string, unknown>} T
+ *
+ * @summary returns a list of keys with falsy values
+ * @param {T} source object to check
+ * @returns {Array<keyof T>}
+ */
+export const getFalsyKeys = (source) => {
+    return Object
+        .entries(source)
+        .filter(([_, v]) => !v)
+        .map(([k]) => k);
+};
