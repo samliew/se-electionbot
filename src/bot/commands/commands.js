@@ -458,7 +458,7 @@ export const postMetaAnnouncement = async (args) => {
 
     const oneBox = !/\bprett(?:y|ify)/.test(content);
 
-    await sendMessage(config, room, oneBox ? link : makeURL(title, link), null, true);
+    await sendMessage(config, room, oneBox ? link : makeURL(title, link), { isPrivileged: true });
 
     config.flags.announcedMetaPost = true;
 };
@@ -493,7 +493,7 @@ export const postWinnersAnnouncement = async (config, room, election, announceme
 export const echoSomething = async (args) => {
     const { config, room, content } = args;
     const normalized = content.replace(/^@\S+\s+say /i, '');
-    await sendMessage(config, room, normalized, null, true);
+    await sendMessage(config, room, normalized, { isPrivileged: true });
 };
 
 /**
@@ -672,7 +672,7 @@ export const muteCommand = async (args) => {
 
     const response = `*silenced for ${num} mins*`;
 
-    await sendMessage(config, room, response, null, true);
+    await sendMessage(config, room, response, { isPrivileged: true });
 
     config.updateLastMessage(response, Date.now() + (+num * 6e4) - (throttleSecs * 1e3));
 };
@@ -685,7 +685,7 @@ export const muteCommand = async (args) => {
 export const unmuteCommand = async (args) => {
     const { config, room } = args;
     const response = `I can speak freely again.`;
-    await sendMessage(config, room, response, null, true);
+    await sendMessage(config, room, response, { isPrivileged: true });
     config.updateLastMessage(response);
 };
 

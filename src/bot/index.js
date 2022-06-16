@@ -382,7 +382,7 @@ use defaults ${defaultChatNotSet}`
         }
         // Announce join room if in debug mode
         else if (config.debug) {
-            await sendMessage(config, room, getRandomPlop(), null, true);
+            await sendMessage(config, room, getRandomPlop(), { isPrivileged: true });
         }
 
         // initialize per-room ignore list
@@ -600,7 +600,7 @@ use defaults ${defaultChatNotSet}`
                      */
                     if (responseText) {
                         logResponse(config, responseText, preparedMessage, decodedMessage);
-                        await sendMultipartMessage(config, room, responseText, msg.id, { isPrivileged: true, log: false });
+                        await sendMultipartMessage(config, room, responseText, { isPrivileged: true, log: false, inResponseTo: msg.id });
                     }
 
                     return; // no further action since we matched a privileged bot command
@@ -653,9 +653,7 @@ use defaults ${defaultChatNotSet}`
 
                 responseText = await calcCandidateScore(election, user, { userId, content: preparedMessage });
 
-                // TODO: msg.id is not guaranteed to be defined
-                await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
-
+                await sendReply(config, room, responseText, { inResponseTo: msg.id });
                 return; // stop here since we are using a different default response method
             }
             else if (isAskedForScoreFormula(preparedMessage)) {
@@ -698,12 +696,12 @@ use defaults ${defaultChatNotSet}`
             }
             else if (isPrivileged && isAskedHowManyModsInTheRoom(preparedMessage)) {
                 const modNumResponse = await sayHowManyModsAreHere(config, client, room);
-                await sendMultipartMessage(config, room, modNumResponse, msg.id, { isPrivileged: true });
+                await sendMultipartMessage(config, room, modNumResponse, { isPrivileged: true, inResponseTo: msg.id });
                 return;
             }
             else if (isAskedHowManyCandidatesInTheRoom(preparedMessage)) {
                 const nomineeNumResponse = await sayHowManyCandidatesAreHere(config, election, client, room);
-                await sendMultipartMessage(config, room, nomineeNumResponse, msg.id, { isPrivileged: true });
+                await sendMultipartMessage(config, room, nomineeNumResponse, { isPrivileged: true, inResponseTo: msg.id });
                 return;
             }
 
@@ -726,7 +724,7 @@ use defaults ${defaultChatNotSet}`
                 }
                 else if (preparedMessage.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, preparedMessage);
-                    await sendMessage(config, room, responseText, null, false);
+                    await sendMessage(config, room, responseText);
                     return; // stop here since we are using a different default response method
                 }
                 else if (config.awaitingConfirmation.has(userId)) {
@@ -742,8 +740,7 @@ use defaults ${defaultChatNotSet}`
                 }
 
                 if (responseText) {
-                    // TODO: msg.id might be undefined
-                    await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
+                    await sendReply(config, room, responseText, { inResponseTo: msg.id });
                     return; // stop here since we are using a different default response method
                 }
 
@@ -767,7 +764,7 @@ use defaults ${defaultChatNotSet}`
 
             if (responseText) {
                 logResponse(config, responseText, preparedMessage, decodedMessage);
-                await sendMultipartMessage(config, room, responseText, msg.id, { log: false });
+                await sendMultipartMessage(config, room, responseText, { log: false, inResponseTo: msg.id });
             }
 
         }); // End new message event listener

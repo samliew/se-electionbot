@@ -88,7 +88,7 @@ export const sayIdleGreeting = async (config, elections, election, botUser, room
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, await sayGreeting(config, elections, election, botUser, room, getRandomAnnouncement()), null, true);
+    return sendMessage(config, room, await sayGreeting(config, elections, election, botUser, room, getRandomAnnouncement()), { isPrivileged: true });
 };
 
 /**
@@ -110,5 +110,5 @@ export const sayBusyGreeting = async (config, elections, election, botUser, room
     config.activityCounter = 0;
     config.funResponseCounter = 0;
 
-    return sendMessage(config, room, await sayGreeting(config, elections, election, botUser, room, getRandomAnnouncement()), null, true);
+    return sendMessage(config, room, await sayGreeting(config, elections, election, botUser, room, getRandomAnnouncement()), { isPrivileged: true });
 };
