@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { filterMap, mapMap } from "../shared/utils/maps.js";
+import { getFalsyKeys } from "../shared/utils/objects.js";
 import { sayFeedback } from "./commands/commands.js";
 import { sayElectionSchedule } from "./messages/phases.js";
 import { sendMessageList } from "./queue.js";
@@ -514,7 +515,13 @@ export default class ScheduledAnnouncement {
      * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
      */
     reinitialize() {
-        this.stopAll(); // TODO: check status
+        const result = this.stopAll();
+
+        const failed = getFalsyKeys(result);
+        if (failed.length) {
+            console.log(`[cron] failed to reinit tasks: ${failed}`);
+        }
+
         return this.initAll();
     }
 
