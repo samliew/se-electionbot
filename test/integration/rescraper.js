@@ -6,6 +6,7 @@ import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Rescraper from "../../src/bot/rescraper.js";
 import { getMockBotConfig, getMockBotUser } from "../mocks/bot.js";
+import { getMockNominee } from "../mocks/nominee.js";
 
 describe(Rescraper.name, () => {
 
@@ -65,8 +66,20 @@ describe(Rescraper.name, () => {
         });
 
         it('should attempt to announce withdrawn nominations if any', async () => {
-            // TODO
-            expect(true).to.be.true;
+            const announceStub = sinon.stub(ann, "announceWithdrawnNominees");
+
+            scraper.setAnnouncement(ann);
+            sinon.stub(election, "electionChatRoomChanged").get(() => false);
+            sinon.stub(election, "electionDatesChanged").get(() => false);
+            sinon.stub(election, "phase").get(() => "nomination").set(() => { });
+            sinon.stub(election, "hasNewNominees").get(() => false);
+
+            const nominee = getMockNominee(election);
+            election.addActiveNominee(nominee);
+            election.addWithdrawnNominee(nominee);
+
+            await scraper.rescrape();
+            expect(announceStub.calledOnce).to.be.true;
         });
 
         it('should attempt to announce cancellation if cancelled', async () => {
