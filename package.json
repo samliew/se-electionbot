@@ -13,6 +13,8 @@
         "start": "node dist/bot/index.js",
         "dev": "node --loader ts-node/esm src/bot/index.js",
         "test": "npm run typecheck && mocha",
+        "test:integration": "npm run typecheck && mocha -- test/integration/**/*.js",
+        "test:unit": "npm run typecheck && mocha -- test/unit/**/*.js",
         "coverage": "c8 mocha",
         "copy-files": "copyup \"src/server/**/*\" dist/"
     },
