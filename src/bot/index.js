@@ -672,7 +672,7 @@ use defaults ${defaultChatNotSet}`
             // Could conflict with isAskedAboutVoting below - should not match "how to vote" - min length required
             else if (isAskedHowOrWhoToVote(preparedMessage)) {
                 if (election.phase == null) responseText = await sayElectionNotStartedYet(config, elections, election, preparedMessage, user, me, room);
-                else responseText = sayInformedDecision();
+                else responseText = await sayInformedDecision(config, elections, election, preparedMessage, user, me, room);
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
                 responseText = await sayCurrentMods(election, entities.decode);
