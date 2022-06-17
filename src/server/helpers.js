@@ -186,3 +186,18 @@ export const eq = (a, b) => a === b;
 
 /** @type {(a:unknown,b:unknown) => boolean} */
 export const neq = (a, b) => a !== b;
+
+/**
+ * @summary inverts a value (coerces to boolean)
+ * @param {unknown} val value to invert
+ * @returns {boolean}
+ */
+export const not = (val) => !val;
+
+/**
+ * @summary checks a source for including a value
+ * @param {string|unknown[]} source source to check
+ * @param {any} value value to check
+ * @returns {boolean}
+ */
+export const includes = (source, value) => source.includes(value);
