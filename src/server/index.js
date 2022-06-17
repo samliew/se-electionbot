@@ -218,6 +218,7 @@ app.route('/')
                     chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                     siteHostname: ELECTION.siteHostname,
                     election: ELECTION,
+                    instances: await getHerokuInstancesForNav(BOT_CONFIG),
                     routes: routes(app, publicPaths),
                     path,
                     password,
@@ -272,6 +273,7 @@ app.route('/say')
                     chatRoomId,
                     path,
                     password,
+                    instances: await getHerokuInstancesForNav(BOT_CONFIG),
                     routes: routes(app, publicPaths),
                     statusText: statusMap[success],
                     transcriptMessages: transcriptMessages.slice(-showTranscriptMessages),
@@ -307,8 +309,13 @@ app.route('/say')
     });
 
 app.route("/server")
-    .get(({ query, path }, res) => {
+    .get(async ({ query, path }, res) => {
         const { password = "" } = /** @type {AuthQuery} */(query);
+
+        if (!BOT_CONFIG) {
+            console.error("SERVER - bot config missing");
+            return res.sendStatus(500);
+        }
 
         try {
             res.render("server", {
@@ -319,7 +326,6 @@ app.route("/server")
                         __dirname,
                         mounted: {
                             client: !!BOT_CLIENT,
-                            config: !!BOT_CONFIG,
                             election: !!ELECTION,
                             room: !!BOT_ROOM
                         },
@@ -342,6 +348,7 @@ app.route("/server")
                             "view engine": app.get("view engine")
                         },
                     },
+                    instances: await getHerokuInstancesForNav(BOT_CONFIG),
                     routes: routes(app, publicPaths),
                     versions: process.versions,
                     password,
@@ -391,6 +398,7 @@ app.route('/config')
                     configObject: envVars,
                     path,
                     password,
+                    instances: await getHerokuInstancesForNav(BOT_CONFIG),
                     routes: routes(app, publicPaths),
                     statusText: statusMap[success],
                 }
@@ -442,8 +450,13 @@ app.route("/ping")
     });
 
 app.route("/feedback")
-    .get(({ query, path }, res) => {
+    .get(async ({ query, path }, res) => {
         const { password = "" } = /** @type {AuthQuery} */(query);
+
+        if (!BOT_CONFIG) {
+            console.error("SERVER - bot config missing");
+            return res.sendStatus(500);
+        }
 
         res.render('feedback', {
             page: {
@@ -454,6 +467,7 @@ app.route("/feedback")
             data: {
                 path,
                 password,
+                instances: await getHerokuInstancesForNav(BOT_CONFIG),
                 routes: routes(app, publicPaths),
             }
         });
@@ -552,8 +566,13 @@ app.route("/realtime")
     });
 
 app.route("/health")
-    .get(({ query, path }, res) => {
+    .get(async ({ query, path }, res) => {
         const { password = "" } = /** @type {AuthQuery} */(query);
+
+        if (!BOT_CONFIG) {
+            console.error("SERVER - bot config missing");
+            return res.sendStatus(500);
+        }
 
         res.render("health", {
             page: {
@@ -564,6 +583,7 @@ app.route("/health")
             data: {
                 path,
                 password,
+                instances: await getHerokuInstancesForNav(BOT_CONFIG),
                 routes: routes(app, publicPaths),
                 numConnections: connections.size
             }

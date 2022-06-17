@@ -14,11 +14,11 @@
         {{/each}}
         </optgroup>
         <optgroup label="Instances">
-            <option value="https://electionbot1.samliew.com">ElectionBot 1</option>
-            <option value="https://electionbot2.samliew.com">ElectionBot 2</option>
-            <option value="https://electionbot3.samliew.com">ElectionBot 3</option>
-            <option value="https://electionbot4.samliew.com">ElectionBot 4</option>
-            <option value="https://electionbot5.samliew.com">ElectionBot 5</option>
+            {{#each instances}}
+                {{#if (either (not (includes name "test")) ../password) }}
+                <option value="{{web_url}}">{{name}}</option>
+                {{/if}}
+            {{/each}}
         </optgroup>
     </select>
   </nav>
