@@ -832,3 +832,13 @@ export const isAskedWhatModsAreRunning = (text) => {
         /^(?:list|what|which|who)(?:\s+of)?(?:\s+the)?(?:\s+current)?\s+mod(?:erator)?s?(?:\s+that)?\s+(?:(?:are|is)\s+running|(?:ha[sv]e?\s+)?nominated)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is asking if existing mods have to nominate
+ * @type {MessageGuard}
+ */
+export const isAskedIfModsHaveToRun = (text) => {
+    return someMatch([
+        /(?:do|must)\s+(?:current|existing)\s+mod(?:erator)?s(?:\s+have\s+to)?\s+(?:run|nominate|step\s+down)/i
+    ], text);
+};

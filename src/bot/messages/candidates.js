@@ -11,6 +11,7 @@ import { sayElectionNotStartedYet } from "./phases.js";
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../score").CandidateScore} CandidateScore
  * @typedef {import("../election").default} Election
+ * @typedef {import("../election").ElectionPhase} ElectionPhase
  * @typedef {import("../index").MessageBuilder} MessageBuilder
  * @typedef {import("chatexchange/dist/Room").default} Room
  */
@@ -284,4 +285,47 @@ export const sayWhatModsAreRunning = (config, _es, election) => {
     }
 
     return runningText;
+};
+
+/**
+ * @summary builds a response to a query about whether existing mods have to nominate
+ * @type {MessageBuilder}
+ */
+export const sayIfModsHaveToRun = (config, _es, election) => {
+    const { electionType, siteUrl, dateNomination } = election;
+
+    const modURL = makeURL("existing moderators", `${siteUrl}/users?tab=moderators`);
+
+    const prefix = "As this is";
+    const suffix = "have to run in the election or step down";
+
+    if (electionType !== "graduation") {
+        return `${prefix} not a graduation election, ${modURL} do not ${suffix}.`;
+    }
+
+    const haveToRun = `${prefix} a graduation election, ${modURL} ${suffix}.`;
+
+    const { nowOverride } = config;
+
+    const phase = election.getPhase(nowOverride);
+
+    if (!phase) {
+        return `${haveToRun} The election hasn't started yet (${dateToRelativeTime(dateNomination, { now: nowOverride })}) — don't forget to remind them!`;
+    }
+
+    const { currentModerators, nominees, winners } = election;
+
+    const nominatedMods = filterMap(currentModerators, (m) => nominees.has(m.user_id));
+    const nominatedModNames = listify(...mapMap(nominatedMods, (m) => m.display_name)) || "None of them";
+
+    const wonMods = filterMap(winners, (n) => nominatedMods.has(n.userId));
+    const wonModNames = listify(...mapMap(wonMods, (n) => n.userName)) || "None of them";
+
+    /** @type {Partial<Record<Exclude<ElectionPhase, null>, string>>} */
+    const phaseMap = {
+        cancelled: `${haveToRun} ${nominatedModNames} nominated before the election was cancelled`,
+        ended: `${haveToRun} ${nominatedModNames} nominated, and ${wonModNames} won`,
+    };
+
+    return `${phaseMap[phase] || `${haveToRun} ${nominatedModNames} nominated`}.`;
 };
