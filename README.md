@@ -12,18 +12,14 @@ Please direct any queries & feedback to [the developers](https://github.com/saml
 
 General election help:
 
-- what is an election/ how does it work
-- how to nominate (myself/someone/others)
-- how to vote
-- who should I vote for/ how to decide who to vote for
+- what is an election / how does it work
+
+About candidate score:
+
 - how is the candidate score calculated
 - **what is my candidate score** _(calculates if ownself is eligible for nomination)_
-- where is the election page
-- can I vote in the election
-- why are elections cancelled
-- will the election be cancelled
 
-Election badges:
+About election badges:
 
 - what are the moderation badges
 - what are the participation badges
@@ -36,21 +32,39 @@ Current election info:
 - what is the election status
 - when is the election starting/ when is the next phase
 - when is the election ending
-- who are the candidates/nominees
-- who are the winners/new moderators
 - how many positions are there
-- how many `<mods\|users>` `<voted\|participated>`
 - how many users visited the election
-- how many users are eligible to vote
-- why was a nomination removed
 - where are the nomination comments
-- will the election be cancelled
+- where is the election page
 - what is the election type
+
+About cancellation:
+
+- why are elections cancelled
+- will the election be cancelled
+
+About candidates:
+
+- do current moderators have to run
+- how many users are eligible to vote
+- how to nominate `[myself\|someone\|others]`
+- who are the `<candidates\|nominees>`
+- who are the `<winners\|new moderators>`
 - who of the moderators is running
+- why was a nomination removed
+
+About voting:
+
+- can I vote in the election
+- how to decide who to vote for
+- how many `<mods\|users>` `<voted\|participated>`
+- how to vote
+- who should I vote for
 
 **Voting stats calculation**
 
-"how many users voted" command optionally accepts "to `<timestamp>`" postfix to limit the query.<br>
+"how many users voted" command optionally accepts "to `<timestamp>`" postfix to limit the query.
+
 If none is provided, it will default to the current date and time.
 The timestamp can be specified in several formats (`Z`, aka Zulu time indicator can be omitted for brevity):
 
