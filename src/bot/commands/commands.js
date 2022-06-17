@@ -5,7 +5,7 @@ import { flat } from "../../shared/utils/arrays.js";
 import { formatAsChatCode } from "../../shared/utils/chat.js";
 import { dateToUtcTimestamp, getMilliseconds } from "../../shared/utils/dates.js";
 import { matchISO8601, matchNumber } from "../../shared/utils/expressions.js";
-import { mergeMaps } from "../../shared/utils/maps.js";
+import { mapMap, mergeMaps } from "../../shared/utils/maps.js";
 import { formatNumber } from "../../shared/utils/strings.js";
 import { getBadges, getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election, { getSiteElections, getVotingGraph } from "../election.js";
@@ -839,4 +839,25 @@ export const getModsVotedCommand = async (args) => {
     const format = partialRight(formatNumber, [3]);
 
     return `${basePrefix}, ${format(numVoted)} ${postfix}.`;
+};
+
+/**
+ * @summary reports users awaiting confirmation
+ * @param {CommandArguments} args command arguments
+ * @returns {string}
+ */
+export const getConfirmationsCommand = (args) => {
+    const { config } = args;
+
+    const confirmations = mapMap(config.awaitingConfirmation, (builder, uid) => {
+        return `${uid} -> ${builder.name}`;
+    });
+
+    const { length } = confirmations;
+
+    if (!length) {
+        return "Not waiting for confirmation by any user.";
+    }
+
+    return `Waiting for ${length} user${pluralize(length)} confirmation:\n${confirmations.join("\n")}`;
 };

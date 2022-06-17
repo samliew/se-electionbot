@@ -120,6 +120,7 @@ Users with access level set to `AccessLevel.dev` have access to a list of power 
 | chatroom                                                        | Gets the current election chat room URL                                                   |
 | debug `<on\|off>`                                               | Switches debug mode on or off                                                             |
 | feedback                                                        | Posts a message about giving feedback to the bot                                          |
+| `<get\|report>` confirmations                                   | Lists chat user ids and message builder names that are in the confirmation mode           |
 | get cron                                                        | Gets a report on the current cron jobs                                                    |
 | `<get modes report\|report modes>`                              | Gets a report on the current mode state                                                   |
 | get rooms                                                       | Lists the chat rooms the bot is currently joined to                                       |

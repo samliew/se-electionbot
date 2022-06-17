@@ -10,7 +10,7 @@ import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -402,6 +402,7 @@ use defaults ${defaultChatNotSet}`
             "die": ["stops the bot in case of emergency", dieCommand, /die|shutdown|turn off/, AccessLevel.privileged],
             "feedback": ["bot says how to provide feedback", sayFeedback, /^feedback/, AccessLevel.dev],
             "fun": ["switches fun mode on/off", switchMode, /fun/, AccessLevel.privileged],
+            "get confirmations": ["lists users awaiting confirmation", getConfirmationsCommand, /^(?:get|report) confirmations/, AccessLevel.dev],
             "get cron": ["lists scheduled announcements", getCronCommand, /get cron/, AccessLevel.dev],
             "get modes": ["gets the current state of modes", getModeReport, /^(?:get modes?\s+report|report\s+modes)/, AccessLevel.dev],
             "get rooms": ["get list of rooms where bot is in", listRoomsCommand, /get rooms/, AccessLevel.dev],
