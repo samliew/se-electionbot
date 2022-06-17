@@ -8,6 +8,8 @@
  * @typedef {Record<string, { methods: string[], public: boolean }>} RouteInfo
  */
 
+import { HerokuClient, prettifyBotInstanceName } from "../bot/herokuClient.js";
+
 /**
  * @summary starts the server
  * @param {ExpressApp} app Express application
@@ -109,4 +111,20 @@ export const farewell = async (app, config, room) => {
     }
     await room.leave();
     terminate(app);
+};
+
+/**
+ * @summary fetches, formats, and sorts bot instances for inclusion in navigation
+ * @param {BotConfig} config bot configuraion
+ * @returns {Promise<import("../bot/herokuClient").App[]>}
+ */
+export const getHerokuInstancesForNav = async (config) => {
+    const herokuInsances = new HerokuClient(config);
+    const instances = await herokuInsances.fetchInstances();
+    return instances
+        .map(({ name, ...rest }) => ({
+            ...rest,
+            name: prettifyBotInstanceName(name)
+        }))
+        .sort((a, b) => a.name < b.name ? -1 : 1);
 };

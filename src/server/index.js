@@ -4,11 +4,11 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from "url";
 import { getCurrentAPIQuota } from '../bot/api.js';
 import Election, { listNomineesInRoom } from '../bot/election.js';
-import { HerokuClient, prettifyBotInstanceName } from "../bot/herokuClient.js";
+import { HerokuClient } from "../bot/herokuClient.js";
 import { fetchChatTranscript, getUsersCurrentlyInTheRoom, isBotInTheRoom, wait } from '../bot/utils.js';
 import { dateToUtcTimestamp } from '../shared/utils/dates.js';
 import * as helpers from "./helpers.js";
-import { farewell, routes, start } from './utils.js';
+import { farewell, getHerokuInstancesForNav, routes, start } from './utils.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const viewsPath = join(__dirname, "views");
@@ -144,22 +144,6 @@ app.use((req, res, next) => {
 
     next();
 });
-
-/**
- * @summary fetches, formats, and sorts bot instances for inclusion in navigation
- * @param {BotConfig} config bot configuraion
- * @returns {Promise<import("../bot/herokuClient").App[]>}
- */
-const getHerokuInstancesForNav = async (config) => {
-    const herokuInsances = new HerokuClient(config);
-    const instances = await herokuInsances.fetchInstances();
-    return instances
-        .map(({ name, ...rest }) => ({
-            ...rest,
-            name: prettifyBotInstanceName(name)
-        }))
-        .sort((a, b) => a.name < b.name ? -1 : 1);
-};
 
 // Routes
 app.route('/')
