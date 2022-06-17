@@ -811,6 +811,15 @@ export default class Election {
     }
 
     /**
+     * @summary returns a link to the current questionnaire
+     * @returns {string}
+     */
+    get questionnaireURL() {
+        const { electionUrl } = this;
+        return `${electionUrl}#questionnaire`;
+    }
+
+    /**
      * @summary returns chat domain of the election
      * @returns {Host}
      */
