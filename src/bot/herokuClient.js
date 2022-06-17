@@ -5,7 +5,7 @@ import Heroku from 'heroku-client';
 
 /**
  * @typedef {{
- *  app: { id: string, name: string },
+ *  app: App,
  *  command: string,
  *  created_at: string,
  *  id: string,
@@ -14,6 +14,17 @@ import Heroku from 'heroku-client';
  *  type: "web" | "worker",
  *  updated_at: string
  * }} Formation
+ *
+ * @typedef {{
+ *  created_at: string,
+ *  id: string,
+ *  maintenance: boolean,
+ *  name: string,
+ *  released_at: string | null,
+ *  updated_at: string,
+ * }} App
+ *
+ * @typedef {import("./config").BotConfig} BotConfig
  */
 
 export class HerokuClient {
@@ -32,7 +43,7 @@ export class HerokuClient {
     ];
 
     /**
-     * @param {import("./config").BotConfig} config bot configuration
+     * @param {BotConfig} config bot configuration
      * @param {string|null} apiKey Heroku API key
      */
     constructor(config, apiKey = null) {
@@ -55,6 +66,16 @@ export class HerokuClient {
      */
     setApiKey(token) {
         this._client.options.token = token;
+    }
+
+    /**
+     * @summary gets bot instances
+     * @returns {Promise<App[]>}
+     */
+    async fetchInstances() {
+        /** @type {App[]} */
+        const apps = await this._client.get(`/apps`);
+        return apps.filter(({ name }) => name.includes("electionbot"));
     }
 
     /**

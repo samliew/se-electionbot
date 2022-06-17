@@ -47,4 +47,9 @@ describe('Heroku API integration', function () {
         });
         expect(success).to.be.false;
     });
+
+    testIf('should be able to fetch instances', async () => {
+        const instances = await heroku.fetchInstances();
+        expect(instances.length).to.be.at.least(6);
+    });
 });
