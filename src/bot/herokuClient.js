@@ -1,4 +1,5 @@
 import Heroku from 'heroku-client';
+import { capitalize } from './utils.js';
 
 // Heroku API documentation
 // https://devcenter.heroku.com/articles/platform-api-reference
@@ -22,6 +23,7 @@ import Heroku from 'heroku-client';
  *  name: string,
  *  released_at: string | null,
  *  updated_at: string,
+ *  web_url: string,
  * }} App
  *
  * @typedef {import("./config").BotConfig} BotConfig
@@ -214,3 +216,15 @@ export class HerokuClient {
         return formations;
     };
 }
+
+/**
+ * @summary pretty-prints bot instance name (Heroku app name)
+ * @param {string} instanceName app name
+ * @returns {string}
+ */
+export const prettifyBotInstanceName = (instanceName) => {
+    // https://regex101.com/r/h8fxu0/2
+    return capitalize(instanceName
+        .replace(/^(?:se-)?(\w+?)(\d+|)(?:-(test))?$/, "$1 $2$3")
+        .replace(/\s+$/, " 1"));
+};
