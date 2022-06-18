@@ -5,7 +5,7 @@
  * @typedef {import("express").IRoute} IRoute
  * @typedef {import("express").IRouter} IRouter
  * @typedef {import("chatexchange/dist/Room").default} Room
- * @typedef {Record<string, { methods: string[], public: boolean }>} RouteInfo
+ * @typedef {Map<string, { methods: string[], path: string, public: boolean }>} RouteInfo
  */
 
 import Handlebars from 'express-handlebars';
@@ -143,4 +143,24 @@ export const getHerokuInstancesForNav = async (config) => {
             name: prettifyBotInstanceName(name)
         }))
         .sort((a, b) => a.name < b.name ? -1 : 1);
+};
+
+/**
+ * @summary adds a listener to an {@link ExpressApp} to add its routes to parent's routes
+ * @param {ExpressApp} subapp Express app
+ * @returns {void}
+ */
+export const onMountAddToRoutes = (subapp) => {
+    subapp.on("mount", (parent) => {
+        const { mountpath } = subapp;
+
+        /** @type {RouteInfo} */
+        const parentRoutes = parent.get("routes");
+
+        /** @type {string[]} */
+        const parentPublicPaths = parent.get("public_paths");
+
+        routes(subapp, parentPublicPaths, mountpath.toString())
+            .forEach((info) => parentRoutes.set(info.path, info));
+    });
 };
