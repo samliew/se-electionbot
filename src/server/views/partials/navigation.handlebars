@@ -3,15 +3,15 @@
     <select class="form-select" id="nav">
         <option selected="selected">Menu</option>
         <optgroup label="Menu">
-        {{#each routes}}
-        {{#unlessEquals @key ../path}}
+        {{#iterate routes}}
+        {{#unlessEquals this.path ../path}}
             {{#if (either this.public ../password)}}
-            <option value="{{@key}}{{#if ../password}}?password={{../password}}{{/if}}">
-            {{initIfFalsy (unprefix "/" @key) "home"}}
+            <option value="{{this.path}}{{#if ../password}}?password={{../password}}{{/if}}">
+            {{initIfFalsy (capitalize (unprefix "/" this.path)) "Home"}}
             </option>
             {{/if}}
         {{/unlessEquals}}
-        {{/each}}
+        {{/iterate}}
         </optgroup>
         <optgroup label="Instances">
             {{#each instances}}
