@@ -86,10 +86,18 @@ const getRoutesFromRouter = (routes, router, publicPaths, parentPath) => {
 
         const prettyPath = prettifyPath(path);
 
-        routes.set(path, {
+        const routePath = parentPath ? `${parentPath}${prettyPath}` : prettyPath || "/";
+
+        const existingRoute = routes.get(routePath);
+        if (existingRoute) {
+            existingRoute.methods.push(...methods);
+            return;
+        }
+
+        routes.set(routePath, {
             methods: [...methods],
-            path: parentPath ? `${parentPath}${prettyPath}` : prettyPath || "/",
-            public: publicPaths.includes(path)
+            path: routePath,
+            public: publicPaths.includes(routePath)
         });
     });
 
