@@ -1,6 +1,11 @@
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { formatOrdinal, prettify } from "../shared/utils/strings.js";
 
+/**
+ * @typedef {import("handlebars")}
+ * @typedef {Handlebars.HelperOptions} HelperOptions
+ */
+
 /** @type {(source: unknown) => boolean} */
 export const isArr = (source) => Array.isArray(source);
 
@@ -31,17 +36,17 @@ export const isURL = (source) => {
 /** @type {<T>(source: T, init: T) => T} */
 export const initIfFalsy = (source, init) => source || init;
 
-/** @type {(a1:unknown, a2:unknown, options:object) => unknown} */
+/** @type {(a1:unknown, a2:unknown, options:HelperOptions) => unknown} */
 export const ifEquals = function (a1, a2, options) {
     return (a1 == a2) ? options.fn(this) : options.inverse(this);
 };
 
-/** @type {(a1:unknown, a2:unknown, options:object) => unknown} */
+/** @type {(a1:unknown, a2:unknown, options:HelperOptions) => unknown} */
 export const unlessEquals = function (a1, a2, options) {
     return a1 != a2 ? options.fn(this) : options.inverse(this);
 };
 
-/** @type {(value:unknown, options:object) => unknown} */
+/** @type {(value:unknown, options:HelperOptions) => unknown} */
 export const ifTruthy = function (value, options) {
     return !!value ? options.fn(this) : options.inverse(this);
 };
@@ -171,7 +176,12 @@ export const years = (seconds) => {
 /** @type {(n: number) => string} */
 export const ordinal = (num) => `${num}<sup>${formatOrdinal(num).replace(/^\d+/, "")}</sup>`;
 
-/** @type {(source: Map<unknown, unknown> | Set<unknown> | unknown[], options: object) => any} */
+/**
+ * @summary iterates over a collection
+ * @param {Map<unknown, unknown> | Set<unknown> | unknown[]} source collection to iterate
+ * @param {HelperOptions} options Handlebars helper options
+ * @returns {string}
+ */
 export const iterate = (source, options) => {
     let output = "";
     source.forEach((v) => output += options.fn(v));
