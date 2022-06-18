@@ -134,6 +134,9 @@ export const contextCall = (name, ctxt, ...args) => typeof ctxt[name] === "funct
 /** @type {(prefix:string, text:string) => string} */
 export const unprefix = (prefix, text) => text.replace(new RegExp(`^${prefix}\\s*?`), "");
 
+/** @type {(prefix:string, text:string) => string} */
+export const unsuffix = (suffix, text) => text.replace(new RegExp(`\\s*?${suffix}$`), "");
+
 /** @type {<T>(array: T[]) => T[]} */
 export const reverse = (array) => [...array].reverse();
 
