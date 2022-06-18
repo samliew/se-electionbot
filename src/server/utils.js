@@ -59,19 +59,23 @@ export const stop = async (app) => {
 };
 
 /**
- * @summary gets all mounted routes for an {@link ExpressApp}
- * @param {ExpressApp} app Express application
- * @param {string[]} [publicPaths] paths that are publicly accessible
+ * @summary helper for extracting route infos from a router
+ * @param {RouteInfo} routes accumulator {@link RouteInfo}
+ * @param {IRouter} router router to extract routes from
+ * @param {string[]} publicPaths publicly accessible paths
+ * @param {string} [parentPath] parent path (for mounted apps)
  * @returns {RouteInfo}
  */
-export const routes = (app, publicPaths = []) => {
-    /** @type {RouteInfo} */
-    const routes = {};
-
-    const { stack } = /** @type {IRouter} */(app._router);
+const getRoutesFromRouter = (routes, router, publicPaths, parentPath) => {
+    const { stack, } = router;
 
     stack.forEach((item) => {
-        const { route } = /** @type {{route:IRoute}} */(item);
+        const { route, name, handle } = /** @type {{ route?:IRoute } & ({ name: "router", handle:IRouter }|{ name: "mounted_app", handle:ExpressApp })} */(item);
+
+        // https://stackoverflow.com/a/28199817/11407695
+        if (name === "router") {
+            getRoutesFromRouter(routes, handle, publicPaths, parentPath);
+        }
 
         if (!route) return;
 
@@ -80,13 +84,27 @@ export const routes = (app, publicPaths = []) => {
         const methods = new Set();
         stack.forEach(({ method }) => methods.add(method.toUpperCase()));
 
-        routes[path] = {
+        const prettyPath = prettifyPath(path);
+
+        routes.set(path, {
             methods: [...methods],
+            path: parentPath ? `${parentPath}${prettyPath}` : prettyPath || "/",
             public: publicPaths.includes(path)
-        };
+        });
     });
 
     return routes;
+};
+
+/**
+ * @summary gets all mounted routes for an {@link ExpressApp}
+ * @param {ExpressApp} app Express application
+ * @param {string[]} publicPaths publicly accessible paths
+ * @param {string} [parentPath] parent path (for mounted apps)
+ * @returns {RouteInfo}
+ */
+export const routes = (app, publicPaths, parentPath) => {
+    return getRoutesFromRouter(new Map(), app._router, publicPaths, parentPath);
 };
 
 /**
@@ -98,6 +116,11 @@ export const terminate = async (app) => {
     await stop(app);
     process.exit(0);
 };
+
+/**
+ * @param {string} path path to prettify
+ */
+export const prettifyPath = (path) => path.replace(/\/$/, "");
 
 /**
  * @summary sends a farewell message and stops the server
