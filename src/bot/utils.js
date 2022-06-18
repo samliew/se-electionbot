@@ -602,11 +602,11 @@ export const roomKeepAlive = (config, client, room) => {
 };
 
 /**
- * @summary capitalizes the word
- * @param {string} word
+ * @summary capitalizes a given word
+ * @param {string} word word to properly capitalize
  * @returns {string}
  */
-export const capitalize = (word) => word[0].toUpperCase() + word.slice(1).toLowerCase();
+export const capitalize = (word) => word && word[0].toUpperCase() + word.slice(1).toLowerCase();
 
 /**
  * @summary base pluralization
