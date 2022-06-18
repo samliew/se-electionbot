@@ -36,13 +36,13 @@
                 </tr>
             </thead>
             <tbody>
-                {{#each data/routes}}
+                {{#iterate data/routes}}
                 <tr>
-                    <td>{{{ url @key }}}</td>
+                    <td>{{{ url this.path }}}</td>
                     <td>{{ join this/methods ", " }}</td>
                     <td>{{{ yesno this/public }}}</td>
                 </tr>
-                {{/each}}
+                {{/iterate}}
             </tbody>
         </table>
 
