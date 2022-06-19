@@ -11,7 +11,7 @@
         "typecheck": "tsc --noEmit -p ./tsconfig.bot.json",
         "typecheck:tests": "tsc --noEmit -p ./tsconfig.test.json",
         "start": "node dist/bot/index.js",
-        "dev": "node --loader ts-node/esm src/bot/index.js",
+        "dev": "npm run scss:dev && node --loader ts-node/esm src/bot/index.js",
         "test": "npm run typecheck && mocha",
         "test:integration": "npm run typecheck && mocha -- test/integration/**/*.js",
         "test:unit": "npm run typecheck && mocha -- test/unit/**/*.js",
