@@ -28,7 +28,8 @@ describe('Heroku API integration', function () {
     }));
 
     testIf('should be able to fetch environment variables', async () => {
-        const configVars = await heroku.fetchConfigVars();
+        const [app] = await heroku.fetchInstances();
+        const configVars = await heroku.fetchConfigVars(app);
         expect(typeof configVars).to.equal("object");
     });
 

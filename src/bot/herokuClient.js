@@ -82,13 +82,16 @@ export class HerokuClient {
 
     /**
      * @summary get environment variables
+     * @param {App} app Heroku app to fetch config vars for
      * @return {Promise<object>}
      */
-    async fetchConfigVars() {
-        const configVars = await this._client.get(`/apps/${this._appName}/config-vars`);
+    async fetchConfigVars(app) {
+        const { _client, _sensitiveKeys } = this;
+
+        const configVars = await _client.get(`/apps/${app.name}/config-vars`);
 
         // Remove sensitive keys
-        this._sensitiveKeys.every(key => delete configVars[key]);
+        _sensitiveKeys.forEach(key => delete configVars[key]);
 
         return configVars;
     };
