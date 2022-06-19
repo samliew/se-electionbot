@@ -62,3 +62,23 @@ export const onlyTruthy = (item) => !!item;
  * @returns {Array<T>}
  */
 export const uniquify = (array) => [...new Set(array)];
+
+/**
+ * @template {unknown} T
+ * @template {unknown} U
+ *
+ * @summary maps an {@link array} sequentially with an asynchronous {@link callback}
+ * @param {T[]} array array to map
+ * @param {(val: T, idx: number, arr: T[]) => U | Promise<U>} callback mapper callback
+ * @returns {Promise<U[]>}
+ */
+export const asyncMapSequential = async (array, callback) => {
+    /** @type {U[]} */
+    const output = [];
+
+    for (let i = 0; i < array.length; i++) {
+        output.push(await callback(array[i], i, array));
+    }
+
+    return output;
+};
