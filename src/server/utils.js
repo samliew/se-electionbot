@@ -1,6 +1,7 @@
 /**
  * @typedef {import("../bot/config").BotConfig} BotConfig
  * @typedef {import("express").Application} ExpressApp
+ * @typedef {import("../bot/herokuClient").App} HerokuApp
  * @typedef {import("http").Server} HttpServer
  * @typedef {import("express").IRoute} IRoute
  * @typedef {import("express").IRouter} IRouter
@@ -163,12 +164,12 @@ export const configureApp = (app, config, viewsPath) => {
 /**
  * @summary fetches, formats, and sorts bot instances for inclusion in navigation
  * @param {BotConfig} config bot configuraion
- * @returns {Promise<import("../bot/herokuClient").App[]>}
+ * @param {HerokuApp[]} [instances] cached instances to avoid refetching
+ * @returns {Promise<HerokuApp[]>}
  */
-export const getHerokuInstancesForNav = async (config) => {
-    const herokuInsances = new HerokuClient(config);
-    const instances = await herokuInsances.fetchInstances();
-    return instances
+export const getHerokuInstancesForNav = async (config, instances) => {
+    const apps = instances || await new HerokuClient(config).fetchInstances();
+    return apps
         .map(({ name, ...rest }) => ({
             ...rest,
             name: prettifyBotInstanceName(name)
