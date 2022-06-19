@@ -1,5 +1,6 @@
 import express from "express";
 import { HerokuClient } from "../../bot/herokuClient.js";
+import { sortMap } from "../../shared/utils/maps.js";
 import { getHerokuInstancesForNav, onMountAddToRoutes, prettifyPath } from "../utils.js";
 
 /**
@@ -35,7 +36,14 @@ config.get("/", async ({ query, path, app, baseUrl }, res) => {
 
         // Fetch config vars
         const heroku = new HerokuClient(botConfig);
-        const envVars = await heroku.fetchConfigVars();
+
+        const instances = await heroku.fetchInstances();
+
+        /** @type {Map<string,Record<string, unknown>>} */
+        const env = new Map();
+        for (const app of instances) {
+            env.set(app.name, await heroku.fetchConfigVars(app));
+        }
 
         const botChatUser = await botClient.getMe();
 
@@ -47,8 +55,8 @@ config.get("/", async ({ query, path, app, baseUrl }, res) => {
             current: "Config",
             heading: `Update ${await botChatUser.name} environment variables`,
             data: {
-                configObject: envVars,
-                instances: await getHerokuInstancesForNav(botConfig),
+                env: sortMap(env, (k1, _, k2) => k1 < k2 ? -1 : 1),
+                instances: await getHerokuInstancesForNav(botConfig, instances),
                 password,
                 path: prettifyPath(baseUrl + path),
                 routes: app.get("routes"),

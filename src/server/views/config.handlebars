@@ -4,26 +4,34 @@
 
 {{> breadcrumbs current=current }}
 
-<form method="post">
+{{#ifTruthy data/statusText}}
+<div class="mt-4">
+    {{{data/statusText}}}
+</div>
+{{/ifTruthy}}
 
-    <div class="mt-4">
-        {{{data/statusText}}}
-    </div>
+{{#iterate data/env}}
+<section class="collapsible-container">
+    <label for="collapsible-toggle-{{key}}" class="section-label">{{key}}</label>
+    <input id="collapsible-toggle-{{key}}" type="checkbox" class="collapsible-toggle" hidden{{#if (eq ../page/appName key)}} checked{{/if}} />
 
-    <div class="row mt-4">
-        {{#each data/configObject}}
-        <div class="col-12 col-md-6 col-xl-4">
-            <div class="form-group">
-                <label for="{{@key}}">{{@key}}</label>
-                <input type="text" class="form-control" name="{{@key}}" id="{{@key}}" value="{{this}}" aria-label="{{@key}}" placeholder="(empty)" />
+    <form id="{{key}}" method="post" class="collapsible">
+        <div class="row">
+            {{#each val}}
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="form-group">
+                    <label for="{{@key}}">{{@key}}</label>
+                    <input type="text" class="form-control" name="{{@key}}" id="{{@key}}" value="{{this}}" aria-label="{{@key}}" placeholder="(empty)" />
+                </div>
             </div>
+            {{/each}}
         </div>
-        {{/each}}
-    </div>
 
-    <input type="hidden" name="password" value="{{data/password}}" />
+        <input type="hidden" name="password" value="{{data/password}}" />
 
-    <div class="form-controls text-center mt-4">
-        <button class="btn btn-primary">Save</button>
-    </div>
-</form>
+        <div class="form-controls text-center mt-4">
+            <button class="btn btn-primary">Save</button>
+        </div>
+    </form>
+</section>
+{{/iterate}}
