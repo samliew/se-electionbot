@@ -98,16 +98,18 @@ export class HerokuClient {
 
     /**
      * @summary update environment variables
+     * @param {string} appName Heroku app name to update
      * @param {object} configVars key-value environment variable pairs
      * @returns {Promise<boolean>}
      */
-    async updateConfigVars(configVars) {
+    async updateConfigVars(appName, configVars) {
         if (typeof configVars !== 'object') return false;
 
         // Do not update requests with sensitive keys
-        if (this._sensitiveKeys.some(key => Object.keys(configVars).includes(key))) return false;
+        const keys = Object.keys(configVars);
+        if (this._sensitiveKeys.some(key => keys.includes(key))) return false;
 
-        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: configVars }) && true;
+        return await this._client.patch(`/apps/${appName}/config-vars`, { body: configVars }) && true;
     };
 
     /**

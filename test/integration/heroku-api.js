@@ -8,6 +8,7 @@ describe('Heroku API integration', function () {
 
     dotenv.config();
 
+    const testInstanceName = "se-electionbot-test";
     const hasCreds = !!process.env.HEROKU_API_TOKEN;
     const testIf = hasCreds ? test : test.skip;
 
@@ -34,14 +35,14 @@ describe('Heroku API integration', function () {
     });
 
     testIf('should be able to update environment variables', async () => {
-        const success = await heroku.updateConfigVars({
+        const success = await heroku.updateConfigVars(testInstanceName, {
             "TEST": "pass"
         });
         expect(success).to.be.true;
     });
 
     testIf('should not be able to update sensitive environment variables', async () => {
-        const success = await heroku.updateConfigVars({
+        const success = await heroku.updateConfigVars(testInstanceName, {
             "TEST": "fail",
             "ACCOUNT_EMAIL": "fail",
             "ACCOUNT_PASSWORD": "fail"
