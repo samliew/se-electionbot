@@ -1,5 +1,6 @@
 import express from "express";
 import { HerokuClient } from "../../bot/herokuClient.js";
+import { asyncMapSequential, onlyTruthy } from "../../shared/utils/arrays.js";
 import { getOrInit, sortMap } from "../../shared/utils/maps.js";
 import { diffObjects } from "../../shared/utils/objects.js";
 import { getHerokuInstancesForNav, onMountAddToRoutes, prettifyPath } from "../utils.js";
@@ -45,8 +46,8 @@ config.get("/", async ({ query, path, app, baseUrl }, res) => {
         const heroku = new HerokuClient(botConfig);
 
         const instances = await heroku.fetchInstances();
-        for (const app of instances) {
-            currentConfigVars.set(app.name, await heroku.fetchConfigVars(app));
+        for (const { name } of instances) {
+            currentConfigVars.set(name, await heroku.fetchConfigVars(name));
         }
 
         const botChatUser = await botClient.getMe();
@@ -89,7 +90,7 @@ config.post('/', async (req, res) => {
             console.log(`[server] submitted body:\n"${JSON.stringify(body)}"`);
         }
 
-        const { instance } = query;
+        const { instance, bulk } = query;
         if (typeof instance !== "string") {
             console.error(`[server] received unknown instance: "${instance}"`);
             return res.redirect(`/config?password=${password}&success=false`);
@@ -97,42 +98,54 @@ config.post('/', async (req, res) => {
 
         const heroku = new HerokuClient(botConfig);
 
-        const currentInstanceConfigVars = getOrInit(currentConfigVars, instance, {});
-        if (!Object.keys(currentInstanceConfigVars).length) {
-            const app = await heroku.fetchInstance(instance);
-            if (!app) {
-                console.error(`[server] missing instance "${instance}"`);
-                return res.redirect(`/config?password=${password}&success=false`);
-            }
+        const instances = bulk === "all" ?
+            await heroku.fetchInstances() :
+            [await heroku.fetchInstance(instance)].filter(onlyTruthy);
 
-            currentConfigVars.set(instance, await heroku.fetchConfigVars(app));
+        if (!instances.length) {
+            console.error(`[server] no instances to update`);
+            return res.redirect(`/config?password=${password}&success=false`);
         }
 
-        const { added, changed, removed } = diffObjects(currentInstanceConfigVars, fields);
+        const currentInstanceVars = getOrInit(currentConfigVars, instance, {});
+        if (!Object.keys(currentInstanceVars).length) {
+            Object.assign(currentInstanceVars, await heroku.fetchConfigVars(instance));
+        }
 
-        /** @type {Record<string, unknown>} */
-        const updates = {};
-        added.forEach((key) => updates[key] = fields[key]);
-        changed.forEach((key) => updates[key] = fields[key]);
-        removed.forEach((key) => updates[key] = null); // Heroku treats 'null' as deletion
+        const { added, changed, removed } = diffObjects(currentInstanceVars, fields);
 
         // Validation
-        if (added.length === 0 && changed.length === 0) {
+        if (added.length === 0 && changed.length === 0 && removed.length === 0) {
             console.error(`[server] config update changed nothing`, fields);
             return res.redirect(`/config?password=${password}&success=false`);
         }
 
-        const status = await heroku.updateConfigVars(instance, fields);
+        /** @type {Record<string, unknown>} */
+        const updatedVars = {};
+        added.forEach((key) => updatedVars[key] = fields[key]);
+        changed.forEach((key) => updatedVars[key] = fields[key]);
+        removed.forEach((key) => updatedVars[key] = null); // Heroku treats 'null' as deletion
 
-        /** @type {BotRoom|undefined} */
-        const room = app.get("bot_room");
+        console.log(`[server] instance vars updates:\n`, updatedVars);
 
-        if (status && room) {
-            const status = await room.leave();
-            console.log(`[server] left room ${room.id} after update: ${status}`);
-        }
+        const updateStatuses = await asyncMapSequential(instances, async (inst) => {
+            console.log(`[server] updating "${inst.name}" vars`);
 
-        res.redirect(`/config?password=${password}&success=${status}`);
+            const status = await heroku.updateConfigVars(inst.name, updatedVars);
+
+            /** @type {BotRoom|undefined} */
+            const room = app.get("bot_room");
+
+            // TODO: leave all rooms once a single instance can fork multiple bots
+            if (status && room) {
+                const status = await room.leave();
+                console.log(`[server] left room ${room.id} after update: ${status}`);
+            }
+
+            return status;
+        });
+
+        res.redirect(`/config?password=${password}&success=${updateStatuses.every(Boolean)}`);
     } catch (error) {
         console.error(`[server] config submit error:`, error);
         res.redirect(`/config?password=${password}&success=false`);
