@@ -4,10 +4,10 @@
         <option selected="selected">Menu</option>
         <optgroup label="Menu">
         {{#iterate routes}}
-        {{#unlessEquals this.path ../path}}
-            {{#if (either this.public ../password)}}
-            <option value="{{this.path}}{{#if ../password}}?password={{../password}}{{/if}}">
-            {{initIfFalsy (capitalize (unprefix "/" this.path)) "Home"}}
+        {{#unlessEquals val.path ../path}}
+            {{#if (either val.public ../password)}}
+            <option value="{{val.path}}{{#if ../password}}?password={{../password}}{{/if}}">
+            {{initIfFalsy (capitalize (unprefix "/" val.path)) "Home"}}
             </option>
             {{/if}}
         {{/unlessEquals}}

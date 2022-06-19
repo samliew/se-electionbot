@@ -11,12 +11,12 @@
         <tbody>
         {{#iterate (getter election key)}}
         <tr>
-            <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
-            <td>{{years this.creation_date}}</td>
-            {{#if this.election}}
-                <td>{{{ordinal this.election}}} <a href="{{this.electionLink}}">election</a> ({{year (getter (get ../election/elections this.election) "dateEnded")}})</td>
-            {{else if this.appointed}}
-                <td>appointed ({{this.appointed}})</td>
+            <td><a href="{{val.link}}">{{{val.display_name}}}</a></td>
+            <td>{{years val.creation_date}}</td>
+            {{#if val.election}}
+                <td>{{{ordinal val.election}}} <a href="{{val.electionLink}}">election</a> ({{year (getter (get ../election/elections val.election) "dateEnded")}})</td>
+            {{else if val.appointed}}
+                <td>appointed ({{val.appointed}})</td>
             {{else}}
                 <td></td>
             {{/if}}

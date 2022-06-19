@@ -76,16 +76,16 @@
             {{#iterate elections}}
             <tr>
                 <td>
-                    <a href="{{electionUrl}}">{{getter this "electionNum"}}</a>
-                    {{#ifEquals (getter this "electionNum") (getter @root/data/election "electionNum")}}<span title="Current Election">*</span>{{/ifEquals}}
+                    <a href="{{val/electionUrl}}">{{getter val "electionNum"}}</a>
+                    {{#ifEquals (getter val "electionNum") (getter @root/data/election "electionNum")}}<span title="Current Election">*</span>{{/ifEquals}}
                 </td>
-                <td>{{year dateNomination}}</td>
-                <td>{{{yesno datePrimary}}}</td>
-                <td>{{{yesno (contextCall "isCancelled" this)}}}</td>
-                <td>{{numPositions}}</td>
-                <td>{{len nominees}}</td>
-                <td>{{len withdrawnNominees}}</td>
-                <td>{{len winners}}</td>
+                <td>{{year val/dateNomination}}</td>
+                <td>{{{yesno val/datePrimary}}}</td>
+                <td>{{{yesno (contextCall "isCancelled" val)}}}</td>
+                <td>{{val/numPositions}}</td>
+                <td>{{len val/nominees}}</td>
+                <td>{{len val/withdrawnNominees}}</td>
+                <td>{{len val/winners}}</td>
             </tr>
             {{/iterate}}
             </tbody>

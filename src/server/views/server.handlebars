@@ -38,9 +38,9 @@
             <tbody>
                 {{#iterate data/routes}}
                 <tr>
-                    <td>{{{ url this.path }}}</td>
-                    <td>{{ join this/methods ", " }}</td>
-                    <td>{{{ yesno this/public }}}</td>
+                    <td>{{{ url val/path }}}</td>
+                    <td>{{ join val/methods ", " }}</td>
+                    <td>{{{ yesno val/public }}}</td>
                 </tr>
                 {{/iterate}}
             </tbody>

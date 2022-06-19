@@ -188,7 +188,7 @@ export const ordinal = (num) => `${num}<sup>${formatOrdinal(num).replace(/^\d+/,
  */
 export const iterate = (source, options) => {
     let output = "";
-    source.forEach((v) => output += options.fn(v));
+    source.forEach((val, key) => output += options.fn({ key, val }));
     return output;
 };
 
