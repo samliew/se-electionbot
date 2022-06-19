@@ -1,6 +1,7 @@
 import express from "express";
 import { HerokuClient } from "../../bot/herokuClient.js";
-import { sortMap } from "../../shared/utils/maps.js";
+import { getOrInit, sortMap } from "../../shared/utils/maps.js";
+import { diffObjects } from "../../shared/utils/objects.js";
 import { getHerokuInstancesForNav, onMountAddToRoutes, prettifyPath } from "../utils.js";
 
 /**
@@ -13,6 +14,12 @@ import { getHerokuInstancesForNav, onMountAddToRoutes, prettifyPath } from "../u
 export const config = express();
 
 onMountAddToRoutes(config);
+
+/**
+ * @summary internal cache of current Heroku config variables
+ * @type {Map<string,Record<string, unknown>>}
+ */
+const currentConfigVars = new Map();
 
 config.get("/", async ({ query, path, app, baseUrl }, res) => {
     const { success, password = "" } = /** @type {AuthQuery} */(query);
@@ -38,11 +45,8 @@ config.get("/", async ({ query, path, app, baseUrl }, res) => {
         const heroku = new HerokuClient(botConfig);
 
         const instances = await heroku.fetchInstances();
-
-        /** @type {Map<string,Record<string, unknown>>} */
-        const env = new Map();
         for (const app of instances) {
-            env.set(app.name, await heroku.fetchConfigVars(app));
+            currentConfigVars.set(app.name, await heroku.fetchConfigVars(app));
         }
 
         const botChatUser = await botClient.getMe();
@@ -55,7 +59,7 @@ config.get("/", async ({ query, path, app, baseUrl }, res) => {
             current: "Config",
             heading: `Update ${await botChatUser.name} environment variables`,
             data: {
-                env: sortMap(env, (k1, _, k2) => k1 < k2 ? -1 : 1),
+                env: sortMap(currentConfigVars, (k1, _, k2) => k1 < k2 ? -1 : 1),
                 instances: await getHerokuInstancesForNav(botConfig, instances),
                 password,
                 path: prettifyPath(baseUrl + path),
@@ -91,14 +95,33 @@ config.post('/', async (req, res) => {
             return res.redirect(`/config?password=${password}&success=false`);
         }
 
+        const heroku = new HerokuClient(botConfig);
+
+        const currentInstanceConfigVars = getOrInit(currentConfigVars, instance, {});
+        if (!Object.keys(currentInstanceConfigVars).length) {
+            const app = await heroku.fetchInstance(instance);
+            if (!app) {
+                console.error(`[server] missing instance "${instance}"`);
+                return res.redirect(`/config?password=${password}&success=false`);
+            }
+
+            currentConfigVars.set(instance, await heroku.fetchConfigVars(app));
+        }
+
+        const { added, changed, removed } = diffObjects(currentInstanceConfigVars, fields);
+
+        /** @type {Record<string, unknown>} */
+        const updates = {};
+        added.forEach((key) => updates[key] = fields[key]);
+        changed.forEach((key) => updates[key] = fields[key]);
+        removed.forEach((key) => updates[key] = null); // Heroku treats 'null' as deletion
+
         // Validation
-        if (Object.keys(fields).length === 0) {
-            console.error(`[server] invalid request`);
+        if (added.length === 0 && changed.length === 0) {
+            console.error(`[server] config update changed nothing`, fields);
             return res.redirect(`/config?password=${password}&success=false`);
         }
 
-        // Update environment variables
-        const heroku = new HerokuClient(botConfig);
         const status = await heroku.updateConfigVars(instance, fields);
 
         /** @type {BotRoom|undefined} */
@@ -109,7 +132,7 @@ config.post('/', async (req, res) => {
             console.log(`[server] left room ${room.id} after update: ${status}`);
         }
 
-        res.redirect(`/config?password=${password}&success=true`);
+        res.redirect(`/config?password=${password}&success=${status}`);
     } catch (error) {
         console.error(`[server] config submit error:`, error);
         res.redirect(`/config?password=${password}&success=false`);
