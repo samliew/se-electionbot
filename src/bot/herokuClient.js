@@ -92,7 +92,7 @@ export class HerokuClient {
     /**
      * @summary get environment variables
      * @param {App} app Heroku app to fetch config vars for
-     * @return {Promise<object>}
+     * @return {Promise<Record<string, unknown>>}
      */
     async fetchConfigVars(app) {
         const { _client, _sensitiveKeys } = this;
@@ -108,7 +108,7 @@ export class HerokuClient {
     /**
      * @summary update environment variables
      * @param {string} appName Heroku app name to update
-     * @param {object} configVars key-value environment variable pairs
+     * @param {Record<string, unknown>} configVars key-value environment variable pairs
      * @returns {Promise<boolean>}
      */
     async updateConfigVars(appName, configVars) {
@@ -180,7 +180,7 @@ export class HerokuClient {
 
     /**
      * @summary scale app's dynos to nothing (kills process with manual rescale needed to restart)
-     * @param {"web"|"worker"} [type] process type to scale
+     * @param {Formation["type"]} [type] process type to scale
      * @return {Promise<boolean>}
      */
     async scaleNone(type = "web") {
@@ -191,7 +191,7 @@ export class HerokuClient {
 
     /**
      * @summary scale app's dynos to free
-     * @param {"web"|"worker"} [type] process type to scale
+     * @param {Formation["type"]} [type] process type to scale
      * @return {Promise<boolean>}
      */
     async scaleFree(type = "web") {
@@ -202,7 +202,7 @@ export class HerokuClient {
 
     /**
      * @summary scale app's dynos to hobby
-     * @param {"web"|"worker"} [type] process type to scale
+     * @param {Formation["type"]} [type] process type to scale
      * @return {Promise<boolean>}
      */
     async scaleHobby(type = "web") {
