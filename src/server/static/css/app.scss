@@ -2,8 +2,10 @@
 @import "~bootstrap/dist/css/bootstrap.min.css";
 
 // Components
+@import "components/_collapsible";
 @import "components/_general";
 @import "components/_header";
+@import "components/_labels";
 @import "components/_tables";
 @import "components/_forms";
 
