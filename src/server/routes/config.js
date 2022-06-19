@@ -70,7 +70,7 @@ config.get("/", async ({ query, path, app, baseUrl }, res) => {
 });
 
 config.post('/', async (req, res) => {
-    const { body, app } = req;
+    const { body, app, query } = req;
     const { password, ...fields } = body;
 
     /** @type {BotConfig|undefined} */
@@ -85,6 +85,12 @@ config.post('/', async (req, res) => {
             console.log(`[server] submitted body:\n"${JSON.stringify(body)}"`);
         }
 
+        const { instance } = query;
+        if (typeof instance !== "string") {
+            console.error(`[server] received unknown instance: "${instance}"`);
+            return res.redirect(`/config?password=${password}&success=false`);
+        }
+
         // Validation
         if (Object.keys(fields).length === 0) {
             console.error(`[server] invalid request`);
@@ -93,7 +99,7 @@ config.post('/', async (req, res) => {
 
         // Update environment variables
         const heroku = new HerokuClient(botConfig);
-        const status = await heroku.updateConfigVars(fields);
+        const status = await heroku.updateConfigVars(instance, fields);
 
         /** @type {BotRoom|undefined} */
         const room = app.get("bot_room");
