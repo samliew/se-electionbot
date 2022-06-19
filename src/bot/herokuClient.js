@@ -71,6 +71,15 @@ export class HerokuClient {
     }
 
     /**
+     * @summary gets a bot instance by name
+     * @param {string} appName Heroku app name
+     * @returns {Promise<App>}
+     */
+    async fetchInstance(appName) {
+        return this._client.get(`/apps/${appName}`);
+    }
+
+    /**
      * @summary gets bot instances
      * @returns {Promise<App[]>}
      */
