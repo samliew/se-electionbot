@@ -301,3 +301,14 @@ export const dateUnitHandlers = new Map([
  * @returns {number}
  */
 export const getCurrentUTCyear = () => new Date().getUTCFullYear();
+
+/**
+ * @summary parses a date from short or long UTC string (seconds precision)
+ * @param {string} str UTC string
+ * @returns {Date}
+ */
+export const getDateFromUTCstring = (str) => {
+    // https://regex101.com/r/OkiMXZ/2
+    const [, yyyy, MM, dd, hh = "0", mm = "0", ss = "0"] = /(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}):(\d{2}))?/.exec(str) || [];
+    return new Date(Date.UTC(+yyyy, +MM - 1, +dd, +hh, +mm, +ss));
+};
