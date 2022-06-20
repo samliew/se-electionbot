@@ -3,7 +3,7 @@ import { partialRight } from "ramda";
 import * as ServerUtils from "../../server/utils.js";
 import { flat } from "../../shared/utils/arrays.js";
 import { formatAsChatCode } from "../../shared/utils/chat.js";
-import { dateToUtcTimestamp, getMilliseconds } from "../../shared/utils/dates.js";
+import { dateToUtcTimestamp, getDateFromUTCstring, getMilliseconds } from "../../shared/utils/dates.js";
 import { matchISO8601, matchNumber } from "../../shared/utils/expressions.js";
 import { mapMap, mergeMaps } from "../../shared/utils/maps.js";
 import { formatNumber } from "../../shared/utils/strings.js";
@@ -84,11 +84,9 @@ export const setAccessCommand = (args) => {
 export const timetravelCommand = (args) => {
     const { config, election, content } = args;
 
-    const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
+    const destination = content.includes("today") ? new Date() : getDateFromUTCstring(content);
 
-    if (!today && (!yyyy || !MM || !dd)) return "Sorry, Doc! Invalid coordinates";
-
-    const destination = today ? new Date() : new Date(+yyyy, +MM - 1, +dd);
+    if (Number.isNaN(destination.valueOf())) return "Sorry, Doc! Invalid coordinates";
 
     const phase = election.getPhase(destination);
 
@@ -97,7 +95,7 @@ export const timetravelCommand = (args) => {
     config.flags.announcedWinners = false;
     config.flags.saidElectionEndingSoon = false;
 
-    config.nowOverride = today ? void 0 : destination;
+    config.nowOverride = content.includes("today") ? void 0 : destination;
 
     const intl = new Intl.DateTimeFormat("en-US", {
         year: "numeric",
