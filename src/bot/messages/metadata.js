@@ -64,7 +64,7 @@ const helpTopics = [
     { short: true, text: "Who should I vote for" },
     { short: true, text: "How is candidate score calculated" },
     { short: true, text: "What is my candidate score" },
-    { short: true, text: "What are the moderation/participation/editing badges" },
+    { short: true, text: "What are the mod/participation/editor badges" },
     { short: true, text: "What is the election status" },
     { short: true, text: "When is the next phase" },
     { short: true, text: "How many are eligible to vote" },
@@ -83,10 +83,10 @@ const helpTopics = [
     { short: false, text: "Who are the winners" },
     { short: false, text: "Who is the best mod" },
     { short: false, text: "Do moderators get paid" },
-    { short: false, text: "Can we edit a diamond into our username" },
+    { short: false, text: "Can we add a diamond to our username" },
     { short: false, text: "What is Meek STV" },
     { short: false, text: "Where can the ballot file be found" },
-    { short: false, text: "What is the link to the election" },
+    { short: false, text: "What is the election link" },
     { short: false, text: "What is the Nth question of the questionnaire" }
 ];
 
