@@ -417,7 +417,7 @@ export const isAskedAboutRequiredBadges = (text) => {
  * @returns {boolean}
  */
 export const isAskedAboutBadgesOfType = (text) => {
-    return /^(?:what|list)(?: are)?(?: the)?.+?\b(participation|editing|moderation)\s+badges/i.test(text);
+    return /^(?:what|list)(?: are)?(?: the)?.+?\b(participation|edit(?:ing|or)?|mod(?:eration)?)\s+badges/i.test(text);
 };
 
 /**

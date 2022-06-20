@@ -13,8 +13,8 @@ import { makeURL, pluralize, pluralizePhrase } from "../utils.js";
  * @type {MessageBuilder}
  */
 export const sayBadgesByType = (config, _es, election, text, user) => {
-    // https://regex101.com/r/xanwAH/2
-    const type = safeCapture(/(?<!\/)\b(participation|editing|moderation)\b(?!\/)/, text);
+    // https://regex101.com/r/xanwAH/3
+    const type = safeCapture(/(?<!\/)\b(participation|edit(?:ing|or)?|mod(?:eration)?)\b(?!\/)/, text);
     if (!type) {
         config.awaitingConfirmation.set(user.id, sayBadgesByType);
         const types = uniquify(election.electionBadges.map(({ type }) => type));

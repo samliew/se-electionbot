@@ -608,7 +608,9 @@ describe('Message Guards', () => {
     const listBadgeTypeMatches = [
         "what are the participation badges?",
         "list the moderation badges?",
-        "what are editing badges?"
+        "what are editing badges?",
+        "What are the editor badges",
+        "List mod badges",
     ];
 
     describe(isAskedAboutRequiredBadges.name, () => {
