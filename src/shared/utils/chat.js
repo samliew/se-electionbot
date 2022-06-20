@@ -1,5 +1,6 @@
 import entities from 'html-entities';
 import sanitize from "sanitize-html";
+import { validateDate } from "./dates.js";
 
 /**
  * @summary strips mentions of a given user from a message
@@ -48,3 +49,17 @@ export const validateChatTranscriptURL = (url) => {
  * @returns {string}
  */
 export const formatAsChatCode = (lines) => lines.map((l) => `${" ".repeat(4)}${l}`).join("\n");
+
+/**
+ * @summary formats a given {@link date} as /yyyy/M/d
+ * @param {string | number | Date} date date to format
+ * @returns {string}
+ */
+export const formatAsTranscriptPath = (date) => {
+    return "/" + validateDate(date)
+        .toISOString()
+        .slice(0, 10)
+        .split("-")
+        .map((part) => part.replace(/^0/, ""))
+        .join("/");
+};
