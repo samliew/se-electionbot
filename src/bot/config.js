@@ -509,6 +509,9 @@ export class BotConfig {
     get showTranscriptMessages() {
         return this.#env.num("transcript_size", 20);
     }
+    set showTranscriptMessages(v) {
+        this.#env.set("transcript_size", v);
+    }
 
     /**
      * @summary adds a user as a bot administrator
