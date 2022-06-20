@@ -1,5 +1,4 @@
 import express from "express";
-import { fetchChatTranscript } from "../../bot/utils.js";
 import { getHerokuInstancesForNav, onMountAddToRoutes, prettifyPath } from "../utils.js";
 
 /**
@@ -33,9 +32,7 @@ say.get("/", async ({ query, path, baseUrl, app }, res) => {
             undefined: ""
         };
 
-        const { chatDomain, chatRoomId, showTranscriptMessages } = config;
-
-        const transcriptMessages = await fetchChatTranscript(config, `https://chat.${chatDomain}/transcript/${chatRoomId}`);
+        const { chatDomain, chatRoomId } = config;
 
         const botChatUser = await botClient.getMe();
 
@@ -54,7 +51,6 @@ say.get("/", async ({ query, path, baseUrl, app }, res) => {
                 instances: await getHerokuInstancesForNav(config),
                 routes: app.get("routes"),
                 statusText: statusMap[success],
-                transcriptMessages: transcriptMessages.slice(-showTranscriptMessages),
             }
         });
     } catch (error) {

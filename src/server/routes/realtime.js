@@ -86,7 +86,7 @@ realtime.get("/", async ({ ip, query, app }, res) => {
         while (server.listening && res.writable) {
             const transcriptMessages = await fetchChatTranscript(config, botRoom.transcriptURL); // FIXME: cache internally
 
-            transcriptMessages.forEach((message) => {
+            transcriptMessages.reverse().forEach((message) => {
                 const { messageId } = message;
                 if (sent.has(messageId)) return;
                 res.write(`event: message\ndata: ${JSON.stringify(message)}${EVENT_SEPARATOR}`);

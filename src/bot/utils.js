@@ -5,8 +5,8 @@ import { get } from 'https';
 import { JSDOM } from "jsdom";
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
-import { validateChatTranscriptURL } from "../shared/utils/chat.js";
-import { dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "../shared/utils/dates.js";
+import { formatAsTranscriptPath, validateChatTranscriptURL } from "../shared/utils/chat.js";
+import { addDates, dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "../shared/utils/dates.js";
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { constructUserAgent } from "../shared/utils/fetch.js";
 import { getOrInit, has } from "../shared/utils/maps.js";
@@ -229,6 +229,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
  *   chatUserId: number,
  *   chatDomain: string,
  *   message: string,
+ *   messageURL?: string,
  *   messageMarkup: string,
  *   messageHtml?: string,
  *   date: number,
@@ -238,6 +239,11 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
  * @summary fetches the chat room transcript and retrieve messages
  * @param {BotConfig} config bot configuration
  * @param {string} url url of chat transcript
+ * @param {{
+ *  messages?: ChatMessage[],
+ *  order?: "asc" | "desc",
+ *  transcriptDate?: Date
+ * }} [options] configuration options
  * @returns {Promise<ChatMessage[]>}
  *
  * INFO:
@@ -245,77 +251,133 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
  *   this function currently uses the UTC time of last message + 1 second.
  * If a exact timestamps are required, use fetchLatestChatEvents
  */
-export const fetchChatTranscript = async (config, url) => {
-    /** @type {ChatMessage[]} */
-    const messages = [];
+export const fetchChatTranscript = async (config, url, options = {}) => {
+    const { messages = [], order = "desc", transcriptDate } = options;
 
-    // Validate chat transcript url
+    const { showTranscriptMessages, nowOverride } = config;
+
+    // already reached the target, can return early
+    if (messages.length >= showTranscriptMessages) return messages;
+
     if (!validateChatTranscriptURL(url)) return messages;
-
-    console.log('Fetching chat transcript:', url);
 
     // https://regex101.com/r/pMzAk7/2
     const chatDomain = safeCapture(/((?:meta\.)?stack(?:overflow|exchange)\.com)/, url) || "stackoverflow.com";
 
-    const chatTranscript = await fetchUrl(config, url);
-    const $chat = cheerio.load(/** @type {string} */(chatTranscript));
+    const now = transcriptDate || nowOverride || new Date();
+
+    const utcDate = formatAsTranscriptPath(now);
+
+    console.log(`[transcript] fetching ${url}${utcDate}`);
+
+    const chatTranscript = await fetchUrl(config, url + utcDate);
+    const { window: { document } } = new JSDOM(chatTranscript);
 
     // Get date from transcript
-    const [, year, m, date] = $chat('head title').text().match(/(\d+)-(\d+)-(\d+)/) || [];
+    const [, year, m, date] = document.querySelector("head title")?.textContent?.match(/(\d+)-(\d+)-(\d+)/) || [];
     const month = m ? +m - 1 : void 0;
 
-    const now = Date.now();
-    let lastKnownDatetime = null;
+    // process messages in descending order
+    const messageElements = [...document.querySelectorAll('#transcript .message')];
 
-    $chat('#transcript .message').each(function (i, el) {
-        const $this = $chat(el);
-        const messageId = +($this.children('a').attr('name') || 0);
-        const userlink = $this.parent().siblings('.signature').find('a');
-        const messageElem = $this.find('.content');
+    // sanity check if the room doesn't have messages to reach 'TRANSCRIPT_SIZE'
+    // fetching transcript for a non-existent date results in an empty list
+    if (!messageElements.length) return messages;
 
+    /**
+     * @param {Element|null|undefined} elem
+     */
+    const parseTimestamp = (elem) => {
+        const [, h, min, apm] = elem
+            ?.closest(".messages")
+            ?.querySelector(".timestamp")
+            ?.textContent
+            ?.match(/(\d+):(\d+) ([AP])M/i) || [];
+
+        const hour = h && apm ? +(apm === 'A' ? (h === '12' ? 0 : h) : +h + 12) : void 0;
+
+        // decrement by 1s if no timestamp, otherwise new UTC timestamp
+        if ([year, month, date, hour, min].every(p => p !== void 0)) {
+            return Date.UTC(+year, /** @type {number} */(month), +date, hour, +min, 0);
+        }
+
+        return;
+    };
+
+    const timestamps = messageElements.map(parseTimestamp);
+
+    /** @type {number | undefined} */
+    let lastKnownTimestamp;
+
+    messageElements.forEach((el, idx) => {
+        const messageTimestamp = timestamps[idx];
+
+        const dateFound = messageTimestamp !== void 0;
+
+        lastKnownTimestamp = dateFound ?
+            messageTimestamp :
+            (lastKnownTimestamp ? lastKnownTimestamp + 1000 : timestamps.slice(0, idx).find(Boolean));
+
+        if (!lastKnownTimestamp) return;
+
+        // decrement by 1s if no timestamp, otherwise new UTC timestamp
+        const date = lastKnownTimestamp;
+
+        const messageAnchor = el.querySelector("a");
+        if (!messageAnchor) return;
+
+        const messageId = +(messageAnchor.getAttribute("name") || 0);
+
+        /** @type {HTMLAnchorElement|null|undefined} */
+        const userAnchor = el.closest(".monologue")?.querySelector(".signature a");
+        if (!userAnchor) return;
+
+        const messageElem = el.querySelector(".content");
         if (!messageElem) return;
 
-        const messageText = messageElem.text()?.trim();
-        // Strip HTML from chat message
-        const messageHtml = messageElem.html()?.trim() || "";
+        const message = messageElem.textContent?.trim() || "";
+        const messageHtml = messageElem.innerHTML?.trim() || "";
         const messageMarkup = htmlToChatMarkdown(messageHtml);
+        const messageURL = `${url}?m=${messageId}#${messageId}`;
 
-        const [, h, min, apm] = $this.siblings('.timestamp').text().match(/(\d+):(\d+) ([AP])M/i) || [];
+        // can never be in the future
+        if (date > now.valueOf()) return;
 
-        const hour = h && apm ? +(
-            apm === 'A' ? (
-                h === '12' ? 0 : h
-            ) : +h + 12
-        ) : void 0;
-
-        // Increment by 1s if no timestamp, otherwise new UTC timestamp
-        if ([year, month, date, hour, min].every(p => p !== void 0)) {
-            lastKnownDatetime = Date.UTC(+year, /** @type {number} */(month), +date, hour, +min, 0);
-
-            if (config.verbose) console.log("lastKnownDatetime", messageId, lastKnownDatetime);
-        }
-        else {
-            lastKnownDatetime += 1000;
-        }
+        const userId = matchNumber(/(-?\d+)/, userAnchor.href);
+        const { textContent: username } = userAnchor;
+        if (!userId || !username) return;
 
         messages.push({
-            username: userlink.text(),
-            // @ts-expect-error
-            chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
             chatDomain,
-            message: messageText,
-            messageMarkup: messageMarkup,
-            messageHtml: messageHtml,
-            date: lastKnownDatetime <= now ? lastKnownDatetime : now, // can never be in the future
-            messageId: messageId
+            chatUserId: +userId,
+            date,
+            message,
+            messageHtml,
+            messageId,
+            messageURL,
+            messageMarkup,
+            username,
         });
-    }).get();
+    });
 
-    if (config.verbose) {
-        console.log('Transcript messages fetched:', messages.slice(-30));
+    // always put latest messages first
+    order === "asc" ? messages.sort((a, b) => a.date < b.date ? -1 : 1) : messages.reverse();
+
+    const slice = messages.slice(0, showTranscriptMessages);
+
+    // reached after scraping, don't need to fetch more
+    if (slice.length < showTranscriptMessages) {
+        // throttle chat scrapes just in case
+        await wait(0.5);
+
+        return fetchChatTranscript(config, url, {
+            ...options,
+            messages,
+            transcriptDate: addDates(now, -1),
+        });
     }
 
-    return messages;
+    return slice;
 };
 
 /**

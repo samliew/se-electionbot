@@ -332,8 +332,6 @@ use defaults ${defaultChatNotSet}`
         /*
          * Sync state from chat transcript on startup
          * - activityCounter, lastActivityTime, lastMessageTime, lastBotMessage, (botSentLastMessage)
-         *
-         * NOTE: Not a very reliable method if there are few messages in the room, since transcript page only displays messages from the same day
          */
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
 
