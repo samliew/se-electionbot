@@ -52,8 +52,6 @@ realtime.get("/", async ({ ip, query, app }, res) => {
 
     console.log(`[${ip}] subscribed to ${type} realtime`);
 
-    const sent = new Map();
-
     // TODO: restrict
     if (type === "cron") {
         /** @type {Announcement} */
@@ -83,15 +81,17 @@ realtime.get("/", async ({ ip, query, app }, res) => {
     }
 
     if (type === "message") {
-        while (server.listening && res.writable) {
-            const transcriptMessages = await fetchChatTranscript(config, botRoom.transcriptURL); // FIXME: cache internally
+        const sent = new Map();
 
-            transcriptMessages.reverse().forEach((message) => {
+        while (server.listening && res.writable) {
+            const messages = await fetchChatTranscript(config, botRoom.transcriptURL); // FIXME: cache internally
+
+            for (const message of messages.reverse()) {
                 const { messageId } = message;
-                if (sent.has(messageId)) return;
+                if (sent.has(messageId)) continue;
                 res.write(`event: message\ndata: ${JSON.stringify(message)}${EVENT_SEPARATOR}`);
                 sent.set(messageId, message);
-            });
+            }
 
             await wait(30);
         }
