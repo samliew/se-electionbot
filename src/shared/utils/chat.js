@@ -63,3 +63,35 @@ export const formatAsTranscriptPath = (date) => {
         .map((part) => part.replace(/^0/, ""))
         .join("/");
 };
+
+/**
+ * @summary parses chat timestamp
+ * @param {Element} elem message element
+ * @param {Date} now current transcript date
+ * @returns {number|undefined}
+ */
+export const parseTimestamp = (elem, now) => {
+
+    const parent = elem?.closest(".messages");
+    if (!parent) return;
+
+    const stamp = parent.querySelector(".timestamp");
+    if (!stamp) return;
+
+    const [, h, min, apm] = stamp.textContent?.match(/(\d+):(\d+) ([AP])M/i) || [];
+
+    const hour = h && apm ? +(apm === 'A' ? (h === '12' ? 0 : h) : +h + 12) : void 0;
+
+    if ([hour, min].some(p => p === void 0)) return;
+
+    const secondsOffset = [...parent.children].indexOf(elem) - 1;
+
+    return Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        hour,
+        +min,
+        secondsOffset < 0 ? 0 : secondsOffset
+    );
+};
