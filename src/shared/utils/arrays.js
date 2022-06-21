@@ -82,3 +82,20 @@ export const asyncMapSequential = async (array, callback) => {
 
     return output;
 };
+
+/**
+ * @template {unknown[]} T
+ *
+ * @summary finds last array element satisfying the {@link predicate}
+ * @param {T} array array to search
+ * @param {(val: T[number], idx: number, arr: T) => boolean} predicate search callback
+ * @returns {T[number]|undefined}
+ */
+export const findLast = (array, predicate) => {
+    for (let i = array.length - 1; i >= 0; i--) {
+        const val = array[i];
+        if (predicate(val, i, array)) return val;
+    }
+
+    return;
+};
