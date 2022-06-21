@@ -75,7 +75,10 @@
         const dateLink = document.createElement("a");
         dateLink.href = `https://chat.${chatDomain}/transcript/message/${messageId}`;
         dateLink.target = "_blank";
-        dateLink.textContent = dateToRelativetime(date);
+
+        const dateSpan = document.createElement("span");
+        dateSpan.classList.add("relativetime");
+        dateSpan.title = new Date(date).toISOString();
 
         const userCell = document.createElement("td");
 
@@ -87,11 +90,14 @@
         const msgCell = document.createElement("td");
         msgCell.innerHTML = messageHtml;
 
+        dateLink.append(dateSpan);
         dateCell.append(dateLink);
         userCell.append(userLink);
         row.append(idCell, dateCell, userCell, msgCell);
 
         messagesTableBody.prepend(row);
+
+        updateRelativeDates();
     });
 
     realtime.addEventListener("error", (event) => {
