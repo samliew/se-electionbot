@@ -9,20 +9,18 @@ import { allMatch, noneMatch, someMatch } from "../shared/utils/expressions.js";
 
 /**
  * @summary checks if the message asked how or where to nominate
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForNominatingInfo = (text) => {
     return someMatch([
-        /^(?:how|where|can I)(?:\s+can I)?(?:\s+to)?\s+(?:nominate|submit|register|enter|apply|elect)(?!\s+(?:an)?others?|\s+some(?:one|body))/i,
-        /^(?:how|where|can I)\s+(?:to |can I )?be(?:come)?(?:\s+a)?\s+mod(?:erator)?/i
+        /^(?:how|where)(?:\s+can\s+I)?(?:\s+to)?\s+(?:nominate|submit|register|enter|apply|elect)(?!\s+(?:an)?others?|\s+some(?:one|body))/i,
+        /^(?:how|where)\s+(?:to |can\s+I\s+)?be(?:come)?(?:\s+a)?\s+mod(?:erator)?/i
     ], text);
 };
 
 /**
  * @summary checks if the message asked if they can nominate others
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedIfCanNominateOthers = (text) => {
     return someMatch([
@@ -32,8 +30,7 @@ export const isAskedIfCanNominateOthers = (text) => {
 
 /**
  * @summary checks if the message asked why a nomination was removed
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhyNominationRemoved = (text) => {
     return /^(?:why|what)\b/.test(text) &&
@@ -53,8 +50,7 @@ export const isAskedWhyBeAMod = (text) => {
 
 /**
  * @summary checks if the message asked if mods are paid
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedIfModsArePaid = (text) => {
     return /^(?:why|what|are|how|do)\b/.test(text) &&
@@ -64,19 +60,19 @@ export const isAskedIfModsArePaid = (text) => {
 
 /**
  * @summary checks if the message asked what do moderators do or what privileges they have
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutModsOrModPowers = (text) => {
-    return /^(?:why|what|should|does)\b/.test(text) &&
-        /\b(?:should i (?:be|become)|is a|(?:do|does)(?: a)? (?:mod|moderator)s?|benefits?|privileges?|powers?|responsibilit(?:y|ies))\b/.test(text) &&
-        /\b(?:mod|moderator)s?\b/.test(text);
+    return someMatch([
+        /^what\s+(?:do(?:es)?|are|is)(?:\s+(?:a|the))?\s+(?:mod(?:erator)?'?s?'?)(?:\s+(?:doe?|responsibilit(?:ie|y)|power)s?)?/i,
+        /^(?:why\s+)?should\s+i\s+(?:be(?:come)?)(?:\s+a)?\s+(?:mod(?:erator)?)/i,
+        /^what(?:\s+are)?(?:\s+(?:a|the))?\s+(?:power|responsibilit(?:ie|y)|power)s?\s+(?:do(?:es)?|of)(?:\s+(?:a|the))?\s+mod(?:erator)?s?(?:\s+ha(?:ve|s))?/i,
+    ], text);
 };
 
 /**
  * @summary checks if the message asked how or where to vote
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutVoting = (text) => {
     return allMatch([
@@ -95,9 +91,9 @@ export const isAskedAboutVoting = (text) => {
 export const isAskedForCurrentMods = (text, apiSlug = null) => {
     return someMatch([
         new RegExp(`^whois ${apiSlug} mod(?:erator)?s$`),
-        /^who(?: are| is|'s) the current mod(?:erator)?s?/,
-        /^how many mod(?:erator)?s? (are there|do we have)/,
-        /^how.*\bcontact\b.*mod(?:erator)?s?/
+        /^who(?: are| is|'s)(?:\s+the)?\s+(?:current|present)\s+mod(?:erator)?s?/i,
+        /^how many mod(?:erator)?s? (are there|do we have)/i,
+        /^how.*\bcontact\b.*mod(?:erator)?s?/i,
     ], text);
 };
 
@@ -118,8 +114,7 @@ export const isAskedForFormerMods = (text, apiSlug = null) => {
 
 /**
  * @summary checks if the message asked to tell who winners are
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForCurrentWinners = (text) => {
     return allMatch([
@@ -130,8 +125,7 @@ export const isAskedForCurrentWinners = (text) => {
 
 /**
  * @summary checks if the message asked to tell how many positions are due
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForCurrentPositions = (text) => {
     return /^how many (?:positions|mod(?:erator)?s) (?:are|were|will be)(?: being)? (?:elected|there)/.test(text);
@@ -139,8 +133,7 @@ export const isAskedForCurrentPositions = (text) => {
 
 /**
  * @summary checks if the message asked to tell who nominees are
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForCurrentNominees = (text) => {
     return someMatch([
@@ -152,8 +145,7 @@ export const isAskedForCurrentNominees = (text) => {
 
 /**
  * @summary checks if the message asked to tell who the withdrawn nominees are
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForWithdrawnNominees = (text) => {
     return someMatch([
@@ -165,8 +157,7 @@ export const isAskedForWithdrawnNominees = (text) => {
 
 /**
  * @summary checks if the message asked for current election schedule
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForElectionSchedule = (text) => {
     return /(?:when|how|what)(?: is|'s) the election(?: scheduled)?|election schedule/.test(text);
@@ -174,8 +165,7 @@ export const isAskedForElectionSchedule = (text) => {
 
 /**
  * @summary checks if the message asked if anyone can edit in a ♦ in their username
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutUsernameDiamond = (text) => {
     return /(?:edit|insert|add).+?(?:\u2666|diamond).+?(?:user)?name/.test(text);
@@ -183,8 +173,7 @@ export const isAskedAboutUsernameDiamond = (text) => {
 
 /**
  * @summary checks if the message asked who created or maintains the bot
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhoMadeMe = (text) => {
     return /who(?: (?:are|is) your)?\s+(?:made|created|own(?:s|ers?)|develop(?:s|ed|ers?)|maintain(?:s|ers?))(?:\s+you)?/.test(text);
@@ -192,8 +181,7 @@ export const isAskedWhoMadeMe = (text) => {
 
 /**
  * @summary checks if the message asked who or what the bot is
- * @param {string} text message content
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhoAmI = (text) => {
     return someMatch([
@@ -205,8 +193,7 @@ export const isAskedWhoAmI = (text) => {
 /**
  * @mention
  * @summary checks if the message asked how the bot fares
- * @param {string} text message content
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedHowAmI = (text) => {
     return someMatch([
@@ -216,8 +203,7 @@ export const isAskedHowAmI = (text) => {
 
 /**
  * @summary checks if the message asked whether the bot is alive
- * @param {string} text message content
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAmIalive = (text) => {
     return someMatch([/^(?:where\s+ar[et]\s+(?:you|thou)|alive|dead|ping)(?:$|\?)/i, /^are\s+you\s+(?:t?here|alive|dead)(?:$|\?)/i], text);
@@ -225,8 +211,7 @@ export const isAskedAmIalive = (text) => {
 
 /**
  * @summary checks if the message asked for meaning of life
- * @param {string} text message content
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedMeaningOfLife = (text) => {
     return someMatch([
@@ -237,8 +222,7 @@ export const isAskedMeaningOfLife = (text) => {
 
 /**
  * @summary checks if the message asked for one's candidate score
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForOwnScore = (text) => {
     return /can i nominate myself/.test(text) ||
@@ -247,8 +231,7 @@ export const isAskedForOwnScore = (text) => {
 
 /**
  * @summary checks if the message asked for candidate score of another user
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForOtherScore = (text) => {
     return allMatch([
@@ -258,22 +241,20 @@ export const isAskedForOtherScore = (text) => {
 
 /**
  * @summary checks if the message asked for candidate score calculation formula
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForScoreFormula = (text) => {
     return someMatch(
         [
-            /(?:what|how)\b.+\bcandidate score\b(?!\s+of).*\b(?:calculated|formula)?(?:$|\?)/,
-            /what\b.+\bformula\b.+\bcandidate score(?:$|\?)/
+            /^(?:what|how)\s+is(?:\s+(?:a|the))?\s+candidate\s+score\s+(?:formula|calculated)/i,
+            /^what\s+is(?:\s+(?:a|the))?(\s+formula\s+for(?:\s+(?:a|the))?)?\s+candidate\s+score(?!\s+(?:of|for))/i,
         ], text
     );
 };
 
 /**
  * @summary checks if the message asked for candidate score leaderboard
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForScoreLeaderboard = (text) => {
     return /who\b.*\b(?:highest|greatest|most)\b.*\bcandidate scores?/.test(text) ||
@@ -282,8 +263,7 @@ export const isAskedForScoreLeaderboard = (text) => {
 
 /**
  * @summary detects if someone is thanking the bot
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isThankingTheBot = (text) => {
     return /thanks?(?= you|,? bot|[!?]|$)/.test(text);
@@ -291,8 +271,7 @@ export const isThankingTheBot = (text) => {
 
 /**
  * @summary detects if someone is praising or loving the bot
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isLovingTheBot = (text) => {
     return [
@@ -304,8 +283,7 @@ export const isLovingTheBot = (text) => {
 
 /**
  * @summary detects if someone is saying happy birthday
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isSayingHappyBirthday = (text) => {
     return [
@@ -316,8 +294,7 @@ export const isSayingHappyBirthday = (text) => {
 /**
  * @fun
  * @summary detects if someone is loving the bot in fun mode
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isLovingTheBotFun = (text) => {
     return someMatch([
@@ -327,8 +304,7 @@ export const isLovingTheBotFun = (text) => {
 
 /**
  * @summary detects if someone hates the bot
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isHatingTheBot = (text) => {
     return [
@@ -340,8 +316,7 @@ export const isHatingTheBot = (text) => {
 
 /**
  * @summary detects if someone is saying the bot is insane
- * @param {string} text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isSayingBotIsInsane = (text) => {
     return [
@@ -351,8 +326,7 @@ export const isSayingBotIsInsane = (text) => {
 
 /**
  * @summary checks if the message is asking about user eligibility
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForUserEligibility = (text) => {
     return /^(?:can|is) user \d+(?: be)? (?:eligible|nominated?|elected?)/.test(text);
@@ -361,8 +335,7 @@ export const isAskedForUserEligibility = (text) => {
 /**
  * @fun
  * @summary checks if a message is asking how many mods it takes to change a lightbulb
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutLightbulb = (text) => {
     return /how (?:many|much) mod(?:erator)?s(?: does)? it takes? to (?:change|fix|replace)(?: a| the)? light\s?bulb/.test(text);
@@ -371,8 +344,7 @@ export const isAskedAboutLightbulb = (text) => {
 /**
  * @fun
  * @summary checks if a message is asking for a Jon Skeet joke
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutJonSkeetJokes = (text) => {
     return /(?:tell|say)\b.*\bjon\s?skeet\s?(?:joke|fact|meme)?(?:[?!]|$)/i.test(text);
@@ -381,19 +353,17 @@ export const isAskedAboutJonSkeetJokes = (text) => {
 /**
  * @fun
  * @summary checks if a message is asking for a joke
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutJokes = (text) => {
     return someMatch([
-        /(?:tell|make|say)\b.+?\b(?:me|us)?\b.+?(?:(?: a)? joke|laugh)/
-    ], text);
+        /(?:tell|make|say)\b.+?\b(?:me|us)?\b.+?(?:(?: a)? joke|laugh)/i
+    ], text) && !/jon\s?skeet/i.test(text);
 };
 
 /**
  * @summary checks if a message is asking if bot's responses are canned
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedIfResponsesAreCanned = (text) => {
     return /bot\b.+?says?\b.+?canned/i.test(text);
@@ -401,8 +371,7 @@ export const isAskedIfResponsesAreCanned = (text) => {
 
 /**
  * @summary checks if a message is asking to list required badges
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutRequiredBadges = (text) => {
     return someMatch([
@@ -413,8 +382,7 @@ export const isAskedAboutRequiredBadges = (text) => {
 
 /**
  * @summary checks if a message is asking to list badges of a certain type
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutBadgesOfType = (text) => {
     return /^(?:what|list)(?: are)?(?: the)?.+?\b(participation|edit(?:ing|or)?|mod(?:eration)?)\s+badges/i.test(text);
@@ -422,42 +390,36 @@ export const isAskedAboutBadgesOfType = (text) => {
 
 /**
  * @summary checks if a message is asking how to vote or who to vote for
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedHowOrWhoToVote = (text) => {
-    return text.length > 14 && // temp fix - prevents matching "how to vote?"
-        someMatch(
-            [
-                /^(?:how|whom?)\s+(?:should(?:n't|\s+not)? i|to)\s+(?:(?:choose|pick|decide|determine)?.+?\bvote\b|vote)/i,
-                /^how\s+do(?:es)?\s+(?:the\s+)?voting\s+(?:process)?work/i
-            ],
-            text
-        );
+    return someMatch([
+        /^(?:whom?|how)\s+(?:should(?:n't|\s+not)?\s+i|to)\s+(?:choose|pick|decide|determine|vote\s+for)/i,
+        /^how\s+do(?:es)?\s+(?:i|one)\s+vote/i,
+        /^how\s+do(?:es)?\s+(?:the\s+)?voting\s+(?:process)?work/i,
+    ], text);
 };
 
 /**
  * @summary checks if a message is asking how to save the votes
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedHowToSaveVotes = (text) => {
     return someMatch(
-            [
-                /(?:how\s+)?(?:are|can i|should i|do i|to)\s+.*\b(?:saved?|votes?|ballot)\b.+\b(?:it|saved?|votes?|ballot)\b/i,
-                /^(?:is|are)\s+the.+(?:votes?|voting|ballot).+(?:saved?|submitted|sen[dt]).+automatically/i,
-                /^(?:where|which)(?: button)?.+to.+click.+to.+(?:save|submit|send).+the.+(?:votes?|voting|ballot)/i,
-                /^do i(?: have to click anything to)?.+\b(?:save|submit|send)\b.+(?:the|my).+(?:votes?|voting|ballot)/i,
-                /^(?:which|is there a|where is the) button to (?:submit the (?:votes?|ballot)|click after voting)/i,
-            ],
-            text
-        );
+        [
+            /(?:how\s+)?(?:are|can i|should i|do i|to)\s+.*\b(?:saved?|votes?|ballot)\b.+\b(?:it|saved?|votes?|ballot)\b/i,
+            /^(?:is|are)\s+the.+(?:votes?|voting|ballot).+(?:saved?|submitted|sen[dt]).+automatically/i,
+            /^(?:where|which)(?: button)?.+to.+click.+to.+(?:save|submit|send).+the.+(?:votes?|voting|ballot)/i,
+            /^do i(?: have to click anything to)?.+\b(?:save|submit|send)\b.+(?:the|my).+(?:votes?|voting|ballot)/i,
+            /^(?:which|is there a|where is the) button to (?:submit the (?:votes?|ballot)|click after voting)/i,
+        ],
+        text
+    );
 };
 
 /**
  * @summary checks if a message is asking where did the nomination comments go
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutMissingComments = (text) => {
     return allMatch([
@@ -469,8 +431,7 @@ export const isAskedAboutMissingComments = (text) => {
 
 /**
  * @summary checks if a message is asking who is the best candidate
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhoIsTheBestCandidate = (text) => {
     return someMatch([
@@ -480,8 +441,7 @@ export const isAskedWhoIsTheBestCandidate = (text) => {
 
 /**
  * @summary checks if a message is asking who is the best mod
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhoIsTheBestMod = (text) => {
     return someMatch([
@@ -491,8 +451,7 @@ export const isAskedWhoIsTheBestMod = (text) => {
 
 /**
  * @summary checks if a message is asking about STV ranked-choice voting
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutSTV = (text) => {
     return someMatch([
@@ -516,8 +475,7 @@ export const isBotMentioned = async (text, botChatProfile) => {
 
 /**
  * @summary checks if a message is asking how many mods are in the room
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedHowManyModsInTheRoom = (text) => {
     return someMatch([
@@ -527,8 +485,7 @@ export const isAskedHowManyModsInTheRoom = (text) => {
 
 /**
  * @summary checks if a message is asking how many candidates are in the room
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedHowManyCandidatesInTheRoom = (text) => {
     return someMatch([
@@ -549,8 +506,7 @@ export const isAskedWhatBotCanDo = (text) => {
 
 /**
  * @summary checks if a message is asking for help
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForHelp = (text) => {
     return someMatch([
@@ -561,8 +517,7 @@ export const isAskedForHelp = (text) => {
 
 /**
  * @summary checks if a message is asking for full help
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForFullHelp = (text) => {
     return someMatch([
@@ -572,8 +527,7 @@ export const isAskedForFullHelp = (text) => {
 
 /**
  * @summary checks if a message is asking for what an election is
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhatElectionIs = (text) => {
     return text.length <= 56 && someMatch([
@@ -584,8 +538,7 @@ export const isAskedWhatElectionIs = (text) => {
 
 /**
  * @summary checks if a message is asking what the election status is
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhatIsElectionStatus = (text) => {
     return someMatch([
@@ -597,8 +550,7 @@ export const isAskedWhatIsElectionStatus = (text) => {
 
 /**
  * @summary checks if a message is asking when is the next phase
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhenIsTheNextPhase = (text) => {
     return someMatch([
@@ -610,8 +562,7 @@ export const isAskedWhenIsTheNextPhase = (text) => {
 
 /**
  * @summary checks if a message is asking when the election ends
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhenTheElectionEnds = (text) => {
     return someMatch([
@@ -621,8 +572,7 @@ export const isAskedWhenTheElectionEnds = (text) => {
 
 /**
  * @summary checks if a message is asking how many users are eligible to vote
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedHowManyAreEligibleToVote = (text) => {
     return someMatch([
@@ -632,8 +582,7 @@ export const isAskedHowManyAreEligibleToVote = (text) => {
 
 /**
  * @summary checks if a message is asking for the election page
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForElectionPage = (text) => {
     return someMatch([
@@ -645,8 +594,7 @@ export const isAskedForElectionPage = (text) => {
 
 /**
  * @summary checks if a message is asking where can one find a ballot file
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutBallotFile = (text) => {
     return someMatch([
@@ -657,8 +605,7 @@ export const isAskedAboutBallotFile = (text) => {
 
 /**
  * @summary checks if a message is asking for the list of election phases
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutElectionPhases = (text) => {
     return someMatch([
@@ -669,8 +616,7 @@ export const isAskedAboutElectionPhases = (text) => {
 
 /**
  * @summary checks if a message is asking how many users already voted
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedHowManyVoted = (text) => {
     return someMatch([
@@ -681,8 +627,7 @@ export const isAskedHowManyVoted = (text) => {
 
 /**
  * @summary checks if a message is asking how many mods already voted
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedHowManyModsVoted = (text) => {
     return someMatch([
@@ -692,8 +637,7 @@ export const isAskedHowManyModsVoted = (text) => {
 
 /**
  * @summary checks if a message is asking if one has voted themselves
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedIfOneHasVoted = (text) => {
     return someMatch([
@@ -703,8 +647,7 @@ export const isAskedIfOneHasVoted = (text) => {
 
 /**
  * @summary checks if a message is asking if one can vote
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedIfCanVote = (text) => {
     return someMatch([
@@ -714,8 +657,7 @@ export const isAskedIfCanVote = (text) => {
 
 /**
  * @summary checks if a message is asking where to find results
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhereToFindResults = (text) => {
     return someMatch([
@@ -726,8 +668,7 @@ export const isAskedWhereToFindResults = (text) => {
 
 /**
  * @summary checks if a message is asking for a question from the questionnaire
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedForQuestionnaireQuestion = (text) => {
     return someMatch([
@@ -737,8 +678,7 @@ export const isAskedForQuestionnaireQuestion = (text) => {
 
 /**
  * @summary checks if a message is asking for past election results
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutElectionResults = (text) => {
     return someMatch([
@@ -750,8 +690,7 @@ export const isAskedAboutElectionResults = (text) => {
 
 /**
  * @summary checks if a message is asking for the election phase duration
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutElectionPhaseDuration = (text) => {
     return someMatch([
@@ -761,8 +700,7 @@ export const isAskedAboutElectionPhaseDuration = (text) => {
 
 /**
  * @summary checks if a message is asking for why the bot is
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedWhyIsBot = (text) => {
     return someMatch([
@@ -773,8 +711,7 @@ export const isAskedWhyIsBot = (text) => {
 
 /**
  * @summary checks if a message is asking about bot pronouns
- * @param {string} text message text
- * @returns {boolean}
+ * @type {MessageGuard}
  */
 export const isAskedAboutBotPronouns = (text) => {
     return someMatch([
