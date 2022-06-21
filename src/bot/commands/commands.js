@@ -537,8 +537,12 @@ export const joinRoomCommand = async (args) => {
         return "Missing target room ID";
     }
 
-    const status = await client.joinRoom(+roomId);
+    const room = client.getRoom(+roomId);
+
+    const status = await room.join();
     const roomURL = makeURL(roomId, `https://chat.${config.chatDomain}/rooms/${roomId}`);
+
+    await room.watch();
 
     return status ? `Joined room ${roomURL}` : `Failed to join room ${roomId}`;
 };

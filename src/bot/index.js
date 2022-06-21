@@ -409,7 +409,7 @@ use defaults ${defaultChatNotSet}`
             "greet": ["makes the bot welcome everyone", greetCommand, /^(?:greet|welcome)/, AccessLevel.privileged],
             "ignore": ["stop bot from responding to a user", ignoreUserCommand, /^ignore \d+/, AccessLevel.privileged],
             "impersonate": ["impersonates a user", impersonateUserCommand, /^impersonate \d+/, AccessLevel.dev],
-            "join room": ["joins a given room", joinRoomCommand, /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, AccessLevel.dev],
+            "join room": ["joins a given room", joinRoomCommand, /^(?:join|watch)\s+(\d+\s+|)room(?:\s+(\d+)|)/, AccessLevel.dev],
             "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, /leave(?:\s+this)?\s+room/, AccessLevel.dev],
             "mute": ["stop bot from responding for N mins", muteCommand, /^(?:mute|timeout|sleep)/, AccessLevel.privileged],
             "mods voted": ["posts how many mods voted", getModsVotedCommand, /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, AccessLevel.privileged],
