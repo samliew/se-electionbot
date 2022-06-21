@@ -312,3 +312,13 @@ export const getDateFromUTCstring = (str) => {
     const [, yyyy, MM, dd, hh = "0", mm = "0", ss = "0"] = /(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}):(\d{2}))?/.exec(str) || [];
     return new Date(Date.UTC(+yyyy, +MM - 1, +dd, +hh, +mm, +ss));
 };
+
+/**
+ * @summary returns a copy of a {@link date} shifted to its EOD
+ * @param {string|number|Date} date date to shift
+ * @returns {Date}
+ */
+export const toEndOfDay = (date) => {
+    const d = validateDate(date);
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 23, 59, 59, 999));
+};
