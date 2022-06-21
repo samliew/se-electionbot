@@ -5,8 +5,9 @@ import { get } from 'https';
 import { JSDOM } from "jsdom";
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
-import { formatAsTranscriptPath, validateChatTranscriptURL } from "../shared/utils/chat.js";
-import { addDates, dateToRelativeTime, dateToUtcTimestamp, toTadParamFormat } from "../shared/utils/dates.js";
+import { findLast } from "../shared/utils/arrays.js";
+import { formatAsTranscriptPath, parseTimestamp, validateChatTranscriptURL } from "../shared/utils/chat.js";
+import { addDates, dateToRelativeTime, dateToUtcTimestamp, toEndOfDay, toTadParamFormat } from "../shared/utils/dates.js";
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { constructUserAgent } from "../shared/utils/fetch.js";
 import { getOrInit, has } from "../shared/utils/maps.js";
@@ -273,10 +274,6 @@ export const fetchChatTranscript = async (config, url, options = {}) => {
     const chatTranscript = await fetchUrl(config, url + utcDate);
     const { window: { document } } = new JSDOM(chatTranscript);
 
-    // Get date from transcript
-    const [, year, m, date] = document.querySelector("head title")?.textContent?.match(/(\d+)-(\d+)-(\d+)/) || [];
-    const month = m ? +m - 1 : void 0;
-
     // process messages in descending order
     const messageElements = [...document.querySelectorAll('#transcript .message')];
 
@@ -284,56 +281,48 @@ export const fetchChatTranscript = async (config, url, options = {}) => {
     // fetching transcript for a non-existent date results in an empty list
     if (!messageElements.length) return messages;
 
-    /**
-     * @param {Element|null|undefined} elem
-     */
-    const parseTimestamp = (elem) => {
-        const [, h, min, apm] = elem
-            ?.closest(".messages")
-            ?.querySelector(".timestamp")
-            ?.textContent
-            ?.match(/(\d+):(\d+) ([AP])M/i) || [];
+    const timestamps = messageElements.map((el) => parseTimestamp(el, now));
 
-        const hour = h && apm ? +(apm === 'A' ? (h === '12' ? 0 : h) : +h + 12) : void 0;
-
-        // decrement by 1s if no timestamp, otherwise new UTC timestamp
-        if ([year, month, date, hour, min].every(p => p !== void 0)) {
-            return Date.UTC(+year, /** @type {number} */(month), +date, hour, +min, 0);
-        }
-
-        return;
-    };
-
-    const timestamps = messageElements.map(parseTimestamp);
-
-    /** @type {number | undefined} */
+    /** @type {number|undefined} */
     let lastKnownTimestamp;
 
     messageElements.forEach((el, idx) => {
         const messageTimestamp = timestamps[idx];
 
-        const dateFound = messageTimestamp !== void 0;
+        if (messageTimestamp) {
+            lastKnownTimestamp = messageTimestamp;
+        }
 
-        lastKnownTimestamp = dateFound ?
-            messageTimestamp :
-            (lastKnownTimestamp ? lastKnownTimestamp + 1000 : timestamps.slice(0, idx).find(Boolean));
+        if (!messageTimestamp) {
+            lastKnownTimestamp = lastKnownTimestamp || findLast(timestamps.slice(0, idx), Boolean);
+            if (lastKnownTimestamp) lastKnownTimestamp += 1000;
+        }
 
-        if (!lastKnownTimestamp) return;
-
-        // decrement by 1s if no timestamp, otherwise new UTC timestamp
-        const date = lastKnownTimestamp;
+        if (!lastKnownTimestamp) {
+            if (config.debug) console.log(`[transcript] missing message timestamp`);
+            return;
+        }
 
         const messageAnchor = el.querySelector("a");
-        if (!messageAnchor) return;
+        if (!messageAnchor) {
+            if (config.debug) console.log(`[transcript] missing message anchor`);
+            return;
+        };
 
         const messageId = +(messageAnchor.getAttribute("name") || 0);
 
         /** @type {HTMLAnchorElement|null|undefined} */
         const userAnchor = el.closest(".monologue")?.querySelector(".signature a");
-        if (!userAnchor) return;
+        if (!userAnchor) {
+            if (config.debug) console.log(`[transcript] missing user anchor: ${messageId}`);
+            return;
+        }
 
         const messageElem = el.querySelector(".content");
-        if (!messageElem) return;
+        if (!messageElem) {
+            if (config.debug) console.log(`[transcript] missing message element: ${messageId}`);
+            return;
+        }
 
         const message = messageElem.textContent?.trim() || "";
         const messageHtml = messageElem.innerHTML?.trim() || "";
@@ -341,7 +330,10 @@ export const fetchChatTranscript = async (config, url, options = {}) => {
         const messageURL = `${url}?m=${messageId}#${messageId}`;
 
         // can never be in the future
-        if (date > now.valueOf()) return;
+        if (lastKnownTimestamp > now.valueOf()) {
+            if (config.debug) console.log(`[transcript] future message: ${messageURL}\n`, new Date(lastKnownTimestamp), now);
+            return;
+        }
 
         const userId = matchNumber(/(-?\d+)/, userAnchor.href);
         const { textContent: username } = userAnchor;
@@ -350,7 +342,7 @@ export const fetchChatTranscript = async (config, url, options = {}) => {
         messages.push({
             chatDomain,
             chatUserId: +userId,
-            date,
+            date: lastKnownTimestamp,
             message,
             messageHtml,
             messageId,
@@ -361,7 +353,8 @@ export const fetchChatTranscript = async (config, url, options = {}) => {
     });
 
     // always put latest messages first
-    order === "asc" ? messages.sort((a, b) => a.date < b.date ? -1 : 1) : messages.reverse();
+    const isAscOrder = order === "asc";
+    messages.sort((a, b) => (isAscOrder ? a.date < b.date : a.date > b.date) ? -1 : 1)
 
     const slice = messages.slice(0, showTranscriptMessages);
 
@@ -372,8 +365,8 @@ export const fetchChatTranscript = async (config, url, options = {}) => {
 
         return fetchChatTranscript(config, url, {
             ...options,
-            messages,
-            transcriptDate: addDates(now, -1),
+            messages: slice,
+            transcriptDate: addDates(toEndOfDay(now), -1),
         });
     }
 
