@@ -33,9 +33,11 @@ export const isAskedIfCanNominateOthers = (text) => {
  * @type {MessageGuard}
  */
 export const isAskedWhyNominationRemoved = (text) => {
-    return /^(?:why|what)\b/.test(text) &&
-        /\b(?:nomination|nominee|candidate)s?\b/.test(text) &&
-        /\b(?:deleted?|vanish(?:ed)?|erased?|removed?|unpublish(?:ed)?|cancel(?:led)?|withdrawn?|fewer|less(?:er)?|resign)\b/.test(text);
+    return allMatch([
+        /^(?:why|what)\b/i,
+        /\b(?:nomination|nominee|candidate)s?\b/i,
+        /\b(?:deleted?|vanish(?:ed)?|erased?|removed?|unpublish(?:ed)?|cancel(?:led)?|withdrawn?|fewer|less(?:er)?|resign)\b/i,
+    ], text);
 };
 
 /**
