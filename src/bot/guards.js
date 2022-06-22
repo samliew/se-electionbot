@@ -331,7 +331,7 @@ export const isAskedForUserEligibility = (text) => {
  * @type {MessageGuard}
  */
 export const isAskedAboutLightbulb = (text) => {
-    return /how (?:many|much) mod(?:erator)?s(?: does)? it takes? to (?:change|fix|replace)(?: a| the)? light\s?bulb/.test(text);
+    return /how (?:many|much) mod(?:erator)?s(?: does)? it takes? to (?:change|fix|replace)(?: a| the)? light(?:\s?bulb)?/i.test(text);
 };
 
 /**
