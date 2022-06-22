@@ -688,7 +688,7 @@ export const isAskedAboutElectionResults = (text) => {
  */
 export const isAskedAboutElectionPhaseDuration = (text) => {
     return someMatch([
-        /^how\s+long\s+(?:does|will)(?:\s+the)?\s+(?:election|nomination|primary)\s+phase\s+lasts?/i
+        /^how\s+long\s+(?:does|will|is)(?:\s+the)?\s+(?:election|nomination|primary)\s+phase(?:\s+lasts?)?/i
     ], text);
 };
 
