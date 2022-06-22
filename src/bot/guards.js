@@ -77,10 +77,9 @@ export const isAskedAboutModsOrModPowers = (text) => {
  * @type {MessageGuard}
  */
 export const isAskedAboutVoting = (text) => {
-    return allMatch([
-        /^(?:where|how|want|when)\b/,
-        /\b(?:do|can|to|give|cast|should)\b/,
-        /\b(?:voting|vote|elect)\b/,
+    return someMatch([
+        /^what\s+is\s+voting/i,
+        /^(?:where|how)\s+(?:do(?:es)?|can)\s+(?:i|one)\s+vote/i,
     ], text);
 };
 

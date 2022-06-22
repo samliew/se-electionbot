@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import {
-    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentMods, isAskedForCurrentNominees,
+    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting, isAskedAmIalive, isAskedForCurrentMods, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWhyNominationRemoved, isAskedWillElectionBeCancelled, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot
 } from "../../src/bot/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
@@ -253,6 +253,14 @@ describe('Message Guards', () => {
         "who should i vote for",
         "how to choose who to vote for?",
         "who shouldn't I vote for"
+    ];
+
+    const aboutVotingMatches = [
+        "what is voting?",
+        "where do I vote?",
+        "Where does one vote",
+        "where can I vote?",
+        "How can I vote",
     ];
 
     const haveIvotedMatches = [
@@ -650,6 +658,7 @@ describe('Message Guards', () => {
         [isAskedMeaningOfLife, meaningOfLifeMatches],
         [isAskedForScoreLeaderboard, scoreLeaderboardMatches],
         [isAskedWhyNominationRemoved, whyNominationRemovedMatches],
+        [isAskedAboutVoting, aboutVotingMatches],
     ]);
 
     before(() => {
