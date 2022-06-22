@@ -619,6 +619,7 @@ export const isAskedHowManyVoted = (text) => {
 };
 
 /**
+ * TODO: unused guard (intentionally, was questioned by users)
  * @summary checks if a message is asking how many mods already voted
  * @type {MessageGuard}
  */
@@ -665,7 +666,7 @@ export const isAskedWhereToFindResults = (text) => {
  */
 export const isAskedForQuestionnaireQuestion = (text) => {
     return someMatch([
-        /^what\s+is(?:\s+the)?\s+(\w+|\d+(?:st|nd|rd|th))(?:\s+questionnaire)?\s+question(?:\s+of(?:\s+the)?\s+questionnaire)?/i
+        /^what\s+is(?:\s+the)?\s+(\w+|\d+(?:st|nd|rd|th)?)(?:\s+questionn?aire)?\s+question(?:\s+of(?:\s+the)?\s+questionn?aire)?/i
     ], text);
 };
 
