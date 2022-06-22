@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAmIalive, isAskedForCurrentMods, isAskedForCurrentNominees,
-    isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWillElectionBeCancelled, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot
+    isAskedForCurrentPositions, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWillElectionBeCancelled, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot
 } from "../../src/bot/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -571,6 +571,12 @@ describe('Message Guards', () => {
         "where did the comments go"
     ];
 
+    const scoreLeaderboardMatches = [
+        "Who has the highest candidate score?",
+        "candidate score leaderboard",
+        "who's with the greatest candidate score",
+    ];
+
     /** @type {Map<import("../../src/bot/guards.js").MessageGuard, string[]>} */
     const guardToMatchesMap = new Map([
         [isAskedAboutElectionResults, pastElectionResultsMatches],
@@ -635,6 +641,7 @@ describe('Message Guards', () => {
         [isAskedAboutBallotFile, ballotFileMatches],
         [isAskedWhereToFindResults, electionResultsMatches],
         [isAskedMeaningOfLife, meaningOfLifeMatches],
+        [isAskedForScoreLeaderboard, scoreLeaderboardMatches],
     ]);
 
     before(() => {

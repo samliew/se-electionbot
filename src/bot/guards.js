@@ -257,8 +257,10 @@ export const isAskedForScoreFormula = (text) => {
  * @type {MessageGuard}
  */
 export const isAskedForScoreLeaderboard = (text) => {
-    return /who\b.*\b(?:highest|greatest|most)\b.*\bcandidate scores?/.test(text) ||
-        /candidate scores? leaderboard(?:$|\?)/.test(text);
+    return someMatch([
+        /who\b.*\b(?:highest|greatest|most)\b.*\bcandidate\s+scores?/i,
+        /candidate\s+scores?\s+leaderboard(?:$|\?)/i,
+    ], text);
 };
 
 /**
