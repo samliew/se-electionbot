@@ -45,10 +45,9 @@ export const sayWhyBeAMod = () => {
 
 /**
  * @summary builds a response to if mods are paid
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayAreModsPaid = (election) => {
+export const sayAreModsPaid = (_c, _es, election) => {
     const { siteUrl } = election;
 
     const modsURI = makeURL("Elected ♦ moderators", `${siteUrl}/help/site-moderators`);
@@ -88,7 +87,7 @@ export const sayBestModerator = async (_config, _elections, election, _content, 
 
 /**
  * @summary builds a response to a query if it is possible to add a ♦ in a username
- * @returns {string}
+ * @type {MessageBuilder}
  */
 export const sayCanEditDiamond = () => {
     return `No one can edit the diamond symbol (♦) into their username.`;
@@ -224,10 +223,9 @@ export const sayOtherSiteMods = (siteHostname, moderators, decodeEntities) => {
 
 /**
  * @summary builds a message about mod responsibilities
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayWhatModsDo = (election) => {
+export const sayWhatModsDo = (_c, _es, election) => {
     const { siteUrl } = election;
 
     const modActivities = [

@@ -3,10 +3,9 @@ import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { filterMap, mapMap } from "../shared/utils/maps.js";
 import { getFalsyKeys } from "../shared/utils/objects.js";
 import { sayFeedback } from "./commands/commands.js";
-import { sayElectionSchedule } from "./messages/phases.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
-import { makeURL, pluralize, wait } from "./utils.js";
+import { getFormattedElectionSchedule, makeURL, pluralize, wait } from "./utils.js";
 
 export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chance to cast or modify your votes!";
 
@@ -63,7 +62,7 @@ export default class ScheduledAnnouncement {
             config, _room,
             [
                 `The ${makeURL("election", _election.electionUrl)} dates have changed:`,
-                sayElectionSchedule(_election)
+                getFormattedElectionSchedule(_election)
             ],
             { isPrivileged: true }
         );

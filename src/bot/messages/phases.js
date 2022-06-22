@@ -2,7 +2,7 @@ import { dateToRelativeTime } from "../../shared/utils/dates.js";
 import { mapMap } from "../../shared/utils/maps.js";
 import { boldify } from "../../shared/utils/markdown.js";
 import { getCandidateOrNominee } from "../random.js";
-import { capitalize, linkToRelativeTimestamp, linkToUtcTimestamp, listify, makeURL, numToString, pluralize, pluralizePhrase } from "../utils.js";
+import { getFormattedElectionSchedule, linkToRelativeTimestamp, linkToUtcTimestamp, listify, makeURL, numToString, pluralize, pluralizePhrase } from "../utils.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig
@@ -121,31 +121,10 @@ export const sayElectionIsOver = (_c, _es, election) => {
 
 /**
  * @summary builds the election schedule message
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayElectionSchedule = (election) => {
-    const { dateElection, dateNomination, datePrimary, dateEnded, phase, siteName, electionNum } = election;
-
-    const arrow = ' <-- current phase';
-
-    const prefix = `    ${siteName} Election ${electionNum} Schedule`;
-
-    /** @type {[Exclude<ElectionPhase,null>,string][]} */
-    const dateMap = [
-        ["nomination", dateNomination],
-        ["primary", datePrimary || ""],
-        ["election", dateElection],
-        ["ended", dateEnded]
-    ];
-
-    const maxPhaseLen = Math.max(...dateMap.map(([{ length }]) => length));
-
-    const phases = dateMap.map(
-        ([ph, date]) => `    ${capitalize(ph)}: ${" ".repeat(maxPhaseLen - ph.length)}${date || "never"}${ph === phase ? arrow : ""}`
-    );
-
-    return [prefix, ...phases].join("\n");
+export const sayElectionSchedule = (_c, _es, election) => {
+    return getFormattedElectionSchedule(election);
 };
 
 /**

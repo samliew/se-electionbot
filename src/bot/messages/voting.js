@@ -40,7 +40,7 @@ export const sayAboutVoting = (_c, _es, election, ...rest) => {
 
 /**
  * @summary builds a response to how to save the ranking order, or whether votes are saved automatically
- * @returns {string}
+ * @type {MessageBuilder}
  */
 export const sayHowToSaveVotes = () => {
     return `Your ranking of the candidates is saved automatically as soon changes are made to the sort order. You can amend your vote/ballot freely until the end of the election.`;
@@ -48,12 +48,9 @@ export const sayHowToSaveVotes = () => {
 
 /**
  * @summary builds a number of voters based on the Constituent badge
- * @param {BotConfig} config bot configuration
- * @param {Election} election current election
- * @param {string} text message content
- * @returns {Promise<string>}
+ * @type {MessageBuilder}
  */
-export const sayAlreadyVoted = async (config, election, text) => {
+export const sayAlreadyVoted = async (config, _es, election, text) => {
 
     const { phase, dateElection, statVoters, apiSlug, siteUrl } = election;
 

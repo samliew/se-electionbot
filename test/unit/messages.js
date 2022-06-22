@@ -52,7 +52,7 @@ describe("Messages", () => {
 
     describe(sayElectionSchedule.name, () => {
 
-        it('should correctly set arrow to the current phase', () => {
+        it('should correctly set arrow to the current phase', async () => {
             const date = new Date().toLocaleString("en-US");
 
             const election = new Election("stackoverflow.com/election/1");
@@ -65,13 +65,15 @@ describe("Messages", () => {
             /** @type {Exclude<ElectionPhase, null>[]} */
             const phases = ["nomination", "primary", "election", "ended"];
 
-            phases.forEach((phase, i) => {
+            const promises = phases.map(async (phase, i) => {
                 election.phase = phase;
-                const schedule = sayElectionSchedule(election);
+                const schedule = await sayElectionSchedule(config, election.elections, election, "", user, bot, room);
                 const currElectionLine = schedule.split("\n").slice(1)[i];
                 expect(currElectionLine.includes("<-- current phase")).to.be.true;
                 expect(currElectionLine.includes(capitalize(phase))).to.be.true;
             });
+
+            await Promise.all(promises);
         });
     });
 

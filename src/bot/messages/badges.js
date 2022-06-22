@@ -46,10 +46,9 @@ export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = 
 
 /**
  * @summary builds a response to the required badges query
- * @param {Election} election election to check required badges for
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayRequiredBadges = (election) => {
+export const sayRequiredBadges = (_c, _es, election) => {
 
     if (!election.isStackOverflow()) {
         return "There are no required badges for elections on this site.";

@@ -484,6 +484,18 @@ use defaults ${defaultChatNotSet}`
             [isAskedForHelp, sayShortHelp],
             [isAskedForFullHelp, sayFullHelp],
             [isAskedIfModsHaveToRun, sayIfModsHaveToRun],
+            [isAskedWhyNominationRemoved, sayWhyNominationRemoved],
+            [isAskedHowToSaveVotes, sayHowToSaveVotes],
+            [isAskedAboutModsOrModPowers, sayWhatModsDo],
+            [isAskedAboutRequiredBadges, sayRequiredBadges],
+            [isAskedForScoreFormula, sayCandidateScoreFormula],
+            [isAskedHowToSaveVotes, sayHowToSaveVotes],
+            [isAskedIfModsArePaid, sayAreModsPaid],
+            [isAskedAboutMissingComments, sayMissingComments],
+            [isAskedAboutUsernameDiamond, sayCanEditDiamond],
+            [isAskedHowManyVoted, sayAlreadyVoted],
+            [isAskedAboutBadgesOfType, sayBadgesByType],
+            [isAskedForElectionSchedule, sayElectionSchedule]
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
@@ -639,15 +651,6 @@ use defaults ${defaultChatNotSet}`
                 responseText = await builder(config, elections, election, preparedMessage, user, me, room);
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
-            else if (isAskedAboutBadgesOfType(preparedMessage)) {
-                responseText = await sayBadgesByType(config, elections, election, preparedMessage, user, me, room);
-            }
-            else if (isAskedAboutRequiredBadges(preparedMessage)) {
-                responseText = sayRequiredBadges(election);
-            }
-            else if (isAskedAboutModsOrModPowers(preparedMessage)) {
-                responseText = sayWhatModsDo(election);
-            }
             else if (isAskedForOwnScore(preparedMessage) || isAskedForOtherScore(preparedMessage)) {
                 const calcCandidateScore = makeCandidateScoreCalc(config, soPastAndPresentModIds);
 
@@ -656,17 +659,8 @@ use defaults ${defaultChatNotSet}`
                 await sendReply(config, room, responseText, { inResponseTo: msg.id });
                 return; // stop here since we are using a different default response method
             }
-            else if (isAskedForScoreFormula(preparedMessage)) {
-                responseText = sayCandidateScoreFormula(config, elections, election);
-            }
             else if (isAskedForScoreLeaderboard(preparedMessage)) {
                 responseText = sayCandidateScoreLeaderboard(election.apiSlug);
-            }
-            else if (isAskedHowManyVoted(preparedMessage)) {
-                responseText = await sayAlreadyVoted(config, election, preparedMessage);
-            }
-            else if (isAskedHowToSaveVotes(preparedMessage)) {
-                responseText = sayHowToSaveVotes();
             }
             // Could conflict with isAskedAboutVoting below - should not match "how to vote" - min length required
             else if (isAskedHowOrWhoToVote(preparedMessage)) {
@@ -675,21 +669,6 @@ use defaults ${defaultChatNotSet}`
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
                 responseText = await sayCurrentMods(election, entities.decode);
-            }
-            else if (isAskedWhyNominationRemoved(preparedMessage)) {
-                responseText = sayWhyNominationRemoved();
-            }
-            else if (isAskedIfModsArePaid(preparedMessage)) {
-                responseText = sayAreModsPaid(election);
-            }
-            else if (isAskedForElectionSchedule(preparedMessage)) {
-                responseText = sayElectionSchedule(election);
-            }
-            else if (isAskedAboutUsernameDiamond(preparedMessage)) {
-                responseText = sayCanEditDiamond();
-            }
-            else if (isAskedAboutMissingComments(preparedMessage)) {
-                responseText = sayMissingComments(config, election);
             }
             else if (isPrivileged && isAskedForUserEligibility(preparedMessage)) {
                 responseText = await sayUserEligibility(config, election, preparedMessage);

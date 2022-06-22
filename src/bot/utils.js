@@ -31,7 +31,9 @@ let _apiBackoff = Date.now();
  * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("chatexchange").default} Client
+ * @typedef {import("./election").default} Election
  * @typedef {import("./index").ElectionBadge} ElectionBadge
+ * @typedef {import("./election").ElectionPhase} ElectionPhase
  * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {import("./commands/user").User} ChatUser
  */
@@ -1046,4 +1048,33 @@ export const onlyBotMessages = async (botProfile) => {
     const { id } = botProfile;
     const name = await botProfile.name;
     return ({ username, chatUserId }) => username === name || chatUserId === id;
+};
+
+/**
+ * @summary abstract helper for getting the election schedule
+ * @param {Election} election current election
+ * @returns {string}
+ */
+export const getFormattedElectionSchedule = (election) => {
+    const { dateElection, dateNomination, datePrimary, dateEnded, phase, siteName, electionNum } = election;
+
+    const arrow = ' <-- current phase';
+
+    const prefix = `    ${siteName} Election ${electionNum} Schedule`;
+
+    /** @type {[Exclude<ElectionPhase,null>,string][]} */
+    const dateMap = [
+        ["nomination", dateNomination],
+        ["primary", datePrimary || ""],
+        ["election", dateElection],
+        ["ended", dateEnded]
+    ];
+
+    const maxPhaseLen = Math.max(...dateMap.map(([{ length }]) => length));
+
+    const phases = dateMap.map(
+        ([ph, date]) => `    ${capitalize(ph)}: ${" ".repeat(maxPhaseLen - ph.length)}${date || "never"}${ph === phase ? arrow : ""}`
+    );
+
+    return [prefix, ...phases].join("\n");
 };
