@@ -42,7 +42,6 @@ import {
     isBotMentioned,
     isHatingTheBot,
     isLovingTheBot,
-    isLovingTheBotFun,
     isSayingBotIsInsane,
     isSayingHappyBirthday,
     isThankingTheBot
@@ -500,7 +499,7 @@ use defaults ${defaultChatNotSet}`
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
         const funRules = [
-            [isLovingTheBotFun, sayLoveYou],
+            [isLovingTheBot, sayLoveYou],
             [isAskedHowAmI, sayHowIsBot],
             [isAskedWhoAmI, getRandomWhoAmI],
             [isAskedWhyIsBot, getRandomWhyAmI],

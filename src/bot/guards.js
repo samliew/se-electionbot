@@ -296,17 +296,6 @@ export const isSayingHappyBirthday = (text) => {
 };
 
 /**
- * @fun
- * @summary detects if someone is loving the bot in fun mode
- * @type {MessageGuard}
- */
-export const isLovingTheBotFun = (text) => {
-    return someMatch([
-        /^i\s+(?:love|like)\s+(?:you|bot)/i
-    ], text);
-};
-
-/**
  * @summary detects if someone hates the bot
  * @type {MessageGuard}
  */
