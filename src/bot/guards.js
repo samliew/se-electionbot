@@ -118,9 +118,10 @@ export const isAskedForFormerMods = (text, apiSlug = null) => {
  * @type {MessageGuard}
  */
 export const isAskedForCurrentWinners = (text) => {
-    return allMatch([
-        /^(?:who|how\s+many)/,
-        /winners|new\s+mod|will\s+win|future\s+mod/
+    return someMatch([
+        /^(?:who|how\s+many)\b.+?\b(?:winners|new\s+mod|will\s+win|future\s+mod)/i,
+        /^(?:who(?:'s|\s+is|\s+are))?(?:\s+(?:a|the))?(?:\s+current)?\s+winners?/i,
+        /^who(?:\s+ha(?:s|ve))?\s+won(?:\s+th[ei]s?)?\s+election/i,
     ], text);
 };
 
