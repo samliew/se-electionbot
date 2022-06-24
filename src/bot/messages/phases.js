@@ -123,8 +123,8 @@ export const sayElectionIsOver = (_c, _es, election) => {
  * @summary builds the election schedule message
  * @type {MessageBuilder}
  */
-export const sayElectionSchedule = (_c, _es, election) => {
-    return getFormattedElectionSchedule(election);
+export const sayElectionSchedule = (config, _es, election) => {
+    return getFormattedElectionSchedule(config, election);
 };
 
 /**

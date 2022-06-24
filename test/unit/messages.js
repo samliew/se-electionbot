@@ -53,20 +53,24 @@ describe("Messages", () => {
     describe(sayElectionSchedule.name, () => {
 
         it('should correctly set arrow to the current phase', async () => {
-            const date = new Date().toLocaleString("en-US");
+            const date = new Date();
+            const dates = [date, addDates(date, 7), addDates(date, 11), addDates(date, 15)];
+
+            const [dateNomination, datePrimary, dateElection, dateEnded] = dates;
 
             const election = new Election("stackoverflow.com/election/1");
             election.siteName = "Stack Overflow";
-            election.dateElection = date;
-            election.dateEnded = date;
-            election.dateNomination = date;
-            election.datePrimary = date;
+            election.dateElection = dateToUtcTimestamp(dateElection);
+            election.dateEnded = dateToUtcTimestamp(dateEnded);
+            election.dateNomination = dateToUtcTimestamp(dateNomination);
+            election.datePrimary = dateToUtcTimestamp(datePrimary);
 
             /** @type {Exclude<ElectionPhase, null>[]} */
             const phases = ["nomination", "primary", "election", "ended"];
 
             const promises = phases.map(async (phase, i) => {
-                election.phase = phase;
+                config.nowOverride = dates[i];
+
                 const schedule = await sayElectionSchedule(config, election.elections, election, "", user, bot, room);
                 const currElectionLine = schedule.split("\n").slice(1)[i];
                 expect(currElectionLine.includes("<-- current phase")).to.be.true;

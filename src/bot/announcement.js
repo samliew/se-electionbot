@@ -62,7 +62,7 @@ export default class ScheduledAnnouncement {
             config, _room,
             [
                 `The ${makeURL("election", _election.electionUrl)} dates have changed:`,
-                getFormattedElectionSchedule(_election)
+                getFormattedElectionSchedule(config, _election)
             ],
             { isPrivileged: true }
         );

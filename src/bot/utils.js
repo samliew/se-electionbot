@@ -6,13 +6,14 @@ import { JSDOM } from "jsdom";
 import Cache from "node-cache";
 import sanitize from "sanitize-html";
 import { findLast } from "../shared/utils/arrays.js";
-import { formatAsTranscriptPath, parseTimestamp, validateChatTranscriptURL } from "../shared/utils/chat.js";
+import { formatAsChatCode, formatAsTranscriptPath, parseTimestamp, validateChatTranscriptURL } from "../shared/utils/chat.js";
 import { addDates, dateToRelativeTime, dateToUtcTimestamp, toEndOfDay, toTadParamFormat } from "../shared/utils/dates.js";
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { constructUserAgent } from "../shared/utils/fetch.js";
 import { getOrInit, has } from "../shared/utils/maps.js";
 import { htmlToChatMarkdown } from "../shared/utils/markdown.js";
 import { numericNullable } from "../shared/utils/objects.js";
+import { longestLength } from "../shared/utils/strings.js";
 import { getUserAssociatedAccounts } from "./api.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
@@ -1052,29 +1053,32 @@ export const onlyBotMessages = async (botProfile) => {
 
 /**
  * @summary abstract helper for getting the election schedule
+ * @param {BotConfig} config bot configuration
  * @param {Election} election current election
  * @returns {string}
  */
-export const getFormattedElectionSchedule = (election) => {
-    const { dateElection, dateNomination, datePrimary, dateEnded, phase, siteName, electionNum } = election;
+export const getFormattedElectionSchedule = (config, election) => {
+    const { dateCancelled, dateElection, dateNomination, datePrimary, dateEnded, electionOrdinalName } = election;
 
     const arrow = ' <-- current phase';
 
-    const prefix = `    ${siteName} Election ${electionNum} Schedule`;
+    const prefix = `${electionOrdinalName} schedule`;
 
     /** @type {[Exclude<ElectionPhase,null>,string][]} */
     const dateMap = [
         ["nomination", dateNomination],
         ["primary", datePrimary || ""],
         ["election", dateElection],
-        ["ended", dateEnded]
+        [dateCancelled ? "cancelled" : "ended", dateCancelled || dateEnded],
     ];
 
-    const maxPhaseLen = Math.max(...dateMap.map(([{ length }]) => length));
+    const maxPhaseLen = longestLength(dateMap.map(([phase]) => phase));
+
+    const phase = election.getPhase(config.nowOverride);
 
     const phases = dateMap.map(
-        ([ph, date]) => `    ${capitalize(ph)}: ${" ".repeat(maxPhaseLen - ph.length)}${date || "never"}${ph === phase ? arrow : ""}`
+        ([ph, date]) => `${capitalize(ph)}: ${" ".repeat(maxPhaseLen - ph.length)}${date || "never"}${ph === phase ? arrow : ""}`
     );
 
-    return [prefix, ...phases].join("\n");
+    return formatAsChatCode([prefix, ...phases]);
 };
