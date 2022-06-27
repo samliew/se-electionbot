@@ -73,12 +73,16 @@ describe(Rescraper.name, () => {
             sinon.stub(election, "electionDatesChanged").get(() => false);
             sinon.stub(election, "phase").get(() => "nomination").set(() => { });
             sinon.stub(election, "hasNewNominees").get(() => false);
+            sinon.stub(election, "scrapeElection").resolves(true);
+            sinon.stub(election, "validate").returns({ status: true, errors: [] });
 
             const nominee = getMockNominee(election);
             election.addActiveNominee(nominee);
-            election.addWithdrawnNominee(nominee);
+            election.pushHistory();
+            election.nominees.clear();
 
             await scraper.rescrape();
+
             expect(announceStub.calledOnce).to.be.true;
         });
 
