@@ -96,12 +96,12 @@ export default class Rescraper {
             }
 
             if (config.debugOrVerbose) {
-                const { nominees, winners, phase } = election;
+                const { nominees, winners } = election;
 
-                console.log(`RESCRAPER - Candidates: ${mapMap(nominees, x => x.userName).join(', ')}`);
+                console.log(`[rescraper] candidates: ${mapMap(nominees, x => x.userName).join(', ')}`);
 
-                if (phase === 'ended') {
-                    console.log(`RESCRAPER - Winners: ${mapMap(winners, x => x.userName).join(', ')}`);
+                if (election.isEnded()) {
+                    console.log(`[rescraper] winners: ${mapMap(winners, x => x.userName).join(', ')}`);
                 }
 
                 const {
@@ -110,11 +110,13 @@ export default class Rescraper {
                     canIdleGreet: idleCanSayHi
                 } = config;
 
-                console.log(`RESCRAPER - IDLE? idleCanSayHi: ${idleCanSayHi}
-                    ----------- reachedMinActivity: ${roomReachedMinActivityCount};
-                    ----------- roomBecameIdleAWhileAgo: ${roomBecameIdleAWhileAgo}; roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}
-                    ----------- botHasBeenQuiet: ${botHasBeenQuiet}; botSentLastMessage: ${botSentLastMessage}`
-                );
+                console.log(`[rescraper] bot state:
+botHasBeenQuiet: ${botHasBeenQuiet};
+botSentLastMessage: ${botSentLastMessage}
+idleCanSayHi: ${idleCanSayHi}
+roomReachedMinActivityCount: ${roomReachedMinActivityCount};
+roomBecameIdleAWhileAgo: ${roomBecameIdleAWhileAgo};
+roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
             }
 
             // No previous scrape results yet, do not proceed (prev can be null)
