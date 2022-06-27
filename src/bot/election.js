@@ -1554,8 +1554,6 @@ export default class Election {
                 return this.scrapeElection(config, true);
             }
 
-            this.pushHistory();
-
             const metaElems = content.find(".flex--item.mt4 .d-flex.gs4 .flex--item:nth-child(2)");
             const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
 
@@ -1648,6 +1646,8 @@ winners           ${this.numWinners};
 chat URL          ${this.chatUrl}
 primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; winners: ${this.numWinners}; withdrawals: ${this.numWithdrawals}`)
             );
+
+            this.pushHistory();
 
             return true;
         }
