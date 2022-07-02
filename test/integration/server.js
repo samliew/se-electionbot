@@ -36,7 +36,6 @@ describe("Dashboard", function () {
     /** @type {ExpressApp} */
     let app;
     before(async () => {
-        sinon.stub(console, "log")
         await election.scrapeElection(config);
         app = await startServer(client, room, config, election, announcement, {
             graceful: false,
@@ -46,6 +45,7 @@ describe("Dashboard", function () {
 
     after(() => stop(app));
 
+    beforeEach(() => sinon.stub(console, "log"));
     afterEach(() => sinon.restore());
 
     dotenv.config();
