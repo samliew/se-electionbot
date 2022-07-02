@@ -1180,16 +1180,36 @@ export default class Election {
     }
 
     /**
+     * @summary clears the election cancellation state
+     * @returns {Election}
+     */
+    clearCancellation() {
+        this.dateCancelled = void 0;
+        this.cancelledText = void 0;
+        return this;
+    }
+
+    /**
+     * @summary clears the election participation state
+     * @returns {Election}
+     */
+    clearParticipants() {
+        this.withdrawnNominees.clear();
+        this.winners.clear();
+        this.nominees.clear();
+        return this;
+    }
+
+    /**
      * @summary resets the election to initial state
      * @returns {Election}
      */
     reset() {
         // TODO: expand
-        this.withdrawnNominees.clear();
-        this.winners.clear();
+        this.clearCancellation();
+        this.clearParticipants();
         this.questionnaire.length = 0;
         this.moderators.clear();
-        this.nominees.clear();
         this.phase = null;
         this.updated = Date.now();
         this.forget();
