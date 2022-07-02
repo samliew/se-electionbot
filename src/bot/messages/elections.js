@@ -89,14 +89,13 @@ export const sayElectionResults = (_config, elections, _election, text) => {
  * @summary builds a response to a query about election phase duration
  * @type {MessageBuilder}
  */
-export const sayElectionPhaseDuration = (_config, _elections, election, text) => {
+export const sayElectionPhaseDuration = (config, _elections, election, text) => {
     const {
         dateElection,
         dateEnded,
         dateNomination,
         datePrimary,
-        electionNum,
-        siteName
+        electionOrdinalName,
     } = election;
 
     const phase = /** @type {Exclude<ElectionPhase, null|"cancelled"|"ended">} */(
@@ -112,9 +111,9 @@ export const sayElectionPhaseDuration = (_config, _elections, election, text) =>
 
     const [from, to] = phaseMap[phase];
 
-    if (!from || !to) return ""; // TODO: consider what to return
+    if (!from || !to) return `The ${electionOrdinalName} does not have a "${phase}" phase.`;
 
-    const rel = datesToDuration(getSeconds(from) * 1e3, getSeconds(to) * 1e3);
+    const duration = datesToDuration(getSeconds(from) * 1e3, getSeconds(to) * 1e3);
 
     const rules = [
         [election.isActive(), "is"],
@@ -124,7 +123,11 @@ export const sayElectionPhaseDuration = (_config, _elections, election, text) =>
 
     const [_rule, modal] = rules.find(([rule]) => rule) || [, "is"];
 
-    return `The ${formatOrdinal(electionNum || 1)} ${siteName} election "${phase}" phase ${modal} ${rel} long`;
+    const relTime = dateToRelativeTime(to, { now: config.nowOverride });
+
+    const relative = `(end${relTime.endsWith("ago") ? "ed" : "s"} ${relTime})`;
+
+    return `The ${electionOrdinalName} "${phase}" phase ${modal} ${duration} long ${relative}.`;
 };
 
 /**
