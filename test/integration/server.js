@@ -45,15 +45,18 @@ describe("Dashboard", function () {
 
     after(() => stop(app));
 
-    beforeEach(() => sinon.stub(console, "log"));
-    afterEach(() => sinon.restore());
-
     dotenv.config();
     const hasCreds = !!process.env.HEROKU_API_TOKEN;
     const testIf = hasCreds ? test : test.skip;
 
     if (!hasCreds) {
         console.log("Cannot test Dashboard server integration with no Heroku API token, skipping");
+    }
+
+    // since all tests are skipped, afterEach hook will not run
+    if (hasCreds) {
+        beforeEach(() => sinon.stub(console, "log"));
+        afterEach(() => sinon.restore());
     }
 
     describe("Routes", () => {
