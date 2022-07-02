@@ -9,6 +9,7 @@ const MS_IN_HOUR = 60 * MS_IN_MINUTE;
  * @typedef {import("./env").default<BotEnvironment>} BotEnv
  * @typedef {import("./env").BotEnvironment} BotEnvironment
  * @typedef {import("chatexchange/dist/Client").Host} Host
+ * @typedef {import("./index").MessageBuilder} MessageBuilder
  * @typedef {import("./utils").RoomUser} RoomUser
  */
 
@@ -299,7 +300,7 @@ export class BotConfig {
 
     /**
      * @summary <userId, handler> map of actions awaiting user confirmation
-     * @type {Map<number, () => Promise<string>>}
+     * @type {Map<number, MessageBuilder>}
      */
     awaitingConfirmation = new Map();
 
@@ -507,6 +508,9 @@ export class BotConfig {
      */
     get showTranscriptMessages() {
         return this.#env.num("transcript_size", 20);
+    }
+    set showTranscriptMessages(v) {
+        this.#env.set("transcript_size", v);
     }
 
     /**

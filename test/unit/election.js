@@ -3,11 +3,12 @@ import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
+import { getMockElectionAnnouncement } from "../mocks/election.js";
 import { getMockNominee } from "../mocks/nominee.js";
 import { getMockApiUser, getMockUserProfile } from "../mocks/user.js";
 
 /**
- * @typedef { import("../../src/bot/election").ElectionPhase} ElectionPhase
+ * @typedef {import("../../src/bot/election").ElectionPhase} ElectionPhase
  */
 
 describe(Election.name, () => {
@@ -16,6 +17,43 @@ describe(Election.name, () => {
     afterEach(() => sinon.restore());
 
     describe('getters', () => {
+
+        describe("electionNum", () => {
+            it('should correctly extract election number from URL', () => {
+                const election = new Election("https://stackoverflow.com/election/5");
+                expect(election.electionNum).to.equal(5);
+
+                election.electionUrl = "https://stackoverflow.com/election";
+                expect(election.electionNum).to.be.undefined;
+            });
+        });
+
+        describe("electionType", () => {
+            it('should correctly determine election type', () => {
+                const dateNomination = dateToUtcTimestamp(Date.now());
+
+                const election = new Election("https://stackoverflow.com/election/5");
+                election.dateNomination = dateNomination;
+
+                election.announcements.set(123, getMockElectionAnnouncement({
+                    dateNomination,
+                    type: "pro-tempore",
+                }));
+                expect(election.electionType).to.equal("pro-tempore");
+
+                election.announcements.set(123, getMockElectionAnnouncement({
+                    dateNomination,
+                    type: "full",
+                }));
+                expect(election.electionType).to.equal("full");
+
+                election.announcements.set(123, getMockElectionAnnouncement({
+                    dateNomination,
+                    type: "graduation",
+                }));
+                expect(election.electionType).to.equal("graduation");
+            });
+        });
 
         describe('currentModerators', () => {
             const election = new Election("https://stackoverflow.com/election/1");
@@ -101,8 +139,8 @@ describe(Election.name, () => {
                 e2.elections.set(1, e1);
                 e2.elections.set(2, e2);
 
-                e1.arrWinners.push(getMockNominee(e1, { userId: 1 }));
-                e2.arrWinners.push(getMockNominee(e2, { userId: 2 }));
+                e1.winners.set(1, getMockNominee(e1, { userId: 1 }));
+                e2.winners.set(2, getMockNominee(e2, { userId: 2 }));
 
                 expect(e1.allWinners.size).to.equal(1);
                 expect(e2.allWinners.size).to.equal(2);
@@ -254,8 +292,8 @@ describe(Election.name, () => {
                 const nominee1 = getMockNominee(election, { userId: 1 });
                 const nominee2 = getMockNominee(election, { userId: 2 });
 
-                election.arrWinners.push(nominee1);
-                election.arrWinners.push(nominee2);
+                election.winners.set(1, nominee1);
+                election.winners.set(2, nominee2);
 
                 const { numWinners } = election;
                 expect(numWinners).to.equal(2);
@@ -316,13 +354,13 @@ describe(Election.name, () => {
 
                 election.pushHistory();
 
-                election.arrWinners.push(newWinner);
+                election.winners.set(2, newWinner);
 
                 const { newWinners } = election;
                 expect(newWinners).length(1);
 
-                const [nominee] = newWinners;
-                expect(nominee.userId).to.equal(2);
+                const nominee = newWinners.get(2);
+                expect(nominee).to.not.be.undefined;
             });
 
             it('should return an empty array on no Winners', () => {
@@ -341,11 +379,11 @@ describe(Election.name, () => {
 
                 election.pushHistory();
 
-                election.arrWinners.push(newWinner);
+                election.winners.set(42, newWinner);
 
                 expect(election.hasNewWinners).to.be.true;
 
-                election.arrWinners.pop();
+                election.winners.delete(42);
 
                 expect(election.hasNewWinners).to.be.false;
             });
@@ -360,14 +398,6 @@ describe(Election.name, () => {
                 election.pushHistory();
 
                 election.chatUrl = "https://new.url";
-
-                expect(election.electionChatRoomChanged).to.be.true;
-
-                // Set both urls to be same, but change chat room id
-                election.chatRoomId = 1;
-                election.chatUrl = "https://new.url";
-                election.pushHistory();
-                election.chatRoomId = 2;
 
                 expect(election.electionChatRoomChanged).to.be.true;
             });
@@ -392,6 +422,38 @@ describe(Election.name, () => {
         });
     });
 
+    describe(Election.prototype.getElectionBadges.name, () => {
+        const election = new Election("https://stackoverflow.com/election/1");
+
+        it("should correctly filter by type", () => {
+            const editingBadges = election.getElectionBadges("editing");
+            expect(editingBadges.length).to.equal(6);
+            expect(editingBadges[0].type).to.equal("editing");
+        });
+
+        it("should correctly filter by status", () => {
+            const requiredBadges = election.getElectionBadges("all", "required");
+            expect(requiredBadges.length).to.equal(4);
+            expect(requiredBadges[1].required).to.be.true;
+        });
+
+        it("should equal requiredBadges on status=required type=all", () => {
+            const badges = new Set(election.requiredBadges.map((b) => b.badge_id));
+            const required = election.getElectionBadges("all", "required");
+
+            expect(badges.size).to.equal(required.length);
+            expect(required.every((b) => badges.has(b.badge_id))).to.be.true;
+        });
+
+        it("should equal optionalBadges on status=optional type=all", () => {
+            const badges = new Set(election.optionalBadges.map((b) => b.badge_id));
+            const optional = election.getElectionBadges("all", "optional");
+
+            expect(badges.size).to.equal(optional.length);
+            expect(optional.every((b) => badges.has(b.badge_id))).to.be.true;
+        });
+    });
+
     describe(Election.prototype.getPhase.name, () => {
 
         it('should correctly determine phase', () => {
@@ -400,7 +462,7 @@ describe(Election.name, () => {
             const tomorrow = dateToUtcTimestamp(new Date(now + 864e5));
             const yesterday = dateToUtcTimestamp(new Date(now - 864e5));
 
-            const election = new Election("https://stackoverflow.com/election/12", 12);
+            const election = new Election("https://stackoverflow.com/election/12");
             election.dateElection = tomorrow;
             election.dateEnded = tomorrow;
             election.datePrimary = tomorrow;
@@ -494,7 +556,7 @@ describe(Election.name, () => {
         it('should correctly determine if an id is a nominee', () => {
             const testIds = [42, 24, -9000];
 
-            const election = new Election("https://stackoverflow.com/election/12", 12);
+            const election = new Election("https://stackoverflow.com/election/12");
 
             testIds.forEach((userId) => {
                 election.addActiveNominee(getMockNominee(election, { userId }));

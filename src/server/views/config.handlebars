@@ -1,20 +1,38 @@
-{{> navigation routes=data/routes password=data/password path=data/path }}
+{{> navigation routes=data/routes password=data/password path=data/path instances=data/instances }}
 
-<h1>{{{heading}}}</h1>
+<h1 class="fs-4">{{{heading}}}</h1>
 
 {{> breadcrumbs current=current }}
 
-<form method="post" class="equal-columns">
-
+{{#ifTruthy data/statusText}}
+<div class="mt-4">
     {{{data/statusText}}}
+</div>
+{{/ifTruthy}}
 
-    {{#each data/configObject}}
-    <div><label>{{@key}} <input type="text" name="{{@key}}" aria-label="{{@key}}" value="{{this}}" placeholder="(empty)" /></label></div>
-    {{/each}}
+{{#iterate data/env}}
+<section class="collapsible-container">
+    <label for="collapsible-toggle-{{key}}" class="section-label">{{key}}</label>
+    <input id="collapsible-toggle-{{key}}" type="checkbox" class="collapsible-toggle" hidden{{#if (eq ../page/appName key)}} checked{{/if}} />
 
-    <input type="hidden" name="password" value="{{data/password}}" />
+    <form id="{{key}}" method="post" class="collapsible" action="/config?instance={{key}}">
+        <div class="row">
+            {{#each val}}
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="form-group">
+                    <label for="{{@key}}">{{@key}}</label>
+                    <input type="text" class="form-control" name="{{@key}}" id="{{@key}}" value="{{this}}" aria-label="{{@key}}" placeholder="(empty)" />
+                </div>
+            </div>
+            {{/each}}
+        </div>
 
-    <div class="form-controls mt20">
-        <button>Save</button>
-    </div>
-</form>
+        <input type="hidden" name="password" value="{{@root/data/password}}" />
+
+        <div class="form-controls text-center mt-4">
+            <button class="btn btn-primary">Save</button>
+            <button class="btn" formaction="/config?instance={{key}}&bulk=all">Save to all</button>
+        </div>
+    </form>
+</section>
+{{/iterate}}

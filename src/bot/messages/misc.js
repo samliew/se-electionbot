@@ -8,11 +8,9 @@ import { makeURL } from "../utils.js";
 
 /**
  * @summary builds a response to a query why some comments are missing
- * @param {BotConfig} _config bot configuration
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayMissingComments = (_config, election) => {
+export const sayMissingComments = (_c, _es, election) => {
     const { electionUrl, phase } = election;
 
     return phase !== "nomination" ?

@@ -1,3 +1,4 @@
+{{#if (len this)}}
 <table class="table-small">
   <thead>
     <tr>
@@ -36,3 +37,6 @@
     {{/each}}
   </tbody>
 </table>
+{{else}}
+    {{> emptySmallTable }}
+{{/if}}

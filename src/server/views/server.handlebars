@@ -1,52 +1,50 @@
-{{> navigation routes=data/routes password=data/password path=data/path }}
+{{> navigation routes=data/routes password=data/password path=data/path instances=data/instances }}
 
-<h1>{{{heading}}}</h1>
+<h1 class="fs-4">{{{heading}}}</h1>
 
 {{> breadcrumbs current=current }}
 
-<main class="dashboard">
-    <section>
-        <aside>
-            <h2>Configuration</h2>
-            {{> deep data/configuration top=true}}
-        </aside>
+<main class="dashboard row">
+    <section class="col-auto">
 
-        <aside>
-            <h2>Versions</h2>
-            <table class="table-small">
-                <tbody>
-                    {{#each data/versions}}
-                    <tr>
-                        <td>{{ @key }}</td>
-                        <td>{{ this }}</td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </aside>
+        <h2 class="fs-4">Configuration</h2>
+        {{> deep data/configuration top=true}}
+
+        <h2 class="fs-4">Versions</h2>
+        <table class="table-small">
+            <tbody>
+                {{#each data/versions}}
+                <tr>
+                    <td>{{ @key }}</td>
+                    <td>{{ this }}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
     </section>
 
-    <section>
-        <aside>
-            <h2>Routes</h2>
-            <table class="table-small">
-                <thead>
-                    <tr>
-                        <th>path</th>
-                        <th>methods</th>
-                        <th>public</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each data/routes}}
-                    <tr>
-                        <td>{{{ url @key }}}</td>
-                        <td>{{ join this/methods ", " }}</td>
-                        <td>{{{ yesno this/public }}}</td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </aside>
+    <section class="col-auto">
+
+        <h2 class="fs-4">Routes</h2>
+        <table class="table-small">
+            <thead>
+                <tr>
+                    <th>path</th>
+                    <th>methods</th>
+                    <th>public</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#iterate data/routes}}
+                <tr>
+                    <td>{{{ url val/path }}}</td>
+                    <td>{{ join val/methods ", " }}</td>
+                    <td>{{{ yesno val/public }}}</td>
+                </tr>
+                {{/iterate}}
+            </tbody>
+        </table>
+
     </section>
 </main>

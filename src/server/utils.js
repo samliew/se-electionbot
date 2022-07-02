@@ -1,12 +1,17 @@
 /**
  * @typedef {import("../bot/config").BotConfig} BotConfig
+ * @typedef {import("express-handlebars/types").ConfigOptions} ConfigOptions
  * @typedef {import("express").Application} ExpressApp
+ * @typedef {import("../bot/herokuClient").App} HerokuApp
  * @typedef {import("http").Server} HttpServer
  * @typedef {import("express").IRoute} IRoute
  * @typedef {import("express").IRouter} IRouter
  * @typedef {import("chatexchange/dist/Room").default} Room
- * @typedef {Record<string, { methods: string[], public: boolean }>} RouteInfo
+ * @typedef {Map<string, { methods: string[], path: string, public: boolean }>} RouteInfo
  */
+
+import { engine } from 'express-handlebars';
+import { HerokuClient, prettifyBotInstanceName } from "../bot/herokuClient.js";
 
 /**
  * @summary starts the server
@@ -56,19 +61,23 @@ export const stop = async (app) => {
 };
 
 /**
- * @summary gets all mounted routes for an {@link ExpressApp}
- * @param {ExpressApp} app Express application
- * @param {string[]} [publicPaths] paths that are publicly accessible
+ * @summary helper for extracting route infos from a router
+ * @param {RouteInfo} routes accumulator {@link RouteInfo}
+ * @param {IRouter} router router to extract routes from
+ * @param {string[]} publicPaths publicly accessible paths
+ * @param {string} [parentPath] parent path (for mounted apps)
  * @returns {RouteInfo}
  */
-export const routes = (app, publicPaths = []) => {
-    /** @type {RouteInfo} */
-    const routes = {};
-
-    const { stack } = /** @type {IRouter} */(app._router);
+const getRoutesFromRouter = (routes, router, publicPaths, parentPath) => {
+    const { stack, } = router;
 
     stack.forEach((item) => {
-        const { route } = /** @type {{route:IRoute}} */(item);
+        const { route, name, handle } = /** @type {{ route?:IRoute } & ({ name: "router", handle:IRouter }|{ name: "mounted_app", handle:ExpressApp })} */(item);
+
+        // https://stackoverflow.com/a/28199817/11407695
+        if (name === "router") {
+            getRoutesFromRouter(routes, handle, publicPaths, parentPath);
+        }
 
         if (!route) return;
 
@@ -77,13 +86,35 @@ export const routes = (app, publicPaths = []) => {
         const methods = new Set();
         stack.forEach(({ method }) => methods.add(method.toUpperCase()));
 
-        routes[path] = {
+        const prettyPath = prettifyPath(path);
+
+        const routePath = parentPath ? `${parentPath}${prettyPath}` : prettyPath || "/";
+
+        const existingRoute = routes.get(routePath);
+        if (existingRoute) {
+            existingRoute.methods.push(...methods);
+            return;
+        }
+
+        routes.set(routePath, {
             methods: [...methods],
-            public: publicPaths.includes(path)
-        };
+            path: routePath,
+            public: publicPaths.includes(routePath)
+        });
     });
 
     return routes;
+};
+
+/**
+ * @summary gets all mounted routes for an {@link ExpressApp}
+ * @param {ExpressApp} app Express application
+ * @param {string[]} publicPaths publicly accessible paths
+ * @param {string} [parentPath] parent path (for mounted apps)
+ * @returns {RouteInfo}
+ */
+export const routes = (app, publicPaths, parentPath) => {
+    return getRoutesFromRouter(new Map(), app._router, publicPaths, parentPath);
 };
 
 /**
@@ -95,6 +126,11 @@ export const terminate = async (app) => {
     await stop(app);
     process.exit(0);
 };
+
+/**
+ * @param {string} path path to prettify
+ */
+export const prettifyPath = (path) => path.replace(/\/$/, "");
 
 /**
  * @summary sends a farewell message and stops the server
@@ -109,4 +145,55 @@ export const farewell = async (app, config, room) => {
     }
     await room.leave();
     terminate(app);
+};
+
+/**
+ * @summary configures shared Express options
+ * @param {ExpressApp} app Express app to stop
+ * @param {ConfigOptions} config Handlebars configuration
+ * @param {string} viewsPath path to app views
+ * @returns {ExpressApp}
+ */
+export const configureApp = (app, config, viewsPath) => {
+    return app
+        .engine('handlebars', engine(config))
+        .set("views", viewsPath)
+        .set('view engine', 'handlebars')
+        .set('view cache', 'false');
+};
+
+/**
+ * @summary fetches, formats, and sorts bot instances for inclusion in navigation
+ * @param {BotConfig} config bot configuraion
+ * @param {HerokuApp[]} [instances] cached instances to avoid refetching
+ * @returns {Promise<HerokuApp[]>}
+ */
+export const getHerokuInstancesForNav = async (config, instances) => {
+    const apps = instances || await new HerokuClient(config).fetchInstances();
+    return apps
+        .map(({ name, ...rest }) => ({
+            ...rest,
+            name: prettifyBotInstanceName(name)
+        }))
+        .sort((a, b) => a.name < b.name ? -1 : 1);
+};
+
+/**
+ * @summary adds a listener to an {@link ExpressApp} to add its routes to parent's routes
+ * @param {ExpressApp} subapp Express app
+ * @returns {void}
+ */
+export const onMountAddToRoutes = (subapp) => {
+    subapp.on("mount", (parent) => {
+        const { mountpath } = subapp;
+
+        /** @type {RouteInfo} */
+        const parentRoutes = parent.get("routes");
+
+        /** @type {string[]} */
+        const parentPublicPaths = parent.get("public_paths");
+
+        routes(subapp, parentPublicPaths, mountpath.toString())
+            .forEach((info) => parentRoutes.set(info.path, info));
+    });
 };

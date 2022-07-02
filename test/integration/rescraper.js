@@ -6,6 +6,7 @@ import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Rescraper from "../../src/bot/rescraper.js";
 import { getMockBotConfig, getMockBotUser } from "../mocks/bot.js";
+import { getMockNominee } from "../mocks/nominee.js";
 
 describe(Rescraper.name, () => {
 
@@ -16,8 +17,8 @@ describe(Rescraper.name, () => {
     const client = new Client["default"]("stackoverflow.com");
     const room = new Room["default"](client, -1);
 
-    const oldSendMessage = Room["default"].prototype.sendMessage;
-    afterEach(() => Room["default"].prototype.sendMessage = oldSendMessage);
+    beforeEach(() => sinon.stub(Room["default"].prototype, "leave"));
+    beforeEach(() => sinon.stub(Room["default"].prototype, "sendMessage"));
 
     let config = getMockBotConfig();
     afterEach(() => config = getMockBotConfig());
@@ -31,7 +32,7 @@ describe(Rescraper.name, () => {
     let ann = new ScheduledAnnouncement(config, room, election, scraper);
     afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
 
-    describe('rescrape', function () {
+    describe(Rescraper.prototype.rescrape.name, function () {
         this.timeout(10000);
 
         this.beforeEach(() => {
@@ -65,8 +66,24 @@ describe(Rescraper.name, () => {
         });
 
         it('should attempt to announce withdrawn nominations if any', async () => {
-            // TODO
-            expect(true).to.be.true;
+            const announceStub = sinon.stub(ann, "announceWithdrawnNominees");
+
+            scraper.setAnnouncement(ann);
+            sinon.stub(election, "electionChatRoomChanged").get(() => false);
+            sinon.stub(election, "electionDatesChanged").get(() => false);
+            sinon.stub(election, "phase").get(() => "nomination").set(() => { });
+            sinon.stub(election, "hasNewNominees").get(() => false);
+            sinon.stub(election, "scrapeElection").resolves(true);
+            sinon.stub(election, "validate").returns({ status: true, errors: [] });
+
+            const nominee = getMockNominee(election);
+            election.addActiveNominee(nominee);
+            election.pushHistory();
+            election.nominees.clear();
+
+            await scraper.rescrape();
+
+            expect(announceStub.calledOnce).to.be.true;
         });
 
         it('should attempt to announce cancellation if cancelled', async () => {

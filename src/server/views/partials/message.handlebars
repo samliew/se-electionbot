@@ -1,0 +1,16 @@
+<tr>
+  <td
+    data-message-id="{{messageId}}"
+    class="cursor-pointer"
+    title="click to reply to this message"
+  >{{messageId}}</td>
+  <td title="click to open the message"><a
+      href="https://chat.{{@root/data/chatDomain}}/transcript/message/{{messageId}}"
+      target="_blank"
+    >{{utcTimestamp date}}</a></td>
+  <td><a
+      href="https://chat.{{@root/data/chatDomain}}/users/{{chatUserId}}"
+      target="_blank"
+    >{{username}}</a></td>
+  <td>{{{messageHtml}}}</td>
+</tr>

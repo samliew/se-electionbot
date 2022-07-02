@@ -26,3 +26,6 @@ dist/
 
 # Debug folder
 debug/
+
+# Dev-only SASS-compiled CSS files
+src/server/static/**/*.css

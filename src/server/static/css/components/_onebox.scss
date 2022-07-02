@@ -1,0 +1,120 @@
+.onebox {
+  margin: 10px 0px;
+}
+
+.ob-post {
+  background: {
+    color: White;
+  }
+
+  column-gap: 0.5em;
+  color: #222;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 1em;
+  row-gap: 0.5em;
+
+  & .ob-post-body {
+    display: flex;
+    gap: 0.5em;
+    margin: 0;
+    order: 4;
+  }
+
+  & .ob-post-siteicon {
+    cursor: pointer;
+
+    margin: {
+        top: 0.25em;
+    };
+
+    order: 3;
+  }
+
+  & .ob-post-tags {
+    display: flex;
+    gap: 0.25em;
+    order: 5;
+
+    & a {
+      text: {
+        decoration: none;
+      }
+
+      &:hover {
+        text: {
+          decoration: underline;
+        }
+
+        & .ob-post-tag {
+          border: {
+            width: 1px 0px 0px 1px;
+          }
+        }
+      }
+    }
+
+    & .ob-post-tag {
+      background: {
+        color: #e0eaf1;
+      }
+
+      border: {
+        width: 0px 1px 1px 0px;
+      }
+
+      color: #3e6d8e;
+
+      font: {
+        size: 0.9em;
+      }
+
+      padding: 3px 4px;
+    }
+  }
+
+  & .ob-post-title {
+    flex-grow: 1;
+
+    font: {
+      size: 1.3em;
+      weight: bold;
+    }
+
+    order: 2;
+  }
+
+  & .ob-post-votes {
+    background: {
+      color: #eee;
+    }
+
+    color: #555;
+
+    flex: {
+      basis: max-content;
+    }
+
+    font: {
+      weight: bold;
+    }
+
+    min-width: 32px;
+
+    text: {
+      align: center;
+    }
+
+    order: 1;
+    padding: 0.25em;
+
+    & .ob-post-accepted {
+      background: {
+        color: #737967;
+      }
+
+      color: #fbfabd;
+    }
+  }
+}

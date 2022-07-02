@@ -1,16 +1,25 @@
 <header>
   <nav class="main-nav">
-    <select id="nav">
-      <option selected="selected">Menu</option>
-      {{#each routes}}
-      {{#unlessEquals @key ../path}}
-        {{#if (either this.public ../password)}}
-        <option value="{{@key}}{{#if ../password}}?password={{../password}}{{/if}}">
-          {{initIfFalsy (unprefix "/" @key) "home"}}
-        </option>
-        {{/if}}
-      {{/unlessEquals}}
-      {{/each}}
+    <select class="form-select" id="nav">
+        <option selected="selected">Menu</option>
+        <optgroup label="Menu">
+        {{#iterate routes}}
+        {{#unlessEquals val.path ../path}}
+            {{#if (either val.public ../password)}}
+            <option value="{{val.path}}{{#if ../password}}?password={{../password}}{{/if}}">
+            {{initIfFalsy (capitalize (unprefix "/" val.path)) "Home"}}
+            </option>
+            {{/if}}
+        {{/unlessEquals}}
+        {{/iterate}}
+        </optgroup>
+        <optgroup label="Instances">
+            {{#each instances}}
+                {{#if (either (not (includes name "test")) ../password) }}
+                <option value="{{web_url}}">{{name}}</option>
+                {{/if}}
+            {{/each}}
+        </optgroup>
     </select>
   </nav>
 </header>

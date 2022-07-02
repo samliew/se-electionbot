@@ -3,9 +3,9 @@ import { partialRight } from "ramda";
 import * as ServerUtils from "../../server/utils.js";
 import { flat } from "../../shared/utils/arrays.js";
 import { formatAsChatCode } from "../../shared/utils/chat.js";
-import { dateToUtcTimestamp, getMilliseconds } from "../../shared/utils/dates.js";
+import { dateToUtcTimestamp, getDateFromUTCstring, getMilliseconds } from "../../shared/utils/dates.js";
 import { matchISO8601, matchNumber } from "../../shared/utils/expressions.js";
-import { mergeMaps } from "../../shared/utils/maps.js";
+import { mapMap, mergeMaps } from "../../shared/utils/maps.js";
 import { formatNumber } from "../../shared/utils/strings.js";
 import { getBadges, getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election, { getSiteElections, getVotingGraph } from "../election.js";
@@ -84,11 +84,9 @@ export const setAccessCommand = (args) => {
 export const timetravelCommand = (args) => {
     const { config, election, content } = args;
 
-    const [, yyyy, MM, dd, today] = /(?:(\d{4})-(\d{2})-(\d{2}))|(today)/.exec(content) || [];
+    const destination = content.includes("today") ? new Date() : getDateFromUTCstring(content);
 
-    if (!today && (!yyyy || !MM || !dd)) return "Sorry, Doc! Invalid coordinates";
-
-    const destination = today ? new Date() : new Date(+yyyy, +MM - 1, +dd);
+    if (Number.isNaN(destination.valueOf())) return "Sorry, Doc! Invalid coordinates";
 
     const phase = election.getPhase(destination);
 
@@ -97,7 +95,7 @@ export const timetravelCommand = (args) => {
     config.flags.announcedWinners = false;
     config.flags.saidElectionEndingSoon = false;
 
-    config.nowOverride = today ? void 0 : destination;
+    config.nowOverride = content.includes("today") ? void 0 : destination;
 
     const intl = new Intl.DateTimeFormat("en-US", {
         year: "numeric",
@@ -249,7 +247,7 @@ export const listSiteModerators = async (args) => {
 };
 
 /**
- * TODO: account for cross-domain switches
+ * @summary switches elections without restarting the bot
  * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
@@ -270,7 +268,7 @@ export const changeElection = async (args) => {
 
     const { electionNum, elections, electionUrl } = election;
 
-    if (electionNum === targetNum) {
+    if (electionUrl === targetUrl) {
         return `changing to the ${makeURL("same election", targetUrl)} is a noop`;
     }
 
@@ -283,8 +281,11 @@ export const changeElection = async (args) => {
 
     election.reset();
     election.electionUrl = targetUrl;
-    election.electionNum = targetNum;
     elections.set(targetNum, election);
+
+    if (election.chatDomain !== config.chatDomain) {
+        config.chatDomain = election.chatDomain;
+    }
 
     const status = await election.scrapeElection(config);
     if (!status) {
@@ -299,6 +300,7 @@ export const changeElection = async (args) => {
 
     await election.updateElectionBadges(config);
     await election.updateModerators(config);
+    await election.updateElectionAnnouncements(config);
 
     announcement.reinitialize();
 
@@ -454,7 +456,7 @@ export const postMetaAnnouncement = async (args) => {
 
     const oneBox = !/\bprett(?:y|ify)/.test(content);
 
-    await sendMessage(config, room, oneBox ? link : makeURL(title, link), null, true);
+    await sendMessage(config, room, oneBox ? link : makeURL(title, link), { isPrivileged: true });
 
     config.flags.announcedMetaPost = true;
 };
@@ -489,7 +491,7 @@ export const postWinnersAnnouncement = async (config, room, election, announceme
 export const echoSomething = async (args) => {
     const { config, room, content } = args;
     const normalized = content.replace(/^@\S+\s+say /i, '');
-    await sendMessage(config, room, normalized, null, true);
+    await sendMessage(config, room, normalized, { isPrivileged: true });
 };
 
 /**
@@ -535,8 +537,12 @@ export const joinRoomCommand = async (args) => {
         return "Missing target room ID";
     }
 
-    const status = await client.joinRoom(+roomId);
+    const room = client.getRoom(+roomId);
+
+    const status = await room.join();
     const roomURL = makeURL(roomId, `https://chat.${config.chatDomain}/rooms/${roomId}`);
+
+    await room.watch();
 
     return status ? `Joined room ${roomURL}` : `Failed to join room ${roomId}`;
 };
@@ -668,7 +674,7 @@ export const muteCommand = async (args) => {
 
     const response = `*silenced for ${num} mins*`;
 
-    await sendMessage(config, room, response, null, true);
+    await sendMessage(config, room, response, { isPrivileged: true });
 
     config.updateLastMessage(response, Date.now() + (+num * 6e4) - (throttleSecs * 1e3));
 };
@@ -681,7 +687,7 @@ export const muteCommand = async (args) => {
 export const unmuteCommand = async (args) => {
     const { config, room } = args;
     const response = `I can speak freely again.`;
-    await sendMessage(config, room, response, null, true);
+    await sendMessage(config, room, response, { isPrivileged: true });
     config.updateLastMessage(response);
 };
 
@@ -835,4 +841,25 @@ export const getModsVotedCommand = async (args) => {
     const format = partialRight(formatNumber, [3]);
 
     return `${basePrefix}, ${format(numVoted)} ${postfix}.`;
+};
+
+/**
+ * @summary reports users awaiting confirmation
+ * @param {CommandArguments} args command arguments
+ * @returns {string}
+ */
+export const getConfirmationsCommand = (args) => {
+    const { config } = args;
+
+    const confirmations = mapMap(config.awaitingConfirmation, (builder, uid) => {
+        return `${uid} -> ${builder.name}`;
+    });
+
+    const { length } = confirmations;
+
+    if (!length) {
+        return "Not waiting for confirmation by any user.";
+    }
+
+    return `Waiting for ${length} user${pluralize(length)} confirmation:\n${confirmations.join("\n")}`;
 };

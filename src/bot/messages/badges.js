@@ -1,26 +1,34 @@
+import { uniquify } from "../../shared/utils/arrays.js";
+import { safeCapture } from "../../shared/utils/expressions.js";
 import { makeURL, pluralize, pluralizePhrase } from "../utils.js";
 
 /**
  * @typedef {import("../index").ElectionBadge} Badge
  * @typedef {import("../election").default} Election
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  */
 
 /**
  * @summary builds a response to badges of a certain type query
- * @param {Badge[]} badges
- * @param {Badge["type"]} type
- * @param {boolean} [isSO]
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayBadgesByType = (badges, type, isSO = true) => {
-    const filtered = badges.filter(({ type: btype }) => btype === type);
+export const sayBadgesByType = (config, _es, election, text, user) => {
+    // https://regex101.com/r/xanwAH/3
+    const type = safeCapture(/(?<!\/)\b(participation|edit(?:ing|or)?|mod(?:eration)?)\b(?!\/)/, text);
+    if (!type) {
+        config.awaitingConfirmation.set(user.id, sayBadgesByType);
+        const types = uniquify(election.electionBadges.map(({ type }) => type));
+        return `Can you clarify which type (${types.join(", ")}) to list, @${user.name.replace(/\s/g, "")}?`;
+    }
+
+    const filtered = election.electionBadges.filter((b) => b.type === type);
 
     const { length } = filtered;
 
     const numBadgesPrefix = `The ${length} ${type} badge${pluralize(length)} ${pluralize(length, "are", "is")}: `;
 
     return numBadgesPrefix + (
-        isSO ?
+        election.isStackOverflow() ?
             filtered.map(({ badge_id, name }) => makeURL(name, `https://stackoverflow.com/help/badges/${badge_id}`)) :
             filtered.map(({ name }) => name)
     ).join(", ");
@@ -38,10 +46,9 @@ export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = 
 
 /**
  * @summary builds a response to the required badges query
- * @param {Election} election election to check required badges for
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayRequiredBadges = (election) => {
+export const sayRequiredBadges = (_c, _es, election) => {
 
     if (!election.isStackOverflow()) {
         return "There are no required badges for elections on this site.";

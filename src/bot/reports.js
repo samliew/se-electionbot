@@ -34,8 +34,13 @@ export const pingDevelopers = async (message, config, room) => {
             await wait(0.1);
         }
 
+        if (!developerNames.length) {
+            console.log(`[reports] no developer names to ping`);
+            return false;
+        }
+
         await sendMessageList(config, room, [
-            `${message} cc ${listify(...developerNames)}`
+            `${message} ${listify(...developerNames)}`
         ], { isPrivileged: true });
 
         return true;

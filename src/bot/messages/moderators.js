@@ -9,18 +9,45 @@ import { sayMissingBadges } from "./badges.js";
  * @typedef {import("../commands/user").User} BotUser
  * @typedef {import("../score").CandidateScore} CandidateScore
  * @typedef {import("../election").default} Election
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../election").ModeratorUser} ModeratorUser
- *
- * @typedef {import("../index").MessageBuilder} MessageBuilder
  */
 
 /**
- * @summary builds a response to if mods are paid
- * @param {Election} election
- * @returns {string}
+ * @summary builds a response to a query asking why be a mod
+ * @type {MessageBuilder}
  */
-export const sayAreModsPaid = (election) => {
+export const sayWhyBeAMod = () => {
+    const atom = makeURL("ambassadors of trust", "https://stackoverflow.blog/2009/05/18/a-theory-of-moderation/");
+
+    const intrinsic = [
+        `Moderators are ${atom} and lead the community by example`,
+        "are the primary arbiters of disputes",
+        "help maintain their sites at scale",
+        "ensure the scope stays focused"
+    ];
+
+    const tools = [
+        "binding votes",
+        "post locks",
+        "more data points",
+        "user suspension tooling",
+        "tag maintenance tools"
+    ];
+
+    const extrinsic = [
+        `Moderators also get access to powerful tools to be effective at their tasks (${listify(...tools)})`
+    ];
+
+    return `${listify(...intrinsic)}. Consider becoming one if those values speak to you. ${extrinsic}.`;
+};
+
+/**
+ * @summary builds a response to if mods are paid
+ * @type {MessageBuilder}
+ */
+export const sayAreModsPaid = (_c, _es, election) => {
     const { siteUrl } = election;
 
     const modsURI = makeURL("Elected ♦ moderators", `${siteUrl}/help/site-moderators`);
@@ -60,7 +87,7 @@ export const sayBestModerator = async (_config, _elections, election, _content, 
 
 /**
  * @summary builds a response to a query if it is possible to add a ♦ in a username
- * @returns {string}
+ * @type {MessageBuilder}
  */
 export const sayCanEditDiamond = () => {
     return `No one can edit the diamond symbol (♦) into their username.`;
@@ -196,10 +223,9 @@ export const sayOtherSiteMods = (siteHostname, moderators, decodeEntities) => {
 
 /**
  * @summary builds a message about mod responsibilities
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayWhatModsDo = (election) => {
+export const sayWhatModsDo = (_c, _es, election) => {
     const { siteUrl } = election;
 
     const modActivities = [

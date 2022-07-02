@@ -6,39 +6,41 @@ import { formatNumber, percentify } from "../../shared/utils/strings.js";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "../api.js";
 import { getCandidateOrNominee, getRandomSoFar, RandomArray } from "../random.js";
 import { calculateScore } from "../score.js";
-import { linkToRelativeTimestamp, makeURL, pluralize, scrapeAwardedBadge } from "../utils.js";
+import { linkToRelativeTimestamp, listify, makeURL, pluralize, scrapeAwardedBadge } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../commands/user").User} BotUser
  * @typedef {import("../election").default} Election
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  */
 
 /**
  * @summary builds a response to voting info query
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayAboutVoting = (election) => {
+export const sayAboutVoting = (_c, _es, election, ...rest) => {
     const { dateElection, electionUrl, phase, repVote, statVoters } = election;
 
     const comeBackFinalPhaseText = ` Don't forget to come back ${linkToRelativeTimestamp(dateElection)} to also vote in the election's final voting phase!`;
 
+    const decision = sayInformedDecision(_c, _es, election, ...rest);
+
     const phaseMap = {
         cancelled: statVoters,
         ended: `The ${makeURL("election", electionUrl)} has ended. You can no longer vote.`,
-        election: `If you have at least ${repVote} reputation, you can rank the candidates in your preferred order in ${makeURL("the election", `${electionUrl}?tab=election`)}. ${sayInformedDecision()}`,
+        election: `If you have at least ${repVote} reputation, you can rank the candidates in your preferred order in ${makeURL("the election", `${electionUrl}?tab=election`)}. ${decision}`,
         nomination: `You cannot vote yet. In the meantime you can read and comment on the ${makeURL("candidates' nominations", `${electionUrl}?tab=nomination`)} as well as their answers to the questionnaire to find out more about their moderation style.${comeBackFinalPhaseText}`,
-        primary: `If you have at least ${repVote} reputation, you can freely ${makeURL("vote for the candidates", `${electionUrl}?tab=primary`)}. ${sayInformedDecision()}${comeBackFinalPhaseText}`
+        primary: `If you have at least ${repVote} reputation, you can freely ${makeURL("vote for the candidates", `${electionUrl}?tab=primary`)}. ${decision}${comeBackFinalPhaseText}`
     };
 
-    return phaseMap[phase] || sayElectionNotStartedYet(election);
+    return phaseMap[phase] || sayElectionNotStartedYet(_c, _es, election, ...rest);
 };
 
 /**
  * @summary builds a response to how to save the ranking order, or whether votes are saved automatically
- * @returns {string}
+ * @type {MessageBuilder}
  */
 export const sayHowToSaveVotes = () => {
     return `Your ranking of the candidates is saved automatically as soon changes are made to the sort order. You can amend your vote/ballot freely until the end of the election.`;
@@ -46,12 +48,9 @@ export const sayHowToSaveVotes = () => {
 
 /**
  * @summary builds a number of voters based on the Constituent badge
- * @param {BotConfig} config bot configuration
- * @param {Election} election current election
- * @param {string} text message content
- * @returns {Promise<string>}
+ * @type {MessageBuilder}
  */
-export const sayAlreadyVoted = async (config, election, text) => {
+export const sayAlreadyVoted = async (config, _es, election, text) => {
 
     const { phase, dateElection, statVoters, apiSlug, siteUrl } = election;
 
@@ -193,14 +192,20 @@ export const sayIfOneHasVoted = async (config, _elections, election, _text, user
 
 /**
  * @summary builds a response to who to vote for query
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayInformedDecision = () => {
-    const prefix = `If you want to make an informed decision on who to vote for`;
-    const readAnswers = `read the ${getCandidateOrNominee()}s' answers to the questionnaire`;
-    const lookMeta = `look at examples of their participation on Meta and how they conduct themselves`;
+export const sayInformedDecision = (_c, _es, election) => {
+    const { questionnaireURL } = election;
 
-    return `${prefix}, you should ${readAnswers}, and also ${lookMeta}.`;
+    const prefix = `If you want to make an informed decision on who to vote for`;
+
+    const heuristics = [
+        `read the ${getCandidateOrNominee()}s' answers to the ${makeURL("questionnaire", questionnaireURL)}`,
+        `look at examples of their participation on Meta`,
+        `how they conduct themselves`
+    ];
+
+    return `${prefix}, you should ${listify(...heuristics)}.`;
 };
 
 /**

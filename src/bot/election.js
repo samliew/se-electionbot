@@ -2,7 +2,7 @@ import { AllowedHosts } from "chatexchange/dist/Client.js";
 import cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
 import { isOneOf, mapify } from '../shared/utils/arrays.js';
-import { addDates, dateToUtcTimestamp, daysDiff, getMilliseconds } from '../shared/utils/dates.js';
+import { addDates, dateToUtcTimestamp, dateUnitHandlers, daysDiff, getCurrentUTCyear, getMilliseconds } from '../shared/utils/dates.js';
 import { findLast } from '../shared/utils/dom.js';
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { filterMap, getOrInit, has, mergeMaps, sortMap } from '../shared/utils/maps.js';
@@ -33,11 +33,14 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
  *  electionLink?: string
  * }} ModeratorUser
  *
+ * @typedef {"full" | "graduation" | "pro-tempore"} ElectionType
+ *
  * @typedef {{
  *  dateAnnounced: string,
- *  dateElection: string,
+ *  dateNomination: string,
  *  postLink: string,
  *  postTitle: string,
+ *  type: ElectionType,
  *  userId: number,
  *  userLink: string,
  *  userName: string
@@ -84,7 +87,7 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
         // Invalid, or still a nominee based on nomination post ids
         if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) continue;
 
-        if (config.debugOrVerbose) {
+        if (config.verbose) {
             console.log(`Nomination announcement:`, messageMarkup, { currentNomineePostIds, userName, nominationLink, postId });
         }
 
@@ -274,7 +277,7 @@ export const getSiteElections = async (config, siteUrl, maxElectionNumber, scrap
         const data = await fetchUrl(config, electionURL);
         if (!data) continue;
 
-        const election = new Election(electionURL, electionNum);
+        const election = new Election(electionURL);
         elections.set(electionNum, election);
 
         if (scrape) {
@@ -369,15 +372,28 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
     // "Announcing a “Graduation” election for 2022"
     // "Announcing the first full election for Arts & Crafts!"
     // "Announcing a Pro Tempore election for 2022"
-    // https://regex101.com/r/OTlwms/1
-    const announcementTitleExpr = /^announc(?:ing|ement).+?election.+?for/i;
+    // "Leaving Private Beta, and Initial Pro-Tem Moderator Election!"
+    // https://regex101.com/r/OTlwms/2
+    const announcementTitleExpr = /^announc(?:ing|ement).+?election.+?for|initial(?:\s+pro(?:\s+|-)tem(?:pore)?)\s+moderator\s+election/i;
 
-    // https://regex101.com/r/uXY3xB/1
-    const electionDateExpr = /on\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
+    // https://regex101.com/r/GKcR6r/2
+    const proTemporeTitleExpr = /\bpro(?:\s+|-)tem(?:pore)?\b/i;
+
+    // graduation title can be one of:
+    // July Graduation Moderator Election - Might you stand?
+    // Announcing the first full election for Arts & Crafts!
+    // Announcing a “Graduation” election for 2022
+    // 2022 Graduation Election: Community Interest Check
+    // Announcing a “Graduation” election for 2022
+    // https://regex101.com/r/Qb8pB1/1
+    const graduationTitleExpr = /\bgraduation|(?:first|1st)\s+full\b/i;
+
+    // https://regex101.com/r/uXY3xB/4
+    const electionDateExpr = /(?<!beta\s+)on\s+(?:<(?:strong|em|i)>)?(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
 
     const containers = questionList.querySelectorAll(".question-container");
 
-    /** @type {Map<string, Map<number, Pick<ElectionAnnouncement, "postLink"|"postTitle">>>} */
+    /** @type {Map<string, Map<number, Pick<ElectionAnnouncement, "postLink"|"postTitle"|"type">>>} */
     const allScraped = new Map();
 
     containers.forEach((container) => {
@@ -398,7 +414,15 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
         const postId = matchNumber(/\/questions\/(\d+)\//, postLink);
         if (!postId || has(scraped, postId)) return;
 
-        scraped.set(postId, { postLink, postTitle });
+        scraped.set(postId, {
+            postLink,
+            postTitle,
+            type: proTemporeTitleExpr.test(postTitle) ?
+                "pro-tempore" :
+                graduationTitleExpr.test(postTitle) ?
+                    "graduation" :
+                    "full"
+        });
     });
 
     const time = config.get("default_election_time", "20:00:00");
@@ -443,7 +467,7 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
             const upcomingElectionAnnouncement = {
                 ...scraped.get(postId),
                 dateAnnounced,
-                dateElection,
+                dateNomination: dateElection,
                 userId,
                 userLink,
                 userName
@@ -602,8 +626,11 @@ export default class Election {
      */
     withdrawnNominees = new Map();
 
-    /** @type {Nominee[]} */
-    arrWinners = [];
+    /**
+     * @summary map of userId to {@link Nominee} that won the election
+     * @type {Map<number,Nominee>}
+     */
+    winners = new Map();
 
     /** @type {Map<number, ModeratorUser>} */
     moderators = new Map();
@@ -673,12 +700,6 @@ export default class Election {
     ];
 
     /**
-     * @summary date of the cancellation of the election
-     * @type {string|undefined}
-     */
-    dateCancellation;
-
-    /**
      * @summary date of the start of the nomination phase
      * @type {string}
      */
@@ -716,9 +737,8 @@ export default class Election {
 
     /**
      * @param {string} electionUrl URL of the election, i.e. https://stackoverflow.com/election/12
-     * @param {string|number|null} [electionNum] number of election, can be a numeric string
      */
-    constructor(electionUrl, electionNum = null) {
+    constructor(electionUrl) {
 
         // electionUrl at minimum, needs to end with /election/ before we can scrape it
         if (!this.validElectionUrl(electionUrl)) {
@@ -726,10 +746,30 @@ export default class Election {
         }
 
         this.electionUrl = electionUrl;
+    }
 
-        const idFromURL = /** @type {string} */(electionUrl.split('/').pop());
+    /**
+     * @summary returns current election number
+     * @returns {number|undefined}
+     */
+    get electionNum() {
+        const { electionUrl } = this;
+        return matchNumber(/\/election\/(\d+)/, electionUrl);
+    }
 
-        this.electionNum = electionNum ? +electionNum : +idFromURL || null;
+    /**
+     * @summary returns election type
+     * @returns {ElectionType}
+     */
+    get electionType() {
+        const { announcements, dateNomination } = this;
+
+        const [announcement] = filterMap(
+            announcements,
+            (v) => v.dateNomination === dateNomination
+        ).values();
+
+        return announcement?.type || "full";
     }
 
     /**
@@ -771,6 +811,15 @@ export default class Election {
     }
 
     /**
+     * @summary returns a link to the current questionnaire
+     * @returns {string}
+     */
+    get questionnaireURL() {
+        const { electionUrl } = this;
+        return `${electionUrl}#questionnaire`;
+    }
+
+    /**
      * @summary returns chat domain of the election
      * @returns {Host}
      */
@@ -790,6 +839,17 @@ export default class Election {
         if (isOneOf(AllowedHosts, networkOrigin)) return networkOrigin;
 
         return "stackexchange.com";
+    }
+
+    /**
+     * @summary returns election chat room id from {@link Election.chatUrl}
+     * @returns {number|undefined}
+     */
+    get chatRoomId() {
+        const { chatUrl } = this;
+        return chatUrl ?
+            matchNumber(/(\d+)$/, chatUrl) :
+            void 0;
     }
 
     /**
@@ -925,8 +985,8 @@ export default class Election {
      * @returns {number}
      */
     get numWinners() {
-        const { arrWinners } = this;
-        return arrWinners.length || 0;
+        const { winners } = this;
+        return winners.size;
     }
 
     /**
@@ -971,21 +1031,23 @@ export default class Election {
         /** @type {Map<number, Nominee>} */
         const allWinners = new Map();
 
-        elections.forEach(({ arrWinners }) => {
-            arrWinners.forEach((n) => allWinners.set(n.userId, n));
+        elections.forEach(({ winners }) => {
+            winners.forEach((n) => allWinners.set(n.userId, n));
         });
 
         return allWinners;
     }
 
     /**
-     * @summary gets a list of new Winners
-     * @returns {Nominee[]}
+     * @summary gets new {@link Nominee} winners
+     * @returns {Map<number, Nominee>}
      */
     get newWinners() {
-        const { prev, arrWinners } = this;
-        const prevIds = (prev?.arrWinners || []).map(({ userId }) => userId);
-        return arrWinners.filter(({ userId }) => !prevIds.includes(userId));
+        const { prev, winners } = this;
+
+        const prevWinners = prev?.winners || new Map();
+
+        return filterMap(winners, ({ userId }) => !prevWinners.has(userId));
     }
 
     /**
@@ -1003,7 +1065,7 @@ export default class Election {
      */
     get hasNewWinners() {
         const { newWinners } = this;
-        return !!newWinners.length;
+        return !!newWinners.size;
     }
 
     /**
@@ -1011,14 +1073,13 @@ export default class Election {
      * @returns {boolean}
      */
     get electionChatRoomChanged() {
-        const { prev, chatUrl, chatDomain, chatRoomId } = this;
+        const { prev, chatUrl, chatDomain } = this;
 
         if (!prev) return false;
 
         const chatUrlChanged = prev.chatUrl !== chatUrl;
         const chatDomainChanged = prev.chatDomain !== chatDomain;
-        const chatRoomIdChanged = prev.chatRoomId !== chatRoomId;
-        return chatUrlChanged || chatDomainChanged || chatRoomIdChanged;
+        return chatUrlChanged || chatDomainChanged;
     }
 
     /**
@@ -1069,6 +1130,29 @@ export default class Election {
     }
 
     /**
+     * @summary gets a list of {@link ElectionBadge}s by type
+     * @param {"all"|"editing"|"moderation"|"participation"} type badge type
+     * @param {"all"|"optional"|"required"} [status] badge status
+     * @returns {ElectionBadge[]}
+     */
+    getElectionBadges(type, status = "all") {
+        const { electionBadges } = this;
+
+        const all = type === "all";
+
+        const badgesByType = all ?
+            electionBadges :
+            electionBadges.filter((b) => b.type === type);
+
+        if (status !== "all") {
+            const invert = status === "optional";
+            return badgesByType.filter((b) => b.required !== invert);
+        }
+
+        return badgesByType;
+    }
+
+    /**
      * @summary clones the election
      * @param {BotConfig} config bot configuration
      * @returns {Promise<Election>}
@@ -1082,17 +1166,40 @@ export default class Election {
     /**
      * @summary forgets about previous states
      * @param {number} [states] number of states to forget
-     * @returns {void}
+     * @returns {Election}
      */
     forget(states = 1) {
         const { history } = this;
 
         let cleanups = 0;
         while (this.prev) {
-            if (cleanups >= states) return;
+            if (cleanups >= states) return this;
             history.shift();
             cleanups += 1;
         }
+
+        return this;
+    }
+
+    /**
+     * @summary clears the election cancellation state
+     * @returns {Election}
+     */
+    clearCancellation() {
+        this.dateCancelled = void 0;
+        this.cancelledText = void 0;
+        return this;
+    }
+
+    /**
+     * @summary clears the election participation state
+     * @returns {Election}
+     */
+    clearParticipants() {
+        this.withdrawnNominees.clear();
+        this.winners.clear();
+        this.nominees.clear();
+        return this;
     }
 
     /**
@@ -1101,15 +1208,13 @@ export default class Election {
      */
     reset() {
         // TODO: expand
-        this.withdrawnNominees.clear();
-        this.arrWinners.length = 0;
+        this.clearCancellation();
+        this.clearParticipants();
         this.questionnaire.length = 0;
         this.moderators.clear();
-        this.nominees.clear();
         this.phase = null;
         this.updated = Date.now();
-        this.forget();
-        return this;
+        return this.forget();
     }
 
     /**
@@ -1321,17 +1426,30 @@ export default class Election {
 
         if (!$(statusElem).text().includes('cancelled')) return false;
 
-        // https://regex101.com/r/UOGdTo/1
-        const cancellationDateExpr = /\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
-        const [, monthday, year] = cancellationDateExpr.exec(notice) || [];
+        // start with checking if the date is relative
+        // https://regex101.com/r/7azemG/2
+        const [, num, unit] = /\b(\d+)\s+(second|minute|hour|day|month|year)s?\s+ago\b/i.exec(notice) || [];
 
-        this.dateCancelled = dateToUtcTimestamp(`${monthday}, ${year} 20:00:00Z`);
+        if (!unit) {
+            // https://regex101.com/r/UOGdTo/1
+            const cancellationDateExpr = /\s+(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
+            const [, monthday, year = getCurrentUTCyear()] = cancellationDateExpr.exec(notice) || [];
+            this.dateCancelled = dateToUtcTimestamp(`${monthday}, ${year} 20:00:00Z`);
+        } else {
+            const cancellationDate = dateUnitHandlers.get(unit)?.(Date.now(), -+num);
+            if (!cancellationDate) return false;
+
+            this.dateCancelled = dateToUtcTimestamp(cancellationDate);
+        }
+
+        const prettyText = notice.replace(/<a href="/g, 'See [meta](');
 
         // Convert link to chat-friendly markup
-        this.cancelledText = notice
-            ?.replace(/<a href="/g, 'See [meta](')
-            .replace(/">.+/g, ') for details.')
-            .trim();
+        // SE can use a truncated notice
+        this.cancelledText = (prettyText === notice ?
+            $(statusElem).text().replace(/(\s){2,}/gm, " ") :
+            prettyText.replace(/">.+/g, ') for details.')
+        ).trim();
 
         this.phase = 'cancelled';
         return true;
@@ -1449,8 +1567,7 @@ export default class Election {
                 }
 
                 // Set next election number and url
-                this.electionNum = $('a[href^="/election/"]').length + 1;
-                this.electionUrl = this.electionUrl + this.electionNum;
+                this.electionUrl = this.electionUrl + ($('a[href^="/election/"]').length + 1);
 
                 console.log(`Retrying with election number ${this.electionNum} - ${this.electionUrl}`);
 
@@ -1458,11 +1575,8 @@ export default class Election {
                 return this.scrapeElection(config, true);
             }
 
-            this.pushHistory();
-
             const metaElems = content.find(".flex--item.mt4 .d-flex.gs4 .flex--item:nth-child(2)");
             const metaVals = metaElems.map((_i, el) => $(el).attr('title') || $(el).text()).get();
-            const metaPhaseElems = $('#mainbar .js-filter-btn a');
 
             const [_numCandidates, numPositions] = metaVals.slice(-2, metaVals.length);
 
@@ -1506,18 +1620,7 @@ export default class Election {
 
             // Empty string if not set as environment variable, or not found on election page
             this.chatUrl = process.env.ELECTION_CHATROOM_URL || this.scrapeElectionChatRoom($);
-            this.chatRoomId = matchNumber(/(\d+)$/, this.chatUrl) || null;
             this.phase = this.getPhase();
-
-            // Detect active election number if not specified
-            if (this.isActive() && !this.electionNum) {
-                this.electionNum = matchNumber(/(\d+)/, metaPhaseElems.attr('href') || "") || null;
-
-                // Append to electionUrl
-                this.electionUrl += this.electionNum;
-
-                if (config.debugOrVerbose) console.log('INFO  - Election is active and number was auto-detected:', this.electionNum);
-            }
 
             // If election has ended (or cancelled)
             if (this.phase === 'ended') {
@@ -1544,26 +1647,28 @@ export default class Election {
 
                     // Get winners
                     const winnerIds = $(statsElem).find('a').map((_i, el) => +( /** @type {string} */($(el).attr('href')?.split('/')[2]))).get();
-                    this.arrWinners = [...this.getWinners(winnerIds).values()];
+                    this.winners = this.getWinners(winnerIds);
                 }
             }
 
             this.newlyWithdrawnNominees.forEach((nominee) => this.addWithdrawnNominee(nominee));
 
             console.log(
-                `SCRAPE - Election page ${this.electionUrl} has been scraped successfully at ${dateToUtcTimestamp(this.updated)}.` +
-                (config.debugOrVerbose ? `\n--------
+                `[election] scraped ${this.electionUrl} at ${dateToUtcTimestamp(this.updated)}.` +
+                (config.debugOrVerbose ? `
 phase             ${this.phase};
 primary date      ${this.datePrimary};
 election date     ${this.dateElection};
 ended date        ${this.dateEnded};
 cancelled date    ${this.dateCancelled};
 candidates        ${this.numNominees};
-withdrawals       ${this.numWithdrawals}
+withdrawals       ${this.numWithdrawals};
 winners           ${this.numWinners};
 chat URL          ${this.chatUrl}
 primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; winners: ${this.numWinners}; withdrawals: ${this.numWithdrawals}`)
             );
+
+            this.pushHistory();
 
             return true;
         }
@@ -1571,6 +1676,25 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
             console.error(`SCRAPE - Failed scraping ${this.electionUrl}`, message);
             return false;
         }
+    }
+
+    /**
+     * @summary updates election announcements
+     * @param {BotConfig} config bot configuration
+     * @returns {Promise<Election>}
+     */
+    async updateElectionAnnouncements(config) {
+        const { siteHostname } = this;
+
+        const electionAnnouncements = await scrapeElectionAnnouncements(config);
+        const electionSiteAnnouncements = getOrInit(electionAnnouncements, siteHostname, new Map());
+
+        this.announcements = sortMap(
+            electionSiteAnnouncements,
+            (_, a, __, b) => b.dateNomination > a.dateNomination ? -1 : 1
+        );
+
+        return this;
     }
 
     /**

@@ -1,10 +1,11 @@
 import { datesToDuration, dateToRelativeTime, dateToShortISO8601Timestamp, getSeconds } from "../../shared/utils/dates.js";
 import { matchISO8601, matchNumber, safeCapture } from "../../shared/utils/expressions.js";
+import { findInMap, mapMap } from "../../shared/utils/maps.js";
 import { formatOrdinal } from "../../shared/utils/strings.js";
 import { getAwardedBadges, getNamedBadges } from "../api.js";
 import { getCandidateOrNominee, getRandomNow } from "../random.js";
 import { pingDevelopers } from "../reports.js";
-import { makeURL, pluralize } from "../utils.js";
+import { listify, makeURL, pluralize } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
 /**
@@ -18,20 +19,20 @@ import { sayElectionNotStartedYet } from "./phases.js";
  * @summary builds current winners message
  * @type {MessageBuilder}
  */
-export const sayCurrentWinners = (_c, _es, election) => {
-    const { phase, arrWinners = [], siteUrl, electionUrl } = election;
+export const sayCurrentWinners = (_c, _es, election, ...rest) => {
+    const { phase, winners, siteUrl, electionUrl } = election;
 
     const phaseMap = {
         "default": `The election is not over yet. Stay tuned for the winners!`,
-        "null": sayElectionNotStartedYet(election),
+        "null": sayElectionNotStartedYet(_c, _es, election, ...rest),
         "ended": `The winners can be found on the ${makeURL("election page", electionUrl)}.`
     };
 
-    const { length } = arrWinners;
+    const { size } = winners;
 
-    if (phase === 'ended' && length > 0) {
-        const winnerNames = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
-        return `The winner${pluralize(length)} ${length > 1 ? 'are' : 'is'}: ${winnerNames.join(', ')}.`;
+    if (phase === 'ended' && size > 0) {
+        const winnerNames = mapMap(winners, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
+        return `The winner${pluralize(size)} ${size > 1 ? 'are' : 'is'}: ${winnerNames.join(', ')}.`;
     }
 
     return phaseMap[phase] || phaseMap.default;
@@ -88,14 +89,13 @@ export const sayElectionResults = (_config, elections, _election, text) => {
  * @summary builds a response to a query about election phase duration
  * @type {MessageBuilder}
  */
-export const sayElectionPhaseDuration = (_config, _elections, election, text) => {
+export const sayElectionPhaseDuration = (config, _elections, election, text) => {
     const {
         dateElection,
         dateEnded,
         dateNomination,
         datePrimary,
-        electionNum,
-        siteName
+        electionOrdinalName,
     } = election;
 
     const phase = /** @type {Exclude<ElectionPhase, null|"cancelled"|"ended">} */(
@@ -111,9 +111,9 @@ export const sayElectionPhaseDuration = (_config, _elections, election, text) =>
 
     const [from, to] = phaseMap[phase];
 
-    if (!from || !to) return ""; // TODO: consider what to return
+    if (!from || !to) return `The ${electionOrdinalName} does not have a "${phase}" phase.`;
 
-    const rel = datesToDuration(getSeconds(from) * 1e3, getSeconds(to) * 1e3);
+    const duration = datesToDuration(getSeconds(from) * 1e3, getSeconds(to) * 1e3);
 
     const rules = [
         [election.isActive(), "is"],
@@ -123,7 +123,11 @@ export const sayElectionPhaseDuration = (_config, _elections, election, text) =>
 
     const [_rule, modal] = rules.find(([rule]) => rule) || [, "is"];
 
-    return `The ${formatOrdinal(electionNum || 1)} ${siteName} election "${phase}" phase ${modal} ${rel} long`;
+    const relTime = dateToRelativeTime(to, { now: config.nowOverride });
+
+    const relative = `(end${relTime.endsWith("ago") ? "ed" : "s"} ${relTime})`;
+
+    return `The ${electionOrdinalName} "${phase}" phase ${modal} ${duration} long ${relative}.`;
 };
 
 /**
@@ -167,15 +171,15 @@ export const sayWhatIsAnElection = (_c, _es, election) => {
  * @summary builds a response to a query where to find results
  * @type {MessageBuilder}
  */
-export const sayWhereToFindElectionResults = (_config, _elections, election) => {
+export const sayWhereToFindElectionResults = (_c, _es, election, ...rest) => {
     const { opavoteUrl, siteName, electionNum, dateEnded } = election;
 
     const resultsLocation = opavoteUrl ? ` The results can be found online via ${makeURL("OpaVote", opavoteUrl)}.` : "";
 
-    /** @type {[boolean,string][]} */
+    /** @type {[boolean,ReturnType<MessageBuilder>][]} */
     const rules = [
         [election.isActive(), `The election is ${getRandomNow()} — the results will become available after it ends ${dateToRelativeTime(dateEnded)}.`],
-        [election.isNotStartedYet(), sayElectionNotStartedYet(election)],
+        [election.isNotStartedYet(), sayElectionNotStartedYet(_c, _es, election, ...rest)],
         [election.isEnded(), `The ${formatOrdinal(electionNum || 1)} ${siteName} election has ended.${resultsLocation}`]
     ];
 
@@ -303,6 +307,33 @@ export const sayHowManyVisitedElection = async (config, _es, election, text, _u,
     const enoughRep = `and had enough reputation (${repVote})`;
 
     return `${basePrefix}, ${visited} ${enoughRep} to vote ${responses[phase] || "so far"}.`;
+};
+
+/**
+ * @summary builds a response to a query on what is the type of the election
+ * @type {MessageBuilder}
+ */
+export const sayElectionType = (config, _es, election, text) => {
+    const { announcements, electionType, dateNomination } = election;
+
+    const type = ["full", "graduation"].every((t) => t !== electionType) ?
+        makeURL(electionType, "https://meta.stackexchange.com/q/314459") :
+        electionType;
+
+    const announcement = findInMap(announcements, (a) => a.dateNomination === dateNomination);
+
+    const announcementNote = announcement ?
+        ` (see ${makeURL("the announcement", announcement.postLink)})` :
+        "";
+
+    const prefix = `This is a ${type} election${announcementNote}.`;
+
+    // famous in-joke: https://meta.stackexchange.com/a/323902
+    if (config.fun && /tempur[ea]/.test(text)) {
+        return `${prefix} Don't forget to add ${listify("eggs", "flour", "water")} to the ${getCandidateOrNominee()}s!`;
+    }
+
+    return prefix;
 };
 
 // /**

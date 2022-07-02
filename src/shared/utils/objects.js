@@ -75,3 +75,62 @@ export const clone = (source, target = {}) => {
 
     return target;
 };
+
+/**
+ * @template {Record<string, unknown>} T
+ *
+ * @summary returns a list of keys with falsy values
+ * @param {T} source object to check
+ * @returns {Array<keyof T>}
+ */
+export const getFalsyKeys = (source) => {
+    return Object
+        .entries(source)
+        .filter(([_, v]) => !v)
+        .map(([k]) => k);
+};
+
+/**
+ * @template {Record<string, unknown>} T
+ * @template {Record<string, unknown>} U
+ *
+ * @typedef {{
+ *  added: Array<keyof U & string>,
+ *  changed: Array<keyof T & string>,
+ *  removed: Array<keyof T & string>,
+ * }} ObjectDiff<T,U>
+ */
+
+/**
+ * @template {Record<string, unknown>} T
+ * @template {Record<string, unknown>} U
+ *
+ * @summary gets a shallow diff between two records
+ * @param {T} source source record
+ * @param {U} target modified record
+ * @returns {ObjectDiff<T, U>}
+ */
+export const diffObjects = (source, target) => {
+    const allKeys = new Set([...Object.keys(source), ...Object.keys(target)]);
+
+    /** @type {ObjectDiff<T,U>} */
+    const diff = { added: [], changed: [], removed: [] };
+
+    allKeys.forEach((key) => {
+        const inSource = key in source;
+        const inTarget = key in target;
+        const inBoth = inSource && inTarget;
+
+        // TODO: diff nested objects
+        if (inBoth && source[key] !== target[key]) {
+            diff.changed.push(key);
+            return;
+        }
+
+        if (inBoth) return;
+        if (inSource) diff.removed.push(key);
+        if (inTarget) diff.added.push(key);
+    });
+
+    return diff;
+};

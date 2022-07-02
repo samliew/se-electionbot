@@ -62,3 +62,40 @@ export const onlyTruthy = (item) => !!item;
  * @returns {Array<T>}
  */
 export const uniquify = (array) => [...new Set(array)];
+
+/**
+ * @template {unknown} T
+ * @template {unknown} U
+ *
+ * @summary maps an {@link array} sequentially with an asynchronous {@link callback}
+ * @param {T[]} array array to map
+ * @param {(val: T, idx: number, arr: T[]) => U | Promise<U>} callback mapper callback
+ * @returns {Promise<U[]>}
+ */
+export const asyncMapSequential = async (array, callback) => {
+    /** @type {U[]} */
+    const output = [];
+
+    for (let i = 0; i < array.length; i++) {
+        output.push(await callback(array[i], i, array));
+    }
+
+    return output;
+};
+
+/**
+ * @template {unknown[]} T
+ *
+ * @summary finds last array element satisfying the {@link predicate}
+ * @param {T} array array to search
+ * @param {(val: T[number], idx: number, arr: T) => boolean} predicate search callback
+ * @returns {T[number]|undefined}
+ */
+export const findLast = (array, predicate) => {
+    for (let i = array.length - 1; i >= 0; i--) {
+        const val = array[i];
+        if (predicate(val, i, array)) return val;
+    }
+
+    return;
+};

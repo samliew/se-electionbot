@@ -46,26 +46,32 @@ describe("Stack Exchange Chat integration", function () {
 
     describe(fetchChatTranscript.name, async () => {
         testIf('should fetch chat transcript correctly', async () => {
-            const transcriptUrl = "https://chat.stackoverflow.com/transcript/190503/2019/3/20";
-            const chatMessages = await fetchChatTranscript(getMockBotConfig(), transcriptUrl);
+            const transcriptUrl = "https://chat.stackoverflow.com/transcript/190503";
+            const config = getMockBotConfig({ showTranscriptMessages: 7 });
+            const messages = await fetchChatTranscript(config, transcriptUrl, {
+                order: "asc",
+                transcriptDate: new Date(Date.UTC(2019, 2, 20, 23, 59, 59, 999)),
+            });
 
-            expect(chatMessages).to.not.be.empty;
+            expect(messages).to.not.be.empty;
 
-            expect(chatMessages[0].username).to.equal("Samuel Liew");
-            expect(chatMessages[0].chatUserId).to.equal(584192);
-            expect(chatMessages[0].message).to.equal("how do I vote?");
-            expect(chatMessages[0].date).to.equal(1553052480000);
-            expect(chatMessages[0].messageId).to.equal(45689273);
+            const [first, second, third, fourth, fifth, sixth, seventh] = messages;
 
-            expect(chatMessages[1].date).to.equal(1553052481000);
-            expect(chatMessages[2].date).to.equal(1553052482000);
-            expect(chatMessages[3].date).to.equal(1553052483000);
-            expect(chatMessages[4].date).to.equal(1553052484000);
-            expect(chatMessages[5].date).to.equal(1553052485000);
+            expect(first.username).to.equal("Samuel Liew");
+            expect(first.chatUserId).to.equal(584192);
+            expect(first.message).to.equal("how do I vote?");
+            expect(first.date).to.equal(1553052480000);
+            expect(first.messageId).to.equal(45689273);
 
-            expect(chatMessages[6].date).to.equal(1553053320000);
-            expect(chatMessages[6].message).to.equal("how do I vote?  This is a test link");
-            expect(chatMessages[6].messageMarkup).to.equal("**how do *I* vote?**  [This is a test link](https://stackoverflow.com/election)");
+            expect(second.date).to.equal(1553052481000);
+            expect(third.date).to.equal(1553052482000);
+            expect(fourth.date).to.equal(1553052483000);
+            expect(fifth.date).to.equal(1553052484000);
+            expect(sixth.date).to.equal(1553052485000);
+
+            expect(seventh.date).to.equal(1553053320000);
+            expect(seventh.message).to.equal("how do I vote?  This is a test link");
+            expect(seventh.messageMarkup).to.equal("**how do *I* vote?**  [This is a test link](https://stackoverflow.com/election)");
         });
     });
 

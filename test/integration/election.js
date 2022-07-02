@@ -17,7 +17,7 @@ describe(Election.name, function () {
             const result = await election.scrapeElection(getMockBotConfig());
 
             expect(result).to.be.true;
-            expect(election.chatRoomId).to.not.be.null;
+            expect(election.chatRoomId).to.not.be.undefined;
             expect(election.repVote).to.equal(150);
             expect(election.electionNum).to.equal(13);
         });
