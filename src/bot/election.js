@@ -1166,17 +1166,19 @@ export default class Election {
     /**
      * @summary forgets about previous states
      * @param {number} [states] number of states to forget
-     * @returns {void}
+     * @returns {Election}
      */
     forget(states = 1) {
         const { history } = this;
 
         let cleanups = 0;
         while (this.prev) {
-            if (cleanups >= states) return;
+            if (cleanups >= states) return this;
             history.shift();
             cleanups += 1;
         }
+
+        return this;
     }
 
     /**
@@ -1212,8 +1214,7 @@ export default class Election {
         this.moderators.clear();
         this.phase = null;
         this.updated = Date.now();
-        this.forget();
-        return this;
+        return this.forget();
     }
 
     /**
