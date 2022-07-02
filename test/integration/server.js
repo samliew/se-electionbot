@@ -1,7 +1,9 @@
 import { expect } from "chai";
 import Client from "chatexchange";
 import User from "chatexchange/dist/User.js";
+import dotenv from "dotenv";
 import { JSDOM } from "jsdom";
+import { test } from "mocha";
 import sinon from "sinon";
 import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
@@ -46,8 +48,16 @@ describe("Dashboard", function () {
 
     afterEach(() => sinon.restore());
 
+    dotenv.config();
+    const hasCreds = !!process.env.HEROKU_API_TOKEN;
+    const testIf = hasCreds ? test : test.skip;
+
+    if (!hasCreds) {
+        console.log("Cannot test Dashboard server integration with no Heroku API token, skipping");
+    }
+
     describe("Routes", () => {
-        it('should correctly render the home route', async () => {
+        testIf('should correctly render the home route', async () => {
             const getMeStub = sinon.stub(client, "getMe");
             getMeStub.resolves(new User["default"](client, 42));
 
