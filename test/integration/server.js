@@ -17,7 +17,9 @@ import { getMockBotConfig } from "../mocks/bot.js";
  * @typedef {import("http").Server} HttpServer
  */
 
-describe("Dashboard", () => {
+describe("Dashboard", function () {
+    this.timeout(1e4); // route rendering can be slow
+
     /** @type {Client} */
     const client = new Client["default"]("stackoverflow.com");
     const room = client.getRoom(92073);
