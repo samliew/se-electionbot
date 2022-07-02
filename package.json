@@ -51,7 +51,7 @@
         "express-handlebars": "^6.0.6",
         "heroku-client": "^3.1.0",
         "html-entities": "^2.3.3",
-        "jsdom": "^18.1.1",
+        "jsdom": "^20.0.0",
         "markdown-it": "^12.3.2",
         "node-cache": "^5.1.2",
         "node-cron": "^3.0.0",
