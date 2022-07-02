@@ -1,11 +1,11 @@
 import cron from "node-cron";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { filterMap, mapMap } from "../shared/utils/maps.js";
+import { getFalsyKeys } from "../shared/utils/objects.js";
 import { sayFeedback } from "./commands/commands.js";
-import { sayElectionSchedule } from "./messages/phases.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
-import { makeURL, pluralize, wait } from "./utils.js";
+import { getFormattedElectionSchedule, makeURL, pluralize, wait } from "./utils.js";
 
 export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chance to cast or modify your votes!";
 
@@ -62,7 +62,7 @@ export default class ScheduledAnnouncement {
             config, _room,
             [
                 `The ${makeURL("election", _election.electionUrl)} dates have changed:`,
-                sayElectionSchedule(_election)
+                getFormattedElectionSchedule(config, _election)
             ],
             { isPrivileged: true }
         );
@@ -216,14 +216,14 @@ export default class ScheduledAnnouncement {
         // No election
         if (!election) return false;
 
-        const { arrWinners, phase, opavoteUrl, siteUrl } = election;
+        const { winners, phase, opavoteUrl, siteUrl } = election;
 
-        const { length } = arrWinners;
+        const { size } = winners;
 
-        if (config.debug) console.log('announceWinners() called: ', arrWinners);
+        if (config.debug) console.log('announceWinners() called: ', winners);
 
         // Needs to have ended and have winners
-        if (phase !== 'ended' || length === 0) {
+        if (phase !== 'ended' || size === 0) {
             console.log("announceWinners - called but no winners to announce?", config.verbose ? election : "");
             return false;
         }
@@ -240,12 +240,12 @@ export default class ScheduledAnnouncement {
 
         config.flags.saidElectionEndingSoon = true;
         config.flags.announcedWinners = true;
-        config.scrapeIntervalMins = 10;
+        config.scrapeIntervalMins = 5;
 
-        const winnerList = arrWinners.map(({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
+        const winnerList = mapMap(winners, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
 
         // Build the message
-        let msg = `**Congratulations to the winner${pluralize(length)}** ${winnerList.join(', ')}!`;
+        let msg = `**Congratulations to the winner${pluralize(size)}** ${winnerList.join(', ')}!`;
 
         if (opavoteUrl) {
             msg += ` You can ${makeURL("view the results online via OpaVote", opavoteUrl)}.`;
@@ -514,7 +514,13 @@ export default class ScheduledAnnouncement {
      * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
      */
     reinitialize() {
-        this.stopAll(); // TODO: check status
+        const result = this.stopAll();
+
+        const failed = getFalsyKeys(result);
+        if (failed.length) {
+            console.log(`[cron] failed to reinit tasks: ${failed}`);
+        }
+
         return this.initAll();
     }
 

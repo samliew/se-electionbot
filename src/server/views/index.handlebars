@@ -1,301 +1,200 @@
-{{> navigation routes=data/routes password=data/password path=data/path }}
+{{> navigation routes=data/routes password=data/password path=data/path instances=data/instances }}
 
-<h1>{{{heading}}}</h1>
+<h1 class="fs-4">{{{heading}}}</h1>
 
 {{#with data}}
-
 <blockquote>
     <p>I am <strong>{{{url botconfig/repoUrl "ElectionBot"}}}</strong>, a chatbot that can answer commonly-asked questions about elections for sites on the Stack Exchange network.</p>
     <p>This instance is listening to <strong>{{{url chatRoomUrl}}}</strong>.</p>
     <p>The bot is {{#if isBotInRoom}}{{else}}<strong>not</strong> {{/if}}in the room.</p>
 </blockquote>
 
-<main class="dashboard">
+<main class="dashboard row">
 
     {{#with election}}
-    <section>
-        <aside>
-            <h2>Election Info</h2>
-            <table>
-                <tr><td>Last updated</td><td>{{> relativetime date=updated}}</td></tr>
-                <tr><td>Site</td><td>{{siteName}}</td></tr>
-                <tr><td>Hostname</td><td>{{{url (getter @root/data/election "siteUrl")}}}</td></tr>
+    <section class="col-auto">
+
+        <h2 class="fs-4">Election Info</h2>
+        <table>
+            <tr><td>Last updated</td><td>{{> relativetime date=updated}}</td></tr>
+            <tr><td>Site</td><td>{{siteName}}</td></tr>
+            <tr>
+                <td>Type</td>
+                <td>{{getter this "electionType"}}</td>
+            </tr>
+            <tr><td>Hostname</td><td>{{{url (getter @root/data/election "siteUrl")}}}</td></tr>
+            <tr>
+                <td>Is Stack Overflow</td>
+                <td>{{{boolean (contextCall "isStackOverflow" this)}}}</td>
+            </tr>
+            <tr><td>Election Title</td><td>{{title}}</td></tr>
+            <tr><td>Election URL</td><td>{{{url electionUrl}}}</td></tr>
+            <tr><td>Election Chat</td>
+                {{#if chatUrl}}
+                <td>{{{url chatUrl}}}</td>
+                {{else}}
+                <td></td>
+                {{/if}}
+            </tr>
+            <tr><td>Current phase</td>
+                {{#if phase}}
+                <td><strong>{{phase}}</strong></td>
+                {{else}}
+                <td></td>
+                {{/if}}
+            </tr>
+            <tr><td>Nomination date</td><td>{{> relativetime date=dateNomination}}</td></tr>
+            <tr><td>Primary date</td><td>{{#if datePrimary}}{{> relativetime date=datePrimary}}{{/if}}</td></tr>
+            <tr><td>Election date</td><td>{{> relativetime date=dateElection}}</td></tr>
+            <tr><td>End date</td><td>{{> relativetime date=dateEnded}}</td></tr>
+            <tr><td>Cancelled date</td><td>{{#if dateCancelled}}{{> relativetime date=dateCancelled}}{{/if}}</td></tr>
+            <tr><td>Cancelled text</td><td>{{#if cancelledText}}<pre>{{cancelledText}}</pre>{{/if}}</td></tr>
+            <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
+            <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
+            <tr><td>Positions</td><td>{{numPositions}}</td></tr>
+            <tr><td>Opavote URL</td><td>{{{url opavoteUrl}}}</td></tr>
+            <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
+            <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
+        </table>
+
+        <h2 class="fs-4">Election History</h2>
+        {{#if (len elections)}}
+        <table class="table-small">
+            <thead>
                 <tr>
-                    <td>Is Stack Overflow</td>
-                    <td>{{{boolean (contextCall "isStackOverflow" this)}}}</td>
+                    <th>Link</th>
+                    <th>Year</th>
+                    <th>Primary</th>
+                    <th>Cancelled</th>
+                    <th>Positions</th>
+                    <th>Nominees</th>
+                    <th>Withdrawn</th>
+                    <th>Winners</th>
                 </tr>
-                <tr><td>Election Title</td><td>{{title}}</td></tr>
-                <tr><td>Election URL</td><td>{{{url electionUrl}}}</td></tr>
-                <tr><td>Election Chat</td>
-                    {{#if chatUrl}}
-                    <td>{{{url chatUrl}}}</td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
-                <tr><td>Current phase</td>
-                    {{#if phase}}
-                    <td><strong>{{phase}}</strong></td>
-                    {{else}}
-                    <td></td>
-                    {{/if}}
-                </tr>
-                <tr><td>Nomination date</td><td>{{> relativetime date=dateNomination}}</td></tr>
-                <tr><td>Primary date</td><td>{{#if datePrimary}}{{> relativetime date=datePrimary}}{{/if}}</td></tr>
-                <tr><td>Election date</td><td>{{> relativetime date=dateElection}}</td></tr>
-                <tr><td>End date</td><td>{{> relativetime date=dateEnded}}</td></tr>
-                <tr><td>Cancelled date</td><td>{{#if dateCancelled}}{{> relativetime date=dateCancelled}}{{/if}}</td></tr>
-                <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
-                <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>
-                <tr><td>Positions</td><td>{{numPositions}}</td></tr>
-                <tr><td>Opavote URL</td><td>{{{url opavoteUrl}}}</td></tr>
-                <tr><td>Voter stats</td><td>{{statVoters}}</td></tr>
-                <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
-            </table>
+            </thead>
+            <tbody>
+            {{#iterate elections}}
+            <tr>
+                <td>
+                    <a href="{{val/electionUrl}}">{{getter val "electionNum"}}</a>
+                    {{#ifEquals (getter val "electionNum") (getter @root/data/election "electionNum")}}<span title="Current Election">*</span>{{/ifEquals}}
+                </td>
+                <td>{{year val/dateNomination}}</td>
+                <td>{{{yesno val/datePrimary}}}</td>
+                <td>{{{yesno (contextCall "isCancelled" val)}}}</td>
+                <td>{{val/numPositions}}</td>
+                <td>{{len val/nominees}}</td>
+                <td>{{len val/withdrawnNominees}}</td>
+                <td>{{len val/winners}}</td>
+            </tr>
+            {{/iterate}}
+            </tbody>
+        </table>
+        {{else}}
+            {{> emptySmallTable }}
+        {{/if}}
 
-            <h2>Election History</h2>
-            {{#if (len elections)}}
-            <table class="table-small">
-                <thead>
-                    <tr>
-                        <th>Link</th>
-                        <th>Year</th>
-                        <th>Primary</th>
-                        <th>Cancelled</th>
-                        <th>Positions</th>
-                        <th>Nominees</th>
-                        <th>Withdrawn</th>
-                        <th>Winners</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {{#iterate elections}}
+        <h2 class="fs-4">Election Announcements</h2>
+        {{#if (len announcements)}}
+        <table class="table-small">
+            <thead>
                 <tr>
-                    <td>
-                        <a href="{{electionUrl}}">{{electionNum}}</a>
-                        {{#ifEquals electionNum @root/data/election/electionNum}}<span title="Current Election">*</span>{{/ifEquals}}
-                    </td>
-                    <td>{{year dateNomination}}</td>
-                    <td>{{{yesno datePrimary}}}</td>
-                    <td>{{{yesno (contextCall "isCancelled" this)}}}</td>
-                    <td>{{numPositions}}</td>
-                    <td>{{len nominees}}</td>
-                    <td>{{len withdrawnNominees}}</td>
-                    <td>{{len arrWinners}}</td>
+                    <th>Type</th>
+                    <th>Announced On</th>
+                    <th>Nomination Date</th>
+                    <th>Author</th>
+                    <th>Title</th>
                 </tr>
-                {{/iterate}}
-                </tbody>
-            </table>
-            {{else}}
-                {{> emptySmallTable }}
-            {{/if}}
+            </thead>
+            <tbody>
+                {{#each (values announcements)}}
+                <tr>
+                    <td>{{type}}</td>
+                    <td>{{utcTimestamp dateAnnounced}}</td>
+                    <td>{{utcTimestamp dateNomination}}</td>
+                    <td>{{{url userLink userName}}}</td>
+                    <td>{{{url postLink postTitle}}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        {{else}}
+            {{> emptySmallTable }}
+        {{/if}}
 
-            <h2>Election Announcements</h2>
-            {{#if (len announcements)}}
-            <table class="table-small">
-                <thead>
-                    <tr>
-                        <th>Announced On</th>
-                        <th>Election Date</th>
-                        <th>Author</th>
-                        <th>Title</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each (values announcements)}}
-                    <tr>
-                        <td>{{utcTimestamp dateAnnounced}}</td>
-                        <td>{{utcTimestamp dateElection}}</td>
-                        <td>{{{url userLink userName}}}</td>
-                        <td>{{{url postLink postTitle}}}</td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-            {{else}}
-                {{> emptySmallTable }}
-            {{/if}}
+        <h2 class="fs-4">Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len nominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
+        {{> nominees (values nominees) }}
 
-            <h2>Candidates <span class="small-count" data-prefix="(" data-suffix=")">{{len nominees}} total, {{len @root/data/nomineesInRoom}} in the room</span></h2>
-            {{#if (len nominees)}}
-                {{> nominees (values nominees) }}
-            {{else}}
-                {{> emptySmallTable }}
-            {{/if}}
+        {{> totalsTableHeader header="Withdrawn" collection=withdrawnNominees }}
+        {{> nominees (values withdrawnNominees) }}
 
-            {{> totalsTableHeader header="Withdrawn" collection=withdrawnNominees }}
-            {{#if (len withdrawnNominees)}}
-                {{> nominees (values withdrawnNominees) }}
-            {{else}}
-                {{> emptySmallTable }}
-            {{/if}}
+        {{> totalsTableHeader header="Winners" collection=winners }}
+        {{> nominees (values winners) }}
 
-            {{> totalsTableHeader header="Winners" collection=arrWinners }}
-            {{#if (len arrWinners)}}
-                {{> nominees arrWinners }}
-            {{else}}
-                {{> emptySmallTable }}
-            {{/if}}
-        </aside>
     </section>
     {{/with}}
 
     {{#with election}}
-    <section>
-        <aside>
-            {{> totalsTableHeader header="Current Moderators" collection=(getter this "currentModerators") }}
-            {{#if (len (getter this "currentModerators"))}}
-                <table class="table-small">
-                   <thead>
-                        <tr>
-                            <th>Link</th>
-                            <th>Member for</th>
-                            <th>Election</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {{#iterate (getter this "currentModerators")}}
-                    <tr>
-                        <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
-                        <td>{{years this.creation_date}}</td>
-                        {{#if this.election}}
-                            <td>{{{ordinal this.election}}} <a href="{{this.electionLink}}">election</a> ({{year (getter (get @root/data/election/elections this.election) "dateEnded")}})</td>
-                        {{else if this.appointed}}
-                            <td>appointed ({{this.appointed}})</td>
-                        {{else}}
-                            <td></td>
-                        {{/if}}
-                    </tr>
-                    {{/iterate}}
-                    </tbody>
-                </table>
-            {{else}}
-                {{> emptySmallTable }}
-            {{/if}}
+    <section class="col-auto">
 
-            {{> totalsTableHeader header="Former Moderators" collection=(getter this "formerModerators") }}
-            {{#if (len (getter this "formerModerators"))}}
-                <table class="table-small">
-                   <thead>
-                        <tr>
-                            <th>Link</th>
-                            <th>Member for</th>
-                            <th>Election</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {{#iterate (getter this "formerModerators")}}
-                    <tr>
-                        <td><a href="{{this.link}}">{{{this.display_name}}}</a></td>
-                        <td>{{years this.creation_date}}</td>
-                        {{#if this.election}}
-                            <td>{{{ordinal this.election}}} <a href="{{this.electionLink}}">election</a> ({{year (getter (get @root/data/election/elections this.election) "dateEnded")}})</td>
-                        {{else if this.appointed}}
-                            <td>appointed ({{this.appointed}})</td>
-                        {{else}}
-                            <td></td>
-                        {{/if}}
-                    </tr>
-                    {{/iterate}}
-                    </tbody>
-                </table>
-            {{else}}
-                {{> emptySmallTable }}
-            {{/if}}
+        {{> moderatorTable header="Current Moderators" election=@root/data/election key="currentModerators" }}
+        {{> moderatorTable header="Former Moderators" election=@root/data/election key="formerModerators" }}
 
-            {{#if (len (getter this "requiredBadges"))}}
-            {{> totalsTableHeader header="Required Badges" collection=(getter this "requiredBadges") }}
-            <table class="table-small">
-                <thead>
-                    <tr>
-                        <th>Link</th>
-                        <th>Id</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {{#each (getter this "requiredBadges")}}
-                <tr>
-                    <td><a href="{{getter @root/data/election "siteUrl"}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
-                    <td>{{this.badge_id}}</td>
-                    <td>{{this.type}}</td>
-                </tr>
-                {{/each}}
-                </tbody>
-            </table>
-            {{/if}}
+        {{#if (len (getter this "requiredBadges"))}}
+        {{> badgesTable election=@root/data/election status="required" type="all" header="Required Badges" }}
+        {{/if}}
 
-            {{> totalsTableHeader header="Election Badges" collection=(getter this "optionalBadges") }}
-            <table class="table-small">
-                <thead>
-                    <tr>
-                        <th>Link</th>
-                        <th>Id</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {{#each (getter this "optionalBadges")}}
-                <tr>
-                    <td><a href="{{getter @root/data/election "siteUrl"}}/help/badges/{{this.badge_id}}">{{this.name}}</a></td>
-                    <td>{{this.badge_id}}</td>
-                    <td>{{this.type}}</td>
-                </tr>
-                {{/each}}
-                </tbody>
-            </table>
-        </aside>
+        {{> badgesTable election=@root/data/election status="all" type="editing" header="Editing Badges" }}
+        {{> badgesTable election=@root/data/election status="all" type="moderation" header="Moderation Badges" }}
+        {{> badgesTable election=@root/data/election status="all" type="participation" header="Participation Badges" }}
+
     </section>
     {{/with}}
 
     {{#with botconfig}}
-    <section>
-        <aside>
-            <h2>Bot Config</h2>
-            <table>
-                <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
-                <tr><td>scriptInitDate</td><td>{{> relativetime date=scriptInitDate}}</td></tr>
-                <tr>
-                    <td>SE API quota</td>
-                    <td id="api-quota"></td>
-                </tr>
-                <tr><td>Control Room</td><td>{{{url controlRoomUrl}}}</td></tr>
-                <tr><td>Display Name</td><td>{{chatDisplayName}}</td></tr>
-                <tr><td>Is Muted</td><td>{{{boolean isMuted}}} {{#if isMuted}}{{> relativetime date=unmutesAt short=true prefix="for "}}{{/if}}</td></tr>
-                <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
-                <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
-                <tr><td>electionAfterpartyMins</td><td>{{electionAfterpartyMins}} mins</td></tr>
-                <tr><td>duplicateResponseText</td><td>{{duplicateResponseText}}</td></tr>
-                <tr><td>maxMessageLength</td><td>{{maxMessageLength}}</td></tr>
-                <tr><td>maxMessageParts</td><td>{{maxMessageParts}}</td></tr>
-                <tr>
-                    <td>showTranscriptMessages</td>
-                    <td>{{showTranscriptMessages}}</td>
-                </tr>
-                <tr><td>keepAlive</td><td>{{{boolean keepAlive}}}</td></tr>
-                <tr><td>feedbackUrl</td><td>{{{url feedbackUrl "feedback form"}}}</td></tr>
-                <tr><td>repoUrl</td><td>{{{url repoUrl}}}</td></tr>
-                <tr><td>flags</td><td>{{> deep flags}}</td></tr>
-            </table>
-        </aside>
+    <section class="col-auto">
 
-        <aside>
-            <h2>Scheduled Announcements</h2>
-            <table class="table-small">
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>cron</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody id="cron"></tbody>
-            </table>
-        </aside>
+        <h2 class="fs-4">Bot Config</h2>
+        <table>
+            <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
+            <tr><td>scriptInitDate</td><td>{{> relativetime date=scriptInitDate}}</td></tr>
+            <tr>
+                <td>SE API quota</td>
+                <td id="api-quota"></td>
+            </tr>
+            <tr><td>Control Room</td><td>{{{url controlRoomUrl}}}</td></tr>
+            <tr><td>Display Name</td><td>{{chatDisplayName}}</td></tr>
+            <tr><td>Is Muted</td><td>{{{boolean isMuted}}} {{#if isMuted}}{{> relativetime date=unmutesAt short=true prefix="for "}}{{/if}}</td></tr>
+            <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
+            <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
+            <tr><td>electionAfterpartyMins</td><td>{{electionAfterpartyMins}} mins</td></tr>
+            <tr><td>duplicateResponseText</td><td>{{duplicateResponseText}}</td></tr>
+            <tr><td>maxMessageLength</td><td>{{maxMessageLength}}</td></tr>
+            <tr><td>maxMessageParts</td><td>{{maxMessageParts}}</td></tr>
+            <tr>
+                <td>showTranscriptMessages</td>
+                <td>{{showTranscriptMessages}}</td>
+            </tr>
+            <tr><td>keepAlive</td><td>{{{boolean keepAlive}}}</td></tr>
+            <tr><td>feedbackUrl</td><td>{{{url feedbackUrl "feedback form"}}}</td></tr>
+            <tr><td>repoUrl</td><td>{{{url repoUrl}}}</td></tr>
+            <tr><td>flags</td><td>{{> deep flags}}</td></tr>
+        </table>
+
+        <h2 class="fs-4">Scheduled Announcements</h2>
+        <table class="table-small">
+            <thead hidden>
+                <tr>
+                    <th>Type</th>
+                    <th>Cron</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="cron"></tbody>
+        </table>
 
         {{#if herokuDynos.length}}
-        <aside>
-            <h2>Hosting (Heroku Dynos)</h2>
+            <h2 class="fs-4">Hosting (Heroku Dynos)</h2>
             <table>
                 {{#each herokuDynos}}
                 <tr>
@@ -308,140 +207,169 @@
                 </tr>
                 {{/each}}
             </table>
-        </aside>
         {{/if}}
+
     </section>
     {{/with}}
 
     {{#with botconfig}}
-    <section>
-        <aside>
-            <h2>Room Activity</h2>
-            <table>
-                <tr><td>Bot</td><td>
-                    <table class="nested">
-                        <tr><td>lastMessageTime</td><td>{{#if lastMessageTime}}{{> relativetime date=lastMessageTime}}{{/if}}</td></tr>
-                        <tr>
-                            <td>lastBotMessage</td>
-                            {{#if lastBotMessage}}
-                            <td>
-                                <pre>{{lastBotMessage}}</pre>
-                                <div class="mt10">{{{lastBotMessageHtml}}}</div>
-                            </td>
-                            {{else}}
-                            <td></td>
-                            {{/if}}
-                        </tr>
-                        <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
-                        <tr><td>botHasBeenQuiet</td>
-                        <td>{{{boolean botHasBeenQuiet}}}
-                            {{#unless botHasBeenQuiet}}{{> relativetime date=botWillBeQuietDate short=true}}{{/unless}}
-                        </td></tr>
-                        <tr><td>ignoreSelf</td><td>{{{boolean ignoreSelf}}}</td></tr>
-                    </table>
-                </td></tr>
+    <section class="col-auto">
 
-                <tr><td>Activity</td><td>
-                    <table class="nested">
-                        <tr><td>lastActivityTime</td><td>{{> relativetime date=lastActivityTime}}</td></tr>
-                        <tr><td>activityCounter</td><td>{{activityCounter}}</td></tr>
-                        <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>
-                        <tr><td>roomReachedMinActivityCount</td><td>{{{boolean roomReachedMinActivityCount}}}</td></tr>
-                        <tr><td>maxActivityCountThreshold</td><td>{{maxActivityCountThreshold}}</td></tr>
-                        <tr><td>roomReachedMaxActivityCount</td><td>{{{boolean roomReachedMaxActivityCount}}}</td></tr>
-                    </table>
-                </td></tr>
+        <h2 class="fs-4">Room Activity</h2>
+        <table>
+            <tr><td>Bot</td><td>
+                <table class="nested">
+                    <tr><td>lastMessageTime</td><td>{{#if lastMessageTime}}{{> relativetime date=lastMessageTime}}{{/if}}</td></tr>
+                    <tr>
+                        <td>lastBotMessage</td>
+                        {{#if lastBotMessage}}
+                        <td>
+                            <pre>{{lastBotMessage}}</pre>
+                            <div class="mt-2">{{{lastBotMessageHtml}}}</div>
+                        </td>
+                        {{else}}
+                        <td></td>
+                        {{/if}}
+                    </tr>
+                    <tr><td>botSentLastMessage</td><td>{{{boolean botSentLastMessage}}}</td></tr>
+                    <tr><td>botHasBeenQuiet</td>
+                    <td>{{{boolean botHasBeenQuiet}}}
+                        {{#unless botHasBeenQuiet}}{{> relativetime date=botWillBeQuietDate short=true}}{{/unless}}
+                    </td></tr>
+                    <tr><td>ignoreSelf</td><td>{{{boolean ignoreSelf}}}</td></tr>
+                </table>
+            </td></tr>
 
-                <tr><td>Room Idle</td><td>
-                    <table class="nested">
-                        <tr><td>shortIdleDurationMins</td><td>{{shortIdleDurationMins}} mins</td></tr>
-                        <tr><td>roomBecameIdleAWhileAgo</td><td>{{{boolean roomBecameIdleAWhileAgo}}}
-                            {{#unless roomBecameIdleAWhileAgo}}{{> relativetime date=roomBecameIdleAWhileDate short=true}}{{/unless}}
-                        </td></tr>
-                        <tr><td>longIdleDurationHours</td><td>{{longIdleDurationHours}} hours</td></tr>
-                        <tr><td>roomBecameIdleHoursAgo</td><td>{{{boolean roomBecameIdleHoursAgo}}}
-                            {{#unless roomBecameIdleHoursAgo}}{{> relativetime date=roomBecameIdleHoursDate short=true}}{{/unless}}
-                        </td></tr>
-                        <tr><td>shortBusyDurationMinutes</td><td>{{shortBusyDurationMinutes}} mins</td></tr>
-                        <tr><td>roomTooBusyForMinutes</td><td>{{{boolean roomTooBusyForMinutes}}}</td></tr>
-                        <tr><td>longBusyDurationHours</td><td>{{longBusyDurationHours}} hours</td></tr>
-                        <tr><td>roomTooBusyForHours</td><td>{{{boolean roomTooBusyForHours}}}</td></tr>
-                        <tr><td>lowActivityCheckMins</td><td>{{lowActivityCheckMins}} mins</td></tr>
-                    </table>
-                </td></tr>
+            <tr><td>Activity</td><td>
+                <table class="nested">
+                    <tr><td>lastActivityTime</td><td>{{> relativetime date=lastActivityTime}}</td></tr>
+                    <tr><td>activityCounter</td><td>{{activityCounter}}</td></tr>
+                    <tr><td>minActivityCountThreshold</td><td>{{minActivityCountThreshold}}</td></tr>
+                    <tr><td>roomReachedMinActivityCount</td><td>{{{boolean roomReachedMinActivityCount}}}</td></tr>
+                    <tr><td>maxActivityCountThreshold</td><td>{{maxActivityCountThreshold}}</td></tr>
+                    <tr><td>roomReachedMaxActivityCount</td><td>{{{boolean roomReachedMaxActivityCount}}}</td></tr>
+                </table>
+            </td></tr>
 
-                <tr><td>Fun</td><td>
-                    <table class="nested">
-                        <tr><td>funResponseCounter</td><td>{{funResponseCounter}}</td></tr>
-                        <tr><td>maxFunResponses</td><td>{{maxFunResponses}}</td></tr>
-                        <tr><td>canSendFunResponse</td><td>{{{boolean canSendFunResponse}}}</td></tr>
-                    </table>
-                </td></tr>
-            </table>
-        </aside>
+            <tr><td>Room Idle</td><td>
+                <table class="nested">
+                    <tr><td>shortIdleDurationMins</td><td>{{shortIdleDurationMins}} mins</td></tr>
+                    <tr><td>roomBecameIdleAWhileAgo</td><td>{{{boolean roomBecameIdleAWhileAgo}}}
+                        {{#unless roomBecameIdleAWhileAgo}}{{> relativetime date=roomBecameIdleAWhileDate short=true}}{{/unless}}
+                    </td></tr>
+                    <tr><td>longIdleDurationHours</td><td>{{longIdleDurationHours}} hours</td></tr>
+                    <tr><td>roomBecameIdleHoursAgo</td><td>{{{boolean roomBecameIdleHoursAgo}}}
+                        {{#unless roomBecameIdleHoursAgo}}{{> relativetime date=roomBecameIdleHoursDate short=true}}{{/unless}}
+                    </td></tr>
+                    <tr><td>shortBusyDurationMinutes</td><td>{{shortBusyDurationMinutes}} mins</td></tr>
+                    <tr><td>roomTooBusyForMinutes</td><td>{{{boolean roomTooBusyForMinutes}}}</td></tr>
+                    <tr><td>longBusyDurationHours</td><td>{{longBusyDurationHours}} hours</td></tr>
+                    <tr><td>roomTooBusyForHours</td><td>{{{boolean roomTooBusyForHours}}}</td></tr>
+                    <tr><td>lowActivityCheckMins</td><td>{{lowActivityCheckMins}} mins</td></tr>
+                </table>
+            </td></tr>
+
+            <tr><td>Fun</td><td>
+                <table class="nested">
+                    <tr><td>funResponseCounter</td><td>{{funResponseCounter}}</td></tr>
+                    <tr><td>maxFunResponses</td><td>{{maxFunResponses}}</td></tr>
+                    <tr><td>canSendFunResponse</td><td>{{{boolean canSendFunResponse}}}</td></tr>
+                </table>
+            </td></tr>
+        </table>
+
     </section>
     {{/with}}
 
 </main>
-
 {{/with}}
 
 <base target="_blank" />
-<meta http-equiv="refresh" content="{{data/autoRefreshInterval}}" />
+<noscript>
+    <meta http-equiv="refresh" content="{{data/autoRefreshInterval}}" />
+</noscript>
 
 <script>
-    (() => {
-        const qtyRealtime = new EventSource(`${location.origin}/realtime?type=quota`);
-        qtyRealtime.addEventListener("quota", (event) => {
-            const { data } = event;
+(() => {
+    const qtyRealtime = new EventSource(`${location.origin}/realtime?type=quota`);
+    qtyRealtime.addEventListener("quota", (event) => {
+        const { data } = event;
 
-            const quotaCell = document.getElementById("api-quota");
-            if(quotaCell) {
-                quotaCell.textContent = data;
-            }
+        const quotaCell = document.getElementById("api-quota");
+        if(quotaCell) {
+            quotaCell.textContent = data;
+        }
+    });
+
+    const schRealtime = new EventSource(`${location.origin}/realtime?type=cron`);
+    schRealtime.addEventListener("schedules", (event) => {
+        const { data } = event;
+
+        /** @type {[type:string, cronexpr:string][]} */
+        const schedules = JSON.parse(data);
+
+        /** @type {HTMLTableSectionElement|undefined} */
+        const cronTbody = document.getElementById("cron");
+        if(!cronTbody) return;
+
+        const cronThead = cronTbody.previousElementSibling;
+
+        const rows = schedules.map(([type, cron, date]) => {
+            const row = document.createElement("tr");
+
+            const typeCell = document.createElement("td");
+            typeCell.textContent = type;
+
+            const cronCell = document.createElement("td");
+            cronCell.textContent = cron;
+            cronCell.classList.add('text-nowrap');
+
+            const dateCell = document.createElement("td");
+            dateCell.textContent = date;
+
+            row.append(typeCell, cronCell, dateCell);
+            return row;
         });
 
-        const schRealtime = new EventSource(`${location.origin}/realtime?type=cron`);
-        schRealtime.addEventListener("schedules", (event) => {
-            const { data } = event;
+        for(const row of cronTbody.rows) row.remove();
 
-            /** @type {[type:string, cronexpr:string][]} */
-            const schedules = JSON.parse(data);
+        if(!rows.length) {
+            cronThead.hidden = true;
 
-            /** @type {HTMLTableSectionElement|undefined} */
-            const cronTbody = document.getElementById("cron");
-            if(!cronTbody) return;
+            const emptyRow = document.createElement("tr");
+            const emptyCell = document.createElement("td");
+            emptyCell.colSpan = 3;
 
-            const rows = schedules.map(([type, cron, date]) => {
-                const row = document.createElement("tr");
+            emptyRow.append(emptyCell);
+            cronTbody.append(emptyRow);
+            return;
+        }
 
-                const typeCell = document.createElement("td");
-                typeCell.textContent = type;
+        cronThead.hidden = false;
+        cronTbody.append(...rows);
+    });
 
-                const cronCell = document.createElement("td");
-                cronCell.textContent = cron;
-                cronCell.classList.add('nowrap');
+    schRealtime.addEventListener("error", (event) => {
+        console.debug(event);
+        schRealtime.close();
+    });
 
-                const dateCell = document.createElement("td");
-                dateCell.textContent = date;
+    qtyRealtime.addEventListener("error", (event) => {
+        console.debug(event);
+        qtyRealtime.close();
+    });
 
-                row.append(typeCell, cronCell, dateCell);
-                return row;
-            });
+    const refreshRealtime = new EventSource(`${location.origin}/realtime?type=refresh`);
+    refreshRealtime.addEventListener("message", () => {
+        schRealtime.close();
+        qtyRealtime.close();
+        refreshRealtime.close();
+        location.reload();
+    });
 
-            for(const row of cronTbody.rows) row.remove();
-
-            cronTbody.append(...rows);
-        });
-
-        schRealtime.addEventListener("error", (event) => {
-            console.debug(event);
-            schRealtime.close();
-        });
-
-        qtyRealtime.addEventListener("error", (event) => {
-            console.debug(event);
-            qtyRealtime.close();
-        });
-    })();
+    refreshRealtime.addEventListener("error", (event) => {
+        console.debug(event);
+        refreshRealtime.close();
+    });
+})();
 </script>

@@ -17,7 +17,9 @@ import { getMockBotConfig } from "../mocks/bot.js";
  * @typedef {import("http").Server} HttpServer
  */
 
-describe("Dashboard", () => {
+describe("Dashboard", function () {
+    this.timeout(1e4); // route rendering can be slow
+
     /** @type {Client} */
     const client = new Client["default"]("stackoverflow.com");
     const room = client.getRoom(92073);
@@ -34,7 +36,10 @@ describe("Dashboard", () => {
     before(async () => {
         sinon.stub(console, "log")
         await election.scrapeElection(config);
-        app = await startServer(client, room, config, election, announcement);
+        app = await startServer(client, room, config, election, announcement, {
+            graceful: false,
+            portOverride: 0,
+        });
     });
 
     after(() => stop(app));

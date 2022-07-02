@@ -1,0 +1,36 @@
+.collapsible {
+  height: 0;
+  transition: height 0.25s linear;
+  overflow: hidden;
+}
+
+.collapsible-container {
+  display: grid;
+
+  @for $i from 1 through 6 {
+    & h#{$i} {
+      margin: {
+        top: 0.5em;
+      }
+    }
+  }
+
+  & form {
+    margin: 0;
+  }
+}
+
+.collapsible-toggle {
+  visibility: hidden;
+
+  &::after {
+    content: "Show " attr(data-label);
+    visibility: visible;
+  }
+
+  &:checked {
+    & + .collapsible {
+      height: 100%;
+    }
+  }
+}

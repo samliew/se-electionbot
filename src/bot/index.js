@@ -5,17 +5,17 @@ import entities from 'html-entities';
 import { startServer } from "../server/index.js";
 import { logActivity, logResponse } from "../shared/utils/bot.js";
 import { prepareMessageForMatching } from "../shared/utils/chat.js";
+import { MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { matchNumber } from "../shared/utils/expressions.js";
-import { getOrInit, sortMap } from "../shared/utils/maps.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcement, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
+import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections, scrapeElectionAnnouncements } from './election.js';
+import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections } from './election.js';
 import BotEnv from "./env.js";
 import {
     isAskedAboutBadgesOfType,
@@ -33,27 +33,27 @@ import {
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp,
     isAskedForHelp,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
+    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
     isAskedWhyAreElectionsCancelled,
+    isAskedWhyBeAMod,
     isAskedWhyIsBot,
     isAskedWhyNominationRemoved,
     isAskedWillElectionBeCancelled,
     isBotMentioned,
     isHatingTheBot,
     isLovingTheBot,
-    isLovingTheBotFun,
     isSayingBotIsInsane,
     isSayingHappyBirthday,
     isThankingTheBot
 } from "./guards.js";
 import { HerokuClient } from "./herokuClient.js";
 import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
-import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
-import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayHowManyVisitedElection, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults, sayWillElectionBeCancelled } from "./messages/elections.js";
+import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayIfModsHaveToRun, sayWhatModsAreRunning, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
+import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayElectionType, sayHowManyVisitedElection, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults, sayWillElectionBeCancelled } from "./messages/elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
-import { sayCommonlyAskedQuestions, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
+import { sayCommonlyAskedQuestions, sayFullHelp, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
 import { sayHappyBirthday, sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
-import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayFormerMods, sayHowManyModsAreHere, sayWhatModsDo } from "./messages/moderators.js";
+import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayFormerMods, sayHowManyModsAreHere, sayWhatModsDo, sayWhyBeAMod } from "./messages/moderators.js";
 import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElectionNotStartedYet, sayElectionSchedule, sayNextPhase } from "./messages/phases.js";
 import { sayQuestionnaireQuestion } from "./messages/questionnaire.js";
 import { sayCandidateScoreFormula, sayCandidateScoreLeaderboard } from "./messages/score.js";
@@ -61,6 +61,7 @@ import { sayAboutBallotFile, sayAboutSTV } from "./messages/stv.js";
 import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowToSaveVotes, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "./random.js";
+import { pingDevelopers } from "./reports.js";
 import Rescraper from "./rescraper.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
@@ -106,6 +107,12 @@ import {
 
 (async () => {
 
+    // Overrides console.log/error to insert newlines
+    const _origLog = console.log;
+    const _origErr = console.error;
+    console.log = (...args) => _origLog.call(console, ...args, '\n');
+    console.error = (...args) => _origErr.call(console, ...args, '\n');
+
     // If running locally, load environment variables from .env file
     if (process.env.NODE_ENV !== 'production') {
         dotenv.config({ debug: process.env.DEBUG === 'true' });
@@ -138,13 +145,13 @@ import {
     }
 
     // Other environment variables
-    const defaultChatDomain = /** @type {Host} */(env.str("chat_domain", "stackexchange.com") || "stackexchange.com");
+    const defaultChatDomain = /** @type {Host} */(env.str("chat_domain", "stackexchange.com"));
     const defaultChatRoomId = env.num("chat_room_id", 92073);
     const defaultChatNotSet = !process.env.CHAT_DOMAIN || !process.env.CHAT_ROOM_ID;
 
     console.log(`[defaults]
 chat domain  ${defaultChatDomain};
-char room    ${defaultChatRoomId};
+chat room    ${defaultChatRoomId};
 use defaults ${defaultChatNotSet}`
     );
 
@@ -159,49 +166,6 @@ use defaults ${defaultChatNotSet}`
         1114, 100297, 229044, 1252759, 444991, 871050, 2057919, 3093387, 1849664, 2193767, 4099593,
         541136, 476, 366904, 189134, 563532, 584192, 3956566, 6451573, 3002139
     ];
-
-    /** @type {{ short: boolean, text: string }[]} */
-    const helpTopics = [
-        { short: true, text: "What is an election" },
-        { short: true, text: "How to nominate myself" },
-        { short: true, text: "How to vote" },
-        { short: true, text: "Who should I vote for" },
-        { short: true, text: "How is the candidate score calculated" },
-        { short: true, text: "What is my candidate score" },
-        { short: false, text: "Who has the highest candidate score" },
-        { short: true, text: "What are the moderation/participation/editing badges" },
-        { short: false, text: "What is the election schedule" },
-        { short: true, text: "What is the election status" },
-        { short: false, text: "When is the election starting/ending" },
-        { short: true, text: "When is the next phase" },
-        { short: false, text: "How many users have voted?" },
-        { short: true, text: "How many users are eligible to vote?" },
-        { short: false, text: "How many positions are there" },
-        { short: true, text: "Who are the candidates" },
-        { short: false, text: "Who is the best candidate" },
-        { short: false, text: "Which candidates have withdrawn" },
-        { short: false, text: "Why was a nomination removed" },
-        { short: false, text: "Who are the winners" },
-        { short: true, text: "Who are the current mods" },
-        { short: false, text: "Who is the best mod" },
-        { short: false, text: "Do moderators get paid" },
-        { short: true, text: "What are the responsibilities of a moderator" },
-        { short: false, text: "Can we edit a diamond into our username" },
-        { short: true, text: "What is Single Transferable Vote (STV)" },
-        { short: false, text: "What is Meek STV" },
-        { short: false, text: "Where can the ballot file be found" },
-        { short: false, text: "What is the link to the election" },
-        { short: false, text: "What is the Nth question of the questionnaire" }
-    ];
-
-    // Overrides console.log/error to insert newlines
-    (function () {
-        const _origLog = console.log;
-        const _origErr = console.error;
-        console.log = (...args) => _origLog.call(console, ...args, '\n');
-        console.error = (...args) => _origErr.call(console, ...args, '\n');
-    })();
-
 
     // Init bot config with defaults
     const config = new BotConfig(defaultChatDomain, defaultChatRoomId, env);
@@ -243,13 +207,9 @@ use defaults ${defaultChatNotSet}`
             return;
         }
 
-        const electionAnnouncements = await scrapeElectionAnnouncements(config);
-        const electionSiteAnnouncements = getOrInit(electionAnnouncements, election.siteHostname, new Map());
-        election.announcements = sortMap(electionSiteAnnouncements, (_, a, __, b) => b.dateElection > a.dateElection ? -1 : 1);
+        await election.updateElectionAnnouncements(config);
 
         election.elections = elections;
-
-        const { electionBadges } = election;
 
         // Reduced longIdleDurationHours if it's a Stack Overflow election
         if (election.isStackOverflow()) config.longIdleDurationHours = 3;
@@ -371,8 +331,6 @@ use defaults ${defaultChatNotSet}`
         /*
          * Sync state from chat transcript on startup
          * - activityCounter, lastActivityTime, lastMessageTime, lastBotMessage, (botSentLastMessage)
-         *
-         * NOTE: Not a very reliable method if there are few messages in the room, since transcript page only displays messages from the same day
          */
         const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
 
@@ -421,7 +379,7 @@ use defaults ${defaultChatNotSet}`
         }
         // Announce join room if in debug mode
         else if (config.debug) {
-            await sendMessage(config, room, getRandomPlop(), null, true);
+            await sendMessage(config, room, getRandomPlop(), { isPrivileged: true });
         }
 
         // initialize per-room ignore list
@@ -441,6 +399,7 @@ use defaults ${defaultChatNotSet}`
             "die": ["stops the bot in case of emergency", dieCommand, /die|shutdown|turn off/, AccessLevel.privileged],
             "feedback": ["bot says how to provide feedback", sayFeedback, /^feedback/, AccessLevel.dev],
             "fun": ["switches fun mode on/off", switchMode, /fun/, AccessLevel.privileged],
+            "get confirmations": ["lists users awaiting confirmation", getConfirmationsCommand, /^(?:get|report) confirmations/, AccessLevel.dev],
             "get cron": ["lists scheduled announcements", getCronCommand, /get cron/, AccessLevel.dev],
             "get modes": ["gets the current state of modes", getModeReport, /^(?:get modes?\s+report|report\s+modes)/, AccessLevel.dev],
             "get rooms": ["get list of rooms where bot is in", listRoomsCommand, /get rooms/, AccessLevel.dev],
@@ -449,7 +408,7 @@ use defaults ${defaultChatNotSet}`
             "greet": ["makes the bot welcome everyone", greetCommand, /^(?:greet|welcome)/, AccessLevel.privileged],
             "ignore": ["stop bot from responding to a user", ignoreUserCommand, /^ignore \d+/, AccessLevel.privileged],
             "impersonate": ["impersonates a user", impersonateUserCommand, /^impersonate \d+/, AccessLevel.dev],
-            "join room": ["joins a given room", joinRoomCommand, /^join\s+(\d+\s+|)room(?:\s+(\d+)|)/, AccessLevel.dev],
+            "join room": ["joins a given room", joinRoomCommand, /^(?:join|watch)\s+(\d+\s+|)room(?:\s+(\d+)|)/, AccessLevel.dev],
             "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, /leave(?:\s+this)?\s+room/, AccessLevel.dev],
             "mute": ["stop bot from responding for N mins", muteCommand, /^(?:mute|timeout|sleep)/, AccessLevel.privileged],
             "mods voted": ["posts how many mods voted", getModsVotedCommand, /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, AccessLevel.privileged],
@@ -510,12 +469,37 @@ use defaults ${defaultChatNotSet}`
             [isAskedWhyAreElectionsCancelled, sayWhenAreElectionsCancelled],
             [isAskedWillElectionBeCancelled, sayWillElectionBeCancelled],
             [isAskedWhatElectionIs, sayWhatIsAnElection],
-            [isAskedHowManyVisitedElection, sayHowManyVisitedElection]
+            [isAskedHowManyVisitedElection, sayHowManyVisitedElection],
+            // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
+            [isAskedForNominatingInfo, sayHowToNominate],
+            [isAskedWhatIsElectionStatus, sayAboutElectionStatus],
+            [isAskedWhenIsTheNextPhase, sayNextPhase],
+            [isAskedWhenTheElectionEnds, sayElectionIsEnding],
+            [isAskedForWithdrawnNominees, sayWithdrawnNominations],
+            [isAskedAboutVoting, sayAboutVoting],
+            [isAskedWhyBeAMod, sayWhyBeAMod],
+            [isAskedWhatIsElectionType, sayElectionType],
+            [isAskedWhatModsAreRunning, sayWhatModsAreRunning],
+            [isAskedForHelp, sayShortHelp],
+            [isAskedForFullHelp, sayFullHelp],
+            [isAskedIfModsHaveToRun, sayIfModsHaveToRun],
+            [isAskedWhyNominationRemoved, sayWhyNominationRemoved],
+            [isAskedHowToSaveVotes, sayHowToSaveVotes],
+            [isAskedAboutModsOrModPowers, sayWhatModsDo],
+            [isAskedAboutRequiredBadges, sayRequiredBadges],
+            [isAskedForScoreFormula, sayCandidateScoreFormula],
+            [isAskedHowToSaveVotes, sayHowToSaveVotes],
+            [isAskedIfModsArePaid, sayAreModsPaid],
+            [isAskedAboutMissingComments, sayMissingComments],
+            [isAskedAboutUsernameDiamond, sayCanEditDiamond],
+            [isAskedHowManyVoted, sayAlreadyVoted],
+            [isAskedAboutBadgesOfType, sayBadgesByType],
+            [isAskedForElectionSchedule, sayElectionSchedule]
         ];
 
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
         const funRules = [
-            [isLovingTheBotFun, sayLoveYou],
+            [isLovingTheBot, sayLoveYou],
             [isAskedHowAmI, sayHowIsBot],
             [isAskedWhoAmI, getRandomWhoAmI],
             [isAskedWhyIsBot, getRandomWhyAmI],
@@ -627,7 +611,7 @@ use defaults ${defaultChatNotSet}`
                      */
                     if (responseText) {
                         logResponse(config, responseText, preparedMessage, decodedMessage);
-                        await sendMultipartMessage(config, room, responseText, msg.id, { isPrivileged: true, log: false });
+                        await sendMultipartMessage(config, room, responseText, { isPrivileged: true, log: false, inResponseTo: msg.id });
                     }
 
                     return; // no further action since we matched a privileged bot command
@@ -666,108 +650,42 @@ use defaults ${defaultChatNotSet}`
                 responseText = await builder(config, elections, election, preparedMessage, user, me, room);
                 if (config.verbose) console.log(`Built response: ${responseText}`);
             }
-            else if (isAskedAboutBadgesOfType(preparedMessage)) {
-                const [, type] = /(participation|editing|moderation)/.exec(preparedMessage) || [];
-                responseText = sayBadgesByType(electionBadges, type, election.isStackOverflow());
-            }
-            else if (isAskedAboutRequiredBadges(preparedMessage)) {
-                responseText = sayRequiredBadges(election);
-            }
-            else if (isAskedAboutModsOrModPowers(preparedMessage)) {
-                responseText = sayWhatModsDo(election);
-            }
             else if (isAskedForOwnScore(preparedMessage) || isAskedForOtherScore(preparedMessage)) {
                 const calcCandidateScore = makeCandidateScoreCalc(config, soPastAndPresentModIds);
 
                 responseText = await calcCandidateScore(election, user, { userId, content: preparedMessage });
 
-                // TODO: msg.id is not guaranteed to be defined
-                await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
-
+                await sendReply(config, room, responseText, { inResponseTo: msg.id });
                 return; // stop here since we are using a different default response method
-            }
-            else if (isAskedForScoreFormula(preparedMessage)) {
-                responseText = sayCandidateScoreFormula(config, elections, election);
             }
             else if (isAskedForScoreLeaderboard(preparedMessage)) {
                 responseText = sayCandidateScoreLeaderboard(election.apiSlug);
             }
-            else if (isAskedForWithdrawnNominees(preparedMessage)) {
-                responseText = sayWithdrawnNominations(config, election);
-            }
-            else if (isAskedHowManyVoted(preparedMessage)) {
-                responseText = await sayAlreadyVoted(config, election, preparedMessage);
-            }
-            else if (isAskedHowToSaveVotes(preparedMessage)) {
-                responseText = sayHowToSaveVotes();
-            }
             // Could conflict with isAskedAboutVoting below - should not match "how to vote" - min length required
             else if (isAskedHowOrWhoToVote(preparedMessage)) {
-                if (election.phase == null) responseText = sayElectionNotStartedYet(election);
-                else responseText = sayInformedDecision();
+                if (election.phase == null) responseText = await sayElectionNotStartedYet(config, elections, election, preparedMessage, user, me, room);
+                else responseText = await sayInformedDecision(config, elections, election, preparedMessage, user, me, room);
             }
             else if (isAskedForCurrentMods(preparedMessage, election.apiSlug)) {
                 responseText = await sayCurrentMods(election, entities.decode);
-            }
-            // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
-            else if (isAskedForNominatingInfo(preparedMessage)) {
-                const mentionsAnother = ['user', 'person', 'someone', 'somebody', 'other'].some(x => preparedMessage.includes(x));
-                responseText = sayHowToNominate(election, electionBadges, mentionsAnother);
-            }
-            else if (isAskedWhyNominationRemoved(preparedMessage)) {
-                responseText = sayWhyNominationRemoved();
-            }
-            else if (isAskedIfModsArePaid(preparedMessage)) {
-                responseText = sayAreModsPaid(election);
-            }
-            else if (isAskedWhatIsElectionStatus(preparedMessage)) {
-                responseText = sayAboutElectionStatus(config, election);
-            }
-            else if (isAskedWhenIsTheNextPhase(preparedMessage)) {
-                responseText = sayNextPhase(config, election);
-            }
-            else if (isAskedWhenTheElectionEnds(preparedMessage)) {
-                responseText = sayElectionIsEnding(election);
-            }
-            else if (isAskedAboutVoting(preparedMessage)) {
-                responseText = sayAboutVoting(election);
-            }
-            else if (isAskedForElectionSchedule(preparedMessage)) {
-                responseText = sayElectionSchedule(election);
-            }
-            else if (isAskedAboutUsernameDiamond(preparedMessage)) {
-                responseText = sayCanEditDiamond();
-            }
-            else if (isAskedAboutMissingComments(preparedMessage)) {
-                responseText = sayMissingComments(config, election);
             }
             else if (isPrivileged && isAskedForUserEligibility(preparedMessage)) {
                 responseText = await sayUserEligibility(config, election, preparedMessage);
             }
             else if (isPrivileged && isAskedHowManyModsInTheRoom(preparedMessage)) {
                 const modNumResponse = await sayHowManyModsAreHere(config, client, room);
-                await sendMultipartMessage(config, room, modNumResponse, msg.id, { isPrivileged: true });
+                await sendMultipartMessage(config, room, modNumResponse, { isPrivileged: true, inResponseTo: msg.id });
                 return;
             }
             else if (isAskedHowManyCandidatesInTheRoom(preparedMessage)) {
                 const nomineeNumResponse = await sayHowManyCandidatesAreHere(config, election, client, room);
-                await sendMultipartMessage(config, room, nomineeNumResponse, msg.id, { isPrivileged: true });
+                await sendMultipartMessage(config, room, nomineeNumResponse, { isPrivileged: true, inResponseTo: msg.id });
                 return;
             }
 
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
-
-                if (isAskedForFullHelp(preparedMessage)) {
-                    await sendMultipartMessage(config, room, "Examples of election FAQs I can help with:\n- " +
-                        helpTopics.map(({ text }) => text).join('\n- '), msg.id, { isPrivileged: true });
-                    return; // Message sent, no need to continue
-                }
-                // Help - contain this to a single message please (<500 chars including line breaks, bullets, and whitespace)
-                if (isAskedForHelp(preparedMessage)) {
-                    responseText = sayShortHelp(helpTopics);
-                }
-                else if (isAskedWhoAmI(preparedMessage)) {
+                if (isAskedWhoAmI(preparedMessage)) {
                     responseText = await sayWhoAmI(me, preparedMessage);
                 }
                 else if (isAskedAmIalive(preparedMessage)) {
@@ -784,11 +702,13 @@ use defaults ${defaultChatNotSet}`
                 }
                 else if (preparedMessage.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, preparedMessage);
-                    await sendMessage(config, room, responseText, null, false);
+                    await sendMessage(config, room, responseText);
                     return; // stop here since we are using a different default response method
                 }
                 else if (config.awaitingConfirmation.has(userId)) {
-                    responseText = await config.awaitingConfirmation.get(userId)?.() || "";
+                    responseText = await config.awaitingConfirmation.get(userId)?.(
+                        config, elections, election, preparedMessage, user, me, room
+                    ) || "";
                     config.awaitingConfirmation.delete(userId);
                 }
                 // The rest below are fun mode only
@@ -798,23 +718,31 @@ use defaults ${defaultChatNotSet}`
                 }
 
                 if (responseText) {
-                    // TODO: msg.id might be undefined
-                    await sendReply(config, room, responseText, /** @type {number} */(msg.id), false);
+                    await sendReply(config, room, responseText, { inResponseTo: msg.id });
                     return; // stop here since we are using a different default response method
+                }
+
+                // bot mentioned, no response, not fun mode or can't have fun - we might be interested
+                if (!(config.canSendFunResponse && config.fun)) {
+                    await pingDevelopers("You might want to take a look at this,", config, room);
                 }
 
                 // Bot was mentioned and did not match any previous guards - return a random response
                 if (config.fun && config.canSendFunResponse) {
                     responseText = getRandomFunResponse();
                     config.funResponseCounter++;
-                } // End random response
 
-            } // End bot mentioned
+                    setTimeout(
+                        () => config.funResponseCounter = 0,
+                        10 * MS_IN_SECOND * SEC_IN_MINUTE
+                    );
+                }
+            }
 
 
             if (responseText) {
                 logResponse(config, responseText, preparedMessage, decodedMessage);
-                await sendMessage(config, room, responseText, null, false, false);
+                await sendMultipartMessage(config, room, responseText, { log: false, inResponseTo: msg.id });
             }
 
         }); // End new message event listener

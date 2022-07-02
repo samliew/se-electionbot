@@ -1,4 +1,4 @@
-import { SEC_IN_MINUTE } from "../shared/utils/dates.js";
+import { MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { mapMap } from "../shared/utils/maps.js";
 import { HerokuClient } from "./herokuClient.js";
 import { sayBusyGreeting, sayIdleGreeting } from "./messages/greetings.js";
@@ -96,12 +96,12 @@ export default class Rescraper {
             }
 
             if (config.debugOrVerbose) {
-                const { nominees, arrWinners, phase } = election;
+                const { nominees, winners } = election;
 
-                console.log(`RESCRAPER - Candidates: ${mapMap(nominees, x => x.userName).join(', ')}`);
+                console.log(`[rescraper] candidates: ${mapMap(nominees, x => x.userName).join(', ')}`);
 
-                if (phase === 'ended') {
-                    console.log(`RESCRAPER - Winners: ${arrWinners.map(x => x.userName).join(', ')}`);
+                if (election.isEnded()) {
+                    console.log(`[rescraper] winners: ${mapMap(winners, x => x.userName).join(', ')}`);
                 }
 
                 const {
@@ -110,11 +110,13 @@ export default class Rescraper {
                     canIdleGreet: idleCanSayHi
                 } = config;
 
-                console.log(`RESCRAPER - IDLE? idleCanSayHi: ${idleCanSayHi}
-                    ----------- reachedMinActivity: ${roomReachedMinActivityCount};
-                    ----------- roomBecameIdleAWhileAgo: ${roomBecameIdleAWhileAgo}; roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}
-                    ----------- botHasBeenQuiet: ${botHasBeenQuiet}; botSentLastMessage: ${botSentLastMessage}`
-                );
+                console.log(`[rescraper] bot state:
+botHasBeenQuiet: ${botHasBeenQuiet};
+botSentLastMessage: ${botSentLastMessage}
+idleCanSayHi: ${idleCanSayHi}
+roomReachedMinActivityCount: ${roomReachedMinActivityCount};
+roomBecameIdleAWhileAgo: ${roomBecameIdleAWhileAgo};
+roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
             }
 
             // No previous scrape results yet, do not proceed (prev can be null)
@@ -208,21 +210,22 @@ export default class Rescraper {
                 const { canIdleGreet, canBusyGreet } = config;
                 if (canIdleGreet) await sayIdleGreeting(config, elections, election, bot, room);
                 if (canBusyGreet) await sayBusyGreeting(config, elections, election, bot, room);
-                console.log(`[rescraper] said activity greeting`);
+                console.log(`[rescraper] activity greeting\n`, { canIdleGreet, canBusyGreet });
             }
 
             // The election is over
-            else if (election.isInactive() && config.scrapeIntervalMins !== 10) {
+            else if (election.isInactive() && config.scrapeIntervalMins < 5) {
 
-                // Increase scrape interval since we don't need to scrape often
-                config.scrapeIntervalMins = 10;
-
-                if (config.debugOrVerbose) {
-                    console.log(`RESCRAPER - Scrape interval increased to ${config.scrapeIntervalMins}.`);
-                }
+                // Set scrape interval to 5 mins since we no longer need to scrape frequently
+                config.scrapeIntervalMins = 5;
+                console.log(`[rescraper] scrape interval increased to ${config.scrapeIntervalMins}.`);
 
                 // Stay in room a while longer
-                await wait(config.electionAfterpartyMins * SEC_IN_MINUTE * 1e3);
+                await wait(config.electionAfterpartyMins * SEC_IN_MINUTE);
+
+                // Otherwise we sometimes leave an afterimage
+                const status = await room.leave();
+                console.log(`[rescraper] left election room: ${status}`);
 
                 // Scale Heroku dynos to free (restarts app)
                 const heroku = new HerokuClient(config);
@@ -258,10 +261,10 @@ export default class Rescraper {
     start() {
         const { config } = this;
 
-        this.timeout = setTimeout(this.rescrape.bind(this), config.scrapeIntervalMins * 60000);
+        this.timeout = setTimeout(this.rescrape.bind(this), config.scrapeIntervalMins * SEC_IN_MINUTE * MS_IN_SECOND);
 
         if (config.debugOrVerbose) {
-            console.log(`RESCRAPER - Next rescrape scheduled in ${config.scrapeIntervalMins} mins.`);
+            console.log(`[rescraper] rescrape scheduled in ${config.scrapeIntervalMins} mins.`);
         }
     }
 }

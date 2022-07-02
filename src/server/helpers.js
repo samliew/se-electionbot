@@ -1,5 +1,11 @@
+import { capitalize } from "../bot/utils.js";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { formatOrdinal, prettify } from "../shared/utils/strings.js";
+
+/**
+ * @typedef {import("handlebars")}
+ * @typedef {Handlebars.HelperOptions} HelperOptions
+ */
 
 /** @type {(source: unknown) => boolean} */
 export const isArr = (source) => Array.isArray(source);
@@ -31,14 +37,19 @@ export const isURL = (source) => {
 /** @type {<T>(source: T, init: T) => T} */
 export const initIfFalsy = (source, init) => source || init;
 
-/** @type {(a1:unknown, a2:unknown, options:object) => unknown} */
+/** @type {(a1:unknown, a2:unknown, options:HelperOptions) => unknown} */
 export const ifEquals = function (a1, a2, options) {
     return (a1 == a2) ? options.fn(this) : options.inverse(this);
 };
 
-/** @type {(a1:unknown, a2:unknown, options:object) => unknown} */
+/** @type {(a1:unknown, a2:unknown, options:HelperOptions) => unknown} */
 export const unlessEquals = function (a1, a2, options) {
     return a1 != a2 ? options.fn(this) : options.inverse(this);
+};
+
+/** @type {(value:unknown, options:HelperOptions) => unknown} */
+export const ifTruthy = function (value, options) {
+    return !!value ? options.fn(this) : options.inverse(this);
 };
 
 export const ifNotEmpty = function (value, options) {
@@ -82,7 +93,7 @@ export const url = (url, text = "") => {
     return `<a href="${url}">${text}</a>`;
 };
 
-export { dateToUtcTimestamp as utcTimestamp, prettify };
+export { capitalize, dateToUtcTimestamp as utcTimestamp, prettify };
 
 /** @type {(data: string) => string} */
 export const json = (data) => {
@@ -123,6 +134,9 @@ export const contextCall = (name, ctxt, ...args) => typeof ctxt[name] === "funct
 
 /** @type {(prefix:string, text:string) => string} */
 export const unprefix = (prefix, text) => text.replace(new RegExp(`^${prefix}\\s*?`), "");
+
+/** @type {(prefix:string, text:string) => string} */
+export const unsuffix = (suffix, text) => text.replace(new RegExp(`\\s*?${suffix}$`), "");
 
 /** @type {<T>(array: T[]) => T[]} */
 export const reverse = (array) => [...array].reverse();
@@ -166,12 +180,38 @@ export const years = (seconds) => {
 /** @type {(n: number) => string} */
 export const ordinal = (num) => `${num}<sup>${formatOrdinal(num).replace(/^\d+/, "")}</sup>`;
 
-/** @type {(source: Map<unknown, unknown> | Set<unknown> | unknown[], options: object) => any} */
+/**
+ * @summary iterates over a collection
+ * @param {Map<unknown, unknown> | Set<unknown> | unknown[]} source collection to iterate
+ * @param {HelperOptions} options Handlebars helper options
+ * @returns {string}
+ */
 export const iterate = (source, options) => {
     let output = "";
-    source.forEach((v) => output += options.fn(v));
+    source.forEach((val, key) => output += options.fn({ key, val }));
     return output;
 };
 
 /** @type {(...sources: unknown[]) => boolean} */
 export const either = (...sources) => sources.slice(0, -1).some(Boolean);
+
+/** @type {(a:unknown,b:unknown) => boolean} */
+export const eq = (a, b) => a === b;
+
+/** @type {(a:unknown,b:unknown) => boolean} */
+export const neq = (a, b) => a !== b;
+
+/**
+ * @summary inverts a value (coerces to boolean)
+ * @param {unknown} val value to invert
+ * @returns {boolean}
+ */
+export const not = (val) => !val;
+
+/**
+ * @summary checks a source for including a value
+ * @param {string|unknown[]} source source to check
+ * @param {any} value value to check
+ * @returns {boolean}
+ */
+export const includes = (source, value) => source.includes(value);

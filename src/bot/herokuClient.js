@@ -1,11 +1,12 @@
 import Heroku from 'heroku-client';
+import { capitalize } from './utils.js';
 
 // Heroku API documentation
 // https://devcenter.heroku.com/articles/platform-api-reference
 
 /**
  * @typedef {{
- *  app: { id: string, name: string },
+ *  app: App,
  *  command: string,
  *  created_at: string,
  *  id: string,
@@ -14,6 +15,18 @@ import Heroku from 'heroku-client';
  *  type: "web" | "worker",
  *  updated_at: string
  * }} Formation
+ *
+ * @typedef {{
+ *  created_at: string,
+ *  id: string,
+ *  maintenance: boolean,
+ *  name: string,
+ *  released_at: string | null,
+ *  updated_at: string,
+ *  web_url: string,
+ * }} App
+ *
+ * @typedef {import("./config").BotConfig} BotConfig
  */
 
 export class HerokuClient {
@@ -32,7 +45,7 @@ export class HerokuClient {
     ];
 
     /**
-     * @param {import("./config").BotConfig} config bot configuration
+     * @param {BotConfig} config bot configuration
      * @param {string|null} apiKey Heroku API key
      */
     constructor(config, apiKey = null) {
@@ -58,30 +71,54 @@ export class HerokuClient {
     }
 
     /**
-     * @summary get environment variables
-     * @return {Promise<object>}
+     * @summary gets a bot instance by name
+     * @param {string} appName Heroku app name
+     * @returns {Promise<App>}
      */
-    async fetchConfigVars() {
-        const configVars = await this._client.get(`/apps/${this._appName}/config-vars`);
+    async fetchInstance(appName) {
+        return this._client.get(`/apps/${appName}`);
+    }
+
+    /**
+     * @summary gets bot instances
+     * @returns {Promise<App[]>}
+     */
+    async fetchInstances() {
+        /** @type {App[]} */
+        const apps = await this._client.get(`/apps`);
+        return apps.filter(({ name }) => name.includes("electionbot"));
+    }
+
+    /**
+     * @summary get environment variables
+     * @param {string} appName Heroku app name to fetch config vars for
+     * @return {Promise<Record<string, unknown>>}
+     */
+    async fetchConfigVars(appName) {
+        const { _client, _sensitiveKeys } = this;
+
+        const configVars = await _client.get(`/apps/${appName}/config-vars`);
 
         // Remove sensitive keys
-        this._sensitiveKeys.every(key => delete configVars[key]);
+        _sensitiveKeys.forEach(key => delete configVars[key]);
 
         return configVars;
     };
 
     /**
      * @summary update environment variables
-     * @param {object} configVars key-value environment variable pairs
+     * @param {string} appName Heroku app name to update
+     * @param {Record<string, unknown>} configVars key-value environment variable pairs
      * @returns {Promise<boolean>}
      */
-    async updateConfigVars(configVars) {
+    async updateConfigVars(appName, configVars) {
         if (typeof configVars !== 'object') return false;
 
         // Do not update requests with sensitive keys
-        if (this._sensitiveKeys.some(key => Object.keys(configVars).includes(key))) return false;
+        const keys = Object.keys(configVars);
+        if (this._sensitiveKeys.some(key => keys.includes(key))) return false;
 
-        return await this._client.patch(`/apps/${this._appName}/config-vars`, { body: configVars }) && true;
+        return await this._client.patch(`/apps/${appName}/config-vars`, { body: configVars }) && true;
     };
 
     /**
@@ -143,7 +180,7 @@ export class HerokuClient {
 
     /**
      * @summary scale app's dynos to nothing (kills process with manual rescale needed to restart)
-     * @param {"web"|"worker"} [type] process type to scale
+     * @param {Formation["type"]} [type] process type to scale
      * @return {Promise<boolean>}
      */
     async scaleNone(type = "web") {
@@ -154,7 +191,7 @@ export class HerokuClient {
 
     /**
      * @summary scale app's dynos to free
-     * @param {"web"|"worker"} [type] process type to scale
+     * @param {Formation["type"]} [type] process type to scale
      * @return {Promise<boolean>}
      */
     async scaleFree(type = "web") {
@@ -165,7 +202,7 @@ export class HerokuClient {
 
     /**
      * @summary scale app's dynos to hobby
-     * @param {"web"|"worker"} [type] process type to scale
+     * @param {Formation["type"]} [type] process type to scale
      * @return {Promise<boolean>}
      */
     async scaleHobby(type = "web") {
@@ -193,3 +230,15 @@ export class HerokuClient {
         return formations;
     };
 }
+
+/**
+ * @summary pretty-prints bot instance name (Heroku app name)
+ * @param {string} instanceName app name
+ * @returns {string}
+ */
+export const prettifyBotInstanceName = (instanceName) => {
+    // https://regex101.com/r/h8fxu0/2
+    return capitalize(instanceName
+        .replace(/^(?:se-)?(\w+?)(\d+|)(?:-(test))?$/, "$1 $2$3")
+        .replace(/\s+$/, " 1"));
+};

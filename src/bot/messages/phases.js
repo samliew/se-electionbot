@@ -1,24 +1,25 @@
-import { getCandidateOrNominee } from "../random.js";
-import { capitalize, linkToRelativeTimestamp, linkToUtcTimestamp, listify, makeURL, numToString, pluralize, pluralizePhrase } from "../utils.js";
 import { dateToRelativeTime } from "../../shared/utils/dates.js";
+import { mapMap } from "../../shared/utils/maps.js";
+import { boldify } from "../../shared/utils/markdown.js";
+import { getCandidateOrNominee } from "../random.js";
+import { getFormattedElectionSchedule, linkToRelativeTimestamp, linkToUtcTimestamp, listify, makeURL, numToString, pluralize, pluralizePhrase } from "../utils.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../election").default} Election
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  * @typedef {import("../election").ElectionPhase} ElectionPhase
  */
 
 /**
  * @summary builds a response to the election status query
- * @param {BotConfig} _config bot configuration
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayAboutElectionStatus = (_config, election) => {
+export const sayAboutElectionStatus = (_c, _es, election, ...rest) => {
     const { phase, numNominees, electionUrl, statVoters = "", repVote, dateElection } = election;
 
-    if (election.isNotStartedYet()) return sayElectionNotStartedYet(election);
-    if (election.isEnded()) return sayElectionIsOver(election);
+    if (election.isNotStartedYet()) return sayElectionNotStartedYet(_c, _es, election, ...rest);
+    if (election.isEnded()) return sayElectionIsOver(_c, _es, election, ...rest);
     if (phase === 'cancelled') return statVoters;
 
     const phaseLink = makeURL("election", `${electionUrl}?tab=${phase}`);
@@ -42,10 +43,7 @@ export const sayAboutElectionStatus = (_config, election) => {
 
 /**
  * @summary builds a response to what phases are there query
- * @param {BotConfig} _config bot configuration
- * @param {Map<number, Election>} _elections election history
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
 export const sayAboutThePhases = (_config, _elections, election) => {
     const { datePrimary, numNominees, primaryThreshold, electionUrl } = election;
@@ -60,29 +58,32 @@ export const sayAboutThePhases = (_config, _elections, election) => {
 };
 
 /**
- * TODO: do not add nomination phase if not started
  * @summary Default election message
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayElectionNotStartedYet = ({ dateNomination, electionUrl }) => `The ${makeURL("election", electionUrl)} has not started yet. The **nomination** phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativeTime(dateNomination)}).`;
+export const sayElectionNotStartedYet = (_c, _es, election) => {
+    const { dateNomination, electionUrl } = election;
+
+    const startsIn = `The ${boldify("nomination")} phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativeTime(dateNomination)}).`;
+
+    return `The ${makeURL("election", electionUrl)} has not started yet. ${startsIn}`;
+};
 
 /**
  * @summary builds a response to when does election end query
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayElectionIsEnding = (election) => {
+export const sayElectionIsEnding = (_c, _es, election, ...rest) => {
     const { phase, dateEnded } = election;
 
-    /** @type {[phase:ElectionPhase, handler:(e:Election) => string][]} */
+    /** @type {[phase:ElectionPhase, handler:MessageBuilder][]} */
     const phaseMap = [
-        ["ended", (e) => sayElectionIsOver(e)]
+        ["ended", (...args) => sayElectionIsOver(...args)]
     ];
 
     const [, handler] = phaseMap.find(([p]) => phase === p) || [];
 
-    if (handler) return handler(election);
+    if (handler) return handler(_c, _es, election, ...rest);
 
     const relativetime = dateToRelativeTime(dateEnded);
     return `The election ends at ${linkToUtcTimestamp(dateEnded)} (${relativetime}).`;
@@ -100,16 +101,15 @@ export const sayElectionIsRunning = (election) => {
 
 /**
  * @summary gets election is over response text
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayElectionIsOver = (election) => {
-    const { electionUrl, numWinners, arrWinners, siteUrl, opavoteUrl } = election;
+export const sayElectionIsOver = (_c, _es, election) => {
+    const { electionUrl, numWinners, winners, siteUrl, opavoteUrl } = election;
 
     let responseText = `The ${makeURL("election", electionUrl)} is over. See you next time!`;
 
     if (numWinners > 0) {
-        responseText = `The [election](${electionUrl}) has ended. The ${pluralizePhrase(numWinners, "winners are:", "winner is")} ${arrWinners.map(v => `[${v.userName}](${siteUrl + '/users/' + v.userId})`).join(', ')}.`;
+        responseText = `The [election](${electionUrl}) has ended. The ${pluralizePhrase(numWinners, "winners are:", "winner is")} ${mapMap(winners, v => `[${v.userName}](${siteUrl + '/users/' + v.userId})`).join(', ')}.`;
 
         if (opavoteUrl) {
             responseText += ` You can [view the results online via OpaVote](${opavoteUrl}).`;
@@ -121,41 +121,26 @@ export const sayElectionIsOver = (election) => {
 
 /**
  * @summary builds the election schedule message
- * @param {Election} election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayElectionSchedule = (election) => {
-    const { dateElection, dateNomination, datePrimary, dateEnded, phase, siteName, electionNum } = election;
-
-    const arrow = ' <-- current phase';
-
-    const prefix = `    ${siteName} Election ${electionNum} Schedule`;
-
-    /** @type {[Exclude<ElectionPhase,null>,string][]} */
-    const dateMap = [
-        ["nomination", dateNomination],
-        ["primary", datePrimary || ""],
-        ["election", dateElection],
-        ["ended", dateEnded]
-    ];
-
-    const maxPhaseLen = Math.max(...dateMap.map(([{ length }]) => length));
-
-    const phases = dateMap.map(
-        ([ph, date]) => `    ${capitalize(ph)}: ${" ".repeat(maxPhaseLen - ph.length)}${date || "never"}${ph === phase ? arrow : ""}`
-    );
-
-    return [prefix, ...phases].join("\n");
+export const sayElectionSchedule = (config, _es, election) => {
+    return getFormattedElectionSchedule(config, election);
 };
 
 /**
  * @summary builds next phase response message
- * @param {BotConfig} config bot configuration
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayNextPhase = (config, election) => {
-    const { phase, datePrimary, dateElection, statVoters, reachedPrimaryThreshold, numNominees, nomineesLeftToReachPrimaryThreshold: nomineesLeft } = election;
+export const sayNextPhase = (config, _es, election, ...rest) => {
+    const {
+        phase,
+        datePrimary,
+        dateElection,
+        statVoters,
+        reachedPrimaryThreshold,
+        numNominees,
+        nomineesLeftToReachPrimaryThreshold: nomineesLeft
+    } = election;
 
     const { showPrimaryCountdownAfter } = config;
 
@@ -165,8 +150,8 @@ export const sayNextPhase = (config, election) => {
     const phaseMap = {
         "cancelled": statVoters,
         "election": sayElectionIsRunning(election),
-        "ended": sayElectionIsOver(election),
-        "null": sayElectionNotStartedYet(election),
+        "ended": sayElectionIsOver(config, _es, election, ...rest),
+        "null": sayElectionNotStartedYet(config, _es, election, ...rest),
         "nomination": `The next phase is the ${datePrimary && reachedPrimaryThreshold ?
             `**primary** at ${linkToUtcTimestamp(datePrimary)} (${dateToRelativeTime(datePrimary)}).` :
             `**election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativeTime(dateElection)})${needsMoreForPrimary}.`}`,

@@ -12,18 +12,14 @@ Please direct any queries & feedback to [the developers](https://github.com/saml
 
 General election help:
 
-- what is an election/ how does it work
-- how to nominate (myself/someone/others)
-- how to vote
-- who should I vote for/ how to decide who to vote for
+- what is an election / how does it work
+
+About candidate score:
+
 - how is the candidate score calculated
 - **what is my candidate score** _(calculates if ownself is eligible for nomination)_
-- where is the election page
-- can I vote in the election
-- why are elections cancelled
-- will the election be cancelled
 
-Election badges:
+About election badges:
 
 - what are the moderation badges
 - what are the participation badges
@@ -36,18 +32,39 @@ Current election info:
 - what is the election status
 - when is the election starting/ when is the next phase
 - when is the election ending
-- who are the candidates/nominees
-- who are the winners/new moderators
 - how many positions are there
-- how many `<mods\|users>` `<voted\|participated>`
 - how many users visited the election
-- how many users are eligible to vote
-- why was a nomination removed
 - where are the nomination comments
+- where is the election page
+- what is the election type
+
+About cancellation:
+
+- why are elections cancelled
+- will the election be cancelled
+
+About candidates:
+
+- do current moderators have to run
+- how many users are eligible to vote
+- how to nominate `[myself\|someone\|others]`
+- who are the `<candidates\|nominees>`
+- who are the `<winners\|new moderators>`
+- who of the moderators is running
+- why was a nomination removed
+
+About voting:
+
+- can I vote in the election
+- how to decide who to vote for
+- how many `<mods\|users>` `<voted\|participated>`
+- how to vote
+- who should I vote for
 
 **Voting stats calculation**
 
-"how many users voted" command optionally accepts "to `<timestamp>`" postfix to limit the query.<br>
+"how many users voted" command optionally accepts "to `<timestamp>`" postfix to limit the query.
+
 If none is provided, it will default to the current date and time.
 The timestamp can be specified in several formats (`Z`, aka Zulu time indicator can be omitted for brevity):
 
@@ -61,6 +78,7 @@ About moderators/moderating:
 
 - what are the responsibilities of a moderator
 - why should I be a moderator
+- why would anyone want to be a moderator
 - do moderators get paid
 - who are the `<current\|former>` moderators
 - who is the best moderator
@@ -116,6 +134,7 @@ Users with access level set to `AccessLevel.dev` have access to a list of power 
 | chatroom                                                        | Gets the current election chat room URL                                                   |
 | debug `<on\|off>`                                               | Switches debug mode on or off                                                             |
 | feedback                                                        | Posts a message about giving feedback to the bot                                          |
+| `<get\|report>` confirmations                                   | Lists chat user ids and message builder names that are in the confirmation mode           |
 | get cron                                                        | Gets a report on the current cron jobs                                                    |
 | `<get modes report\|report modes>`                              | Gets a report on the current mode state                                                   |
 | get rooms                                                       | Lists the chat rooms the bot is currently joined to                                       |
@@ -171,7 +190,7 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `KEEP_ALIVE`                   | boolean  | no        | `false`                    | whether bot will ping itself occasionally                                                               |
 | `LOW_ACTIVITY_CHECK_MINS`      | number   | no        | `10`                       | interval (minutes) before bot can check room for inactivity                                             |
 | `LOW_ACTIVITY_COUNT_THRESHOLD` | number   | no        | `20`                       | bot can classify room as inactive only after these amount of messages have been sent                    |
-| `MAINTAINERS`                  | JSON     | no        | `{"stackoverflow.com":[]}` | JSON map of chat domains to lists of maintainer ids                                                      |
+| `MAINTAINERS`                  | JSON     | no        | `{"stackoverflow.com":[]}` | JSON map of chat domains to lists of maintainer ids                                                     |
 | `NODE_ENV`                     | string   | no        | `production`               | whether bot is in Node debug mode                                                                       |
 | `PASSWORD`                     | string   | no        | -                          | password to access non-public routes of the bot dashboard                                               |
 | `REPO_URL`                     | string   | no        | -                          | URL of this git repository                                                                              |

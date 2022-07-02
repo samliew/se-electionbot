@@ -1,13 +1,18 @@
+import { dateToRelativeTime } from "../../shared/utils/dates.js";
+import { filterMap, mapMap } from "../../shared/utils/maps.js";
+import { boldify } from "../../shared/utils/markdown.js";
 import { listNomineesInRoom } from "../election.js";
 import { getCandidateOrNominee, getRandomCurrently, RandomArray } from "../random.js";
 import { getScoreText } from "../score.js";
-import { capitalize, getUsersCurrentlyInTheRoom, listify, makeURL, mapToName, mapToRequired, pluralize } from "../utils.js";
+import { capitalize, getUsersCurrentlyInTheRoom, listify, makeURL, mapToName, pluralize } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../score").CandidateScore} CandidateScore
  * @typedef {import("../election").default} Election
+ * @typedef {import("../election").ElectionPhase} ElectionPhase
+ * @typedef {import("../index").MessageBuilder} MessageBuilder
  * @typedef {import("chatexchange/dist/Room").default} Room
  */
 
@@ -52,15 +57,12 @@ export const sayBestCandidate = (_config, _elections, election) => {
 
 /**
  * @summary builds current nominees list response message
- * @param {BotConfig} _config bot configuration
- * @param {Map<number, Election>} _elections election history
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayCurrentCandidates = (_config, _elections, election) => {
+export const sayCurrentCandidates = (_c, _es, election, ...rest) => {
     const { phase, numNominees, electionUrl, nominees } = election;
 
-    if (!phase) return sayElectionNotStartedYet(election);
+    if (!phase) return sayElectionNotStartedYet(_c, _es, election, ...rest);
 
     if (numNominees > 0) {
         const pastBe = pluralize(numNominees, "were", "was");
@@ -139,27 +141,37 @@ export const sayHowManyCandidatesAreHere = async (config, election, client, room
 
 /**
  * @summary builds a response on how to nominate self or others
- * @param {Election} election current election
- * @param {object} electionBadges list of election badges
- * @param {boolean} mentionsAnother if user asks about nominating others
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayHowToNominate = (election, electionBadges, mentionsAnother = false) => {
+export const sayHowToNominate = (_c, _es, election) => {
+    const { siteHostname, repNominate, requiredBadges, siteUrl, electionUrl } = election;
 
-    const requiredBadges = electionBadges.filter(mapToRequired);
-    const requiredBadgeNames = requiredBadges.map(mapToName);
+    const requiredBadgeLinks = requiredBadges.map(mapToName);
 
-    const { siteHostname } = election;
+    const requirements = [
+        `at least ${repNominate} reputation`,
+        "be at least 18 years old"
+    ];
 
-    // Markup to bold additional text if talking about nominating others
-    const mentionsAnotherBold = mentionsAnother ? '**' : '';
+    if (election.isStackOverflow()) {
+        requirements.push(`have ${listify(...requiredBadgeLinks)} ${makeURL("badges", `${siteUrl}/help/badges`)}`);
+    }
 
-    let requirements = [`at least ${election.repNominate} reputation`, 'at least 18 years of age'];
-    if (election.isStackOverflow()) requirements.push(`have these badges (*${requiredBadgeNames.join(', ')}*)`);
-    if (siteHostname && /askubuntu\.com$/.test(siteHostname)) requirements.push(`[signed the Ubuntu Code of Conduct](https://askubuntu.com/q/100275)`);
-    requirements.push(`and cannot have been suspended anywhere on the [Stack Exchange network](https://stackexchange.com/sites?view=list#traffic) within the past year`);
+    if (siteHostname && /askubuntu\.com$/.test(siteHostname)) {
+        requirements.push(`${makeURL("sign the Ubuntu Code of Conduct", "https://askubuntu.com/q/100275")}`);
+    }
 
-    return `You can only nominate yourself as a candidate during the nomination phase. You'll need ${requirements.join(', ')}. ${mentionsAnotherBold}You cannot nominate another user.${mentionsAnotherBold}`;
+    const networkURL = makeURL("Stack Exchange network", "https://stackexchange.com/sites?view=list#traffic");
+
+    requirements.push(`can't have been suspended anywhere on the ${networkURL} within the past year`);
+
+    const anotherUserClause = "You can't nominate others.";
+
+    return [
+        `You can only nominate during the ${makeURL("nomination", `${electionUrl}?tab=nomination`)} phase.`,
+        `You'll need ${listify(...requirements)}.`,
+        boldify(anotherUserClause),
+    ].join(" ");
 };
 
 /**
@@ -186,14 +198,12 @@ export const sayWhyNominationRemoved = () => {
 
 /**
  * @summary builds a response to who are the withdrawn nominees
- * @param {BotConfig} _config bot configuration
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayWithdrawnNominations = (_config, election) => {
+export const sayWithdrawnNominations = (_c, _es, election, ...rest) => {
     const { withdrawnNominees, numWithdrawals } = election;
 
-    if (election.isNotStartedYet()) return sayElectionNotStartedYet(election);
+    if (election.isNotStartedYet()) return sayElectionNotStartedYet(_c, _es, election, ...rest);
 
     if (numWithdrawals > 0) {
         const isAre = pluralize(numWithdrawals, "are", "is");
@@ -209,4 +219,113 @@ export const sayWithdrawnNominations = (_config, election) => {
     }
 
     return `No ${getCandidateOrNominee()}s have withdrawn from the election yet.`;
+};
+
+/**
+ * @summary builds a response to who are the withdrawn nominees
+ * @type {MessageBuilder}
+ */
+export const sayWhatModsAreRunning = (config, _es, election) => {
+    const { nowOverride } = config;
+
+    const { currentModerators, electionUrl, electionType, nominees, siteUrl } = election;
+
+    const phase = election.getPhase(nowOverride);
+
+    const nominatedMods = filterMap(currentModerators, (m) => nominees.has(m.user_id));
+    const nominatedModNames = mapMap(nominatedMods, (m) => m.display_name);
+
+    const names = listify(...nominatedModNames);
+
+    const { size: numNominatedMods } = nominatedMods;
+
+    const nominationPhaseURL = makeURL("nominated", `${electionUrl}?tab=nomination`);
+
+    const runningPrefix = `${names} ${pluralize(numNominatedMods, "have", "has")} ${nominationPhaseURL}.`;
+
+    const { electionOrdinalName } = election;
+
+    if (!phase) {
+        const { dateNomination } = election;
+        const startsIn = dateToRelativeTime(dateNomination, { now: nowOverride });
+        return `Nobody nominated as the ${electionOrdinalName} hasn't even started yet (${startsIn}).`;
+    }
+
+    if (phase === "ended") {
+        const { winners } = election;
+
+        const wonMods = filterMap(winners, (n) => nominatedMods.has(n.userId));
+
+        const wonModNames = listify(...mapMap(wonMods, (n) => n.userName));
+
+        const { size: numWonMods } = wonMods;
+
+        const allNominatedModsWon = wonMods.size === numNominatedMods;
+
+        /** @type {Map<boolean, string>} */
+        const pfxs = new Map();
+        pfxs.set(!numWonMods, "Not one of them");
+        pfxs.set(numWonMods > 0, wonModNames);
+        pfxs.set(allNominatedModsWon, "And they");
+        pfxs.set(allNominatedModsWon && numWonMods > 1, "All of them");
+
+        const wonSuffix = `${pfxs.get(true)} ${pluralize(numWonMods, "have", "has")}`;
+
+        return `${runningPrefix} ${wonSuffix} won the ${electionOrdinalName}.`;
+    }
+
+    const runningText = numNominatedMods ?
+        runningPrefix :
+        `No ${makeURL("current moderators", `${siteUrl}/users?tab=moderators`)} have ${nominationPhaseURL}.`;
+
+    if (electionType === "graduation" && phase === "nomination" && numNominatedMods < currentModerators.size) {
+        const notNominatedMods = filterMap(currentModerators, (m) => !nominatedMods.has(m.user_id));
+        const notNominatedNames = listify(...mapMap(notNominatedMods, (m) => m.display_name));
+        return `${runningText} As it is a graduation election, ${notNominatedNames} will have to step down unless they nominate.`;
+    }
+
+    return runningText;
+};
+
+/**
+ * @summary builds a response to a query about whether existing mods have to nominate
+ * @type {MessageBuilder}
+ */
+export const sayIfModsHaveToRun = (config, _es, election) => {
+    const { electionType, siteUrl, dateNomination } = election;
+
+    const modURL = makeURL("existing moderators", `${siteUrl}/users?tab=moderators`);
+
+    const prefix = "As this is";
+    const suffix = "have to run in the election or step down";
+
+    if (electionType !== "graduation") {
+        return `${prefix} not a graduation election, ${modURL} do not ${suffix}.`;
+    }
+
+    const haveToRun = `${prefix} a graduation election, ${modURL} ${suffix}.`;
+
+    const { nowOverride } = config;
+
+    const phase = election.getPhase(nowOverride);
+
+    if (!phase) {
+        return `${haveToRun} The election hasn't started yet (${dateToRelativeTime(dateNomination, { now: nowOverride })}) — don't forget to remind them!`;
+    }
+
+    const { currentModerators, nominees, winners } = election;
+
+    const nominatedMods = filterMap(currentModerators, (m) => nominees.has(m.user_id));
+    const nominatedModNames = listify(...mapMap(nominatedMods, (m) => m.display_name)) || "None of them";
+
+    const wonMods = filterMap(winners, (n) => nominatedMods.has(n.userId));
+    const wonModNames = listify(...mapMap(wonMods, (n) => n.userName)) || "None of them";
+
+    /** @type {Partial<Record<Exclude<ElectionPhase, null>, string>>} */
+    const phaseMap = {
+        cancelled: `${haveToRun} ${nominatedModNames} nominated before the election was cancelled`,
+        ended: `${haveToRun} ${nominatedModNames} nominated, and ${wonModNames} won`,
+    };
+
+    return `${phaseMap[phase] || `${haveToRun} ${nominatedModNames} nominated`}.`;
 };

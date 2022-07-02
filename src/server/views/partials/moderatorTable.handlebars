@@ -1,0 +1,29 @@
+{{> totalsTableHeader header=header collection=(getter election key) }}
+{{#if (len (getter election key))}}
+    <table class="table-small">
+    <thead>
+            <tr>
+                <th>Link</th>
+                <th>Member for</th>
+                <th>Election</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{#iterate (getter election key)}}
+        <tr>
+            <td><a href="{{val.link}}">{{{val.display_name}}}</a></td>
+            <td>{{years val.creation_date}}</td>
+            {{#if val.election}}
+                <td>{{{ordinal val.election}}} <a href="{{val.electionLink}}">election</a> ({{year (getter (get ../election/elections val.election) "dateEnded")}})</td>
+            {{else if val.appointed}}
+                <td>appointed ({{val.appointed}})</td>
+            {{else}}
+                <td></td>
+            {{/if}}
+        </tr>
+        {{/iterate}}
+        </tbody>
+    </table>
+{{else}}
+    {{> emptySmallTable }}
+{{/if}}

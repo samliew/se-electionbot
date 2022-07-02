@@ -4,13 +4,15 @@
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} WebsocketEvent
  *
  * @typedef {{
+ *  ignoreMute?: boolean,
+ *  inResponseTo?: number,
  *  isPrivileged?: boolean,
  *  log?: boolean
  * }} MessageOptions
  */
 
-import { wait } from "./utils.js";
 import { logResponse } from "../shared/utils/bot.js";
+import { wait } from "./utils.js";
 
 // TODO: implement message queue
 /**
@@ -18,12 +20,11 @@ import { logResponse } from "../shared/utils/bot.js";
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to announce in
  * @param {string} responseText Message to send
- * @param {null|number} inResponseTo message ID to reply to
- * @param {boolean} [isPrivileged] privileged user flag
- * @param {boolean} [log] flag to log valid messages
+ * @param {MessageOptions} [options] message configuration
  * @returns {Promise<void>}
  */
-const _sendTheMessage = async function (config, room, responseText, inResponseTo = null, isPrivileged = false, log = true) {
+const _sendTheMessage = async function (config, room, responseText, options = {}) {
+    const { ignoreMute = false, isPrivileged = false, log = true, inResponseTo } = options;
 
     const { debugOrVerbose } = config;
 
@@ -35,7 +36,7 @@ const _sendTheMessage = async function (config, room, responseText, inResponseTo
         return;
     }
 
-    if (!isPrivileged && config.isMuted) {
+    if (!isPrivileged && !ignoreMute && config.isMuted) {
         if (debugOrVerbose) console.log(`[muted response] "${responseText}"`);
         return;
     }
@@ -61,13 +62,11 @@ const _sendTheMessage = async function (config, room, responseText, inResponseTo
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to announce in
  * @param {string} responseText Message to send
- * @param {null|number} [inResponseTo] message ID to reply to
- * @param {boolean} [isPrivileged] privileged user flag
- * @param {boolean} [log] flag to log valid messages
+ * @param {MessageOptions} [options] message configuration
  * @returns {Promise<any>}
  */
-export const sendMessage = async function (config, room, responseText, inResponseTo = null, isPrivileged = false, log = true) {
-    return _sendTheMessage.call(this, config, room, responseText, inResponseTo, isPrivileged, log);
+export const sendMessage = async function (config, room, responseText, options) {
+    return _sendTheMessage.call(this, config, room, responseText, options);
 };
 
 /**
@@ -76,19 +75,17 @@ export const sendMessage = async function (config, room, responseText, inRespons
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to announce in
  * @param {string} responseText Message to send
- * @param {null|number} inResponseTo message ID to reply to
- * @param {boolean} [isPrivileged] privileged user flag
+ * @param {MessageOptions} [options] message configuration
  * @returns {Promise<any>}
  */
-export const sendReply = async function (config, room, responseText, inResponseTo, isPrivileged = false) {
-    return _sendTheMessage.call(this, config, room, responseText, inResponseTo, isPrivileged);
+export const sendReply = async function (config, room, responseText, options) {
+    return _sendTheMessage.call(this, config, room, responseText, options);
 };
 
 /**
  * @param {BotConfig} config bot configuration
  * @param {Room} room room to announce in
  * @param {string} responseText Message to send
- * @param {null|number} inResponseTo message ID to reply to
  * @param {MessageOptions} [options] configuration
  * @returns {Promise<boolean>}
  */
@@ -96,9 +93,9 @@ export const sendMultipartMessage = async (
     config,
     room,
     responseText,
-    inResponseTo = null,
-    { isPrivileged = false, log = true } = {}
+    options = {}
 ) => {
+    const { isPrivileged = false, log = true, inResponseTo } = options;
 
     const { debugOrVerbose } = config;
     const { maxMessageLength, maxMessageParts, minThrottleSecs } = config;
@@ -155,7 +152,7 @@ export const sendMultipartMessage = async (
         return false; // Do not send actual response if they take too many messages
     }
 
-    await sendMessageList(config, room, messages, { isPrivileged, log });
+    await sendMessageList(config, room, messages, { ignoreMute: true, isPrivileged, log, inResponseTo });
 
     if (!isPrivileged) {
         // Record last bot message and time
@@ -178,14 +175,14 @@ export const sendMultipartMessage = async (
  * @param {MessageOptions} options configuration
  * @returns {Promise<void>}
  */
-export const sendMessageList = async (config, room, messages, { isPrivileged = false, log = true }) => {
+export const sendMessageList = async (config, room, messages, options) => {
     const { throttleSecs } = config;
 
     const { length: numMessages } = messages;
 
     let sent = 1;
     for (const message of messages) {
-        await _sendTheMessage(config, room, message, null, isPrivileged, log);
+        await _sendTheMessage(config, room, message, options);
 
         if (numMessages > 1) {
             await wait(throttleSecs * sent);

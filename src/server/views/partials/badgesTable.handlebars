@@ -1,0 +1,28 @@
+{{> totalsTableHeader header=header collection=(contextCall "getElectionBadges" election type status) }}
+<table class="table-small">
+  <thead>
+    <tr>
+      <th>Link</th>
+      <th>Id</th>
+      {{#if (eq type "all")}}
+      <th>Type</th>
+      {{/if}}
+    </tr>
+  </thead>
+  <tbody>
+    {{#each (contextCall "getElectionBadges" election type status)}}
+    <tr>
+        <td><a
+            href="{{getter
+            ../election
+            'siteUrl'
+            }}/help/badges/{{this.badge_id}}"
+        >{{this.name}}</a></td>
+        <td>{{this.badge_id}}</td>
+        {{#if (eq ../type "all")}}
+        <td>{{this.type}}</td>
+        {{/if}}
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
