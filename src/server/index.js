@@ -1,11 +1,8 @@
 import express from 'express';
-import Handlebars from 'express-handlebars';
 import { dirname, join } from 'path';
 import { fileURLToPath } from "url";
 import Election from '../bot/election.js';
 import * as helpers from "./helpers.js";
-import { configureApp, farewell, start } from './utils.js';
-
 import { config } from "./routes/config.js";
 import { feedback } from "./routes/feedback.js";
 import { health } from "./routes/health.js";
@@ -14,12 +11,14 @@ import { ping } from './routes/ping.js';
 import { realtime } from "./routes/realtime.js";
 import { say } from "./routes/say.js";
 import { server } from "./routes/server.js";
+import { configureApp, farewell, start } from './utils.js';
 
 /**
  * @typedef {import("../bot/announcement").default} Announcement
  * @typedef {{ password?:string, success: string }} AuthQuery
  * @typedef {import("../bot/config").BotConfig} BotConfig
  * @typedef {import("chatexchange").default} Client
+ * @typedef {import("express-handlebars/types").ConfigOptions} ConfigOptions
  * @typedef {import("express").Application} ExpressApp
  * @typedef {import("express").Response} ExpressRes
  * @typedef {import("chatexchange/dist/Room").default} Room
@@ -46,7 +45,7 @@ const publicPaths = [
     "/static",
 ];
 
-/** @type {Handlebars.ExphbsOptions} */
+/** @type {ConfigOptions} */
 const handlebarsConfig = {
     // without extname property set to .<extension>, partials will not work
     extname: ".handlebars",

@@ -1,5 +1,6 @@
 /**
  * @typedef {import("../bot/config").BotConfig} BotConfig
+ * @typedef {import("express-handlebars/types").ConfigOptions} ConfigOptions
  * @typedef {import("express").Application} ExpressApp
  * @typedef {import("../bot/herokuClient").App} HerokuApp
  * @typedef {import("http").Server} HttpServer
@@ -9,7 +10,7 @@
  * @typedef {Map<string, { methods: string[], path: string, public: boolean }>} RouteInfo
  */
 
-import Handlebars from 'express-handlebars';
+import { engine } from 'express-handlebars';
 import { HerokuClient, prettifyBotInstanceName } from "../bot/herokuClient.js";
 
 /**
@@ -149,13 +150,13 @@ export const farewell = async (app, config, room) => {
 /**
  * @summary configures shared Express options
  * @param {ExpressApp} app Express app to stop
- * @param {Handlebars.ExphbsOptions} config Handlebars configuration
+ * @param {ConfigOptions} config Handlebars configuration
  * @param {string} viewsPath path to app views
  * @returns {ExpressApp}
  */
 export const configureApp = (app, config, viewsPath) => {
     return app
-        .engine('handlebars', Handlebars(config))
+        .engine('handlebars', engine(config))
         .set("views", viewsPath)
         .set('view engine', 'handlebars')
         .set('view cache', 'false');
