@@ -170,7 +170,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
 
             // Official results out
             if (election.isEnded() && election.hasNewWinners) {
-                const status = await announcement?.announceWinners(room, election);
+                const status = await announcement?.announceWinners();
                 console.log(`[rescraper] announced winners: ${status}`);
             }
 

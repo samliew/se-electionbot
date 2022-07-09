@@ -205,17 +205,12 @@ export default class ScheduledAnnouncement {
 
     /**
      * @summary Announces winners when available
-     * @param {Room} room chatroom to post to
-     * @param {Election} [election] election to announce for
      * @returns {Promise<boolean>}
      */
-    async announceWinners(room, election) {
-        const { config } = this;
+    async announceWinners() {
+        const { config, _election, _room } = this;
 
-        // No election
-        if (!election) return false;
-
-        const { winners, phase, opavoteUrl, siteUrl } = election;
+        const { winners, phase, opavoteUrl, siteUrl } = _election;
 
         const { size } = winners;
 
@@ -223,7 +218,7 @@ export default class ScheduledAnnouncement {
 
         // Needs to have ended and have winners
         if (phase !== 'ended' || size === 0) {
-            console.log("announceWinners - called but no winners to announce?", config.verbose ? election : "");
+            console.log("announceWinners - called but no winners to announce?", config.verbose ? _election : "");
             return false;
         }
 
@@ -251,7 +246,7 @@ export default class ScheduledAnnouncement {
         }
 
         // Announce
-        await room.sendMessage(msg);
+        await _room.sendMessage(msg);
 
         return true;
     }

@@ -172,20 +172,15 @@ describe(ScheduledAnnouncement.name, () => {
     });
 
     describe(ScheduledAnnouncement.prototype.announceWinners.name, () => {
-        it('should return false on no election passed', async () => {
-            const status = await ann.announceWinners(room);
-            expect(status).to.be.false;
-        });
-
         it('should return false if election is not ended', async () => {
             election.phase = "cancelled";
-            const status = await ann.announceWinners(room, election);
+            const status = await ann.announceWinners();
             expect(status).to.be.false;
         });
 
         it('should return false if election is ended without winners', async () => {
             election.phase = "ended";
-            const status = await ann.announceWinners(room, election);
+            const status = await ann.announceWinners();
             expect(status).to.be.false;
         });
 
@@ -203,7 +198,7 @@ describe(ScheduledAnnouncement.name, () => {
             election.winners.set(42, getMockNominee(election));
             election.phase = "ended";
 
-            const status = await ann.announceWinners(room, election);
+            const status = await ann.announceWinners();
             expect(status).to.be.false;
         });
 
@@ -213,7 +208,7 @@ describe(ScheduledAnnouncement.name, () => {
 
             const stubbed = sinon.stub(room, "sendMessage");
 
-            const promise = ann.announceWinners(room, election);
+            const promise = ann.announceWinners();
 
             await clock.runAllAsync();
 

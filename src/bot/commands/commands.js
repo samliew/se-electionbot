@@ -175,9 +175,9 @@ export const announceNominees = async (args) => {
  * @returns {Promise<string>}
  */
 export const announceWinners = async (args) => {
-    const { announcement, config, election, room } = args;
+    const { announcement, config, election } = args;
     await election.scrapeElection(config);
-    const status = await announcement.announceWinners(room, election);
+    const status = await announcement.announceWinners();
     return status ? "" : "There are no winners yet.";
 };
 
@@ -464,14 +464,13 @@ export const postMetaAnnouncement = async (args) => {
 /**
  * @summary announces
  * @param {BotConfig} config bot config
- * @param {Room} room current room
  * @param {Election} election current election instance
  * @param {Announcement} announcement announcement controller
  * @param {ChatMessage[]} messages transcript messages
  * @param {ChatUser} botUser bot user
  * @returns {Promise<boolean>}
  */
-export const postWinnersAnnouncement = async (config, room, election, announcement, messages, botUser) => {
+export const postWinnersAnnouncement = async (config, election, announcement, messages, botUser) => {
     const { id } = botUser;
 
     const expr = /^(?:The winners? (?:are|is):|Congratulations to the winners?)/;
@@ -480,7 +479,7 @@ export const postWinnersAnnouncement = async (config, room, election, announceme
 
     if (config.debug) console.log(`announced ${winnersAnnounced.length} winner${pluralize(winnersAnnounced.length)}`);
 
-    return !!winnersAnnounced || election.numWinners <= 0 || announcement.announceWinners(room, election);
+    return !!winnersAnnounced || election.numWinners <= 0 || announcement.announceWinners();
 };
 
 /**
