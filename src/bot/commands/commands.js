@@ -36,7 +36,6 @@ import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait
  *  config: BotConfig,
  *  content: string,
  *  election: Election,
- *  elections: Map<number, Election>,
  *  room: Room,
  *  user: User
  * }} CommandArguments
@@ -384,7 +383,7 @@ export const getModeReport = (args) => {
  * @returns {Promise<void>}
  */
 export const greetCommand = async (args) => {
-    const { config, elections, election, bot, room, content } = args;
+    const { config, election, bot, room, content } = args;
 
     const [, type = "idle"] = /\b(idle|busy)\b/.exec(content) || [];
 
@@ -394,7 +393,7 @@ export const greetCommand = async (args) => {
         busy: sayBusyGreeting
     };
 
-    await greetingMap[type]?.(config, elections, election, bot, room);
+    await greetingMap[type]?.(config, election.elections, election, bot, room);
 
     config.activityCounter = 0;
 };
