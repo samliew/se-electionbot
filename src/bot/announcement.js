@@ -2,10 +2,9 @@ import cron from "node-cron";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { filterMap, mapMap } from "../shared/utils/maps.js";
 import { getFalsyKeys } from "../shared/utils/objects.js";
-import { sayFeedback } from "./commands/commands.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
-import { getFormattedElectionSchedule, makeURL, pluralize, wait } from "./utils.js";
+import { getFormattedElectionSchedule, makeURL, pluralize } from "./utils.js";
 
 export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chance to cast or modify your votes!";
 
@@ -253,15 +252,6 @@ export default class ScheduledAnnouncement {
 
         // Announce
         await room.sendMessage(msg);
-
-        console.log("announceWinners - announced winners");
-
-        // Wait before asking for feedback
-        // Will always be true because repoUrl has a default value, for now
-        if (config.feedbackUrl || config.repoUrl) {
-            await wait(60);
-            await room.sendMessage(sayFeedback({ config }));
-        }
 
         return true;
     }
