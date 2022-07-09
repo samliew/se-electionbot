@@ -11,6 +11,7 @@ import { ping } from './routes/ping.js';
 import { realtime } from "./routes/realtime.js";
 import { say } from "./routes/say.js";
 import { server } from "./routes/server.js";
+import { commands } from "./routes/commands.js";
 import { configureApp, farewell, start } from './utils.js';
 
 /**
@@ -115,6 +116,7 @@ app.use((req, res, next) => {
 const connections = new Map();
 app.set("keep-alive-connections", connections);
 
+app.use("/commands", configureApp(commands, handlebarsConfig, viewsPath));
 app.use("/config", configureApp(config, handlebarsConfig, viewsPath));
 app.use("/feedback", configureApp(feedback, handlebarsConfig, viewsPath));
 app.use("/health", configureApp(health, handlebarsConfig, viewsPath));

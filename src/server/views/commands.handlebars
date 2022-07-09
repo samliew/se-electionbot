@@ -1,0 +1,30 @@
+{{> navigation routes=data/routes password=data/password path=data/path instances=data/instances }}
+
+{{> breadcrumbs current=current }}
+
+{{#ifTruthy data/statusText}}
+<div class="mt-4">
+    {{{data/statusText}}}
+</div>
+{{/ifTruthy}}
+
+<form id="run-command" method="post" action="/commands">
+    <div class="row">
+        <div class="col-12">
+            <label for="content">Command text</label>
+            <input class="form-control" id="content" name="content" placeholder="Enter text to forward to the command" type="text" value="">
+        </div>
+    </div>
+
+    {{#each (partition data/commands 3)}}
+    <div class="row">
+        {{#each this}}
+        <div class="col-12 col-md-6 col-xl-4 mb-2">
+            <button class="btn btn-outline-secondary" formaction="/commands?command={{this}}" title="Run the '{{this}}' command">{{this}}</button>
+        </div>
+        {{/each}}
+    </div>
+    {{/each}}
+
+    <input type="hidden" name="password" value="{{data/password}}" />
+</form>
