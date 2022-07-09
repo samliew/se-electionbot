@@ -1,4 +1,5 @@
 import { capitalize } from "../bot/utils.js";
+import { partition } from "../shared/utils/arrays.js";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { formatOrdinal, prettify } from "../shared/utils/strings.js";
 
@@ -93,7 +94,7 @@ export const url = (url, text = "") => {
     return `<a href="${url}">${text}</a>`;
 };
 
-export { capitalize, dateToUtcTimestamp as utcTimestamp, prettify };
+export { capitalize, dateToUtcTimestamp as utcTimestamp, prettify, partition };
 
 /** @type {(data: string) => string} */
 export const json = (data) => {
