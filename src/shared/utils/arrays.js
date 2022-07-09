@@ -99,3 +99,27 @@ export const findLast = (array, predicate) => {
 
     return;
 };
+
+/**
+ * @template {unknown} T
+ *
+ * @summary partitions an {@link array}
+ * @param {T[]} array array to partition
+ * @param {number} size max part size
+ * @returns {T[][]}
+ */
+export const partition = (array, size) => {
+    /** @type {T[][]} */
+    const partitioned = [];
+
+    array.forEach((item, i) => {
+        if (i % size) {
+            last(partitioned)?.push(item);
+            return;
+        }
+
+        partitioned.push([item]);
+    });
+
+    return partitioned;
+};
