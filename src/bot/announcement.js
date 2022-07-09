@@ -256,30 +256,6 @@ export default class ScheduledAnnouncement {
     }
 
     /**
-     * @summary convenience method for updating Rescraper
-     * @param {Rescraper} rescraper rescraper instance
-     */
-    setRescraper(rescraper) {
-        this.rescraper = rescraper;
-    }
-
-    /**
-     * @summary convenience method for updating the Room
-     * @param {Room} room the room to announce in
-     */
-    setRoom(room) {
-        this._room = room;
-    }
-
-    /**
-     * @summary convenience method for updating the Election
-     * @param {Election} election election to announce for
-     */
-    setElection(election) {
-        this._election = election;
-    }
-
-    /**
      * @summary formats date as a cron expression (UTC)
      * @param {string | number | Date} date date to format
      * @param {number} [minute] minute override

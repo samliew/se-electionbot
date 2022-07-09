@@ -306,7 +306,6 @@ use defaults ${defaultChatNotSet}`
         // Start rescraper utility, and initialise announcement cron jobs
         const rescraper = new Rescraper(config, client, room, elections, election);
         const announcement = new Announcement(config, room, election, rescraper);
-        announcement.setRescraper(rescraper);
 
         const initStatus = announcement.initAll();
 
