@@ -214,17 +214,21 @@ export default class ScheduledAnnouncement {
 
         const { size } = winners;
 
-        if (config.debug) console.log('announceWinners() called: ', winners);
+        const logPfx = `[${this.announceWinners.name}]`;
+
+        if (config.debugOrVerbose) {
+            console.log(`${logPfx} winners (${winners.size}):\n`, mapMap(winners, ({ userName }) => userName));
+        }
 
         // Needs to have ended and have winners
         if (phase !== 'ended' || size === 0) {
-            console.log("announceWinners - called but no winners to announce?", config.verbose ? _election : "");
+            console.log(`${logPfx} no winners to announce`, config.verbose ? _election : "");
             return false;
         }
 
         // Winners have been already announced
         if (config.flags.announcedWinners) {
-            console.log("announceWinners - Winners have already been announced");
+            console.log(`${logPfx} winners have already been announced`);
             return false;
         }
 
