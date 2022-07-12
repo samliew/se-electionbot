@@ -29,7 +29,7 @@ import {
     isAskedAboutLightbulb,
     isAskedAboutMissingComments,
     isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting,
-    isAskedAmIalive,
+    isAskedAmIAlive,
     isAskedForCurrentMods,
     isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp,
     isAskedForHelp,
@@ -686,7 +686,7 @@ use defaults ${defaultChatNotSet}`
                 if (isAskedWhoAmI(preparedMessage)) {
                     responseText = await sayWhoAmI(me, preparedMessage);
                 }
-                else if (isAskedAmIalive(preparedMessage)) {
+                else if (isAskedAmIAlive(preparedMessage)) {
                     responseText = getRandomAlive();
                 }
                 else if (isAskedWhoMadeMe(preparedMessage)) {

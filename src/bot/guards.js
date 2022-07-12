@@ -207,7 +207,7 @@ export const isAskedHowAmI = (text) => {
  * @summary checks if the message asked whether the bot is alive
  * @type {MessageGuard}
  */
-export const isAskedAmIalive = (text) => {
+export const isAskedAmIAlive = (text) => {
     return someMatch([/^(?:where\s+ar[et]\s+(?:you|thou)|alive|dead|ping)(?:$|\?)/i, /^are\s+you\s+(?:t?here|alive|dead)(?:$|\?)/i], text);
 };
 
