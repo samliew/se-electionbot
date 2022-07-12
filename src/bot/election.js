@@ -373,8 +373,9 @@ export const scrapeElectionAnnouncements = async (config, page = 1) => {
     // "Announcing the first full election for Arts & Crafts!"
     // "Announcing a Pro Tempore election for 2022"
     // "Leaving Private Beta, and Initial Pro-Tem Moderator Election!"
-    // https://regex101.com/r/OTlwms/2
-    const announcementTitleExpr = /^announc(?:ing|ement).+?election.+?for|initial(?:\s+pro(?:\s+|-)tem(?:pore)?)\s+moderator\s+election/i;
+    // "Announcing an upcoming election"
+    // https://regex101.com/r/OTlwms/3
+    const announcementTitleExpr = /^announc(?:ing|ement).+?election.*?|initial(?:\s+pro(?:\s+|-)tem(?:pore)?)\s+moderator\s+election/i;
 
     // https://regex101.com/r/GKcR6r/2
     const proTemporeTitleExpr = /\bpro(?:\s+|-)tem(?:pore)?\b/i;
