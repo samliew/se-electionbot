@@ -19,6 +19,17 @@ import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
  */
 
 /**
+ * @typedef {{
+ *  from?: Date | string | number;
+ *  to?: Date | string | number;
+ * }} DateTimeOptions
+ *
+ * @typedef {{
+ *  page?: number
+ * }} PagingOptions
+ */
+
+/**
  * @description A simple in-memory cached list of network sites
  * @type {Site[]}
  */
@@ -66,7 +77,7 @@ export const handleResponse = async (response, backoffCallback, successCallback)
  * @summary gets all named badges from the API
  * @param {BotConfig} config
  * @param {string} site election site slug
- * @param {{ page?: number, name?: string }} options request options
+ * @param {PagingOptions & { name?: string }} options request options
  * @returns {Promise<Badge[]>}
  */
 export const getNamedBadges = async (config, site, options = {}) => {
@@ -106,10 +117,7 @@ export const getNamedBadges = async (config, site, options = {}) => {
 };
 
 /**
- * @typedef {{
- *  from ?: string | number | Date,
- *  page ?: number,
- *  to ?: string | number | Date,
+ * @typedef {DateTimeOptions & PagingOptions & {
  *  type ?: Badge["badge_type"] | "all"
  * }} GetBadgesOptions
  *
@@ -169,11 +177,7 @@ export const getBadges = async (config, userIds, site, options = {}) => {
  * @param {BotConfig} config
  * @param {string} site election site slug
  * @param {number[]} badgeIds badge ids
- * @param {{
- *  from?: Date|string|number,
- *  to?: Date|string|number,
- *  page?: number,
- * }} options configuration
+ * @param {DateTimeOptions & PagingOptions} options configuration
  * @returns {Promise<Badge[]>}
  */
 export const getAwardedBadges = async (config, site, badgeIds, options) => {
@@ -214,10 +218,7 @@ export const getAwardedBadges = async (config, site, badgeIds, options) => {
  * @param {BotConfig} config
  * @param {string} site election site slug
  * @param {number} badgeId Constituent badge id
- * @param {{
- *  from: Date|string|number,
- *  to?: Date|string|number
- * }} options configuration
+ * @param {Required<Pick<DateTimeOptions, "from">> & DateTimeOptions} options configuration
  * @returns {Promise<number>}
  */
 export const getNumberOfVoters = async (config, site, badgeId, options) => {
@@ -275,11 +276,7 @@ export const getNumberOfUsersEligibleToVote = async (config, election) => {
  * @summary gets the network mods from the API
  * @param {BotConfig} config bot configuration
  * @param {string} site election site slug
- * @param {{
- *  from?: string|number|Date,
- *  page?: number,
- *  to?: string|number|Date
- * }} [options] configuration
+ * @param {DateTimeOptions & PagingOptions} [options] configuration
  * @returns {Promise<Map<number, User>>}
  */
 export const getModerators = async (config, site, options = {}) => {
@@ -497,7 +494,7 @@ export const getMetaSite = async (config, site) => {
  * @summary gets a list of official Meta posts with moderator election results
  * @param {BotConfig} config bot configuration
  * @param {string} metasite meta site API slug
- * @param {{ from?: string|number|Date, to?: string|number|Date }} [options] configuration
+ * @param {DateTimeOptions} [options] configuration
  * @returns {Promise<Question[]>}
  */
 export const getMetaResultAnnouncements = async (config, metasite, options = {}) => {
@@ -524,10 +521,10 @@ export const getMetaResultAnnouncements = async (config, metasite, options = {})
 };
 
 /**
- * @summary gets a {@link StackExchangeAPI.Post} from the API
+ * @summary gets {@link StackExchangeAPI.Post}s from the API
  * @param {BotConfig} config bot configuration
  * @param {number[]} ids post ids to fetch
- * @param {{ page?: number, site?: string }} [options] configuration
+ * @param {PagingOptions & { site?: string }} [options] configuration
  * @returns {Promise<StackExchangeAPI.Post[]>}
  */
 export const getPosts = async (config, ids, options = {}) => {
