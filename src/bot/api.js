@@ -1,5 +1,5 @@
 import { getSeconds } from "../shared/utils/dates.js";
-import { mergeMaps } from "../shared/utils/maps.js";
+import { has, mergeMaps } from "../shared/utils/maps.js";
 import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
 
 /**
@@ -464,6 +464,9 @@ export const getUserAssociatedAccounts = async (config, networkId, page = 1) => 
     );
 };
 
+/** @type {Map<string, Site>} */
+const metaSiteCache = new Map();
+
 /**
  * @see https://api.stackexchange.com/docs/info
  * @param {BotConfig} config bot configuration
@@ -471,13 +474,16 @@ export const getUserAssociatedAccounts = async (config, networkId, page = 1) => 
  * @returns {Promise<Site|undefined>}
  */
 export const getMetaSite = async (config, site) => {
+    if (has(metaSiteCache, site)) {
+        console.log(`[cache] ${site} meta`);
+        return metaSiteCache.get(site);
+    }
+
     const url = new URL(`${apiBase}/${apiVer}/info`);
     url.search = new URLSearchParams({
-        site,
-        pagesize: "100",
         filter: "!.0j6AKUvkY2pnnyuzGkDGyJz",
-        intitle: "moderator election results",
         key: getStackApiKey(config.apiKeyPool),
+        site,
     }).toString();
 
     return handleResponse(
@@ -485,7 +491,9 @@ export const getMetaSite = async (config, site) => {
         () => getMetaSite(config, site),
         ({ items = [] }) => {
             const [{ site: { related_sites = [] } = {} }] = items;
-            return related_sites.find(({ relation }) => relation === "meta");
+            const meta = related_sites.find(({ relation }) => relation === "meta");
+            if (meta) metaSiteCache.set(site, meta);
+            return meta;
         }
     );
 };
