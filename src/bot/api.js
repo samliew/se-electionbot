@@ -558,3 +558,56 @@ export const getPosts = async (config, ids, options = {}) => {
         }
     );
 };
+
+/**
+ * @link https://api.stackexchange.com/docs/search
+ *
+ * @summary searches the API for {@link StackExchangeAPI.Question}s
+ * @param {BotConfig} config bot configuration
+ * @param {string} site site API slug
+ * @param {DateTimeOptions & PagingOptions & ({ intitle?: string; tagged: string[]; nottagged: never; }
+ *  | { intitle?: string; tagged: string[]; nottagged?: string[]; }
+ *  | { intitle: string; tagged?: never; nottagged?: never; }
+ * )} options request configuration
+ * @returns {Promise<Map<number, StackExchangeAPI.Question>>}
+ */
+export const searchQuestions = async (config, site, options) => {
+    const { tagged, intitle, nottagged, from, page = 1, to } = options;
+
+    /** @type {Map<number, StackExchangeAPI.Question>} */
+    const posts = new Map();
+
+    if ((!tagged && !intitle && !nottagged)) return posts;
+
+    const params = new URLSearchParams({
+        filter: "!6VvPDzQ)xXOrL",
+        key: getStackApiKey(config.apiKeyPool),
+        page: page.toString(),
+        pagesize: "100",
+        site,
+    });
+
+    if (from) params.append("fromdate", getSeconds(from).toString());
+    if (intitle) params.append("intitle", intitle);
+    if (nottagged) params.append("nottagged", nottagged.join(";"));
+    if (tagged) params.append("tagged", tagged.join(";"));
+    if (to) params.append("todate", getSeconds(to).toString());
+
+    const url = new URL(`${apiBase}/${apiVer}/search`);
+    url.search = params.toString();
+
+    return handleResponse(
+        /** @type {ApiWrapper<StackExchangeAPI.Question>} */(await fetchUrl(config, url, true)) || {},
+        () => searchQuestions(config, site, options),
+        async ({ items = [], has_more, }) => {
+            items.forEach((post) => posts.set(post.question_id, post));
+
+            if (has_more) {
+                const otherItems = await searchQuestions(config, site, { ...options, page: page + 1 });
+                return mergeMaps(posts, otherItems);
+            }
+
+            return posts;
+        }
+    );
+};
