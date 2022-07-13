@@ -9,7 +9,7 @@ import { filterMap, getOrInit, has, mergeMaps, sortMap } from '../shared/utils/m
 import { clone } from '../shared/utils/objects.js';
 import { scrapeModerators } from '../shared/utils/scraping.js';
 import { formatOrdinal } from "../shared/utils/strings.js";
-import { getBadges, getNamedBadges, getNumberOfVoters, getPosts, getUserInfo } from './api.js';
+import { getBadges, getMetaSite, getNamedBadges, getNumberOfVoters, getUserInfo, searchQuestions } from './api.js';
 import History from "./history.js";
 import { calculateScore } from './score.js';
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from './utils.js';
@@ -349,141 +349,78 @@ export const scrapeQuestionnaire = ($, el) => {
 const announcementsCache = new Map();
 
 /**
- * @summary scrapes upcoming election announcements
+ * @summary gets upcoming election announcements
  * @param {BotConfig} config bot configuration
- * @param {number} [page] feed page to scrape
+ * @param {Election} election current election
  * @returns {Promise<Map<string, Map<number, ElectionAnnouncement>>>}
  */
-export const scrapeElectionAnnouncements = async (config, page = 1) => {
-    const url = new URL("https://stackexchange.com/filters/421979/all-elections");
-    url.searchParams.append("page", page.toString());
-
-    const html = await fetchUrl(config, url);
-    const { window: { document } } = new JSDOM(html);
-
-    const questionList = document.getElementById("question-list");
-    if (!questionList) {
-        console.log("[announcements] missing question list");
-        return announcementsCache;
-    }
-
-    // title can be one of:
-    // "Announcement: Upcoming Moderator Election Planned for May 9"
-    // "Announcing a “Graduation” election for 2022"
-    // "Announcing the first full election for Arts & Crafts!"
-    // "Announcing a Pro Tempore election for 2022"
-    // "Leaving Private Beta, and Initial Pro-Tem Moderator Election!"
-    // "Announcing an upcoming election"
+export const getElectionAnnouncements = async (config, election) => {
     // https://regex101.com/r/OTlwms/3
     const announcementTitleExpr = /^announc(?:ing|ement).+?election.*?|initial(?:\s+pro(?:\s+|-)tem(?:pore)?)\s+moderator\s+election/i;
 
     // https://regex101.com/r/GKcR6r/2
     const proTemporeTitleExpr = /\bpro(?:\s+|-)tem(?:pore)?\b/i;
 
-    // graduation title can be one of:
-    // July Graduation Moderator Election - Might you stand?
-    // Announcing the first full election for Arts & Crafts!
-    // Announcing a “Graduation” election for 2022
-    // 2022 Graduation Election: Community Interest Check
-    // Announcing a “Graduation” election for 2022
     // https://regex101.com/r/Qb8pB1/1
-    const graduationTitleExpr = /\bgraduation|(?:first|1st)\s+full\b/i;
+    const graduationExpr = /\bgraduation|(?:first|1st)\s+full\b/i;
 
     // https://regex101.com/r/uXY3xB/4
     const electionDateExpr = /(?<!beta\s+)on\s+(?:<(?:strong|em|i)>)?(\d{1,2}\s+\w+|\w+\s+\d{1,2})(?:,?\s+(\d{2,4}))?/i;
 
-    const containers = questionList.querySelectorAll(".question-container");
+    const { apiSlug, siteHostname } = election;
 
-    /** @type {Map<string, Map<number, Pick<ElectionAnnouncement, "postLink"|"postTitle"|"type">>>} */
-    const allScraped = new Map();
+    const metaSite = await getMetaSite(config, apiSlug);
+    if (!metaSite) {
+        console.log(`[announcements] missing meta site for ${apiSlug}`);
+        return announcementsCache;
+    }
 
-    containers.forEach((container) => {
-        /** @type {HTMLAnchorElement | null} */
-        const postAnchor = container.querySelector("a.question-link");
-        /** @type {HTMLAnchorElement | null} */
-        const siteAnchor = container.querySelector("a.question-host");
-        if (!postAnchor || !siteAnchor) return;
+    const announcements = getOrInit(announcementsCache, siteHostname, new Map());
 
-        const metaSite = siteAnchor.textContent?.trim();
-        const postTitle = postAnchor.textContent?.trim();
-        if (!metaSite || !postTitle || !announcementTitleExpr.test(postTitle)) return;
-
-        const scraped = getOrInit(allScraped, metaSite, new Map());
-
-        const { href: postLink } = postAnchor;
-
-        const postId = matchNumber(/\/questions\/(\d+)\//, postLink);
-        if (!postId || has(scraped, postId)) return;
-
-        scraped.set(postId, {
-            postLink,
-            postTitle,
-            type: proTemporeTitleExpr.test(postTitle) ?
-                "pro-tempore" :
-                graduationTitleExpr.test(postTitle) ?
-                    "graduation" :
-                    "full"
-        });
+    const posts = await searchQuestions(config, metaSite.api_site_parameter, {
+        intitle: "election",
     });
 
     const time = config.get("default_election_time", "20:00:00");
 
-    for (const [metaSite, scraped] of allScraped) {
-        const electionSite = metaSite.replace("meta.", "");
-        const site = metaSite.replace(/(?:\.stackexchange)?\.com/, "");
+    posts.forEach((post) => {
+        const { body, creation_date, owner, question_id, link, title } = post;
+        if (!body || !owner || !title) {
+            console.log(`[announcements] missing post info body (${apiSlug})`);
+            return;
+        }
 
-        const announcements = getOrInit(announcementsCache, electionSite, new Map());
+        if (!announcementTitleExpr.test(title)) return;
 
-        const postIds = [...scraped.keys()];
-        const posts = await getPosts(config, postIds, { site });
+        const { user_id: userId, link: userLink, display_name: userName } = owner;
+        if (!userId || !userLink || !userName) {
+            console.log(`[announcements] missing post owner fields (${apiSlug})`);
+            return;
+        }
 
-        postIds.forEach((postId, idx) => {
-            if (!has(scraped, postId)) return;
+        const postedAt = new Date(creation_date * 1000);
 
-            const { body, creation_date, owner } = posts[idx];
-            if (!body) {
-                console.log(`[announcements] missing post body (${site})`);
-                return;
-            }
+        const [_, monthday, year = postedAt.getFullYear()] = electionDateExpr.exec(body) || [];
 
-            if (!owner) {
-                console.log(`[announcements] missing post owner (${site})`);
-                return;
-            }
+        const dateElection = dateToUtcTimestamp(`${monthday}, ${year} ${time}Z`);
+        const dateAnnounced = dateToUtcTimestamp(postedAt);
 
-            const { user_id: userId, link: userLink, display_name: userName } = owner;
-            if (!userId || !userLink || !userName) {
-                console.log(`[announcements] missing post owner fields (${site})`);
-                return;
-            }
+        /** @type {ElectionAnnouncement} */
+        const upcomingElectionAnnouncement = {
+            dateAnnounced,
+            dateNomination: dateElection,
+            postLink: link,
+            postTitle: title,
+            type: proTemporeTitleExpr.test(title) ?
+                "pro-tempore" :
+                graduationExpr.test(title) || graduationExpr.test(body) ? "graduation" : "full",
+            userId,
+            userLink,
+            userName
+        };
 
-            const postedAt = new Date(creation_date * 1000);
-
-            const [_, monthday, year = postedAt.getFullYear()] = electionDateExpr.exec(body) || [];
-
-            const dateElection = dateToUtcTimestamp(`${monthday}, ${year} ${time}Z`);
-            const dateAnnounced = dateToUtcTimestamp(postedAt);
-
-            /** @type {ElectionAnnouncement} */
-            const upcomingElectionAnnouncement = {
-                ...scraped.get(postId),
-                dateAnnounced,
-                dateNomination: dateElection,
-                userId,
-                userLink,
-                userName
-            };
-
-            announcements.set(postId, upcomingElectionAnnouncement);
-        });
-    }
-
-    const hasMore = document.querySelector(".page-numbers.next");
-    if (hasMore) {
-        const nextPage = page + 1;
-        console.log(`[announcements] scraping next page (${nextPage})`);
-        await scrapeElectionAnnouncements(config, nextPage);
-    }
+        announcements.set(question_id, upcomingElectionAnnouncement);
+    });
 
     return announcementsCache;
 };
@@ -1687,7 +1624,7 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
     async updateElectionAnnouncements(config) {
         const { siteHostname } = this;
 
-        const electionAnnouncements = await scrapeElectionAnnouncements(config);
+        const electionAnnouncements = await getElectionAnnouncements(config, this);
         const electionSiteAnnouncements = getOrInit(electionAnnouncements, siteHostname, new Map());
 
         this.announcements = sortMap(
