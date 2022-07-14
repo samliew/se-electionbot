@@ -16,7 +16,7 @@ describe('Heroku API integration', function () {
         console.log("Cannot test Heroku API integration with no API token, skipping");
     }
 
-    this.timeout(5e3); // APIs can be slow
+    this.timeout(1e4); // APIs can be slow
 
     const heroku = new HerokuClient(getMockBotConfig({
         flags: {
