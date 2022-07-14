@@ -61,7 +61,7 @@ export default class Rescraper {
         const { client, elections, election, config, announcement, room } = this;
 
         if (config.debugOrVerbose) {
-            console.log(`RESCRAPER - Rescrape function called.`);
+            console.log(`[rescraper] rescrape function called.`);
         }
 
         try {
@@ -87,21 +87,21 @@ export default class Rescraper {
             const { status, errors } = election.validate();
 
             if (!status || !rescraped) {
-                console.log(`RESCRAPER - Invalid election data:\n${errors.join("\n")}`);
+                console.log(`[rescraper] invalid election data:\n${errors.join("\n")}`);
                 return this.start();
             }
 
             if (config.verbose) {
-                console.log('RESCRAPER -', election.updated, election);
+                console.log(`[rescraper] updated election:`, election.updated, election);
             }
 
             if (config.debugOrVerbose) {
-                const { nominees, winners } = election;
+                const { nominees, winners, numNominees, numWinners } = election;
 
-                console.log(`[rescraper] candidates: ${mapMap(nominees, x => x.userName).join(', ')}`);
+                console.log(`[rescraper] candidates (${numNominees}): ${mapMap(nominees, x => x.userName).join(', ')}`);
 
                 if (election.isEnded()) {
-                    console.log(`[rescraper] winners: ${mapMap(winners, x => x.userName).join(', ')}`);
+                    console.log(`[rescraper] winners (${numWinners}): ${mapMap(winners, x => x.userName).join(', ')}`);
                 }
 
                 const {
@@ -238,7 +238,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
         }
 
         if (config.debugOrVerbose) {
-            console.log(`RESCRAPER - Rescrape function completed.`);
+            console.log(`[rescraper] rescrape function completed.`);
         }
     };
 
@@ -251,7 +251,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
         if (timeout) this.timeout = clearTimeout(timeout);
 
         if (config.debugOrVerbose) {
-            console.log(`RESCRAPER - Next rescrape cleared.`);
+            console.log(`[rescraper] next rescrape cleared.`);
         }
     }
 
