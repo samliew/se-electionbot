@@ -1,4 +1,5 @@
 import { JSDOM } from "jsdom";
+import { findLast } from "../../shared/utils/dom.js";
 import { matchNumber } from "../../shared/utils/expressions.js";
 import { has } from "../../shared/utils/maps.js";
 import { getBadges, getUserInfo } from "../api.js";
@@ -66,10 +67,8 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
 
         const { window: { document } } = new JSDOM(revisionHTML);
 
-        // @ts-expect-error
-        const userIdHref = /** @type {string} */(findLast(`#content a[href*="/user"]`, document)?.href);
-        // @ts-expect-error
-        const nominationDateString = /** @type {string} */(findLast(`#content .relativetime`, document)?.title);
+        const userIdHref = findLast(`#content a[href*="/user"]`, document)?.getAttribute("href") || "";
+        const nominationDateString = findLast(`#content .relativetime`, document)?.getAttribute("title");
 
         const userId = matchNumber(/\/users\/(\d+)/, userIdHref) || -42;
 
