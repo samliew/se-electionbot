@@ -1,4 +1,4 @@
-import { Nominee } from "../../src/bot/election.js";
+import Nominee from "../../src/bot/elections/nominees.js";
 
 /**
  * @typedef {import("../../src/bot/election").default} Election

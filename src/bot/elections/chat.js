@@ -2,7 +2,7 @@ import { JSDOM } from "jsdom";
 import { matchNumber } from "../../shared/utils/expressions.js";
 import { has } from "../../shared/utils/maps.js";
 import { getBadges, getUserInfo } from "../api.js";
-import { Nominee } from "../election.js";
+import Nominee from "../elections/nominees.js";
 import { calculateScore } from "../score.js";
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from "../utils.js";
 
