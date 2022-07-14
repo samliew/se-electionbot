@@ -50,7 +50,7 @@ export default class Nominee {
      * @summary link to the nomination post
      * @type {string}
      */
-    _nominationLink;
+    #nominationLink;
 
     /**
      * @summary set this to true if nominee has withdrawn
@@ -86,6 +86,35 @@ export default class Nominee {
     }
 
     /**
+     * @summary checks whether a nominee has withdrawn
+     * @return {boolean}
+     */
+    get hasWithdrawn() {
+        return this.withdrawn || this.withdrawnDate !== null;
+    }
+
+    /**
+     * @summary get link to the nomination post
+     * @return {string}
+     */
+    get nominationLink() {
+        const { hasWithdrawn, election } = this;
+
+        const postId = matchNumber(/#post-(\d+)/, this.#nominationLink);
+
+        // If withdrawn, change to post history as original post can longer be viewed
+        return hasWithdrawn ? `${election.siteUrl}/posts/${postId}/revisions` : this.#nominationLink;
+    }
+
+    /**
+     * @summary set link to the nomination post
+     * @param {string} value new nomination link
+     */
+    set nominationLink(value) {
+        this.#nominationLink = value;
+    }
+
+    /**
      * @summary scrapes user "years for" from their profile
      * @param {BotConfig} config bot configuration
      * @returns {Promise<Nominee>}
@@ -101,35 +130,6 @@ export default class Nominee {
 
         this.userYears = (textContent || "").replace(/,.+$/, ''); // truncate years as displayed in elections
         return this;
-    }
-
-    /**
-     * @summary checks whether a nominee has withdrawn
-     * @return {boolean}
-     */
-    get hasWithdrawn() {
-        return this.withdrawn || this.withdrawnDate !== null;
-    }
-
-    /**
-     * @summary get link to the nomination post
-     * @return {string}
-     */
-    get nominationLink() {
-        const { _nominationLink, hasWithdrawn, election } = this;
-
-        const postId = matchNumber(/#post-(\d+)/, _nominationLink);
-
-        // If withdrawn, change to post history as original post can longer be viewed
-        return hasWithdrawn ? `${election.siteUrl}/posts/${postId}/revisions` : _nominationLink;
-    }
-
-    /**
-     * @summary set link to the nomination post
-     * @param {string} value
-     */
-    set nominationLink(value) {
-        this._nominationLink = value;
     }
 
     toJSON() {
