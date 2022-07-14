@@ -1,7 +1,7 @@
 import { dateToRelativeTime } from "../../shared/utils/dates.js";
 import { filterMap, mapMap } from "../../shared/utils/maps.js";
 import { boldify } from "../../shared/utils/markdown.js";
-import { listNomineesInRoom } from "../election.js";
+import { listNomineesInRoom } from "../elections/chat.js";
 import { getCandidateOrNominee, getRandomCurrently, RandomArray } from "../random.js";
 import { getScoreText } from "../score.js";
 import { capitalize, getUsersCurrentlyInTheRoom, listify, makeURL, mapToName, pluralize } from "../utils.js";

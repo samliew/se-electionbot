@@ -1,5 +1,5 @@
 import express from "express";
-import { listNomineesInRoom } from "../../bot/election.js";
+import { listNomineesInRoom } from "../../bot/elections/chat.js";
 import { getUsersCurrentlyInTheRoom, isBotInTheRoom } from "../../bot/utils.js";
 import { dateToUtcTimestamp } from "../../shared/utils/dates.js";
 import { getHerokuInstancesForNav, onMountAddToRoutes } from "../utils.js";

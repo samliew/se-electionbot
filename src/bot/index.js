@@ -15,7 +15,8 @@ import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
-import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, getSiteElections } from './election.js';
+import { getSiteElections } from './election.js';
+import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat } from "./elections/chat.js";
 import BotEnv from "./env.js";
 import {
     isAskedAboutBadgesOfType,
