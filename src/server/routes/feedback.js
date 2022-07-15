@@ -25,6 +25,7 @@ feedback.get("/", async ({ query, path, app, baseUrl }, res) => {
             appName: process.env.HEROKU_APP_NAME,
             title: "Feedback"
         },
+        current: "Feedback",
         heading: `ElectionBot Feedback`,
         data: {
             instances: await getHerokuInstancesForNav(config),

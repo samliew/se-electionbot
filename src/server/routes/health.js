@@ -29,6 +29,7 @@ health.get("/", async ({ query, path, app, baseUrl }, res) => {
             appName: process.env.HEROKU_APP_NAME,
             title: "Health"
         },
+        current: "Health",
         heading: `Server Health Check`,
         data: {
             instances: await getHerokuInstancesForNav(config),
