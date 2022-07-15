@@ -1,5 +1,11 @@
 <nav>
-  <span class="navitem">{{{url "/" label="Home"}}}</span>
+    <span class="navitem">
+    {{#if password}}
+        {{{url (query "/" password=password) label="Home"}}}
+    {{else}}
+        {{{url "/" label="Home"}}}
+    {{/if}}
+    </span>
   &nbsp;>&nbsp;
   <span class="navitem">{{current}}</span>
 </nav>
