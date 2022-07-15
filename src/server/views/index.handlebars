@@ -4,7 +4,7 @@
 
 {{#with data}}
 <blockquote>
-    <p>I am <strong>{{{url botconfig/repoUrl "ElectionBot"}}}</strong>, a chatbot that can answer commonly-asked questions about elections for sites on the Stack Exchange network.</p>
+    <p>I am <strong>{{{url botconfig/repoUrl label="ElectionBot"}}}</strong>, a chatbot that can answer commonly-asked questions about elections for sites on the Stack Exchange network.</p>
     <p>This instance is listening to <strong>{{{url chatRoomUrl}}}</strong>.</p>
     <p>The bot is {{#if isBotInRoom}}{{else}}<strong>not</strong> {{/if}}in the room.</p>
 </blockquote>
@@ -112,8 +112,8 @@
                     <td>{{type}}</td>
                     <td>{{utcTimestamp dateAnnounced}}</td>
                     <td>{{utcTimestamp dateNomination}}</td>
-                    <td>{{{url userLink userName}}}</td>
-                    <td>{{{url postLink postTitle}}}</td>
+                    <td>{{{url userLink label=userName}}}</td>
+                    <td>{{{url postLink label=postTitle}}}</td>
                 </tr>
                 {{/each}}
             </tbody>
@@ -176,7 +176,7 @@
                 <td>{{showTranscriptMessages}}</td>
             </tr>
             <tr><td>keepAlive</td><td>{{{boolean keepAlive}}}</td></tr>
-            <tr><td>feedbackUrl</td><td>{{{url feedbackUrl "feedback form"}}}</td></tr>
+            <tr><td>feedbackUrl</td><td>{{{url feedbackUrl label="feedback form"}}}</td></tr>
             <tr><td>repoUrl</td><td>{{{url repoUrl}}}</td></tr>
             <tr><td>flags</td><td>{{> deep flags}}</td></tr>
         </table>

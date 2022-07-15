@@ -1,11 +1,11 @@
+import Hbs from "handlebars";
 import { capitalize } from "../bot/utils.js";
 import { partition } from "../shared/utils/arrays.js";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { formatOrdinal, prettify } from "../shared/utils/strings.js";
 
 /**
- * @typedef {import("handlebars")}
- * @typedef {Handlebars.HelperOptions} HelperOptions
+ * @typedef {Hbs.HelperOptions} HelperOptions
  */
 
 /** @type {(source: unknown) => boolean} */
@@ -87,11 +87,44 @@ export const ifCond = function (v1, operator, v2, options) {
 /** @type {(m:{ get:(a:string) => unknown }, a:string) => unknown} */
 export const get = (model, key) => model.get(key);
 
-/** @type {(url:string, text?: string) => string} */
-export const url = (url, text = "") => {
-    if (!/^(https?:\/\/|\/)/.test(url)) return "";
-    if (!text || typeof text !== 'string') text = url.replace(/^https?:\/\//, '');
-    return `<a href="${url}">${text}</a>`;
+/**
+ * @summary generates HTMLAnchorElement HTML
+ * @param {string} link URL of the link
+ * @param {HelperOptions & {
+ *  hash: {
+ *      label?: string;
+ *      target?: string;
+ *      title?: string;
+ *  }
+ * }} options link options
+ * @returns {Handlebars.SafeString}
+ */
+export const url = (link, options) => {
+    const { label = "", ...rest } = options.hash;
+
+    if (!/^(https?:\/\/|\/)/.test(link)) {
+        return new Hbs.SafeString("");
+    }
+
+    if (!label || typeof label !== 'string') {
+        return url(link, {
+            ...options,
+            hash: {
+                ...options.hash,
+                label: link.replace(/^https?:\/\//, ''),
+            }
+        });
+    }
+
+    const attributes = Object
+        .entries(rest)
+        .filter(([_, v]) => v !== void 0)
+        .map(([k, v]) => `${Hbs.escapeExpression(k)}="${Hbs.escapeExpression(v)}"`)
+        .join(" ");
+
+    return new Hbs.SafeString(
+        `<a href="${Hbs.escapeExpression(link)}" ${attributes}>${Hbs.escapeExpression(label)}</a>`
+    );
 };
 
 export { capitalize, dateToUtcTimestamp as utcTimestamp, prettify, partition };
