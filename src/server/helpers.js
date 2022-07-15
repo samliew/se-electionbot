@@ -2,6 +2,7 @@ import Hbs from "handlebars";
 import { capitalize } from "../bot/utils.js";
 import { partition } from "../shared/utils/arrays.js";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
+import { isEmptyObj } from "../shared/utils/objects.js";
 import { formatOrdinal, prettify } from "../shared/utils/strings.js";
 
 /**
@@ -125,6 +126,20 @@ export const url = (link, options) => {
     return new Hbs.SafeString(
         `<a href="${Hbs.escapeExpression(link)}" ${attributes}>${Hbs.escapeExpression(label)}</a>`
     );
+};
+
+/**
+ * @summary appends a query string to the URL
+ * @param {string} link URL of the link
+ * @param {HelperOptions} options helper options
+ * @returns {string}
+ */
+export const query = (link, options) => {
+    const { hash } = options;
+
+    if (!/^(https?:\/\/|\/)/.test(link) || isEmptyObj(hash)) return link;
+
+    return `${link}?${new URLSearchParams(hash).toString()}`;
 };
 
 export { capitalize, dateToUtcTimestamp as utcTimestamp, prettify, partition };
