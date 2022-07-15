@@ -134,3 +134,10 @@ export const diffObjects = (source, target) => {
 
     return diff;
 };
+
+/**
+ * @summary checks if an {@link obj} doesn't have any enumerable properties
+ * @param {object} obj object to check
+ * @returns {boolean}
+ */
+export const isEmptyObj = (obj) => !Object.keys(obj).length;
