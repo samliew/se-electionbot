@@ -1232,18 +1232,27 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
      * @returns {Promise<Election>}
      */
     async updateElectionBadges(config) {
-        const { apiSlug, electionBadges } = this;
+        const { apiSlug, electionBadges, hasRequiredBadges } = this;
 
         const allNamedBadges = await getNamedBadges(config, apiSlug);
         const badgeMap = mapify(allNamedBadges, "name");
 
         electionBadges.forEach((electionBadge) => {
             const { name } = electionBadge;
+
             const matchedBadge = badgeMap.get(name);
+            if (!matchedBadge) return;
+
+            const { badge_id } = matchedBadge;
 
             // Replace the badge id for badges with the same badge names
             // TODO: Hardcode list of badges where this will not work properly (non-english sites?)
-            if (matchedBadge) electionBadge.badge_id = matchedBadge.badge_id;
+            electionBadge.badge_id = badge_id;
+
+            // when updating to non-SO sites, no badges are required
+            // when updating to SO, required badges are reset to defaults
+            // TODO: switch electionBadges to a Map
+            electionBadge.required = hasRequiredBadges && Election.requiredBadgeIds.has(badge_id);
         });
 
         if (config.debugOrVerbose) {
