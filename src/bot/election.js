@@ -182,6 +182,13 @@ export default class Election {
     };
 
     /**
+     * @summary Stack Overflow-only default list of required badges
+     * TODO: make generic if this is applied network-wide
+     * @type {Set<number>}
+     */
+    static requiredBadgeIds = new Set([32, 901, 1002, 12]);
+
+    /**
      * @description Site election badges, defaults to Stack Overflow's
      * @type {ElectionBadge[]}
      */
