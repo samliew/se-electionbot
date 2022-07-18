@@ -158,7 +158,7 @@ export class HerokuClient {
      * @param {{ web?: ScaleUpdates, worker?: ScaleUpdates }} updates
      * @return {Promise<boolean>}
      */
-    async _scale({ web, worker }) {
+    async #scale({ web, worker }) {
         try {
             const { _client, _appName } = this;
 
@@ -186,7 +186,7 @@ export class HerokuClient {
      * @return {Promise<boolean>}
      */
     async scaleNone(type = "web") {
-        return this._scale({
+        return this.#scale({
             [type]: { quantity: 0, size: "free" }
         });
     };
@@ -197,7 +197,7 @@ export class HerokuClient {
      * @return {Promise<boolean>}
      */
     async scaleFree(type = "web") {
-        return this._scale({
+        return this.#scale({
             [type]: { quantity: 1, size: "free" }
         });
     };
@@ -208,7 +208,7 @@ export class HerokuClient {
      * @return {Promise<boolean>}
      */
     async scaleHobby(type = "web") {
-        return this._scale({
+        return this.#scale({
             [type]: { quantity: 1, size: "hobby" }
         });
     };
