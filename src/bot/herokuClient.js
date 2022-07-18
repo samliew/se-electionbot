@@ -5,13 +5,15 @@ import { capitalize } from './utils.js';
 // https://devcenter.heroku.com/articles/platform-api-reference
 
 /**
+ * @typedef {"free" | "hobby" | "standard-1X" | "standard-2X" | "performance-M" | "performance-L"} FormationSize
+ *
  * @typedef {{
  *  app: App,
  *  command: string,
  *  created_at: string,
  *  id: string,
  *  quantity: number,
- *  size: "free" | "hobby" | "standard-1X" | "standard-2X" | "performance-M" | "performance-L",
+ *  size: FormationSize,
  *  type: "web" | "worker",
  *  updated_at: string
  * }} Formation
