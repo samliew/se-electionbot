@@ -217,7 +217,9 @@ use defaults ${defaultChatNotSet}`
 
         // Get heroku dynos data and cache it in BotConfig
         config.herokuDynos = await heroku.getDynos();
-        console.log('Heroku dynos: ', config.herokuDynos.map(({ type, size, quantity }) => `${type}: ${size.toLowerCase()} (${quantity})`).join(', '));
+        console.log('[heroku] dynos: ', config.herokuDynos.map(
+            ({ type, size, quantity }) => `${type}: ${size.toLowerCase()} (${quantity})`).join(', ')
+        );
 
         /*
          * If is in production mode, and is an active election,
@@ -225,13 +227,13 @@ use defaults ${defaultChatNotSet}`
          */
         const hasPaidDyno = config.herokuDynos.some(({ size }) => !/free/i.test(size));
         if (!config.debug && election.isActive() && !hasPaidDyno) {
-            console.log('Scaling up to Heroku hobby dyno...');
-            await heroku.scaleHobby();
+            const status = await heroku.scaleHobby();
+            console.log(`[heroku] scaled up to hobby dyno: ${status}`);
         }
         // Otherwise, scale down to free dynos
         else if (!election.isActive() && hasPaidDyno) {
-            console.log('Scaling down to Heroku free dyno...');
-            await heroku.scaleFree();
+            const status = await heroku.scaleFree();
+            console.log(`[heroku] scaled down to free dyno: ${status}`);
         }
 
         /*
