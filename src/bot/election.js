@@ -578,6 +578,19 @@ export default class Election {
     }
 
     /**
+     * @summary checks if election badges are required
+     *
+     * @description
+     * Currently, only Stack Overflow has required badges, but it can change,
+     * so the getter is intentionally generic
+     *
+     * @returns {boolean}
+     */
+    get hasRequiredBadges() {
+        return this.isStackOverflow();
+    }
+
+    /**
      * @summary checks if the election chat room link has changed/found for the first time
      * @returns {boolean}
      */

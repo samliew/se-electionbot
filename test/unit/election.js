@@ -28,6 +28,16 @@ describe(Election.name, () => {
             });
         });
 
+        describe("hasRequiredBadges", () => {
+            it('should correctly determine if the election has required badges', () => {
+                const election = new Election("https://stackoverflow.com/election/1");
+                expect(election.hasRequiredBadges).to.be.true;
+
+                election.electionUrl = "https://stackapps.com";
+                expect(election.hasRequiredBadges).to.be.false;
+            });
+        });
+
         describe("electionType", () => {
             it('should correctly determine election type', () => {
                 const dateNomination = dateToUtcTimestamp(Date.now());
