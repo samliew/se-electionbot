@@ -1,4 +1,13 @@
 /**
+ * @typedef {{
+ *  admin: number;
+ *  all: number;
+ *  dev: number;
+ *  mod: number;
+ *  privileged: number;
+ *  user: number;
+ * }} AccessLevel
+ *
  * @summary represents possible user access levels
  */
 export const AccessLevel = {

@@ -6,6 +6,7 @@ const MS_IN_MINUTE = 60 * MS_IN_SECOND;
 const MS_IN_HOUR = 60 * MS_IN_MINUTE;
 
 /**
+ * @typedef {import("./commands/access.js").AccessLevel} AccessLevel
  * @typedef {import("./env").default<BotEnvironment>} BotEnv
  * @typedef {import("./env").BotEnvironment} BotEnvironment
  * @typedef {import("chatexchange/dist/Client").Host} Host
@@ -450,10 +451,22 @@ export class BotConfig {
         return flags.debug && flags.verbose;
     }
 
-    /* User groups */
-
+    /**
+     * @summary network account ids of users with {@link AccessLevel.dev} access
+     * @type {Set<number>}
+     */
     devIds = new Set(parseIds(process.env.DEV_IDS || ""));
+
+    /**
+     * @summary network account ids of users with {@link AccessLevel.privileged} access
+     * @type {Set<number>}
+     */
     adminIds = new Set(parseIds(process.env.ADMIN_IDS || ''));
+
+    /**
+     * @summary chat user ids of users to ignore by the bot
+     * @type {Set<number>}
+     */
     ignoredUserIds = new Set(parseIds(process.env.IGNORED_USER_IDS || ''));
 
     /**
