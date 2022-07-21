@@ -16,9 +16,6 @@ import { getMockCommandUser, getMockUserProfile } from "../mocks/user.js";
 
 describe('Commands', () => {
 
-    beforeEach(() => sinon.stub(console, "log"));
-    afterEach(() => sinon.restore());
-
     describe(CommandManager.name, () => {
 
         describe('adding', () => {

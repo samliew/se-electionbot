@@ -11,11 +11,6 @@ describe('Message Queue', () => {
 
         const client = new Client["default"]("stackexchange.com");
 
-        beforeEach(() => {
-            sinon.restore();
-            sinon.stub(console, "log");
-        });
-
         /** @type {Room} */
         let room;
         beforeEach(() => room = new Room["default"](client, -1));

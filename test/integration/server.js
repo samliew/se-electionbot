@@ -53,12 +53,6 @@ describe("Dashboard", function () {
         console.log("Cannot test Dashboard server integration with no Heroku API token, skipping");
     }
 
-    // since all tests are skipped, afterEach hook will not run
-    if (hasCreds) {
-        beforeEach(() => sinon.stub(console, "log"));
-        afterEach(() => sinon.restore());
-    }
-
     describe("Routes", () => {
         testIf('should correctly render the home route', async () => {
             const getMeStub = sinon.stub(client, "getMe");

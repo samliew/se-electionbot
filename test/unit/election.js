@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -12,9 +11,6 @@ import { getMockApiUser, getMockUserProfile } from "../mocks/user.js";
  */
 
 describe(Election.name, () => {
-
-    beforeEach(() => sinon.stub(console, "log"));
-    afterEach(() => sinon.restore());
 
     describe('getters', () => {
 

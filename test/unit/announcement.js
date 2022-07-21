@@ -15,9 +15,6 @@ import { getMockNominee } from "../mocks/nominee.js";
 
 describe(ScheduledAnnouncement.name, () => {
 
-    beforeEach(() => sinon.stub(console, "log"));
-    afterEach(() => sinon.restore());
-
     /** @type {sinon.SinonFakeTimers} */
     let clock;
     beforeEach(() => clock = sinon.useFakeTimers());

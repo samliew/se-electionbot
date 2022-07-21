@@ -9,10 +9,6 @@ import { getMockBotConfig, getMockBotUser } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
 describe(Rescraper.name, () => {
-
-    beforeEach(() => sinon.stub(console, "log"));
-    afterEach(() => sinon.restore());
-
     /** @type {Client} */
     const client = new Client["default"]("stackoverflow.com");
     const room = new Room["default"](client, -1);

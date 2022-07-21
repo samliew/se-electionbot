@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
 import { test } from "mocha";
-import sinon from "sinon";
 import BotEnv from "../../src/bot/env.js";
 import {
     fetchChatTranscript,
@@ -12,10 +11,6 @@ import {
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe("Stack Exchange Chat integration", function () {
-
-    beforeEach(() => sinon.stub(console, "log"));
-    afterEach(() => sinon.restore());
-
     dotenv.config();
 
     const env = new BotEnv(process.env);

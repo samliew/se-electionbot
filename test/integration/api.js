@@ -1,15 +1,11 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
 import { test } from "mocha";
-import sinon from "sinon";
 import { getNumberOfVoters, getStackApiKey } from "../../src/bot/api.js";
 import { getSiteUserIdFromChatStackExchangeId } from "../../src/bot/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe("Stack Exchange API integration", function () {
-
-    beforeEach(() => sinon.stub(console, "log"));
-    afterEach(() => sinon.restore());
 
     dotenv.config();
 

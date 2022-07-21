@@ -1,13 +1,8 @@
 import { expect } from "chai";
-import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 
 describe(Election.name, function () {
-
-    beforeEach(() => sinon.stub(console, "log"));
-    afterEach(() => sinon.restore());
-
     this.timeout(10e3); // scraping can be slow
 
     describe(Election.prototype.scrapeElection.name, () => {

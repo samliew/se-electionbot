@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import CE from "chatexchange";
-import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { sayBadgesByType } from "../../src/bot/messages/badges.js";
 import { sayWithdrawnNominations } from "../../src/bot/messages/candidates.js";
@@ -24,9 +23,6 @@ import { getMockApiUser, getMockCommandUser } from "../mocks/user.js";
  */
 
 describe("Messages", () => {
-
-    before(() => sinon.stub(console, "log"));
-    after(() => sinon.restore());
 
     /** @type {ReturnType<typeof getMockBotConfig>} */
     let config;
