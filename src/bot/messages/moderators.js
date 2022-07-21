@@ -187,7 +187,7 @@ export const sayHowManyModsAreHere = async (config, client, room) => {
     const mods = users.filter(({ isModerator }) => isModerator);
     const { length: numMods } = mods;
 
-    const modNames = listify(...mods.map(({ userName, userLink }) => userLink ? makeURL(userName, userLink) : userName));
+    const modNames = listify(...mods.map(({ name: userName, link: userLink }) => userLink ? makeURL(userName, userLink) : userName));
 
     if (config.debug) {
         console.log({

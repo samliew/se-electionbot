@@ -1,3 +1,4 @@
+import { getNetworkAccountIdFromChatId } from "../utils.js";
 import { AccessLevel } from "./access.js";
 
 /**
@@ -61,10 +62,13 @@ export class User {
     /**
      * @summary updates user's {@link AccessLevel}
      * @param {BotConfig} config bot configuration
-     * @returns {User}
+     * @returns {Promise<User>}
      */
-    updateAccess(config) {
+    async updateAccess(config) {
         const { profile: { id } } = this;
+
+        const accountId = await getNetworkAccountIdFromChatId(config, id);
+        if (!accountId) return this;
 
         /** @type {[Set<number>, number][]} */
         const userLevels = [
@@ -73,7 +77,7 @@ export class User {
             [config.adminIds, AccessLevel.admin]
         ];
 
-        const [, access] = userLevels.find(([ids]) => ids.has(id)) || [, AccessLevel.user];
+        const [, access] = userLevels.find(([ids]) => ids.has(accountId)) || [, AccessLevel.user];
 
         this.access = access;
         return this;

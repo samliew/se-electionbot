@@ -173,13 +173,13 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | ------------------------------ | -------- | --------- | -------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `ACCOUNT_EMAIL`                | string   | yes       | -                          | email of bot account                                                                                    |
 | `ACCOUNT_PASSWORD`             | string   | yes       | -                          | password of bot account                                                                                 |
-| `ADMIN_IDS`                    | number[] | no        | -                          | user chatIds to grant admin privileges (pipe-delimited) (mods and ROs are already privileged)           |
+| `ADMIN_IDS`                    | number[] | no        | -                          | user network account ids to grant admin privileges (pipe-delimited) (mods and ROs are already privileged)           |
 | `CHAT_DOMAIN`                  | string   | no        | -                          | default chat domain (stackexchange.com \| stackoverflow.com)                                            |
 | `CHAT_ROOM_ID`                 | number   | no        | -                          | default chat room ID that the bot will join                                                             |
 | `CONTROL_ROOM_ID`              | number   | no        | -                          | flight control room for the bot to join                                                                 |
 | `DEBUG`                        | boolean  | no        | `false`                    | whether bot is in debug mode                                                                            |
 | `DEFAULT_ELECTION_TIME`        | string   | no        | `20:00:00`                 | default election time (used for upcoming election announcements)                                        |
-| `DEV_IDS`                      | number[] | no        | -                          | user chatIds to grant dev privileges (pipe-delimited)                                                   |
+| `DEV_IDS`                      | number[] | no        | -                          | user network account ids to grant dev privileges (pipe-delimited)                                                   |
 | `ELECTION_CHATROOM_URL`        | string   | no        | -                          | URL of the election chat room                                                                           |
 | `ELECTION_URL`                 | string   | yes       | -                          | URL of election page (with ID) that the bot will scrape                                                 |
 | `FEEDBACK_FORM_URL`            | string   | no        | -                          | URL for users to provide feedback about the bot                                                         |

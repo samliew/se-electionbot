@@ -1,5 +1,5 @@
 import { chatMarkdownToHtml } from "../shared/utils/markdown.js";
-import { parseBoolEnv, parseIds } from "./utils.js";
+import { getNetworkAccountIdFromChatId as getNetworkIdFromChatId, parseBoolEnv, parseIds } from "./utils.js";
 
 const MS_IN_SECOND = 1e3;
 const MS_IN_MINUTE = 60 * MS_IN_SECOND;
@@ -9,6 +9,7 @@ const MS_IN_HOUR = 60 * MS_IN_MINUTE;
  * @typedef {import("./commands/access.js").AccessLevel} AccessLevel
  * @typedef {import("./env").default<BotEnvironment>} BotEnv
  * @typedef {import("./env").BotEnvironment} BotEnvironment
+ * @typedef {import("chatexchange/dist/User").default} ChatUser
  * @typedef {import("chatexchange/dist/Client").Host} Host
  * @typedef {import("./index").MessageBuilder} MessageBuilder
  * @typedef {import("./utils").RoomUser} RoomUser
@@ -527,29 +528,97 @@ export class BotConfig {
     }
 
     /**
-     * @summary adds a user as a bot administrator
-     * @param {number|RoomUser} user chat id of the user or chat user
-     * @returns {BotConfig}
+     * @summary abstract privileged user updater
+     * @param {"add"|"delete"} action action to perform
+     * @param {"admin"|"dev"} level user access level
+     * @param {Array<number|ChatUser|RoomUser>|Set<number|ChatUser|RoomUser>} users list of users or network account ids
+     * @returns {Promise<BotConfig>}
      */
-    addAdmin(user) {
-        const { adminIds } = this;
-        adminIds.add(typeof user === "number" ? user : user.userId);
+    async #updatePrivilegedUsers(action, level, users) {
+        const privilegedIds = this[`${level}Ids`];
+
+        const { debugOrVerbose } = this;
+
+        for (const user of users) {
+            const accountId = typeof user !== "number" ?
+                await getNetworkIdFromChatId(this, user.id) :
+                user;
+
+            if (accountId) privilegedIds[action](accountId);
+        }
+
+        if (debugOrVerbose) console.log(`[config] ${level} ids:`, [...privilegedIds]);
         return this;
     }
 
     /**
-     * @summary adds users to admin list in bulk
-     * @param {...(number|RoomUser)} users list of users to add
-     * @returns {BotConfig}
+     * @summary abstract privileged user checker
+     * @param {"admin"|"dev"} level user access level
+     * @param {number|ChatUser|RoomUser} user user or network account id
+     * @returns {Promise<boolean>}
      */
-    addAdmins(...users) {
-        const { adminIds, debugOrVerbose } = this;
-        users.forEach((user) => {
-            adminIds.add(typeof user === "number" ? user : user.userId);
-        });
+    async #isPrivilegedUser(level, user) {
+        const privilegedIds = this[`${level}Ids`];
 
-        if (debugOrVerbose) console.log(`Current admin ids: ${[...adminIds]}`);
-        return this;
+        const accountId = typeof user !== "number" ?
+            await getNetworkIdFromChatId(this, user.id) :
+            user;
+
+        return !!accountId && privilegedIds.has(accountId);
+    }
+
+    /**
+     * @summary adds users to the "admin" access level list
+     * @param {Array<number|ChatUser|RoomUser>} users list of users or network account ids
+     * @returns {Promise<BotConfig>}
+     */
+    async addAdmins(...users) {
+        return this.#updatePrivilegedUsers("add", "admin", users);
+    }
+
+    /**
+     * @summary adds users to the "dev" access level list
+     * @param {Array<number|ChatUser|RoomUser>} users list of users or network account ids
+     * @returns {Promise<BotConfig>}
+     */
+    async addDevs(...users) {
+        return this.#updatePrivilegedUsers("add", "dev", users);
+    }
+
+    /**
+     * @summary checks if a given chat id matches "admin" acces level
+     * @param {number|ChatUser|RoomUser} user user or network account id
+     * @returns {Promise<boolean>}
+     */
+    async isAdmin(user) {
+        return this.#isPrivilegedUser("admin", user);
+    }
+
+    /**
+     * @summary checks if a given chat id matches "dev" access level
+     * @param {number|ChatUser|RoomUser} user user or network account id
+     * @returns {Promise<boolean>}
+     */
+    async isDev(user) {
+        return this.#isPrivilegedUser("dev", user);
+    }
+
+    /**
+     * @summary removes users from the "admin" access level list
+     * @param {Array<number|ChatUser|RoomUser>} users list of users or network account ids
+     * @returns {Promise<BotConfig>}
+     */
+    async removeAdmins(...users) {
+        return this.#updatePrivilegedUsers("delete", "admin", users);
+    }
+
+    /**
+     * @summary removes users to the "dev" access level list
+     * @param {Array<number|ChatUser|RoomUser>} users list of users or network account ids
+     * @returns {Promise<BotConfig>}
+     */
+    async removeDevs(...users) {
+        return this.#updatePrivilegedUsers("delete", "dev", users);
     }
 
     /**

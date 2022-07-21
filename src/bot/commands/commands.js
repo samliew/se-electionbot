@@ -14,7 +14,7 @@ import { sayUptime } from "../messages/metadata.js";
 import { sayOtherSiteMods } from "../messages/moderators.js";
 import { sendMessage } from "../queue.js";
 import { RandomArray } from "../random.js";
-import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
+import { capitalize, fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
 
 /**
  * @typedef {import("../announcement").default} Announcement
@@ -42,11 +42,11 @@ import { capitalize, fetchUrl, linkToRelativeTimestamp, makeURL, pluralize, wait
  */
 
 /**
- * @summary changes user access level (can only de-elevate)
+ * @summary changes user access level
  * @param {Pick<CommandArguments, "config"|"content"|"user">} args command arguments
- * @returns {string}
+ * @returns {Promise<string>}
  */
-export const setAccessCommand = (args) => {
+export const setAccessCommand = async (args) => {
     const { config, content, user } = args;
 
     const [, userId, level] = /set (?:access|level)\s+(\d+|me)\s+(user|admin|dev)/.exec(content) || [];
@@ -54,23 +54,32 @@ export const setAccessCommand = (args) => {
 
     const uid = userId === "me" ? user.id : +userId;
 
-    if (config.debug) console.log({ userId, level, uid });
+    const accountId = await getNetworkAccountIdFromChatId(config, uid);
+
+    if (config.debugOrVerbose) console.log(
+        `[command] ${setAccessCommand.name}:`,
+        { userId, level, uid, accountId }
+    );
+
+    if (!accountId) return `Failed to get network id from ${uid}`;
 
     //TODO: move to user-based from id-based checks
-    const { adminIds, devIds } = config;
-
     const changeMap = {
-        "user": () => {
-            adminIds.delete(uid);
-            devIds.delete(uid);
+        "user": async () => {
+            await config.removeAdmins(accountId);
+            return config.removeDevs(accountId);
         },
-        "admin": () => {
-            devIds.delete(uid);
-            adminIds.add(uid);
+        "admin": async () => {
+            await config.removeDevs(accountId);
+            return config.addAdmins(accountId);
+        },
+        "dev": async () => {
+            await config.removeAdmins(accountId);
+            return config.addDevs(accountId);
         }
     };
 
-    changeMap[level]?.();
+    await changeMap[level]?.();
 
     return `Changed access level of ${uid} to ${level}`;
 };

@@ -1,3 +1,5 @@
+import { matchNumber } from "../shared/utils/expressions.js";
+import { has } from "../shared/utils/maps.js";
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
@@ -7,8 +9,6 @@ import { sayLacksPrivilege } from "./messages/metadata.js";
 import { sayDiamondAlready } from "./messages/moderators.js";
 import { sayHasMaximumCandidateScore, sayNoAccountToCalcScore } from "./messages/score.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID } from "./utils.js";
-import { matchNumber } from "../shared/utils/expressions.js";
-import { has } from "../shared/utils/maps.js";
 
 /**
  * @typedef {import("./index.js").UserProfile} UserProfile
@@ -17,7 +17,7 @@ import { has } from "../shared/utils/maps.js";
  * @typedef {import("./index.js").ResolvedMessage} ResolvedMessage
  * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
  * @typedef {import("./index").ElectionBadge} ElectionBadge
- * @typedef {import("./commands/user").User} ChatUser
+ * @typedef {import("./commands/user").User} CommandUser
  */
 
 /**
@@ -126,7 +126,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
     /**
      * @summary calculates candidate score
      * @param {Election} election
-     * @param {ChatUser} user
+     * @param {CommandUser} user
      * @param {Pick<ResolvedMessage, "userId"|"content">} message
      * @returns {Promise<string>}
      */
@@ -164,7 +164,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             });
         }
 
-        if (isAskingForOtherUser && [isModerator, config.adminIds.has(userId), config.devIds.has(userId)].every((condition) => !condition)) {
+        if (isAskingForOtherUser && [isModerator, user.isPrivileged()].every((condition) => !condition)) {
             config.awaitingConfirmation.set(userId, () => makeCandidateScoreCalc(config, modIds)(election, user, { ...message, content: "" }));
             return sayLacksPrivilege("request candidate score of others", "tell you your own score");
         }

@@ -519,7 +519,7 @@ export const getUsersCurrentlyInTheRoom = async (config, chatHost, room) => {
  * @param {BotConfig} config bot configuration
  * @param {Host} chatHost chat room {@link Host}
  * @param {number} userId chat user Id
- * @returns {Promise<{ id?: number, domain?: string }>}
+ * @returns {Promise<{ id?: number, domain?: string, link: string }>}
  */
 export const scrapeChatUserParentUserInfo = async (config, chatHost, userId) => {
     const chatUserPage = await fetchUrl(config, `https://chat.${chatHost}/users/${userId}`);
@@ -530,7 +530,7 @@ export const scrapeChatUserParentUserInfo = async (config, chatHost, userId) => 
     const domain = safeCapture(/\/\/(.*?)\//, parentUserLink);
     const id = matchNumber(/\/users\/(\d+)\//, parentUserLink);
 
-    return { id, domain };
+    return { id, domain, link: parentUserLink };
 };
 
 /**
@@ -743,6 +743,58 @@ export const matchesOneOfChatHosts = (text, path) => {
     /** @type {Host[]} */
     const hosts = ["meta.stackexchange.com", "stackexchange.com", "stackoverflow.com"];
     return hosts.some((host) => text.includes(host)) && (!path || text.includes(path));
+};
+
+/**
+ * @type {Map<Host, Map<number, number>>}
+ */
+const networkAccountIdCache = new Map();
+
+/**
+ * @summary gets user network account id from chat id
+ * @param {BotConfig} config bot configuration
+ * @param {number} chatId chat user id
+ * @returns {Promise<number|undefined>}
+ */
+export const getNetworkAccountIdFromChatId = async (config, chatId) => {
+    try {
+        const { debugOrVerbose, chatDomain } = config;
+
+        const hostCache = getOrInit(networkAccountIdCache, chatDomain, new Map());
+        if (has(hostCache, chatId)) {
+            const cached = hostCache.get(chatId);
+            if (debugOrVerbose) console.log(`[cache] accound id (${chatDomain}): ${chatId} => ${cached}`);
+            return cached;
+        }
+
+        const { link } = await scrapeChatUserParentUserInfo(config, chatDomain, chatId);
+        if (debugOrVerbose) console.log(`[util] user profile URL: ${link}`);
+
+        // also ensures protocol-relative user URL can be fetched
+        const profileLink = `${link.replace(/^\/\//, "https://")}?tab=profile`;
+
+        const userProfilePage = await fetchUrl(config, profileLink);
+        if (!userProfilePage) return;
+
+        const { window: { document } } = new JSDOM(userProfilePage);
+
+        const networkProfileSelectors = [
+            `#profiles-menu a[href^="https://stackexchange.com/users/"]`,
+            `#mainbar-full [role="menuitem"] a[href^="https://stackexchange.com/users/"]`
+        ];
+
+        const networkUserUrl = document.querySelector(networkProfileSelectors.join(", "))?.getAttribute("href") || "";
+        if (debugOrVerbose) console.log(`[util] network profile URL: ${networkUserUrl}`);
+
+        const accountId = matchNumber(/(\d+)/, networkUserUrl);
+        if (accountId) {
+            hostCache.set(chatId, accountId);
+        }
+
+        return accountId;
+    } catch (error) {
+        console.error(`[util] ${getNetworkAccountIdFromChatId.name} error`, error);
+    }
 };
 
 /**

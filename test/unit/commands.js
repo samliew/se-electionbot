@@ -1,14 +1,14 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { AccessLevel } from "../../src/bot/commands/access.js";
-import { isAliveCommand, resetElection, setAccessCommand, setThrottleCommand, timetravelCommand } from "../../src/bot/commands/commands.js";
+import { isAliveCommand, resetElection, setThrottleCommand, timetravelCommand } from "../../src/bot/commands/commands.js";
 import { CommandManager } from "../../src/bot/commands/index.js";
 import { User } from "../../src/bot/commands/user.js";
 import Election from "../../src/bot/election.js";
 import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
-import { getMockCommandUser, getMockUserProfile } from "../mocks/user.js";
+import { getMockUserProfile } from "../mocks/user.js";
 
 /**
  * @typedef {import("../../src/bot/election.js").ModeratorUser} ModeratorUser
@@ -186,42 +186,6 @@ describe('Commands', () => {
 
                 const noDate = timetravelCommand({ config, election, content: `timetravel to ${isoDate}` });
                 expect(noDate).to.contain("no phase");
-            });
-
-        });
-
-        describe(setAccessCommand.name, () => {
-
-            it('should fail if access level is not valid', () => {
-                const user = getMockCommandUser();
-                const config = getMockBotConfig();
-                config.adminIds.clear();
-
-                const response = setAccessCommand({ config, user, content: "make me the Emperor of Bots" });
-                expect(response).to.contain("provide access");
-                expect(config.adminIds).to.be.empty;
-            });
-
-            it('should deelevate privileges correctly', () => {
-                const user = getMockCommandUser();
-                const config = getMockBotConfig({ adminIds: new Set([user.id]) });
-
-                const response = setAccessCommand({ config, user, content: `set access ${user.id} user` });
-                expect(response).to.match(/changed access/i);
-                expect(config.adminIds).to.be.empty;
-            });
-
-            it('should allow special value "me"', () => {
-                const user = getMockCommandUser();
-                const config = getMockBotConfig();
-                config.adminIds.clear();
-                config.devIds.clear();
-                config.devIds.add(user.id);
-
-                const response = setAccessCommand({ config, user, content: `set access me admin` });
-                expect(response).to.match(/changed access/i);
-                expect(config.devIds).to.be.empty;
-                expect(config.adminIds).to.include(user.id);
             });
 
         });

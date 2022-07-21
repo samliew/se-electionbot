@@ -4,7 +4,7 @@ import { echoSomething, sayFeedback } from '../commands/commands.js';
 import { isBotMentioned } from "../guards.js";
 import { sayIdleGreeting } from '../messages/greetings.js';
 import { sendMessage } from "../queue.js";
-import { getUser, makeURL, roomKeepAlive } from "../utils.js";
+import { makeURL, roomKeepAlive } from "../utils.js";
 
 /**
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -56,10 +56,10 @@ export const joinControlRoom = async (config, elections, election, client, {
             } = prepareMessageForMatching(encodedMessage, await botChatProfile.name);
 
             // Get details of user who triggered the message
-            const user = await getUser(client, userId);
+            const user = await msg.user;
             if (!user) return console.log(`missing user ${userId}`);
 
-            const canSend = user.isModerator || config.devIds.has(user.id);
+            const canSend = await user.isModerator || await config.isDev(user);
             const fromControlRoom = roomId === controlRoomId;
             const isAskingToLeave = /^leave room\b/.test(preparedMessage);
             const isAskingToSay = /^say\b/.test(preparedMessage);

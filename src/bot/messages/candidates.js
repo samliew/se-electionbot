@@ -125,7 +125,7 @@ export const sayHowManyCandidatesAreHere = async (config, election, client, room
 
     const { length: numNomineeInRoom } = nomineesInRoom;
 
-    const nomineeNames = listify(...nomineesInRoom.map(({ userName, userLink }) => userLink ? makeURL(userName, userLink) : userName));
+    const nomineeNames = listify(...nomineesInRoom.map(({ name: userName, link: userLink }) => userLink ? makeURL(userName, userLink) : userName));
 
     if (config.debug) {
         console.log({

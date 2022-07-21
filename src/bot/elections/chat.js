@@ -127,7 +127,7 @@ export const listNomineesInRoom = async (config, election, host, users) => {
     /** @type {RoomUser[]} */
     const nomineesInRoom = [];
     for (const user of users) {
-        const { userId } = user;
+        const { id: userId } = user;
 
         if (host === "stackoverflow.com" && nominees.has(userId)) {
             nomineesInRoom.push(user);

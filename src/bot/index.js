@@ -270,7 +270,7 @@ use defaults ${defaultChatNotSet}`
 
         // Add non-mod room owners to list of admins (privileged users)
         const owners = await fetchRoomOwners(config);
-        config.addAdmins(...owners);
+        await config.addAdmins(...owners);
 
         // Get current site named badges (i.e.: non-tag badges)
         if (!election.isStackOverflow()) {
@@ -550,7 +550,7 @@ use defaults ${defaultChatNotSet}`
             }
 
             const user = new User(profile);
-            user.updateAccess(config);
+            await user.updateAccess(config);
 
             // update the user to check the commands against
             commander.user = user;
