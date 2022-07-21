@@ -94,7 +94,7 @@ describe("Stack Exchange Chat integration", function () {
     describe(fetchRoomOwners.name, async () => {
         testIf('should fetch chat room owners correctly', async () => {
             const owners = await fetchRoomOwners(getMockBotConfig());
-            expect(owners.some(user => user.userId === 584192)).to.be.true;
+            expect(owners.some(user => user.id === 584192)).to.be.true;
         });
     });
 });

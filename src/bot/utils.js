@@ -421,9 +421,9 @@ export const fetchLatestChatEvents = async (config, url, fkey, msgCount = 100) =
 
 /**
  * @typedef {{
- *  userName: string,
- *  userId: number,
- *  userLink?: string,
+ *  name: string,
+ *  id: number,
+ *  link?: string,
  *  isModerator: boolean,
  *  aboutMe?: string
  * }} RoomUser
@@ -458,14 +458,14 @@ export const fetchRoomOwners = async (config, chatDomain, chatRoomId) => {
         const userId = matchNumber(/\/(\d+)\//, href) || NO_ACCOUNT_ID;
 
         owners.push({
-            userId,
-            userName: textContent?.replace(/\s\u2666$/, '') || "",
-            userLink: href,
+            id: userId,
+            name: textContent?.replace(/\s\u2666$/, '') || "",
+            link: href,
             isModerator: textContent?.includes('♦') || false
         });
     });
 
-    console.log(`[room owners] room ${chatRoomId} (${chatDomain})\n${owners.map(({ userId, userName }) => `${userId} - ${userName}`).join("\n")}`);
+    console.log(`[room owners] room ${chatRoomId} (${chatDomain})\n${owners.map(({ id: userId, name: userName }) => `${userId} - ${userName}`).join("\n")}`);
 
     return owners;
 };
@@ -497,17 +497,17 @@ export const getUsersCurrentlyInTheRoom = async (config, chatHost, room) => {
         const userName = card.querySelector(".user-header")?.getAttribute("title") || "";
         const demoddedUserName = userName.replace(/\s\u2666$/, '');
 
-        const userLink = card.querySelector(`.user-header a[href*="/users/"]`)?.getAttribute("href") || "";
-        const userId = matchNumber(/(\d+)/, userLink) || -Infinity;
+        const link = card.querySelector(`.user-header a[href*="/users/"]`)?.getAttribute("href") || "";
+        const id = matchNumber(/(\d+)/, link) || -Infinity;
 
         const aboutMe = card.querySelector(".user-message-info")?.getAttribute("title") || "";
 
         const isModerator = !!card.querySelector(".user-header .moderator");
 
         return {
-            userName: demoddedUserName,
-            userId,
-            userLink,
+            name: demoddedUserName,
+            id,
+            link,
             isModerator,
             aboutMe
         };
@@ -1024,7 +1024,7 @@ export const isBotInTheRoom = async (config, client, room, users) => {
 
     const { id } = await client.getMe();
 
-    return inRoom.some(({ userId }) => userId === id);
+    return inRoom.some(({ id: userId }) => userId === id);
 };
 
 /**
