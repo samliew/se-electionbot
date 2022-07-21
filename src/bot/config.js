@@ -331,6 +331,14 @@ export class BotConfig {
     }
 
     /**
+     * @summary whether to autoscale Heroku to Hobby
+     * @type {boolean}
+     */
+    get autoscaleHeroku() {
+        return this.#env.bool("autoscale_heroku", true);
+    }
+
+    /**
      * @summary source code repository URL
      * @type {string}
      */

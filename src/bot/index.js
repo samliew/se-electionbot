@@ -226,7 +226,7 @@ use defaults ${defaultChatNotSet}`
          * scale Heroku dyno to Hobby (paid) if it's using free dynos only (restarts app)
          */
         const hasPaidDyno = config.herokuDynos.some(({ size }) => !/free/i.test(size));
-        if (!config.debug && election.isActive() && !hasPaidDyno) {
+        if (config.autoscaleHeroku && election.isActive() && !hasPaidDyno) {
             const status = await heroku.scaleHobby();
             console.log(`[heroku] scaled up to hobby dyno: ${status}`);
         }

@@ -2,6 +2,7 @@
 export interface BotEnvironment {
     ACCOUNT_EMAIL?: string;
     ACCOUNT_PASSWORD?: string;
+    AUTOSCALE_HEROKU?: string;
     CHAT_DOMAIN?: string;
     CHAT_ROOM_ID?: string;
     CONTROL_ROOM_ID?: string;
