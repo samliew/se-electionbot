@@ -5,5 +5,9 @@
     "exit": true,
     "loader": [
         "ts-node/esm"
-    ]
+    ],
+    "require": [
+        "./test/setup.js"
+    ],
+    "timeout": 5000
 }
