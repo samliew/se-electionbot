@@ -19,49 +19,19 @@ import { getSiteElections } from './election.js';
 import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat } from "./elections/chat.js";
 import BotEnv from "./env.js";
 import {
-    isAskedAboutBadgesOfType,
-    isAskedAboutBallotFile,
-    isAskedAboutBotPronouns,
-    isAskedAboutElectionPhaseDuration,
-    isAskedAboutElectionPhases,
-    isAskedAboutElectionResults,
-    isAskedAboutJokes,
-    isAskedAboutJonSkeetJokes,
-    isAskedAboutLightbulb,
-    isAskedAboutMissingComments,
-    isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting,
-    isAskedAmIAlive,
-    isAskedForCurrentMods,
-    isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp,
-    isAskedForHelp,
-    isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe,
-    isAskedWhyAreElectionsCancelled,
-    isAskedWhyBeAMod,
-    isAskedWhyIsBot,
-    isAskedWhyNominationRemoved,
-    isAskedWillElectionBeCancelled,
-    isBotMentioned,
-    isHatingTheBot,
-    isLovingTheBot,
-    isSayingBotIsInsane,
-    isSayingHappyBirthday,
-    isThankingTheBot
+    isAskedForCurrentMods, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowAmI, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isBotMentioned
 } from "./guards.js";
 import { HerokuClient } from "./herokuClient.js";
-import { sayBadgesByType, sayRequiredBadges } from "./messages/badges.js";
-import { sayBestCandidate, sayCurrentCandidates, sayHowManyCandidatesAreHere, sayHowToNominate, sayHowToNominateOthers, sayIfModsHaveToRun, sayWhatModsAreRunning, sayWhyNominationRemoved, sayWithdrawnNominations } from "./messages/candidates.js";
-import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayElectionType, sayHowManyVisitedElection, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults, sayWillElectionBeCancelled } from "./messages/elections.js";
-import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./messages/jokes.js";
-import { sayCommonlyAskedQuestions, sayFullHelp, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./messages/metadata.js";
-import { sayHappyBirthday, sayMissingComments, sayOffTopicMessage } from "./messages/misc.js";
-import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayCurrentMods, sayFormerMods, sayHowManyModsAreHere, sayWhatModsDo, sayWhyBeAMod } from "./messages/moderators.js";
-import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElectionNotStartedYet, sayElectionSchedule, sayNextPhase } from "./messages/phases.js";
-import { sayQuestionnaireQuestion } from "./messages/questionnaire.js";
-import { sayCandidateScoreFormula, sayCandidateScoreLeaderboard } from "./messages/score.js";
-import { sayAboutBallotFile, sayAboutSTV } from "./messages/stv.js";
-import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowToSaveVotes, sayIfOneCanVote, sayIfOneHasVoted, sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
+import { sayHowManyCandidatesAreHere } from "./messages/candidates.js";
+import { casualRules, funRules, unprivilegedRules } from "./messages/index.js";
+import { sayHowAmI } from "./messages/metadata.js";
+import { sayOffTopicMessage } from "./messages/misc.js";
+import { sayCurrentMods, sayHowManyModsAreHere } from "./messages/moderators.js";
+import { sayElectionNotStartedYet } from "./messages/phases.js";
+import { sayCandidateScoreLeaderboard } from "./messages/score.js";
+import { sayInformedDecision, sayUserEligibility } from "./messages/voting.js";
 import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
-import { getRandomAlive, getRandomFunResponse, getRandomGoodThanks, getRandomNegative, getRandomPlop, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "./random.js";
+import { getRandomFunResponse, getRandomPlop } from "./random.js";
 import { pingDevelopers } from "./reports.js";
 import Rescraper from "./rescraper.js";
 import { makeCandidateScoreCalc } from "./score.js";
@@ -443,84 +413,6 @@ use defaults ${defaultChatNotSet}`
             ],
             rm_election: ["reset election"]
         });
-
-        /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
-        const unprivilegedRules = [
-            [isAskedForCurrentPositions, sayNumberOfPositions],
-            [isAskedIfResponsesAreCanned, sayCannedResponses],
-            [isAskedWhoIsTheBestCandidate, sayBestCandidate],
-            [isSayingBotIsInsane, sayInsaneComeback],
-            [isAskedAboutSTV, sayAboutSTV],
-            [isAskedIfCanNominateOthers, sayHowToNominateOthers],
-            [isAskedHowManyAreEligibleToVote, sayHowManyAreEligibleToVote],
-            [isAskedForElectionPage, sayElectionPage],
-            [isAskedAboutBallotFile, sayAboutBallotFile],
-            [isAskedWhoIsTheBestMod, sayBestModerator],
-            [isAskedForCurrentNominees, sayCurrentCandidates],
-            [isAskedForCurrentWinners, sayCurrentWinners],
-            [isAskedForFormerMods, sayFormerMods],
-            [isAskedAboutElectionPhases, sayAboutThePhases],
-            [isAskedIfOneHasVoted, sayIfOneHasVoted],
-            [isAskedIfCanVote, sayIfOneCanVote],
-            [isAskedWhereToFindResults, sayWhereToFindElectionResults],
-            [isAskedForQuestionnaireQuestion, sayQuestionnaireQuestion],
-            [isAskedAboutElectionResults, sayElectionResults],
-            [isAskedAboutElectionPhaseDuration, sayElectionPhaseDuration],
-            [isAskedWhatBotCanDo, sayCommonlyAskedQuestions],
-            [isLovingTheBot, getRandomGoodThanks],
-            [isHatingTheBot, getRandomNegative],
-            [isSayingHappyBirthday, sayHappyBirthday],
-            [isAskedWhyAreElectionsCancelled, sayWhenAreElectionsCancelled],
-            [isAskedWillElectionBeCancelled, sayWillElectionBeCancelled],
-            [isAskedWhatElectionIs, sayWhatIsAnElection],
-            [isAskedHowManyVisitedElection, sayHowManyVisitedElection],
-            // TODO: find alternative way to include "vote" - can't use word here or it will trigger "informed decision" guard
-            [isAskedForNominatingInfo, sayHowToNominate],
-            [isAskedWhatIsElectionStatus, sayAboutElectionStatus],
-            [isAskedWhenIsTheNextPhase, sayNextPhase],
-            [isAskedWhenTheElectionEnds, sayElectionIsEnding],
-            [isAskedForWithdrawnNominees, sayWithdrawnNominations],
-            [isAskedAboutVoting, sayAboutVoting],
-            [isAskedWhyBeAMod, sayWhyBeAMod],
-            [isAskedWhatIsElectionType, sayElectionType],
-            [isAskedWhatModsAreRunning, sayWhatModsAreRunning],
-            [isAskedForHelp, sayShortHelp],
-            [isAskedForFullHelp, sayFullHelp],
-            [isAskedIfModsHaveToRun, sayIfModsHaveToRun],
-            [isAskedWhyNominationRemoved, sayWhyNominationRemoved],
-            [isAskedHowToSaveVotes, sayHowToSaveVotes],
-            [isAskedAboutModsOrModPowers, sayWhatModsDo],
-            [isAskedAboutRequiredBadges, sayRequiredBadges],
-            [isAskedForScoreFormula, sayCandidateScoreFormula],
-            [isAskedHowToSaveVotes, sayHowToSaveVotes],
-            [isAskedIfModsArePaid, sayAreModsPaid],
-            [isAskedAboutMissingComments, sayMissingComments],
-            [isAskedAboutUsernameDiamond, sayCanEditDiamond],
-            [isAskedHowManyVoted, sayAlreadyVoted],
-            [isAskedAboutBadgesOfType, sayBadgesByType],
-            [isAskedForElectionSchedule, sayElectionSchedule]
-        ];
-
-        /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
-        const funRules = [
-            [isLovingTheBot, sayLoveYou],
-            [isAskedHowAmI, sayHowIsBot],
-            [isAskedWhoAmI, getRandomWhoAmI],
-            [isAskedWhyIsBot, getRandomWhyAmI],
-            [isAskedAboutBotPronouns, sayPreferredPronouns],
-            [isAskedMeaningOfLife, sayAnswerToLifeUniverseAndEverything],
-            [isAskedAboutJonSkeetJokes, sayAJonSkeetJoke],
-            [isAskedAboutJokes, sayAJoke],
-            [isAskedAboutLightbulb, sayHowManyModsItTakesToFixLightbulb]
-        ];
-
-        /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
-        const casualRules = [
-            [isAskedWhoAmI, sayWhoAmI],
-            [isAskedAmIAlive, getRandomAlive],
-            [isAskedWhoMadeMe, sayWhoMadeMe],
-            [isThankingTheBot, getRandomThanks]
-        ];
 
         const dashboardApp = await startServer(client, room, config, election, announcement);
 
