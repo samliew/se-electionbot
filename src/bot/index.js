@@ -517,6 +517,9 @@ use defaults ${defaultChatNotSet}`
         /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
         const casualRules = [
             [isAskedWhoAmI, sayWhoAmI],
+            [isAskedAmIAlive, getRandomAlive],
+            [isAskedWhoMadeMe, sayWhoMadeMe],
+            [isThankingTheBot, getRandomThanks]
         ];
 
         const dashboardApp = await startServer(client, room, config, election, announcement);
@@ -696,17 +699,8 @@ use defaults ${defaultChatNotSet}`
                 const [, casualHandler] = casualRules.find(([g]) => g(preparedMessage)) || [];
                 responseText = await casualHandler?.(config, elections, election, preparedMessage, user, me, room);
 
-                if (isAskedAmIAlive(preparedMessage)) {
-                    responseText = getRandomAlive();
-                }
-                else if (isAskedWhoMadeMe(preparedMessage)) {
-                    responseText = await sayWhoMadeMe(config);
-                }
-                else if (isAskedHowAmI(preparedMessage)) {
+                if (isAskedHowAmI(preparedMessage)) {
                     responseText = sayHowAmI(config, election);
-                }
-                else if (isThankingTheBot(preparedMessage)) {
-                    responseText = getRandomThanks();
                 }
                 else if (preparedMessage.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, preparedMessage);
