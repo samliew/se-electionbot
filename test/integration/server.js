@@ -7,7 +7,7 @@ import { test } from "mocha";
 import sinon from "sinon";
 import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
-import Rescraper from "../../src/bot/rescraper.js";
+import Scheduler from "../../src/bot/scheduler.js";
 import { fetchUrl } from "../../src/bot/utils.js";
 import { startServer } from "../../src/server/index.js";
 import { stop } from "../../src/server/utils.js";
@@ -30,14 +30,14 @@ describe("Dashboard", function () {
 
     const election = new Election("https://stackoverflow.com/election/13");
 
-    const scraper = new Rescraper(config, client, room, new Map([[13, election]]), election);
-    const announcement = new ScheduledAnnouncement(config, room, election, scraper);
+    const announcement = new ScheduledAnnouncement(config, room, election);
+    const scheduler = new Scheduler(election, announcement);
 
     /** @type {ExpressApp} */
     let app;
     before(async () => {
         await election.scrapeElection(config);
-        app = await startServer(client, room, config, election, announcement, {
+        app = await startServer(client, room, config, election, scheduler, announcement, {
             graceful: false,
             portOverride: 0,
         });

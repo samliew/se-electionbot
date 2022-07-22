@@ -33,6 +33,7 @@ import { sendMessage, sendMultipartMessage, sendReply } from "./queue.js";
 import { getRandomFunResponse, getRandomPlop } from "./random.js";
 import { pingDevelopers } from "./reports.js";
 import Rescraper from "./rescraper.js";
+import Scheduler from "./scheduler.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
     fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
@@ -278,13 +279,14 @@ use defaults ${defaultChatNotSet}`
         room.only(ChatEventType.MESSAGE_POSTED);
 
         // Start rescraper utility, and initialise announcement cron jobs
-        const rescraper = new Rescraper(config, client, room, elections, election);
-        const announcement = new Announcement(config, room, election, rescraper);
+        const announcement = new Announcement(config, room, election);
+        const scheduler = new Scheduler(election, announcement);
+        const rescraper = new Rescraper(config, client, room, elections, election, scheduler);
 
-        const initStatus = announcement.initAll();
+        const initStatus = scheduler.initAll();
 
         console.log(`[init] scheduled tasks init:\n${Object.keys(initStatus).map(
-            (type) => `${type}: ${announcement.schedules.get(
+            (type) => `${type}: ${scheduler.schedules.get(
                 /** @type {TaskType} */(type)
             ) || "not initialized"}`
         ).join("\n")}`);
@@ -413,7 +415,7 @@ use defaults ${defaultChatNotSet}`
             rm_election: ["reset election"]
         });
 
-        const dashboardApp = await startServer(client, room, config, election, announcement);
+        const dashboardApp = await startServer(client, room, config, election, scheduler, announcement);
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
@@ -498,6 +500,7 @@ use defaults ${defaultChatNotSet}`
                     content: preparedMessage,
                     election,
                     room,
+                    scheduler,
                     user
                 };
 

@@ -5,6 +5,7 @@ import sinon from "sinon";
 import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Rescraper from "../../src/bot/rescraper.js";
+import Scheduler from "../../src/bot/scheduler.js";
 import { getMockBotConfig, getMockBotUser } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
@@ -22,11 +23,16 @@ describe(Rescraper.name, () => {
     let election = new Election("https://stackoverflow.com/election/12");
     afterEach(() => election = new Election("https://stackoverflow.com/election/12"));
 
-    let scraper = new Rescraper(config, client, room, new Map([[12, election]]), election);
-    afterEach(() => scraper = new Rescraper(config, client, room, new Map([[12, election]]), election));
+    let ann = new ScheduledAnnouncement(config, room, election);
+    afterEach(() => ann = new ScheduledAnnouncement(config, room, election));
 
-    let ann = new ScheduledAnnouncement(config, room, election, scraper);
-    afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
+    /** @type {Scheduler} */
+    let scheduler;
+    beforeEach(() => scheduler = new Scheduler(election, ann));
+
+    /** @type {Rescraper} */
+    let scraper;
+    beforeEach(() => scraper = new Rescraper(config, client, room, new Map([[12, election]]), election, scheduler));
 
     describe(Rescraper.prototype.rescrape.name, function () {
         this.timeout(10000);

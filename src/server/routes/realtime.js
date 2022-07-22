@@ -4,7 +4,7 @@ import { fetchChatTranscript, wait } from "../../bot/utils.js";
 import { onMountAddToRoutes } from "../utils.js";
 
 /**
- * @typedef {import("../../bot/announcement").default} Announcement
+ * @typedef {import("../../bot/scheduler.js").default} Scheduler
  * @typedef {import("../../bot/config").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/Room").default} BotRoom
  * @typedef {import("express").Response} ExpressRes
@@ -54,15 +54,15 @@ realtime.get("/", async ({ ip, query, app }, res) => {
 
     // TODO: restrict
     if (type === "cron") {
-        /** @type {Announcement} */
-        const announcer = app.get("bot_announcer");
+        /** @type {Scheduler} */
+        const scheduler = app.get("bot_scheduler");
 
         while (server.listening && res.writable) {
-            if (announcer) {
-                const { schedules } = announcer;
+            if (scheduler) {
+                const { schedules } = scheduler;
 
                 const data = [...schedules]
-                    .map(([type, cron]) => [type, cron, announcer.getUTCfromCronExpression(cron) || ""])
+                    .map(([type, cron]) => [type, cron, scheduler.getUTCfromCronExpression(cron) || ""])
                     .sort(([, , adate], [, , bdate]) => adate < bdate ? -1 : 1);
 
                 res.write(`event: schedules\ndata: ${JSON.stringify(data)}${EVENT_SEPARATOR}`);

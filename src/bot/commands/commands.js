@@ -26,6 +26,7 @@ import { capitalize, fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTime
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../index").UserProfile} UserProfile
  * @typedef {import("chatexchange/dist/User").default} ChatUser
+ * @typedef {import("../scheduler.js").default} Scheduler
  * @typedef {import("./user").User} User
  *
  * @typedef {{
@@ -37,6 +38,7 @@ import { capitalize, fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTime
  *  content: string,
  *  election: Election,
  *  room: Room,
+ *  scheduler: Scheduler,
  *  user: User
  * }} CommandArguments
  */
@@ -260,7 +262,7 @@ export const listSiteModerators = async (args) => {
  * @returns {Promise<string>}
  */
 export const changeElection = async (args) => {
-    const { announcement, config, election, content } = args;
+    const { scheduler, config, election, content } = args;
 
     const targetUrl = content.replace(/.*?(?=https:\/\/)/, "");
 
@@ -310,7 +312,7 @@ export const changeElection = async (args) => {
     await election.updateModerators(config);
     await election.updateElectionAnnouncements(config);
 
-    announcement.reinitialize();
+    scheduler.reinitialize();
 
     return `successfully switched elections\nfrom: ${electionUrl}\nto: ${targetUrl}`;
 };
@@ -587,11 +589,11 @@ export const dieCommand = (args) => {
 
 /**
  * @summary gets a list of currently scheduled announcements
- * @param {Pick<CommandArguments, "announcement">} args command arguments
+ * @param {Pick<CommandArguments, "scheduler">} args command arguments
  * @returns {string}
  */
 export const getCronCommand = (args) => {
-    const { schedules } = args.announcement;
+    const { schedules } = args.scheduler;
 
     const entries = [...schedules];
 
@@ -613,11 +615,11 @@ ${lines.join("\n")}`;
 
 /**
  * @summary gets a list of currently scheduled announcements
- * @param {Pick<CommandArguments, "announcement">} args command arguments
+ * @param {Pick<CommandArguments, "scheduler">} args command arguments
  * @returns {string}
  */
 export const scheduleTestCronCommand = (args) => {
-    const schedule = args.announcement.initTest();
+    const schedule = args.scheduler.initTest();
     return `setting up test cron job: ${schedule}`;
 };
 

@@ -10,6 +10,7 @@ import { wait } from "./utils.js";
  * @typedef {import("./election.js").default} Election
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("./announcement.js").default} Announcement
+ * @typedef {import("./scheduler.js").default} Scheduler
  */
 
 /**
@@ -24,25 +25,19 @@ export default class Rescraper {
     timeout;
 
     /**
-     * @summary elections announcer
-     * @type {Announcement|undefined}
-     */
-    announcement;
-
-    /**
      * @param {BotConfig} config bot config
      * @param {Client} client ChatExchange client
      * @param {Room} room chatroom the bot is connected to
      * @param {Map<number, Election>} elections site elections
      * @param {Election} election current election
-     * @param {Announcement} [announcement] announcer instance
+     * @param {Scheduler} scheduler announcer instance
      */
-    constructor(config, client, room, elections, election, announcement) {
+    constructor(config, client, room, elections, election, scheduler) {
         this.client = client;
         this.config = config;
         this.election = election;
         this.elections = elections;
-        this.announcement = announcement;
+        this.scheduler = scheduler;
         this.room = room;
     }
 
@@ -58,7 +53,7 @@ export default class Rescraper {
      * @summary Function to rescrape election data, and process election or chat room updates
      */
     async rescrape() {
-        const { client, elections, election, config, announcement, room } = this;
+        const { client, elections, election, config, announcement, room, scheduler } = this;
 
         if (config.debugOrVerbose) {
             console.log(`[rescraper] rescrape function called.`);
@@ -68,16 +63,16 @@ export default class Rescraper {
             // Should happen before scrape call to ensure the announcement is unscheduled,
             // otherwise we may report new phase when in reality the dates are being changed.
             // Stops election phase start announcement if phase is eligible for extension.
-            if (announcement?.isTaskInitialized("start") && election.isExtensionEligible(config)) {
-                const status = announcement.stopElectionStart();
+            if (scheduler.isTaskInitialized("start") && election.isExtensionEligible(config)) {
+                const status = scheduler.stopElectionStart();
                 console.log(`[rescraper] election start task stop: ${status}`);
             }
 
             // Starts election phase announcement if phase is no longer eligible for extension.
             // TODO: it is possible to have a last-minute nomination in the extended period,
             // which can bypass the rescraper - in this case, election start can't be announced
-            if (!announcement?.isTaskInitialized("start") && !election.isExtensionEligible(config)) {
-                const status = announcement?.initElectionStart(election.dateElection);
+            if (!scheduler.isTaskInitialized("start") && !election.isExtensionEligible(config)) {
+                const status = scheduler.initElectionStart(election.dateElection);
                 console.log(`[rescraper] election start task start: ${status}`);
             }
 
@@ -146,22 +141,24 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
             }
 
             // Primary phase was activated (due to >10 candidates)
-            if (!announcement?.hasPrimary && election.datePrimary) {
-                announcement?.initPrimary(election.datePrimary);
+            if (!scheduler.hasPrimary && election.datePrimary) {
+                scheduler.initPrimary(election.datePrimary);
                 const status = await announcement?.announcePrimary();
                 console.log(`[rescraper] announced primary: ${status}`);
             }
 
             // Election dates has changed (manually by CM)
             if (election.electionDatesChanged) {
-                announcement?.reinitialize();
+                scheduler.reinitialize();
                 const status = await announcement?.announceDatesChanged();
                 console.log(`[rescraper] announced dates change: ${status}`);
             }
 
             if (election.phase === 'cancelled' && election.isNewPhase()) {
-                const status = await announcement?.announceCancelled(room, election);
+                scheduler.stopAll();
+                const status = await announcement?.announceCancelled(room);
                 console.log(`[rescraper] announced cancellation: ${status}`);
+                this.stop();
 
                 // Scale Heroku dynos to free (restarts app)
                 const heroku = new HerokuClient(config);
@@ -170,8 +167,10 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
 
             // Official results out
             if (election.isEnded() && election.hasNewWinners) {
+                scheduler.stopAll();
                 const status = await announcement?.announceWinners();
                 console.log(`[rescraper] announced winners: ${status}`);
+                this.stop();
             }
 
             // Election just over, there are no winners yet (waiting for CM)

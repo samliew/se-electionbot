@@ -1,7 +1,5 @@
-import cron from "node-cron";
-import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
+import { dateToUtcTimestamp } from "../shared/utils/dates.js";
 import { filterMap, mapMap } from "../shared/utils/maps.js";
-import { getFalsyKeys } from "../shared/utils/objects.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
 import { getFormattedElectionSchedule, makeURL, pluralize } from "./utils.js";
@@ -11,41 +9,22 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./election.js").default} Election
- * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("./rescraper.js").default} Rescraper
- *
+ * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {"start"|"end"|"primary"|"nomination"|"test"} TaskType
  */
 
 export default class ScheduledAnnouncement {
 
     /**
-     * @summary task cron expressions
-     * @type {Map<TaskType, string>}
-     */
-    schedules = new Map();
-
-    /**
-     * @summary scheduled cron tasks
-     * @type {Map<TaskType, cron.ScheduledTask>}
-     */
-    tasks = new Map();
-
-    /**
      * @param {BotConfig} config bot configuration
      * @param {Room} room room to announce in
      * @param {Election} election election to announce for
-     * @param {Rescraper} rescraper election rescraper
      */
-    constructor(config, room, election, rescraper) {
+    constructor(config, room, election) {
         this._room = room;
         this._election = election;
-        this.rescraper = rescraper;
         this.config = config;
-    }
-
-    get hasPrimary() {
-        return !this.schedules.has("primary");
     }
 
     /**
@@ -72,24 +51,16 @@ export default class ScheduledAnnouncement {
     /**
      * @summary Election cancelled
      * @param {Room} room chatroom to post to
-     * @param {Election} [election] election to announce for
      * @returns {Promise<boolean>}
      */
-    async announceCancelled(room, election) {
+    async announceCancelled(room) {
+        const { _election } = this;
 
-        if (!election) return false;
-
-        const { cancelledText, phase } = election;
+        const { cancelledText, phase } = _election;
 
         // Needs to be cancelled
         if (!cancelledText || phase !== 'cancelled') return false;
 
-        // Stop all cron jobs
-        this.stopAll();
-
-        this.rescraper.stop();
-
-        // Announce
         await room.sendMessage(cancelledText);
 
         return true;
@@ -232,10 +203,6 @@ export default class ScheduledAnnouncement {
             return false;
         }
 
-        // When winners are announced, stop future announcements and rescraper
-        this.stopAll();
-        this.rescraper.stop();
-
         config.flags.saidElectionEndingSoon = true;
         config.flags.announcedWinners = true;
         config.scrapeIntervalMins = 5;
@@ -249,46 +216,29 @@ export default class ScheduledAnnouncement {
             msg += ` You can ${makeURL("view the results online via OpaVote", opavoteUrl)}.`;
         }
 
-        // Announce
         await _room.sendMessage(msg);
 
         return true;
     }
 
     /**
-     * @summary formats date as a cron expression (UTC)
-     * @param {string | number | Date} date date to format
-     * @param {number} [minute] minute override
-     * @returns {string}
+     * @summary announces an {@link Election} phase change
+     * @param {"nomination"|"election"|"primary"} tab tab of the election to open
+     * @param {string} label label of the election URL markdown
+     * @param {string} changeDesc description of the change
+     * @param {string} actionDesc description of the call to action
+     * @returns {Promise<boolean>}
      */
-    getCronExpression(date, minute = 0) {
-        const validated = validateDate(date);
-        return `${minute} ${validated.getUTCHours()} ${validated.getUTCDate()} ${validated.getUTCMonth() + 1} *`;
-    }
+    async #announcePhaseChange(tab, label, changeDesc, actionDesc) {
+        const { config, _election, _room } = this;
 
-    /**
-     * @summary formats cron expression (UTC) as UTC timestamp
-     * @param {string} cronExpression cron expression (UTC)
-     * @returns {string}
-     */
-    getUTCfromCronExpression(cronExpression) {
-        const [m, h, d, M] = cronExpression.split(" ");
+        const messages = [
+            `**The ${makeURL(label, `${_election.electionUrl}?tab=${tab}`)} ${changeDesc}.** ${actionDesc}.`
+        ];
 
-        const now = new Date();
+        await sendMessageList(config, _room, messages, { isPrivileged: true });
 
-        return dateToUtcTimestamp(
-            new Date(now.getFullYear(), +M - 1, +d, +h, +m, 0, 0)
-        );
-    }
-
-    /**
-     * @summary checks if the task is already initialized
-     * @param {TaskType} type type of the task
-     * @returns {boolean}
-     */
-    isTaskInitialized(type) {
-        const { schedules, tasks } = this;
-        return schedules.has(type) && tasks.has(type);
+        return true;
     }
 
     /**
@@ -340,101 +290,11 @@ export default class ScheduledAnnouncement {
     }
 
     /**
-     * @summary announces an {@link Election} phase change
-     * @param {"nomination"|"election"|"primary"} tab tab of the election to open
-     * @param {string} label label of the election URL markdown
-     * @param {string} changeDesc description of the change
-     * @param {string} actionDesc description of the call to action
-     * @returns {Promise<boolean>}
-     */
-    async #announcePhaseChange(tab, label, changeDesc, actionDesc) {
-        const { config, _election, _room } = this;
-
-        const status = await _election.scrapeElection(config);
-        if (!status) return false;
-
-        const messages = [
-            `**The ${makeURL(label, `${_election.electionUrl}?tab=${tab}`)} ${changeDesc}.** ${actionDesc}.`
-        ];
-
-        await sendMessageList(config, _room, messages, { isPrivileged: true });
-
-        return true;
-    }
-
-    /**
-     * @this {ScheduledAnnouncement}
-     *
-     * @summary initializes a scheduled task
-     * @param {TaskType} type task type
-     * @param {string | number | Date | undefined} date date at which to make the announcement
-     * @param {(t:string, l:string,c:string,d:string) => Promise<boolean>} handler announcement handler
-     * @returns {boolean}
-     */
-    #initializeTask(type, date, handler) {
-        if (this.isTaskInitialized(type) || typeof date == 'undefined') return false;
-
-        const validDate = validateDate(date);
-
-        if (validDate.valueOf() <= Date.now()) return false;
-
-        // ensure the task is stopped before rescheduling
-        this.#stop(type);
-
-        const cs = this.getCronExpression(validDate);
-
-        this.tasks.set(type, cron.schedule(cs, handler.bind(this), { timezone: "Etc/UTC" }));
-
-        console.log(`[cron] initialized ${type} task`, cs);
-        this.schedules.set(type, cs);
-        return true;
-    }
-
-    /**
-     * @summary initializes task for election end
-     * @param {string | number | Date | undefined} date date at which to make the announcement
-     * @returns {boolean}
-     */
-    initElectionEnd(date) {
-        return this.#initializeTask("end", date, this.announceElectionEnd);
-    }
-
-    /**
-     * @summary initializes task for election phase start
-     * @param {string | number | Date | undefined} date date at which to make the announcement
-     * @returns {boolean}
-     */
-    initElectionStart(date) {
-        return this.#initializeTask("start", date, this.announceElectionStart);
-    }
-
-    /**
-     * @summary initializes task for primary phase start
-     * @param {string | number | Date | undefined} date date at which to make the announcement
-     * @returns {boolean}
-     */
-    initPrimary(date) {
-        return this.#initializeTask("primary", date, this.announcePrimaryStart);
-    }
-
-    /**
-     * @summary initializes task for nomination phase start
-     * @param {string | number | Date | undefined} date date at which to make the announcement
-     * @returns {boolean}
-     */
-    initNomination(date) {
-        return this.#initializeTask("nomination", date, this.announceNominationStart);
-    }
-
-    /**
      * @summary announces that the test task has completed
      * @returns {Promise<boolean>}
      */
     async announceTestTask() {
         const { config, _election, _room } = this;
-
-        const status = await _election.scrapeElection(config);
-        if (!status) return false;
 
         const messages = [
             `Test cron job succesfully completed at ${dateToUtcTimestamp(/**  @type {number} */(_election.updated))}.`
@@ -443,102 +303,5 @@ export default class ScheduledAnnouncement {
         await sendMessageList(config, _room, messages, { isPrivileged: true });
 
         return true;
-    }
-
-    /**
-     * @summary schedules a test cron job rescraping the {@link Election}
-     * @returns {string}
-     */
-    initTest() {
-        const dNow = new Date();
-        const cs = this.getCronExpression(dNow, dNow.getMinutes() + 2);
-
-        cron.schedule(cs, () => this.announceTestTask(), { timezone: "Etc/UTC" });
-
-        console.log('[cron] initialized test task', cs);
-        return cs;
-    }
-
-    /**
-     * @summary initializes all tasks
-     * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
-     */
-    initAll() {
-        const { _election } = this;
-
-        return {
-            end: this.initElectionEnd(_election.dateEnded),
-            nomination: this.initNomination(_election.dateNomination),
-            primary: this.initPrimary(_election.datePrimary),
-            start: this.initElectionStart(_election.dateElection),
-        };
-    }
-
-    /**
-     * @summary reinitializes all tasks
-     * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
-     */
-    reinitialize() {
-        const result = this.stopAll();
-
-        const failed = getFalsyKeys(result);
-        if (failed.length) {
-            console.log(`[cron] failed to reinit tasks: ${failed}`);
-        }
-
-        return this.initAll();
-    }
-
-    /**
-     * @summary stops a scheduled task
-     * @param {TaskType} type type of the task
-     * @returns {boolean}
-     */
-    #stop(type) {
-        this.tasks.get(type)?.stop();
-        this.schedules.delete(type);
-        console.log(`[cron] stopped ${type} task`);
-        return true;
-    }
-
-    /**
-     * @summary stops the election end task
-     */
-    stopElectionEnd() {
-        return this.#stop("end");
-    }
-
-    /**
-     * @summary stops the election start task
-     */
-    stopElectionStart() {
-        return this.#stop("start");
-    }
-
-    /**
-     * @summary stops the primary start task
-     */
-    stopPrimary() {
-        return this.#stop("primary");
-    }
-
-    /**
-     * @summary stops the nomination start task
-     */
-    stopNomination() {
-        return this.#stop("nomination");
-    }
-
-    /**
-     * @summary stops all tasks
-     * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
-     */
-    stopAll() {
-        return {
-            end: this.stopElectionEnd(),
-            nomination: this.stopNomination(),
-            primary: this.stopPrimary(),
-            start: this.stopElectionStart(),
-        };
     }
 }

@@ -1,23 +1,38 @@
 import { expect } from "chai";
+import Client from "chatexchange";
+import Room from "chatexchange/dist/Room.js";
+import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Scheduler from "../../src/bot/scheduler.js";
 import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
+import { getMockBotConfig } from "../mocks/bot.js";
 
 /**
- * @typedef {import("../../src/bot/announcement.js").default} ScheduledAnnouncement
+ * @typedef {import("../../src/bot/config.js").default} BotConfig
  */
 
 describe(Scheduler.name, () => {
+
+    /** @type {BotConfig} */
+    let config;
+    beforeEach(() => config = getMockBotConfig());
 
     /** @type {Election} */
     let election;
     beforeEach(() => election = new Election("https://stackoverflow.com/election/12"));
 
-    const mockAnnouncer = /** @type {ScheduledAnnouncement} */ ({});
+    /** @type {Client} */
+    const client = new Client["default"]("stackoverflow.com");
+    /** @type {Room} */
+    const room = new Room["default"](client, -1);
+
+    /** @type {ScheduledAnnouncement} */
+    let announcer;
+    beforeEach(() => announcer = new ScheduledAnnouncement(config, room, election));
 
     /** @type {Scheduler} */
     let scheduler;
-    beforeEach(() => scheduler = new Scheduler(election, mockAnnouncer));
+    beforeEach(() => scheduler = new Scheduler(election, announcer));
 
     describe(Scheduler.prototype.getCronExpression.name, () => {
         it('should correctly format cron from dates (in UTC)', () => {

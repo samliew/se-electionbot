@@ -4,7 +4,6 @@ import Room from "chatexchange/dist/Room.js";
 import sinon from "sinon";
 import ScheduledAnnouncement from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
-import Rescraper from "../../src/bot/rescraper.js";
 import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
@@ -34,21 +33,12 @@ describe(ScheduledAnnouncement.name, () => {
     let election = new Election("https://stackoverflow.com/election/12");
     afterEach(() => election = new Election("https://stackoverflow.com/election/12"));
 
-    let scraper = new Rescraper(config, client, room, new Map([[12, election]]), election);
-    afterEach(() => scraper = new Rescraper(config, client, room, new Map([[12, election]]), election));
-
-    let ann = new ScheduledAnnouncement(config, room, election, scraper);
-    afterEach(() => ann = new ScheduledAnnouncement(config, room, election, scraper));
+    let announcer = new ScheduledAnnouncement(config, room, election);
+    afterEach(() => announcer = new ScheduledAnnouncement(config, room, election));
 
     describe(ScheduledAnnouncement.prototype.announceCancelled.name, () => {
-
-        it('should return false on no Electon', async () => {
-            const status = await ann.announceCancelled(room);
-            expect(status).to.be.false;
-        });
-
         it('should return false on no cancelledText', async () => {
-            const status = await ann.announceCancelled(room);
+            const status = await announcer.announceCancelled(room);
             expect(status).to.be.false;
         });
 
@@ -59,7 +49,7 @@ describe(ScheduledAnnouncement.name, () => {
 
             const messageStub = sinon.stub(room, "sendMessage");
 
-            const promise = ann.announceCancelled(room, election);
+            const promise = announcer.announceCancelled(room);
 
             await clock.runAllAsync();
 
@@ -76,7 +66,7 @@ describe(ScheduledAnnouncement.name, () => {
         it('should correctly announce that election is ending soon', async () => {
             const messageStub = sinon.stub(room, "sendMessage");
 
-            const promise = ann.announceElectionEndingSoon();
+            const promise = announcer.announceElectionEndingSoon();
 
             await clock.runAllAsync();
 
@@ -98,7 +88,7 @@ describe(ScheduledAnnouncement.name, () => {
                 getMockNominee(election, { userName, userId: i })
             ));
 
-            const promise = ann.announceNewNominees();
+            const promise = announcer.announceNewNominees();
 
             await clock.runAllAsync();
 
@@ -114,7 +104,7 @@ describe(ScheduledAnnouncement.name, () => {
 
     describe(ScheduledAnnouncement.prototype.announcePrimary.name, () => {
         it('should not announce if primary threshold is not reached', async () => {
-            const status = await ann.announcePrimary();
+            const status = await announcer.announcePrimary();
             expect(status).to.be.false;
         });
 
@@ -124,7 +114,7 @@ describe(ScheduledAnnouncement.name, () => {
 
             const stubbed = sinon.stub(room, "sendMessage");
 
-            const status = await ann.announcePrimary();
+            const status = await announcer.announcePrimary();
             expect(status).to.be.true;
 
             stubbed.args.forEach(([msg]) => {
@@ -139,18 +129,18 @@ describe(ScheduledAnnouncement.name, () => {
     describe(ScheduledAnnouncement.prototype.announceWinners.name, () => {
         it('should return false if election is not ended', async () => {
             election.phase = "cancelled";
-            const status = await ann.announceWinners();
+            const status = await announcer.announceWinners();
             expect(status).to.be.false;
         });
 
         it('should return false if election is ended without winners', async () => {
             election.phase = "ended";
-            const status = await ann.announceWinners();
+            const status = await announcer.announceWinners();
             expect(status).to.be.false;
         });
 
         it('should return false if already announced', async () => {
-            ann.config = getMockBotConfig({
+            announcer.config = getMockBotConfig({
                 flags: {
                     announcedWinners: true,
                     saidElectionEndingSoon: true,
@@ -163,7 +153,7 @@ describe(ScheduledAnnouncement.name, () => {
             election.winners.set(42, getMockNominee(election));
             election.phase = "ended";
 
-            const status = await ann.announceWinners();
+            const status = await announcer.announceWinners();
             expect(status).to.be.false;
         });
 
@@ -173,7 +163,7 @@ describe(ScheduledAnnouncement.name, () => {
 
             const stubbed = sinon.stub(room, "sendMessage");
 
-            const promise = ann.announceWinners();
+            const promise = announcer.announceWinners();
 
             await clock.runAllAsync();
 
@@ -199,9 +189,9 @@ describe(ScheduledAnnouncement.name, () => {
 
             const stubbed = sinon.stub(room, "sendMessage");
 
-            ann._election = election;
+            announcer._election = election;
 
-            const promise = ann.announceWithdrawnNominees();
+            const promise = announcer.announceWithdrawnNominees();
 
             await clock.runAllAsync();
 
@@ -224,7 +214,7 @@ describe(ScheduledAnnouncement.name, () => {
 
             const stubbed = sinon.stub(room, "sendMessage");
 
-            const promise = ann.announceDatesChanged();
+            const promise = announcer.announceDatesChanged();
 
             await clock.runAllAsync();
 
@@ -243,7 +233,7 @@ describe(ScheduledAnnouncement.name, () => {
 
             const stubbed = sinon.stub(room, "sendMessage");
 
-            const promise = ann.announceNominationStart();
+            const promise = announcer.announceNominationStart();
 
             await clock.runAllAsync();
 
@@ -262,7 +252,7 @@ describe(ScheduledAnnouncement.name, () => {
 
             const stubbed = sinon.stub(room, "sendMessage");
 
-            const promise = ann.announceElectionStart();
+            const promise = announcer.announceElectionStart();
 
             await clock.runAllAsync();
 
@@ -281,7 +271,7 @@ describe(ScheduledAnnouncement.name, () => {
 
             const stubbed = sinon.stub(room, "sendMessage");
 
-            const promise = ann.announcePrimaryStart();
+            const promise = announcer.announcePrimaryStart();
 
             await clock.runAllAsync();
 
@@ -300,7 +290,7 @@ describe(ScheduledAnnouncement.name, () => {
 
             const stubbed = sinon.stub(room, "sendMessage");
 
-            const promise = ann.announceElectionEnd();
+            const promise = announcer.announceElectionEnd();
 
             await clock.runAllAsync();
 
