@@ -1,6 +1,5 @@
 import { parsePackage } from "../../shared/utils/package.js";
-import { formatOrdinal } from "../../shared/utils/strings.js";
-import { getRandomFAQ, getRandomStatus } from "../random.js";
+import { getRandomFAQ } from "../random.js";
 import { listify, makeURL } from "../utils.js";
 
 /**
@@ -30,13 +29,9 @@ export const sayCommonlyAskedQuestions = async (config, _es, _e, _t, _u, bot) =>
  * @summary builds a response to a how am I query
  * @type {MessageBuilder}
  */
-export const sayHowAmI = (config, _es, election) => {
-    const { electionNum, siteName } = election;
-
-    const funResponses = ["Manically depressed...", "Jolly good, jolly good!", "Like I am alive!"];
-    const normalResponses = [`Busy reporting on the ${formatOrdinal(electionNum || 1)} ${siteName} election`];
-
-    return getRandomStatus(config.fun ? funResponses : normalResponses);
+export const sayHowAmI = (_c, _es, election) => {
+    const { electionOrdinalName, electionUrl } = election;
+    return `Busy reporting on the ${makeURL(electionOrdinalName, electionUrl)}`;
 };
 
 

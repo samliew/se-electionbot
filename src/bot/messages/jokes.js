@@ -99,4 +99,7 @@ export const sayHowIsBot = () => getRandomStatus([
     `I'm bored. Amuse me.`,
     `Why don't you come up sometime and see me?`,
     `Today, I consider myself the luckiest bot on the face of the earth.`,
+    "Manically depressed...",
+    "Jolly good, jolly good!",
+    "Like I am alive!",
 ]);
