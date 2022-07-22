@@ -514,6 +514,11 @@ use defaults ${defaultChatNotSet}`
             [isAskedAboutLightbulb, sayHowManyModsItTakesToFixLightbulb]
         ];
 
+        /** @type {[m:(c:string) => boolean, b:MessageBuilder][]} */
+        const casualRules = [
+            [isAskedWhoAmI, sayWhoAmI],
+        ];
+
         const dashboardApp = await startServer(client, room, config, election, announcement);
 
         // Main event listener
@@ -688,10 +693,10 @@ use defaults ${defaultChatNotSet}`
 
             // Did not match any previous guards, and bot was mentioned
             if (!responseText && botMentionedCasually && config.throttleSecs <= 10) {
-                if (isAskedWhoAmI(preparedMessage)) {
-                    responseText = await sayWhoAmI(me, preparedMessage);
-                }
-                else if (isAskedAmIAlive(preparedMessage)) {
+                const [, casualHandler] = casualRules.find(([g]) => g(preparedMessage)) || [];
+                responseText = await casualHandler?.(config, elections, election, preparedMessage, user, me, room);
+
+                if (isAskedAmIAlive(preparedMessage)) {
                     responseText = getRandomAlive();
                 }
                 else if (isAskedWhoMadeMe(preparedMessage)) {

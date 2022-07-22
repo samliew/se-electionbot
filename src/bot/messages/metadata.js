@@ -116,18 +116,15 @@ export const sayShortHelp = (config) => {
 
 /**
  * @summary builds a response to a who am I query
- * @param {IProfileData|User} botChatProfile bot profile
- * @param {string} content message content
- * @returns {Promise<string>}
+ * @type {MessageBuilder}
  */
-export const sayWhoAmI = async (botChatProfile, content) => {
-    const about = await botChatProfile.about;
-    const name = await botChatProfile.name;
-    const prefix = /^are\b.+?/i.test(content) ? "Yes, " : "";
+export const sayWhoAmI = async (_c, _es, _e, text, _u, bot) => {
+    const about = await bot.about;
+    const name = await bot.name;
+    const prefix = /^are\b.+?/i.test(text) ? "Yes, " : "";
     const noAboutME = "I prefer to keep an air of mystery about me";
     return `${prefix}I am ${name}, and ${about || noAboutME}`;
 };
-
 
 /**
  * @summary builds a contributor list message
