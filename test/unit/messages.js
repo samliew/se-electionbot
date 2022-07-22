@@ -4,7 +4,7 @@ import Election from "../../src/bot/election.js";
 import { sayBadgesByType } from "../../src/bot/messages/badges.js";
 import { sayWithdrawnNominations } from "../../src/bot/messages/candidates.js";
 import { sayGreeting } from "../../src/bot/messages/greetings.js";
-import { sayShortHelp } from "../../src/bot/messages/metadata.js";
+import { sayHowAmI, sayShortHelp } from "../../src/bot/messages/metadata.js";
 import { sayDiamondAlready } from "../../src/bot/messages/moderators.js";
 import { sayAboutElectionStatus, sayElectionIsEnding, sayElectionSchedule } from "../../src/bot/messages/phases.js";
 import { calculateScore } from "../../src/bot/score.js";
@@ -303,6 +303,16 @@ describe("Messages", () => {
             const election = new Election("https://stackoverflow.com/election/12");
             const message = await sayShortHelp(config, election.elections, election, "", user, bot, room);
             expect(message.length).to.be.lessThanOrEqual(500);
+        });
+    });
+
+    describe(sayHowAmI.name, () => {
+        it("should include the election ordinal name and link", async () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+            election.siteName = "Stack Overflow";
+            const message = await sayHowAmI(config, election.elections, election, "", user, bot, room);
+            expect(message).to.include("12th Stack Overflow election");
+            expect(message).to.include(election.electionUrl);
         });
     });
 });
