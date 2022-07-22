@@ -240,6 +240,12 @@ export default class Election {
     dateEnded;
 
     /**
+     * @summary election site name
+     * @type {string|undefined}
+     */
+    siteName;
+
+    /**
      * @summary election questionnaire
      * @type {string[]}
      */
@@ -1026,6 +1032,18 @@ export default class Election {
     }
 
     /**
+     * @summary scrapes election {@link siteName}
+     * @param {cheerio.Root} $ Cheerio root element
+     * @returns {string|undefined}
+     */
+    scrapeSiteName($) {
+        return $('meta[property="og:site_name"]')
+            .attr('content')
+            ?.replace('Stack Exchange', '')
+            .trim();
+    }
+
+    /**
      * @summary pushes an election state to history
      * @returns {Election}
      */
@@ -1121,7 +1139,7 @@ export default class Election {
             const repToNominate = +minRep.replace(/\D/g, "");
 
             this.updated = Date.now();
-            this.siteName = $('meta[property="og:site_name"]').attr('content')?.replace('Stack Exchange', '').trim();
+            this.siteName = this.scrapeSiteName($);
             this.title = pageTitle;
             this.dateNomination = nominationDate;
             this.datePrimary = primaryDate;
