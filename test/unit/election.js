@@ -81,9 +81,16 @@ describe(Election.name, () => {
         });
 
         describe("electionOrdinalName", () => {
-            const election = new Election("https://stackoverflow.com/election/2");
-            election.siteName = "Stack Overflow";
-            expect(election.electionOrdinalName).to.equal("2nd Stack Overflow election");
+            it("should correctly format the ordinal name", () => {
+                const election = new Election("https://stackoverflow.com/election/2");
+                election.siteName = "Stack Overflow";
+                expect(election.electionOrdinalName).to.equal("2nd Stack Overflow election");
+            });
+
+            it("should default to hostname without TLD on no 'siteName'", () => {
+                const election = new Election("https://stackoverflow.com/election/10");
+                expect(election.electionOrdinalName).to.equal("10th stackoverflow election");
+            });
         });
 
         describe("electionPhaseDuration", () => {

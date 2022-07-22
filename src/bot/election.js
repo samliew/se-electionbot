@@ -300,7 +300,8 @@ export default class Election {
      */
     get electionOrdinalName() {
         const { electionNum, siteName } = this;
-        return `${formatOrdinal(electionNum || 1)} ${siteName} election`;
+        const name = siteName || this.siteHostname.replace(/\.[^.]+$/, "");
+        return `${formatOrdinal(electionNum || 1)} ${name} election`;
     }
 
     /**
