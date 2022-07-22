@@ -28,11 +28,9 @@ export const sayCommonlyAskedQuestions = async (config, _es, _e, _t, _u, bot) =>
 
 /**
  * @summary builds a response to a how am I query
- * @param {BotConfig} config bot configuration
- * @param {Election} election current election
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayHowAmI = (config, election) => {
+export const sayHowAmI = (config, _es, election) => {
     const { electionNum, siteName } = election;
 
     const funResponses = ["Manically depressed...", "Jolly good, jolly good!", "Like I am alive!"];

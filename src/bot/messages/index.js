@@ -9,7 +9,7 @@ import { sayBadgesByType, sayRequiredBadges } from "./badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowToNominate, sayHowToNominateOthers, sayIfModsHaveToRun, sayWhatModsAreRunning, sayWhyNominationRemoved, sayWithdrawnNominations } from "./candidates.js";
 import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayElectionType, sayHowManyVisitedElection, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults, sayWillElectionBeCancelled } from "./elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./jokes.js";
-import { sayCommonlyAskedQuestions, sayFullHelp, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./metadata.js";
+import { sayCommonlyAskedQuestions, sayFullHelp, sayHowAmI, sayShortHelp, sayWhoAmI, sayWhoMadeMe } from "./metadata.js";
 import { sayHappyBirthday, sayMissingComments } from "./misc.js";
 import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayFormerMods, sayWhatModsDo, sayWhyBeAMod } from "./moderators.js";
 import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElectionSchedule, sayNextPhase } from "./phases.js";
@@ -102,5 +102,6 @@ export const casualRules = [
     [isAskedWhoAmI, sayWhoAmI],
     [isAskedAmIAlive, getRandomAlive],
     [isAskedWhoMadeMe, sayWhoMadeMe],
-    [isThankingTheBot, getRandomThanks]
+    [isThankingTheBot, getRandomThanks],
+    [isAskedHowAmI, sayHowAmI],
 ];

@@ -19,12 +19,11 @@ import { getSiteElections } from './election.js';
 import { addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat } from "./elections/chat.js";
 import BotEnv from "./env.js";
 import {
-    isAskedForCurrentMods, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowAmI, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isBotMentioned
+    isAskedForCurrentMods, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isBotMentioned
 } from "./guards.js";
 import { HerokuClient } from "./herokuClient.js";
 import { sayHowManyCandidatesAreHere } from "./messages/candidates.js";
 import { casualRules, funRules, unprivilegedRules } from "./messages/index.js";
-import { sayHowAmI } from "./messages/metadata.js";
 import { sayOffTopicMessage } from "./messages/misc.js";
 import { sayCurrentMods, sayHowManyModsAreHere } from "./messages/moderators.js";
 import { sayElectionNotStartedYet } from "./messages/phases.js";
@@ -591,10 +590,7 @@ use defaults ${defaultChatNotSet}`
                 const [, casualHandler] = casualRules.find(([g]) => g(preparedMessage)) || [];
                 responseText = await casualHandler?.(config, elections, election, preparedMessage, user, me, room);
 
-                if (isAskedHowAmI(preparedMessage)) {
-                    responseText = sayHowAmI(config, election);
-                }
-                else if (preparedMessage.startsWith('offtopic')) {
+                if (preparedMessage.startsWith('offtopic')) {
                     responseText = sayOffTopicMessage(election, preparedMessage);
                     await sendMessage(config, room, responseText);
                     return; // stop here since we are using a different default response method
