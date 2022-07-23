@@ -8,7 +8,7 @@ import { resolveObj } from "../../shared/utils/objects.js";
 import { getHerokuInstancesForNav, onMountAddToRoutes, prettifyPath } from "../utils.js";
 
 /**
- * @typedef {import("../../bot/announcement").default} Announcement
+ * @typedef {import("../../bot/announcement").Announcer} Announcement
  * @typedef {import("../").AuthQuery} AuthQuery
  * @typedef {import("chatexchange").default} BotClient
  * @typedef {import("../../bot/config").BotConfig} BotConfig

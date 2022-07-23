@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import { JSDOM } from "jsdom";
 import { test } from "mocha";
 import sinon from "sinon";
-import ScheduledAnnouncement from "../../src/bot/announcement.js";
+import Announcer from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Scheduler from "../../src/bot/scheduler.js";
 import { fetchUrl } from "../../src/bot/utils.js";
@@ -30,7 +30,7 @@ describe("Dashboard", function () {
 
     const election = new Election("https://stackoverflow.com/election/13");
 
-    const announcement = new ScheduledAnnouncement(config, room, election);
+    const announcement = new Announcer(config, room, election);
     const scheduler = new Scheduler(election, announcement);
 
     /** @type {ExpressApp} */

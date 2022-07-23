@@ -2,7 +2,7 @@ import { expect } from "chai";
 import Client from "chatexchange";
 import Room from "chatexchange/dist/Room.js";
 import sinon from "sinon";
-import ScheduledAnnouncement from "../../src/bot/announcement.js";
+import Announcer from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Rescraper from "../../src/bot/rescraper.js";
 import Scheduler from "../../src/bot/scheduler.js";
@@ -23,8 +23,8 @@ describe(Rescraper.name, () => {
     let election = new Election("https://stackoverflow.com/election/12");
     afterEach(() => election = new Election("https://stackoverflow.com/election/12"));
 
-    let ann = new ScheduledAnnouncement(config, room, election);
-    afterEach(() => ann = new ScheduledAnnouncement(config, room, election));
+    let ann = new Announcer(config, room, election);
+    afterEach(() => ann = new Announcer(config, room, election));
 
     /** @type {Scheduler} */
     let scheduler;

@@ -5,7 +5,7 @@ import { dateToUtcTimestamp } from "../../shared/utils/dates.js";
 import { getHerokuInstancesForNav, onMountAddToRoutes } from "../utils.js";
 
 /**
- * @typedef {import("../../bot/announcement").default} Announcement
+ * @typedef {import("../../bot/announcement").Announcer} Announcement
  * @typedef {import("../").AuthQuery} AuthQuery
  * @typedef {import("chatexchange").default} BotClient
  * @typedef {import("../../bot/config").BotConfig} BotConfig

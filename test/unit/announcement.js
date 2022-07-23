@@ -2,7 +2,7 @@ import { expect } from "chai";
 import Client from "chatexchange";
 import Room from "chatexchange/dist/Room.js";
 import sinon from "sinon";
-import ScheduledAnnouncement from "../../src/bot/announcement.js";
+import Announcer from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -12,7 +12,7 @@ import { getMockNominee } from "../mocks/nominee.js";
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} Message
  */
 
-describe(ScheduledAnnouncement.name, () => {
+describe(Announcer.name, () => {
 
     /** @type {sinon.SinonFakeTimers} */
     let clock;
@@ -33,10 +33,10 @@ describe(ScheduledAnnouncement.name, () => {
     let election = new Election("https://stackoverflow.com/election/12");
     afterEach(() => election = new Election("https://stackoverflow.com/election/12"));
 
-    let announcer = new ScheduledAnnouncement(config, room, election);
-    afterEach(() => announcer = new ScheduledAnnouncement(config, room, election));
+    let announcer = new Announcer(config, room, election);
+    afterEach(() => announcer = new Announcer(config, room, election));
 
-    describe(ScheduledAnnouncement.prototype.announceCancelled.name, () => {
+    describe(Announcer.prototype.announceCancelled.name, () => {
         it('should return false on no cancelledText', async () => {
             const status = await announcer.announceCancelled(room);
             expect(status).to.be.false;
@@ -62,7 +62,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
-    describe(ScheduledAnnouncement.prototype.announceElectionEndingSoon.name, () => {
+    describe(Announcer.prototype.announceElectionEndingSoon.name, () => {
         it('should correctly announce that election is ending soon', async () => {
             const messageStub = sinon.stub(room, "sendMessage");
 
@@ -77,7 +77,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
-    describe(ScheduledAnnouncement.prototype.announceNewNominees.name, () => {
+    describe(Announcer.prototype.announceNewNominees.name, () => {
 
         it('should correctly announce new nominees', async () => {
             const names = ["Jane", "John"];
@@ -102,7 +102,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
-    describe(ScheduledAnnouncement.prototype.announcePrimary.name, () => {
+    describe(Announcer.prototype.announcePrimary.name, () => {
         it('should not announce if primary threshold is not reached', async () => {
             const status = await announcer.announcePrimary();
             expect(status).to.be.false;
@@ -126,7 +126,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
-    describe(ScheduledAnnouncement.prototype.announceWinners.name, () => {
+    describe(Announcer.prototype.announceWinners.name, () => {
         it('should return false if election is not ended', async () => {
             election.phase = "cancelled";
             const status = await announcer.announceWinners();
@@ -177,7 +177,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
-    describe(ScheduledAnnouncement.prototype.announceWithdrawnNominees.name, () => {
+    describe(Announcer.prototype.announceWithdrawnNominees.name, () => {
         it('should correctly announce withdrawn nominations', async () => {
             const withdrawn = getMockNominee(election, { userName: "John", nominationLink: "test", userId: 1 });
             const remaining = getMockNominee(election, { userName: "Joanne", nominationLink: "test2", userId: 2 });
@@ -203,7 +203,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
-    describe(ScheduledAnnouncement.prototype.announceDatesChanged.name, () => {
+    describe(Announcer.prototype.announceDatesChanged.name, () => {
         it('should correctly announce election date changes', async () => {
             const now = dateToUtcTimestamp(Date.now());
 
@@ -227,7 +227,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
-    describe(ScheduledAnnouncement.prototype.announceNominationStart.name, () => {
+    describe(Announcer.prototype.announceNominationStart.name, () => {
         it('should correctly announce nomination phase start', async () => {
             sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
 
@@ -246,7 +246,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
-    describe(ScheduledAnnouncement.prototype.announceElectionStart.name, () => {
+    describe(Announcer.prototype.announceElectionStart.name, () => {
         it('should correctly announce election phase start', async () => {
             sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
 
@@ -265,7 +265,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
-    describe(ScheduledAnnouncement.prototype.announcePrimaryStart.name, () => {
+    describe(Announcer.prototype.announcePrimaryStart.name, () => {
         it('should correctly announce election phase start', async () => {
             sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
 
@@ -284,7 +284,7 @@ describe(ScheduledAnnouncement.name, () => {
         });
     });
 
-    describe(ScheduledAnnouncement.prototype.announceElectionEnd.name, () => {
+    describe(Announcer.prototype.announceElectionEnd.name, () => {
         it('should correctly announce election phase start', async () => {
             sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
 

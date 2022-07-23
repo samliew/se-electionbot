@@ -9,7 +9,7 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
  * @typedef {import("./election.js").default} Election
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("./rescraper.js").default} Rescraper
- * @typedef {import("./announcement.js").default} ScheduledAnnouncement
+ * @typedef {import("./announcement.js").default} Announcer
  * @typedef {"start"|"end"|"primary"|"nomination"|"test"} TaskType
  */
 
@@ -29,7 +29,7 @@ export default class Scheduler {
 
     /**
      * @summary election announcer
-     * @type {ScheduledAnnouncement}
+     * @type {Announcer}
      */
     #announcer;
 
@@ -41,7 +41,7 @@ export default class Scheduler {
 
     /**
      * @param {Election} election current election
-     * @param {ScheduledAnnouncement} announcer announcer
+     * @param {Announcer} announcer announcer
      */
     constructor(election, announcer) {
         this.#announcer = announcer;

@@ -17,7 +17,7 @@ import { RandomArray } from "../random.js";
 import { capitalize, fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
 
 /**
- * @typedef {import("../announcement").default} Announcement
+ * @typedef {import("../announcement").Announcer} Announcement
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../utils").ChatMessage} ChatMessage
  * @typedef {import("chatexchange").default} Client

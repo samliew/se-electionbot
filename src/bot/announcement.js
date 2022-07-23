@@ -14,7 +14,7 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
  * @typedef {"start"|"end"|"primary"|"nomination"|"test"} TaskType
  */
 
-export default class ScheduledAnnouncement {
+export default class Announcer {
 
     /**
      * @param {BotConfig} config bot configuration

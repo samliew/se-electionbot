@@ -9,7 +9,7 @@ import { wait } from "./utils.js";
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("./election.js").default} Election
  * @typedef {import("chatexchange/dist/Room").default} Room
- * @typedef {import("./announcement.js").default} Announcement
+ * @typedef {import("./announcement.js").default} Announcer
  * @typedef {import("./scheduler.js").default} Scheduler
  */
 
@@ -43,7 +43,7 @@ export default class Rescraper {
 
     /**
      * @summary convenience method for updating Announcement
-     * @param {Announcement} announcement announcement instance
+     * @param {Announcer} announcement announcement instance
      */
     setAnnouncement(announcement) {
         this.announcement = announcement;

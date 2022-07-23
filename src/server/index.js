@@ -3,6 +3,7 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from "url";
 import Election from '../bot/election.js';
 import * as helpers from "./helpers.js";
+import { commands } from "./routes/commands.js";
 import { config } from "./routes/config.js";
 import { feedback } from "./routes/feedback.js";
 import { health } from "./routes/health.js";
@@ -11,11 +12,10 @@ import { ping } from './routes/ping.js';
 import { realtime } from "./routes/realtime.js";
 import { say } from "./routes/say.js";
 import { server } from "./routes/server.js";
-import { commands } from "./routes/commands.js";
 import { configureApp, farewell, start } from './utils.js';
 
 /**
- * @typedef {import("../bot/announcement").default} Announcement
+ * @typedef {import("../bot/announcement").Announcer} Announcement
  * @typedef {{ password?:string, success: string }} AuthQuery
  * @typedef {import("../bot/config").BotConfig} BotConfig
  * @typedef {import("chatexchange").default} Client

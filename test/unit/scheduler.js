@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import Client from "chatexchange";
 import Room from "chatexchange/dist/Room.js";
-import ScheduledAnnouncement from "../../src/bot/announcement.js";
+import Announcer from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import Scheduler from "../../src/bot/scheduler.js";
 import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
@@ -26,9 +26,9 @@ describe(Scheduler.name, () => {
     /** @type {Room} */
     const room = new Room["default"](client, -1);
 
-    /** @type {ScheduledAnnouncement} */
+    /** @type {Announcer} */
     let announcer;
-    beforeEach(() => announcer = new ScheduledAnnouncement(config, room, election));
+    beforeEach(() => announcer = new Announcer(config, room, election));
 
     /** @type {Scheduler} */
     let scheduler;
