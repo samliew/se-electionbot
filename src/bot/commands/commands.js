@@ -13,7 +13,7 @@ import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
 import { sayUptime } from "../messages/metadata.js";
 import { sayOtherSiteMods } from "../messages/moderators.js";
 import { sendMessage } from "../queue.js";
-import { RandomArray } from "../random.js";
+import { getCandidateOrNominee, RandomArray } from "../random.js";
 import { capitalize, fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
 
 /**
@@ -177,6 +177,18 @@ export const announceNewNominees = async (args) => {
     await election.scrapeElection(config);
     const status = await announcement.announceNewNominees();
     return status ? "" : "There are no nominees yet.";
+};
+
+/**
+ * @summary manually announces all nominees
+ * @param {CommandArguments} args command arguments
+ * @returns {Promise<string>}
+ */
+export const announceNominees = async (args) => {
+    const { announcement, config, election } = args;
+    await election.scrapeElection(config);
+    const status = await announcement.announceNominees();
+    return status ? "" : `There are no ${getCandidateOrNominee()}s yet.`;
 };
 
 /**
