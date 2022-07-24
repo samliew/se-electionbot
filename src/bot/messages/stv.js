@@ -1,4 +1,5 @@
-import { capitalize, makeURL } from "../utils.js";
+import { capitalize } from "../../shared/utils/strings.js";
+import { makeURL } from "../utils.js";
 
 /**
  * @typedef {import("../config").BotConfig} BotConfig

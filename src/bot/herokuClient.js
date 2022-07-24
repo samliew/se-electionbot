@@ -1,5 +1,5 @@
 import Heroku from 'heroku-client';
-import { capitalize } from './utils.js';
+import { capitalize } from '../shared/utils/strings.js';
 
 // Heroku API documentation
 // https://devcenter.heroku.com/articles/platform-api-reference

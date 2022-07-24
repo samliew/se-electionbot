@@ -1,9 +1,8 @@
 import Hbs from "handlebars";
-import { capitalize } from "../bot/utils.js";
 import { partition } from "../shared/utils/arrays.js";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { isEmptyObj } from "../shared/utils/objects.js";
-import { formatOrdinal, prettify } from "../shared/utils/strings.js";
+import { capitalize, formatOrdinal, prettify } from "../shared/utils/strings.js";
 
 /**
  * @typedef {Hbs.HelperOptions} HelperOptions

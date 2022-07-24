@@ -1,4 +1,8 @@
-import { capitalize } from "../../bot/utils.js";
+/**
+ * @template {string} T
+ *
+ * @typedef {T extends `${infer U}${infer V}` ? `${Uppercase<U>}${Lowercase<V>}` : T} Scased<T>
+ */
 
 /**
  * @summary formats a number accorting to the number of didits to group and a separator
@@ -62,6 +66,19 @@ export const percentify = (numA, numB, precision, postfix = "%") => {
  * @param {string} text string to prettify
  */
 export const prettify = (text) => text.split("-").map(capitalize).join(" ");
+
+/**
+ * @template {string} T
+ *
+ * @summary capitalizes a given word
+ * @param {T} word word to properly capitalize
+ * @returns {Scased<T>}
+ */
+export const capitalize = (word) => {
+    return word && /** @type {Scased<T>} */ (
+        word[0].toUpperCase() + word.slice(1).toLowerCase()
+    );
+};
 
 /**
  * @summary finds the longest string length

@@ -13,7 +13,7 @@ import { constructUserAgent } from "../shared/utils/fetch.js";
 import { getOrInit, has } from "../shared/utils/maps.js";
 import { htmlToChatMarkdown } from "../shared/utils/markdown.js";
 import { numericNullable } from "../shared/utils/objects.js";
-import { longestLength } from "../shared/utils/strings.js";
+import { capitalize, longestLength } from "../shared/utils/strings.js";
 import { getUserAssociatedAccounts } from "./api.js";
 
 export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
@@ -658,13 +658,6 @@ export const roomKeepAlive = (config, client, room) => {
         if (verbose) console.log('KEEP ALIVE - rejoin room:', chatDomain, id);
     }, 5 * 60000);
 };
-
-/**
- * @summary capitalizes a given word
- * @param {string} word word to properly capitalize
- * @returns {string}
- */
-export const capitalize = (word) => word && word[0].toUpperCase() + word.slice(1).toLowerCase();
 
 /**
  * @summary base pluralization

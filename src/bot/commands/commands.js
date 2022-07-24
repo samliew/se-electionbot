@@ -6,7 +6,7 @@ import { formatAsChatCode } from "../../shared/utils/chat.js";
 import { dateToUtcTimestamp, getDateFromUTCstring, getMilliseconds } from "../../shared/utils/dates.js";
 import { matchISO8601, matchNumber } from "../../shared/utils/expressions.js";
 import { mapMap, mergeMaps } from "../../shared/utils/maps.js";
-import { formatNumber } from "../../shared/utils/strings.js";
+import { formatNumber, capitalize } from "../../shared/utils/strings.js";
 import { getBadges, getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election, { getSiteElections, getVotingGraph } from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
@@ -14,7 +14,7 @@ import { sayUptime } from "../messages/metadata.js";
 import { sayOtherSiteMods } from "../messages/moderators.js";
 import { sendMessage } from "../queue.js";
 import { getCandidateOrNominee, RandomArray } from "../random.js";
-import { capitalize, fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
+import { fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
 
 /**
  * @typedef {import("../announcement.js").default} Announcer
@@ -647,14 +647,17 @@ export const getElectionRoomURL = (args) => {
 
 /**
  * @summary gets current time in UTC
- * @param {Pick<CommandArguments, "election">} args command arguments
+ * @param {Pick<CommandArguments, "election"|"config">} args command arguments
  * @returns {string}
  */
 export const getTimeCommand = (args) => {
-    const { phase, dateElection } = args.election;
+    const { election, config } = args;
+
+    const { dateElection } = election;
 
     const current = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
-    if (!['election', 'ended', 'cancelled'].includes(phase || "")) {
+
+    if (election.isActive() && election.getPhase(config.nowOverride) !== "election") {
         return `${current} (election phase starts ${linkToRelativeTimestamp(dateElection)})`;
     }
 
