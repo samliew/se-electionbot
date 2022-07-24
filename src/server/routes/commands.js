@@ -8,7 +8,7 @@ import { resolveObj } from "../../shared/utils/objects.js";
 import { getHerokuInstancesForNav, onMountAddToRoutes, prettifyPath } from "../utils.js";
 
 /**
- * @typedef {import("../../bot/announcement").Announcer} Announcement
+ * @typedef {import("../../bot/announcement.js").default} Announcer
  * @typedef {import("../").AuthQuery} AuthQuery
  * @typedef {import("chatexchange").default} BotClient
  * @typedef {import("../../bot/config").BotConfig} BotConfig
@@ -77,7 +77,7 @@ commands.post("/", async (req, res) => {
         return res.redirect(`/commands?password=${password}&success=false`);
     }
 
-    /** @type {Announcement|undefined} */
+    /** @type {Announcer|undefined} */
     const announcement = app.get("bot_announcer");
     /** @type {BotConfig|undefined} */
     const config = app.get("bot_config");

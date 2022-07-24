@@ -15,7 +15,7 @@ import { server } from "./routes/server.js";
 import { configureApp, farewell, start } from './utils.js';
 
 /**
- * @typedef {import("../bot/announcement").Announcer} Announcement
+ * @typedef {import("../bot/announcement.js").default} Announcer
  * @typedef {{ password?:string, success: string }} AuthQuery
  * @typedef {import("../bot/config").BotConfig} BotConfig
  * @typedef {import("chatexchange").default} Client
@@ -134,7 +134,7 @@ app.use("/server", configureApp(server, handlebarsConfig, viewsPath));
  * @param {BotConfig} config  bot configuration
  * @param {Election} election current election
  * @param {Scheduler} scheduler task scheduler
- * @param {Announcement} announcement announcement
+ * @param {Announcer} announcement announcement
  * @param {{
  *  graceful?: boolean,
  *  portOverride?: number,

@@ -17,7 +17,7 @@ import { RandomArray } from "../random.js";
 import { capitalize, fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
 
 /**
- * @typedef {import("../announcement").Announcer} Announcement
+ * @typedef {import("../announcement.js").default} Announcer
  * @typedef {import("../config").BotConfig} BotConfig
  * @typedef {import("../utils").ChatMessage} ChatMessage
  * @typedef {import("chatexchange").default} Client
@@ -30,7 +30,7 @@ import { capitalize, fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTime
  * @typedef {import("./user").User} User
  *
  * @typedef {{
- *  announcement: Announcement,
+ *  announcement: Announcer,
  *  app: ExpressApp,
  *  bot: ChatUser,
  *  client: Client,
@@ -475,7 +475,7 @@ export const postMetaAnnouncement = async (args) => {
  * @summary announces
  * @param {BotConfig} config bot config
  * @param {Election} election current election instance
- * @param {Announcement} announcement announcement controller
+ * @param {Announcer} announcement announcement controller
  * @param {ChatMessage[]} messages transcript messages
  * @param {ChatUser} botUser bot user
  * @returns {Promise<boolean>}

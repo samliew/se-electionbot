@@ -8,7 +8,7 @@ import { prepareMessageForMatching } from "../shared/utils/chat.js";
 import { MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
-import Announcement, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
+import Announcer, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
 import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
@@ -279,7 +279,7 @@ use defaults ${defaultChatNotSet}`
         room.only(ChatEventType.MESSAGE_POSTED);
 
         // Start rescraper utility, and initialise announcement cron jobs
-        const announcement = new Announcement(config, room, election);
+        const announcement = new Announcer(config, room, election);
         const scheduler = new Scheduler(election, announcement);
         const rescraper = new Rescraper(config, client, room, elections, election, scheduler);
 

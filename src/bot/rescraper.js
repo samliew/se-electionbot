@@ -42,7 +42,7 @@ export default class Rescraper {
     }
 
     /**
-     * @summary convenience method for updating Announcement
+     * @summary convenience method for updating {@link Announcer}
      * @param {Announcer} announcement announcement instance
      */
     setAnnouncement(announcement) {
