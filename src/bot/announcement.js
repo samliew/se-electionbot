@@ -9,10 +9,28 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./election.js").default} Election
+ * @typedef {import("./elections/nominees.js").default} Nominee
  * @typedef {import("./rescraper.js").default} Rescraper
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {"start"|"end"|"primary"|"nomination"|"test"} TaskType
  */
+
+/**
+ * @summary gets only valid election participants
+ * @param {Map<number, Nominee>} participants
+ * @returns {Map<number, Nominee>}
+ */
+const getValidParticipants = (participants) => {
+    return filterMap(
+        participants,
+        ({ userName, nominationLink }) => {
+            if (!userName || !nominationLink) {
+                // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
+                console.log(`[announcer] missing user info`, { userName, nominationLink });
+            }
+            return !!userName;
+        });
+}
 
 export default class Announcer {
 
@@ -95,15 +113,7 @@ export default class Announcer {
 
         const nominationTab = `${electionUrl}?tab=nomination`;
 
-        const onlyWithUsernames = filterMap(
-            newlyNominatedNominees,
-            ({ userName, nominationLink }) => {
-                if (!userName || !nominationLink) {
-                    // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
-                    console.log(`missing user info`, { userName, nominationLink });
-                }
-                return !!userName;
-            });
+        const onlyWithUsernames = getValidParticipants(newlyNominatedNominees);
 
         const messages = mapMap(
             onlyWithUsernames,
@@ -125,15 +135,9 @@ export default class Announcer {
     async announceWithdrawnNominees() {
         const { _room, config, _election } = this;
 
-        const onlyWithUsernames = filterMap(
-            _election.newlyWithdrawnNominees,
-            ({ userName, nominationLink }) => {
-                if (!userName || !nominationLink) {
-                    // guards this case: https://chat.stackoverflow.com/transcript/message/53252518#53252518
-                    console.log(`missing user info`, { userName, nominationLink });
-                }
-                return !!userName;
-            });
+        const { newlyWithdrawnNominees } = _election;
+
+        const onlyWithUsernames = getValidParticipants(newlyWithdrawnNominees);
 
         const messages = mapMap(
             onlyWithUsernames,
