@@ -10,7 +10,7 @@ import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcer, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
-import { announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
+import { announceNewNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -363,7 +363,7 @@ use defaults ${defaultChatNotSet}`
         const commander = new CommandManager();
         commander.bulkAdd({
             "alive": ["bot reports on its status", isAliveCommand, /^(?:alive|awake|ping|uptime)/, AccessLevel.privileged],
-            "announce nominees": ["makes the bot announce nominees", announceNominees, /^announce nominees/, AccessLevel.privileged],
+            "announce new nominees": ["makes the bot announce nominees", announceNewNominees, /^announce new nominees/, AccessLevel.privileged],
             "announce winners": ["makes the bot fetch and announce winners", announceWinners, /^announce winners/, AccessLevel.privileged],
             "change election": ["switches current election", changeElection, /^(?:change|switch)\s+elections?/, AccessLevel.dev],
             "chatroom": ["gets election chat room link", getElectionRoomURL, /chatroom/, AccessLevel.dev],

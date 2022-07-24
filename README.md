@@ -105,25 +105,25 @@ ElectionBot info _(requires mention)_:
 
 Moderators and privileged users can also use these commands _(requires mention)_ to help moderate the chat room:
 
-| Command                                                    | Action                                        |
-| ---------------------------------------------------------- | --------------------------------------------- |
-| alive                                                      | Requests a status report from the bot         |
-| announce `<nominees\|winners>`                             | Makes the bot announce candidates or winners  |
-| commands                                                   | Prints help for all bot commands              |
-| `<brew\|make>` coffee `[for <username>]`                   | Brew a random cup of coffee                   |
-| `<die\|shutdown>`                                          | Shuts down the bot in case of an emergency    |
-| fun `<on\|off>`                                            | Switches fun mode on or off                   |
-| get throttle                                               | Gets the current throttle value (seconds)     |
-| get time                                                   | Gets the current UTC timestamp                |
-| greet                                                      | Posts a greeting message from the bot         |
-| ignore `<userId>`                                          | Stops the bot from responding to a user       |
-| `<mute\|timeout\|sleep>` `[N]`                             | Stops the bot from responding for `N` minutes |
-| post meta [pretty]                                         | Posts an official Meta announcement           |
-| say `<message>`                                            | Makes the bot echo a `message`                |
-| set throttle `<N>`                                         | Sets the current throttle value (seconds)     |
-| `<unmute\|clear timeout>`                                  | Allows bot to respond if previously muted     |
-| voter report from `<date\|datetime>` to `<date\|datetime>` | Gets a per-day report on user voting          |
-| whois `<sitename>` mods                                    | Lists current mods of a `sitename`            |
+| Command                                                    | Action                                           |
+| ---------------------------------------------------------- | ------------------------------------------------ |
+| alive                                                      | Requests a status report from the bot            |
+| announce `<new nominees\|winners>`                         | Makes the bot announce new candidates or winners |
+| commands                                                   | Prints help for all bot commands                 |
+| `<brew\|make>` coffee `[for <username>]`                   | Brew a random cup of coffee                      |
+| `<die\|shutdown>`                                          | Shuts down the bot in case of an emergency       |
+| fun `<on\|off>`                                            | Switches fun mode on or off                      |
+| get throttle                                               | Gets the current throttle value (seconds)        |
+| get time                                                   | Gets the current UTC timestamp                   |
+| greet                                                      | Posts a greeting message from the bot            |
+| ignore `<userId>`                                          | Stops the bot from responding to a user          |
+| `<mute\|timeout\|sleep>` `[N]`                             | Stops the bot from responding for `N` minutes    |
+| post meta [pretty]                                         | Posts an official Meta announcement              |
+| say `<message>`                                            | Makes the bot echo a `message`                   |
+| set throttle `<N>`                                         | Sets the current throttle value (seconds)        |
+| `<unmute\|clear timeout>`                                  | Allows bot to respond if previously muted        |
+| voter report from `<date\|datetime>` to `<date\|datetime>` | Gets a per-day report on user voting             |
+| whois `<sitename>` mods                                    | Lists current mods of a `sitename`               |
 
 ## Developer-only commands
 

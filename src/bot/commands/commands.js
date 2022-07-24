@@ -168,11 +168,11 @@ export const isAliveCommand = (args) => {
 };
 
 /**
- * @summary manually announces winners
+ * @summary manually announces new nominees
  * @param {CommandArguments} args command arguments
  * @returns {Promise<string>}
  */
-export const announceNominees = async (args) => {
+export const announceNewNominees = async (args) => {
     const { announcement, config, election } = args;
     await election.scrapeElection(config);
     const status = await announcement.announceNewNominees();
