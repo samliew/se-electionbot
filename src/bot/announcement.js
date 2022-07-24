@@ -2,7 +2,7 @@ import { dateToUtcTimestamp } from "../shared/utils/dates.js";
 import { filterMap, mapMap } from "../shared/utils/maps.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
-import { getFormattedElectionSchedule, makeURL, pluralize } from "./utils.js";
+import { getFormattedElectionSchedule, listify, makeURL, pluralize } from "./utils.js";
 
 export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chance to cast or modify your votes!";
 
@@ -95,6 +95,33 @@ export default class Announcer {
 
         const messages = [
             `The ${makeURL('election', electionUrl)} ${ELECTION_ENDING_SOON_TEXT}`
+        ];
+
+        await sendMessageList(config, _room, messages, { isPrivileged: true });
+
+        return true;
+    }
+
+    /**
+     * @summary announces all nominees
+     * @returns {Promise<boolean>}
+     */
+    async announceNominees() {
+        const { config, _election, _room } = this;
+
+        const { nominees, numNominees } = _election;
+
+        const onlyWithUsernames = getValidParticipants(nominees);
+
+        const nomineeList = mapMap(
+            onlyWithUsernames,
+            ({ nominationLink, userName }) => {
+                return makeURL(userName, nominationLink);
+            }
+        );
+
+        const messages = [
+            `There ${pluralize(numNominees, "are", "is")} ${numNominees} ${getCandidateOrNominee()}${pluralize(numNominees)}: ${listify(...nomineeList)}`
         ];
 
         await sendMessageList(config, _room, messages, { isPrivileged: true });

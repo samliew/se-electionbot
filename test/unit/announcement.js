@@ -77,6 +77,28 @@ describe(Announcer.name, () => {
         });
     });
 
+    describe(Announcer.prototype.announceNominees.name, () => {
+        it('should correctly announce nominees', async () => {
+            const messageStub = sinon.stub(room, "sendMessage");
+
+            election.addActiveNominee(
+                getMockNominee(election, { userName: "John", userId: 42 })
+            );
+
+            const promise = announcer.announceNominees();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.true;
+
+            const [[msg]] = messageStub.args;
+            expect(msg).to.match(/1 (?:nominee|candidate)/i);
+            expect(msg).to.include("John");
+
+            messageStub.restore();
+        });
+    });
+
     describe(Announcer.prototype.announceNewNominees.name, () => {
 
         it('should correctly announce new nominees', async () => {
