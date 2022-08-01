@@ -322,3 +322,14 @@ export const toEndOfDay = (date) => {
     const d = validateDate(date);
     return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 23, 59, 59, 999));
 };
+
+/**
+ * @summary sets milliseconds of a {@link date} to 0
+ * @param {string|number|Date} date date to trim
+ * @returns {Date}
+ */
+export const trimMs = (date) => {
+    const d = validateDate(date);
+    d.setMilliseconds(0);
+    return d;
+};
