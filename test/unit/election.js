@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import Election from "../../src/bot/election.js";
-import { addDates, dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
+import { addDates, dateToUtcTimestamp, trimMs } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockElectionAnnouncement } from "../mocks/election.js";
 import { getMockNominee } from "../mocks/nominee.js";
@@ -464,6 +464,41 @@ describe(Election.name, () => {
 
             expect(badges.size).to.equal(optional.length);
             expect(optional.every((b) => badges.has(b.badge_id))).to.be.true;
+        });
+    });
+
+    describe(Election.prototype.getNextPhaseDate.name, () => {
+        it("should correctly determine next phase date", () => {
+            const election = new Election("https://stackoverflow.com/election/12");
+
+            const nominationStart = trimMs(new Date());
+            const primaryStart = trimMs(addDates(nominationStart, election.durations.nomination));
+            const electionStart = trimMs(addDates(primaryStart, election.durations.primary));
+            const endedStart = trimMs(addDates(electionStart, election.durations.electionWithPrimary));
+
+            election.dateNomination = dateToUtcTimestamp(nominationStart);
+            election.datePrimary = dateToUtcTimestamp(primaryStart);
+            election.dateElection = dateToUtcTimestamp(electionStart);
+            election.dateEnded = dateToUtcTimestamp(endedStart);
+
+            expect(
+                election.getNextPhaseDate(nominationStart)?.valueOf(),
+                `Primary start (${primaryStart}) != nomination start (${nominationStart}) + duration`
+            ).to.equal(primaryStart.valueOf());
+
+            expect(
+                election.getNextPhaseDate(primaryStart)?.valueOf(),
+                `Election start (${electionStart}) != primary start (${primaryStart}) + duration`
+            ).to.equal(electionStart.valueOf());
+
+            expect(
+                election.getNextPhaseDate(electionStart)?.valueOf(),
+                `Ended start (${endedStart}) != election start (${electionStart}) + duration`
+            ).to.equal(endedStart.valueOf());
+
+            expect(
+                election.getNextPhaseDate(endedStart)
+            ).to.be.undefined;
         });
     });
 

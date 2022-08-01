@@ -5,7 +5,7 @@ import { addDates, dateToUtcTimestamp, dateUnitHandlers, daysDiff, getCurrentUTC
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { filterMap, getOrInit, mergeMaps, sortMap } from '../shared/utils/maps.js';
 import { clone } from '../shared/utils/objects.js';
-import { formatOrdinal } from "../shared/utils/strings.js";
+import { capitalize, formatOrdinal } from "../shared/utils/strings.js";
 import { getNamedBadges, getNumberOfVoters } from './api.js';
 import { getElectionAnnouncements } from "./elections/announcements.js";
 import { getAppointedModerators, getElectedModerators } from "./elections/moderators.js";
@@ -686,6 +686,29 @@ export default class Election {
         }
 
         return badgesByType;
+    }
+
+    /**
+     * @summary gets start date of the next {@link ElectionPhase}
+     * @param {Date} [today] current date override
+     * @returns {Date|undefined}
+     */
+    getNextPhaseDate(today) {
+        const phase = this.getPhase(today) || "nomination";
+        if (phase === "ended" || phase === "cancelled") return;
+
+        const phaseStart = this[`date${capitalize(phase)}`];
+        if (!phaseStart) return;
+
+        const { durations, datePrimary } = this;
+
+        const duration = phase === "election" ?
+            durations[datePrimary ?
+                "electionWithPrimary" :
+                "electionWithoutPrimary"] :
+            durations[phase];
+
+        return addDates(phaseStart, duration);
     }
 
     /**
