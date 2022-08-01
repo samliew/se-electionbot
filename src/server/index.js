@@ -3,6 +3,8 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from "url";
 import Election from '../bot/election.js';
 import * as helpers from "./helpers.js";
+import { publicPaths } from './middleware/index.js';
+import { queryAuth } from './middleware/queryAuth.js';
 import { commands } from "./routes/commands.js";
 import { config } from "./routes/config.js";
 import { feedback } from "./routes/feedback.js";
@@ -34,19 +36,6 @@ const layoutsPath = join(viewsPath, "layouts");
 
 const app = express();
 
-/*
- * By default we want to password-protect all routes.
- * Whitelist these public paths from password protection.
- */
-const publicPaths = [
-    "/",
-    "/favicon.ico",
-    "/feedback",
-    "/ping",
-    "/realtime",
-    "/static",
-];
-
 /** @type {ConfigOptions} */
 const handlebarsConfig = {
     // without extname property set to .<extension>, partials will not work
@@ -74,44 +63,7 @@ app.use(express.static(staticPath));
  */
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-
-    const { query, ip, hostname, path, body = {}, app } = req;
-
-    /** @type {BotConfig|undefined} */
-    const config = app.get("bot_config");
-
-    // Redirect to hostname specified in bot config
-    const scriptHostname = config?.scriptHostname;
-    if (scriptHostname && !scriptHostname.includes(hostname) && !scriptHostname.includes('localhost')) {
-        if (config?.debugOrVerbose) console.log(`[server] Redirected ${hostname} to ${scriptHostname}`);
-
-        const querystring = req.url.split('?')[1] || null;
-        res.redirect(`${scriptHostname}${path}${querystring ? '?' + querystring : ''}`);
-        return;
-    }
-
-    // Password-protect pages
-    const { password: pwdFromQuery = "" } = query;
-    const { password: pwdFromBody = "" } = body;
-
-    const password = pwdFromQuery || pwdFromBody;
-    const validPwd = password === process.env.PASSWORD;
-
-    if (!publicPaths.includes(path) && !validPwd) {
-        console.log(`[server] Unauthorised connect "${path}"
-            IP:   ${ip}
-            Host: ${hostname}
-            Pass: ${password}
-        `);
-        return res.sendStatus(401);
-    }
-
-    next();
-});
+app.use(queryAuth);
 
 /** @type {Map<string, ExpressRes>} */
 const connections = new Map();
