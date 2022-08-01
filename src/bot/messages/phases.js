@@ -15,26 +15,30 @@ import { getFormattedElectionSchedule, linkToRelativeTimestamp, linkToUtcTimesta
  * @summary builds a response to the election status query
  * @type {MessageBuilder}
  */
-export const sayAboutElectionStatus = (_c, _es, election, ...rest) => {
-    const { phase, numNominees, electionUrl, statVoters = "", repVote, dateElection } = election;
+export const sayAboutElectionStatus = (config, _es, election, ...rest) => {
+    const { numNominees, electionUrl, statVoters = "", repVote, dateElection } = election;
 
-    if (election.isNotStartedYet()) return sayElectionNotStartedYet(_c, _es, election, ...rest);
-    if (election.isEnded()) return sayElectionIsOver(_c, _es, election, ...rest);
+    const phase = election.getPhase(config.nowOverride);
+
+    if (phase === null) return sayElectionNotStartedYet(config, _es, election, ...rest);
+    if (phase === "ended") return sayElectionIsOver(config, _es, election, ...rest);
     if (phase === 'cancelled') return statVoters;
 
     const phaseLink = makeURL("election", `${electionUrl}?tab=${phase}`);
 
+    const nomineeTerm = getCandidateOrNominee();
+
     if (phase === 'election') {
         const status = `The ${phaseLink} is in the final voting phase`;
-        return `${status}. You can cast your ballot by ranking ${getCandidateOrNominee()}s in order of preference if you haven't done so already.`;
+        return `${status}. You can cast your ballot by ranking ${nomineeTerm}s in order of preference if you haven't done so already.`;
     }
 
-    const prefix = `The ${phaseLink} is in the ${phase} phase with ${numNominees} ${getCandidateOrNominee()}s`;
+    const prefix = `The ${phaseLink} is in the ${phase} phase with ${numNominees} ${nomineeTerm}${pluralize(numNominees)}`;
 
     if (phase === 'primary') {
         const postfix = `come back ${linkToRelativeTimestamp(dateElection)} to vote in the final election voting phase`;
         const conditions = `If you have at least ${repVote} reputation`;
-        const actions = `you may freely vote on the ${getCandidateOrNominee()}s`;
+        const actions = `you may freely vote on the ${nomineeTerm}s`;
         return `${prefix}. ${conditions}, ${actions}, and ${postfix}.`;
     }
 

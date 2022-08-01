@@ -216,12 +216,12 @@ describe("Messages", () => {
     });
 
     describe(sayAboutElectionStatus.name, () => {
-        /** @type {ReturnType<typeof getMockBotConfig>} */
-        let config;
-        beforeEach(() => config = getMockBotConfig());
+        /** @type {Election} */
+        let election;
+        beforeEach(() => election = new Election("https://stackoverflow.com/election/42"));
+
 
         it('should correctly determine if election has not started yet', () => {
-            const election = new Election("https://stackoverflow.com/election/12");
             election.dateNomination = dateToUtcTimestamp(addDates(Date.now(), 7));
 
             const message = sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
@@ -229,8 +229,8 @@ describe("Messages", () => {
         });
 
         it('should correctly determine if election is over', () => {
-            const election = new Election("https://stackoverflow.com/election/12");
-            election.phase = "ended";
+            election.dateEnded = dateToUtcTimestamp(Date.now());
+            config.nowOverride = addDates(Date.now(), 1);
 
             const message = sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
             expect(message).to.match(/is over/i);
@@ -239,30 +239,29 @@ describe("Messages", () => {
         it('should correctly determine if election is cancelled', () => {
             const statVoters = "test voter stats";
 
-            const election = new Election("https://stackoverflow.com/election/42");
-            election.phase = "cancelled";
+            election.dateElection = dateToUtcTimestamp(Date.now());
+            election.dateCancelled = dateToUtcTimestamp(Date.now());
             election.statVoters = statVoters;
+            config.nowOverride = addDates(Date.now(), 1);
 
             const message = sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
             expect(message).to.include(statVoters);
         });
 
         it('should build correct message for the election phase', () => {
-            const election = new Election("https://stackoverflow.com/election/42");
-            election.phase = "election";
+            election.dateElection = dateToUtcTimestamp(Date.now());
+            config.nowOverride = new Date();
 
             const message = sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
             expect(message).to.include("final voting phase");
         });
 
-        it('should build correct message for the primary phase', async () => {
-            const election = new Election("https://stackoverflow.com/election/42");
+        it('should build correct message for the primary phase', () => {
             election.dateElection = dateToUtcTimestamp(addDates(Date.now(), 4));
             election.datePrimary = dateToUtcTimestamp(Date.now());
-            election.phase = "primary";
 
-            const message = await sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
-            expect(message).to.include(`is in the ${election.phase} phase`);
+            const message = sayAboutElectionStatus(config, election.elections, election, "", user, bot, room);
+            expect(message).to.include(`is in the primary phase`);
             expect(message).to.match(/come back.+?to vote/);
         });
     });
