@@ -449,11 +449,12 @@ use defaults ${defaultChatNotSet}`
             //if user is null, we have a problem
             if (!profile) return console.log(`missing user ${userId}`);
 
-            if (profile.isModerator) {
-                config.modIds.add(profile.id);
+            const user = new User(profile);
+
+            if(user.isMod()) {
+                await config.addAdmins(profile);
             }
 
-            const user = new User(profile);
             await user.updateAccess(config);
 
             // update the user to check the commands against
