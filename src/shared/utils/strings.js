@@ -86,3 +86,13 @@ export const capitalize = (word) => {
  * @returns {number}
  */
 export const longestLength = (strings) => Math.max(...strings.map(({ length }) => length)) || 0;
+
+/**
+ * @summary trims leading, trailing, and duplicate whitespaces
+ * @param {string} text text to normalize
+ * @returns {string}
+ */
+export const normalizeSpaces = (text) => {
+    // https://regex101.com/r/Wj7Ng4/1
+    return text.replace(/^\s+|(\s)\s+|^\s+|\s+$/gm, "$1");
+};
