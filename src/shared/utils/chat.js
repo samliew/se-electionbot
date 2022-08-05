@@ -1,6 +1,7 @@
 import entities from 'html-entities';
 import sanitize from "sanitize-html";
 import { validateDate } from "./dates.js";
+import { normalizeSpaces } from './strings.js';
 
 /**
  * @summary strips mentions of a given user from a message
@@ -28,7 +29,10 @@ export const stripMentions = (message, username) => {
 export const prepareMessageForMatching = (encodedMessage, username) => {
     const decoded = entities.decode(encodedMessage);
     const prepared = sanitize(
-        stripMentions(decoded.toLowerCase(), username),
+        stripMentions(
+            normalizeSpaces(
+                decoded.toLowerCase()
+            ), username),
         { allowedTags: [] }
     );
     return { decodedMessage: decoded, preparedMessage: prepared };
