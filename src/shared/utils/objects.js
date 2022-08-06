@@ -141,3 +141,35 @@ export const diffObjects = (source, target) => {
  * @returns {boolean}
  */
 export const isEmptyObj = (obj) => !Object.keys(obj).length;
+
+/**
+ * @template T
+ *
+ * @summary deep-clones a value
+ * @param {T} value value to clone
+ */
+export const deepClone = (value) => {
+    if (value instanceof Map) {
+        return new Map([...value].map(([k, v]) => [k, deepClone(v)]));
+    }
+
+    if (value instanceof Set) {
+        return new Set([...value].map(deepClone));
+    }
+
+    if (value instanceof Date) {
+        return new Date(value.valueOf());
+    }
+
+    if (Array.isArray(value)) {
+        return value.map(deepClone);
+    }
+
+    if (typeof value === "object" && value) {
+        return Object.fromEntries(
+            Object.entries(value).map(([k, v]) => [k, deepClone(v)])
+        );
+    }
+
+    return value;
+};
