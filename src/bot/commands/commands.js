@@ -4,9 +4,9 @@ import * as ServerUtils from "../../server/utils.js";
 import { flat } from "../../shared/utils/arrays.js";
 import { formatAsChatCode } from "../../shared/utils/chat.js";
 import { dateToUtcTimestamp, getDateFromUTCstring, getMilliseconds } from "../../shared/utils/dates.js";
-import { matchISO8601, matchNumber } from "../../shared/utils/expressions.js";
+import { matchISO8601, matchNumber, safeCapture } from "../../shared/utils/expressions.js";
 import { mapMap, mergeMaps } from "../../shared/utils/maps.js";
-import { formatNumber, capitalize } from "../../shared/utils/strings.js";
+import { capitalize, formatNumber } from "../../shared/utils/strings.js";
 import { getBadges, getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election, { getSiteElections, getVotingGraph } from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
@@ -886,4 +886,32 @@ export const getConfirmationsCommand = (args) => {
     }
 
     return `Waiting for ${length} user${pluralize(length)} confirmation:\n${confirmations.join("\n")}`;
+};
+
+/**
+ * @summary forces an update for the current election
+ * @param {Pick<CommandArguments,"config"|"election"|"content">} args command arguments
+ * @returns {Promise<string>}
+ */
+export const updateElection = async (args) => {
+    const { config, election, content } = args;
+
+    const updateType = safeCapture(
+        // https://regex101.com/r/jG9Yzc/2
+        /update\s+election(?:\s+(announcements|badges|moderators))?/i,
+        content
+    );
+
+    if (!updateType) return "";
+
+    /** @type {Record<string, (c: BotConfig) => Promise<Election>>} */
+    const updateMap = {
+        announcements: election.updateElectionAnnouncements,
+        badges: election.updateElectionBadges,
+        moderators: election.updateModerators,
+    };
+
+    await updateMap[updateType].call(election, config);
+
+    return "";
 };

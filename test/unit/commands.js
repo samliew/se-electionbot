@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import { AccessLevel } from "../../src/bot/commands/access.js";
-import { isAliveCommand, resetElection, setThrottleCommand, timetravelCommand } from "../../src/bot/commands/commands.js";
+import { isAliveCommand, resetElection, setThrottleCommand, timetravelCommand, updateElection } from "../../src/bot/commands/commands.js";
 import { CommandManager } from "../../src/bot/commands/index.js";
 import { User } from "../../src/bot/commands/user.js";
 import Election from "../../src/bot/election.js";
@@ -11,18 +11,24 @@ import { getMockNominee } from "../mocks/nominee.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
 /**
+ * @typedef {import("../../src/bot/config.js").default} BotConfig
  * @typedef {import("../../src/bot/election.js").ModeratorUser} ModeratorUser
  */
 
 describe('Commands', () => {
 
+    /** @type {User} */
+    let user;
+    beforeEach(() => user = new User(getMockUserProfile()));
+
     describe(CommandManager.name, () => {
+
+        /** @type {CommandManager} */
+        let commander;
+        beforeEach(() => commander = new CommandManager(user));
 
         describe('adding', () => {
             it("bulkAdd should correctly add commands", () => {
-                const user = new User(getMockUserProfile());
-
-                const commander = new CommandManager(user);
                 commander.bulkAdd({
                     build: ["builds something", () => void 0, void 0],
                     test: ["tests something", () => true, void 0]
@@ -35,9 +41,6 @@ describe('Commands', () => {
 
         describe('aliasing', () => {
             it('"alias" should correctly add aliases', () => {
-                const user = new User(getMockUserProfile());
-
-                const commander = new CommandManager(user);
                 commander.add({
                     name: "bark",
                     description: "barks, what else?",
@@ -51,9 +54,6 @@ describe('Commands', () => {
             });
 
             it('"aliases" method should correct set aliases', () => {
-                const user = new User(getMockUserProfile());
-
-                const commander = new CommandManager(user);
                 commander.add({ name: "♦", description: "gets a diamond", handler: () => "♦" });
                 commander.add({ name: "gold", description: "gets some gold", handler: () => "#FFD700" });
 
@@ -73,11 +73,7 @@ describe('Commands', () => {
         });
 
         describe('help', () => {
-
             it('should only list available commands', () => {
-                const user = new User(getMockUserProfile());
-
-                const commander = new CommandManager(user);
                 commander.add({ name: "alive", description: "pings the bot", handler: () => "I am alive", access: AccessLevel.all });
                 commander.add({ name: "stop", description: "stops the bot", handler: () => "stopping...", access: AccessLevel.dev });
 
@@ -96,9 +92,6 @@ describe('Commands', () => {
             });
 
             it('should correctly list aliases', () => {
-                const user = new User(getMockUserProfile());
-
-                const commander = new CommandManager(user);
                 commander.add({ name: "bark", description: "barks, what else?", handler: () => "bark!", access: AccessLevel.all });
                 commander.alias("bark", ["say"]);
 
@@ -108,12 +101,12 @@ describe('Commands', () => {
         });
 
         describe('AccessLevel', () => {
-            const user = new User(getMockUserProfile());
 
-            const commander = new CommandManager(user);
-            commander.add({ name: "destroy", description: "Destroys the universe", handler: () => "💥", access: AccessLevel.dev });
-            commander.add({ name: "restart", description: "Restarts the bot", handler: () => true, access: AccessLevel.privileged });
-            commander.add({ name: "pet", description: "Pets the bot", handler: () => "good bot! Who's a good bot?", access: AccessLevel.all });
+            beforeEach(() => {
+                commander.add({ name: "destroy", description: "Destroys the universe", handler: () => "💥", access: AccessLevel.dev });
+                commander.add({ name: "restart", description: "Restarts the bot", handler: () => true, access: AccessLevel.privileged });
+                commander.add({ name: "pet", description: "Pets the bot", handler: () => "good bot! Who's a good bot?", access: AccessLevel.all });
+            });
 
             it('should allow privileged commands for privileged users', () => {
                 user.access = AccessLevel.dev;
@@ -143,12 +136,16 @@ describe('Commands', () => {
 
     describe('Individual commands', () => {
 
+        /** @type {BotConfig} */
+        let config;
+        beforeEach(() => config = getMockBotConfig());
+
+        /** @type {Election} */
+        let election;
+        beforeEach(() => election = new Election("https://stackoverflow.com/election/12"));
+
         describe(timetravelCommand.name, () => {
-
             it('should fail if date is not valid', () => {
-                const config = getMockBotConfig();
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 const response = timetravelCommand({ config, election, content: "take me to the moon" });
                 expect(response).to.match(/invalid/i);
             });
@@ -160,16 +157,14 @@ describe('Commands', () => {
                 const futureDate = new Date();
                 futureDate.setDate(endingDate.getDate() + 365);
 
-                const config = getMockBotConfig({
-                    flags: {
-                        announcedWinners: true,
-                        saidElectionEndingSoon: true,
-                        debug: false,
-                        fun: false,
-                        verbose: false
-                    }
+                Object.assign(config.flags, {
+                    announcedWinners: true,
+                    saidElectionEndingSoon: true,
+                    debug: false,
+                    fun: false,
+                    verbose: false
                 });
-                const election = new Election("https://stackoverflow.com/election/12");
+
                 election.phase = "nomination";
                 election.dateEnded = endingDate.toISOString();
 
@@ -187,15 +182,11 @@ describe('Commands', () => {
                 const noDate = timetravelCommand({ config, election, content: `timetravel to ${isoDate}` });
                 expect(noDate).to.contain("no phase");
             });
-
         });
 
         describe(setThrottleCommand.name, () => {
-
             it('should do nothing if new throttle is invalid', () => {
-                const throttleSecs = 5;
-
-                const config = getMockBotConfig({ throttleSecs });
+                config.throttleSecs = 5;
 
                 const status = setThrottleCommand({
                     config,
@@ -207,9 +198,7 @@ describe('Commands', () => {
             });
 
             it('should correctly update throttle value', () => {
-                const throttleSecs = 5;
-
-                const config = getMockBotConfig({ throttleSecs });
+                config.throttleSecs = 5;
 
                 const status = setThrottleCommand({
                     config,
@@ -219,13 +208,10 @@ describe('Commands', () => {
                 expect(status).to.contain("throttle set");
                 expect(config.throttleSecs).to.equal(10);
             });
-
         });
 
         describe(isAliveCommand.name, () => {
-
             it('should correctly build responses', () => {
-                const config = getMockBotConfig();
                 const mockHost = "hosting.com";
                 const mockStart = new Date();
 
@@ -264,36 +250,68 @@ describe('Commands', () => {
                 const noVerbose = isAliveCommand(args);
                 expect(noVerbose).to.not.contain("verbose ");
             });
-
         });
 
         describe(resetElection.name, () => {
-
             it('should make current election forget the last state', () => {
-                const election = new Election("https://stackoverflow.com/election/13");
-
                 election.pushHistory();
 
-                resetElection({ config: getMockBotConfig(), election });
+                resetElection({ config, election });
 
                 expect(election.prev).to.be.null;
             });
 
             it('should reset current election state', () => {
-                const election = new Election("https://stackoverflow.com/election/13");
                 election.addActiveNominee(getMockNominee(election));
                 election.winners.set(42, getMockNominee(election));
                 election.moderators.set(-1, /** @type {ModeratorUser} */({}));
                 election.phase = "primary";
 
-                resetElection({ config: getMockBotConfig(), election });
+                resetElection({ config, election });
 
                 expect(election.numNominees).to.equal(0);
                 expect(election.numWinners).to.equal(0);
                 expect(election.numMods).to.equal(0);
                 expect(election.phase).to.be.null;
             });
+        });
 
+        describe(updateElection.name, async () => {
+
+            /** @type {Record<string, sinon.SinonStub>} */
+            const stubs = {};
+            beforeEach(() => {
+                Object.assign(stubs, {
+                    announcements: sinon.stub(election, "updateElectionAnnouncements"),
+                    badges: sinon.stub(election, "updateElectionBadges"),
+                    moderators: sinon.stub(election, "updateModerators"),
+                });
+            });
+
+            it("should noop if no update type is provided", async () => {
+                await updateElection({
+                    config,
+                    election,
+                    content: "update election",
+                });
+
+                Object.values(stubs).forEach((stub) => {
+                    expect(stub.called, stub.name).to.be.false;
+                });
+            });
+
+            it("should correctly update elections", async () => {
+                for (const type of ["announcements", "badges", "moderators"]) {
+                    await updateElection({
+                        config,
+                        election,
+                        content: `update election ${type}`
+                    });
+
+                    const stub = stubs[type];
+                    expect(stub.calledOnce).to.be.true;
+                }
+            });
         });
     });
 });
