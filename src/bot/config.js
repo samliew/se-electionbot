@@ -1,4 +1,6 @@
+import { asyncMapSequential } from "../shared/utils/arrays.js";
 import { chatMarkdownToHtml } from "../shared/utils/markdown.js";
+import { scrapeNetworkProfile } from "../shared/utils/scraping.js";
 import { getNetworkAccountIdFromChatId as getNetworkIdFromChatId, parseBoolEnv, parseIds } from "./utils.js";
 
 const MS_IN_SECOND = 1e3;
@@ -13,6 +15,7 @@ const MS_IN_HOUR = 60 * MS_IN_MINUTE;
  * @typedef {import("chatexchange/dist/User").default} ChatUser
  * @typedef {import("chatexchange/dist/Client").Host} Host
  * @typedef {import("./index").MessageBuilder} MessageBuilder
+ * @typedef {import("../shared/utils/scraping.js").NetworkProfile} NetworkProfile
  * @typedef {import("./utils").RoomUser} RoomUser
  */
 
@@ -592,6 +595,24 @@ export class BotConfig {
      */
     async addDevs(...users) {
         return this.#updatePrivilegedUsers("add", "dev", users);
+    }
+
+    /**
+     * @summary gets a list of network user profiles with the "admin" access level
+     * @returns {Promise<Array<NetworkProfile>>}
+     */
+    async getAdmins() {
+        const { adminIds } = this;
+        return asyncMapSequential([...adminIds], (accountId) => scrapeNetworkProfile(this, accountId));
+    }
+
+    /**
+     * @summary gets a list of network user profiles with the "dev" access level
+     * @returns {Promise<Array<NetworkProfile>>}
+     */
+    async getDevs() {
+        const { devIds } = this;
+        return asyncMapSequential([...devIds], (accountId) => scrapeNetworkProfile(this, accountId));
     }
 
     /**
