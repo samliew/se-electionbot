@@ -154,7 +154,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 console.log(`[rescraper] announced dates change: ${status}`);
             }
 
-            if (election.phase === 'cancelled' && election.isNewPhase()) {
+            if (election.isCancelled() && election.isNewPhase()) {
                 scheduler.stopAll();
                 const status = await announcement?.announceCancelled(room);
                 console.log(`[rescraper] announced cancellation: ${status}`);
