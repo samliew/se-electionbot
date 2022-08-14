@@ -9,6 +9,7 @@ const MS_IN_HOUR = 60 * MS_IN_MINUTE;
  * @typedef {import("./commands/access.js").AccessLevel} AccessLevel
  * @typedef {import("./env").default<BotEnvironment>} BotEnv
  * @typedef {import("./env").BotEnvironment} BotEnvironment
+ * @typedef {import("./commands/user.js").User} BotUser
  * @typedef {import("chatexchange/dist/User").default} ChatUser
  * @typedef {import("chatexchange/dist/Client").Host} Host
  * @typedef {import("./index").MessageBuilder} MessageBuilder
@@ -672,6 +673,30 @@ export class BotConfig {
     checkSameResponseAsPrevious(newContent) {
         // Unable to repost same message within 30 seconds
         return this.lastBotMessage === newContent && Date.now() - 30e4 < this.lastMessageTime;
+    }
+
+    /**
+     * @summary gets confirmation handler for a given user
+     * @param {number|BotUser|ChatUser|RoomUser} user user or user id
+     * @returns {MessageBuilder|undefined}
+     */
+    getConfirmationHandler(user) {
+        const { awaitingConfirmation } = this;
+        const id = typeof user === "number" ? user : user.id;
+        return awaitingConfirmation.get(id);
+    }
+
+    /**
+     * @summary sets confirmation handler for a given user
+     * @param {number|BotUser|ChatUser|RoomUser} user user or user id
+     * @param {MessageBuilder} handler successful confirmation handler
+     * @returns {BotConfig}
+     */
+    setConfirmationHandler(user, handler) {
+        const { awaitingConfirmation } = this;
+        const id = typeof user === "number" ? user : user.id;
+        awaitingConfirmation.set(id, handler);
+        return this;
     }
 
     toJSON() {
