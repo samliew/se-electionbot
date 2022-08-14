@@ -885,10 +885,14 @@ export default class Election {
 
     /**
      * @summary checks if the election has ended
+     * @param {Date} [today] current date override
      * @returns {boolean}
      */
-    isEnded() {
-        const { phase, dateEnded } = this;
+    isEnded(today) {
+        const { dateEnded } = this;
+
+        const phase = this.getPhase(today);
+
         return phase !== "cancelled" && [
             phase === "ended",
             new Date(dateEnded).valueOf() < Date.now()

@@ -59,6 +59,8 @@ export default class Rescraper {
             console.log(`[rescraper] rescrape function called.`);
         }
 
+        const { nowOverride } = config;
+
         try {
             // Should happen before scrape call to ensure the announcement is unscheduled,
             // otherwise we may report new phase when in reality the dates are being changed.
@@ -166,7 +168,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
             }
 
             // Official results out
-            if (election.isEnded() && election.hasNewWinners) {
+            if (election.isEnded(nowOverride) && election.hasNewWinners) {
                 scheduler.stopAll();
                 const status = await announcement?.announceWinners();
                 console.log(`[rescraper] announced winners: ${status}`);
