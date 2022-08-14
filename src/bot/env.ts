@@ -18,6 +18,7 @@ export interface BotEnvironment {
     LOW_ACTIVITY_COUNT_THRESHOLD?: string;
     MAX_FUN_RESPONSES?: string;
     MAINTAINERS?: string;
+    PASSWORD?: string;
     REPO_URL?: string;
     SCRAPE_INTERVAL_MINS?: string;
     SHORT_IDLE_DURATION_MINS?: string;

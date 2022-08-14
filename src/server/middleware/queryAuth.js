@@ -3,12 +3,13 @@
  */
 
 import { publicPaths } from "./index.js";
+import { timingSafeEqual } from "./utils.js";
 
 /**
  * @summary middleware for query string-based auth
  * @type {import("express").RequestHandler}
  */
-export const queryAuth = (req, res, next) => {
+export const queryAuth = async (req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
@@ -17,10 +18,16 @@ export const queryAuth = (req, res, next) => {
     /** @type {BotConfig|undefined} */
     const config = app.get("bot_config");
 
+    if (!config) {
+        console.error("[server] bot config missing");
+        res.sendStatus(500);
+        return;
+    }
+
     // Redirect to hostname specified in bot config
-    const scriptHostname = config?.scriptHostname;
+    const { scriptHostname } = config;
     if (scriptHostname && !scriptHostname.includes(hostname) && !scriptHostname.includes('localhost')) {
-        if (config?.debugOrVerbose) console.log(`[server] Redirected ${hostname} to ${scriptHostname}`);
+        if (config.debugOrVerbose) console.log(`[server] redirected ${hostname} to ${scriptHostname}`);
 
         const querystring = req.url.split('?')[1] || null;
         res.redirect(`${scriptHostname}${path}${querystring ? '?' + querystring : ''}`);
@@ -32,10 +39,13 @@ export const queryAuth = (req, res, next) => {
     const { password: pwdFromBody = "" } = body;
 
     const password = pwdFromQuery || pwdFromBody;
-    const validPwd = password === process.env.PASSWORD;
+
+    const dashboardPwd = config.get("password");
+
+    const validPwd = !!dashboardPwd && await timingSafeEqual(password, dashboardPwd);
 
     if (!publicPaths.includes(path) && !validPwd) {
-        console.log(`[server] Unauthorised connect "${path}"
+        console.log(`[server] unauthorised connect "${path}"
             IP:   ${ip}
             Host: ${hostname}
             Pass: ${password}
@@ -43,6 +53,8 @@ export const queryAuth = (req, res, next) => {
         res.sendStatus(401);
         return;
     }
+
+    res.locals.authenticated = true;
 
     next();
 };
