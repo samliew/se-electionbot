@@ -84,3 +84,42 @@ export const scrapeModerators = async (config, siteUrl) => {
 
     return mods;
 };
+
+/**
+ * @typedef {{
+ *  about_me: string,
+ *  display_name: string,
+ *  link: string,
+ *  id: number,
+ *  location: string,
+ *  profile_image: string,
+ * }} NetworkProfile
+ *
+ * @summary scrapes user's network profile
+ * @param {BotConfig} config bot configuration
+ * @param {string|number} accountId user network account id
+ * @returns {Promise<NetworkProfile>}
+ */
+export const scrapeNetworkProfile = async (config, accountId) => {
+    const base = "https://stackexchange.com/users/";
+
+    const url = new URL(accountId.toString(), base);
+
+    const html = await fetchUrl(config, url);
+
+    const { window: { document } } = new JSDOM(html);
+
+    const display_name = document.querySelector(".user-details a[href*='/users']")?.textContent || "";
+    const about_me = document.querySelector(".user-about-me")?.innerHTML || "";
+    const location = document.querySelector(".user-details > p:last-child")?.innerHTML || "";
+    const profile_image = document.querySelector(".user-avatar > img")?.getAttribute("src") || "";
+
+    return {
+        about_me,
+        display_name,
+        id: +accountId,
+        link: url.toString(),
+        location,
+        profile_image,
+    };
+};
