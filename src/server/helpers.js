@@ -17,8 +17,13 @@ export const isObj = (source) => !!source && typeof source === "object";
 /** @type {(source: unknown) => boolean} */
 export const isBool = (source) => typeof source === "boolean";
 
-/** @type {(source: unknown[], sep: string) => string} */
-export const join = (source, sep) => source.join(sep);
+/**
+ * @summary joins a collection on a separator
+ * @param {unknown[]|Set<unknown>} source collection to join
+ * @param {string} [sep] separator to join on
+ * @returns {string}
+ */
+export const join = (source, sep = "") => [...source].join(sep);
 
 /** @type {(source: unknown) => boolean} */
 export const isURL = (source) => {
