@@ -288,12 +288,16 @@ describe('Commands', () => {
                 });
             });
 
-            it("should noop if no update type is provided", async () => {
-                await updateElection({
+            it("should noop and request confirmation if no update type is provided", async () => {
+                const message = await updateElection({
                     config,
-                    election,
                     content: "update election",
+                    election,
+                    user,
                 });
+
+                expect(config.awaitingConfirmation.has(user.id));
+                expect(message).to.include("update type");
 
                 Object.values(stubs).forEach((stub) => {
                     expect(stub.called, stub.name).to.be.false;
@@ -302,11 +306,14 @@ describe('Commands', () => {
 
             it("should correctly update elections", async () => {
                 for (const type of ["announcements", "badges", "moderators"]) {
-                    await updateElection({
+                    const message = await updateElection({
                         config,
+                        content: `update election ${type}`,
                         election,
-                        content: `update election ${type}`
+                        user,
                     });
+
+                    expect(message).to.include(type).and.include("updated");
 
                     const stub = stubs[type];
                     expect(stub.calledOnce).to.be.true;

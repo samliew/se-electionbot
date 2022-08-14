@@ -14,7 +14,7 @@ import { sayUptime } from "../messages/metadata.js";
 import { sayOtherSiteMods } from "../messages/moderators.js";
 import { sendMessage } from "../queue.js";
 import { getCandidateOrNominee, RandomArray } from "../random.js";
-import { fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, makeURL, pluralize, wait } from "../utils.js";
+import { fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, listify, makeURL, pluralize, wait } from "../utils.js";
 
 /**
  * @typedef {import("../announcement.js").default} Announcer
@@ -27,7 +27,7 @@ import { fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, makeU
  * @typedef {import("../index").UserProfile} UserProfile
  * @typedef {import("chatexchange/dist/User").default} ChatUser
  * @typedef {import("../scheduler.js").default} Scheduler
- * @typedef {import("./user").User} User
+ * @typedef {import("./user").User} BotUser
  *
  * @typedef {{
  *  announcement: Announcer,
@@ -39,7 +39,7 @@ import { fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, makeU
  *  election: Election,
  *  room: Room,
  *  scheduler: Scheduler,
- *  user: User
+ *  user: BotUser
  * }} CommandArguments
  */
 
@@ -890,19 +890,17 @@ export const getConfirmationsCommand = (args) => {
 
 /**
  * @summary forces an update for the current election
- * @param {Pick<CommandArguments,"config"|"election"|"content">} args command arguments
+ * @param {Pick<CommandArguments,"config"|"election"|"content"|"user">} args command arguments
  * @returns {Promise<string>}
  */
 export const updateElection = async (args) => {
-    const { config, election, content } = args;
+    const { config, election, content, user } = args;
 
     const updateType = safeCapture(
         // https://regex101.com/r/jG9Yzc/2
         /update\s+election(?:\s+(announcements|badges|moderators))?/i,
         content
     );
-
-    if (!updateType) return "";
 
     /** @type {Record<string, (c: BotConfig) => Promise<Election>>} */
     const updateMap = {
@@ -911,7 +909,20 @@ export const updateElection = async (args) => {
         moderators: election.updateModerators,
     };
 
+    const updateTypes = Object.keys(updateMap);
+
+    if (!updateType) {
+        config.setConfirmationHandler(user, (_c, _es, _e, text) => {
+            return updateElection({
+                ...args,
+                content: `update election ${text}`
+            });
+        });
+
+        return `Please reply with the update type: ${listify(...updateTypes)}.`;
+    }
+
     await updateMap[updateType].call(election, config);
 
-    return "";
+    return `Successfully updated ${updateType}`;
 };
