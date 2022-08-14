@@ -8,7 +8,7 @@ import { capitalize, formatOrdinal, prettify } from "../shared/utils/strings.js"
  * @typedef {Hbs.HelperOptions} HelperOptions
  */
 
-/** @type {(source: unknown) => boolean} */
+/** @type {(source: unknown) => source is unknown[]} */
 export const isArr = (source) => Array.isArray(source);
 
 /** @type {(source: unknown) => boolean} */
@@ -268,3 +268,20 @@ export const not = (val) => !val;
  * @returns {boolean}
  */
 export const includes = (source, value) => source.includes(value);
+
+/**
+ * @template {string[]|unknown[][]} T
+ *
+ * @summary concatenates several sources together
+ * @param {T} params sources to concatenate
+ * @returns {T[number]}
+ */
+export const concat = (...params) => {
+    const [firstSource] = params;
+
+    const sources = params.slice(0, -1);
+
+    return !isArr(firstSource) ?
+        sources.join("") :
+        sources.flatMap((s) => s);
+};
