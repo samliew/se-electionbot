@@ -129,24 +129,25 @@ Moderators and privileged users can also use these commands _(requires mention)_
 
 Users with access level set to `AccessLevel.dev` have access to a list of power user commands _(requires @-mention)_:
 
-| Command                                                         | Action                                                                                    |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| chatroom                                                        | Gets the current election chat room URL                                                   |
-| debug `<on\|off>`                                               | Switches debug mode on or off                                                             |
-| feedback                                                        | Posts a message about giving feedback to the bot                                          |
-| `<get\|report>` confirmations                                   | Lists chat user ids and message builder names that are in the confirmation mode           |
-| get cron                                                        | Gets a report on the current cron jobs                                                    |
-| `<get modes report\|report modes>`                              | Gets a report on the current mode state                                                   |
-| get rooms                                                       | Lists the chat rooms the bot is currently joined to                                       |
-| impersonate `<userId>`                                          | Considers all messages to come from a user with `userId` (NB: might downlevel privileges) |
-| join `[roomId]` room `[roomId]`                                 | Makes the bot join a room wiht `roomId`                                                   |
-| leave `[this\|current]` room `[roomId]`                         | Makes the bot leave the current room or a room with `roomId`                              |
-| reset election                                                  | Resets the current election state and clears the scraping history                         |
-| set `<access\|level>` `<me\|userId>` `<user\|admin\|dev>`       | Sets access level of a user with `userId`                                                 |
-| test cron                                                       | Schedules a test cron job                                                                 |
-| `<88 miles\|delorean\|timetravel>` to `<today\|date\|datetime>` | Adjusts the bot's internal clock to a given date                                          |
-| verbose `<on\|off>`                                             | Switches verbose mode on or off                                                           |
-| what is the candidate score for `<userRef>`                     | Calculates candidate score of a user by `userRef` (see below)                             |
+| Command                                                         | Action                                                                                    | Confirmation                     |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------- |
+| chatroom                                                        | Gets the current election chat room URL                                                   |                                  |
+| debug `<on\|off>`                                               | Switches debug mode on or off                                                             |                                  |
+| feedback                                                        | Posts a message about giving feedback to the bot                                          |                                  |
+| `<get\|report>` confirmations                                   | Lists chat user ids and message builder names that are in the confirmation mode           |                                  |
+| get cron                                                        | Gets a report on the current cron jobs                                                    |                                  |
+| `<get modes report\|report modes>`                              | Gets a report on the current mode state                                                   |                                  |
+| get rooms                                                       | Lists the chat rooms the bot is currently joined to                                       |                                  |
+| impersonate `<userId>`                                          | Considers all messages to come from a user with `userId` (NB: might downlevel privileges) |                                  |
+| join `[roomId]` room `[roomId]`                                 | Makes the bot join a room wiht `roomId`                                                   |                                  |
+| leave `[this\|current]` room `[roomId]`                         | Makes the bot leave the current room or a room with `roomId`                              |                                  |
+| reset election                                                  | Resets the current election state and clears the scraping history                         |                                  |
+| set `<access\|level>` `<me\|userId>` `<user\|admin\|dev>`       | Sets access level of a user with `userId`                                                 |                                  |
+| test cron                                                       | Schedules a test cron job                                                                 |                                  |
+| `<88 miles\|delorean\|timetravel>` to `<today\|date\|datetime>` | Adjusts the bot's internal clock to a given date                                          |                                  |
+| update election `<announcements\|badges\|moderators>`           | Forces an update to election data                                                         | Reply with a correct update type |
+| verbose `<on\|off>`                                             | Switches verbose mode on or off                                                           |                                  |
+| what is the candidate score for `<userRef>`                     | Calculates candidate score of a user by `userRef` (see below)                             |                                  |
 
 **Election results Meta post**
 
