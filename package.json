@@ -60,7 +60,7 @@
         "sanitize-html": "^2.7.1"
     },
     "devDependencies": {
-        "@types/chai": "^4.3.2",
+        "@types/chai": "^4.3.3",
         "@types/chai-as-promised": "^7.1.5",
         "@types/cheerio": "^0.22.31",
         "@types/express": "^4.17.13",
