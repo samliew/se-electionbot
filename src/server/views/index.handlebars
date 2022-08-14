@@ -282,6 +282,45 @@
             </td></tr>
         </table>
 
+        {{#if @root/authenticated}}
+        <h2 class="fs-4">Bot Users</h2>
+        <table>
+            <tbody>
+                <tr>
+                    <td>Privileged</td>
+                    <td>
+                        <table class="nested">
+                            <tr>
+                                <td>Admins</td>
+                                <td>
+                                    <table class="nested">
+                                        <tbody>
+                                        {{#each @root/data/admins}}
+                                        <tr><td>{{{url link label=display_name}}}</td></tr>
+                                        {{/each}}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Devs</td>
+                                <td>
+                                    <table class="nested">
+                                        <tbody>
+                                        {{#each @root/data/devs}}
+                                        <tr><td>{{{url link label=display_name}}}</td></tr>
+                                        {{/each}}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        {{/if}}
+
     </section>
     {{/with}}
 

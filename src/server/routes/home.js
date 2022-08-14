@@ -48,11 +48,6 @@ home.get("/", async ({ query, path, app }, res) => {
             lastMessageTime,
         } = config;
 
-        const safeBotData = {
-            ...JSON.parse(JSON.stringify(config)),
-            apiKeyPool: []
-        };
-
         const chatProfile = await botClient.getMe();
         const chatDisplayName = await chatProfile.name;
 
@@ -83,6 +78,8 @@ home.get("/", async ({ query, path, app }, res) => {
                 autoRefreshInterval: config.scrapeIntervalMins * 60,
                 chatRoomUrl: `https://chat.${chatDomain}/rooms/${chatRoomId}`,
                 siteHostname: botElecton.siteHostname,
+                admins: await config.getAdmins(),
+                devs: await config.getDevs(),
                 election: botElecton,
                 instances: await getHerokuInstancesForNav(config),
                 routes: app.get("routes"),
@@ -91,12 +88,12 @@ home.get("/", async ({ query, path, app }, res) => {
                 nomineesInRoom,
                 botconfig: {
                     // overrides should come after the object spread
-                    ...safeBotData,
+                    ...JSON.parse(JSON.stringify(config)),
                     roomBecameIdleAWhileDate: new Date(lastActivityTime + (shortIdleDurationMins * 6e4)),
                     roomBecameIdleHoursDate: new Date(lastActivityTime + (longIdleDurationHours * 60 * 6e4)),
                     botWillBeQuietDate: new Date(lastMessageTime + (lowActivityCheckMins * 6e4)),
                     chatDisplayName,
-                }
+                },
             }
         });
     } catch (error) {
