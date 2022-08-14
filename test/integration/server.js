@@ -36,11 +36,13 @@ describe("Dashboard", function () {
     /** @type {ExpressApp} */
     let app;
     before(async () => {
+        sinon.stub(console, "log");
         await election.scrapeElection(config);
         app = await startServer(client, room, config, election, scheduler, announcement, {
             graceful: false,
             portOverride: 0,
         });
+        sinon.restore();
     });
 
     after(() => stop(app));
