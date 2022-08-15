@@ -1,10 +1,16 @@
 import { dateToUtcTimestamp } from "../shared/utils/dates.js";
 import { filterMap, mapMap } from "../shared/utils/maps.js";
+import { capitalize } from "../shared/utils/strings.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
 import { getFormattedElectionSchedule, listify, makeURL, pluralize } from "./utils.js";
 
 export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chance to cast or modify your votes!";
+
+/**
+ * @template {string} T
+ * @typedef {import("../shared/utils/strings.js").Scased<T>} Scased
+ */
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -13,6 +19,7 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
  * @typedef {import("./rescraper.js").default} Rescraper
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {"start"|"end"|"primary"|"nomination"|"test"} TaskType
+ * @typedef {"cancelled"|"ended"|"nomination"|"nominees"|"winners"} AnnouncementType
  */
 
 /**
@@ -46,6 +53,36 @@ export default class Announcer {
     }
 
     /**
+     * @type {Map<`announced${Scased<AnnouncementType>}`, boolean>}
+     */
+    #flags = new Map([
+        ["announcedCancelled", false],
+        ["announcedEnded", false],
+        ["announcedNomination", false],
+        ["announcedNominees", false],
+        ["announcedWinners", false],
+    ]);
+    
+    /**
+     * @summary sets announcement state by type
+     * @param {AnnouncementType} type
+     * @param {boolean} state
+     * @returns {Announcer}
+     */
+    setAnnounced(type, state) {
+        this.#flags.set(`announced${capitalize(type)}`, state);
+        return this;
+    }
+
+    /**
+     * @param {AnnouncementType} type
+     * @returns {boolean}
+     */
+    getAnnounced(type) {
+        return this.#flags.get(`announced${capitalize(type)}`) || false;
+    }
+
+    /**
      * @summary Election dates changed
      * @returns {Promise<boolean>}
      */
@@ -68,19 +105,20 @@ export default class Announcer {
 
     /**
      * @summary Election cancelled
-     * @param {Room} room chatroom to post to
      * @returns {Promise<boolean>}
      */
-    async announceCancelled(room) {
-        const { _election } = this;
+    async announceCancelled() {
+        if (this.getAnnounced("cancelled")) return true;
 
-        const { cancelledText, phase } = _election;
+        const { _election, config, _room } = this;
 
-        // Needs to be cancelled
-        if (!cancelledText || phase !== 'cancelled') return false;
+        const { cancelledText } = _election;
 
-        await room.sendMessage(cancelledText);
+        if (!cancelledText || !_election.isCancelled()) return false;
 
+        await sendMessageList(config, _room, [cancelledText], { isPrivileged: true });
+
+        this.setAnnounced("cancelled", true);
         return true;
     }
 
@@ -107,6 +145,8 @@ export default class Announcer {
      * @returns {Promise<boolean>}
      */
     async announceNominees() {
+        if (this.getAnnounced("nominees")) return true;
+
         const { config, _election, _room } = this;
 
         const { nominees, numNominees } = _election;
@@ -126,6 +166,7 @@ export default class Announcer {
 
         await sendMessageList(config, _room, messages, { isPrivileged: true });
 
+        this.setAnnounced("nominees", true);
         return true;
     }
 
@@ -210,6 +251,8 @@ export default class Announcer {
      * @returns {Promise<boolean>}
      */
     async announceWinners() {
+        if (this.getAnnounced("winners")) return true;
+
         const { config, _election, _room } = this;
 
         const { winners, phase, opavoteUrl, siteUrl } = _election;
@@ -247,8 +290,9 @@ export default class Announcer {
             msg += ` You can ${makeURL("view the results online via OpaVote", opavoteUrl)}.`;
         }
 
-        await _room.sendMessage(msg);
+        await sendMessageList(config, _room, [msg], { isPrivileged: true });
 
+        this.setAnnounced("winners", true);
         return true;
     }
 

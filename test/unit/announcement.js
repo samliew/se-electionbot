@@ -36,9 +36,16 @@ describe(Announcer.name, () => {
     let announcer = new Announcer(config, room, election);
     afterEach(() => announcer = new Announcer(config, room, election));
 
+    describe(`${Announcer.prototype.getAnnounced.name} & ${Announcer.prototype.setAnnounced.name}`, () => {
+        it("should correctly get/set announcement state", () => {
+            announcer.setAnnounced("cancelled", true);
+            expect(announcer.getAnnounced("cancelled")).to.be.true;
+        });
+    });
+
     describe(Announcer.prototype.announceCancelled.name, () => {
         it('should return false on no cancelledText', async () => {
-            const status = await announcer.announceCancelled(room);
+            const status = await announcer.announceCancelled();
             expect(status).to.be.false;
         });
 
@@ -49,7 +56,7 @@ describe(Announcer.name, () => {
 
             const messageStub = sinon.stub(room, "sendMessage");
 
-            const promise = announcer.announceCancelled(room);
+            const promise = announcer.announceCancelled();
 
             await clock.runAllAsync();
 
