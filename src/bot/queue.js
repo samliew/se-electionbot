@@ -49,8 +49,7 @@ const _sendTheMessage = async function (config, room, responseText, options = {}
         responseText = config.duplicateResponseText;
     }
 
-    // Send the message
-    await room.sendMessage.call(room, (inResponseTo ? `:${inResponseTo} ` : "") + responseText);
+    await room.sendMessage((inResponseTo ? `:${inResponseTo} ` : "") + responseText);
 
     // Record last sent message and time so we don't flood the room
     config.updateLastMessage(responseText);
