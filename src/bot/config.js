@@ -655,10 +655,10 @@ export class BotConfig {
      * @summary gets an uparsed value from the environment
      * @param {Lowercase<keyof BotEnvironment>} key key to lookup
      * @param {string} [def] optional default
-     * @returns {string|undefined}
+     * @returns {string}
      */
     get(key, def = "") {
-        return this.#env[key] || def;
+        return this.#env.str(key, def);
     }
 
     /**
