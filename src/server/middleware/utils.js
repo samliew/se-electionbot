@@ -1,5 +1,8 @@
 import crypto, { pbkdf2, randomBytes } from "crypto";
 
+// TODO: store salt and hash once a persistent DB is added (see #62)
+const salt = randomBytes(32);
+
 /**
  * @summary hashes a given password to a SHA-512 key
  * @param {string} pwd password
@@ -7,8 +10,7 @@ import crypto, { pbkdf2, randomBytes } from "crypto";
  */
 const hashPassword = (pwd) => {
     return new Promise((res, rej) => {
-        // TODO: store salt and hash once a persistent DB is added (see #62)
-        pbkdf2(pwd, randomBytes(32), 100000, 512, "sha512", (err, key) => err ? rej(err) : res(key));
+        pbkdf2(pwd, salt, 100000, 512, "sha512", (err, key) => err ? rej(err) : res(key));
     });
 };
 
