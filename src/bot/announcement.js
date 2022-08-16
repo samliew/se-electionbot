@@ -1,5 +1,5 @@
 import { dateToUtcTimestamp } from "../shared/utils/dates.js";
-import { filterMap, mapMap } from "../shared/utils/maps.js";
+import { filterMap, mapMap, mergeIntoMap } from "../shared/utils/maps.js";
 import { capitalize } from "../shared/utils/strings.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
@@ -19,7 +19,7 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
  * @typedef {import("./rescraper.js").default} Rescraper
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {"start"|"end"|"primary"|"nomination"|"test"} TaskType
- * @typedef {"cancelled"|"ended"|"nomination"|"nominees"|"winners"} AnnouncementType
+ * @typedef {"cancelled"|"ended"|"nomination"|"nominees"} AnnouncementType
  */
 
 /**
@@ -60,9 +60,17 @@ export default class Announcer {
         ["announcedEnded", false],
         ["announcedNomination", false],
         ["announcedNominees", false],
-        ["announcedWinners", false],
     ]);
-    
+
+    /**
+     * @type {Record<"nominees"|"winners"|"withdrawals", Map<number, Nominee>>}
+     */
+    #announced = {
+        nominees: new Map(),
+        winners: new Map(),
+        withdrawals: new Map(),
+    };
+
     /**
      * @summary sets announcement state by type
      * @param {AnnouncementType} type
@@ -177,11 +185,18 @@ export default class Announcer {
     async announceNewNominees() {
         const { _room, config, _election } = this;
 
-        const { newlyNominatedNominees, electionUrl } = _election;
+        const { nominees, electionUrl } = _election;
+
+        const announced = this.#announced.nominees;
+        const toAnnounce = filterMap(nominees, (n) => !announced.has(n.userId));
+        if (!toAnnounce.size) {
+            console.log(`[announcer] no new nominees to announce`);
+            return true;
+        }
 
         const nominationTab = `${electionUrl}?tab=nomination`;
 
-        const onlyWithUsernames = getValidParticipants(newlyNominatedNominees);
+        const onlyWithUsernames = getValidParticipants(toAnnounce);
 
         const messages = mapMap(
             onlyWithUsernames,
@@ -193,6 +208,7 @@ export default class Announcer {
 
         await sendMessageList(config, _room, messages, { isPrivileged: true });
 
+        mergeIntoMap(announced, toAnnounce);
         return true;
     }
 
@@ -205,7 +221,14 @@ export default class Announcer {
 
         const { newlyWithdrawnNominees } = _election;
 
-        const onlyWithUsernames = getValidParticipants(newlyWithdrawnNominees);
+        const announced = this.#announced.withdrawals;
+        const toAnnounce = filterMap(newlyWithdrawnNominees, (n) => !announced.has(n.userId));
+        if (!toAnnounce.size) {
+            console.log(`[announcer] no withdrawn nominees to announce`);
+            return true;
+        }
+
+        const onlyWithUsernames = getValidParticipants(toAnnounce);
 
         const messages = mapMap(
             onlyWithUsernames,
@@ -216,6 +239,7 @@ export default class Announcer {
 
         await sendMessageList(config, _room, messages, { isPrivileged: true });
 
+        mergeIntoMap(announced, toAnnounce);
         return true;
     }
 
@@ -251,29 +275,33 @@ export default class Announcer {
      * @returns {Promise<boolean>}
      */
     async announceWinners() {
-        if (this.getAnnounced("winners")) return true;
-
         const { config, _election, _room } = this;
 
-        const { winners, phase, opavoteUrl, siteUrl } = _election;
+        const { winners, opavoteUrl, siteUrl } = _election;
 
         const { size } = winners;
 
-        const logPfx = `[${this.announceWinners.name}]`;
+        const { verbose } = config;
 
         if (config.debugOrVerbose) {
-            console.log(`${logPfx} winners (${winners.size}):\n`, mapMap(winners, ({ userName }) => userName));
+            console.log(`[announcer] winners (${winners.size}):\n`, mapMap(winners, ({ userName }) => userName));
         }
 
-        // Needs to have ended and have winners
-        if (phase !== 'ended' || size === 0) {
-            console.log(`${logPfx} no winners to announce`, config.verbose ? _election : "");
+        if (!_election.isEnded(config.nowOverride)) {
+            console.log(`[announcer] the election hasn't ended yet`, verbose ? _election : "");
+            return false;
+        }
+
+        const announced = this.#announced.winners;
+        const toAnnounce = filterMap(winners, (w) => !announced.has(w.userId));
+        if (!toAnnounce) {
+            console.log(`[announcer] no winners to announce`, verbose ? _election : "");
             return false;
         }
 
         // Winners have been already announced
         if (config.flags.announcedWinners) {
-            console.log(`${logPfx} winners have already been announced`);
+            console.log(`[announcer] winners have already been announced`);
             return false;
         }
 
@@ -281,7 +309,7 @@ export default class Announcer {
         config.flags.announcedWinners = true;
         config.scrapeIntervalMins = 5;
 
-        const winnerList = mapMap(winners, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
+        const winnerList = mapMap(toAnnounce, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));
 
         // Build the message
         let msg = `**Congratulations to the winner${pluralize(size)}** ${winnerList.join(', ')}!`;
@@ -292,7 +320,7 @@ export default class Announcer {
 
         await sendMessageList(config, _room, [msg], { isPrivileged: true });
 
-        this.setAnnounced("winners", true);
+        mergeIntoMap(announced, toAnnounce);
         return true;
     }
 
