@@ -12,7 +12,7 @@ export const everyInMap = (map, callback) => {
     for (const [k, v] of map) {
         if (!callback(v, k, map)) return false;
     }
-    
+
     return true;
 };
 
@@ -89,6 +89,21 @@ export const mergeMaps = (...sources) => {
     });
 
     return merged;
+};
+
+/**
+ * @template {unknown} T
+ * @template {unknown} U
+ *
+ * @summary merges together a list of {@link Map} instances into a {@link target}
+ * @param {Map<T, U>} target {@link Map} to merge into
+ * @param {...Map<T, U>} sources {@link Map}s to merge together
+ * @returns {Map<T, U>}
+ */
+export const mergeIntoMap = (target, ...sources) => {
+    const merged = mergeMaps(...sources);
+    merged.forEach((v, k) => target.set(k, v));
+    return target;
 };
 
 /**
