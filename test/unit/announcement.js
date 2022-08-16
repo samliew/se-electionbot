@@ -9,6 +9,7 @@ import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
 /**
+ * @typedef {import("../../src/bot/config.js").default} BotConfig
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} Message
  */
 
@@ -17,24 +18,30 @@ describe(Announcer.name, () => {
     /** @type {sinon.SinonFakeTimers} */
     let clock;
     beforeEach(() => clock = sinon.useFakeTimers());
-    afterEach(() => clock.restore());
 
     /** @type {Client} */
-    const client = new Client["default"]("stackoverflow.com");
+    let client;
+    beforeEach(() => client = new Client["default"]("stackoverflow.com"));
+
     /** @type {Room} */
-    const room = new Room["default"](client, -1);
+    let room;
+    beforeEach(() => room = new Room["default"](client, -1));
 
-    const oldSendMessage = Room["default"].prototype.sendMessage;
-    afterEach(() => Room["default"].prototype.sendMessage = oldSendMessage);
+    /** @type {BotConfig} */
+    let config;
+    beforeEach(() => config = getMockBotConfig());
 
-    let config = getMockBotConfig();
-    afterEach(() => config = getMockBotConfig());
+    /** @type {Election} */
+    let election;
+    beforeEach(() => election = new Election("https://stackoverflow.com/election/12"));
 
-    let election = new Election("https://stackoverflow.com/election/12");
-    afterEach(() => election = new Election("https://stackoverflow.com/election/12"));
+    /** @type {Announcer} */
+    let announcer;
+    beforeEach(() => announcer = new Announcer(config, room, election));
 
-    let announcer = new Announcer(config, room, election);
-    afterEach(() => announcer = new Announcer(config, room, election));
+    /** @type {sinon.SinonStub} */
+    let messageStub;
+    beforeEach(() => messageStub = sinon.stub(room, "sendMessage"));
 
     describe(`${Announcer.prototype.getAnnounced.name} & ${Announcer.prototype.setAnnounced.name}`, () => {
         it("should correctly get/set announcement state", () => {
@@ -54,8 +61,6 @@ describe(Announcer.name, () => {
             election.phase = "cancelled";
             election.cancelledText = mockReason;
 
-            const messageStub = sinon.stub(room, "sendMessage");
-
             const promise = announcer.announceCancelled();
 
             await clock.runAllAsync();
@@ -64,15 +69,11 @@ describe(Announcer.name, () => {
 
             const [[message]] = messageStub.args;
             expect(message).to.equal(mockReason);
-
-            messageStub.restore();
         });
     });
 
     describe(Announcer.prototype.announceElectionEndingSoon.name, () => {
         it('should correctly announce that election is ending soon', async () => {
-            const messageStub = sinon.stub(room, "sendMessage");
-
             const promise = announcer.announceElectionEndingSoon();
 
             await clock.runAllAsync();
@@ -86,8 +87,6 @@ describe(Announcer.name, () => {
 
     describe(Announcer.prototype.announceNominees.name, () => {
         it('should correctly announce nominees', async () => {
-            const messageStub = sinon.stub(room, "sendMessage");
-
             election.addActiveNominee(
                 getMockNominee(election, { userName: "John", userId: 42 })
             );
@@ -101,17 +100,12 @@ describe(Announcer.name, () => {
             const [[msg]] = messageStub.args;
             expect(msg).to.match(/1 (?:nominee|candidate)/i);
             expect(msg).to.include("John");
-
-            messageStub.restore();
         });
     });
 
     describe(Announcer.prototype.announceNewNominees.name, () => {
-
         it('should correctly announce new nominees', async () => {
             const names = ["Jane", "John"];
-
-            const messageStub = sinon.stub(room, "sendMessage");
 
             names.forEach((userName, i) => election.addActiveNominee(
                 getMockNominee(election, { userName, userId: i })
@@ -126,8 +120,6 @@ describe(Announcer.name, () => {
             messageStub.args.forEach(([msg], i) => {
                 expect(msg.includes(names[i])).to.be.true;
             });
-
-            messageStub.restore();
         });
     });
 
@@ -141,56 +133,38 @@ describe(Announcer.name, () => {
             election.primaryThreshold = 0;
             election.addActiveNominee(getMockNominee(election));
 
-            const stubbed = sinon.stub(room, "sendMessage");
+            expect(await announcer.announcePrimary()).to.be.true;
 
-            const status = await announcer.announcePrimary();
-            expect(status).to.be.true;
-
-            stubbed.args.forEach(([msg]) => {
+            messageStub.args.forEach(([msg]) => {
                 expect(msg).to.include("primary");
                 expect(msg).to.include("more than 0");
             });
-
-            stubbed.restore();
         });
     });
 
     describe(Announcer.prototype.announceWinners.name, () => {
         it('should return false if election is not ended', async () => {
             election.phase = "cancelled";
-            const status = await announcer.announceWinners();
-            expect(status).to.be.false;
+            expect(await announcer.announceWinners()).to.be.false;
         });
 
         it('should return false if election is ended without winners', async () => {
             election.phase = "ended";
-            const status = await announcer.announceWinners();
-            expect(status).to.be.false;
+            expect(await announcer.announceWinners()).to.be.false;
         });
 
         it('should return false if already announced', async () => {
-            announcer.config = getMockBotConfig({
-                flags: {
-                    announcedWinners: true,
-                    saidElectionEndingSoon: true,
-                    debug: false,
-                    verbose: false,
-                    fun: false
-                }
-            });
-
+            config.flags.announcedWinners = true;
+            config.flags.saidElectionEndingSoon = true;
             election.winners.set(42, getMockNominee(election));
             election.phase = "ended";
 
-            const status = await announcer.announceWinners();
-            expect(status).to.be.false;
+            expect(await announcer.announceWinners()).to.be.false;
         });
 
         it('should correctly announce winners', async () => {
             election.winners.set(42, getMockNominee(election, { userName: "Jeanne" }));
-            election.phase = "ended";
-
-            const stubbed = sinon.stub(room, "sendMessage");
+            election.dateEnded = dateToUtcTimestamp(Date.now());
 
             const promise = announcer.announceWinners();
 
@@ -198,11 +172,9 @@ describe(Announcer.name, () => {
 
             expect(await promise).to.be.true;
 
-            const [[message]] = stubbed.args;
+            const [[message]] = messageStub.args;
 
             expect(message).to.match(/to the winner\*\*.+Jeanne/);
-
-            stubbed.restore();
         });
     });
 
@@ -216,17 +188,13 @@ describe(Announcer.name, () => {
             election.pushHistory();
             election.nominees.delete(1);
 
-            const stubbed = sinon.stub(room, "sendMessage");
-
-            announcer._election = election;
-
             const promise = announcer.announceWithdrawnNominees();
 
             await clock.runAllAsync();
 
             expect(await promise).to.be.true;
 
-            const [[message]] = stubbed.args;
+            const [[message]] = messageStub.args;
 
             expect(message).to.match(/John\b.+?\bwithdrawn/);
         });
@@ -241,15 +209,13 @@ describe(Announcer.name, () => {
             election.dateElection = now;
             election.pushHistory();
 
-            const stubbed = sinon.stub(room, "sendMessage");
-
             const promise = announcer.announceDatesChanged();
 
             await clock.runAllAsync();
 
             expect(await promise).to.be.true;
 
-            const [[change], [schedule]] = stubbed.args;
+            const [[change], [schedule]] = messageStub.args;
 
             expect(change).to.match(/dates\s+have\s+changed:/);
             expect(schedule).to.match(new RegExp(`\\b${now}\\b`, "m"));
@@ -260,15 +226,13 @@ describe(Announcer.name, () => {
         it('should correctly announce nomination phase start', async () => {
             sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
 
-            const stubbed = sinon.stub(room, "sendMessage");
-
             const promise = announcer.announceNominationStart();
 
             await clock.runAllAsync();
 
             expect(await promise).to.be.true;
 
-            const [[message]] = stubbed.args;
+            const [[message]] = messageStub.args;
 
             expect(message).to.match(/nomination\s+phase/);
             expect(message).to.match(/may\s+now\s+nominate/);
@@ -279,15 +243,13 @@ describe(Announcer.name, () => {
         it('should correctly announce election phase start', async () => {
             sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
 
-            const stubbed = sinon.stub(room, "sendMessage");
-
             const promise = announcer.announceElectionStart();
 
             await clock.runAllAsync();
 
             expect(await promise).to.be.true;
 
-            const [[message]] = stubbed.args;
+            const [[message]] = messageStub.args;
 
             expect(message).to.match(/final\s+voting\s+phase/);
             expect(message).to.match(/may\s+now\s+rank\s+the\s+candidates/);
@@ -298,15 +260,13 @@ describe(Announcer.name, () => {
         it('should correctly announce election phase start', async () => {
             sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
 
-            const stubbed = sinon.stub(room, "sendMessage");
-
             const promise = announcer.announcePrimaryStart();
 
             await clock.runAllAsync();
 
             expect(await promise).to.be.true;
 
-            const [[message]] = stubbed.args;
+            const [[message]] = messageStub.args;
 
             expect(message).to.match(/primary\s+phase/);
             expect(message).to.match(/vote\s+on\s+the\s+candidates.+?posts/);
@@ -317,15 +277,13 @@ describe(Announcer.name, () => {
         it('should correctly announce election phase start', async () => {
             sinon.stub(election, "scrapeElection").returns(Promise.resolve(true));
 
-            const stubbed = sinon.stub(room, "sendMessage");
-
             const promise = announcer.announceElectionEnd();
 
             await clock.runAllAsync();
 
             expect(await promise).to.be.true;
 
-            const [[message]] = stubbed.args;
+            const [[message]] = messageStub.args;
 
             expect(message).to.match(/has\s+now\s+ended/);
             expect(message).to.match(/winners\s+will\s+be\s+announced/);
