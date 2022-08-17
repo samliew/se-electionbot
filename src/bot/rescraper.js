@@ -1,8 +1,7 @@
-import { MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
+import { addMinutes, MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { mapMap } from "../shared/utils/maps.js";
 import { HerokuClient } from "./herokuClient.js";
 import { sayBusyGreeting, sayIdleGreeting } from "./messages/greetings.js";
-import { wait } from "./utils.js";
 
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
@@ -214,23 +213,24 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 console.log(`[rescraper] activity greeting\n`, { canIdleGreet, canBusyGreet });
             }
 
-            // The election is over
-            else if (election.isInactive() && config.scrapeIntervalMins < 5) {
-
+            else if (election.isInactive()) {
                 // Set scrape interval to 5 mins since we no longer need to scrape frequently
-                config.scrapeIntervalMins = 5;
-                console.log(`[rescraper] scrape interval increased to ${config.scrapeIntervalMins}.`);
+                if (config.scrapeIntervalMins < 5) {
+                    config.scrapeIntervalMins = 5;
+                    console.log(`[rescraper] scrape interval increased to ${config.scrapeIntervalMins}.`);
+                }
 
-                // Stay in room a while longer
-                await wait(config.electionAfterpartyMins * SEC_IN_MINUTE);
-
-                // Otherwise we sometimes leave an afterimage
-                const status = await room.leave();
-                console.log(`[rescraper] left election room: ${status}`);
-
-                // Scale Heroku dynos to free (restarts app)
-                const heroku = new HerokuClient(config);
-                await heroku.scaleFree();
+                scheduler.initLeave(
+                    addMinutes(nowOverride || new Date(), config.electionAfterpartyMins),
+                    room,
+                    async () => {
+                        // Scale Heroku dynos to free (restarts app)
+                        const heroku = new HerokuClient(config);
+                        if (await heroku.hasPaidDynos()) {
+                            await heroku.scaleFree();
+                        }
+                    }
+                );
             }
 
             this.start();
