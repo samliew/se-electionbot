@@ -10,7 +10,7 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("./rescraper.js").default} Rescraper
  * @typedef {import("./announcement.js").default} Announcer
- * @typedef {"start"|"end"|"primary"|"nomination"|"test"} TaskType
+ * @typedef {"start"|"end"|"primary"|"nomination"|"test"|"leave"} TaskType
  */
 
 export default class Scheduler {
@@ -57,9 +57,10 @@ export default class Scheduler {
      * @param {TaskType} type task type
      * @param {string | number | Date | undefined} date date at which to make the announcement
      * @param {() => Promise<boolean>} handler announcement handler
+     * @param {(status: boolean) => Promise<void>} [callback] to run after the task completes
      * @returns {boolean}
      */
-    #initializeTask(type, date, handler) {
+    #initializeTask(type, date, handler, callback) {
         if (this.isTaskInitialized(type) || typeof date == 'undefined') return false;
 
         const validDate = validateDate(date);
@@ -71,9 +72,10 @@ export default class Scheduler {
 
         const cs = this.getCronExpression(validDate);
 
-        const boundHandler = handler.bind(this.#announcer);
-
-        this.tasks.set(type, cron.schedule(cs, boundHandler, { timezone: "Etc/UTC" }));
+        this.tasks.set(type, cron.schedule(cs, async () => {
+            const status = await handler();
+            await callback?.(status);
+        }, { timezone: "Etc/UTC" }));
 
         console.log(`[cron] initialized ${type} task`, cs);
         this.schedules.set(type, cs);
@@ -131,37 +133,62 @@ export default class Scheduler {
     /**
      * @summary initializes task for election end
      * @param {string | number | Date | undefined} date date at which to run the task
+     * @param {(status: boolean) => Promise<void>} [callback] to run after the task completes
      * @returns {boolean}
      */
-    initElectionEnd(date) {
-        return this.#initializeTask("end", date, this.#announcer.announceElectionEnd);
+    initElectionEnd(date, callback) {
+        return this.#initializeTask("end", date,
+            () => this.#announcer.announceElectionEnd(),
+            callback);
     }
 
     /**
      * @summary initializes task for election phase start
      * @param {string | number | Date | undefined} date date at which to run the task
+     * @param {(status: boolean) => Promise<void>} [callback] to run after the task completes
      * @returns {boolean}
      */
-    initElectionStart(date) {
-        return this.#initializeTask("start", date, this.#announcer.announceElectionStart);
+    initElectionStart(date, callback) {
+        return this.#initializeTask("start", date,
+            () => this.#announcer.announceElectionStart(),
+            callback);
     }
 
     /**
      * @summary initializes task for primary phase start
      * @param {string | number | Date | undefined} date date at which to run the task
+     * @param {(status: boolean) => Promise<void>} [callback] to run after the task completes
      * @returns {boolean}
      */
-    initPrimary(date) {
-        return this.#initializeTask("primary", date, this.#announcer.announcePrimaryStart);
+    initPrimary(date, callback) {
+        return this.#initializeTask("primary", date,
+            () => this.#announcer.announcePrimaryStart(),
+            callback);
     }
 
     /**
      * @summary initializes task for nomination phase start
      * @param {string | number | Date | undefined} date date at which to run the task
+     * @param {(status: boolean) => Promise<void>} [callback] to run after the task completes
      * @returns {boolean}
      */
-    initNomination(date) {
-        return this.#initializeTask("nomination", date, this.#announcer.announceNominationStart);
+    initNomination(date, callback) {
+        return this.#initializeTask("nomination", date,
+            () => this.#announcer.announceNominationStart(),
+            callback);
+    }
+
+    /**
+     * @summary initializes task for leaving the election room
+     * @param {string | number | Date | undefined} date date at which to run the task
+     * @param {Room} room room to leave
+     * @param {(status: boolean) => Promise<void>} [callback] to run after the task completes
+     * @returns {boolean}
+     */
+    initLeave(date, room, callback) {
+        return this.#initializeTask("leave", date,
+            () => room.leave(),
+            callback);
     }
 
     /**
@@ -180,7 +207,7 @@ export default class Scheduler {
 
     /**
      * @summary initializes all tasks
-     * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
+     * @returns {{ [P in Exclude<TaskType, "test"|"leave">]: boolean }}
      */
     initAll() {
         const election = this.#election;
@@ -195,7 +222,7 @@ export default class Scheduler {
 
     /**
      * @summary reinitializes all tasks
-     * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
+     * @returns {{ [P in Exclude<TaskType, "test"|"leave">]: boolean }}
      */
     reinitialize() {
         const result = this.stopAll();
@@ -237,8 +264,15 @@ export default class Scheduler {
     }
 
     /**
+     * @summary stops the leave room task
+     */
+    stopLeave() {
+        return this.#stop("leave");
+    }
+
+    /**
      * @summary stops all tasks
-     * @returns {{ [P in Exclude<TaskType, "test">]: boolean }}
+     * @returns {{ [P in Exclude<TaskType, "test"|"leave">]: boolean }}
      */
     stopAll() {
         return {
