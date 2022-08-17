@@ -195,7 +195,7 @@ use defaults ${defaultChatNotSet}`
          * If is in production mode, and is an active election,
          * scale Heroku dyno to Hobby (paid) if it's using free dynos only (restarts app)
          */
-        const hasPaidDyno = config.herokuDynos.some(({ size }) => !/free/i.test(size));
+        const hasPaidDyno = await heroku.hasPaidDynos();
         const { autoscaleHeroku } = config;
 
         if (autoscaleHeroku && election.isActive() && !hasPaidDyno) {

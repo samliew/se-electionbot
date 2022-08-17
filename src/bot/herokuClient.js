@@ -231,6 +231,16 @@ export class HerokuClient {
 
         return formations;
     };
+
+    /**
+     * @summary check if the app has paid dynos
+     * @param {Formation[]} [dynos] prefetched dynos
+     * @returns {Promise<boolean>}
+     */
+    async hasPaidDynos(dynos) {
+        const toCheck = dynos || await this.getDynos();
+        return toCheck.some(({ size }) => !/free/i.test(size));
+    }
 }
 
 /**

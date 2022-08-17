@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { test } from "mocha";
 import { HerokuClient } from "../../src/bot/herokuClient.js";
 import { getMockBotConfig } from "../mocks/bot.js";
+import { getMockFormation } from "../mocks/heroku.js";
 
 describe('Heroku API integration', function () {
 
@@ -53,5 +54,13 @@ describe('Heroku API integration', function () {
     testIf('should be able to fetch instances', async () => {
         const instances = await heroku.fetchInstances();
         expect(instances.length).to.be.at.least(6);
+    });
+
+    testIf("should correctly determine if has paid dynos", async () => {
+        const paid = await heroku.hasPaidDynos([getMockFormation({ size: "hobby" })]);
+        const free = await heroku.hasPaidDynos([getMockFormation({ size: "free" })]);
+
+        expect(paid).to.be.true;
+        expect(free).to.be.false;
     });
 });
