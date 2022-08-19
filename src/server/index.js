@@ -24,6 +24,7 @@ import { configureApp, farewell, start } from './utils.js';
  * @typedef {import("express-handlebars/types").ConfigOptions} ConfigOptions
  * @typedef {import("express").Application} ExpressApp
  * @typedef {import("express").Response} ExpressRes
+ * @typedef {import("../bot/rescraper.js").default} Rescraper
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../bot/scheduler.js").default} Scheduler
  */
@@ -86,6 +87,7 @@ app.use("/server", configureApp(server, handlebarsConfig, viewsPath));
  * @param {BotConfig} config  bot configuration
  * @param {Election} election current election
  * @param {Scheduler} scheduler task scheduler
+ * @param {Rescraper} rescraper bot rescraper
  * @param {Announcer} announcement announcement
  * @param {{
  *  graceful?: boolean,
@@ -93,12 +95,13 @@ app.use("/server", configureApp(server, handlebarsConfig, viewsPath));
  * }} [options] server startup options
  * @returns {Promise<ExpressApp>}
  */
-export const startServer = async (client, room, config, election, scheduler, announcement, options = {}) => {
+export const startServer = async (client, room, config, election, scheduler, rescraper, announcement, options = {}) => {
     app.set("bot_announcer", announcement);
     app.set("bot_config", config);
     app.set("bot_room", room);
     app.set("bot_election", election);
     app.set("bot_client", client);
+    app.set("bot_rescraper", rescraper);
     app.set("bot_scheduler", scheduler);
 
     const { graceful = true, portOverride } = options;

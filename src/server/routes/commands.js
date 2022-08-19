@@ -15,6 +15,7 @@ import { getHerokuInstancesForNav, onMountAddToRoutes, prettifyPath } from "../u
  * @typedef {import("chatexchange/dist/Room").default} BotRoom
  * @typedef {import("../../bot/commands/commands.js").CommandArguments} CommandArguments
  * @typedef {import("../../bot/election").default} Election
+ * @typedef {import("../../bot/rescraper.js").default} Rescraper
  * @typedef {import("../../bot/scheduler.js").default} Scheduler
  */
 
@@ -89,8 +90,10 @@ commands.post("/", async (req, res) => {
     const election = app.get("bot_election");
     /** @type {Scheduler|undefined} */
     const scheduler = app.get("bot_scheduler");
+    /** @type {Rescraper|undefined} */
+    const rescraper = app.get("bot_rescraper");
 
-    if (!announcement || !config || !client || !election || !room || !scheduler) {
+    if (!announcement || !config || !client || !election || !room || !scheduler || !rescraper) {
         console.error("[server] server is misconfigured");
         return res.sendStatus(500);
     }
@@ -116,6 +119,7 @@ commands.post("/", async (req, res) => {
             config,
             content,
             election,
+            rescraper,
             room,
             scheduler,
             user,

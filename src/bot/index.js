@@ -418,7 +418,7 @@ use defaults ${defaultChatNotSet}`
             rm_election: ["reset election"]
         });
 
-        const dashboardApp = await startServer(client, room, config, election, scheduler, announcement);
+        const dashboardApp = await startServer(client, room, config, election, scheduler, rescraper, announcement);
 
         // Main event listener
         room.on('message', async (/** @type {WebsocketEvent} */ msg) => {
@@ -503,6 +503,7 @@ use defaults ${defaultChatNotSet}`
                     config,
                     content: preparedMessage,
                     election,
+                    rescraper,
                     room,
                     scheduler,
                     user
