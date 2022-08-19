@@ -132,7 +132,8 @@ export default class BotEnv<T extends BotEnvironment | NodeJS.ProcessEnv> {
 
         env[ukey] = Array.isArray(value) ?
             value.join("|") :
-            JSON.stringify(value);
+            typeof value === "string" ? value :
+                JSON.stringify(value);
     }
 
     /**
