@@ -652,6 +652,15 @@ export class BotConfig {
     }
 
     /**
+     * @summary checks if a {@link key} is part of the environment
+     * @param {string} key key to check
+     * @returns {key is Lowercase<keyof BotEnvironment>}
+     */
+    has(key) {
+        return this.#env.has(key);
+    }
+
+    /**
      * @summary gets an uparsed value from the environment
      * @param {Lowercase<keyof BotEnvironment>} key key to lookup
      * @param {string} [def] optional default
@@ -659,6 +668,25 @@ export class BotConfig {
      */
     get(key, def = "") {
         return this.#env.str(key, def);
+    }
+
+    /**
+     * @summary proxies a value to {@link BotEnvironment}
+     * @param {Lowercase<keyof BotEnvironment>} key key to set
+     * @param {unknown} val value to set
+     * @returns {void}
+     */
+    set(key, val) {
+        return this.#env.set(key, val);
+    }
+
+    /**
+     * @summary gets the type of an environment var by a given {@link key}
+     * @param {Lowercase<keyof BotEnvironment>} key key to lookup
+     * @returns {string}
+     */
+    type(key) {
+        return this.#env.type(key);
     }
 
     /**
