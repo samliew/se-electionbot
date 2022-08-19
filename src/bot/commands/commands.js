@@ -926,3 +926,32 @@ export const updateElection = async (args) => {
 
     return `Successfully updated ${updateType}`;
 };
+
+/**
+ * @summary updates a bot configuration variable
+ * @param {Pick<CommandArguments, "config"|"content">} args command arguments
+ * @returns {string}
+ */
+export const updateConfigVarCommand = (args) => {
+    const { config, content } = args;
+
+    // https://regex101.com/r/cRt0md/1
+    const [, key, val] = /^set\s+config\s+(\w+)\s+([^\s]+)/i.exec(content) || [];
+
+    if (!config.has(key)) return `Key ${key} doesn't exist in config`;
+
+    const valType = config.type(key);
+
+    /** @type {Record<"string" | "number"| "boolean", (val:string) => unknown>} */
+    const typeHandlers = {
+        boolean: (v) => JSON.parse(v),
+        number: (v) => +v,
+        string: (v) => v,
+    };
+
+    if (!(valType in typeHandlers)) return `Type "${valType}" updates aren't supported`;
+
+    config.set(key, typeHandlers[valType](val));
+
+    return `Set "${key}" to "${val}" (${valType} type)`;
+};

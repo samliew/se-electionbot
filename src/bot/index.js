@@ -371,6 +371,7 @@ use defaults ${defaultChatNotSet}`
             "coffee": ["brews some coffee", brewCoffeeCommand, /(?:brew|make).+coffee/, AccessLevel.privileged],
             // to reserve the keyword 'help' for normal users
             "commands": ["Prints usage info", () => commander.help("moderator commands (requires mention):"), /commands|usage/, AccessLevel.privileged],
+            "config": ["updates a bot config variable", updateConfigVarCommand, /^set\s+config/, AccessLevel.dev],
             "debug": ["switches debugging on/off", switchMode, /debug(?:ing)?/, AccessLevel.dev],
             "die": ["stops the bot in case of emergency", dieCommand, /die|shutdown|turn off/, AccessLevel.privileged],
             "feedback": ["bot says how to provide feedback", sayFeedback, /^feedback/, AccessLevel.dev],
