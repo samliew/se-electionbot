@@ -23,6 +23,7 @@ import { fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, listi
  * @typedef {import("chatexchange").default} Client
  * @typedef {import("express").Application} ExpressApp
  * @typedef {import("http").Server} HttpServer
+ * @typedef {import("../rescraper.js").default} Rescraper
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("../index").UserProfile} UserProfile
  * @typedef {import("chatexchange/dist/User").default} ChatUser
@@ -37,6 +38,7 @@ import { fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, listi
  *  config: BotConfig,
  *  content: string,
  *  election: Election,
+ *  rescraper: Rescraper,
  *  room: Room,
  *  scheduler: Scheduler,
  *  user: BotUser
@@ -886,6 +888,18 @@ export const getConfirmationsCommand = (args) => {
     }
 
     return `Waiting for ${length} user${pluralize(length)} confirmation:\n${confirmations.join("\n")}`;
+};
+
+/**
+ * @summary forces a rescrape to happen immediately
+ * @param {Pick<CommandArguments, "rescraper">} args command arguments
+ * @returns {Promise<string>}
+ */
+export const rescrapeCommand = async (args) => {
+    const { rescraper } = args;
+    rescraper.stop();
+    await rescraper.rescrape();
+    return `Rescraped at ${dateToUtcTimestamp(Date.now())}`;
 };
 
 /**

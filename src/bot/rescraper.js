@@ -130,7 +130,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
             }
 
             // New nominations
-            if (election.phase === 'nomination' && election.hasNewNominees) {
+            if (election.getPhase(nowOverride)) {
                 const status = await announcement?.announceNewNominees();
                 console.log(`[rescraper] announced nomination: ${status}`);
             }

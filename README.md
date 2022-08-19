@@ -141,6 +141,7 @@ Users with access level set to `AccessLevel.dev` have access to a list of power 
 | impersonate `<userId>`                                          | Considers all messages to come from a user with `userId` (NB: might downlevel privileges) |                                  |
 | join `[roomId]` room `[roomId]`                                 | Makes the bot join a room wiht `roomId`                                                   |                                  |
 | leave `[this\|current]` room `[roomId]`                         | Makes the bot leave the current room or a room with `roomId`                              |                                  |
+| rescrape                                                        | Forces the bot to _rescrape_ election data                                                |                                  |
 | reset election                                                  | Resets the current election state and clears the scraping history                         |                                  |
 | set `<access\|level>` `<me\|userId>` `<user\|admin\|dev>`       | Sets access level of a user with `userId`                                                 |                                  |
 | set config `<env var name>` `<value>`                           | sets an environment variable for the duration of the running the bot                      |                                  |
