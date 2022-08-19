@@ -1,3 +1,4 @@
+import { all } from "../shared/utils/booleans.js";
 
 export interface BotEnvironment {
     ACCOUNT_EMAIL?: string;
@@ -93,6 +94,34 @@ export default class BotEnv<T extends BotEnvironment | NodeJS.ProcessEnv> {
     }
 
     /**
+     * @summary checks if a given env {@link key} exists
+     * @param key key to check
+     */
+    has(key: string): key is Lowercase<keyof T & string> {
+        const env = this.#env;
+        return key.toUpperCase() in env;
+    }
+
+    /**
+     * @summary gets a parsed env value
+     * @param key key to get
+     */
+    parsed(key: Lowercase<keyof T & string>): string | number | boolean | string[] | object | undefined {
+        const env = this.#env;
+        const val: string = env[key.toUpperCase()];
+
+        try {
+            return JSON.parse(val);
+        } catch (error) {
+            return all(
+                val.includes("|"),
+                !val.startsWith("|"),
+                !val.endsWith("|"),
+            ) ? this.or(key) : val;
+        }
+    }
+
+    /**
      * @summary sets a given env {@link key}
      * @param key key to set
      * @param value value to set
@@ -104,5 +133,13 @@ export default class BotEnv<T extends BotEnvironment | NodeJS.ProcessEnv> {
         env[ukey] = Array.isArray(value) ?
             value.join("|") :
             JSON.stringify(value);
+    }
+
+    /**
+     * @summary gets the type of a parsed env value
+     * @param key key to get the type of
+     */
+    type(key: Lowercase<keyof T & string>) {
+        return typeof this.parsed(key);
     }
 }
