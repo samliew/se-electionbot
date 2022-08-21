@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import Election from "../../src/bot/election.js";
-import { addDates, dateToUtcTimestamp, trimMs } from "../../src/shared/utils/dates.js";
+import { addDates, addHours, dateToUtcTimestamp, trimMs } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockElectionAnnouncement } from "../mocks/election.js";
 import { getMockNominee } from "../mocks/nominee.js";
@@ -13,12 +13,15 @@ import { getMockApiUser, getMockUserProfile } from "../mocks/user.js";
 
 describe(Election.name, () => {
 
+    /** @type {Election} */
+    let election;
+    beforeEach(() => election = new Election("https://stackoverflow.com/election/12"));
+
     describe('getters', () => {
 
         describe("electionNum", () => {
             it('should correctly extract election number from URL', () => {
-                const election = new Election("https://stackoverflow.com/election/5");
-                expect(election.electionNum).to.equal(5);
+                expect(election.electionNum).to.equal(12);
 
                 election.electionUrl = "https://stackoverflow.com/election";
                 expect(election.electionNum).to.be.undefined;
@@ -27,7 +30,6 @@ describe(Election.name, () => {
 
         describe("hasRequiredBadges", () => {
             it('should correctly determine if the election has required badges', () => {
-                const election = new Election("https://stackoverflow.com/election/1");
                 expect(election.hasRequiredBadges).to.be.true;
 
                 election.electionUrl = "https://stackapps.com";
@@ -39,7 +41,6 @@ describe(Election.name, () => {
             it('should correctly determine election type', () => {
                 const dateNomination = dateToUtcTimestamp(Date.now());
 
-                const election = new Election("https://stackoverflow.com/election/5");
                 election.dateNomination = dateNomination;
 
                 election.announcements.set(123, getMockElectionAnnouncement({
@@ -63,85 +64,83 @@ describe(Election.name, () => {
         });
 
         describe('currentModerators', () => {
-            const election = new Election("https://stackoverflow.com/election/1");
+            it("should correctly get current moderators", () => {
+                const { moderators } = election;
+                moderators.set(1, {
+                    ...getMockApiUser({ user_id: 1 }),
+                    former: true
+                });
+                moderators.set(2, {
+                    ...getMockApiUser({ user_id: 2 }),
+                    former: false
+                });
 
-            const { moderators } = election;
-            moderators.set(1, {
-                ...getMockApiUser({ user_id: 1 }),
-                former: true
+                const { currentModerators } = election;
+
+                expect(currentModerators.size).to.equal(1);
+                expect(currentModerators.has(2)).to.be.true;
             });
-            moderators.set(2, {
-                ...getMockApiUser({ user_id: 2 }),
-                former: false
-            });
-
-            const { currentModerators } = election;
-
-            expect(currentModerators.size).to.equal(1);
-            expect(currentModerators.has(2)).to.be.true;
         });
 
         describe("electionOrdinalName", () => {
             it("should correctly format the ordinal name", () => {
-                const election = new Election("https://stackoverflow.com/election/2");
                 election.siteName = "Stack Overflow";
-                expect(election.electionOrdinalName).to.equal("2nd Stack Overflow election");
+                expect(election.electionOrdinalName).to.equal("12th Stack Overflow election");
             });
 
             it("should default to hostname without TLD on no 'siteName'", () => {
-                const election = new Election("https://stackoverflow.com/election/10");
+                election.electionUrl = "https://stackoverflow.com/election/10";
                 expect(election.electionOrdinalName).to.equal("10th stackoverflow election");
             });
         });
 
         describe("electionPhaseDuration", () => {
-            const election = new Election("https://stackoverflow.com/election/1");
+            it("should correctly determine the election phase duration", () => {
+                expect(election.electionPhaseDuration).to.equal(election.durations.electionWithoutPrimary);
 
-            expect(election.electionPhaseDuration).to.equal(election.durations.electionWithoutPrimary);
+                election.datePrimary = dateToUtcTimestamp(Date.now());
 
-            election.datePrimary = dateToUtcTimestamp(Date.now());
-
-            expect(election.electionPhaseDuration).to.equal(election.durations.electionWithPrimary);
+                expect(election.electionPhaseDuration).to.equal(election.durations.electionWithPrimary);
+            });
         });
 
         describe('formerModerators', () => {
-            const election = new Election("https://stackoverflow.com/election/1");
+            it("should correctly get former moderators", () => {
+                const { moderators } = election;
+                moderators.set(1, {
+                    ...getMockApiUser({ user_id: 1 }),
+                    former: true
+                });
+                moderators.set(2, {
+                    ...getMockApiUser({ user_id: 2 }),
+                    former: false
+                });
 
-            const { moderators } = election;
-            moderators.set(1, {
-                ...getMockApiUser({ user_id: 1 }),
-                former: true
+                const { formerModerators } = election;
+
+                expect(formerModerators.size).to.equal(1);
+                expect(formerModerators.has(1)).to.be.true;
             });
-            moderators.set(2, {
-                ...getMockApiUser({ user_id: 2 }),
-                former: false
-            });
-
-            const { formerModerators } = election;
-
-            expect(formerModerators.size).to.equal(1);
-            expect(formerModerators.has(1)).to.be.true;
         });
 
         describe('chatDomain', () => {
             it('should return stackoverflow.com for SO elections', () => {
-                const { chatDomain } = new Election("https://stackoverflow.com/election/1");
-                expect(chatDomain).to.equal("stackoverflow.com");
+                expect(election.chatDomain).to.equal("stackoverflow.com");
             });
 
             it('should return stackexchange.com for SE elections', () => {
-                const { chatDomain } = new Election("https://crypto.stackexchange.com/election/1");
-                expect(chatDomain).to.equal("stackexchange.com");
+                election.electionUrl = "https://crypto.stackexchange.com/election/1";
+                expect(election.chatDomain).to.equal("stackexchange.com");
             });
 
             it('should return meta.stackexchange.com for MSE elections', () => {
-                const { chatDomain } = new Election("https://meta.stackexchange.com/election/3");
-                expect(chatDomain).to.equal("meta.stackexchange.com");
+                election.electionUrl = "https://meta.stackexchange.com/election/3";
+                expect(election.chatDomain).to.equal("meta.stackexchange.com");
             });
 
             it('should default to stackexchange.com for network sites with non-SE domains', () => {
-                const { chatDomain } = new Election("https://askubuntu.com/election/6");
-                expect(chatDomain).to.equal("stackexchange.com");
+                election.electionUrl = "https://askubuntu.com/election/6";
+                expect(election.chatDomain).to.equal("stackexchange.com");
             });
         });
 
@@ -162,9 +161,7 @@ describe(Election.name, () => {
         });
 
         describe('reachedPrimaryThreshold', () => {
-
             it('should correctly determine if threshold is reached', () => {
-                const election = new Election("https://stackoverflow.com/election/1");
                 election.addActiveNominee(getMockNominee(election, { userId: 1 }));
                 election.addActiveNominee(getMockNominee(election, { userId: 2 }));
 
@@ -174,13 +171,10 @@ describe(Election.name, () => {
 
                 expect(election.reachedPrimaryThreshold).to.be.true;
             });
-
         });
 
         describe('nomineesLeftToReachPrimaryThreshold', () => {
-
             it('should correctly return the number of nominees left to reach threshold', () => {
-                const election = new Election("https://stackoverflow.com/election/42");
                 election.primaryThreshold = 42;
                 election.addActiveNominee(getMockNominee(election, { userId: 1 }));
                 election.addActiveNominee(getMockNominee(election, { userId: 2 }));
@@ -189,38 +183,30 @@ describe(Election.name, () => {
             });
 
             it('should return 0 if the threshold is already reached', () => {
-                const election = new Election("https://stackoverflow.com/election/1");
                 election.primaryThreshold = 1;
                 election.addActiveNominee(getMockNominee(election, { userId: 1 }));
                 election.addActiveNominee(getMockNominee(election, { userId: 2 }));
 
                 expect(election.nomineesLeftToReachPrimaryThreshold).to.equal(0);
             });
-
         });
 
         describe('requiredBadges', () => {
             it('should correctly return the list of required badges', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
                 const { requiredBadges } = election;
                 expect(requiredBadges.length).to.equal(4);
             });
-
         });
 
         describe('optionalBadges', () => {
             it('should correctly return the list of optional badges', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
                 const { optionalBadges, electionBadges, requiredBadges } = election;
                 expect(optionalBadges.length).to.equal(electionBadges.length - requiredBadges.length);
             });
         });
 
         describe('siteHostname', () => {
-
             it('should correctly get site hostname', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 const { siteHostname } = election;
                 expect(siteHostname).to.equal("stackoverflow.com");
             });
@@ -228,7 +214,6 @@ describe(Election.name, () => {
 
         describe('siteURL', () => {
             it('should return site TLD prefixed with HTTPS protocol', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
                 const { siteUrl, siteHostname } = election;
                 expect(siteUrl).to.match(/^https:\/\//);
                 expect(siteUrl).to.include(siteHostname);
@@ -237,15 +222,12 @@ describe(Election.name, () => {
 
         describe('electionBallotURL', () => {
             it('should correctly return ballot URL', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
                 election.phase = "ended";
                 const { electionBallotURL } = election;
                 expect(electionBallotURL).to.equal(`https://stackoverflow.com/election/download-result/12`);
             });
 
             it('should return empty string if not ended', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 /** @type {ElectionPhase[]} */
                 const phases = ["cancelled", "election", "nomination", "primary", null];
 
@@ -254,71 +236,51 @@ describe(Election.name, () => {
                     const { electionBallotURL } = election;
                     expect(electionBallotURL).to.be.empty;
                 });
-
             });
         });
 
         describe('apiSlug', () => {
-
             it('should correctly get site api slug', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
                 expect(election.apiSlug).to.equal("stackoverflow");
-
-                const election2 = new Election("https://bricks.stackexchange.com/election/1");
-                expect(election2.apiSlug).to.equal("bricks");
+                election.electionUrl = "https://bricks.stackexchange.com/election/1";
+                expect(election.apiSlug).to.equal("bricks");
             });
         });
 
         describe('currentNomineePostIds', () => {
             it('should correctly return nominee post ids', () => {
-                const election = new Election("https://stackoverflow.com/election/13");
-
-                const nominee1 = getMockNominee(election, { userId: 1, nominationLink: "https://stackoverflow.com/election/13#post-1" });
-                const nominee2 = getMockNominee(election, { userId: 2, nominationLink: "https://stackoverflow.com/election/13#post-2" });
+                const nominee1 = getMockNominee(election, { userId: 1, nominationLink: "https://stackoverflow.com/election/12#post-1" });
+                const nominee2 = getMockNominee(election, { userId: 2, nominationLink: "https://stackoverflow.com/election/12#post-2" });
 
                 election.addActiveNominee(nominee1);
                 election.addActiveNominee(nominee2);
 
-                const { currentNomineePostIds } = election;
-
-                expect(currentNomineePostIds).to.deep.equal([1, 2]);
+                expect(election.currentNomineePostIds).to.deep.equal([1, 2]);
             });
         });
 
         describe('numNominees', () => {
-
             it('should correctly return number of Nominees', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 election.addActiveNominee(getMockNominee(election, { userId: 1 }));
                 election.addActiveNominee(getMockNominee(election, { userId: 2 }));
-
-                const { numNominees } = election;
-                expect(numNominees).to.equal(2);
+                expect(election.numNominees).to.equal(2);
             });
         });
 
         describe('numWinners', () => {
-
             it('should correctly return number of Winners', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 const nominee1 = getMockNominee(election, { userId: 1 });
                 const nominee2 = getMockNominee(election, { userId: 2 });
 
                 election.winners.set(1, nominee1);
                 election.winners.set(2, nominee2);
 
-                const { numWinners } = election;
-                expect(numWinners).to.equal(2);
+                expect(election.numWinners).to.equal(2);
             });
         });
 
         describe('withdrawnNominees', () => {
-
             it('should correctly return only new withdrawn Nominees', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 const withdrawn = getMockNominee(election, { userId: 1 });
                 const remaining = getMockNominee(election, { userId: 2 });
 
@@ -336,19 +298,13 @@ describe(Election.name, () => {
         });
 
         describe('newNominees', () => {
-
             it('should correctly return only new Nominees', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 const oldNominee = getMockNominee(election, { userId: 1 });
                 const newNominee = getMockNominee(election, { userId: 2 });
 
                 election.addActiveNominee(oldNominee);
-
                 election.pushHistory();
-
                 election.nominees.delete(1);
-
                 election.addActiveNominee(newNominee);
 
                 const { newlyNominatedNominees } = election;
@@ -360,14 +316,10 @@ describe(Election.name, () => {
         });
 
         describe('newWinners', () => {
-
             it('should correctly return only new Winners', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 const newWinner = getMockNominee(election, { userId: 2 });
 
                 election.pushHistory();
-
                 election.winners.set(2, newWinner);
 
                 const { newWinners } = election;
@@ -378,21 +330,15 @@ describe(Election.name, () => {
             });
 
             it('should return an empty array on no Winners', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 election.pushHistory();
-
                 const { newWinners } = election;
                 expect(newWinners).be.empty;
             });
 
             it('hasNewWinners should correctly check if there are new winners', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 const newWinner = getMockNominee(election, { userId: 42 });
 
                 election.pushHistory();
-
                 election.winners.set(42, newWinner);
 
                 expect(election.hasNewWinners).to.be.true;
@@ -404,10 +350,7 @@ describe(Election.name, () => {
         });
 
         describe('electionChatRoomChanged', () => {
-
             it('should correctly detect if chat room has changed', () => {
-                const election = new Election("https://stackoverflow.com/election/12");
-
                 election.chatUrl = "https://old.url";
                 election.pushHistory();
 
@@ -418,18 +361,12 @@ describe(Election.name, () => {
         });
 
         describe('electionDatesChanged', () => {
-
             it('should correctly detect if dates has changed', () => {
                 const date = new Date();
 
-                const election = new Election("https://stackoverflow.com/election/12");
                 election.dateEnded = dateToUtcTimestamp(date);
-
                 election.pushHistory();
-
-                date.setHours(date.getHours() + 1);
-
-                election.dateEnded = dateToUtcTimestamp(date);
+                election.dateEnded = dateToUtcTimestamp(addHours(date, 1));
 
                 expect(election.electionDatesChanged).to.be.true;
             });
@@ -437,8 +374,6 @@ describe(Election.name, () => {
     });
 
     describe(Election.prototype.getElectionBadges.name, () => {
-        const election = new Election("https://stackoverflow.com/election/1");
-
         it("should correctly filter by type", () => {
             const editingBadges = election.getElectionBadges("editing");
             expect(editingBadges.length).to.equal(6);
@@ -470,8 +405,6 @@ describe(Election.name, () => {
 
     describe(Election.prototype.getNextPhaseDate.name, () => {
         it("should correctly determine next phase date", () => {
-            const election = new Election("https://stackoverflow.com/election/12");
-
             const nominationStart = trimMs(new Date());
             const primaryStart = trimMs(addDates(nominationStart, election.durations.nomination));
             const electionStart = trimMs(addDates(primaryStart, election.durations.primary));
@@ -504,14 +437,12 @@ describe(Election.name, () => {
     });
 
     describe(Election.prototype.getPhase.name, () => {
-
         it('should correctly determine phase', () => {
             const now = Date.now();
 
             const tomorrow = dateToUtcTimestamp(new Date(now + 864e5));
             const yesterday = dateToUtcTimestamp(new Date(now - 864e5));
 
-            const election = new Election("https://stackoverflow.com/election/12");
             election.dateElection = tomorrow;
             election.dateEnded = tomorrow;
             election.datePrimary = tomorrow;
@@ -549,7 +480,6 @@ describe(Election.name, () => {
         it('should correctly determine extension eligibility', () => {
             const config = getMockBotConfig();
 
-            const election = new Election("https://stackoverflow.com/election/12");
             election.phase = "nomination";
             election.numPositions = 2;
 
@@ -573,7 +503,6 @@ describe(Election.name, () => {
 
             const now = Date.now();
 
-            const election = new Election("https://stackoverflow.com/election/1");
             election.phase = "nomination";
             election.dateNomination = dateToUtcTimestamp(now);
 
@@ -587,25 +516,21 @@ describe(Election.name, () => {
 
     describe(Election.prototype.isStackOverflow.name, () => {
         it('should return true if the election is on SO', () => {
-            const election = new Election("https://stackoverflow.com/election/12");
             expect(election.isStackOverflow()).to.be.true;
         });
 
         it('should return false if the election is not on SO', () => {
-            const rpg = new Election("https://rpg.stackexchange.com/election/1");
-            expect(rpg.isStackOverflow()).to.be.false;
+            election.electionUrl = "https://rpg.stackexchange.com/election/1";
+            expect(election.isStackOverflow()).to.be.false;
 
-            const meta = new Election("https://meta.stackexchange.com/election/2");
-            expect(meta.isStackOverflow()).to.be.false;
+            election.electionUrl = "https://meta.stackexchange.com/election/2";
+            expect(election.isStackOverflow()).to.be.false;
         });
     });
 
     describe(Election.prototype.isNominee.name, () => {
-
         it('should correctly determine if an id is a nominee', () => {
             const testIds = [42, 24, -9000];
-
-            const election = new Election("https://stackoverflow.com/election/12");
 
             testIds.forEach((userId) => {
                 election.addActiveNominee(getMockNominee(election, { userId }));
@@ -617,20 +542,13 @@ describe(Election.name, () => {
 
         it('should accept User instance instead of an id', () => {
             const user = getMockUserProfile({ id: 42 });
-
-            const election = new Election("https://stackoverflow.com/election/42");
-
             election.addActiveNominee(getMockNominee(election, { userId: 42, userName: "answer" }));
-
             expect(election.isNominee(user));
         });
     });
 
     describe(Election.prototype.isNotStartedYet.name, () => {
-
         it('should correctly check if election is only upcoming', () => {
-            const election = new Election("https://stackoverflow.com/election/13");
-
             expect(election.isNotStartedYet()).to.be.true;
 
             election.dateNomination = new Date(Date.now() - 864e5).toISOString();
@@ -645,8 +563,6 @@ describe(Election.name, () => {
 
     describe(Election.prototype.isActive.name, () => {
         it('should correctly determine active state', () => {
-            const election = new Election("https://stackoverflow.com/election/12");
-
             /** @type {ElectionPhase[]} */
             const inactivePhases = [null, "ended", "cancelled"];
 
@@ -669,13 +585,11 @@ describe(Election.name, () => {
 
     describe(Election.prototype.isCancelled.name, () => {
         it("should correctly determine if the election is cancelled", () => {
-            const election = new Election("https://stackoverflow.com/election/11");
             election.dateCancelled = election.dateElection = dateToUtcTimestamp(Date.now());
             expect(election.isCancelled()).to.be.true;
         });
 
         it("should account for current date overrides", () => {
-            const election = new Election("https://stackoverflow.com/election/11");
             const now = new Date();
             election.dateCancelled = election.dateElection = dateToUtcTimestamp(now);
             expect(election.isCancelled(addDates(now, -1))).to.be.false;
@@ -684,13 +598,11 @@ describe(Election.name, () => {
 
     describe(Election.prototype.isNomination.name, () => {
         it("should correctly determine if the election is in the nomination phase", () => {
-            const election = new Election("https://stackoverflow.com/election/11");
             election.dateNomination = dateToUtcTimestamp(Date.now());
             expect(election.isNomination()).to.be.true;
         });
 
         it("should account for current date overrides", () => {
-            const election = new Election("https://stackoverflow.com/election/11");
             const now = new Date();
             election.dateNomination = dateToUtcTimestamp(now);
             expect(election.isNomination(addDates(now, -1))).to.be.false;
@@ -698,10 +610,7 @@ describe(Election.name, () => {
     });
 
     describe(Election.prototype.isEnded.name, () => {
-
         it('should corrrectly check if election has ended', () => {
-            const election = new Election("https://stackoverflow.com/election/12");
-
             election.dateEnded = new Date(Date.now() - 100 * 864e5).toISOString();
             expect(election.isEnded()).to.be.true;
 
@@ -714,11 +623,8 @@ describe(Election.name, () => {
     });
 
     describe(Election.prototype.isEnding.name, () => {
-
         it('should correctly check if election is ending', () => {
             const offsetSecs = 5 * 60 * 1000; // 5 minutes
-
-            const election = new Election("https://stackoverflow.com/election/12");
 
             // Move end date to 5 mins in the future (so it will be ending soon)
             election.phase = "election";
@@ -743,8 +649,6 @@ describe(Election.name, () => {
 
     describe(Election.prototype.isInactive.name, () => {
         it("should correctly check if election is inactive", () => {
-            const election = new Election("https://stackoverflow.com/election/12");
-
             election.phase = "election";
             expect(election.isInactive()).to.be.false;
 
@@ -760,10 +664,7 @@ describe(Election.name, () => {
     });
 
     describe(Election.prototype.isNewPhase.name, () => {
-
         it('should correctly determine new phase', () => {
-
-            const election = new Election("https://stackoverflow.com/election/12");
             election.phase = "nomination";
             election.pushHistory();
             election.phase = "election";
@@ -781,7 +682,6 @@ describe(Election.name, () => {
 
     describe(Election.prototype.canVote.name, () => {
         it('should correctly determine if a user can vote', () => {
-            const election = new Election("https://stackoverflow.com/election/12");
             election.repVote = 150;
 
             const cannotVote = election.canVote(getMockUserProfile({ reputation: 42 }));
