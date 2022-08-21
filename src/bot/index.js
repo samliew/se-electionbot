@@ -335,7 +335,7 @@ use defaults ${defaultChatNotSet}`
          * (assuming ElectionBot managed to announce all the nominations from start of election)
          */
         const announcements = await findNominationAnnouncementsInChat(config, me);
-        await addWithdrawnNomineesFromChat(config, election, announcements);
+        await addWithdrawnNomineesFromChat(config, election, announcement, announcements);
 
         if (config.verbose) {
             console.log(`INIT - Added withdrawn nominees:`, election.withdrawnNominees);

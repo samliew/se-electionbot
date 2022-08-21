@@ -8,6 +8,7 @@ import { calculateScore } from "../score.js";
 import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from "../utils.js";
 
 /**
+ * @typedef {import("../announcement.js").default} Announcer
  * @typedef {import("../config.js").BotConfig} BotConfig
  * @typedef {import("chatexchange/dist/User").default} BotUser
  * @typedef {import("../utils").ChatMessage} ChatMessage
@@ -33,10 +34,11 @@ export const findNominationAnnouncementsInChat = async (config, user) => {
  * @summary finds withdrawn {@link Nominee}s that were only announced in chat
  * @param {BotConfig} config bot configuration
  * @param {Election} election current {@link Election}
+ * @param {Announcer} announcer election {@link Announcer}
  * @param {ChatMessage[]} messages list of {@link ChatMessage}s
  * @returns {Promise<number>}
  */
-export const addWithdrawnNomineesFromChat = async (config, election, messages) => {
+export const addWithdrawnNomineesFromChat = async (config, election, announcer, messages) => {
     const {
         currentNomineePostIds,
         dateElectionMs,
@@ -104,6 +106,7 @@ export const addWithdrawnNomineesFromChat = async (config, election, messages) =
             }
         }
 
+        announcer.addAnnouncedParticipant("withdrawals", withdrawnNominee);
         election.addWithdrawnNominee(withdrawnNominee);
 
         // Limit to scraping of withdrawn nominations from transcript if more than number of nominations
