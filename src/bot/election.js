@@ -834,6 +834,16 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election is in the nomination phase
+     * @param {Date} [today] current date override
+     * @returns {boolean}
+     */
+    isNomination(today) {
+        const phase = this.getPhase(today);
+        return phase === "nomination";
+    }
+
+    /**
      * @summary checks if the election has been cancelled
      * @param {Date} [today] current date override
      * @returns {boolean}
