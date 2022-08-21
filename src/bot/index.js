@@ -5,7 +5,7 @@ import entities from 'html-entities';
 import { startServer } from "../server/index.js";
 import { logActivity, logResponse } from "../shared/utils/bot.js";
 import { prepareMessageForMatching } from "../shared/utils/chat.js";
-import { MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
+import { getMilliseconds, MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcer, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
@@ -349,7 +349,7 @@ use defaults ${defaultChatNotSet}`
         }
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
-        if (election.phase === 'ended' && Date.now() < new Date(election.dateEnded).getTime() + 36e5) {
+        if (election.isEnded(config.nowOverride) && Date.now() < getMilliseconds(election.dateEnded) + 36e5) {
             await postWinnersAnnouncement(config, election, announcement, transcriptMessages, me);
         }
         // Announce join room if in debug mode
