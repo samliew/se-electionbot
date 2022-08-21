@@ -11,6 +11,7 @@ import { getMockNominee } from "../mocks/nominee.js";
 /**
  * @typedef {import("../../src/bot/config.js").default} BotConfig
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} Message
+ * @typedef {import("../../src/bot/announcement.js").ParticipantAnnouncementType} ParticipantAnnouncementType
  */
 
 describe(Announcer.name, () => {
@@ -47,6 +48,19 @@ describe(Announcer.name, () => {
         it("should correctly get/set announcement state", () => {
             announcer.setAnnounced("cancelled", true);
             expect(announcer.getAnnounced("cancelled")).to.be.true;
+        });
+    });
+
+    describe(`${Announcer.prototype.addAnnouncedParticipant.name} & ${Announcer.prototype.hasAnnouncedParticipant.name}`, () => {
+        it("should correctly add announced participants by type", () => {
+            /** @type {ParticipantAnnouncementType[]} */
+            const types = ["nominees", "winners", "withdrawals"];
+
+            types.forEach((type, userId) => {
+                const participant = getMockNominee(election, { userId });
+                announcer.addAnnouncedParticipant(type, participant);
+                expect(announcer.hasAnnouncedParticipant(type, participant));
+            });
         });
     });
 
@@ -174,7 +188,6 @@ describe(Announcer.name, () => {
             expect(await promise).to.be.true;
 
             const [[message]] = messageStub.args;
-
             expect(message).to.match(/to the winner\*\*.+Jeanne/);
         });
     });
@@ -194,7 +207,6 @@ describe(Announcer.name, () => {
             expect(await promise).to.be.true;
 
             const [[message]] = messageStub.args;
-
             expect(message).to.match(/John\b.+?\bwithdrawn/);
         });
     });
@@ -215,7 +227,6 @@ describe(Announcer.name, () => {
             expect(await promise).to.be.true;
 
             const [[change], [schedule]] = messageStub.args;
-
             expect(change).to.match(/dates\s+have\s+changed:/);
             expect(schedule).to.match(new RegExp(`\\b${now}\\b`, "m"));
         });
@@ -232,7 +243,6 @@ describe(Announcer.name, () => {
             expect(await promise).to.be.true;
 
             const [[message]] = messageStub.args;
-
             expect(message).to.match(/nomination\s+phase/);
             expect(message).to.match(/may\s+now\s+nominate/);
         });
@@ -249,7 +259,6 @@ describe(Announcer.name, () => {
             expect(await promise).to.be.true;
 
             const [[message]] = messageStub.args;
-
             expect(message).to.match(/final\s+voting\s+phase/);
             expect(message).to.match(/may\s+now\s+rank\s+the\s+candidates/);
         });
@@ -266,7 +275,6 @@ describe(Announcer.name, () => {
             expect(await promise).to.be.true;
 
             const [[message]] = messageStub.args;
-
             expect(message).to.match(/primary\s+phase/);
             expect(message).to.match(/vote\s+on\s+the\s+candidates.+?posts/);
         });
@@ -283,7 +291,6 @@ describe(Announcer.name, () => {
             expect(await promise).to.be.true;
 
             const [[message]] = messageStub.args;
-
             expect(message).to.match(/has\s+now\s+ended/);
             expect(message).to.match(/winners\s+will\s+be\s+announced/);
         });

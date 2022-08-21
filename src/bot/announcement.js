@@ -20,6 +20,7 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {"start"|"end"|"primary"|"nomination"|"test"} TaskType
  * @typedef {"cancelled"|"ended"|"nomination"|"nominees"} AnnouncementType
+ * @typedef {"nominees"|"winners"|"withdrawals"} ParticipantAnnouncementType
  */
 
 /**
@@ -63,13 +64,34 @@ export default class Announcer {
     ]);
 
     /**
-     * @type {Record<"nominees"|"winners"|"withdrawals", Map<number, Nominee>>}
+     * @type {Record<ParticipantAnnouncementType, Map<number, Nominee>>}
      */
     #announced = {
         nominees: new Map(),
         winners: new Map(),
         withdrawals: new Map(),
     };
+
+    /**
+     * @summary adds an individual election participant to announced ones
+     * @param {ParticipantAnnouncementType} type announcement type
+     * @param {Nominee} participant election participant
+     * @returns {Announcer}
+     */
+    addAnnouncedParticipant(type, participant) {
+        this.#announced[type].set(participant.userId, participant);
+        return this;
+    }
+
+    /**
+     * @summary checks if a given participant has been announced
+     * @param {ParticipantAnnouncementType} type announcement type
+     * @param {Nominee} participant election participant
+     * @returns {boolean}
+     */
+    hasAnnouncedParticipant(type, participant) {
+        return this.#announced[type].has(participant.userId);
+    }
 
     /**
      * @summary sets announcement state by type
