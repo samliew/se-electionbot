@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import sinon from "sinon";
 import Election from "../../src/bot/election.js";
 import { addDates, dateToUtcTimestamp, trimMs } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -643,7 +644,6 @@ describe(Election.name, () => {
     });
 
     describe(Election.prototype.isActive.name, () => {
-
         it('should correctly determine active state', () => {
             const election = new Election("https://stackoverflow.com/election/12");
 
@@ -653,18 +653,32 @@ describe(Election.name, () => {
             /** @type {ElectionPhase[]} */
             const activePhases = ["election", "primary", "nomination"];
 
-            const allInactive = inactivePhases.every((phase) => {
-                election.phase = phase;
-                return !election.isActive();
+            const phaseStub = sinon.stub(election, "getPhase");
+
+            inactivePhases.forEach((phase) => {
+                phaseStub.returns(phase);
+                expect(election.isActive()).to.be.false;
             });
 
-            const allActive = activePhases.every((phase) => {
-                election.phase = phase;
-                return election.isActive();
+            activePhases.forEach((phase) => {
+                phaseStub.returns(phase);
+                expect(election.isActive()).to.be.true;
             });
+        });
+    });
 
-            expect(allActive).to.be.true;
-            expect(allInactive).to.be.true;
+    describe(Election.prototype.isNomination.name, () => {
+        it("should correctly determine if the election is in the nomination phase", () => {
+            const election = new Election("https://stackoverflow.com/election/11");
+            election.dateNomination = dateToUtcTimestamp(Date.now());
+            expect(election.isNomination()).to.be.true;
+        });
+
+        it("should account for current date overrides", () => {
+            const election = new Election("https://stackoverflow.com/election/11");
+            const now = new Date();
+            election.dateNomination = dateToUtcTimestamp(now);
+            expect(election.isNomination(addDates(now, -1))).to.be.false;
         });
     });
 
