@@ -667,6 +667,21 @@ describe(Election.name, () => {
         });
     });
 
+    describe(Election.prototype.isCancelled.name, () => {
+        it("should correctly determine if the election is cancelled", () => {
+            const election = new Election("https://stackoverflow.com/election/11");
+            election.dateCancelled = election.dateElection = dateToUtcTimestamp(Date.now());
+            expect(election.isCancelled()).to.be.true;
+        });
+
+        it("should account for current date overrides", () => {
+            const election = new Election("https://stackoverflow.com/election/11");
+            const now = new Date();
+            election.dateCancelled = election.dateElection = dateToUtcTimestamp(now);
+            expect(election.isCancelled(addDates(now, -1))).to.be.false;
+        });
+    });
+
     describe(Election.prototype.isNomination.name, () => {
         it("should correctly determine if the election is in the nomination phase", () => {
             const election = new Election("https://stackoverflow.com/election/11");
