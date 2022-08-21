@@ -58,7 +58,8 @@ describe(Announcer.name, () => {
 
         it('should send message and return true on all conditions matching', async () => {
             const mockReason = "for some reason";
-            election.phase = "cancelled";
+            sinon.stub(election, "getPhase").returns("cancelled");
+
             election.cancelledText = mockReason;
 
             const promise = announcer.announceCancelled();
