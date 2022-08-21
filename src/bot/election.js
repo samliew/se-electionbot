@@ -825,11 +825,12 @@ export default class Election {
 
     /**
      * @summary checks if the election is in an active phase
+     * @param {Date} [today] current date override
      * @returns {boolean}
      */
-    isActive() {
-        const { phase } = this;
-        return ![null, "ended", "cancelled"].includes(/** @type {string} */(phase));
+    isActive(today) {
+        const phase = this.getPhase(today);
+        return ![null, "ended", "cancelled"].includes(phase);
     }
 
     /**
