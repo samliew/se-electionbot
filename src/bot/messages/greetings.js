@@ -37,10 +37,12 @@ export const sayGreeting = async (config, elections, election, botUser, room, gr
         return "";
     }
 
+    const now = config.nowOverride || new Date();
+
     let alreadyVoted = "";
-    if (election.getPhase(config.nowOverride) === "election") {
+    if (election.getPhase(now) === "election") {
         const numEligible = await getNumberOfUsersEligibleToVote(config, election);
-        const numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, { from: dateElection });
+        const numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, { from: dateElection || now });
 
         const format = partialRight(formatNumber, [3]);
         const eligible = `${percentify(numVoters, numEligible, 2)} of ${format(numEligible)} eligible`;

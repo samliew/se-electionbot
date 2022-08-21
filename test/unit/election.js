@@ -40,7 +40,6 @@ describe(Election.name, () => {
         describe("electionType", () => {
             it('should correctly determine election type', () => {
                 const dateNomination = dateToUtcTimestamp(Date.now());
-
                 election.dateNomination = dateNomination;
 
                 election.announcements.set(123, getMockElectionAnnouncement({
@@ -97,9 +96,7 @@ describe(Election.name, () => {
         describe("electionPhaseDuration", () => {
             it("should correctly determine the election phase duration", () => {
                 expect(election.electionPhaseDuration).to.equal(election.durations.electionWithoutPrimary);
-
-                election.datePrimary = dateToUtcTimestamp(Date.now());
-
+                election.datePrimary = Date.now();
                 expect(election.electionPhaseDuration).to.equal(election.durations.electionWithPrimary);
             });
         });
@@ -364,9 +361,9 @@ describe(Election.name, () => {
             it('should correctly detect if dates has changed', () => {
                 const date = new Date();
 
-                election.dateEnded = dateToUtcTimestamp(date);
+                election.dateEnded = date;
                 election.pushHistory();
-                election.dateEnded = dateToUtcTimestamp(addHours(date, 1));
+                election.dateEnded = addHours(date, 1);
 
                 expect(election.electionDatesChanged).to.be.true;
             });
@@ -410,10 +407,10 @@ describe(Election.name, () => {
             const electionStart = trimMs(addDates(primaryStart, election.durations.primary));
             const endedStart = trimMs(addDates(electionStart, election.durations.electionWithPrimary));
 
-            election.dateNomination = dateToUtcTimestamp(nominationStart);
-            election.datePrimary = dateToUtcTimestamp(primaryStart);
-            election.dateElection = dateToUtcTimestamp(electionStart);
-            election.dateEnded = dateToUtcTimestamp(endedStart);
+            election.dateNomination = nominationStart;
+            election.datePrimary = primaryStart;
+            election.dateElection = electionStart;
+            election.dateEnded = endedStart;
 
             expect(
                 election.getNextPhaseDate(nominationStart)?.valueOf(),
@@ -440,8 +437,8 @@ describe(Election.name, () => {
         it('should correctly determine phase', () => {
             const now = Date.now();
 
-            const tomorrow = dateToUtcTimestamp(new Date(now + 864e5));
-            const yesterday = dateToUtcTimestamp(new Date(now - 864e5));
+            const tomorrow = new Date(now + 864e5);
+            const yesterday = new Date(now - 864e5);
 
             election.dateElection = tomorrow;
             election.dateEnded = tomorrow;
@@ -486,7 +483,7 @@ describe(Election.name, () => {
         it("should account for current date overrides", () => {
             election.winners.set(42, getMockNominee(election, { userId: 42 }));
             const now = new Date();
-            election.dateEnded = dateToUtcTimestamp(now);
+            election.dateEnded = now;
             expect(election.hasResults(addDates(now, -1))).to.be.false;
         });
     });
@@ -519,7 +516,7 @@ describe(Election.name, () => {
             const now = Date.now();
 
             election.phase = "nomination";
-            election.dateNomination = dateToUtcTimestamp(now);
+            election.dateNomination = now;
 
             expect(election.isNominationExtended(config)).to.be.false;
 
@@ -600,26 +597,26 @@ describe(Election.name, () => {
 
     describe(Election.prototype.isCancelled.name, () => {
         it("should correctly determine if the election is cancelled", () => {
-            election.dateCancelled = election.dateElection = dateToUtcTimestamp(Date.now());
+            election.dateCancelled = election.dateElection = Date.now();
             expect(election.isCancelled()).to.be.true;
         });
 
         it("should account for current date overrides", () => {
             const now = new Date();
-            election.dateCancelled = election.dateElection = dateToUtcTimestamp(now);
+            election.dateCancelled = election.dateElection = now;
             expect(election.isCancelled(addDates(now, -1))).to.be.false;
         });
     });
 
     describe(Election.prototype.isNomination.name, () => {
         it("should correctly determine if the election is in the nomination phase", () => {
-            election.dateNomination = dateToUtcTimestamp(Date.now());
+            election.dateNomination = Date.now();
             expect(election.isNomination()).to.be.true;
         });
 
         it("should account for current date overrides", () => {
             const now = new Date();
-            election.dateNomination = dateToUtcTimestamp(now);
+            election.dateNomination = now;
             expect(election.isNomination(addDates(now, -1))).to.be.false;
         });
     });

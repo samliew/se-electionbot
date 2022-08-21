@@ -36,7 +36,7 @@ export const sayAboutElectionStatus = (config, _es, election, ...rest) => {
     const prefix = `The ${phaseLink} is in the ${phase} phase with ${numNominees} ${nomineeTerm}${pluralize(numNominees)}`;
 
     if (phase === 'primary') {
-        const postfix = `come back ${linkToRelativeTimestamp(dateElection)} to vote in the final election voting phase`;
+        const postfix = `come back ${dateElection ? linkToRelativeTimestamp(dateElection) : "later"} to vote in the final election voting phase`;
         const conditions = `If you have at least ${repVote} reputation`;
         const actions = `you may freely vote on the ${nomineeTerm}s`;
         return `${prefix}. ${conditions}, ${actions}, and ${postfix}.`;
@@ -68,7 +68,9 @@ export const sayAboutThePhases = (_config, _elections, election) => {
 export const sayElectionNotStartedYet = (_c, _es, election) => {
     const { dateNomination, electionUrl } = election;
 
-    const startsIn = `The ${boldify("nomination")} phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativeTime(dateNomination)}).`;
+    const startsIn = dateNomination ?
+        `The ${boldify("nomination")} phase is starting at ${linkToUtcTimestamp(dateNomination)} (${dateToRelativeTime(dateNomination)}).` :
+        `The ${boldify("nomination")} phase start date will be determined later.`;
 
     return `The ${makeURL("election", electionUrl)} has not started yet. ${startsIn}`;
 };
@@ -78,7 +80,7 @@ export const sayElectionNotStartedYet = (_c, _es, election) => {
  * @type {MessageBuilder}
  */
 export const sayElectionIsEnding = (_c, _es, election, ...rest) => {
-    const { phase, dateEnded } = election;
+    const { phase, dateEnded, electionOrdinalName } = election;
 
     /** @type {[phase:ElectionPhase, handler:MessageBuilder][]} */
     const phaseMap = [
@@ -89,8 +91,12 @@ export const sayElectionIsEnding = (_c, _es, election, ...rest) => {
 
     if (handler) return handler(_c, _es, election, ...rest);
 
+    if (!dateEnded) {
+        return `The ${electionOrdinalName} end date will be determined later.`;
+    }
+
     const relativetime = dateToRelativeTime(dateEnded);
-    return `The election ends at ${linkToUtcTimestamp(dateEnded)} (${relativetime}).`;
+    return `The ${electionOrdinalName} ends at ${linkToUtcTimestamp(dateEnded)} (${relativetime}).`;
 };
 
 /**
@@ -100,7 +106,8 @@ export const sayElectionIsEnding = (_c, _es, election, ...rest) => {
  */
 export const sayElectionIsRunning = (election) => {
     const { electionUrl, dateEnded, } = election;
-    return `The ${makeURL("election", `${electionUrl}?tab=election`)} is currently in the final voting phase, ending at ${linkToUtcTimestamp(dateEnded)} (${dateToRelativeTime(dateEnded)}).`;
+    const endingText = dateEnded ? `at ${linkToUtcTimestamp(dateEnded)} (${dateToRelativeTime(dateEnded)})` : "later";
+    return `The ${makeURL("election", `${electionUrl}?tab=election`)} is currently in the final voting phase, ending ${endingText}.`;
 };
 
 /**
@@ -149,7 +156,9 @@ export const sayNextPhase = (config, _es, election, ...rest) => {
     const { showPrimaryCountdownAfter } = config;
 
     const needsMoreForPrimary = phase === "nomination" && numNominees >= showPrimaryCountdownAfter ?
-        ` unless ${numToString(nomineesLeft)} more candidate${pluralize(nomineesLeft)} show${pluralize(nomineesLeft, "", "s")} up for **primary**` : "";
+        ` unless ${numToString(nomineesLeft)} more candidate${pluralize(nomineesLeft)} show${pluralize(nomineesLeft, "", "s")} up for ${boldify("primary")}` : "";
+
+    const electionText = dateElection ? `at ${linkToUtcTimestamp(dateElection)} (${dateToRelativeTime(dateElection)})` : "some time later";
 
     const phaseMap = {
         "cancelled": statVoters,
@@ -157,9 +166,9 @@ export const sayNextPhase = (config, _es, election, ...rest) => {
         "ended": sayElectionIsOver(config, _es, election, ...rest),
         "null": sayElectionNotStartedYet(config, _es, election, ...rest),
         "nomination": `The next phase is the ${datePrimary && reachedPrimaryThreshold ?
-            `**primary** at ${linkToUtcTimestamp(datePrimary)} (${dateToRelativeTime(datePrimary)}).` :
-            `**election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativeTime(dateElection)})${needsMoreForPrimary}.`}`,
-        "primary": `The next phase is the **election** at ${linkToUtcTimestamp(dateElection)} (${dateToRelativeTime(dateElection)}).`
+            `${boldify("primary")} at ${linkToUtcTimestamp(datePrimary)} (${dateToRelativeTime(datePrimary)}).` :
+            `${boldify("election")} ${electionText}${needsMoreForPrimary}.`}`,
+        "primary": `The next phase is the ${boldify("election")} ${electionText}.`
     };
 
     return phaseMap[phase];

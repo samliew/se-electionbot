@@ -23,7 +23,7 @@ import { sayElectionNotStartedYet } from "./phases.js";
 export const sayAboutVoting = (_c, _es, election, ...rest) => {
     const { dateElection, electionUrl, phase, repVote, statVoters } = election;
 
-    const comeBackFinalPhaseText = ` Don't forget to come back ${linkToRelativeTimestamp(dateElection)} to also vote in the election's final voting phase!`;
+    const comeBackFinalPhaseText = ` Don't forget to come back ${dateElection ? linkToRelativeTimestamp(dateElection) : "later"} to also vote in the election's final voting phase!`;
 
     const decision = sayInformedDecision(_c, _es, election, ...rest);
 
@@ -60,8 +60,10 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
 
     const isInverted = /\bnot\b/i.test(text);
 
+    const now = config.nowOverride || new Date();
+
     const todate = matchISO8601(text, { preMatches: /\b(?:to|till)\s+/ }) ||
-        dateToShortISO8601Timestamp(config.nowOverride || new Date());
+        dateToShortISO8601Timestamp(now);
 
     if (config.debugOrVerbose) {
         console.log("voting date bounds", { todate, fromdate: dateElection });
@@ -73,7 +75,7 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
         const [numEligible, numAwarded] = await Promise.all([
             getNumberOfUsersEligibleToVote(config, election),
             getNumberOfVoters(config, apiSlug, electionBadgeId, {
-                from: dateElection,
+                from: dateElection || now,
                 to: todate
             })
         ]);
@@ -93,7 +95,7 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
         return statVoters || "";
     }
 
-    return `We won't know until the election starts. Come back ${linkToRelativeTimestamp(dateElection)}.`;
+    return `We won't know until the election starts. Come back ${dateElection ? linkToRelativeTimestamp(dateElection) : "later"}.`;
 };
 
 /**

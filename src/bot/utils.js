@@ -1111,10 +1111,10 @@ export const getFormattedElectionSchedule = (config, election) => {
 
     /** @type {[Exclude<ElectionPhase,null>,string][]} */
     const dateMap = [
-        ["nomination", dateNomination],
+        ["nomination", dateNomination || ""],
         ["primary", datePrimary || ""],
-        ["election", dateElection],
-        [dateCancelled ? "cancelled" : "ended", dateCancelled || dateEnded],
+        ["election", dateElection || ""],
+        [dateCancelled ? "cancelled" : "ended", dateCancelled || dateEnded || ""],
     ];
 
     const maxPhaseLen = longestLength(dateMap.map(([phase]) => phase));

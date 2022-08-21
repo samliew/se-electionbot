@@ -178,7 +178,7 @@ export const sayWhereToFindElectionResults = (_c, _es, election, ...rest) => {
 
     /** @type {[boolean,ReturnType<MessageBuilder>][]} */
     const rules = [
-        [election.isActive(), `The election is ${getRandomNow()} — the results will become available after it ends ${dateToRelativeTime(dateEnded)}.`],
+        [election.isActive(), `The election is ${getRandomNow()} — the results will become available after it ends ${dateEnded ? dateToRelativeTime(dateEnded) : "later"}.`],
         [election.isNotStartedYet(), sayElectionNotStartedYet(_c, _es, election, ...rest)],
         [election.isEnded(), `The ${formatOrdinal(electionNum || 1)} ${siteName} election has ended.${resultsLocation}`]
     ];
@@ -236,7 +236,7 @@ export const sayWillElectionBeCancelled = (config, _es, election) => {
         return `${electionName} hasn't even started yet!`;
     }
 
-    const maybeCancelledIn = dateToRelativeTime(dateElection, { now });
+    const maybeCancelledIn = dateElection ? dateToRelativeTime(dateElection, { now }) : "later";
 
     const sustainClause = `unless ${leftToNominateToSustain} more user${pluralize(leftToNominateToSustain)} nominate${pluralize(leftToNominateToSustain, "", "s")}`;
 

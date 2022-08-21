@@ -18,36 +18,36 @@
         <table>
             <tr><td>Last updated</td><td>{{> relativetime date=updated}}</td></tr>
             <tr><td>Site</td><td>{{siteName}}</td></tr>
-            <tr>
-                <td>Type</td>
-                <td>{{getter this "electionType"}}</td>
-            </tr>
-            <tr><td>Hostname</td><td>{{{url (getter @root/data/election "siteUrl")}}}</td></tr>
+            <tr><td>Type</td><td>{{getter this "electionType"}}</td></tr>
+            <tr><td>Hostname</td><td>{{{url (getter this "siteUrl")}}}</td></tr>
             <tr>
                 <td>Is Stack Overflow</td>
                 <td>{{{boolean (contextCall "isStackOverflow" this)}}}</td>
             </tr>
             <tr><td>Election Title</td><td>{{title}}</td></tr>
             <tr><td>Election URL</td><td>{{{url electionUrl}}}</td></tr>
-            <tr><td>Election Chat</td>
-                {{#if chatUrl}}
-                <td>{{{url chatUrl}}}</td>
-                {{else}}
-                <td></td>
-                {{/if}}
+            <tr><td>Election Chat</td>{{#if chatUrl}}<td>{{{url chatUrl}}}</td>{{/if}}</tr>
+            <tr><td>Current phase</td>{{#if phase}}<td><strong>{{phase}}</strong></td>{{/if}}</tr>
+            <tr>
+                <td>Nomination date</td>
+                <td>{{#if (getter this "dateNomination")}}{{> relativetime date=(getter this "dateNomination")}}{{/if}}</td>
             </tr>
-            <tr><td>Current phase</td>
-                {{#if phase}}
-                <td><strong>{{phase}}</strong></td>
-                {{else}}
-                <td></td>
-                {{/if}}
+            <tr>
+                <td>Primary date</td>
+                <td>{{#if (getter this "datePrimary")}}{{> relativetime date=(getter this "datePrimary")}}{{/if}}</td>
             </tr>
-            <tr><td>Nomination date</td><td>{{> relativetime date=dateNomination}}</td></tr>
-            <tr><td>Primary date</td><td>{{#if datePrimary}}{{> relativetime date=datePrimary}}{{/if}}</td></tr>
-            <tr><td>Election date</td><td>{{> relativetime date=dateElection}}</td></tr>
-            <tr><td>End date</td><td>{{> relativetime date=dateEnded}}</td></tr>
-            <tr><td>Cancelled date</td><td>{{#if dateCancelled}}{{> relativetime date=dateCancelled}}{{/if}}</td></tr>
+            <tr>
+                <td>Election date</td>
+                <td>{{#if (getter this "dateElection")}}{{> relativetime date=(getter this "dateElection")}}{{/if}}</td>
+            </tr>
+            <tr>
+                <td>End date</td>
+                <td>{{#if (getter this "dateEnded")}}{{> relativetime date=(getter this "dateEnded")}}{{/if}}</td>
+            </tr>
+            <tr>
+                <td>Cancelled date</td>
+                <td>{{#if (getter this "dateCancelled")}}{{> relativetime date=(getter this "dateCancelled")}}{{/if}}</td>
+            </tr>
             <tr><td>Cancelled text</td><td>{{#if cancelledText}}<pre>{{cancelledText}}</pre>{{/if}}</td></tr>
             <tr><td>Rep. to vote</td><td>{{repVote}}</td></tr>
             <tr><td>Rep. to nominate</td><td>{{repNominate}}</td></tr>

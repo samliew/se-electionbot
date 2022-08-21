@@ -181,10 +181,10 @@ export const getSeconds = (date) => new Date(date).getTime() / MS_IN_SECOND;
 
 /**
  * @summary gets number of milliseconds since *nix epoch
- * @param {Date|string|number} date date to get seconds from
+ * @param {Date|string|number|undefined} date date to get seconds from
  * @returns {number}
  */
-export const getMilliseconds = (date) => validateDate(date).valueOf();
+export const getMilliseconds = (date) => date ? validateDate(date).valueOf() : 0;
 
 /**
  * @summary reformats a date string in US format to ISO 8601
@@ -270,14 +270,14 @@ export const addYears = (date, num = 1) => {
 
 /**
  * @summary returns the difference between two dates in days
- * @param {Date|string|number} start start date
- * @param {Date|string|number} end end date
+ * @param {Date|string|number|undefined} start start date
+ * @param {Date|string|number|undefined} end end date
  * @param {number} [fractions] number of fractional digits to output
  * @returns {number}
  */
 export const daysDiff = (start, end, fractions = 1) => {
-    const snum = validateDate(start).valueOf();
-    const dnum = validateDate(end).valueOf();
+    const snum = getMilliseconds(start);
+    const dnum = getMilliseconds(end);
     const diffMs = dnum - snum;
     const diffDays = (diffMs / MS_IN_SECOND / 60 / 60 / 24);
     return +diffDays.toFixed(fractions);

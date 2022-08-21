@@ -659,7 +659,7 @@ export const getTimeCommand = (args) => {
 
     const current = `UTC time: ${dateToUtcTimestamp(Date.now())}`;
 
-    if (election.isActive() && election.getPhase(config.nowOverride) !== "election") {
+    if (election.isActive() && election.getPhase(config.nowOverride) !== "election" && dateElection) {
         return `${current} (election phase starts ${linkToRelativeTimestamp(dateElection)})`;
     }
 

@@ -248,8 +248,8 @@ export const sayWhatModsAreRunning = (config, _es, election) => {
 
     if (!phase) {
         const { dateNomination } = election;
-        const startsIn = dateToRelativeTime(dateNomination, { now: nowOverride });
-        return `Nobody nominated as the ${electionOrdinalName} hasn't even started yet (${startsIn}).`;
+        const startsIn = dateNomination ? ` (${dateToRelativeTime(dateNomination, { now: nowOverride })})` : "";
+        return `Nobody nominated as the ${electionOrdinalName} hasn't even started yet${startsIn}.`;
     }
 
     if (phase === "ended") {
@@ -311,7 +311,8 @@ export const sayIfModsHaveToRun = (config, _es, election) => {
     const phase = election.getPhase(nowOverride);
 
     if (!phase) {
-        return `${haveToRun} The election hasn't started yet (${dateToRelativeTime(dateNomination, { now: nowOverride })}) — don't forget to remind them!`;
+        const startsIn = dateNomination ? ` (${dateToRelativeTime(dateNomination, { now: nowOverride })})` : "";
+        return `${haveToRun} The election hasn't started yet${startsIn} — don't forget to remind them!`;
     }
 
     const { currentModerators, nominees, winners } = election;

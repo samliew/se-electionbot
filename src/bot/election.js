@@ -1,7 +1,7 @@
 import { AllowedHosts } from "chatexchange/dist/Client.js";
 import cheerio from 'cheerio';
 import { isOneOf, mapify } from '../shared/utils/arrays.js';
-import { addDates, dateToUtcTimestamp, dateUnitHandlers, daysDiff, getCurrentUTCyear, getMilliseconds } from '../shared/utils/dates.js';
+import { addDates, dateToUtcTimestamp, dateUnitHandlers, daysDiff, getCurrentUTCyear, getMilliseconds, validateDate } from '../shared/utils/dates.js';
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { filterMap, getOrInit, mergeMaps, sortMap } from '../shared/utils/maps.js';
 import { clone } from '../shared/utils/objects.js';
@@ -215,29 +215,78 @@ export default class Election {
         { name: 'Yearling', required: false, type: 'participation', badge_id: 13 },
     ];
 
-    /**
-     * @summary date of the start of the nomination phase
-     * @type {string}
-     */
-    dateNomination;
+    /** @type {{ [phase in Exclude<ElectionPhase, null>] ?: string}} */
+    #dates = {};
 
     /**
-     * @summary date of the start of the primary phase
-     * @type {string|undefined}
+     * @summary gets the date of the election cancellation
+     * @returns {string|undefined}
      */
-    datePrimary;
+    get dateCancelled() { return this.#dates.cancelled; }
 
     /**
-     * @summary date of the start of the election phase
-     * @type {string}
+     * @summary sets the date of the election cancellation
+     * @param {string|number|Date|undefined} date date to set
      */
-    dateElection;
+    set dateCancelled(date) {
+        this.#dates.cancelled = date ? dateToUtcTimestamp(validateDate(date)) : void 0;
+    }
 
     /**
-     * @summary end date of the election
-     * @type {string}
+     * @summary gets the date of the start of the nomination phase
+     * @returns {string|undefined}
      */
-    dateEnded;
+    get dateNomination() { return this.#dates.nomination; };
+
+    /**
+     * @summary sets the date of the start of the nomination phase
+     * @param {string|number|Date|undefined} date date to set
+     */
+    set dateNomination(date) {
+        this.#dates.nomination = date ? dateToUtcTimestamp(validateDate(date)) : void 0;
+    }
+
+    /**
+     * @summary gets the date of the start of the primary phase
+     * @returns {string|undefined}
+     */
+    get datePrimary() { return this.#dates.primary; };
+
+    /**
+     * @summary sets the date of the start of the primary phase
+     * @param {string|number|Date|undefined} date date to set
+     */
+    set datePrimary(date) {
+        this.#dates.primary = date ? dateToUtcTimestamp(validateDate(date)) : void 0;
+    }
+
+    /**
+     * @summary gets the date of the start of the election phase
+     * @returns {string|undefined}
+     */
+    get dateElection() { return this.#dates.election; };
+
+    /**
+     * @summary sets the date of the start of the election phase
+     * @param {string|number|Date|undefined} date date to set
+     */
+    set dateElection(date) {
+        this.#dates.election = date ? dateToUtcTimestamp(validateDate(date)) : void 0;
+    }
+
+    /**
+     * @summary gets the end date of the election
+     * @returns {string|undefined}
+     */
+    get dateEnded() { return this.#dates.ended; };
+
+    /**
+     * @summary sets the end date of the election
+     * @param {string|number|Date|undefined} date date to set
+     */
+    set dateEnded(date) {
+        this.#dates.ended = date ? dateToUtcTimestamp(validateDate(date)) : void 0;
+    }
 
     /**
      * @summary election site name
@@ -381,16 +430,16 @@ export default class Election {
      */
     get dateNominationMs() {
         const { dateNomination } = this;
-        return new Date(dateNomination).valueOf();
+        return getMilliseconds(dateNomination);
     }
 
     /**
      * @summary returns datePrimary time value in milliseconds
-     * @returns {number|undefined}
+     * @returns {number}
      */
     get datePrimaryMs() {
         const { datePrimary } = this;
-        return datePrimary ? new Date(datePrimary).valueOf() : void 0;
+        return getMilliseconds(datePrimary);
     }
 
     /**
@@ -399,7 +448,7 @@ export default class Election {
      */
     get dateElectionMs() {
         const { dateElection } = this;
-        return new Date(dateElection).valueOf();
+        return getMilliseconds(dateElection);
     }
 
     /**
@@ -791,9 +840,9 @@ export default class Election {
             [typeof this.numNominees === "number", "num candidates is not a number"],
             [(this.electionNum || 0) > 0, "missing election number"],
             [(this.numPositions || 0) > 0, "missing number of positions"],
-            [this.dateNomination, "missing nomination date"],
-            [this.dateElection, "missing election date"],
-            [this.dateEnded, "missing ending date"]
+            [(this.dateNomination || 0) > 0, "missing nomination date"],
+            [(this.dateElection || 0) > 0, "missing election date"],
+            [(this.dateEnded || 0) > 0, "missing ending date"]
         ];
 
         const invalid = rules.filter(([condition]) => !condition);
@@ -819,8 +868,8 @@ export default class Election {
      * @returns {boolean}
      */
     isNotStartedYet() {
-        const { phase, dateNomination } = this;
-        return !phase || new Date(dateNomination).valueOf() > Date.now();
+        const { phase, dateNominationMs = 0 } = this;
+        return !phase || dateNominationMs > Date.now();
     }
 
     /**
@@ -907,7 +956,7 @@ export default class Election {
 
         return phase !== "cancelled" && [
             phase === "ended",
-            new Date(dateEnded).valueOf() < Date.now()
+            getMilliseconds(dateEnded) < Date.now()
         ].some(Boolean);
     }
 
@@ -918,7 +967,7 @@ export default class Election {
      */
     isEnding(thresholdSecs = 30 * 60) {
         const { phase, dateEnded } = this;
-        const threshold = new Date(dateEnded).valueOf() - thresholdSecs * 1000;
+        const threshold = getMilliseconds(dateEnded) - thresholdSecs * 1e3;
         const isUnderThreshold = threshold <= Date.now();
         return phase === 'election' && isUnderThreshold;
     }
