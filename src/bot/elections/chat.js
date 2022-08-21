@@ -1,4 +1,5 @@
 import { JSDOM } from "jsdom";
+import { getMilliseconds } from "../../shared/utils/dates.js";
 import { findLast } from "../../shared/utils/dom.js";
 import { matchNumber } from "../../shared/utils/expressions.js";
 import { has } from "../../shared/utils/maps.js";
@@ -31,6 +32,72 @@ export const findNominationAnnouncementsInChat = async (config, user) => {
 };
 
 /**
+ * @summary parses a {@link Nominee} from a bot announcement
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {ChatMessage} message {@link ChatMessage} to parse
+ * @returns {Promise<Nominee|undefined>}
+ */
+export const parseNomineeFromChatMessage = async (config, election, message) => {
+    const { dateNominationMs, dateElectionMs, datePrimaryMs, siteHostname, currentNomineePostIds } = election;
+
+    const { messageMarkup } = message;
+
+    const [, userName, nominationLink, postId] =
+        messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
+
+    if (!userName || !nominationLink || !postId) return;
+
+    const nominationRevisionsLink = nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
+
+    /** @type {string} */
+    const revisionHTML = await fetchUrl(config, nominationRevisionsLink);
+
+    const { window: { document } } = new JSDOM(revisionHTML);
+
+    const userIdHref = findLast(`#content a[href*="/user"]`, document)?.getAttribute("href") || "";
+    const nominationDateString = findLast(`#content .relativetime`, document)?.getAttribute("title");
+
+    const userId = matchNumber(/\/users\/(\d+)/, userIdHref) || -42;
+
+    // candidate's nominationDate cannot have been outside of the election's nomination period
+    const nominationDate = new Date(nominationDateString || -1);
+    const nominationMs = getMilliseconds(nominationDate);
+    if (nominationMs < dateNominationMs || nominationMs >= dateElectionMs || (datePrimaryMs && nominationMs >= datePrimaryMs)) return;
+
+    const permalink = userIdHref ? `https://${siteHostname}${userIdHref}` : "";
+
+    const nominee = new Nominee(election, {
+        userId,
+        userName,
+        nominationDate,
+        nominationLink,
+        withdrawn: !currentNomineePostIds.includes(+postId),
+        permalink,
+    });
+
+    await nominee.scrapeUserYears(config);
+
+    // do not calculate scores of feed users and Community
+    if (userId > 0) {
+        const { apiSlug } = election;
+        const userBadges = await getBadges(config, [userId], apiSlug);
+        const users = await getUserInfo(config, [userId], apiSlug);
+
+        if (has(users, userId)) {
+            const { score } = calculateScore(users.get(userId), userBadges, election);
+            nominee.userScore = score;
+        }
+    }
+
+    if (config.verbose) {
+        console.log(`[chat]`, messageMarkup, nominee, { currentNomineePostIds, postId });
+    }
+
+    return nominee;
+};
+
+/**
  * @summary finds withdrawn {@link Nominee}s that were only announced in chat
  * @param {BotConfig} config bot configuration
  * @param {Election} election current {@link Election}
@@ -39,75 +106,16 @@ export const findNominationAnnouncementsInChat = async (config, user) => {
  * @returns {Promise<number>}
  */
 export const addWithdrawnNomineesFromChat = async (config, election, announcer, messages) => {
-    const {
-        currentNomineePostIds,
-        dateElectionMs,
-        dateNominationMs,
-        datePrimaryMs,
-        siteHostname
-    } = election;
-
     let withdrawnCount = 0;
 
-    for (const item of messages) {
-        const { messageMarkup } = item;
+    for (const message of messages) {
+        const nominee = await parseNomineeFromChatMessage(config, election, message);
+        if (!nominee) continue;
 
-        const [, userName, nominationLink, postId] =
-            messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
+        if (election.withdrawnNominees.has(nominee.userId)) continue;
 
-        // Invalid, or still a nominee based on nomination post ids
-        if (!userName || !nominationLink || !postId || currentNomineePostIds.includes(+postId)) continue;
-
-        if (config.verbose) {
-            console.log(`Nomination announcement:`, messageMarkup, { currentNomineePostIds, userName, nominationLink, postId });
-        }
-
-        const nominationRevisionsLink = nominationLink.replace(/election\/\d+\?tab=\w+#post-/i, `posts/`) + "/revisions";
-
-        /** @type {string} */
-        const revisionHTML = await fetchUrl(config, nominationRevisionsLink);
-
-        const { window: { document } } = new JSDOM(revisionHTML);
-
-        const userIdHref = findLast(`#content a[href*="/user"]`, document)?.getAttribute("href") || "";
-        const nominationDateString = findLast(`#content .relativetime`, document)?.getAttribute("title");
-
-        const userId = matchNumber(/\/users\/(\d+)/, userIdHref) || -42;
-
-        if (election.withdrawnNominees.has(userId)) continue;
-
-        // Withdrawn candidate's nominationDate cannot have been outside of the election's nomination period
-        const nominationDate = new Date(nominationDateString || -1);
-        const nominationMs = nominationDate.valueOf();
-        if (nominationMs < dateNominationMs || nominationMs >= dateElectionMs || (datePrimaryMs && nominationMs >= datePrimaryMs)) continue;
-
-        const permalink = userIdHref ? `https://${siteHostname}${userIdHref}` : "";
-
-        const withdrawnNominee = new Nominee(election, {
-            userId,
-            userName,
-            nominationDate: nominationDate,
-            nominationLink: nominationLink,
-            withdrawn: true,
-            permalink,
-        });
-
-        await withdrawnNominee.scrapeUserYears(config);
-
-        // Do not attempt to calculate valid scores
-        if (userId > 0) {
-            const { apiSlug } = election;
-            const userBadges = await getBadges(config, [userId], apiSlug);
-            const users = await getUserInfo(config, [userId], apiSlug);
-
-            if (has(users, userId)) {
-                const { score } = calculateScore(users.get(userId), userBadges, election);
-                withdrawnNominee.userScore = score;
-            }
-        }
-
-        announcer.addAnnouncedParticipant("withdrawals", withdrawnNominee);
-        election.addWithdrawnNominee(withdrawnNominee);
+        announcer.addAnnouncedParticipant("withdrawals", nominee);
+        election.addWithdrawnNominee(nominee);
 
         // Limit to scraping of withdrawn nominations from transcript if more than number of nominations
         if (++withdrawnCount >= election.numNominees) break;
