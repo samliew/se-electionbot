@@ -476,6 +476,21 @@ describe(Election.name, () => {
         });
     });
 
+    describe(Election.prototype.hasResults.name, () => {
+        it("should correctly determine if official results are out", () => {
+            election.winners.set(42, getMockNominee(election, { userId: 42 }));
+            sinon.stub(election, "getPhase").returns("ended");
+            expect(election.hasResults()).to.be.true;
+        });
+
+        it("should account for current date overrides", () => {
+            election.winners.set(42, getMockNominee(election, { userId: 42 }));
+            const now = new Date();
+            election.dateEnded = dateToUtcTimestamp(now);
+            expect(election.hasResults(addDates(now, -1))).to.be.false;
+        });
+    });
+
     describe(Election.prototype.isExtensionEligible.name, () => {
         it('should correctly determine extension eligibility', () => {
             const config = getMockBotConfig();

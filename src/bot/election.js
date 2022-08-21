@@ -980,6 +980,18 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election has winners
+     * @param {Date} [today] current date override
+     * @returns {boolean}
+     */
+    hasResults(today) {
+        const phase = this.getPhase(today);
+        if (phase !== "ended") return false;
+        const { numWinners } = this;
+        return !!numWinners;
+    }
+
+    /**
      * @summary gets Nominee objects for winners
      * @param {number[]} winnerIds
      * @returns {Map<number, Nominee>}
