@@ -840,9 +840,9 @@ export default class Election {
             [typeof this.numNominees === "number", "num candidates is not a number"],
             [(this.electionNum || 0) > 0, "missing election number"],
             [(this.numPositions || 0) > 0, "missing number of positions"],
-            [(this.dateNomination || 0) > 0, "missing nomination date"],
-            [(this.dateElection || 0) > 0, "missing election date"],
-            [(this.dateEnded || 0) > 0, "missing ending date"]
+            [!!this.dateNomination, "missing nomination date"],
+            [!!this.dateElection, "missing election date"],
+            [!!this.dateEnded, "missing ending date"]
         ];
 
         const invalid = rules.filter(([condition]) => !condition);
@@ -908,9 +908,9 @@ export default class Election {
      * @returns {boolean}
      */
     isExtensionEligible(config) {
-        const { numNominees, phase, numPositions = 1 } = this;
+        const { numNominees, numPositions = 1 } = this;
         return [
-            phase === "nomination",
+            this.getPhase(config.nowOverride) === "nomination",
             numNominees <= numPositions,
             !this.isNominationExtended(config)
         ].every(Boolean);
@@ -922,12 +922,12 @@ export default class Election {
      * @returns {boolean}
      */
     isNominationExtended(config) {
-        const { durations: { nomination }, phase, dateNomination } = this;
+        const { durations: { nomination }, dateNomination } = this;
 
         const now = config.nowOverride || new Date();
 
         return [
-            phase === "nomination",
+            this.getPhase(now) === "nomination",
             daysDiff(dateNomination, now) > nomination
         ].every(Boolean);
     }

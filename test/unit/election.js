@@ -490,10 +490,12 @@ describe(Election.name, () => {
 
     describe(Election.prototype.isExtensionEligible.name, () => {
         it('should correctly determine extension eligibility', () => {
-            const config = getMockBotConfig();
+            sinon.stub(election, "getPhase").returns("nomination");
 
-            election.phase = "nomination";
             election.numPositions = 2;
+            election.dateNomination = Date.now();
+
+            const config = getMockBotConfig();
 
             // < number of positions
             election.addActiveNominee(getMockNominee(election, { userId: 1 }));
@@ -511,11 +513,11 @@ describe(Election.name, () => {
 
     describe(Election.prototype.isNominationExtended.name, () => {
         it('should correctly determine if the nomination phase was extended', () => {
+            sinon.stub(election, "getPhase").returns("nomination");
+
             const config = getMockBotConfig();
 
             const now = Date.now();
-
-            election.phase = "nomination";
             election.dateNomination = now;
 
             expect(election.isNominationExtended(config)).to.be.false;
