@@ -219,10 +219,10 @@ export default class Announcer {
     async announceWithdrawnNominees() {
         const { _room, config, _election } = this;
 
-        const { newlyWithdrawnNominees } = _election;
+        const { withdrawnNominees } = _election;
 
         const announced = this.#announced.withdrawals;
-        const toAnnounce = filterMap(newlyWithdrawnNominees, (n) => !announced.has(n.userId));
+        const toAnnounce = filterMap(withdrawnNominees, (n) => !announced.has(n.userId));
         if (!toAnnounce.size) {
             console.log(`[announcer] no withdrawn nominees to announce`);
             return true;

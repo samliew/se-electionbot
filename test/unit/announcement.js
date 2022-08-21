@@ -184,9 +184,7 @@ describe(Announcer.name, () => {
             const remaining = getMockNominee(election, { userName: "Joanne", nominationLink: "test2", userId: 2 });
 
             election.addActiveNominee(remaining);
-            election.addActiveNominee(withdrawn);
-            election.pushHistory();
-            election.nominees.delete(1);
+            election.addWithdrawnNominee(withdrawn);
 
             const promise = announcer.announceWithdrawnNominees();
 
