@@ -79,8 +79,8 @@
                     <a href="{{val/electionUrl}}">{{getter val "electionNum"}}</a>
                     {{#ifEquals (getter val "electionNum") (getter @root/data/election "electionNum")}}<span title="Current Election">*</span>{{/ifEquals}}
                 </td>
-                <td>{{year val/dateNomination}}</td>
-                <td>{{{yesno val/datePrimary}}}</td>
+                <td>{{year (getter val "dateNomination")}}</td>
+                <td>{{{yesno (getter val "datePrimary")}}}</td>
                 <td>{{{yesno (contextCall "isCancelled" val)}}}</td>
                 <td>{{val/numPositions}}</td>
                 <td>{{len val/nominees}}</td>
