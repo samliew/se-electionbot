@@ -486,7 +486,7 @@ export const postMetaAnnouncement = async (args) => {
 };
 
 /**
- * @summary announces
+ * @summary announces election winners
  * @param {BotConfig} config bot config
  * @param {Election} election current election instance
  * @param {Announcer} announcement announcement controller
