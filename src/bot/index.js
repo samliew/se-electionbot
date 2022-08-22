@@ -348,10 +348,12 @@ use defaults ${defaultChatNotSet}`
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
         if (election.isEnded(config.nowOverride) && Date.now() < getMilliseconds(election.dateEnded) + 36e5) {
-            await postWinnersAnnouncement(config, election, announcement, transcriptMessages, me);
+            const status = await postWinnersAnnouncement(config, election, announcement, transcriptMessages, me);
+            console.log(`[init] posted winners announcement: ${status}`);
         }
+
         // Announce join room if in debug mode
-        else if (config.debug) {
+        if (config.debug) {
             await sendMessage(config, room, getRandomPlop(), { isPrivileged: true });
         }
 
