@@ -158,23 +158,14 @@ describe(Announcer.name, () => {
     });
 
     describe(Announcer.prototype.announceWinners.name, () => {
-        it('should return false if election is not ended', async () => {
-            election.phase = "cancelled";
+        it('should return false if election has not ended yet', async () => {
+            sinon.stub(election, "getPhase").returns("election");
             expect(await announcer.announceWinners()).to.be.false;
         });
 
-        it('should return false if election is ended without winners', async () => {
-            election.phase = "ended";
-            expect(await announcer.announceWinners()).to.be.false;
-        });
-
-        it('should return false if already announced', async () => {
-            config.flags.announcedWinners = true;
-            config.flags.saidElectionEndingSoon = true;
-            election.winners.set(42, getMockNominee(election));
-            election.phase = "ended";
-
-            expect(await announcer.announceWinners()).to.be.false;
+        it('should return true if election is ended without winners', async () => {
+            sinon.stub(election, "getPhase").returns("ended");
+            expect(await announcer.announceWinners()).to.be.true;
         });
 
         it('should correctly announce winners', async () => {
