@@ -112,12 +112,12 @@ export const addWithdrawnNomineesFromChat = async (config, election, announcer, 
         const nominee = await parseNomineeFromChatMessage(config, election, message);
         if (!nominee) continue;
 
-        if (election.withdrawnNominees.has(nominee.userId)) continue;
+        if (election.withdrawnNominees.has(nominee.userId) || !nominee.withdrawn) continue;
 
         announcer.addAnnouncedParticipant("withdrawals", nominee);
         election.addWithdrawnNominee(nominee);
 
-        // Limit to scraping of withdrawn nominations from transcript if more than number of nominations
+        // Limit to scraping of nominations from transcript if more than number of nominations
         if (++withdrawnCount >= election.numNominees) break;
     }
 
