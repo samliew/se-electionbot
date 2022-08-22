@@ -95,8 +95,8 @@ export default class Announcer {
 
     /**
      * @summary sets announcement state by type
-     * @param {AnnouncementType} type
-     * @param {boolean} state
+     * @param {AnnouncementType} type announcement type
+     * @param {boolean} state new announcement state
      * @returns {Announcer}
      */
     setAnnounced(type, state) {
@@ -105,7 +105,8 @@ export default class Announcer {
     }
 
     /**
-     * @param {AnnouncementType} type
+     * @summary gets announcement state by type
+     * @param {AnnouncementType} type announcement type
      * @returns {boolean}
      */
     getAnnounced(type) {
