@@ -98,6 +98,30 @@ export const parseNomineeFromChatMessage = async (config, election, message) => 
 };
 
 /**
+ * @summary finds {@link Nominee}s that were announced in chat
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current {@link Election}
+ * @param {Announcer} announcer election {@link Announcer}
+ * @param {ChatMessage[]} messages list of {@link ChatMessage}s
+ * @returns {Promise<number>}
+ */
+export const addAnnouncedNomineesFromChat = async (config, election, announcer, messages) => {
+    let nomineeCount = 0;
+
+    for (const message of messages) {
+        const nominee = await parseNomineeFromChatMessage(config, election, message);
+        if (!nominee) continue;
+
+        announcer.addAnnouncedParticipant("nominees", nominee);
+
+        // Limit to scraping of nominations from transcript if more than number of nominations
+        if (++nomineeCount >= election.numNominees) break;
+    }
+
+    return nomineeCount;
+};
+
+/**
  * @summary finds withdrawn {@link Nominee}s that were only announced in chat
  * @param {BotConfig} config bot configuration
  * @param {Election} election current {@link Election}
