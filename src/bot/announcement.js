@@ -84,6 +84,15 @@ export default class Announcer {
     }
 
     /**
+     * @summary gets announced participants by type
+     * @param {ParticipantAnnouncementType} type announcement type
+     * @returns {Map<number, Nominee>}
+     */
+    getAnnouncedParticipants(type) {
+        return this.#announced[type];
+    }
+
+    /**
      * @summary checks if a given participant has been announced
      * @param {ParticipantAnnouncementType} type announcement type
      * @param {Nominee} participant election participant

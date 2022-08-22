@@ -64,6 +64,22 @@ describe(Announcer.name, () => {
         });
     });
 
+    describe(Announcer.prototype.getAnnouncedParticipants.name, () => {
+        it("should correctly get announced participants by type", () => {
+            /** @type {ParticipantAnnouncementType[]} */
+            const types = ["nominees", "winners", "withdrawals"];
+
+            types.forEach((type, userId) => {
+                const participant = getMockNominee(election, { userId });
+                announcer.addAnnouncedParticipant(type, participant);
+
+                const announced = announcer.getAnnouncedParticipants(type);
+                expect(announced.size).to.equal(1);
+                expect(announced.has(userId)).to.be.true;
+            });
+        });
+    });
+
     describe(Announcer.prototype.announceCancelled.name, () => {
         it('should return false on no cancelledText', async () => {
             const status = await announcer.announceCancelled();
