@@ -24,7 +24,6 @@ describe('Heroku API integration', function () {
             debug: false,
             fun: false,
             verbose: false,
-            announcedWinners: true,
             saidElectionEndingSoon: true
         }
     }));

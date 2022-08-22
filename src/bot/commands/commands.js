@@ -104,7 +104,6 @@ export const timetravelCommand = (args) => {
 
     election.phase = phase;
 
-    config.flags.announcedWinners = false;
     config.flags.saidElectionEndingSoon = false;
 
     config.nowOverride = content.includes("today") ? void 0 : destination;

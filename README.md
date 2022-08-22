@@ -214,7 +214,6 @@ The bot keeps track of its internal state via a set of boolean flags:
 | Flag                     | Default | Description                                           |
 | ------------------------ | ------- | ----------------------------------------------------- |
 | `announcedMetaPost`      | `false` | official Meta post announcing winners has been posted |
-| `announcedWinners`       | `false` | election winners have been announced in the room      |
 | `debug`                  | `false` | debug mode is on (moderate logging)                   |
 | `fun`                    | `true`  | fun mode is on                                        |
 | `saidElectionEndingSoon` | `false` | upcoming end of election has been announced           |

@@ -318,17 +318,10 @@ export default class Announcer {
         const toAnnounce = filterMap(winners, (w) => !announced.has(w.userId));
         if (!toAnnounce) {
             console.log(`[announcer] no winners to announce`, verbose ? _election : "");
-            return false;
-        }
-
-        // Winners have been already announced
-        if (config.flags.announcedWinners) {
-            console.log(`[announcer] winners have already been announced`);
-            return false;
+            return true;
         }
 
         config.flags.saidElectionEndingSoon = true;
-        config.flags.announcedWinners = true;
         config.scrapeIntervalMins = 5;
 
         const winnerList = mapMap(toAnnounce, ({ userName, userId }) => makeURL(userName, `${siteUrl}/users/${userId}`));

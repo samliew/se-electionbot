@@ -158,7 +158,6 @@ describe('Commands', () => {
                 futureDate.setDate(endingDate.getDate() + 365);
 
                 Object.assign(config.flags, {
-                    announcedWinners: true,
                     saidElectionEndingSoon: true,
                     debug: false,
                     fun: false,
@@ -174,7 +173,6 @@ describe('Commands', () => {
                 expect(response).to.match(/phase.+?ended/);
 
                 expect(election.phase).to.equal("ended");
-                expect(config.flags.announcedWinners).to.be.false;
                 expect(config.flags.saidElectionEndingSoon).to.be.false;
 
                 election.dateEnded = "";
