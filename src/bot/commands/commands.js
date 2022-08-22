@@ -454,27 +454,27 @@ export const sayFeedback = (args) => {
 /**
  * @summary posts a meta announcement in the room
  * @param {Pick<CommandArguments, "config"|"content"|"election"|"room">} args command arguments
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>}
  */
-export const postMetaAnnouncement = async (args) => {
+export const postResultsAnnouncement = async (args) => {
     const { config, content, election, room } = args;
 
     const { apiSlug, dateEnded } = election;
 
     const { api_site_parameter } = await getMetaSite(config, apiSlug) || {};
     if (config.debugOrVerbose) {
-        console.log(postMetaAnnouncement.name, {
+        console.log(postResultsAnnouncement.name, {
             api_site_parameter, apiSlug
         });
     }
 
-    if (!api_site_parameter) return;
+    if (!api_site_parameter) return false;
 
     const [announcement] = await getMetaResultAnnouncements(
         config, api_site_parameter,
         { from: dateEnded }
     );
-    if (!announcement) return;
+    if (!announcement) return false;
 
     const { title, link } = announcement;
 
@@ -483,6 +483,7 @@ export const postMetaAnnouncement = async (args) => {
     await sendMessage(config, room, oneBox ? link : makeURL(title, link), { isPrivileged: true });
 
     config.flags.announcedMetaPost = true;
+    return true;
 };
 
 /**

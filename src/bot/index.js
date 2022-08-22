@@ -10,7 +10,7 @@ import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcer, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
-import { announceNewNominees, announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postMetaAnnouncement, postWinnersAnnouncement, rescrapeCommand, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand, updateConfigVarCommand, updateElection } from "./commands/commands.js";
+import { announceNewNominees, announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postResultsAnnouncement, postWinnersAnnouncement, rescrapeCommand, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand, updateConfigVarCommand, updateElection } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -342,8 +342,8 @@ use defaults ${defaultChatNotSet}`
         // TODO: check if not posted yet
         const metaAnnouncements = await searchChat(config, config.chatDomain, "moderator election results", config.chatRoomId);
         if (election.isEnded() && config.canAnnounceMetaPost && !metaAnnouncements.length) {
-            await postMetaAnnouncement({ config, election, room, content: "" });
-            console.log(`INIT - posted meta announcement`);
+            const status = await postResultsAnnouncement({ config, election, room, content: "" });
+            console.log(`[init] posted meta election results: ${status}`);
         }
 
         // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
@@ -389,7 +389,7 @@ use defaults ${defaultChatNotSet}`
             "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, /leave(?:\s+this)?\s+room/, AccessLevel.dev],
             "mute": ["stop bot from responding for N mins", muteCommand, /^(?:mute|timeout|sleep)/, AccessLevel.privileged],
             "mods voted": ["posts how many mods voted", getModsVotedCommand, /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, AccessLevel.privileged],
-            "post meta": ["posts an official Meta announcement", postMetaAnnouncement, /^post meta(?:\s+announcement)?/, AccessLevel.privileged],
+            "post meta": ["posts an official Meta announcement", postResultsAnnouncement, /^post meta(?:\s+announcement)?/, AccessLevel.privileged],
             "rescrape": ["runs the rescraper immediately", rescrapeCommand, /^rescrape/, AccessLevel.dev],
             "restart server": ["restarts the server", restartServerCommand, /^restart\s+server/, AccessLevel.dev],
             "rm_election": ["resets the current election", resetElection, /^reset election/, AccessLevel.dev],
