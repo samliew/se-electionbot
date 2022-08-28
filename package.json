@@ -81,7 +81,7 @@
         "rimraf": "^3.0.2",
         "sinon": "^14.0.0",
         "ts-node": "^10.9.1",
-        "typescript": "^4.7.4",
+        "typescript": "^4.8.2",
         "handlebars": "^4.7.7",
         "node-sass": "^7.0.1",
         "node-sass-package-importer": "^5.3.2"
