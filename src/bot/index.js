@@ -452,7 +452,7 @@ use defaults ${defaultChatNotSet}`
 
             const user = new User(profile);
 
-            if(user.isMod()) {
+            if (user.isMod()) {
                 await config.addAdmins(profile);
             }
 
@@ -643,12 +643,12 @@ use defaults ${defaultChatNotSet}`
 
         }); // End new message event listener
 
+        // Launch task to rejoin room occasionally
+        roomKeepAlive(config, client, room);
 
         // Connect to the room, and listen for new events
         await room.watch();
         console.log(`INIT - Joined and listening in room https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`);
-
-        roomKeepAlive(config, client, room);
 
         // Catch all handler to swallow non-crashing rejections
         process.on("unhandledRejection", (reason) => {
