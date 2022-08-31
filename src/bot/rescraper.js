@@ -216,21 +216,25 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
 
             // The election is over
             else if (election.isInactive() && config.scrapeIntervalMins < 5) {
-                const { electionAfterpartyMins, autoscaleHeroku } = config;
+                const { autoLeaveRoom, electionAfterpartyMins, autoscaleHeroku } = config;
 
                 // Set scrape interval to 5 mins since we no longer need to scrape frequently
                 config.scrapeIntervalMins = 5;
                 console.log(`[rescraper] scrape interval increased to ${config.scrapeIntervalMins}.`);
 
-                // Stay in room a while longer
-                await wait(electionAfterpartyMins * SEC_IN_MINUTE);
+                // If bot can leave room
+                if (autoLeaveRoom) {
+                    // Stay in room a while longer
+                    await wait(electionAfterpartyMins * SEC_IN_MINUTE);
 
-                // Otherwise we sometimes leave an afterimage
-                const status = await room.leave();
-                console.log(`[rescraper] left election room: ${status}`);
+                    // Otherwise we sometimes leave an afterimage
+                    const status = await room.leave();
+                    console.log(`[rescraper] left election room: ${status}`);
+                }
 
-                // Scale Heroku dynos to free (restarts app)
+                // If bot can scale dynos
                 if (autoscaleHeroku) {
+                    // Scale Heroku dynos to free (restarts app)
                     const heroku = new HerokuClient(config);
                     await heroku.scaleFree();
                 }

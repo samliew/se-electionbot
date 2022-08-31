@@ -175,6 +175,7 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `ACCOUNT_EMAIL`                | string   | yes       | -                          | email of bot account                                                                                      |
 | `ACCOUNT_PASSWORD`             | string   | yes       | -                          | password of bot account                                                                                   |
 | `ADMIN_IDS`                    | number[] | no        | -                          | user network account ids to grant admin privileges (pipe-delimited) (mods and ROs are already privileged) |
+| `AUTO_LEAVE_ROOM`              | boolean  | no        | `true`                     | should the bot leave the room when the election has ended, after ELECTION_AFTERPARTY_MINS                 |
 | `AUTOSCALE_HEROKU`             | boolean  | no        | `true`                     | if hosted on Heroku, autoscale the bot to Hobby if tracking an active election and `DEBUG` is `false`     |
 | `CHAT_DOMAIN`                  | string   | no        | -                          | default chat domain (stackexchange.com \| stackoverflow.com)                                              |
 | `CHAT_ROOM_ID`                 | number   | no        | -                          | default chat room ID that the bot will join                                                               |
@@ -182,6 +183,7 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `DEBUG`                        | boolean  | no        | `false`                    | whether bot is in debug mode                                                                              |
 | `DEFAULT_ELECTION_TIME`        | string   | no        | `20:00:00`                 | default election time (used for upcoming election announcements)                                          |
 | `DEV_IDS`                      | number[] | no        | -                          | user network account ids to grant dev privileges (pipe-delimited)                                         |
+| `ELECTION_AFTERPARTY_MINS`     | string   | no        | -                          | interval (minutes) after an election has ended before leaving the room if AUTO_LEAVE_ROOM is set          |
 | `ELECTION_CHATROOM_URL`        | string   | no        | -                          | URL of the election chat room                                                                             |
 | `ELECTION_URL`                 | string   | yes       | -                          | URL of election page (with ID) that the bot will scrape                                                   |
 | `FEEDBACK_FORM_URL`            | string   | no        | -                          | URL for users to provide feedback about the bot                                                           |

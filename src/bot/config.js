@@ -335,6 +335,14 @@ export class BotConfig {
     }
 
     /**
+     * @summary whether to leave election chat room after election
+     * @type {boolean}
+     */
+    get autoLeaveRoom() {
+        return this.#env.bool("auto_leave_room", true);
+    }
+
+    /**
      * @summary whether to autoscale Heroku to Hobby
      * @type {boolean}
      */
