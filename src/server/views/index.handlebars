@@ -154,7 +154,7 @@
     {{#with botconfig}}
     <section class="col-auto">
 
-        <h2 class="fs-4">Bot Config</h2>
+        <h2 class="fs-4">Bot Config <sup><a href="https://github.com/samliew/se-electionbot/blob/master/README.md#environment-variables" title="View documentation"><i class="icon-help"></i></a></sup></h2>
         <table>
             <tr><td>scriptHostname</td><td>{{{url scriptHostname}}}</td></tr>
             <tr><td>scriptInitDate</td><td>{{> relativetime date=scriptInitDate}}</td></tr>
@@ -167,6 +167,7 @@
             <tr><td>Is Muted</td><td>{{{boolean isMuted}}} {{#if isMuted}}{{> relativetime date=unmutesAt short=true prefix="for "}}{{/if}}</td></tr>
             <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
             <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
+            <tr><td>autoLeaveRoom</td><td>{{autoLeaveRoom}} mins</td></tr>
             <tr><td>electionAfterpartyMins</td><td>{{electionAfterpartyMins}} mins</td></tr>
             <tr>
                 <td>autoscaleHeroku</td>
