@@ -13,7 +13,7 @@ export const MS_IN_DAY = MS_IN_SECOND * SEC_IN_MINUTE * MIN_IN_HOUR * HOUR_IN_DA
  */
 export const validateDate = (input) => {
     const output = new Date(input);
-    return Number.isNaN(output) ? new Date() : output;
+    return !(output instanceof Date) || Number.isNaN(output) ? new Date() : output;
 };
 
 /**
