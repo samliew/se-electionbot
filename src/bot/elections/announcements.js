@@ -30,8 +30,8 @@ const announcementsCache = new Map();
  * @returns {Promise<Map<string, Map<number, ElectionAnnouncement>>>}
  */
 export const getElectionAnnouncements = async (config, election) => {
-    // https://regex101.com/r/OTlwms/3
-    const announcementTitleExpr = /^announc(?:ing|ement).+?election.*?|initial(?:\s+pro(?:\s+|-)tem(?:pore)?)\s+moderator\s+election/i;
+    // https://regex101.com/r/3V6Bc5/1
+    const announcementTitleExpr = /^(?:(?:upcoming )?election announcement|announc(?:ing|ement).+?election.*?|initial(?:\s+pro(?:\s+|-)tem(?:pore)?)\s+moderator\s+election)/i;
 
     // https://regex101.com/r/GKcR6r/2
     const proTemporeTitleExpr = /\bpro(?:\s+|-)tem(?:pore)?\b/i;
