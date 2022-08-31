@@ -2,13 +2,15 @@
   display: inline-flex;
   align-content: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
   border: 1px solid #aaa;
   border-radius: 50%;
   transition: 0.15s transform ease;
   transform: rotate(0deg);
   font-style: normal;
+  font-size: 1rem;
+  line-height: 22px;
   text-decoration: none;
 
   &:hover {
