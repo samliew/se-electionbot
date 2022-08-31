@@ -192,20 +192,22 @@ use defaults ${defaultChatNotSet}`
         );
 
         /*
-         * If is in production mode, and is an active election,
+         * If autoscaleHeroku enabled, and is an active election,
          * scale Heroku dyno to Hobby (paid) if it's using free dynos only (restarts app)
          */
-        const hasPaidDyno = config.herokuDynos.some(({ size }) => !/free/i.test(size));
         const { autoscaleHeroku } = config;
+        if (autoscaleHeroku) {
+            const hasPaidDyno = config.herokuDynos.some(({ size }) => !/free/i.test(size));
 
-        if (autoscaleHeroku && election.isActive() && !hasPaidDyno) {
-            const status = await heroku.scaleHobby();
-            console.log(`[heroku] scaled up to hobby dyno: ${status}`);
-        }
-        // Otherwise, scale down to free dynos
-        else if (!autoscaleHeroku && hasPaidDyno) {
-            const status = await heroku.scaleFree();
-            console.log(`[heroku] scaled down to free dyno: ${status}`);
+            if (election.isActive() && !hasPaidDyno) {
+                const status = await heroku.scaleHobby();
+                console.log(`[heroku] scaled up to hobby dyno: ${status}`);
+            }
+            // Otherwise, scale down to free dynos
+            else if (hasPaidDyno) {
+                const status = await heroku.scaleFree();
+                console.log(`[heroku] scaled down to free dyno: ${status}`);
+            }
         }
 
         /*
