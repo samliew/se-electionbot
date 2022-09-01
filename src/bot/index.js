@@ -277,6 +277,7 @@ use defaults ${defaultChatNotSet}`
         }
 
         const room = client.getRoom(config.chatRoomId);
+        let controlRoom;
 
         room.only(ChatEventType.MESSAGE_POSTED);
 
@@ -298,7 +299,7 @@ use defaults ${defaultChatNotSet}`
 
         const { controlRoomId } = config;
         if (controlRoomId) {
-            await joinControlRoom(config, elections, election, client, {
+            controlRoom = await joinControlRoom(config, elections, election, client, {
                 controlRoomId,
                 controlledRoom: room,
                 botChatProfile: me,

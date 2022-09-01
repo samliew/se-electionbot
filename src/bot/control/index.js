@@ -26,7 +26,7 @@ import { makeURL, roomKeepAlive } from "../utils.js";
  *  controlledRoom: Room,
  *  allowSameRoom?: boolean
  * }} options
- * @returns {Promise<boolean>}
+ * @returns {Promise<Room|boolean>}
  */
 export const joinControlRoom = async (config, elections, election, client, {
     controlRoomId,
@@ -103,10 +103,11 @@ export const joinControlRoom = async (config, elections, election, client, {
             `https://chat.${config.chatDomain}/rooms/${controlledRoomId}/info`
         )})`);
 
+        return controlRoom;
+
     } catch (error) {
         console.log(`failed to join control room: ${error}`);
-        return false;
     }
 
-    return true;
+    return false;
 };
