@@ -621,13 +621,8 @@ use defaults ${defaultChatNotSet}`
                     return; // stop here since we are using a different default response method
                 }
 
-                // bot mentioned, no response, not fun mode or can't have fun - we might be interested
-                if (!(config.canSendFunResponse && config.fun)) {
-                    await pingDevelopers("You might want to take a look at this,", config, room);
-                }
-
                 // Bot was mentioned and did not match any previous guards - return a random response
-                if (config.fun && config.canSendFunResponse) {
+                if (config.canSendFunResponse) {
                     responseText = getRandomFunResponse();
                     config.funResponseCounter++;
 
@@ -635,6 +630,10 @@ use defaults ${defaultChatNotSet}`
                         () => config.funResponseCounter = 0,
                         10 * MS_IN_SECOND * SEC_IN_MINUTE
                     );
+                }
+                // Bot mentioned, no response, not fun mode or can't have fun - we might be interested
+                else {
+                    await pingDevelopers("You might want to take a look at this,", config, controlRoom ?? room);
                 }
             }
 

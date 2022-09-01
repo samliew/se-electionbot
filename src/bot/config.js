@@ -442,7 +442,7 @@ export class BotConfig {
     }
 
     get canSendFunResponse() {
-        return this.funResponseCounter < this.maxFunResponses;
+        return this.flags.fun && this.funResponseCounter < this.maxFunResponses;
     }
 
     /**
