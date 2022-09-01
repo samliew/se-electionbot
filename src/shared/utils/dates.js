@@ -19,7 +19,7 @@ export const validateDate = (input) => {
         console.error(`Invalid date: ${input}`);
     }
     // Always return a valid date object
-    return Number.isNaN(output) ? new Date() : output;
+    return Number.isNaN(output.getTime()) ? new Date() : output;
 };
 
 /**
