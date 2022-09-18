@@ -57,13 +57,13 @@
         "node-cron": "^3.0.2",
         "patch-package": "^6.4.7",
         "ramda": "^0.28.0",
-        "sanitize-html": "^2.7.1"
+        "sanitize-html": "^2.7.2"
     },
     "devDependencies": {
         "@types/chai": "^4.3.3",
         "@types/chai-as-promised": "^7.1.5",
         "@types/cheerio": "^0.22.31",
-        "@types/express": "^4.17.13",
+        "@types/express": "^4.17.14",
         "@types/heroku-client": "^3.1.0",
         "@types/jsdom": "^16.2.15",
         "@types/markdown-it": "^12.2.3",
