@@ -7,8 +7,12 @@ export const HOUR_IN_DAY = 24;
 export const MS_IN_DAY = MS_IN_SECOND * SEC_IN_MINUTE * MIN_IN_HOUR * HOUR_IN_DAY;
 
 /**
+ * @typedef {Date|number|string} DateLike ECMAScript data type parseable to a valid date
+ */
+
+/**
  * @summary validates and normalizes a given date-like value
- * @param {Date|number|string} input date-like value to validate
+ * @param {DateLike} input date-like value to validate
  * @returns {Date}
  */
 export const validateDate = (input) => {
@@ -59,7 +63,7 @@ export const getNumDaysInYear = (year) => {
  * }} RelativeTimeOptions
  *
  * @summary formats date to relative time
- * @param {Date|number|string} date
+ * @param {DateLike} date
  * @param {RelativeTimeOptions} [options]
  * @returns {string}
  */
@@ -123,8 +127,8 @@ export const dateToRelativeTime = (date, options = {}) => {
 
 /**
  * @summary converts from/to dates to a duration string
- * @param {Date|string|number} from
- * @param {Date|string|number} to
+ * @param {DateLike} from duration start
+ * @param {DateLike} to duration end
  * @returns {string}
  */
 export const datesToDuration = (from, to) => {
@@ -151,7 +155,7 @@ export const datesToDuration = (from, to) => {
 
 /**
  * @summary formats date input to UTC timestamp in Stack Exchange's format
- * @param {Date|string|number} date date to format
+ * @param {DateLike} date date to format
  * @returns {string}
  */
 export const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
@@ -160,7 +164,7 @@ export const dateToUtcTimestamp = (date) => validateDate(date).toISOString()
 
 /**
  * @summary formates date input to ISO 8601 format without milliseconds
- * @param {Date|string|number} date date to format
+ * @param {DateLike} date date to format
  */
 export const dateToShortISO8601Timestamp = (date) => validateDate(date).toISOString().replace(/\.\d{3}/, "");
 
@@ -170,7 +174,7 @@ export const dateToShortISO8601Timestamp = (date) => validateDate(date).toISOStr
 * @example
 *  https://www.timeanddate.com/worldclock/fixedtime.html?iso=20201231T2359
 *
-* @param {Date|string|number} date
+* @param {DateLike} date
 * @returns {string}
 */
 export const toTadParamFormat = (date) => validateDate(date).toISOString()
@@ -180,14 +184,14 @@ export const toTadParamFormat = (date) => validateDate(date).toISOString()
 
 /**
  * @summary gets number of seconds since *nix epoch
- * @param {Date|string|number} date date to get seconds from
+ * @param {DateLike} date date to get seconds from
  * @returns {number}
  */
 export const getSeconds = (date) => new Date(date).getTime() / MS_IN_SECOND;
 
 /**
  * @summary gets number of milliseconds since *nix epoch
- * @param {Date|string|number|undefined} date date to get seconds from
+ * @param {DateLike|undefined} date date to get seconds from
  * @returns {number}
  */
 export const getMilliseconds = (date) => date ? validateDate(date).valueOf() : 0;
@@ -204,7 +208,7 @@ export const usDateToISO = (datestr) => {
 
 /**
  * @summary adds a given number of seconds to a date
- * @param {Date|string|number} date date to add to
+ * @param {DateLike} date date to add to
  * @param {number} [num] number of seconds to add
  * @returns {Date}
  */
@@ -216,7 +220,7 @@ export const addSeconds = (date, num = 1) => {
 
 /**
  * @summary adds a given number of minutes to a date
- * @param {Date|string|number} date date to add to
+ * @param {DateLike} date date to add to
  * @param {number} [num] number of minutes to add
  * @returns {Date}
  */
@@ -228,7 +232,7 @@ export const addMinutes = (date, num = 1) => {
 
 /**
  * @summary adds a given number of hours to a date
- * @param {Date|string|number} date date to add to
+ * @param {DateLike} date date to add to
  * @param {number} [num] number of hours to add
  * @returns {Date}
  */
@@ -240,7 +244,7 @@ export const addHours = (date, num = 1) => {
 
 /**
  * @summary adds a given number of dates to a date
- * @param {Date|string|number} date date to add to
+ * @param {DateLike} date date to add to
  * @param {number} [num] number of dates to add
  * @returns {Date}
  */
@@ -252,7 +256,7 @@ export const addDates = (date, num = 1) => {
 
 /**
  * @summary adds a given number of months to a date
- * @param {Date|string|number} date date to add to
+ * @param {DateLike} date date to add to
  * @param {number} [num] number of months to add
  * @returns {Date}
  */
@@ -264,7 +268,7 @@ export const addMonths = (date, num = 1) => {
 
 /**
  * @summary adds a given number of years to a date
- * @param {Date|string|number} date date to add to
+ * @param {DateLike} date date to add to
  * @param {number} [num] number of years to add
  * @returns {Date}
  */
@@ -276,8 +280,8 @@ export const addYears = (date, num = 1) => {
 
 /**
  * @summary returns the difference between two dates in days
- * @param {Date|string|number|undefined} start start date
- * @param {Date|string|number|undefined} end end date
+ * @param {DateLike|undefined} start start date
+ * @param {DateLike|undefined} end end date
  * @param {number} [fractions] number of fractional digits to output
  * @returns {number}
  */
@@ -321,7 +325,7 @@ export const getDateFromUTCstring = (str) => {
 
 /**
  * @summary returns a copy of a {@link date} shifted to its EOD
- * @param {string|number|Date} date date to shift
+ * @param {DateLike} date date to shift
  * @returns {Date}
  */
 export const toEndOfDay = (date) => {
@@ -331,7 +335,7 @@ export const toEndOfDay = (date) => {
 
 /**
  * @summary sets milliseconds of a {@link date} to 0
- * @param {string|number|Date} date date to trim
+ * @param {DateLike} date date to trim
  * @returns {Date}
  */
 export const trimMs = (date) => {
