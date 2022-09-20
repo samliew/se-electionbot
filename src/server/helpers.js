@@ -182,8 +182,22 @@ export const call = function (name, ...args) {
     return typeof this[name] === "function" ? this[name](...args.slice(0, -1)) : void 0;
 };
 
-/** @type {(name: string, ctxt: object, ...args: unknown[]) => unknown} */
-export const contextCall = (name, ctxt, ...args) => typeof ctxt[name] === "function" ? ctxt[name](...args.slice(0, -1)) : void 0;
+/**
+ * @template {Record<string, unknown>} T
+ * @template {keyof T} U
+ *
+ * @summary calls a method on a specified context object
+ * @param {U} name name of the method on the {@link ctxt} object
+ * @param {T} ctxt context object
+ * @param {T[U] extends (...args: any[]) => any? [...Parameters<T[U]>, HelperOptions] : [HelperOptions]} args arguments to pass to the call
+ * @returns {T[U] extends (...args: any[]) => any ? ReturnType<T[U]> : undefined}
+ */
+export const contextCall = (name, ctxt, ...args) => {
+    const maybeFunc = ctxt[name];
+    return typeof maybeFunc === "function" ?
+        maybeFunc.call(ctxt, ...args.slice(0, -1)) :
+        void 0;
+};
 
 /** @type {(prefix:string, text:string) => string} */
 export const unprefix = (prefix, text) => text.replace(new RegExp(`^${prefix}\\s*?`), "");
