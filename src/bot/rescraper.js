@@ -130,13 +130,13 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
             }
 
             // New nominations
-            if (election.getPhase(nowOverride)) {
+            if (election.isNomination(nowOverride)) {
                 const status = await announcement?.announceNewNominees();
                 console.log(`[rescraper] announced nomination: ${status}`);
             }
 
             // Withdrawn nominations
-            if (election.isActive() && election.newlyWithdrawnNominees.size) {
+            if (election.isActive(nowOverride)) {
                 const status = await announcement?.announceWithdrawnNominees();
                 console.log(`[rescraper] announced withdrawn: ${status}`);
             }
@@ -155,7 +155,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 console.log(`[rescraper] announced dates change: ${status}`);
             }
 
-            if (election.isCancelled() && election.isNewPhase()) {
+            if (election.isCancelled(nowOverride) && election.isNewPhase()) {
                 scheduler.stopAll();
                 const status = await announcement?.announceCancelled();
                 console.log(`[rescraper] announced cancellation: ${status}`);
@@ -163,11 +163,13 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
 
                 // Scale Heroku dynos to free (restarts app)
                 const heroku = new HerokuClient(config);
-                await heroku.scaleFree();
+                if (await heroku.hasPaidDynos()) {
+                    await heroku.scaleFree();
+                }
             }
 
             // Official results out
-            if (election.isEnded(nowOverride) && election.hasNewWinners) {
+            if (election.hasResults(nowOverride)) {
                 scheduler.stopAll();
                 const status = await announcement?.announceWinners();
                 console.log(`[rescraper] announced winners: ${status}`);
@@ -175,7 +177,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
             }
 
             // Election just over, there are no winners yet (waiting for CM)
-            if (election.isEnded() && election.numWinners === 0) {
+            if (election.isEnded(nowOverride) && election.numWinners === 0) {
 
                 // Reduce scrape interval further
                 config.scrapeIntervalMins = 0.2;
