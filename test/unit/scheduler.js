@@ -47,7 +47,7 @@ describe(Scheduler.name, () => {
 
     describe(Scheduler.prototype.isTaskInitialized.name, () => {
         it('should correctly check if the task is initialized', () => {
-            const now = new Date(2022, 8, 3, 0, 0, 0, 0);
+            const now = addDates(Date.now(), 1);
             election.dateNomination = dateToUtcTimestamp(now);
             election.datePrimary = dateToUtcTimestamp(addDates(now, 7));
             election.dateElection = dateToUtcTimestamp(addDates(now, 14));
@@ -56,18 +56,22 @@ describe(Scheduler.name, () => {
             /** @type {import("../../src/bot/announcement").TaskType[]} */
             const taskTypes = ["start", "end", "nomination", "primary"];
 
-            taskTypes.forEach(
-                (type) => expect(scheduler.isTaskInitialized(type)).to.be.false
-            );
+            taskTypes.forEach((type) => expect(
+                scheduler.isTaskInitialized(type),
+                `task type "${type}" is prematurely initialized`
+            ).to.be.false);
 
             scheduler.initAll();
-            taskTypes.forEach(
-                (type) => expect(scheduler.isTaskInitialized(type)).to.be.true
-            );
+            taskTypes.forEach((type) => expect(
+                scheduler.isTaskInitialized(type),
+                `task type "${type}" is not initialized`
+            ).to.be.true);
 
             scheduler.stopAll();
-            taskTypes.forEach(
-                (type) => expect(scheduler.isTaskInitialized(type)).to.be.false
+            taskTypes.forEach((type) => expect(
+                scheduler.isTaskInitialized(type),
+                `task type "${type}" is not stopped`
+            ).to.be.false
             );
         });
     });
