@@ -61,14 +61,22 @@ export default class Scheduler {
      * @returns {boolean}
      */
     #initializeTask(type, date, handler, callback) {
-        if (this.isTaskInitialized(type) || typeof date == 'undefined') return false;
+        if (!date) {
+            console.log(`[cron] invalid "${type}" task timestamp: ${date}`);
+            return false;
+        }
 
         const validDate = validateDate(date);
 
-        if (validDate.valueOf() <= Date.now()) return false;
+        if (validDate.valueOf() < Date.now()) {
+            console.log(`[cron] past "${type}" task timestamp: ${validDate}`);
+            return false;
+        }
 
         // ensure the task is stopped before rescheduling
-        this.#stop(type);
+        if (this.isTaskInitialized(type)) {
+            this.#stop(type);
+        }
 
         const cs = this.getCronExpression(validDate);
 
@@ -77,7 +85,7 @@ export default class Scheduler {
             await callback?.(status);
         }, { timezone: "Etc/UTC" }));
 
-        console.log(`[cron] initialized ${type} task`, cs);
+        console.log(`[cron] initialized "${type}" task`, cs);
         this.schedules.set(type, cs);
         return true;
     }
