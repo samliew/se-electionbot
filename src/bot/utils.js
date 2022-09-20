@@ -750,6 +750,9 @@ const networkAccountIdCache = new Map();
  * @returns {Promise<number|undefined>}
  */
 export const getNetworkAccountIdFromChatId = async (config, chatId) => {
+    // Simple validation of chatId to avoid unnecessary requests
+    if (chatId < 1) return;
+
     try {
         const { debugOrVerbose, chatDomain } = config;
 
@@ -806,6 +809,9 @@ const siteUserIdCache = new Map();
  * @returns {Promise<number|null>} resolved user id
  */
 export const getSiteUserIdFromChatStackExchangeId = async (config, chatUserId, chatHost, hostname, apiKey) => {
+    // Simple validation of chatUserId to avoid unnecessary requests
+    if (chatUserId < 1) return null;
+
     try {
         const { debugOrVerbose } = config;
 

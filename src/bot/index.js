@@ -192,20 +192,21 @@ use defaults ${defaultChatNotSet}`
         );
 
         /*
-         * If is in production mode, and is an active election,
+         * If autoscaleHeroku enabled, and is an active election,
          * scale Heroku dyno to Hobby (paid) if it's using free dynos only (restarts app)
          */
         const hasPaidDyno = await heroku.hasPaidDynos();
         const { autoscaleHeroku } = config;
-
-        if (autoscaleHeroku && election.isActive() && !hasPaidDyno) {
-            const status = await heroku.scaleHobby();
-            console.log(`[heroku] scaled up to hobby dyno: ${status}`);
-        }
-        // Otherwise, scale down to free dynos
-        else if (!autoscaleHeroku && hasPaidDyno) {
-            const status = await heroku.scaleFree();
-            console.log(`[heroku] scaled down to free dyno: ${status}`);
+        if (autoscaleHeroku) {
+            if (election.isActive() && !hasPaidDyno) {
+                const status = await heroku.scaleHobby();
+                console.log(`[heroku] scaled up to hobby dyno: ${status}`);
+            }
+            // Otherwise, scale down to free dynos
+            else if (hasPaidDyno) {
+                const status = await heroku.scaleFree();
+                console.log(`[heroku] scaled down to free dyno: ${status}`);
+            }
         }
 
         /*
@@ -275,6 +276,7 @@ use defaults ${defaultChatNotSet}`
         }
 
         const room = client.getRoom(config.chatRoomId);
+        let controlRoom;
 
         room.only(ChatEventType.MESSAGE_POSTED);
 
@@ -296,7 +298,7 @@ use defaults ${defaultChatNotSet}`
 
         const { controlRoomId } = config;
         if (controlRoomId) {
-            await joinControlRoom(config, elections, election, client, {
+            controlRoom = await joinControlRoom(config, elections, election, client, {
                 controlRoomId,
                 controlledRoom: room,
                 botChatProfile: me,
@@ -454,7 +456,7 @@ use defaults ${defaultChatNotSet}`
 
             const user = new User(profile);
 
-            if(user.isMod()) {
+            if (user.isMod()) {
                 await config.addAdmins(profile);
             }
 
@@ -621,13 +623,8 @@ use defaults ${defaultChatNotSet}`
                     return; // stop here since we are using a different default response method
                 }
 
-                // bot mentioned, no response, not fun mode or can't have fun - we might be interested
-                if (!(config.canSendFunResponse && config.fun)) {
-                    await pingDevelopers("You might want to take a look at this,", config, room);
-                }
-
                 // Bot was mentioned and did not match any previous guards - return a random response
-                if (config.fun && config.canSendFunResponse) {
+                if (config.canSendFunResponse) {
                     responseText = getRandomFunResponse();
                     config.funResponseCounter++;
 
@@ -635,6 +632,10 @@ use defaults ${defaultChatNotSet}`
                         () => config.funResponseCounter = 0,
                         10 * MS_IN_SECOND * SEC_IN_MINUTE
                     );
+                }
+                // Bot mentioned, no response, not fun mode or can't have fun - we might be interested
+                else {
+                    await pingDevelopers("You might want to take a look at this,", config, controlRoom ?? room);
                 }
             }
 
@@ -646,12 +647,12 @@ use defaults ${defaultChatNotSet}`
 
         }); // End new message event listener
 
+        // Launch task to rejoin room occasionally
+        roomKeepAlive(config, client, room);
 
         // Connect to the room, and listen for new events
         await room.watch();
         console.log(`INIT - Joined and listening in room https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`);
-
-        roomKeepAlive(config, client, room);
 
         // Catch all handler to swallow non-crashing rejections
         process.on("unhandledRejection", (reason) => {
