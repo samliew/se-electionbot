@@ -5,6 +5,8 @@
  * }} ResolveObj<T>
  */
 
+import { onlyTruthy } from "./arrays.js";
+
 /**
  * @template {object} T
  *
@@ -172,4 +174,18 @@ export const deepClone = (value) => {
     }
 
     return value;
+};
+
+/**
+ * @template {{}} T
+ *
+ * @summary gets enumerable own properties of an object
+ * @param {T} obj object to get keys for
+ * @returns {Array<keyof T & string>}
+ */
+export const propertyKeys = (obj) => {
+    return Object.keys(obj).map((key) => {
+        const { value } = Object.getOwnPropertyDescriptor(obj, key) || {};
+        return typeof value === "function" ? void 0 : /** @type {keyof T & string} */ (key);
+    }).filter(onlyTruthy);
 };
