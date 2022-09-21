@@ -159,10 +159,16 @@ export const json = (data) => {
         .replace(/\]/g, "\n]");
 };
 
-/** @type {(data: unknown) => string} */
+/**
+ * @summary displays a given {@link data} as a formatted state indicator
+ * @param {unknown} data data to display as a boolean state
+ * @returns {Handlebars.SafeString}
+ */
 export const boolean = (data) => {
     const isTrue = typeof data === "string" ? data === "true" : !!data;
-    return `<span class="${isTrue ? 'truthy' : 'falsy'}">${isTrue}</span>`;
+    return new Hbs.SafeString(
+        `<span class="${isTrue ? 'truthy' : 'falsy'}">${isTrue}</span>`
+    );
 }
 
 /** @type {(data: unknown) => string} */
