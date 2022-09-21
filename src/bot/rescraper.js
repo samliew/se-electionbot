@@ -222,17 +222,19 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                     console.log(`[rescraper] scrape interval increased to ${config.scrapeIntervalMins}.`);
                 }
 
-                scheduler.initLeave(
-                    addMinutes(nowOverride || new Date(), config.electionAfterpartyMins),
-                    room,
-                    async () => {
-                        // Scale Heroku dynos to free (restarts app)
-                        const heroku = new HerokuClient(config);
-                        if (await heroku.hasPaidDynos()) {
-                            await heroku.scaleFree();
+                if (config.autoLeaveRoom) {
+                    scheduler.initLeave(
+                        addMinutes(nowOverride || new Date(), config.electionAfterpartyMins),
+                        room,
+                        async () => {
+                            // Scale Heroku dynos to free (restarts app)
+                            const heroku = new HerokuClient(config);
+                            if (await heroku.hasPaidDynos()) {
+                                await heroku.scaleFree();
+                            }
                         }
-                    }
-                );
+                    );
+                }
             }
 
             this.start();
