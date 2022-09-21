@@ -32,6 +32,20 @@ export const findNominationAnnouncementsInChat = async (config, user) => {
 };
 
 /**
+ * @summary extracts nomination info from chat announcement
+ * @param {string} content chat message Markdown content
+ * @returns {Partial<Pick<Nominee, "userName"|"nominationLink"> & { postId:string }>}
+ */
+export const getNominationInfoFromChatMessageMarkdown = (content) => {
+    // https://regex101.com/r/Gb4D2J/1
+    const nominationPostExpr = /\[([a-z0-9\p{L} -]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu;
+
+    const [, userName, nominationLink, postId] = content.match(nominationPostExpr) || [, "", "", ""];
+
+    return { postId, userName, nominationLink };
+};
+
+/**
  * @summary parses a {@link Nominee} from a bot announcement
  * @param {BotConfig} config bot configuration
  * @param {Election} election current election
@@ -43,8 +57,7 @@ export const parseNomineeFromChatMessage = async (config, election, message) => 
 
     const { messageMarkup } = message;
 
-    const [, userName, nominationLink, postId] =
-        messageMarkup.match(/\[([a-z0-9\p{L} ]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu) || [, "", "", ""];
+    const { userName, nominationLink, postId } = getNominationInfoFromChatMessageMarkdown(messageMarkup);
 
     if (!userName || !nominationLink || !postId) return;
 

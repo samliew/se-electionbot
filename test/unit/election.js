@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
 import Election from "../../src/bot/election.js";
+import { getNominationInfoFromChatMessageMarkdown } from "../../src/bot/elections/chat.js";
 import { addDates, addHours, dateToUtcTimestamp, trimMs } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
 import { getMockElectionAnnouncement } from "../mocks/election.js";
@@ -706,4 +707,34 @@ describe(Election.name, () => {
         });
     });
 
+});
+
+describe(getNominationInfoFromChatMessageMarkdown.name, () => {
+    it("should correctly extract valid nomination info", () => {
+        const infos = [
+            {
+                userName: "Carl-Fredrik Nyberg Brodda",
+                nominationLink: "https://mathoverflow.net/election/3?tab=nomination#post-430839",
+                postId: "430839"
+            },
+            {
+                userName: "zeraoulia rafik",
+                nominationLink: "https://mathoverflow.net/election/3?tab=nomination#post-430812",
+                postId: "430812"
+            }
+        ];
+
+        const contents = infos.map(
+            ({ nominationLink, userName }) => `**We have a new [nomination](https://mathoverflow.net/election/3?tab=nomination)!** Please welcome our latest candidate [${userName}](${nominationLink})!`);
+
+        contents.forEach((content, idx) => {
+            const parsed = getNominationInfoFromChatMessageMarkdown(content);
+
+            const info = infos[idx];
+
+            Object.entries(parsed).forEach(([key, val]) => {
+                expect(info[key], `incorrectly parsed "${key}"`).to.equal(val);
+            });
+        });
+    });
 });
