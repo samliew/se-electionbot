@@ -44,6 +44,18 @@ describe(Announcer.name, () => {
     let messageStub;
     beforeEach(() => messageStub = sinon.stub(room, "sendMessage"));
 
+    describe("getters", () => {
+        describe("participantAnnouncementTypes", () => {
+            it("should correctly list announcement types", () => {
+                const { participantAnnouncementTypes } = announcer;
+                expect(participantAnnouncementTypes).length(3);
+                expect(participantAnnouncementTypes).to.include("nominees");
+                expect(participantAnnouncementTypes).to.include("winners");
+                expect(participantAnnouncementTypes).to.include("withdrawals");
+            });
+        });
+    });
+
     describe(`${Announcer.prototype.getAnnounced.name} & ${Announcer.prototype.setAnnounced.name}`, () => {
         it("should correctly get/set announcement state", () => {
             announcer.setAnnounced("cancelled", true);

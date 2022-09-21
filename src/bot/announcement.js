@@ -1,5 +1,6 @@
 import { dateToUtcTimestamp } from "../shared/utils/dates.js";
 import { filterMap, mapMap, mergeIntoMap } from "../shared/utils/maps.js";
+import { propertyKeys } from "../shared/utils/objects.js";
 import { capitalize } from "../shared/utils/strings.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
@@ -71,6 +72,14 @@ export default class Announcer {
         winners: new Map(),
         withdrawals: new Map(),
     };
+
+    /**
+     * @summary utility getter for listing available {@link ParticipantAnnouncementType}s
+     * @returns {ParticipantAnnouncementType[]}
+     */
+    get participantAnnouncementTypes() {
+        return propertyKeys(this.#announced);
+    }
 
     /**
      * @summary adds an individual election participant to announced ones
