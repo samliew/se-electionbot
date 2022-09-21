@@ -167,7 +167,7 @@
             <tr><td>Is Muted</td><td>{{{boolean isMuted}}} {{#if isMuted}}{{> relativetime date=unmutesAt short=true prefix="for "}}{{/if}}</td></tr>
             <tr><td>throttleSecs</td><td>{{throttleSecs}} secs</td></tr>
             <tr><td>scrapeIntervalMins</td><td>{{scrapeIntervalMins}} mins</td></tr>
-            <tr><td>autoLeaveRoom</td><td>{{autoLeaveRoom}} mins</td></tr>
+            <tr><td>autoLeaveRoom</td><td>{{{boolean autoLeaveRoom}}}</td></tr>
             <tr><td>electionAfterpartyMins</td><td>{{electionAfterpartyMins}} mins</td></tr>
             <tr>
                 <td>autoscaleHeroku</td>
