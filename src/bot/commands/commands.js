@@ -331,6 +331,18 @@ export const changeElection = async (args) => {
 };
 
 /**
+ * @summary resets the announcer state to defaults
+ * @param {Pick<CommandArguments, "announcement">} args command arguments
+ * @returns {string}
+ */
+export const resetAnnouncerCommand = (args) => {
+    const { announcement } = args;
+    // TODO: reset other announcement types too
+    announcement.resetAnnouncedParticipants();
+    return "Successfully reset the announcer";
+};
+
+/**
  * @summary soft-resets the current election
  * @param {Pick<CommandArguments, "config"|"election">} args command arguments
  * @returns {Promise<string>}
