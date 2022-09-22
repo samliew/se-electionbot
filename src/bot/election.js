@@ -4,7 +4,7 @@ import { isOneOf, mapify } from '../shared/utils/arrays.js';
 import { addDates, dateToUtcTimestamp, dateUnitHandlers, daysDiff, getCurrentUTCyear, getMilliseconds, validateDate } from '../shared/utils/dates.js';
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { filterMap, getOrInit, mergeMaps, sortMap } from '../shared/utils/maps.js';
-import { clone } from '../shared/utils/objects.js';
+import { assignInstanceSetters, clone } from '../shared/utils/objects.js';
 import { capitalize, formatOrdinal } from "../shared/utils/strings.js";
 import { getNamedBadges, getNumberOfVoters } from './api.js';
 import { getElectionAnnouncements } from "./elections/announcements.js";
@@ -1153,13 +1153,13 @@ export default class Election {
 
         /** {@link Map}, {@link Set}, and {@link Array} should be copied */
         Object.entries(this).forEach(([k, v]) => {
-            if (v instanceof Map) return entry[k] = mergeMaps(v);
-            if (v instanceof Set) return entry[k] = new Set(...v);
+            if (v instanceof Map) return entry[k] = new Map([...v]);
+            if (v instanceof Set) return entry[k] = new Set([...v]);
             if (Array.isArray(v)) return entry[k] = [...v];
             entry[k] = v;
         });
 
-        this.history.push(entry);
+        this.history.push(assignInstanceSetters(this, entry));
         return this;
     }
 
