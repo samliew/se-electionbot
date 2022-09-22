@@ -130,11 +130,19 @@ export const fetchUrl = async (_config, url, json = false) => {
  * @returns {Promise<ChatMessage[]>}
  */
 export const searchChat = async (config, chatDomain, query, roomId = '', pagesize = 100, page = 1) => {
-
     console.log(`[chat search] room ${roomId} (${chatDomain})\nquery: "${query}"`);
 
-    const searchUrl = await fetchUrl(config, `https://chat.${chatDomain}/search?q=${query}&user=&room=${roomId}&pagesize=${pagesize}&page=${page}`);
-    const $chat = cheerio.load(/** @type {string} */(searchUrl));
+    const url = new URL(`https://chat.${chatDomain}/search`);
+    url.search = new URLSearchParams({
+        page: page.toString(),
+        pagesize: pagesize.toString(),
+        room: roomId.toString(),
+        q: query,
+        user: "",
+    }).toString();
+
+    const html = await fetchUrl(config, url);
+    const $chat = cheerio.load(html);
 
     /** @type {ChatMessage[]} */
     const messages = [];
@@ -146,7 +154,7 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
     const thisDate = today.getUTCDate();
     const thisDay = today.getUTCDay();
 
-    $chat('#content .message').each(function (i, el) {
+    $chat('#content .message').each((_i, el) => {
         const $this = $chat(el);
         const messageId = +($this.children('a').attr('name') || 0);
         const userlink = $this.parent().siblings('.signature').find('a');
@@ -198,30 +206,30 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
         year = yearValue || thisYear;
         year = year < 2000 ? +year + 2000 : year;
 
-        if (config.debugAndVerbose) {
-            console.log(`Transcript message ${messageId} datetime:`, { timestampString, yearValue, monthValue, dayValue, dayDiff }, { year, month, date, hour, min });
-        }
-
         let datetime = now;
         if (year && month !== -1 && date && hour && min) {
             datetime = Date.UTC(+year, month, +date, +hour, +min, 0);
         }
 
-        messages.push({
+        const message = {
             username: userlink.text(),
             // @ts-expect-error
             chatUserId: +userlink.attr('href')?.match(/\d+/) || -42,
             chatDomain,
             message: messageText,
-            messageMarkup: messageMarkup,
-            messageHtml: messageHtml,
+            messageMarkup,
+            messageHtml,
             date: datetime <= now ? datetime : now, // can never be in the future
-            messageId: messageId
-        });
+            messageId
+        };
+
+        if (config.debugAndVerbose) console.log(`[chat search] found message`, message);
+
+        messages.push(message);
     });
 
-    if (config.verbose) {
-        console.log('Transcript messages fetched:', messages.slice(-30));
+    if (config.debugAndVerbose) {
+        console.log(`[chat search] found messages (${messages.length})`, messages.slice(-30));
     }
 
     return messages;
