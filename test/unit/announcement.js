@@ -92,6 +92,15 @@ describe(Announcer.name, () => {
         });
     });
 
+    describe(Announcer.prototype.resetAnnouncedParticipants.name, () => {
+        it("should correctly reset the participants' state", () => {
+            const nominee = getMockNominee(election, { userId: 42 });
+            announcer.addAnnouncedParticipant("nominees", nominee);
+            announcer.resetAnnouncedParticipants();
+            expect(announcer.hasAnnouncedParticipant("nominees", nominee)).to.be.false;
+        });
+    });
+
     describe(Announcer.prototype.announceCancelled.name, () => {
         it('should return false on no cancelledText', async () => {
             const status = await announcer.announceCancelled();

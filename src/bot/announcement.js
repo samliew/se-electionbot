@@ -112,6 +112,18 @@ export default class Announcer {
     }
 
     /**
+     * @summary resets the announced participants state
+     * @returns {Announcer}
+     */
+    resetAnnouncedParticipants() {
+        const { participantAnnouncementTypes } = this;
+        participantAnnouncementTypes.forEach((type) => {
+            this.#announced[type].clear();
+        });
+        return this;
+    }
+
+    /**
      * @summary sets announcement state by type
      * @param {AnnouncementType} type announcement type
      * @param {boolean} state new announcement state
