@@ -189,3 +189,21 @@ export const propertyKeys = (obj) => {
         return typeof value === "function" ? void 0 : /** @type {keyof T & string} */ (key);
     }).filter(onlyTruthy);
 };
+
+/**
+ * @template {new (...args: any[]) => any} T
+ *
+ * @summary assigns setters in a target to values from getters of a source
+ * @param {InstanceType<T>} from source instance
+ * @param {InstanceType<T>} to target instance
+ * @returns {InstanceType<T>}
+ */
+export const assignInstanceSetters = (from, to) => {
+    const proto = Object.getPrototypeOf(from);
+    Object.getOwnPropertyNames(proto).forEach((name) => {
+        const { get, set } = Object.getOwnPropertyDescriptor(proto, name) || {};
+        if (get && set) to[name] = from[name];
+    });
+
+    return to;
+};
