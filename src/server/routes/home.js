@@ -23,6 +23,8 @@ onMountAddToRoutes(home);
 home.get("/", async ({ query, path, app }, res) => {
     const { password = "" } = /** @type {AuthQuery} */(query);
 
+    /** @type {Announcer|undefined} */
+    const botAnnouncer = app.get("bot_announcer");
     /** @type {BotClient|undefined} */
     const botClient = app.get("bot_client");
     /** @type {BotConfig|undefined} */
@@ -32,7 +34,7 @@ home.get("/", async ({ query, path, app }, res) => {
     /** @type {Election|undefined} */
     const botElecton = app.get("bot_election");
 
-    if (!config || !botElecton || !botClient) {
+    if (!config || !botAnnouncer || !botElecton || !botClient) {
         console.error("[server] required config missing\n", config, botElecton, botClient);
         return res.sendStatus(500);
     }
@@ -73,6 +75,7 @@ home.get("/", async ({ query, path, app }, res) => {
             },
             heading: `${chatDisplayName} up and running.`,
             data: {
+                announcer: botAnnouncer,
                 isBotInRoom,
                 utcNow: dateToUtcTimestamp(Date.now()),
                 autoRefreshInterval: config.scrapeIntervalMins * 60,
