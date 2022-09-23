@@ -676,9 +676,11 @@ export default class Election {
 
         if (!prev) return false;
 
-        return prev.dateNomination !== dateNomination ||
-            prev.dateElection !== dateElection ||
-            prev.dateEnded !== dateEnded;
+        return [
+            prev.dateNomination !== dateNomination,
+            prev.dateElection !== dateElection,
+            prev.dateEnded !== dateEnded,
+        ].some(Boolean);
     }
 
     /**
