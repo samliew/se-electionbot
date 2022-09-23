@@ -325,6 +325,58 @@
     </section>
     {{/with}}
 
+    {{#if @root/authenticated}}
+        {{#with announcer}}
+        <section class="col-auto">
+            <h2 class="fs-4">Announcer</h2>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Nominees</td>
+                        <td>{{boolean (contextCall "getAnnounced" this "nominees")}}</td>
+                    </tr>
+                    <tr>
+                        <td>Cancellation</td>
+                        <td>{{boolean (contextCall "getAnnounced" this "cancelled")}}</td>
+                    </tr>
+                    <tr>
+                        <td>Election end</td>
+                        <td>{{boolean (contextCall "getAnnounced" this "ended")}}</td>
+                    </tr>
+                    <tr>
+                        <td>Nominations</td>
+                        <td>
+                            <table class="nested">
+                                <tbody>
+                                {{#each (getter this "participantAnnouncementTypes")}}
+                                    <tr>
+                                        <td>{{this}}</td>
+                                        <td>{{#if (len (contextCall "getAnnouncedParticipants" @root/data/announcer this))}}
+                                            <table class="nested">
+                                                <tbody>
+                                                {{#iterate (contextCall "getAnnouncedParticipants" @root/data/announcer this)}}
+                                                    <tr>
+                                                        <td>{{{url val/permalink label=val/userName}}}</td>
+                                                    </tr>
+                                                {{/iterate}}
+                                                </tbody>
+                                            </table>
+                                            {{/if}}</td>
+                                    </tr>
+                                {{/each}}
+                                </tbody>
+                            </table>
+
+
+
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        {{/with}}
+    {{/if}}
+
 </main>
 {{/with}}
 
