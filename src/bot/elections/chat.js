@@ -162,7 +162,12 @@ export const addWithdrawnNomineesFromChat = async (config, election, announcer, 
         const nominee = await parseNomineeFromChatMessage(config, election, message);
         if (!nominee) continue;
 
-        if (election.withdrawnNominees.has(nominee.userId) || !nominee.withdrawn) continue;
+        if (election.withdrawnNominees.has(nominee.userId) || !nominee.withdrawn) {
+            if (config.verbose) {
+                console.log(`[chat]`, `nominee has not withdrawn`, message, nominee);
+            }
+            continue;
+        }
 
         announcer.addAnnouncedParticipant("withdrawals", nominee);
         election.addWithdrawnNominee(nominee);
