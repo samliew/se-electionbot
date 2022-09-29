@@ -50,8 +50,8 @@ export const findWithdrawalAnnouncementsInChat = async (config, user) => {
  * @returns {Partial<Pick<Nominee, "userName"|"nominationLink"> & { postId:string }>}
  */
 export const getNominationInfoFromChatMessageMarkdown = (content) => {
-    // https://regex101.com/r/Gb4D2J/1
-    const nominationPostExpr = /\[([a-z0-9\p{L} -]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu;
+    // https://regex101.com/r/nmlVOz/1
+    const nominationPostExpr = /\[([a-z0-9\p{L} -]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)$/iu;
 
     const [, userName, nominationLink, postId] = content.match(nominationPostExpr) || [, "", "", ""];
 

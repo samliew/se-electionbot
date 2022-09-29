@@ -228,8 +228,6 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
             messageId
         };
 
-        if (config.debugAndVerbose) console.log(`[chat search] found message`, message);
-
         messages.push(message);
     });
 
