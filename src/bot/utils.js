@@ -142,7 +142,12 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
     }).toString();
 
     const html = await fetchUrl(config, url);
-    const $chat = cheerio.load(html);
+    if (!html) {
+        // Can't parse response if empty
+        return [];
+    }
+
+    let $chat = cheerio.load(html);
 
     /** @type {ChatMessage[]} */
     const messages = [];
