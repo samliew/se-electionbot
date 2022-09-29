@@ -162,15 +162,24 @@ export const addWithdrawnNomineesFromChat = async (config, election, announcer, 
         const nominee = await parseNomineeFromChatMessage(config, election, message);
         if (!nominee) continue;
 
-        if (election.withdrawnNominees.has(nominee.userId) || !nominee.withdrawn) {
+        // Nominee has not withdrawn
+        if (!nominee.withdrawn) {
             if (config.verbose) {
                 console.log(`[chat]`, `nominee has not withdrawn`, message, nominee);
             }
             continue;
         }
 
+        // Nominee withdrawal has already been announced
+        if (announcer.hasAnnouncedParticipant("withdrawals", nominee) && election.withdrawnNominees.has(nominee.userId)) {
+            if (config.verbose) {
+                console.log(`[chat]`, `nominee withdrawal has already been announced`, message, nominee);
+            }
+            continue;
+        }
+
         announcer.addAnnouncedParticipant("withdrawals", nominee);
-        election.addWithdrawnNominee(nominee);
+        election.addWithdrawnNominee(nominee); // was nominee already added to election withdrawals before this causing a previous bug??
 
         // Limit to scraping of nominations from transcript if more than number of nominations
         if (++withdrawnCount >= election.numNominees) break;
