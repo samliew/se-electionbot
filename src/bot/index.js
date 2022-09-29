@@ -16,7 +16,7 @@ import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
 import { getSiteElections } from './election.js';
-import { addAnnouncedNomineesFromChat, addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat } from "./elections/chat.js";
+import { addAnnouncedNomineesFromChat, addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, findWithdrawalAnnouncementsInChat } from "./elections/chat.js";
 import BotEnv from "./env.js";
 import {
     isAskedForCurrentMods, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isBotMentioned
@@ -336,9 +336,10 @@ use defaults ${defaultChatNotSet}`
          * Sync withdrawn nominees on startup using past ElectionBot announcements
          * (assuming ElectionBot managed to announce all the nominations from start of election)
          */
-        const announcements = await findNominationAnnouncementsInChat(config, me);
-        const addedWithdrawn = await addWithdrawnNomineesFromChat(config, election, announcement, announcements);
-        const addedAnnounced = await addAnnouncedNomineesFromChat(config, election, announcement, announcements);
+        const nominationAnnouncements = await findNominationAnnouncementsInChat(config, me);
+        const withdrawalAnnouncements = await findWithdrawalAnnouncementsInChat(config, me);
+        const addedAnnounced = await addAnnouncedNomineesFromChat(config, election, announcement, nominationAnnouncements);
+        const addedWithdrawn = await addWithdrawnNomineesFromChat(config, election, announcement, withdrawalAnnouncements);
         console.log(`[init] added announced: ${addedWithdrawn} withdrawn, ${addedAnnounced} nominated`);
 
         // TODO: check if not posted yet

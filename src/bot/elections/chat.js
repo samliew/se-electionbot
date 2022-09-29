@@ -19,16 +19,29 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
  */
 
 /**
- * @summary finds all bot announcements in chat transcript
+ * @summary finds all nomination bot announcements in chat transcript
  * @param {BotConfig} config bot configuration
  * @param {BotUser} user current bot user
  * @returns {Promise<ChatMessage[]>}
  */
 export const findNominationAnnouncementsInChat = async (config, user) => {
-    const term = "We have a new nomination Please welcome our latest candidate";
-    const announcements = await searchChat(config, config.chatDomain, term, config.chatRoomId);
+    const nominationsQuery = "We have a new nomination Please welcome our latest candidate";
+    const nominationAnnouncements = await searchChat(config, config.chatDomain, nominationsQuery, config.chatRoomId);
     const botMessageFilter = await onlyBotMessages(user);
-    return announcements.filter(botMessageFilter);
+    return nominationAnnouncements.filter(botMessageFilter);
+};
+
+/**
+ * @summary finds all withdrawn bot announcements in chat transcript
+ * @param {BotConfig} config bot configuration
+ * @param {BotUser} user current bot user
+ * @returns {Promise<ChatMessage[]>}
+ */
+export const findWithdrawalAnnouncementsInChat = async (config, user) => {
+    const withdrawalsQuery = "Attention Candidate has withdrawn from the election";
+    const withdrawalAnnouncements = await searchChat(config, config.chatDomain, withdrawalsQuery, config.chatRoomId);
+    const botMessageFilter = await onlyBotMessages(user);
+    return withdrawalAnnouncements.filter(botMessageFilter);
 };
 
 /**
