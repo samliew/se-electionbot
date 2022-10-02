@@ -19,16 +19,29 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
  */
 
 /**
- * @summary finds all bot announcements in chat transcript
+ * @summary finds all nomination bot announcements in chat transcript
  * @param {BotConfig} config bot configuration
  * @param {BotUser} user current bot user
  * @returns {Promise<ChatMessage[]>}
  */
 export const findNominationAnnouncementsInChat = async (config, user) => {
-    const term = "We have a new nomination Please welcome our latest candidate";
-    const announcements = await searchChat(config, config.chatDomain, term, config.chatRoomId);
+    const nominationsQuery = "We have a new nomination Please welcome our latest candidate";
+    const nominationAnnouncements = await searchChat(config, config.chatDomain, nominationsQuery, config.chatRoomId);
     const botMessageFilter = await onlyBotMessages(user);
-    return announcements.filter(botMessageFilter);
+    return nominationAnnouncements.filter(botMessageFilter);
+};
+
+/**
+ * @summary finds all withdrawn bot announcements in chat transcript
+ * @param {BotConfig} config bot configuration
+ * @param {BotUser} user current bot user
+ * @returns {Promise<ChatMessage[]>}
+ */
+export const findWithdrawalAnnouncementsInChat = async (config, user) => {
+    const withdrawalsQuery = "Attention Candidate has withdrawn from the election";
+    const withdrawalAnnouncements = await searchChat(config, config.chatDomain, withdrawalsQuery, config.chatRoomId);
+    const botMessageFilter = await onlyBotMessages(user);
+    return withdrawalAnnouncements.filter(botMessageFilter);
 };
 
 /**
@@ -37,8 +50,8 @@ export const findNominationAnnouncementsInChat = async (config, user) => {
  * @returns {Partial<Pick<Nominee, "userName"|"nominationLink"> & { postId:string }>}
  */
 export const getNominationInfoFromChatMessageMarkdown = (content) => {
-    // https://regex101.com/r/Gb4D2J/1
-    const nominationPostExpr = /\[([a-z0-9\p{L} -]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)!?$/iu;
+    // https://regex101.com/r/nmlVOz/1
+    const nominationPostExpr = /\[([a-z0-9\p{L} -]+)(?<!nomination)\]\((https:\/\/.+\/election\/\d+\?tab=nomination#post-(\d+))\)/iu;
 
     const [, userName, nominationLink, postId] = content.match(nominationPostExpr) || [, "", "", ""];
 
@@ -146,10 +159,24 @@ export const addWithdrawnNomineesFromChat = async (config, election, announcer, 
         const nominee = await parseNomineeFromChatMessage(config, election, message);
         if (!nominee) continue;
 
-        if (election.withdrawnNominees.has(nominee.userId) || !nominee.withdrawn) continue;
+        // Nominee has not withdrawn
+        if (!nominee.withdrawn) {
+            if (config.verbose) {
+                console.log(`[chat]`, `nominee has not withdrawn`, message, nominee);
+            }
+            continue;
+        }
+
+        // Nominee withdrawal has already been announced
+        if (announcer.hasAnnouncedParticipant("withdrawals", nominee) && election.withdrawnNominees.has(nominee.userId)) {
+            if (config.verbose) {
+                console.log(`[chat]`, `nominee withdrawal has already been announced`, message, nominee);
+            }
+            continue;
+        }
 
         announcer.addAnnouncedParticipant("withdrawals", nominee);
-        election.addWithdrawnNominee(nominee);
+        election.addWithdrawnNominee(nominee); // was nominee already added to election withdrawals before this causing a previous bug??
     }
 
     return withdrawnCount;

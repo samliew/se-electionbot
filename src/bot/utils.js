@@ -142,7 +142,12 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
     }).toString();
 
     const html = await fetchUrl(config, url);
-    const $chat = cheerio.load(html);
+    if (!html) {
+        // Can't parse response if empty
+        return [];
+    }
+
+    let $chat = cheerio.load(html);
 
     /** @type {ChatMessage[]} */
     const messages = [];
@@ -222,8 +227,6 @@ export const searchChat = async (config, chatDomain, query, roomId = '', pagesiz
             date: datetime <= now ? datetime : now, // can never be in the future
             messageId
         };
-
-        if (config.debugAndVerbose) console.log(`[chat search] found message`, message);
 
         messages.push(message);
     });
