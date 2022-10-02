@@ -126,9 +126,6 @@ export const addAnnouncedNomineesFromChat = async (config, election, announcer, 
         if (!nominee) continue;
 
         announcer.addAnnouncedParticipant("nominees", nominee);
-
-        // Limit to scraping of nominations from transcript if more than number of nominations
-        if (++nomineeCount >= election.numNominees) break;
     }
 
     return nomineeCount;
@@ -153,9 +150,6 @@ export const addWithdrawnNomineesFromChat = async (config, election, announcer, 
 
         announcer.addAnnouncedParticipant("withdrawals", nominee);
         election.addWithdrawnNominee(nominee);
-
-        // Limit to scraping of nominations from transcript if more than number of nominations
-        if (++withdrawnCount >= election.numNominees) break;
     }
 
     return withdrawnCount;
