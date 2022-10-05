@@ -347,7 +347,7 @@ export default class Announcer {
 
         const announced = this.#announced.winners;
         const toAnnounce = filterMap(winners, (w) => !announced.has(w.userId));
-        if (!toAnnounce) {
+        if (!toAnnounce.size) {
             console.log(`[announcer] no winners to announce`, verbose ? _election : "");
             return false;
         }

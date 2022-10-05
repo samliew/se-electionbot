@@ -200,9 +200,9 @@ describe(Announcer.name, () => {
             expect(await announcer.announceWinners()).to.be.false;
         });
 
-        it('should return true if election is ended without winners', async () => {
+        it('should return false if election is ended without winners', async () => {
             sinon.stub(election, "getPhase").returns("ended");
-            expect(await announcer.announceWinners()).to.be.true;
+            expect(await announcer.announceWinners()).to.be.false;
         });
 
         it('should correctly announce winners', async () => {
@@ -232,8 +232,7 @@ describe(Announcer.name, () => {
 
             await clock.runAllAsync();
 
-            expect(await promise).to.be.true; // TODO: should this be false?
-
+            expect(await promise).to.be.false;
             expect(messageStub.callCount).to.equal(0);
         });
     });
