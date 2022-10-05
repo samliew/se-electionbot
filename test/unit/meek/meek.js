@@ -25,8 +25,8 @@ describe("Ballot counting", () => {
             for (const fileName of fileNames) {
                 it(`should correctly count ballots in ${fileName}`, async () => {
                     const filePath = join(__dirname, "sample", fileName);
-                    const content = await readFile(filePath);
-                    const [expectedOutput, bltContent] = content.toString().split("\n\n\n");
+                    const content = await readFile(filePath, { encoding: "utf-8" });
+                    const [expectedOutput, bltContent] = content.replace(/\r/g, "").split("\n\n\n");
 
                     const parsed = new BallotParser().parse(bltContent);
                     const electionInfo = new MeekSTV(parsed);
