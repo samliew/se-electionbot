@@ -998,7 +998,7 @@ export const mapToRequired = ({ required }) => !!required;
  * @param {string} ids
  * @returns {number[]}
  */
-export const parseIds = (ids) => ids.split(/\D+/).map(Number);
+export const parseIds = (ids) => ids.split(/\D+/).filter(Boolean).map(Number);
 
 /**
  * @template {(...args: any[]) => any} T
