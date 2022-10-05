@@ -325,7 +325,7 @@ export default class Announcer {
 
     /**
      * @summary Announces winners when available
-     * @returns {Promise<boolean>}
+     * @returns {Promise<boolean>} true if winners were announced
      */
     async announceWinners() {
         const { config, _election, _room } = this;
@@ -349,7 +349,7 @@ export default class Announcer {
         const toAnnounce = filterMap(winners, (w) => !announced.has(w.userId));
         if (!toAnnounce) {
             console.log(`[announcer] no winners to announce`, verbose ? _election : "");
-            return true;
+            return false;
         }
 
         config.flags.saidElectionEndingSoon = true;
