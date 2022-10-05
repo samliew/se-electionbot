@@ -163,7 +163,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
 
                 // Scale Heroku dynos to free (restarts app)
                 const heroku = new HerokuClient(config);
-                if (await heroku.hasPaidDynos()) {
+                if (config.autoscaleHeroku && await heroku.hasPaidDynos()) {
                     await heroku.scaleFree();
                 }
             }
@@ -197,8 +197,10 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 config.scrapeIntervalMins = 1;
 
                 // Scale Heroku dynos to paid (restarts app)
-                const heroku = new HerokuClient(config);
-                await heroku.scaleHobby();
+                if (config.autoscaleHeroku) {
+                    const heroku = new HerokuClient(config);
+                    await heroku.scaleHobby();
+                }
 
                 const status = await announcement?.announceElectionEndingSoon();
                 console.log(`[rescraper] announced ending soon: ${status}`);
@@ -227,9 +229,9 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                         addMinutes(nowOverride || new Date(), config.electionAfterpartyMins),
                         room,
                         async () => {
-                            // Scale Heroku dynos to free (restarts app)
                             const heroku = new HerokuClient(config);
-                            if (await heroku.hasPaidDynos()) {
+                            if (config.autoscaleHeroku && await heroku.hasPaidDynos()) {
+                                // Scale Heroku dynos to free (restarts app)
                                 await heroku.scaleFree();
                             }
                         }
