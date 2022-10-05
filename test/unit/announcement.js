@@ -206,7 +206,8 @@ describe(Announcer.name, () => {
         });
 
         it('should correctly announce winners', async () => {
-            election.winners.set(42, getMockNominee(election, { userName: "Jeanne" }));
+            const nominee = getMockNominee(election, { userName: "Jeanne" });
+            election.winners.set(nominee.userId, nominee);
             election.dateEnded = dateToUtcTimestamp(Date.now());
 
             const promise = announcer.announceWinners();
@@ -217,6 +218,19 @@ describe(Announcer.name, () => {
 
             const [[message]] = messageStub.args;
             expect(message).to.match(/to the winner\*\*.+Jeanne/);
+        });
+
+        it('should not announce winners a second time', async () => {
+            const nominee = getMockNominee(election, { userName: "Jeanne" });
+            election.winners.set(nominee.userId, nominee);
+            election.dateEnded = dateToUtcTimestamp(Date.now());
+            announcer.addAnnouncedParticipant("winners", nominee);
+
+            const promise = announcer.announceWinners();
+
+            await clock.runAllAsync();
+
+            expect(await promise).to.be.false;
         });
     });
 
