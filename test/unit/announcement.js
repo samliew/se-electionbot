@@ -207,7 +207,7 @@ describe(Announcer.name, () => {
 
         it('should correctly announce winners', async () => {
             const nominee = getMockNominee(election, { userName: "Jeanne" });
-            election.winners.set(nominee.userId, nominee);
+            election.addWinner(nominee);
             election.dateEnded = dateToUtcTimestamp(Date.now());
 
             const promise = announcer.announceWinners();
@@ -224,7 +224,7 @@ describe(Announcer.name, () => {
 
         it('should not announce winners a second time', async () => {
             const nominee = getMockNominee(election, { userName: "Jeanne" });
-            election.winners.set(nominee.userId, nominee);
+            election.addWinner(nominee);
             election.dateEnded = dateToUtcTimestamp(Date.now());
             announcer.addAnnouncedParticipant("winners", nominee);
 

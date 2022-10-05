@@ -1166,6 +1166,17 @@ export default class Election {
     }
 
     /**
+     * @summary adds a winner to {@link Election.winners}
+     * @param {Nominee} winner winner to add
+     * @returns {Election}
+     */
+    addWinner(winner) {
+        const { winners } = this;
+        winners.set(winner.userId, winner);
+        return this;
+    }
+
+    /**
      * @summary adds a nominee to the collection of active nominees
      * @param {Nominee} nominee nominee to add
      * @returns {Election}

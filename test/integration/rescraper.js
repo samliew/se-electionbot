@@ -111,7 +111,7 @@ describe(Rescraper.name, () => {
             sinon.stub(election, "electionDatesChanged").get(() => false);
             sinon.stub(election, "getPhase").returns("ended");
 
-            election.winners.set(42, getMockNominee(election, { userId: 42 }));
+            election.addWinner(getMockNominee(election, { userId: 42 }));
 
             await scraper.rescrape();
             expect(winnerStub.calledOnce).to.be.true;

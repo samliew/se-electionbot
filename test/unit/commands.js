@@ -261,7 +261,7 @@ describe('Commands', () => {
 
             it('should reset current election state', () => {
                 election.addActiveNominee(getMockNominee(election));
-                election.winners.set(42, getMockNominee(election));
+                election.addWinner(getMockNominee(election));
                 election.moderators.set(-1, /** @type {ModeratorUser} */({}));
                 election.phase = "primary";
 

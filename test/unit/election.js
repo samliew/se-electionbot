@@ -150,8 +150,8 @@ describe(Election.name, () => {
                 e2.elections.set(1, e1);
                 e2.elections.set(2, e2);
 
-                e1.winners.set(1, getMockNominee(e1, { userId: 1 }));
-                e2.winners.set(2, getMockNominee(e2, { userId: 2 }));
+                e1.addWinner(getMockNominee(e1, { userId: 1 }));
+                e2.addWinner(getMockNominee(e2, { userId: 2 }));
 
                 expect(e1.allWinners.size).to.equal(1);
                 expect(e2.allWinners.size).to.equal(2);
@@ -270,8 +270,8 @@ describe(Election.name, () => {
                 const nominee1 = getMockNominee(election, { userId: 1 });
                 const nominee2 = getMockNominee(election, { userId: 2 });
 
-                election.winners.set(1, nominee1);
-                election.winners.set(2, nominee2);
+                election.addWinner(nominee1);
+                election.addWinner(nominee2);
 
                 expect(election.numWinners).to.equal(2);
             });
@@ -318,7 +318,7 @@ describe(Election.name, () => {
                 const newWinner = getMockNominee(election, { userId: 2 });
 
                 election.pushHistory();
-                election.winners.set(2, newWinner);
+                election.addWinner(newWinner);
 
                 const { newWinners } = election;
                 expect(newWinners).length(1);
@@ -337,7 +337,7 @@ describe(Election.name, () => {
                 const newWinner = getMockNominee(election, { userId: 42 });
 
                 election.pushHistory();
-                election.winners.set(42, newWinner);
+                election.addWinner(newWinner);
 
                 expect(election.hasNewWinners).to.be.true;
 
@@ -476,13 +476,13 @@ describe(Election.name, () => {
 
     describe(Election.prototype.hasResults.name, () => {
         it("should correctly determine if official results are out", () => {
-            election.winners.set(42, getMockNominee(election, { userId: 42 }));
+            election.addWinner(getMockNominee(election, { userId: 42 }));
             sinon.stub(election, "getPhase").returns("ended");
             expect(election.hasResults()).to.be.true;
         });
 
         it("should account for current date overrides", () => {
-            election.winners.set(42, getMockNominee(election, { userId: 42 }));
+            election.addWinner(getMockNominee(election, { userId: 42 }));
             const now = new Date();
             election.dateEnded = now;
             expect(election.hasResults(addDates(now, -1))).to.be.false;
