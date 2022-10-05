@@ -446,7 +446,7 @@ export default class Announcer {
         const { config, _election, _room } = this;
 
         const messages = [
-            `Test cron job succesfully completed at ${dateToUtcTimestamp(/**  @type {number} */(_election.updated))}.`
+            `Test cron job successfully completed at ${dateToUtcTimestamp(/**  @type {number} */(_election.updated))}.`
         ];
 
         await sendMessageList(config, _room, messages, { isPrivileged: true });

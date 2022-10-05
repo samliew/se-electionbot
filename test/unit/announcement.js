@@ -216,6 +216,8 @@ describe(Announcer.name, () => {
 
             expect(await promise).to.be.true;
 
+            expect(messageStub.callCount).to.equal(1);
+
             const [[message]] = messageStub.args;
             expect(message).to.match(/to the winner\*\*.+Jeanne/);
         });
@@ -230,7 +232,9 @@ describe(Announcer.name, () => {
 
             await clock.runAllAsync();
 
-            expect(await promise).to.be.false;
+            expect(await promise).to.be.true; // TODO: should this be false?
+
+            expect(messageStub.callCount).to.equal(0);
         });
     });
 

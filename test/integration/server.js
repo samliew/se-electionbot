@@ -74,6 +74,8 @@ describe("Dashboard", function () {
 
             const html = await fetchUrl(config, url);
 
+            expect(html).to.be.a("string");
+
             const { window: { document } } = new JSDOM(html);
 
             expect(document.querySelector("a[href*='/rooms/190503']")).to.not.be.null;
