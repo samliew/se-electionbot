@@ -166,6 +166,9 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 if (config.autoscaleHeroku && await heroku.hasPaidDynos()) {
                     await heroku.scaleFree();
                 }
+
+                // After calling stop(), we need to return here otherwise start() will be called below!
+                return;
             }
 
             // Official results out
@@ -174,6 +177,9 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 const status = await announcement?.announceWinners();
                 console.log(`[rescraper] announced winners: ${status}`);
                 this.stop();
+
+                // After calling stop(), we need to return here otherwise start() will be called below!
+                return;
             }
 
             // Election just over, there are no winners yet (waiting for CM)
