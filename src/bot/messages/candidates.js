@@ -81,6 +81,12 @@ export const sayCurrentCandidates = (_c, _es, election, ...rest) => {
         const link = makeURL(`${numNominees} ${getCandidateOrNominee()}${pluralize(numNominees)}`, electionUrl);
         const prefix = election.isActive() ? `${capitalize(getRandomCurrently())}, there` : "There";
 
+        // If 4 or fewer candidates, list them all with their profile links
+        if (numNominees <= 4) {
+            const candidates = [...nominees.values()].map(({ userName, permalink }) => makeURL(userName, permalink)).join(', ');
+            return `${prefix} ${modal} ${link}: ${candidates}`;
+        }
+
         // Don't link to individual profiles here, since we can easily hit the 500-char limit if there are at least 6 candidates
         return `${prefix} ${modal} ${link}: ${[...nominees.values()].map(({ userName }) => userName).join(', ')}`;
     }
