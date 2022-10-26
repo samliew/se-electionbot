@@ -375,7 +375,7 @@ export const fetchChatTranscript = async (config, url, options = {}) => {
     // reached after scraping, don't need to fetch more
     if (slice.length < showTranscriptMessages) {
         // throttle chat scrapes just in case
-        await wait(0.5);
+        await wait(2);
 
         return fetchChatTranscript(config, url, {
             ...options,
