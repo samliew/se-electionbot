@@ -57,44 +57,7 @@
             <tr><td>BLT file URL</td><td>{{{url (getter this "electionBallotURL")}}}</td></tr>
         </table>
 
-        <h2 class="fs-4">Election History</h2>
-        {{#if (len elections)}}
-        <table class="table-small">
-            <thead>
-                <tr>
-                    <th>Link</th>
-                    <th>Year</th>
-                    <th>Primary</th>
-                    <th>Cancelled</th>
-                    <th>Positions</th>
-                    <th>Nominees</th>
-                    <th>Withdrawn</th>
-                    <th>Winners</th>
-                </tr>
-            </thead>
-            <tbody>
-            {{#iterate elections}}
-            <tr>
-                <td>
-                    <a href="{{val/electionUrl}}">{{getter val "electionNum"}}</a>
-                    {{#ifEquals (getter val "electionNum") (getter @root/data/election "electionNum")}}<span title="Current Election">*</span>{{/ifEquals}}
-                </td>
-                <td>{{year (getter val "dateNomination")}}</td>
-                <td>{{{yesno (getter val "datePrimary")}}}</td>
-                <td>{{{yesno (contextCall "isCancelled" val)}}}</td>
-                <td>{{val/numPositions}}</td>
-                <td>{{len val/nominees}}</td>
-                <td>{{len val/withdrawnNominees}}</td>
-                <td>{{len val/winners}}</td>
-            </tr>
-            {{/iterate}}
-            </tbody>
-        </table>
-        {{else}}
-            {{> emptySmallTable }}
-        {{/if}}
-
-        <h2 class="fs-4">Election Announcements</h2>
+        <h2 class="fs-4">Election Announcements (Meta)</h2>
         {{#if (len announcements)}}
         <table class="table-small">
             <thead>
@@ -137,15 +100,61 @@
     {{#with election}}
     <section class="col-auto">
 
+        <h2 class="fs-4">Election History</h2>
+        {{#if (len elections)}}
+        <table class="table-small">
+            <thead>
+                <tr>
+                    <th>Link</th>
+                    <th>Year</th>
+                    <th>Primary</th>
+                    <th>Cancelled</th>
+                    <th>Positions</th>
+                    <th>Nominees</th>
+                    <th>Withdrawn</th>
+                    <th>Winners</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{#iterate elections}}
+            <tr>
+                <td>
+                    <a href="{{val/electionUrl}}">{{getter val "electionNum"}}</a>
+                    {{#ifEquals (getter val "electionNum") (getter @root/data/election "electionNum")}}<span title="Current Election">*</span>{{/ifEquals}}
+                </td>
+                <td>{{year (getter val "dateNomination")}}</td>
+                <td>{{{yesno (getter val "datePrimary")}}}</td>
+                <td>{{{yesno (contextCall "isCancelled" val)}}}</td>
+                <td>{{val/numPositions}}</td>
+                <td>{{len val/nominees}}</td>
+                <td>{{len val/withdrawnNominees}}</td>
+                <td>{{len val/winners}}</td>
+            </tr>
+            {{/iterate}}
+            </tbody>
+        </table>
+        {{else}}
+            {{> emptySmallTable }}
+        {{/if}}
+
         {{> moderatorTable header="Current Moderators" election=@root/data/election key="currentModerators" }}
+
         {{> moderatorTable header="Former Moderators" election=@root/data/election key="formerModerators" }}
+
+    </section>
+    {{/with}}
+
+    {{#with election}}
+    <section class="col-auto">
 
         {{#if (len (getter this "requiredBadges"))}}
         {{> badgesTable election=@root/data/election status="required" type="all" header="Required Badges" }}
         {{/if}}
 
         {{> badgesTable election=@root/data/election status="all" type="editing" header="Editing Badges" }}
+
         {{> badgesTable election=@root/data/election status="all" type="moderation" header="Moderation Badges" }}
+
         {{> badgesTable election=@root/data/election status="all" type="participation" header="Participation Badges" }}
 
     </section>
@@ -186,6 +195,39 @@
             <tr><td>flags</td><td>{{> deep flags}}</td></tr>
         </table>
 
+        {{#if @root/authenticated}}
+        <h2 class="fs-4">Bot Users</h2>
+        <table>
+            <tr>
+                <td>Privileged</td>
+                <td>
+                    <table class="nested">
+                        <tr>
+                            <td>Admins</td>
+                            <td>
+                                <table class="nested">
+                                    {{#each @root/data/admins}}
+                                    <tr><td>{{{url link label=display_name}}}</td></tr>
+                                    {{/each}}
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Devs</td>
+                            <td>
+                                <table class="nested">
+                                    {{#each @root/data/devs}}
+                                    <tr><td>{{{url link label=display_name}}}</td></tr>
+                                    {{/each}}
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        {{/if}}
+
         <h2 class="fs-4">Scheduled Announcements</h2>
         <table class="table-small">
             <thead hidden>
@@ -197,6 +239,36 @@
             </thead>
             <tbody id="cron"></tbody>
         </table>
+
+        {{#if @root/authenticated}}
+        {{#with announcer}}
+            <h2 class="fs-4">Announcer</h2>
+            <table>
+                <tr><td>Nominees</td><td>{{boolean (contextCall "getAnnounced" this "nominees")}}</td></tr>
+                <tr><td>Cancellation</td><td>{{boolean (contextCall "getAnnounced" this "cancelled")}}</td></tr>
+                <tr><td>Election end</td><td>{{boolean (contextCall "getAnnounced" this "ended")}}</td></tr>
+                <tr>
+                    <td>Nominations</td>
+                    <td>
+                        <table class="nested">
+                        {{#each (getter this "participantAnnouncementTypes")}}
+                            <tr>
+                                <td>{{this}}</td>
+                                <td>{{#if (len (contextCall "getAnnouncedParticipants" @root/data/announcer this))}}
+                                    <table class="nested">
+                                        {{#iterate (contextCall "getAnnouncedParticipants" @root/data/announcer this)}}
+                                            <tr><td>{{{url val/permalink label=val/userName}}}</td></tr>
+                                        {{/iterate}}
+                                    </table>
+                                    {{/if}}</td>
+                            </tr>
+                        {{/each}}
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        {{/with}}
+        {{/if}}
 
         {{#if herokuDynos.length}}
             <h2 class="fs-4">Hosting (Heroku Dynos)</h2>
@@ -283,99 +355,8 @@
             </td></tr>
         </table>
 
-        {{#if @root/authenticated}}
-        <h2 class="fs-4">Bot Users</h2>
-        <table>
-            <tbody>
-                <tr>
-                    <td>Privileged</td>
-                    <td>
-                        <table class="nested">
-                            <tr>
-                                <td>Admins</td>
-                                <td>
-                                    <table class="nested">
-                                        <tbody>
-                                        {{#each @root/data/admins}}
-                                        <tr><td>{{{url link label=display_name}}}</td></tr>
-                                        {{/each}}
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Devs</td>
-                                <td>
-                                    <table class="nested">
-                                        <tbody>
-                                        {{#each @root/data/devs}}
-                                        <tr><td>{{{url link label=display_name}}}</td></tr>
-                                        {{/each}}
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        {{/if}}
-
     </section>
     {{/with}}
-
-    {{#if @root/authenticated}}
-        {{#with announcer}}
-        <section class="col-auto">
-            <h2 class="fs-4">Announcer</h2>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>Nominees</td>
-                        <td>{{boolean (contextCall "getAnnounced" this "nominees")}}</td>
-                    </tr>
-                    <tr>
-                        <td>Cancellation</td>
-                        <td>{{boolean (contextCall "getAnnounced" this "cancelled")}}</td>
-                    </tr>
-                    <tr>
-                        <td>Election end</td>
-                        <td>{{boolean (contextCall "getAnnounced" this "ended")}}</td>
-                    </tr>
-                    <tr>
-                        <td>Nominations</td>
-                        <td>
-                            <table class="nested">
-                                <tbody>
-                                {{#each (getter this "participantAnnouncementTypes")}}
-                                    <tr>
-                                        <td>{{this}}</td>
-                                        <td>{{#if (len (contextCall "getAnnouncedParticipants" @root/data/announcer this))}}
-                                            <table class="nested">
-                                                <tbody>
-                                                {{#iterate (contextCall "getAnnouncedParticipants" @root/data/announcer this)}}
-                                                    <tr>
-                                                        <td>{{{url val/permalink label=val/userName}}}</td>
-                                                    </tr>
-                                                {{/iterate}}
-                                                </tbody>
-                                            </table>
-                                            {{/if}}</td>
-                                    </tr>
-                                {{/each}}
-                                </tbody>
-                            </table>
-
-
-
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-        {{/with}}
-    {{/if}}
 
 </main>
 {{/with}}

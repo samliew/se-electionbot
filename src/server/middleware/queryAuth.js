@@ -54,7 +54,10 @@ export const queryAuth = async (req, res, next) => {
         return;
     }
 
-    res.locals.authenticated = true;
+    // Some pages can be public yet have auth sections
+    if (validPwd) {
+        res.locals.authenticated = true;
+    }
 
     next();
 };
