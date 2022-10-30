@@ -51,13 +51,13 @@
         "express-handlebars": "^6.0.6",
         "heroku-client": "^3.1.0",
         "html-entities": "^2.3.3",
-        "jsdom": "^20.0.1",
+        "jsdom": "^20.0.2",
         "markdown-it": "^13.0.1",
         "node-cache": "^5.1.2",
         "node-cron": "^3.0.2",
-        "patch-package": "^6.4.7",
+        "patch-package": "^6.5.0",
         "ramda": "^0.28.0",
-        "sanitize-html": "^2.7.2"
+        "sanitize-html": "^2.7.3"
     },
     "devDependencies": {
         "@types/chai": "^4.3.3",
@@ -68,7 +68,7 @@
         "@types/jsdom": "^16.2.15",
         "@types/markdown-it": "^12.2.3",
         "@types/mocha": "^9.1.1",
-        "@types/node-cron": "^3.0.4",
+        "@types/node-cron": "^3.0.5",
         "@types/ramda": "^0.28.18",
         "@types/sanitize-html": "^2.6.2",
         "@types/sinon": "^10.0.13",
