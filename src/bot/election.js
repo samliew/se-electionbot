@@ -379,7 +379,7 @@ export default class Election {
      */
     get formerModerators() {
         const { moderators } = this;
-        return filterMap(moderators, (m) => m.former);
+        return filterMap(moderators, (m) => m.former || (!m.former && m.is_employee));
     }
 
     /**
