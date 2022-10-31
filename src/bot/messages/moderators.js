@@ -68,9 +68,8 @@ export const sayBestModerator = async (_config, _elections, election, _content, 
     const { moderators } = election;
     const { name } = user;
 
-    const mods = [...moderators.values()];
-
-    const currModNames = mods.map(({ display_name }) => display_name);
+    const currMods = [...moderators.values()].filter(({ former, is_employee }) => !former && !is_employee);
+    const currModNames = currMods.map(({ display_name }) => display_name);
 
     if (user.isMod() && currModNames.includes(name)) {
         return `${name} is the best mod!!!`;
@@ -79,9 +78,9 @@ export const sayBestModerator = async (_config, _elections, election, _content, 
     const now = Date.now();
     const dayMs = 864e5;
 
-    const activeMods = mods.filter(({ last_access_date }) => last_access_date * 1e3 + dayMs > now);
+    const activeCurrMods = currMods.filter(({ last_access_date }) => last_access_date * 1e3 + dayMs > now);
 
-    const { display_name, link } = new RandomArray(...activeMods).getRandom();
+    const { display_name, link } = new RandomArray(...activeCurrMods).getRandom();
     return `${getRandomSecretPrefix()} ${makeURL(display_name, link)} is the best mod!`;
 };
 
