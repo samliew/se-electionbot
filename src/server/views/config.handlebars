@@ -40,3 +40,23 @@
     </form>
 </section>
 {{/iterate}}
+
+<script>
+(function() {
+
+    // Set max value of variables ending in _MINS to 35791
+    const minsInputs = document.querySelectorAll('input[name$="_MINS"]');
+    minsInputs.forEach(input => {
+        input.setAttribute('type', 'number');
+        input.setAttribute('max', 35791);
+    });
+
+    // Set min value of fields ending in _SECS or _MINS
+    const secsInputs = document.querySelectorAll('input[name$="_SECS"]');
+    [...secsInputs, ...minsInputs].forEach(input => {
+        input.setAttribute('type', 'number');
+        input.setAttribute('min', 0);
+    });
+
+})();
+</script>
