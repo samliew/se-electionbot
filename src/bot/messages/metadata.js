@@ -127,7 +127,7 @@ export const sayWhoAmI = async (_c, _es, _e, text, _u, bot) => {
 export const sayWhoMadeMe = async (config) => {
     const info = await parsePackage("./package.json");
     if (!info) {
-        if (config.debug) console.log("failed to parse bot package");
+        if (config.debugOrVerbose) console.log("failed to parse bot package");
         return `${makeURL("Samuel", "https://so-user.com/584192?tab=profile")} made me.`;
     }
 
@@ -138,6 +138,27 @@ export const sayWhoMadeMe = async (config) => {
     const maintainers = `I am also maintained by ${contributed}`;
 
     return `${created}. ${maintainers}.`;
+};
+
+/**
+ * @summary builds a project contribution response
+ * @param {BotConfig} config bot configuration
+ * @returns {string}
+ */
+export const sayContributeInfo = (config) => {
+    const { repoUrl } = config;
+    return `You can contribute to my development, provide feedback, or report bugs at ${repoUrl}`;
+};
+
+/**
+ * @summary builds a feedback form response
+ * @param {BotConfig} config bot configuration
+ * @returns {string}
+ */
+export const sayFeedbackForm = (config) => {
+    const { feedbackUrl } = config;
+    if (!feedbackUrl) return sayContributeInfo(config);
+    return `You can provide feedback about me to the project developers at ${feedbackUrl}`;
 };
 
 

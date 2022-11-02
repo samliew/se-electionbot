@@ -350,7 +350,7 @@ export const isAskedAboutJonSkeetJokes = (text) => {
  */
 export const isAskedAboutJokes = (text) => {
     return someMatch([
-        /(?:tell|make|say)\b.+?\b(?:me|us)?\b.+?(?:(?: a)? joke|laugh)/i
+        /(?:tell|make|say|humou?r)\b.+?\b(?:me|us)?\b.+?(?:(?: a)? joke|laugh)/i
     ], text) && !/jon\s?skeet/i.test(text);
 };
 
@@ -368,8 +368,8 @@ export const isAskedIfResponsesAreCanned = (text) => {
  */
 export const isAskedAboutRequiredBadges = (text) => {
     return someMatch([
-        /^(?:what\s+are|list)(?:\s+the)?\s+(?:required|mandatory|necessary)\s+badges/i,
-        /^(?:what|which)(?:\s+of)?(?:\s+the)?\s+badges\s+are\s+(?:required|mandatory|necessary)/i
+        /^(?:what\s+are|list)(?:\s+the)?\s+(?:required|mandatory|necessary|must have)\s+badges/i,
+        /^(?:what|which)(?:\s+of)?(?:\s+the)?\s+badges\s+are\s+(?:need|required?|mandatory|necessary)/i
     ], text);
 };
 

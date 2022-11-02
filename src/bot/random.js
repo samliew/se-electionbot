@@ -81,7 +81,6 @@ export const getRandomFunResponse = () => new RandomArray(
     `What we've got here is failure to communicate.`,
     `Time will tell. Sooner or later, time will tell...`,
     `Well, here's another nice mess you've gotten me into!`,
-    `There will be no such thing as free will; there will only be my will.`,
 ).getRandom();
 
 export const getRandomJoke = () => new RandomArray(
@@ -142,7 +141,6 @@ export const getRandomAnnouncement = () => new RandomArray(
     `I'm sorry to ${getRandomInterjectionVerb()}, but... `,
     "A quick message from my sponsors: ",
     "Welcome to the election chat room! ",
-    "And now for something completely different - ",
     "Hello and welcome to the election night special! ",
     "Interrupting to bring you this important message: ",
 ).getRandom();
@@ -208,6 +206,7 @@ export const getRandomWhoAmI = () => new RandomArray(
 ).getRandom();
 
 export const getRandomWhyAmI = () => new RandomArray(
+    "waffles",
     "because.",
     "Why is anyone?",
     "Exterminate! Exterminate!",

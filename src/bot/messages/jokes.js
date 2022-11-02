@@ -49,7 +49,7 @@ export const sayHowManyModsItTakesToFixLightbulb = (_config, _elections, electio
     const requires = new RandomArray(...names);
 
     const times = Math.floor(Math.random() * requires.length);
-    if (!times) return `Sorry, mods do not fix lightbulbs.`;
+    if (!times) return `Why would you need mods to do it when you could call it a community effort?`;
 
     return `It only takes ${times} mod${pluralize(times, "s")}! Just ask ${requires.getRandom()}.`;
 };
