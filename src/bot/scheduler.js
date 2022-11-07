@@ -233,7 +233,8 @@ export default class Scheduler {
         const election = this.#election;
 
         // Add one minute after election ended
-        const feedbackDate = election.dateEnded?.replace(/00:00/, '01:00');
+        const dateEnded = new Date(election.dateEnded ?? Date.now());
+        const feedbackDate = dateEnded.setMinutes(dateEnded.getMinutes() + 1);
 
         return {
             feedback: this.initFeedbackAsk(feedbackDate),
