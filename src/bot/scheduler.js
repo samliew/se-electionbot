@@ -10,7 +10,7 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
  * @typedef {import("chatexchange/dist/Room").default} Room
  * @typedef {import("./rescraper.js").default} Rescraper
  * @typedef {import("./announcement.js").default} Announcer
- * @typedef {"start"|"end"|"primary"|"nomination"|"test"|"leave"} TaskType
+ * @typedef {"start"|"end"|"primary"|"nomination"|"feedback"|"test"|"leave"} TaskType
  */
 
 export default class Scheduler {
@@ -139,6 +139,18 @@ export default class Scheduler {
     }
 
     /**
+     * @summary initializes task for feedback form
+     * @param {string | number | Date | undefined} date date at which to run the task
+     * @param {(status: boolean) => Promise<void>} [callback] to run after the task completes
+     * @returns {boolean}
+     */
+    initFeedbackAsk(date, callback) {
+        return this.#initializeTask("feedback", date,
+            () => this.#announcer.announceFeedbackAsk(),
+            callback);
+    }
+
+    /**
      * @summary initializes task for election end
      * @param {string | number | Date | undefined} date date at which to run the task
      * @param {(status: boolean) => Promise<void>} [callback] to run after the task completes
@@ -220,7 +232,11 @@ export default class Scheduler {
     initAll() {
         const election = this.#election;
 
+        // Add one minute after election ended
+        const feedbackDate = election.dateEnded?.replace(/00:00/, '01:00');
+
         return {
+            feedback: this.initFeedbackAsk(feedbackDate),
             end: this.initElectionEnd(election.dateEnded),
             nomination: this.initNomination(election.dateNomination),
             primary: this.initPrimary(election.datePrimary),
@@ -241,6 +257,13 @@ export default class Scheduler {
         }
 
         return this.initAll();
+    }
+
+    /**
+     * @summary stops the feedback task
+     */
+    stopFeedbackAsk() {
+        return this.#stop("feedback");
     }
 
     /**
@@ -284,6 +307,7 @@ export default class Scheduler {
      */
     stopAll() {
         return {
+            feedback: this.stopFeedbackAsk(),
             end: this.stopElectionEnd(),
             nomination: this.stopNomination(),
             primary: this.stopPrimary(),

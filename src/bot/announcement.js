@@ -2,6 +2,7 @@ import { dateToUtcTimestamp } from "../shared/utils/dates.js";
 import { filterMap, mapMap, mergeIntoMap } from "../shared/utils/maps.js";
 import { propertyKeys } from "../shared/utils/objects.js";
 import { capitalize } from "../shared/utils/strings.js";
+import { sayFeedback } from "./commands/commands.js";
 import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
 import { getFormattedElectionSchedule, listify, makeURL, pluralize } from "./utils.js";
@@ -19,8 +20,8 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
  * @typedef {import("./elections/nominees.js").default} Nominee
  * @typedef {import("./rescraper.js").default} Rescraper
  * @typedef {import("chatexchange/dist/Room").default} Room
- * @typedef {"start"|"end"|"primary"|"nomination"|"test"} TaskType
- * @typedef {"cancelled"|"ended"|"nomination"|"nominees"} AnnouncementType
+ * @typedef {"start"|"end"|"primary"|"nomination"|"feedback"|"test"} TaskType
+ * @typedef {"cancelled"|"ended"|"nomination"|"nominees"|"feedback"} AnnouncementType
  * @typedef {"nominees"|"winners"|"withdrawals"} ParticipantAnnouncementType
  */
 
@@ -371,6 +372,20 @@ export default class Announcer {
     }
 
     /**
+     * @summary get users to fill in the feedback form after an election
+     * @returns {Promise<boolean>}
+     */
+    async announceFeedbackAsk() {
+        const { _room, config } = this;
+
+        const messages = [...sayFeedback({ config })];
+
+        await sendMessageList(config, _room, messages, { isPrivileged: true });
+
+        return true;
+    }
+
+    /**
      * @summary announces an {@link Election} phase change
      * @param {"nomination"|"election"|"primary"} tab tab of the election to open
      * @param {string} label label of the election URL markdown
@@ -403,6 +418,18 @@ export default class Announcer {
     }
 
     /**
+     * @summary announces primary phase start
+     */
+    announcePrimaryStart() {
+        return this.#announcePhaseChange(
+            "primary",
+            "primary phase",
+            "is now open",
+            "You can now vote on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!"
+        );
+    }
+
+    /**
      * @summary announces election phase start
      */
     announceElectionStart() {
@@ -423,18 +450,6 @@ export default class Announcer {
             "election",
             "has now ended",
             "The winners will be announced shortly"
-        );
-    }
-
-    /**
-     * @summary announces primary phase start
-     */
-    announcePrimaryStart() {
-        return this.#announcePhaseChange(
-            "primary",
-            "primary phase",
-            "is now open",
-            "You can now vote on the candidates' nomination posts. Don't forget to come back in a week for the final election phase!"
         );
     }
 
