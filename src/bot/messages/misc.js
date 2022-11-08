@@ -11,11 +11,14 @@ import { makeURL } from "../utils.js";
  * @type {MessageBuilder}
  */
 export const sayMissingComments = (_c, _es, election) => {
-    const { electionUrl, phase } = election;
+    const { electionUrl, phase, nominees } = election;
 
-    return phase !== "nomination" ?
-        `Comments are only visible on the "${makeURL("Nomination", `${electionUrl}?tab=nomination`)}" tab.` :
-        `If you cannot see any comments on the ${makeURL("Election", `${electionUrl}?tab=election`)} page, either nobody has commented yet, or you need to wear glasses.`;
+    if (phase !== "nomination") {
+        return `Comments are only visible on the "${makeURL("Nomination", `${electionUrl}?tab=nomination`)}" tab.`;
+    }
+
+    return nominees.size === 0 ? "There are no nominees yet." :
+        `If you cannot see any comments on the ${makeURL("Election", `${electionUrl}?tab=nomination`)}, either nobody has commented yet, or you need to wear glasses.`;
 };
 
 /**
