@@ -21,7 +21,9 @@ export const sayBadgesByType = (config, _es, election, text, user) => {
         return `Can you clarify which type (${types.join(", ")}) to list, @${user.name.replace(/\s/g, "")}?`;
     }
 
-    const filtered = election.electionBadges.filter((b) => b.type === type);
+    const normalizedType = type === 'editor' ? 'editing' : type
+
+    const filtered = election.electionBadges.filter((b) => b.type === normalizedType);
 
     const { length } = filtered;
 
