@@ -21,13 +21,21 @@ export const sayBadgesByType = (config, _es, election, text, user) => {
         return `Can you clarify which type (${types.join(", ")}) to list, @${user.name.replace(/\s/g, "")}?`;
     }
 
-    const normalizedType = type === 'editor' ? 'editing' : type
+    const typeNormalizationMap = {
+        editor: "editing",
+        mod: "moderation",
+    }
+
+    const normalizedType = typeNormalizationMap[type] || type
 
     const filtered = election.electionBadges.filter((b) => b.type === normalizedType);
 
     const { length } = filtered;
+    if(!length) {
+        return `There are no ${normalizedType} badges`
+    }
 
-    const numBadgesPrefix = `The ${length} ${type} badge${pluralize(length)} ${pluralize(length, "are", "is")}: `;
+    const numBadgesPrefix = `The ${length} ${normalizedType} badge${pluralize(length)} ${pluralize(length, "are", "is")}: `;
 
     return numBadgesPrefix + (
         election.isStackOverflow() ?
