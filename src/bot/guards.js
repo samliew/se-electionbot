@@ -411,6 +411,16 @@ export const isAskedHowToSaveVotes = (text) => {
 };
 
 /**
+ * @summary checks if a message is asking which badges is one missing
+ * @type {MessageGuard}
+ */
+export const isAskedAboutMissingBadges = (text) => {
+    return allMatch([
+        /wh(?:ich|at)\s+badges\s+(?:am|do)\s+I\s+(?:miss(?:ing)?|not\s+have)/i
+    ], text)
+}
+
+/**
  * @summary checks if a message is asking where did the nomination comments go
  * @type {MessageGuard}
  */
