@@ -81,10 +81,14 @@ export const parseNomineeFromChatMessage = async (config, election, message) => 
 
     const { window: { document } } = new JSDOM(revisionHTML);
 
-    const userIdHref = findLast(`#content a[href*="/user"]`, document)?.getAttribute("href") || "";
+    const userIdHref = findLast(`.js-revisions .s-user-card--link[href*='/user']`, document)?.getAttribute("href") || "";
     const nominationDateString = findLast(`#content .relativetime`, document)?.getAttribute("title");
 
-    const userId = matchNumber(/\/users\/(\d+)/, userIdHref) || -42;
+    const userId = matchNumber(/\/users\/(\d+)/, userIdHref);
+    if(!userId) {
+        console.log(`[chat] invalid nomination user link: ${userIdHref}`);
+        return
+    }
 
     // candidate's nominationDate cannot have been outside of the election's nomination period
     const nominationDate = new Date(nominationDateString || -1);
