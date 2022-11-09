@@ -38,9 +38,11 @@ describe('Message Guards', () => {
         "is it starting soon?",
         "Is it started yet?",
         "when is the next phase",
-        "when is nomination ending?",
+        "when is nomination phase ending?",
+        "When does the election phase end?",
+        "When is nomination phase over?",
         "is election starting?",
-        "is nomination ended?"
+        "is nomination phase ended?"
     ];
 
     const electionEndMatches = [
