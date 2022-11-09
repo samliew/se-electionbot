@@ -66,7 +66,7 @@ export const isAskedIfModsArePaid = (text) => {
  */
 export const isAskedAboutModsOrModPowers = (text) => {
     return someMatch([
-        /^what\s+(?:do(?:es)?|are|is)(?:\s+(?:a|the))?\s+(?:mod(?:erator)?'?s?'?)(?:\s+(?:doe?|responsibilit(?:ie|y)|power)s?)?/i,
+        /^what\s+(?:do(?:es)?|are|is)(?:\s+(?:a|the))?\s+(?:mod(?:erator)?'?s?'?)(?:\s+(?:doe?|responsibilit(?:ie|y)|power)s?)?(?:$|\?)/i,
         /^(?:why\s+)?should\s+i\s+(?:be(?:come)?)(?:\s+a)?\s+(?:mod(?:erator)?)/i,
         /^what(?:\s+are)?(?:\s+(?:a|the))?\s+(?:power|responsibilit(?:ie|y)|power)s?\s+(?:do(?:es)?|of)(?:\s+(?:a|the))?\s+mod(?:erator)?s?(?:\s+ha(?:ve|s))?/i,
     ], text);

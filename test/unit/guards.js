@@ -288,6 +288,7 @@ describe('Message Guards', () => {
         "what are the participation badges?",
         "list the moderation badges?",
         "what are editing badges?",
+        "what are the mod badges?",
         "What are the editor badges",
         "List mod badges",
     ];
