@@ -1,12 +1,28 @@
 import { expect } from "chai";
 import { AllowedHosts } from "chatexchange/dist/Client.js";
 import { asyncCacheable, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/bot/utils.js";
-import { validateChatTranscriptURL } from "../../src/shared/utils/chat.js";
+import { isOneboxedMessage, validateChatTranscriptURL } from "../../src/shared/utils/chat.js";
 import { addDates, addHours, addMinutes, addSeconds, dateToRelativeTime, getNumDaysInMonth } from "../../src/shared/utils/dates.js";
 import { matchNumber } from "../../src/shared/utils/expressions.js";
 import { numericNullable } from "../../src/shared/utils/objects.js";
 
 describe('Chat-related utils', () => {
+    describe(isOneboxedMessage.name, () => {
+        it("should correctly determine if a message is oneboxed", () => {
+            const oneboxed = `<div class="onebox">
+                <a href="">
+                    <img src="" width="240" height="180">
+                        <div>Help! I'm Being Repressed! (Short Version)</div>
+                    </a>
+            </div>`;
+
+            const normal = "Should ignore onebox messages";
+
+            expect(isOneboxedMessage(oneboxed)).to.be.true;
+            expect(isOneboxedMessage(normal)).to.be.false;
+        });
+    });
+
     describe(validateChatTranscriptURL.name, () => {
         it('should return true for valid URLs', () => {
             AllowedHosts.forEach((host) => {

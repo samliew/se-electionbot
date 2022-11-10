@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import { startServer } from "../server/index.js";
 import { logActivity, logResponse } from "../shared/utils/bot.js";
-import { prepareMessageForMatching } from "../shared/utils/chat.js";
+import { isOneboxedMessage, prepareMessageForMatching } from "../shared/utils/chat.js";
 import { getMilliseconds, MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
@@ -447,7 +447,7 @@ use defaults ${defaultChatNotSet}`
             config.activityCounter++;
 
             // Ignore messages with oneboxes
-            if (preparedMessage.includes('onebox')) return;
+            if (isOneboxedMessage(encodedMessage)) return;
 
             // Get details of user who triggered the message
             const profile = await getUser(client, userId);
