@@ -1,6 +1,7 @@
 import { uniquify } from "../../shared/utils/arrays.js";
 import { safeCapture } from "../../shared/utils/expressions.js";
-import { makeURL, pluralize, pluralizePhrase } from "../utils.js";
+import { getBadges, getStackApiKey } from "../api.js";
+import { getSiteUserIdFromChatStackExchangeId, listify, makeURL, pluralize, pluralizePhrase } from "../utils.js";
 
 /**
  * @typedef {import("../index").ElectionBadge} Badge
@@ -45,14 +46,55 @@ export const sayBadgesByType = (config, _es, election, text, user) => {
 };
 
 /**
+* @summary builds missing badges response
+* @param {string[]} badgeNames missing election badge names
+* @param {number} count number of missing badges
+* @param {"required"|"moderation"|"editing"|""} type election badge type
+* @param {boolean} [self] is requesting for self
+* @returns {string}
+*/
+export const buildMissingElectionBadgesResponse = (badgeNames, count, type, self = false) => {
+    const selfPrefix = self ? "You are" : "The user is";
+    const modal = pluralizePhrase(count, "these", "this");
+    const prefix = `${selfPrefix} missing ${modal}${type && ` ${type}`} badge${pluralize(count)}`; 
+    return `${prefix}: ${listify(...badgeNames)}.`;
+}
+
+/**
  * @summary builds missing badges response message
- * @param {string[]} badgeNames
- * @param {number} count
- * @param {boolean} [required]
- * @returns {string}
+ * @type {MessageBuilder}
  */
-export const sayMissingBadges = (badgeNames, count, ownSelf = false, required = false) =>
-    ` ${ownSelf ? "You are" : "The user is"} missing ${pluralizePhrase(count, "these", "this")} ${required ? "required" : ""} badge${pluralize(count)}: ${badgeNames.join(', ')}.`;
+export const sayMissingBadges = async (config, _es, election, _t, user) =>{
+    const { apiSlug, electionBadges, siteHostname } = election;
+
+    const siteUserId = await getSiteUserIdFromChatStackExchangeId(
+        config, 
+        user.id, 
+        config.chatDomain, 
+        siteHostname, 
+        getStackApiKey(config.apiKeyPool) 
+    )
+
+    if(!siteUserId) {
+        return ""
+    }
+
+    const userBadges = await getBadges(config, [siteUserId], apiSlug, {type: "named" });
+    const userBadgeIds = userBadges.map((badge) => badge.badge_id);
+
+    const missingBadges = electionBadges.filter(
+        (badge) => !userBadgeIds.includes(badge.badge_id)
+    );
+
+    const missingBadgeNames = missingBadges.map((badge) => badge.name);
+
+    return buildMissingElectionBadgesResponse(
+        missingBadgeNames,
+        missingBadgeNames.length,
+        "",
+        true // TODO: add ability to request for other users
+    );
+}
 
 /**
  * @summary builds a response to the required badges query
