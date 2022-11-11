@@ -25,6 +25,7 @@ About election badges:
 - what are the participation badges
 - what are the editing badges
 - what are the required badges _(SO-only)_
+- which badges am I missing
 
 Current election info:
 
