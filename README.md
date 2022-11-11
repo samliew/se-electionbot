@@ -59,7 +59,7 @@ About voting:
 - can I vote in the election
 - how to decide who to vote for
 - how many `<mods\|users>` `<voted\|participated>` (`mod` override is currently disabled)
-- how to vote
+- how do I vote
 - who should I vote for
 
 **Voting stats calculation**
