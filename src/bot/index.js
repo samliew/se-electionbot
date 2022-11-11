@@ -602,16 +602,18 @@ use defaults ${defaultChatNotSet}`
                 const [, casualHandler] = casualRules.find(([g]) => g(preparedMessage)) || [];
                 responseText = await casualHandler?.(config, elections, election, preparedMessage, user, me, room);
 
-                if (config.awaitingConfirmation.has(userId)) {
-                    responseText = await config.awaitingConfirmation.get(userId)?.(
-                        config, elections, election, preparedMessage, user, me, room
-                    ) || "";
-                    config.awaitingConfirmation.delete(userId);
-                }
-                // The rest below are fun mode only
-                else if (config.fun) {
-                    const [, funHandler] = funRules.find(([g]) => g(preparedMessage)) || [];
-                    responseText = await funHandler?.(config, elections, election, preparedMessage, user, me, room);
+                if(!responseText) {
+                    if (config.awaitingConfirmation.has(userId)) {
+                        responseText = await config.awaitingConfirmation.get(userId)?.(
+                            config, elections, election, preparedMessage, user, me, room
+                        ) || "";
+                        config.awaitingConfirmation.delete(userId);
+                    }
+                    // The rest below are fun mode only
+                    else if (config.fun) {
+                        const [, funHandler] = funRules.find(([g]) => g(preparedMessage)) || [];
+                        responseText = await funHandler?.(config, elections, election, preparedMessage, user, me, room);
+                    }    
                 }
 
                 if (responseText) {
