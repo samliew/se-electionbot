@@ -4,13 +4,13 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import { startServer } from "../server/index.js";
 import { logActivity, logResponse } from "../shared/utils/bot.js";
-import { prepareMessageForMatching } from "../shared/utils/chat.js";
+import { isOneboxedMessage, prepareMessageForMatching } from "../shared/utils/chat.js";
 import { getMilliseconds, MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcer, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
-import { announceNewNominees, announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postResultsAnnouncement, postWinnersAnnouncement, rescrapeCommand, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand, updateConfigVarCommand, updateElection } from "./commands/commands.js";
+import { announceNewNominees, announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postResultsAnnouncement, postWinnersAnnouncement, rescrapeCommand, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand, updateConfigVarCommand, updateElection, warnOffTopicCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -24,7 +24,6 @@ import {
 import { HerokuClient } from "./herokuClient.js";
 import { sayHowManyCandidatesAreHere } from "./messages/candidates.js";
 import { casualRules, funRules, unprivilegedRules } from "./messages/index.js";
-import { sayOffTopicMessage } from "./messages/misc.js";
 import { sayCurrentMods, sayHowManyModsAreHere } from "./messages/moderators.js";
 import { sayElectionNotStartedYet } from "./messages/phases.js";
 import { sayCandidateScoreLeaderboard } from "./messages/score.js";
@@ -392,6 +391,7 @@ use defaults ${defaultChatNotSet}`
             "leave room": ["makes bot leave a room (room ID)", leaveRoomCommand, /leave(?:\s+this)?\s+room/, AccessLevel.dev],
             "mute": ["stop bot from responding for N mins", muteCommand, /^(?:mute|timeout|sleep)/, AccessLevel.privileged],
             "mods voted": ["posts how many mods voted", getModsVotedCommand, /^how\s+(?:many|much)(?:\s+mod(?:erator)?s)(?:\s+have)?\s+(?:vote|participate)d/, AccessLevel.privileged],
+            "offtopic": ["warns users about posting off-topic messages", warnOffTopicCommand, /^off-?topic/, AccessLevel.privileged],
             "post meta": ["posts an official Meta announcement", postResultsAnnouncement, /^post meta(?:\s+announcement)?/, AccessLevel.privileged],
             "rescrape": ["runs the rescraper immediately", rescrapeCommand, /^rescrape/, AccessLevel.dev],
             "restart server": ["restarts the server", restartServerCommand, /^restart\s+server/, AccessLevel.dev],
@@ -447,7 +447,7 @@ use defaults ${defaultChatNotSet}`
             config.activityCounter++;
 
             // Ignore messages with oneboxes
-            if (preparedMessage.includes('onebox')) return;
+            if (isOneboxedMessage(encodedMessage)) return;
 
             // Get details of user who triggered the message
             const profile = await getUser(client, userId);
@@ -602,21 +602,18 @@ use defaults ${defaultChatNotSet}`
                 const [, casualHandler] = casualRules.find(([g]) => g(preparedMessage)) || [];
                 responseText = await casualHandler?.(config, elections, election, preparedMessage, user, me, room);
 
-                if (preparedMessage.startsWith('offtopic')) {
-                    responseText = sayOffTopicMessage(election, preparedMessage);
-                    await sendMessage(config, room, responseText);
-                    return; // stop here since we are using a different default response method
-                }
-                else if (config.awaitingConfirmation.has(userId)) {
-                    responseText = await config.awaitingConfirmation.get(userId)?.(
-                        config, elections, election, preparedMessage, user, me, room
-                    ) || "";
-                    config.awaitingConfirmation.delete(userId);
-                }
-                // The rest below are fun mode only
-                else if (config.fun) {
-                    const [, funHandler] = funRules.find(([g]) => g(preparedMessage)) || [];
-                    responseText = await funHandler?.(config, elections, election, preparedMessage, user, me, room);
+                if(!responseText) {
+                    if (config.awaitingConfirmation.has(userId)) {
+                        responseText = await config.awaitingConfirmation.get(userId)?.(
+                            config, elections, election, preparedMessage, user, me, room
+                        ) || "";
+                        config.awaitingConfirmation.delete(userId);
+                    }
+                    // The rest below are fun mode only
+                    else if (config.fun) {
+                        const [, funHandler] = funRules.find(([g]) => g(preparedMessage)) || [];
+                        responseText = await funHandler?.(config, elections, election, preparedMessage, user, me, room);
+                    }    
                 }
 
                 if (responseText) {

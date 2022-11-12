@@ -1,4 +1,5 @@
 import entities from 'html-entities';
+import { JSDOM } from 'jsdom';
 import sanitize from "sanitize-html";
 import { validateDate } from "./dates.js";
 import { normalizeSpaces } from './strings.js';
@@ -98,4 +99,19 @@ export const parseTimestamp = (elem, now) => {
         +min,
         secondsOffset < 0 ? 0 : secondsOffset
     );
+};
+
+/**
+ * @summary checks if a chat message is a onebox message
+ * @param {string} htmlContent HTML content of the message
+ * @returns {boolean}
+ */
+export const isOneboxedMessage = (htmlContent) => {
+    try {
+        const { window: { document } } = new JSDOM(htmlContent)
+        return !!document.querySelector(".onebox");
+    } catch (error) {
+        console.log(`[chat] content is not a valid HTML string:\n${error}`, htmlContent);
+        return false;
+    }
 };

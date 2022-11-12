@@ -1,7 +1,7 @@
 import entities from 'html-entities';
 import { getRandomOops, getRandomOpinionPrefix, RandomArray } from "../random.js";
 import { getUsersCurrentlyInTheRoom, listify, makeURL, pluralize } from "../utils.js";
-import { sayMissingBadges } from "./badges.js";
+import { buildMissingElectionBadgesResponse } from "./badges.js";
 
 /**
  * @typedef {import("@userscripters/stackexchange-api-types").User} ApiUser
@@ -151,14 +151,14 @@ export const sayDiamondAlready = (candidateScore, isModerator, wasModerator) => 
         numMissingBadges
     } = candidateScore;
 
-    const missingReqBadges = numMissingRequiredBadges > 0 ? sayMissingBadges(
+    const missingReqBadges = numMissingRequiredBadges > 0 ? buildMissingElectionBadgesResponse(
         missingRequiredBadgeNames,
-        numMissingRequiredBadges, true, true
+        numMissingRequiredBadges, "required", true
     ) : "";
 
-    const missingBadges = numMissingBadges > 0 ? sayMissingBadges(
+    const missingBadges = numMissingBadges > 0 ? buildMissingElectionBadgesResponse(
         missingBadgeNames,
-        numMissingBadges, true
+        numMissingBadges, "", true
     ) : "";
 
     /**

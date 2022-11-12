@@ -22,23 +22,6 @@ export const sayMissingComments = (_c, _es, election) => {
 };
 
 /**
- * @summary builds an off-topic warning message
- * @param {Election} election
- * @param {string} asked
- * @returns {string}
- */
-export const sayOffTopicMessage = (election, asked) => {
-    const { electionUrl } = election;
-
-    const text = `This room is for discussion about the ${makeURL("election", electionUrl)}. Please try to keep the room on-topic. Thank you!`;
-
-    const [, messageId] = asked.split('offtopic');
-
-    // Reply to specific message if valid message id
-    return +messageId ? `:${messageId} ${text}` : text;
-};
-
-/**
  * @summary builds a response to someone congratulating someone with HB
  * @type {MessageBuilder}
  */

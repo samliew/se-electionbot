@@ -3,7 +3,7 @@ import { has } from "../shared/utils/maps.js";
 import { getBadges, getStackApiKey, getUserInfo } from "./api.js";
 import Election from './election.js';
 import { isAskedForOtherScore } from "./guards.js";
-import { sayMissingBadges } from "./messages/badges.js";
+import { buildMissingElectionBadgesResponse } from "./messages/badges.js";
 import { sayDoesNotMeetRequirements } from "./messages/candidates.js";
 import { sayLacksPrivilege } from "./messages/metadata.js";
 import { sayDiamondAlready } from "./messages/moderators.js";
@@ -189,9 +189,14 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             return sayCalcFailed(isAskingForOtherUser);
         }
 
+        const isChatId = isUsingChatLink || isUsingChatId || !isAskingForOtherUser;
+
         // If not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
-        if (!isStackOverflow && (isUsingChatLink || isUsingChatId || !isAskingForOtherUser)) {
-            userId = await getSiteUserIdFromChatStackExchangeId(config, userId, chatDomain, siteHostname, getStackApiKey(config.apiKeyPool));
+        if (isChatId && !isStackOverflow) {
+            userId = await getSiteUserIdFromChatStackExchangeId(
+                config, userId, chatDomain, siteHostname, 
+                getStackApiKey(config.apiKeyPool)
+            );
 
             // Unable to get user id on election site
             if (userId === null) {
@@ -210,6 +215,8 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             console.error(`Invalid user id: ${userId}`);
             return sayCalcFailed(isAskingForOtherUser);
         }
+
+        console.log(`[score] target user id: ${userId}`);
 
         // parallel scrape + API call speeds up calculation
         const [userBadges, requestedUsers] = await Promise.all([
@@ -261,9 +268,17 @@ export const makeCandidateScoreCalc = (config, modIds) =>
                 } is ${getScoreText(score, maxScore)}.`;
 
             if (numMissingRequiredBadges > 0) {
-                responseText += sayMissingBadges(missingRequiredBadgeNames, numMissingRequiredBadges, false, true);
+                responseText += buildMissingElectionBadgesResponse(
+                    missingRequiredBadgeNames, 
+                    numMissingRequiredBadges, 
+                    "required"
+                );
             } else if (numMissingBadges > 0) {
-                responseText += sayMissingBadges(missingBadgeNames, numMissingBadges, false);
+                responseText += buildMissingElectionBadgesResponse(
+                    missingBadgeNames, 
+                    numMissingBadges, 
+                    ""
+                );
             }
         }
         // Does not meet minimum requirements
@@ -278,7 +293,11 @@ export const makeCandidateScoreCalc = (config, modIds) =>
             responseText = `Your candidate score is ${getScoreText(score, maxScore)}.`;
 
             if (numMissingBadges > 0) {
-                responseText += sayMissingBadges(missingBadgeNames, numMissingBadges, true);
+                responseText += buildMissingElectionBadgesResponse(
+                    missingBadgeNames, 
+                    numMissingBadges, 
+                    "", true
+                );
             }
 
             // Already nominated, and not ended/cancelled

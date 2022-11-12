@@ -981,3 +981,26 @@ export const updateConfigVarCommand = (args) => {
 
     return `Set "${key}" to "${val}" (${valType} type)`;
 };
+
+/**
+ * @summary warns a user for being off-topic
+ * @param {CommandArguments} args command arguments
+ * @returns {Promise<void>}
+ */
+export const warnOffTopicCommand = async (args) => {
+    const { election, config, content, room } = args
+
+    const { electionUrl } = election;
+
+    const suffix = `Please try to keep the room on-topic. Thank you!`;
+
+    const replyId = matchNumber(/off-?topic\s+(\d+)/, content);
+
+    const prefix = replyId ? `:${replyId} ` : "";
+
+    const purpose = `discussion about the ${makeURL("election", electionUrl)}`;
+
+    const message = `${prefix}This room is for ${purpose}. ${suffix}`;
+
+    await sendMessage(config, room, message, { isPrivileged: true });
+}

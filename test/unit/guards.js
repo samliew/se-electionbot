@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import {
-    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhaseDuration, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutLightbulb, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting, isAskedAmIAlive, isAskedForCurrentMods, isAskedForCurrentNominees,
+    isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhaseDuration, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutLightbulb, isAskedAboutMissingBadges, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting, isAskedAmIAlive, isAskedForCurrentMods, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowOrWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWhyNominationRemoved, isAskedWillElectionBeCancelled, isBotMentioned, isHatingTheBot, isLovingTheBot, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot
 } from "../../src/bot/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
@@ -38,10 +38,18 @@ describe('Message Guards', () => {
         "is it starting soon?",
         "Is it started yet?",
         "when is the next phase",
-        "when is nomination ending?",
+        "when is nomination phase ending?",
+        "When does the election phase end?",
+        "When is nomination phase over?",
         "is election starting?",
-        "is nomination ended?"
+        "is nomination phase ended?"
     ];
+
+    const missingBadgesMatches = [
+        "What badges am I missing?",
+        "what badges do I miss?",
+        "Which badges do I not have",
+    ]
 
     const electionEndMatches = [
         "When does the election end?",
@@ -288,6 +296,7 @@ describe('Message Guards', () => {
         "what are the participation badges?",
         "list the moderation badges?",
         "what are editing badges?",
+        "what are the mod badges?",
         "What are the editor badges",
         "List mod badges",
     ];
@@ -697,6 +706,7 @@ describe('Message Guards', () => {
         [isAskedForFullHelp, fullHelpMatches],
         [isAskedForQuestionnaireQuestion, questionnaireQuestionMatches],
         [isAskedAboutElectionPhaseDuration, electionPhaseDurationMatches],
+        [isAskedAboutMissingBadges, missingBadgesMatches],
     ]);
 
     before(() => {

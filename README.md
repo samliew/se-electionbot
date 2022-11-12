@@ -25,6 +25,7 @@ About election badges:
 - what are the participation badges
 - what are the editing badges
 - what are the required badges _(SO-only)_
+- which badges am I missing
 
 Current election info:
 
@@ -57,8 +58,8 @@ About voting:
 
 - can I vote in the election
 - how to decide who to vote for
-- how many `<mods\|users>` `<voted\|participated>`
-- how to vote
+- how many `<mods\|users>` `<voted\|participated>` (`mod` override is currently disabled)
+- how do I vote
 - who should I vote for
 
 **Voting stats calculation**
@@ -105,25 +106,26 @@ ElectionBot info _(requires mention)_:
 
 Moderators and privileged users can also use these commands _(requires mention)_ to help moderate the chat room:
 
-| Command                                                    | Action                                                         |
-| ---------------------------------------------------------- | -------------------------------------------------------------- |
-| alive                                                      | Requests a status report from the bot                          |
-| announce `<[new] nominees\|winners>`                       | Makes the bot announce candidates (all or only new) or winners |
-| commands                                                   | Prints help for all bot commands                               |
-| `<brew\|make>` coffee `[for <username>]`                   | Brew a random cup of coffee                                    |
-| `<die\|shutdown>`                                          | Shuts down the bot in case of an emergency                     |
-| fun `<on\|off>`                                            | Switches fun mode on or off                                    |
-| get throttle                                               | Gets the current throttle value (seconds)                      |
-| get time                                                   | Gets the current UTC timestamp                                 |
-| greet                                                      | Posts a greeting message from the bot                          |
-| ignore `<userId>`                                          | Stops the bot from responding to a user                        |
-| `<mute\|timeout\|sleep>` `[N]`                             | Stops the bot from responding for `N` minutes                  |
-| post meta [pretty]                                         | Posts an official Meta announcement                            |
-| say `<message>`                                            | Makes the bot echo a `message`                                 |
-| set throttle `<N>`                                         | Sets the current throttle value (seconds)                      |
-| `<unmute\|clear timeout>`                                  | Allows bot to respond if previously muted                      |
-| voter report from `<date\|datetime>` to `<date\|datetime>` | Gets a per-day report on user voting                           |
-| whois `<sitename>` mods                                    | Lists current mods of a `sitename`                             |
+| Command                                                    | Action                                                                 |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| alive                                                      | Requests a status report from the bot                                  |
+| announce `<[new] nominees\|winners>`                       | Makes the bot announce candidates (all or only new) or winners         |
+| commands                                                   | Prints help for all bot commands                                       |
+| `<brew\|make>` coffee `[for <username>]`                   | Brew a random cup of coffee                                            |
+| `<die\|shutdown>`                                          | Shuts down the bot in case of an emergency                             |
+| fun `<on\|off>`                                            | Switches fun mode on or off                                            |
+| get throttle                                               | Gets the current throttle value (seconds)                              |
+| get time                                                   | Gets the current UTC timestamp                                         |
+| greet                                                      | Posts a greeting message from the bot                                  |
+| ignore `<userId>`                                          | Stops the bot from responding to a user                                |
+| `<mute\|timeout\|sleep>` `[N]`                             | Stops the bot from responding for `N` minutes                          |
+| offtopic `[messageId]`                                     | Warns users (replies if `messageId` is provided) about being off-topic |
+| post meta [pretty]                                         | Posts an official Meta announcement                                    |
+| say `<message>`                                            | Makes the bot echo a `message`                                         |
+| set throttle `<N>`                                         | Sets the current throttle value (seconds)                              |
+| `<unmute\|clear timeout>`                                  | Allows bot to respond if previously muted                              |
+| voter report from `<date\|datetime>` to `<date\|datetime>` | Gets a per-day report on user voting                                   |
+| whois `<sitename>` mods                                    | Lists current mods of a `sitename`                                     |
 
 ## Developer-only commands
 

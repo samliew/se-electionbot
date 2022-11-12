@@ -66,7 +66,7 @@ export const isAskedIfModsArePaid = (text) => {
  */
 export const isAskedAboutModsOrModPowers = (text) => {
     return someMatch([
-        /^what\s+(?:do(?:es)?|are|is)(?:\s+(?:a|the))?\s+(?:mod(?:erator)?'?s?'?)(?:\s+(?:doe?|responsibilit(?:ie|y)|power)s?)?/i,
+        /^what\s+(?:do(?:es)?|are|is)(?:\s+(?:a|the))?\s+(?:mod(?:erator)?'?s?'?)(?:\s+(?:doe?|responsibilit(?:ie|y)|power)s?)?(?:$|\?)/i,
         /^(?:why\s+)?should\s+i\s+(?:be(?:come)?)(?:\s+a)?\s+(?:mod(?:erator)?)/i,
         /^what(?:\s+are)?(?:\s+(?:a|the))?\s+(?:power|responsibilit(?:ie|y)|power)s?\s+(?:do(?:es)?|of)(?:\s+(?:a|the))?\s+mod(?:erator)?s?(?:\s+ha(?:ve|s))?/i,
     ], text);
@@ -411,6 +411,16 @@ export const isAskedHowToSaveVotes = (text) => {
 };
 
 /**
+ * @summary checks if a message is asking which badges is one missing
+ * @type {MessageGuard}
+ */
+export const isAskedAboutMissingBadges = (text) => {
+    return allMatch([
+        /wh(?:ich|at)\s+badges\s+(?:am|do)\s+I\s+(?:miss(?:ing)?|not\s+have)/i
+    ], text)
+}
+
+/**
  * @summary checks if a message is asking where did the nomination comments go
  * @type {MessageGuard}
  */
@@ -548,8 +558,8 @@ export const isAskedWhatIsElectionStatus = (text) => {
 export const isAskedWhenIsTheNextPhase = (text) => {
     return someMatch([
         /^when(?:'s| is| does) (?:the )?next phase/i,
-        /^when(?:'s| is| does) (?:the )?(?:nomination|election) (?:phase )?(?:start|end)(?:ing)/i,
-        /is (?:it|election|nomination) (?:start|end)(?:ing|ed)\s?(soon|yet)?/i,
+        /^when(?:'s| is| does) (?:the )?(?:nomination|election) (?:phase )(?:start|end|over)(?:ing|ed)?/i,
+        /is (?:it|election|nomination) (?:phase )?(?:start|end)(?:ing|ed)\s?(soon|yet)?/i,
     ], text);
 };
 
