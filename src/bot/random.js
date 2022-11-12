@@ -36,11 +36,16 @@ export const getCandidateOrNominee = () => new RandomArray(`candidate`, `nominee
 export const getRandomModal = () => new RandomArray(`want to`, `have to`, `ought to`, `gotta`, `must`).getRandom();
 export const getRandomPlop = () => new RandomArray(`I'm back.`, `*plop*`, `I am reborn`, `Hello world!`, `mic check`, `testing 1, 2, 3`).getRandom();
 export const getRandomOops = () => new RandomArray(`very funny,`, `oops!`, `hmm...`, `hey,`, `sorry,`).getRandom();
-export const getRandomSecretPrefix = () => new RandomArray(
-    `don't tell anyone I said this, but`,
+export const getRandomOpinionPrefix = () => new RandomArray(
+    `I heard from a friend of a friend that`,
+    `Don't tell anyone I said this, but`,
     `I'm not supposed to say this, but`,
-    `*shhh...*`,
-    `*whispers* I think...`,
+    `In my opinion, I think`,
+    `Let it be known that`,
+    `Some people say`,
+    `I heard that`,
+    `I feel that`,
+    `I think`,
 ).getRandom();
 
 export const getRandomGoodThanks = () => new RandomArray(

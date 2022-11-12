@@ -1,5 +1,5 @@
 import entities from 'html-entities';
-import { getRandomOops, getRandomSecretPrefix, RandomArray } from "../random.js";
+import { getRandomOops, getRandomOpinionPrefix, RandomArray } from "../random.js";
 import { getUsersCurrentlyInTheRoom, listify, makeURL, pluralize } from "../utils.js";
 import { sayMissingBadges } from "./badges.js";
 
@@ -81,7 +81,7 @@ export const sayBestModerator = async (_config, _elections, election, _content, 
     const activeCurrMods = currMods.filter(({ last_access_date }) => last_access_date * 1e3 + dayMs > now);
 
     const { display_name, link } = new RandomArray(...activeCurrMods).getRandom();
-    return `${getRandomSecretPrefix()} ${makeURL(display_name, link)} is the best mod!`;
+    return `${getRandomOpinionPrefix()} ${makeURL(display_name, link)} is the best mod!`;
 };
 
 /**
