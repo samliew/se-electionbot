@@ -35,7 +35,7 @@ import Rescraper from "./rescraper.js";
 import Scheduler from "./scheduler.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
-    fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, onlyBotMessages, roomKeepAlive, searchChat
+    fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, makeURL, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
 
 /**
@@ -431,7 +431,7 @@ use defaults ${defaultChatNotSet}`
 
             const { decodedMessage, preparedMessage } = prepareMessageForMatching(encodedMessage, botName);
 
-            const { eventType, userId: originalUserId, targetUserId } = msg;
+            const { eventType, userId: originalUserId, targetUserId, id: msgId } = msg;
 
             // allows the bot to get messages as if they were coming from another user
             const userId = config.impersonatingUserId || originalUserId;
@@ -602,7 +602,7 @@ use defaults ${defaultChatNotSet}`
                 const [, casualHandler] = casualRules.find(([g]) => g(preparedMessage)) || [];
                 responseText = await casualHandler?.(config, elections, election, preparedMessage, user, me, room);
 
-                if(!responseText) {
+                if (!responseText) {
                     if (config.awaitingConfirmation.has(userId)) {
                         responseText = await config.awaitingConfirmation.get(userId)?.(
                             config, elections, election, preparedMessage, user, me, room
@@ -613,7 +613,7 @@ use defaults ${defaultChatNotSet}`
                     else if (config.fun) {
                         const [, funHandler] = funRules.find(([g]) => g(preparedMessage)) || [];
                         responseText = await funHandler?.(config, elections, election, preparedMessage, user, me, room);
-                    }    
+                    }
                 }
 
                 if (responseText) {
@@ -633,7 +633,8 @@ use defaults ${defaultChatNotSet}`
                 }
                 // Bot mentioned, no response, not fun mode or can't have fun - we might be interested
                 else {
-                    await pingDevelopers("You might want to take a look at this,", config, controlRoom ?? room);
+                    const permalink = msgId ? `https://chat.${config.chatDomain}/transcript/message/${msgId}#message-${msgId}` : '';
+                    await pingDevelopers(`You might want to ${makeURL('take a look at this', permalink)},`, config, controlRoom ?? room);
                 }
             }
 

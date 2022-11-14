@@ -7,7 +7,7 @@ import Cache from "node-cache";
 import sanitize from "sanitize-html";
 import { findLast } from "../shared/utils/arrays.js";
 import { formatAsChatCode, formatAsTranscriptPath, parseTimestamp, validateChatTranscriptURL } from "../shared/utils/chat.js";
-import { addDates, dateToRelativeTime, dateToUtcTimestamp, toEndOfDay, toTadParamFormat } from "../shared/utils/dates.js";
+import { addDates, dateToRelativeTime, dateToUtcTimestamp, toEndOfDay, toTimeAndDateIsoFormat } from "../shared/utils/dates.js";
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { constructUserAgent } from "../shared/utils/fetch.js";
 import { getOrInit, has } from "../shared/utils/maps.js";
@@ -16,7 +16,7 @@ import { numericNullable } from "../shared/utils/objects.js";
 import { capitalize, longestLength } from "../shared/utils/strings.js";
 import { getUserAssociatedAccounts } from "./api.js";
 
-export const link = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
+export const timeAndDateUrl = `https://www.timeanddate.com/worldclock/fixedtime.html?iso=`;
 
 export const apiBase = `https://api.stackexchange.com`;
 
@@ -725,7 +725,7 @@ export const numToString = (num, zeroText = 'zero') => {
  * @returns {string}
  */
 export const linkToRelativeTimestamp = (date) =>
-    `[${dateToRelativeTime(date)}](${link}${toTadParamFormat(date)})`;
+    `[${dateToRelativeTime(date)}](${timeAndDateUrl}${toTimeAndDateIsoFormat(date)})`;
 
 
 /**
@@ -733,7 +733,7 @@ export const linkToRelativeTimestamp = (date) =>
  * @param {Date|number|string} date
  * @returns {string}
  */
-export const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${link}${toTadParamFormat(date)})`;
+export const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${timeAndDateUrl}${toTimeAndDateIsoFormat(date)})`;
 
 export const NO_ACCOUNT_ID = -42;
 
@@ -956,16 +956,23 @@ export const getSiteDefaultChatroom = async (config, siteUrl) => {
 };
 
 /**
- * @summary makes a postable URL of form [label](uri)
+ * @summary makes a postable URL of in markdown format [label](uri)
  * @param {string} label
- * @param {string} uri
+ * @param {string|null} uri
  */
-export const makeURL = (label, uri = "") => {
+export const makeURL = (label, uri = null) => {
 
-    // If second param not provided, assume label is a valid link
-    // Shorten link label: Strip https:// from start, and query params from end
-    if (uri === "") {
+    // Invalid URI
+    if (!uri?.startsWith("http")) {
+
+        // Label does not start with 'http', return label text (no markdown link built)
+        if (!label.startsWith("http")) {
+            return label;
+        }
+
+        // Label starts with 'http', set uri to label
         uri = label;
+        // Shorten link label: Strip https:// from start, and query params from end
         label = label.replace(/^https?:\/\//, "").replace(/\?.*$/, "");
     }
 

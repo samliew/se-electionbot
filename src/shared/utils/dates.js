@@ -177,7 +177,7 @@ export const dateToShortISO8601Timestamp = (date) => validateDate(date).toISOStr
 * @param {DateLike} date
 * @returns {string}
 */
-export const toTadParamFormat = (date) => validateDate(date).toISOString()
+export const toTimeAndDateIsoFormat = (date) => validateDate(date).toISOString()
     .replace(/(-|:|\d\dZ)/gi, '')
     .replace(/\..*$/, '')
     .replace(/ /g, 'T');

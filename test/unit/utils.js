@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { AllowedHosts } from "chatexchange/dist/Client.js";
-import { asyncCacheable, listify, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/bot/utils.js";
+import { asyncCacheable, linkToRelativeTimestamp, linkToUtcTimestamp, listify, makeURL, numToString, parseBoolEnv, parseIds, parseNumEnv, pluralize, stripMarkdown } from "../../src/bot/utils.js";
 import { isOneboxedMessage, validateChatTranscriptURL } from "../../src/shared/utils/chat.js";
-import { addDates, addHours, addMinutes, addSeconds, dateToRelativeTime, getNumDaysInMonth } from "../../src/shared/utils/dates.js";
+import { addDates, addHours, addMinutes, addSeconds, dateToRelativeTime, getNumDaysInMonth, toTimeAndDateIsoFormat } from "../../src/shared/utils/dates.js";
 import { matchNumber } from "../../src/shared/utils/expressions.js";
 import { numericNullable } from "../../src/shared/utils/objects.js";
 
@@ -192,6 +192,49 @@ describe('String-related utils', async function () {
         });
     });
 
+    describe('makeURL', () => {
+
+        it('should correctly make a markdown link', () => {
+            const url = makeURL("link text", "https://example.com/path");
+            expect(url).to.equal("[link text](https://example.com/path)");
+        });
+
+        it('should linkify URL label if URI not provided', () => {
+            const url = makeURL("https://example.com/path?query=string&another=param");
+            expect(url).to.equal("[example.com/path](https://example.com/path?query=string&another=param)");
+        });
+
+        it('should return label if label or URI is not a valid URL', () => {
+            const url = makeURL("some text");
+            expect(url).to.equal("some text");
+
+            const url2 = makeURL("some text", "not a URI");
+            expect(url2).to.equal("some text");
+        });
+    });
+
+    describe('cacheable', () => {
+
+        it('should use cached value if available', async () => {
+            const obj = {
+                curr: 0,
+                get next() {
+                    return Promise.resolve(++this.curr);
+                }
+            };
+
+            const func = (/** @type {typeof obj} */o) => o.next;
+            const cached = asyncCacheable("obj", func);
+
+            expect(await cached(obj)).to.equal(1);
+            expect(await cached(obj)).to.equal(1);
+            expect(obj.curr).to.equal(1);
+        });
+    });
+});
+
+describe('Date-related utils', async function () {
+
     describe(dateToRelativeTime.name, () => {
         it('should be able to convert a date in the future correctly', () => {
             const now = new Date();
@@ -225,23 +268,30 @@ describe('String-related utils', async function () {
         });
     });
 
-    describe('cacheable', () => {
+    describe(toTimeAndDateIsoFormat.name, () => {
 
-        it('should use cached value if available', async () => {
-            const obj = {
-                curr: 0,
-                get next() {
-                    return Promise.resolve(++this.curr);
-                }
-            };
+        it('should generate the correct ISO timestamp', () => {
+            const date = new Date(Date.UTC(2022, 11, 31, 23, 59, 59)); // 11 - Dec
+            const isoDateString = toTimeAndDateIsoFormat(date);
+            expect(isoDateString).to.equal('20221231T235959');
+        });
+    });
 
-            const func = (/** @type {typeof obj} */o) => o.next;
+    describe(linkToRelativeTimestamp.name, () => {
 
-            const cached = asyncCacheable("obj", func);
+        it('should generate a timeanddate link with the correct ISO timestamp', () => {
+            const date = new Date(Date.UTC(2022, 11, 31, 23, 59, 59)); // 11 - Dec
+            const relativeLink = linkToRelativeTimestamp(date);
+            expect(relativeLink).to.include('20221231T235959');
+        });
+    });
 
-            expect(await cached(obj)).to.equal(1);
-            expect(await cached(obj)).to.equal(1);
-            expect(obj.curr).to.equal(1);
+    describe(linkToUtcTimestamp.name, () => {
+
+        it('should generate a timeanddate link with the correct ISO timestamp', () => {
+            const date = new Date(Date.UTC(2022, 11, 31, 23, 59, 59)); // 11 - Dec
+            const timestampLink = linkToUtcTimestamp(date);
+            expect(timestampLink).to.include('20221231T235959');
         });
     });
 

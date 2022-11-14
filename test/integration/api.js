@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import dotenv from "dotenv";
 import { test } from "mocha";
+import BotEnv from "../../src/bot/env.js";
 import { getNumberOfVoters, getStackApiKey } from "../../src/bot/api.js";
 import { getSiteUserIdFromChatStackExchangeId } from "../../src/bot/utils.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -9,7 +10,8 @@ describe("Stack Exchange API integration", function () {
 
     dotenv.config();
 
-    const apiKeyPool = process.env.STACK_API_KEYS?.split('|')?.filter(Boolean) || [];
+    const env = new BotEnv(process.env);
+    const apiKeyPool = env.or("stack_api_keys");
 
     const hasCreds = apiKeyPool.length > 0;
     const testIf = hasCreds ? test : test.skip;
