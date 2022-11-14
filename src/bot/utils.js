@@ -958,22 +958,28 @@ export const getSiteDefaultChatroom = async (config, siteUrl) => {
 /**
  * @summary makes a postable URL of in markdown format [label](uri)
  * @param {string} label
- * @param {string|null} uri
+ * @param {string} uri
  */
-export const makeURL = (label, uri = null) => {
+export const makeURL = (label, uri = "") => {
 
-    // Invalid URI
-    if (!uri?.startsWith("http")) {
+    // Trim URI
+    uri = uri.trim();
 
-        // Label does not start with 'http', return label text (no markdown link built)
-        if (!label.startsWith("http")) {
-            return label;
+    // Invalid or empty URI
+    if (uri === "" || !/^(https?:)?\/\//i.test(uri)) {
+
+        // Label starts with 'https://' or '//', use label as URI
+        if (/^\s*(https?:)?\/\//i.test(label)) {
+            uri = label.trim();
+
+            // Shorten link label: Strip https:// from start, and query params from end
+            label = label.trim().replace(/^(https?:)?\/\//, "").replace(/\?.*$/, "");
         }
 
-        // Label starts with 'http', set uri to label
-        uri = label;
-        // Shorten link label: Strip https:// from start, and query params from end
-        label = label.replace(/^https?:\/\//, "").replace(/\?.*$/, "");
+        // URI still empty, return label text (no markdown link built)
+        else {
+            return label;
+        }
     }
 
     return `[${label}](${uri})`;

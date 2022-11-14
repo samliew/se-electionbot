@@ -1,7 +1,7 @@
 import entities from 'html-entities';
 import MIT from "markdown-it";
 import sanitize from "sanitize-html";
-import { makeURL, markdownify } from "../../bot/utils.js";
+import { markdownify } from "../../bot/utils.js";
 
 /**
  * @summary converts HTML to chat Markdown
@@ -22,7 +22,7 @@ export const htmlToChatMarkdown = (content) => {
     return entities.decode(
         markdownify(
             sanitize(
-                content.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, makeURL("$2", "$1")).trim(),
+                content.replace(/<a href="([^"]+)">([^<]+)<\/a>/g, "[$2]($1)").trim(),
                 { allowedTags: ["b", "br", "i", "strike"] }
             ), {
             "b": "**",

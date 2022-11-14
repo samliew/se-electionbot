@@ -409,6 +409,7 @@ describe('Message Guards', () => {
     ];
 
     const botPronounsMatches = [
+        "What is your pronouns?",
         "What are your pronouns?",
         "what's your pronouns",
         "what are your preferred pronouns?"
