@@ -8,7 +8,7 @@ import { isOneboxedMessage, prepareMessageForMatching } from "../shared/utils/ch
 import { getMilliseconds, MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
-import Announcer, { ELECTION_ENDING_SOON_TEXT } from './announcement.js';
+import Announcer, { ELECTION_ENDING_SOON_TEXT, NOMINATION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
 import { announceNewNominees, announceNominees, announceWinners, brewCoffeeCommand, changeElection, dieCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postResultsAnnouncement, postWinnersAnnouncement, rescrapeCommand, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand, updateConfigVarCommand, updateElection, warnOffTopicCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
@@ -318,6 +318,13 @@ use defaults ${defaultChatNotSet}`
         config.flags.saidElectionEndingSoon = transcriptMessages
             .filter(botMessageFilter)
             .filter(({ message }) => electionEndingSoonExpr.test(message)).length > 0;
+
+        const nominationEndingSoonExpr = new RegExp(NOMINATION_ENDING_SOON_TEXT);
+
+        // Check for saidNominationEndingSoon
+        config.flags.saidNominationEndingSoon = transcriptMessages
+            .filter(botMessageFilter)
+            .filter(({ message }) => nominationEndingSoonExpr.test(message)).length > 0;
 
         // Loops through messages by latest first
         transcriptMessages.reverse();

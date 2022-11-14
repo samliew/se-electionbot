@@ -499,6 +499,7 @@ export class BotConfig {
      * @summary bot configuration flags
      */
     flags = {
+        saidNominationEndingSoon: false,
         saidElectionEndingSoon: false,
         announcedMetaPost: false,
         fun: parseBoolEnv("fun_mode", true),

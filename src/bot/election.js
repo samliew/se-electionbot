@@ -963,7 +963,19 @@ export default class Election {
     }
 
     /**
-     * @summary checks if the election is ending soon
+     * @summary checks if the election/nomination phase is starting soon
+     * @param {number} [thresholdSecs] offset to consider the phase starting from (30 mins by default)
+     * @returns {boolean}
+     */
+    isStarting(thresholdSecs = 30 * 60) {
+        const { phase, dateNomination } = this;
+        const threshold = getMilliseconds(dateNomination) - thresholdSecs * 1e3;
+        const isUnderThreshold = threshold <= Date.now();
+        return phase === null && isUnderThreshold; // instead of using null phase, should we switch to a string like "pending"?
+    }
+
+    /**
+     * @summary checks if the election phase is ending soon
      * @param {number} [thresholdSecs] offset to consider the election ending from (30 mins by default)
      * @returns {boolean}
      */
@@ -972,6 +984,30 @@ export default class Election {
         const threshold = getMilliseconds(dateEnded) - thresholdSecs * 1e3;
         const isUnderThreshold = threshold <= Date.now();
         return phase === 'election' && isUnderThreshold;
+    }
+
+    /**
+     * @summary checks if a phase is ending soon
+     * @param {string} phase election phase
+     * @param {number} [thresholdSecs] offset to consider the phase ending from (30 mins by default)
+     * @returns {boolean}
+     */
+    isPhaseEnding(phase, thresholdSecs = 30 * 60) {
+        const { datePrimary, dateElection, dateEnded, phase: currentPhase } = this;
+        const phaseDate = phase === 'nomination' ? (datePrimary ?? dateElection) :
+            phase === 'primary' ? dateElection :
+                phase === 'election' ? dateEnded :
+                    null;
+
+        // Invalid phase
+        if (!phaseDate) {
+            console.error(`[election] isPhaseEnding() - Invalid phase: ${phase}`);
+            return false;
+        }
+
+        const threshold = getMilliseconds(phaseDate) - thresholdSecs * 1e3;
+        const isUnderThreshold = threshold <= Date.now();
+        return phase === currentPhase && isUnderThreshold;
     }
 
     /**

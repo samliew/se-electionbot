@@ -637,6 +637,31 @@ describe(Election.name, () => {
         });
     });
 
+    describe(Election.prototype.isStarting.name, () => {
+        it('should correctly check if election is ending', () => {
+            const offsetSecs = 5 * 60 * 1000; // 5 minutes
+
+            // Move start date to 5 mins in the future (so it will be starting soon)
+            election.phase = null;
+            election.dateNomination = new Date(Date.now() + offsetSecs).toISOString();
+
+            const isStartedInThePast = election.isStarting();
+            expect(isStartedInThePast).to.be.true;
+
+            // Move start date to 5 mins in the past (so it has already started)
+            election.phase = "nomination";
+            election.dateNomination = new Date(Date.now() - offsetSecs).toISOString();
+
+            const isStartedInTheFuture = election.isStarting();
+            expect(isStartedInTheFuture).to.be.false;
+
+            // If election is in election phase, it's not starting
+            election.phase = "election";
+            const isStartedInElection = election.isStarting();
+            expect(isStartedInElection).to.be.false;
+        });
+    });
+
     describe(Election.prototype.isEnding.name, () => {
         it('should correctly check if election is ending', () => {
             const offsetSecs = 5 * 60 * 1000; // 5 minutes
@@ -658,6 +683,31 @@ describe(Election.name, () => {
             // If election is still in nomination phase, it's not ending
             election.phase = "nomination";
             const isEndedInNomination = election.isEnding();
+            expect(isEndedInNomination).to.be.false;
+        });
+    });
+
+    describe(Election.prototype.isPhaseEnding.name, () => {
+        it('should correctly check if a phase is ending', () => {
+            const offsetSecs = 5 * 60 * 1000; // 5 minutes
+
+            // Move end date to 5 mins in the future (so it will be ending soon)
+            election.phase = "election";
+            election.dateEnded = new Date(Date.now() + offsetSecs).toISOString();
+
+            const isEndedInThePast = election.isPhaseEnding('election');
+            expect(isEndedInThePast).to.be.true;
+
+            // Move end date to 5 mins in the past (so it has already ended)
+            election.phase = "ended";
+            election.dateEnded = new Date(Date.now() - offsetSecs).toISOString();
+
+            const isEndedInTheFuture = election.isPhaseEnding('election');
+            expect(isEndedInTheFuture).to.be.false;
+
+            // If election is still in nomination phase, it's not ending
+            election.phase = "nomination";
+            const isEndedInNomination = election.isPhaseEnding('election');
             expect(isEndedInNomination).to.be.false;
         });
     });

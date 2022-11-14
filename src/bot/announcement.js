@@ -7,6 +7,7 @@ import { sendMessageList } from "./queue.js";
 import { getCandidateOrNominee } from "./random.js";
 import { getFormattedElectionSchedule, listify, makeURL, pluralize } from "./utils.js";
 
+export const NOMINATION_ENDING_SOON_TEXT = "is ending soon. This is a reminder to submit your last-minute nominations.";
 export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chance to cast or modify your votes!";
 
 /**
@@ -185,7 +186,25 @@ export default class Announcer {
     }
 
     /**
-     * @summary announces new nominees arrival
+     * @summary announces near end of the nomination phase
+     * @returns {Promise<boolean>}
+     */
+    async announceNominationEndingSoon() {
+        const { _room, config, _election } = this;
+
+        const { electionUrl } = _election;
+
+        const messages = [
+            `The ${makeURL('nomination', electionUrl)} phase ${NOMINATION_ENDING_SOON_TEXT}`
+        ];
+
+        await sendMessageList(config, _room, messages, { isPrivileged: true });
+
+        return true;
+    }
+
+    /**
+     * @summary announces near end of the election phase
      * @returns {Promise<boolean>}
      */
     async announceElectionEndingSoon() {

@@ -2,8 +2,6 @@ import cron from "node-cron";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { getFalsyKeys } from "../shared/utils/objects.js";
 
-export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chance to cast or modify your votes!";
-
 /**
  * @typedef {import("./config.js").BotConfig} BotConfig
  * @typedef {import("./election.js").default} Election

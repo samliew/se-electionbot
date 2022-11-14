@@ -194,7 +194,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 }
             }
 
-            // The election is ending within the next X seconds (default 15 mins) or less, do once only
+            // The election is ending, do once only
             else if (election.isEnding() && !config.flags.saidElectionEndingSoon) {
 
                 config.flags.saidElectionEndingSoon = true;
@@ -209,11 +209,20 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 }
 
                 const status = await announcement?.announceElectionEndingSoon();
-                console.log(`[rescraper] announced ending soon: ${status}`);
+                console.log(`[rescraper] announce election ending soon: ${status}`);
 
                 if (config.debugOrVerbose) {
                     console.log(`[rescraper] scrape interval reduced to ${config.scrapeIntervalMins}`);
                 }
+            }
+
+            // The nomination phase is ending, do once only
+            else if (election.isPhaseEnding('nomination') && !config.flags.saidNominationEndingSoon) {
+
+                config.flags.saidNominationEndingSoon = true;
+
+                const status = await announcement?.announceNominationEndingSoon();
+                console.log(`[rescraper] announce nomination ending soon: ${status}`);
             }
 
             else if (election.isActive()) {
