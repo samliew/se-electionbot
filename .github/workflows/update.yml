@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: dependencies
-      - name: Using Node 14
-        uses: actions/setup-node@v1
+      - name: Using Node 16
+        uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
       - name: Update npm version to latest
         run: npm install -g npm@latest # stop showing warnings about the lockfile
       - name: Install dependencies
