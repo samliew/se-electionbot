@@ -1,3 +1,5 @@
+import { matchNumber } from "../../shared/utils/expressions.js";
+import { RandomArray } from "../random.js";
 import { makeURL } from "../utils.js";
 
 /**
@@ -27,4 +29,22 @@ export const sayMissingComments = (_c, _es, election) => {
  */
 export const sayHappyBirthday = () => {
     return `Happy birthday!`;
+};
+
+/**
+ * @summary builds a response to a n-sided die roll
+ * @type {MessageBuilder}
+ */
+export const getRandomSidedDieRoll = (config, _elections, election, _text) => {
+    const num = matchNumber(/(\d+)/, _text);
+
+    if (!num) {
+        return `I don't understand. Please specify a number of sides, e.g.: "roll a d20" or "roll a 20-sided die".`;
+    }
+
+    const arr = new RandomArray(
+        Array.from({ length: num }, (_, i) => i + 1)
+    ).getRandom();
+
+    return `*${arr}*`;
 };

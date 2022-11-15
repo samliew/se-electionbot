@@ -795,6 +795,17 @@ export const isAskedToRollDie = (text) => {
 };
 
 /**
+ * @summary checks if a message is about rolling a die
+ * @type {MessageGuard}
+ */
+export const isAskedToRollSidedDie = (text) => {
+    return someMatch([
+        /^roll\s+a\s+(\d+)[-\s+]sided\s+dic?e/i,
+        /^roll\s+a\s+d-?(\d+)/i
+    ], text);
+};
+
+/**
  * @summary checks if a message is about flipping a coin
  * @type {MessageGuard}
  */

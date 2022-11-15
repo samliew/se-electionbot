@@ -267,21 +267,21 @@ export const getRandomThanks = () => new RandomArray(
 ).getRandom();
 
 export const getRandomDieRoll = () => new RandomArray(
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
+    "*1*",
+    "*2*",
+    "*3*",
+    "*4*",
+    "*5*",
+    "*6*",
 ).getRandom();
 
 export const getRandomCoinToss = () => new RandomArray(
-    "heads",
-    "tails",
+    "*heads*",
+    "*tails*",
 ).getRandom();
 
 export const getRandomRockPaperScissors = () => new RandomArray(
-    "rock",
-    "paper",
-    "scissors",
+    "*rock*",
+    "*paper*",
+    "*scissors*",
 ).getRandom();
