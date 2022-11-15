@@ -78,9 +78,9 @@ export const isAskedAboutModsOrModPowers = (text) => {
  */
 export const isAskedAboutVoting = (text) => {
     return someMatch([
-        /^what\s+is\s+voting/i,
-        /^(?:where|how)\s+(?:do(?:es)?|can)\s+(?:i|one)\s+vote/i,
-    ], text);
+        /^what(?:'s|\s+is)\s+voting/i,
+        /^(?:where|how)\b.*\b(?:i|we|one|to)\b.*\bvote(?:$|\?)/i,
+    ], text) && !text.includes('save');
 };
 
 /**
@@ -382,14 +382,12 @@ export const isAskedAboutBadgesOfType = (text) => {
 };
 
 /**
- * @summary checks if a message is asking how to vote or who to vote for
+ * @summary checks if a message is asking who to vote for
  * @type {MessageGuard}
  */
-export const isAskedHowOrWhoToVote = (text) => {
+export const isAskedWhoToVote = (text) => {
     return someMatch([
-        /^(?:whom?|how)\s+(?:should(?:n't|\s+not)?\s+i|to)\s+(?:choose|pick|decide|determine|vote\s+for)/i,
-        /^how\s+do(?:es)?\s+(?:i|one)\s+vote/i,
-        /^how\s+do(?:es)?\s+(?:the\s+)?voting\s+(?:process)?work/i,
+        /^(?:whom?|how|which)\s+(?:should(?:n't|\s+not)?\s+i|to)\s+(?:choose|pick|decide|determine|vote\s+for)/i,
     ], text);
 };
 

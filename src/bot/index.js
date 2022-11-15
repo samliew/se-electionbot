@@ -19,7 +19,7 @@ import { getSiteElections } from './election.js';
 import { addAnnouncedNomineesFromChat, addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, findWithdrawalAnnouncementsInChat } from "./elections/chat.js";
 import BotEnv from "./env.js";
 import {
-    isAskedForCurrentMods, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowOrWhoToVote, isBotMentioned
+    isAskedForCurrentMods, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedWhoToVote, isBotMentioned
 } from "./guards.js";
 import { HerokuClient } from "./herokuClient.js";
 import { sayHowManyCandidatesAreHere } from "./messages/candidates.js";
@@ -582,8 +582,7 @@ use defaults ${defaultChatNotSet}`
             else if (isAskedForScoreLeaderboard(preparedMessage)) {
                 responseText = sayCandidateScoreLeaderboard(election.apiSlug);
             }
-            // Could conflict with isAskedAboutVoting below - should not match "how to vote" - min length required
-            else if (isAskedHowOrWhoToVote(preparedMessage)) {
+            else if (isAskedWhoToVote(preparedMessage)) {
                 if (election.phase == null) responseText = await sayElectionNotStartedYet(config, elections, election, preparedMessage, user, me, room);
                 else responseText = await sayInformedDecision(config, elections, election, preparedMessage, user, me, room);
             }

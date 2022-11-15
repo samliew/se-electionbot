@@ -69,7 +69,6 @@ export const unprivilegedRules = [
     [isAskedAboutModsOrModPowers, sayWhatModsDo],
     [isAskedAboutRequiredBadges, sayRequiredBadges],
     [isAskedForScoreFormula, sayCandidateScoreFormula],
-    [isAskedHowToSaveVotes, sayHowToSaveVotes],
     [isAskedIfModsArePaid, sayAreModsPaid],
     [isAskedAboutMissingComments, sayMissingComments],
     [isAskedAboutUsernameDiamond, sayCanEditDiamond],

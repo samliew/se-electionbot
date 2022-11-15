@@ -30,7 +30,7 @@ export const sayAboutVoting = (_c, _es, election, ...rest) => {
     const phaseMap = {
         cancelled: statVoters,
         ended: `The ${makeURL("election", electionUrl)} has ended. You can no longer vote.`,
-        election: `If you have at least ${repVote} reputation, you can rank the candidates in your preferred order in ${makeURL("the election", `${electionUrl}?tab=election`)}. ${decision}`,
+        election: `If you have at least ${repVote} reputation, go to the ${makeURL("election page", `${electionUrl}?tab=election`)}. In the right sidebar you can drag and drop the candidates in your preferred order. ${decision}`,
         nomination: `You cannot vote yet. In the meantime you can read and comment on the ${makeURL("candidates' nominations", `${electionUrl}?tab=nomination`)} as well as their answers to the questionnaire to find out more about their moderation style.${comeBackFinalPhaseText}`,
         primary: `If you have at least ${repVote} reputation, you can freely ${makeURL("vote for the candidates", `${electionUrl}?tab=primary`)}. ${decision}${comeBackFinalPhaseText}`
     };
@@ -43,7 +43,7 @@ export const sayAboutVoting = (_c, _es, election, ...rest) => {
  * @type {MessageBuilder}
  */
 export const sayHowToSaveVotes = () => {
-    return `Your ranking of the candidates is saved automatically as soon changes are made to the sort order. You can amend your vote/ballot freely until the end of the election.`;
+    return `Your ranking of the candidates is saved automatically within five seconds when changes are made to the sort order. You can amend your vote/ballot freely until the end of the election.`;
 };
 
 /**
@@ -193,10 +193,28 @@ export const sayIfOneHasVoted = async (config, _elections, election, _text, user
 };
 
 /**
- * @summary builds a response to who to vote for query
+ * @summary builds a response to who to vote for
  * @type {MessageBuilder}
  */
 export const sayInformedDecision = (_c, _es, election) => {
+    const { questionnaireURL } = election;
+
+    const prefix = `If you want to make an informed decision on who to vote for`;
+
+    const heuristics = [
+        `read the ${getCandidateOrNominee()}s' answers to the ${makeURL("questionnaire", questionnaireURL)}`,
+        `look at examples of their participation on Meta`,
+        `how they conduct themselves`
+    ];
+
+    return `${prefix}, you should ${listify(...heuristics)}.`;
+};
+
+/**
+ * @summary builds a response to how to vote
+ * @type {MessageBuilder}
+ */
+export const sayHowToVote = (_c, _es, election) => {
     const { questionnaireURL } = election;
 
     const prefix = `If you want to make an informed decision on who to vote for`;
