@@ -23,7 +23,7 @@ export const sayCurrentWinners = (_c, _es, election, ...rest) => {
     const { phase, winners, siteUrl, electionUrl } = election;
 
     const phaseMap = {
-        "default": `The election is not over yet. Stay tuned for the winners!`,
+        "default": `The election is not over yet. Stay tuned for the winners...`,
         "null": sayElectionNotStartedYet(_c, _es, election, ...rest),
         "ended": `The winners can be found on the ${makeURL("election page", electionUrl)}.`
     };

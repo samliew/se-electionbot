@@ -724,8 +724,7 @@ export const numToString = (num, zeroText = 'zero') => {
  * @param {Date|number|string} date
  * @returns {string}
  */
-export const linkToRelativeTimestamp = (date) =>
-    `[${dateToRelativeTime(date)}](${timeAndDateUrl}${toTimeAndDateIsoFormat(date)})`;
+export const linkToRelativeTimestamp = (date) => makeURL(dateToRelativeTime(date), timeAndDateUrl + toTimeAndDateIsoFormat(date));
 
 
 /**
@@ -733,7 +732,7 @@ export const linkToRelativeTimestamp = (date) =>
  * @param {Date|number|string} date
  * @returns {string}
  */
-export const linkToUtcTimestamp = (date) => `[${dateToUtcTimestamp(date)}](${timeAndDateUrl}${toTimeAndDateIsoFormat(date)})`;
+export const linkToUtcTimestamp = (date) => makeURL(dateToUtcTimestamp(date), timeAndDateUrl + toTimeAndDateIsoFormat(date));
 
 export const NO_ACCOUNT_ID = -42;
 

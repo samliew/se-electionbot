@@ -749,7 +749,7 @@ export const isAskedWillElectionBeCancelled = (text) => {
  */
 export const isAskedHowManyVisitedElection = (text) => {
     return someMatch([
-        /^how\s+many(?:\s+users)?(?:\s+have)?\s+visited(?:\s+th[ei]s?)?\s+election(?:\s+page)?(?:\?\!?|$)/i
+        /^how\s+many(?:\s+users)?(?:\s+ha(?:ve|s))?\s+(?:visited|seen)(?:\s+th[ei]s?)?\s+election(?:\s+page)?(?:\?\!?|$)/i
     ], text);
 };
 

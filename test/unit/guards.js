@@ -324,8 +324,10 @@ describe('Message Guards', () => {
     ];
 
     const howManyVisitedMatches = [
+        "How many has seen the election",
         "How many visited the election?",
         "how many users have visited this election?",
+        "how many users seen the election?",
         "How many visited election page?"
     ];
 

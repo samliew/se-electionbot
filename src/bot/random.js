@@ -1,3 +1,5 @@
+import { randomInt } from 'crypto';
+
 /**
  * @template {unknown} T
  */
@@ -14,8 +16,9 @@ export class RandomArray extends Array {
      * @returns {T}
      */
     getRandom() {
-        const rnd = Math.floor(Math.random() * this.length);
-        return this[rnd];
+        // Ensure that the length is < 248. See crypto.randomInt documentation
+        const max = this.length >= 248 ? 247 : this.length;
+        return this[randomInt(0, max)];
     }
 
     /**
@@ -33,25 +36,52 @@ export class RandomArray extends Array {
 }
 
 export const getCandidateOrNominee = () => new RandomArray(`candidate`, `nominee`).getRandom();
-export const getRandomModal = () => new RandomArray(`want to`, `have to`, `ought to`, `gotta`, `must`).getRandom();
-export const getRandomPlop = () => new RandomArray(`I'm back.`, `*plop*`, `I am reborn`, `Hello world!`, `mic check`, `testing 1, 2, 3`).getRandom();
-export const getRandomOops = () => new RandomArray(`very funny,`, `oops!`, `hmm...`, `hey,`, `sorry,`).getRandom();
+export const getRandomPunctuation = () => new RandomArray(`.`, `...`, `!`, `!!!`).getRandom();
+export const getRandomModal = () => new RandomArray(
+    `must`,
+    `gotta`,
+    `want to`,
+    `have to`,
+    `ought to`,
+).getRandom();
+export const getRandomPlop = () => new RandomArray(
+    `*plop*`,
+    `I'm back.`,
+    `I am reborn`,
+    `Hello world!`,
+    `testing 1, 2, 3.`,
+).getRandom();
+export const getRandomOops = () => new RandomArray(
+    `oops!`,
+    `hmm...`,
+    `sorry,`,
+    `nice try...`,
+    `very funny,`,
+).getRandom();
 export const getRandomOpinionPrefix = () => new RandomArray(
-    `I heard from a friend of a friend that`,
-    `Don't tell anyone I said this, but`,
-    `I'm not supposed to say this, but`,
-    `In my opinion, I think`,
-    `Let it be known that`,
-    `Some people say`,
-    `I heard that`,
     `I feel that`,
-    `I think`,
+    `I heard that`,
+    `Some people say`,
+    `Research shows that`,
+    `Based on a die roll,`,
+    `Based on a coin toss,`,
+    `I don't know, perhaps`,
+    `In my opinion, I think`,
+    `Math.random() says that`,
+    `My calculations show that`,
+    `I heard from the grapevine that`,
+    `I'm not supposed to say this, but`,
+    `Don't tell anyone I said this, but`,
+    `Based on a random number generator,`,
+    `My programming only allows me to say`,
 ).getRandom();
 
 export const getRandomGoodThanks = () => new RandomArray(
+    `Gee, thanks.`,
     `I know, right?`,
     `You're welcome.`,
-    `Thanks! You're awesome!`,
+    `Thanks, you're awesome!`,
+    `I share your sentiments too.`,
     `I'm only as good as the one who made me.`,
 ).getRandom();
 
@@ -60,12 +90,12 @@ export const getRandomNegative = () => new RandomArray(
     `I want to be alone.`,
     `Well, nobody's perfect.`,
     `You can't handle the truth!`,
+    `I share your sentiments too.`,
     `So you want to play this game?`,
     `Am I more than you bargained for yet?`,
     `Am I supposed to feel bad about that?`,
     `Frankly, my dear, I don't give a damn.`,
     `What we've got here is a small misunderstanding.`,
-    `I'm only human after all, don't put the blame on me.`,
     `Love me or hate me, I swear it won't make or break me.`,
 ).getRandom();
 
@@ -138,55 +168,60 @@ export const getRandomJonSkeetJoke = () => new RandomArray(
 ).getRandom();
 
 export const getRandomInterjectionVerb = () => new RandomArray(
-    "interject", "interrupt", "interfere"
+    "interject",
+    "interrupt",
+    "interfere",
 ).getRandom();
 
 export const getRandomAnnouncement = () => new RandomArray(
-    "Public service announcement: ",
-    `I'm sorry to ${getRandomInterjectionVerb()}, but... `,
-    "A quick message from my sponsors: ",
-    "Welcome to the election chat room! ",
-    "Hello and welcome to the election night special! ",
-    "Interrupting to bring you this important message: ",
+    "Public service announcement:",
+    "A quick message from my sponsors:",
+    "Welcome to the election chat room!",
+    "Hello and welcome to the election night special!",
+    "Interrupting to bring you this important message:",
+    `I'm sorry to ${getRandomInterjectionVerb()}, but...`,
 ).getRandom();
 
 export const getRandomNominationSynonym = () => new RandomArray(
-    "candidature",
     "candidacy",
-    "nomination"
+    "nomination",
+    "candidature",
 ).getRandom();
 
 export const getRandomNow = () => new RandomArray(
     "underway",
+    "in progress",
     "happening at the moment",
-    "in progress"
 ).getRandom();
 
 export const getRandomFAQ = () => new RandomArray(
+    "common questions",
     "commonly-asked questions",
     "frequently-asked questions",
-    "common questions"
 ).getRandom();
 
 export const getRandomCurrently = () => new RandomArray(
-    "currently", "presently", "at the moment"
+    "right now",
+    "currently",
+    "presently",
+    "at the moment",
 ).getRandom();
 
 export const getRandomAlive = () => new RandomArray(
+    "I am, are you?",
     `Hello, it's me.`,
     `No. I'm not here.`,
     `I'm here, aren't I?`,
+    "I am not quite sure",
     `I'm on the interwebs`,
     `I'm here and everywhere`,
-    "I am, are you?",
     "Alive or not, what is the difference?",
-    "I am not quite sure"
 ).getRandom();
 
 export const getRandomSoFar = () => new RandomArray(
     "so far",
+    "to date",
     "thus far",
-    "to date"
 ).getRandom();
 
 /**
@@ -195,10 +230,10 @@ export const getRandomSoFar = () => new RandomArray(
 export const getRandomStatus = (extras = []) => new RandomArray(
     ...extras,
     "Splendid, sir!",
-    "I am doing fine, thank you.",
     "Never felt better!",
+    "Doing fine, and you?",
     "Same old, same old...",
-    "Doing fine, and you?"
+    "I am doing fine, thank you.",
 ).getRandom();
 
 export const getRandomWhoAmI = () => new RandomArray(
@@ -211,12 +246,12 @@ export const getRandomWhoAmI = () => new RandomArray(
 ).getRandom();
 
 export const getRandomWhyAmI = () => new RandomArray(
+    "42",
     "waffles",
     "because.",
     "Why is anyone?",
-    "Exterminate! Exterminate!",
     "And why are you?",
-    "42"
+    "Exterminate! Exterminate!",
 ).getRandom();
 
 export const getRandomThanks = () => new RandomArray(

@@ -1,4 +1,5 @@
 import entities from 'html-entities';
+import { MS_IN_DAY } from '../../shared/utils/dates.js';
 import { getRandomOops, getRandomOpinionPrefix, RandomArray } from "../random.js";
 import { getUsersCurrentlyInTheRoom, listify, makeURL, pluralize } from "../utils.js";
 import { buildMissingElectionBadgesResponse } from "./badges.js";
@@ -236,7 +237,7 @@ export const sayWhatModsDo = (_c, _es, election) => {
 
     const modsAre = `essential to keeping the site clean, fair, and friendly by enforcing the ${makeURL("Code of Conduct", `${siteUrl}/conduct`)}`;
 
-    const modsDo = `They are volunteers who are granted [additional privileges](https://meta.stackexchange.com/q/75189) to handle situations regular users can't, like ${modActivities.join(", ")}`;
+    const modsDo = `They are volunteers who are granted ${makeURL("additional privileges", "https://meta.stackexchange.com/q/75189")} to handle situations regular users can't, like ${modActivities.join(", ")}`;
 
     return `${makeURL("Elected ♦ moderators", `${siteUrl}/help/site-moderators`)} are ${modsAre}. ${modsDo}.`;
 };

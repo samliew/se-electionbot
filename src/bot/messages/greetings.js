@@ -26,7 +26,7 @@ import { sayCommonlyAskedQuestions } from "./metadata.js";
  * @param {string} [greeting] greeting prefix
  * @returns {Promise<string>}
  */
-export const sayGreeting = async (config, elections, election, botUser, room, greeting = 'Welcome to the election chat room! ') => {
+export const sayGreeting = async (config, elections, election, botUser, room, greeting = 'Welcome to the election chat room!') => {
     const { nominees, electionUrl, phase, dateElection, apiSlug } = election;
 
     // Badge that is awarded for voting in elections
@@ -70,7 +70,7 @@ export const sayGreeting = async (config, elections, election, botUser, room, gr
 
     const common = await sayCommonlyAskedQuestions(config, elections, election, "", user, botUser, room);
 
-    return `${greeting}${phaseText} ${common}.`;
+    return `${greeting} ${phaseText} ${common}.`;
 };
 
 /**
