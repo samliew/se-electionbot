@@ -1341,7 +1341,7 @@ export default class Election {
                     // Get election stats
                     this.statVoters = $(statsElem).contents().map((_i, { data, type }) =>
                         type === 'text' ? data?.trim() : ""
-                    ).get().join(' ').trim();
+                    ).get().join(' ').trim().replace(/ called up.*$/, '');
 
                     // Get num of eligible voters, active voters, visited voters, and voters
                     const [numEligible, numActive, numVisited, numVoted] = this.statVoters.replace(/,/g, '').split(/\s+/).filter(Number);
