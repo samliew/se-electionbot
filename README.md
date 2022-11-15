@@ -117,7 +117,7 @@ Moderators and privileged users can also use these commands _(requires mention)_
 | announce `<[new] nominees\|winners>`                       | Makes the bot announce candidates (all or only new) or winners         |
 | commands                                                   | Prints help for all bot commands                                       |
 | `<brew\|make>` coffee `[for <username>]`                   | Brew a random cup of coffee                                            |
-| `<die\|shutdown>`                                          | Shuts down the bot in case of an emergency                             |
+| `<shutdown\|terminate>`                                    | Shuts down the bot in case of an emergency                             |
 | fun `<on\|off>`                                            | Switches fun mode on or off                                            |
 | get throttle                                               | Gets the current throttle value (seconds)                              |
 | get time                                                   | Gets the current UTC timestamp                                         |

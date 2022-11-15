@@ -605,7 +605,7 @@ export const leaveRoomCommand = async (args) => {
  * @param {Pick<CommandArguments, "room">} args command arguments
  * @returns {string}
  */
-export const dieCommand = (args) => {
+export const shutdownCommand = (args) => {
     wait(3).then(() => {
         args.room.leave();
         process.exit(0);
