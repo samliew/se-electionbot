@@ -790,7 +790,7 @@ export const isAskedIfModsHaveToRun = (text) => {
  */
 export const isAskedToRollDie = (text) => {
     return someMatch([
-        /^roll\s+a\s+dic?e/i
+        /^roll.*?(?:a|the)\s+dic?e/i
     ], text);
 };
 
@@ -800,8 +800,8 @@ export const isAskedToRollDie = (text) => {
  */
 export const isAskedToRollSidedDie = (text) => {
     return someMatch([
-        /^roll\s+a\s+(\d+)[-\s+]sided\s+dic?e/i,
-        /^roll\s+a\s+d-?(\d+)/i
+        /^roll.*?(\d+)[-\s+]sided\s+dic?e/i,
+        /^roll.*?d-?(\d+)/i
     ], text);
 };
 
@@ -811,7 +811,7 @@ export const isAskedToRollSidedDie = (text) => {
  */
 export const isAskedToFlipCoin = (text) => {
     return someMatch([
-        /^(?:flip|toss)\s+a\s+coin/i
+        /^(?:flip|toss).*?(?:a|the)\s+coin/i
     ], text);
 };
 
