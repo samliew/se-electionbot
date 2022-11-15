@@ -38,8 +38,8 @@ export const sayHappyBirthday = () => {
 export const getRandomSidedDieRoll = (config, _elections, election, _text) => {
     const num = matchNumber(/(\d+)/, _text);
 
-    if (!num) {
-        return `I don't understand. Please specify a number of sides, e.g.: "roll a d20" or "roll a 20-sided die".`;
+    if (!num || num <= 0 || num > 1000) {
+        return `I don't understand. Please specify a valid number of sides, e.g.: "roll a d20" or "roll a 20-sided die".`;
     }
 
     const arr = new RandomArray(
