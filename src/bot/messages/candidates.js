@@ -31,10 +31,9 @@ export const sayBestCandidate = (_config, _elections, election) => {
     const everyoneIsGreat = `All ${candidateOrNominee}s are great!`;
 
     const responses = new RandomArray(...[
-        `I do not meddle in elections!`,
-        `The best candidate hasn't nominated yet! Or have they?`,
         everyoneIsGreat,
         `Define "best"`,
+        `I do not meddle in elections!`,
         ""
     ]);
 

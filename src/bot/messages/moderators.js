@@ -66,20 +66,24 @@ export const sayAreModsPaid = (_c, _es, election) => {
  * @returns {Promise<string>}
  */
 export const sayBestModerator = async (_config, _elections, election, _content, user) => {
+    const { fun } = _config.flags;
     const { moderators } = election;
     const { name } = user;
+
+    // If there are no mods
+    if (!moderators.size) {
+        return `${getRandomOops()} there are no moderators on this site.`;
+    }
 
     const currMods = [...moderators.values()].filter(({ former, is_employee }) => !former && !is_employee);
     const currModNames = currMods.map(({ display_name }) => display_name);
 
-    if (user.isMod() && currModNames.includes(name)) {
+    if (fun && user.isMod() && currModNames.includes(name)) {
         return `${name} is the best mod!!!`;
     }
 
-    const now = Date.now();
-    const dayMs = 864e5;
-
-    const activeCurrMods = currMods.filter(({ last_access_date }) => last_access_date * 1e3 + dayMs > now);
+    // Possible to have no active mods on smaller sites, or threshold too small - default to all mods
+    const activeCurrMods = currMods.filter(({ last_access_date }) => last_access_date * 1e3 + MS_IN_DAY > Date.now()) ?? currMods;
 
     const { display_name, link } = new RandomArray(...activeCurrMods).getRandom();
     return `${getRandomOpinionPrefix()} ${makeURL(display_name, link)} is the best mod!`;
