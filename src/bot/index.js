@@ -419,7 +419,7 @@ use defaults ${defaultChatNotSet}`
             timetravel: ["delorean", "88 miles"],
             mute: ["timeout", "sleep"],
             commands: ["usage"],
-            die: ["shutdown"],
+            shutdown: ["terminate"],
             greet: ["welcome"],
             whois: [
                 "list moderators",
