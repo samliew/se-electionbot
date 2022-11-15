@@ -43,7 +43,7 @@ export const getRandomSidedDieRoll = (config, _elections, election, _text) => {
     }
 
     const arr = new RandomArray(
-        Array.from({ length: num }, (_, i) => i + 1)
+        ...Array.from({ length: num }, (_, i) => i + 1)
     ).getRandom();
 
     return `*${arr}*`;
