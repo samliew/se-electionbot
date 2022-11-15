@@ -3,7 +3,7 @@
  * @typedef {[m:(c:string) => boolean, b:MessageBuilder]} MessageRule
  */
 
-import { isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhaseDuration, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutLightbulb, isAskedAboutMissingBadges, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting, isAskedAmIAlive, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp, isAskedForHelp, isAskedForNominatingInfo, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedToFlipCoin, isAskedToRollDie, isAskedToRollSidedDie, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWhyNominationRemoved, isAskedWillElectionBeCancelled, isHatingTheBot, isLovingTheBot, isPlayingRockPaperScissors, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot } from "../guards.js";
+import { isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhaseDuration, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutLightbulb, isAskedAboutMissingBadges, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting, isAskedAmIAlive, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp, isAskedForHelp, isAskedForNominatingInfo, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowManyVotedPrevious, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedToFlipCoin, isAskedToRollDie, isAskedToRollSidedDie, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWhyNominationRemoved, isAskedWillElectionBeCancelled, isHatingTheBot, isLovingTheBot, isPlayingRockPaperScissors, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot } from "../guards.js";
 import { getRandomAlive, getRandomCoinToss, getRandomDieRoll, getRandomGoodThanks, getRandomNegative, getRandomRockPaperScissors, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "../random.js";
 import { sayBadgesByType, sayMissingBadges, sayRequiredBadges } from "./badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowToNominate, sayHowToNominateOthers, sayIfModsHaveToRun, sayWhatModsAreRunning, sayWhyNominationRemoved, sayWithdrawnNominations } from "./candidates.js";
@@ -16,7 +16,7 @@ import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElec
 import { sayQuestionnaireQuestion } from "./questionnaire.js";
 import { sayCandidateScoreFormula } from "./score.js";
 import { sayAboutBallotFile, sayAboutSTV } from "./stv.js";
-import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowToSaveVotes, sayIfOneCanVote, sayIfOneHasVoted } from "./voting.js";
+import { sayAboutVoting, sayAlreadyVoted, sayHowManyAreEligibleToVote, sayHowToSaveVotes, sayIfOneCanVote, sayIfOneHasVoted, sayVotedPrevious } from "./voting.js";
 
 /**
  * @summary message rules for unprivileged queries
@@ -73,6 +73,7 @@ export const unprivilegedRules = [
     [isAskedAboutMissingComments, sayMissingComments],
     [isAskedAboutUsernameDiamond, sayCanEditDiamond],
     [isAskedHowManyVoted, sayAlreadyVoted],
+    [isAskedHowManyVotedPrevious, sayVotedPrevious],
     [isAskedAboutBadgesOfType, sayBadgesByType],
     [isAskedForElectionSchedule, sayElectionSchedule],
     [isAskedAboutMissingBadges, sayMissingBadges],

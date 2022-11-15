@@ -79,7 +79,8 @@ export const sayBestModerator = async (_config, _elections, election, _content, 
     const currModNames = currMods.map(({ display_name }) => display_name);
 
     if (fun && user.isMod() && currModNames.includes(name)) {
-        return `${name} is the best mod!!!`;
+        const bestOrWorst = new RandomArray("best", "worst").getRandom(); // chance to be unlucky
+        return `${name.split(' ').shift()} is the ${bestOrWorst} mod${bestOrWorst === "best" ? "!!!" : " :P"}`;
     }
 
     // Possible to have no active mods on smaller sites, or threshold too small - default to all mods

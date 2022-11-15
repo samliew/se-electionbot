@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhaseDuration, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutLightbulb, isAskedAboutMissingBadges, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting, isAskedAmIAlive, isAskedForCurrentMods, isAskedForCurrentNominees,
-    isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedToFlipCoin, isAskedToRollDie, isAskedToRollSidedDie, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWhyNominationRemoved, isAskedWillElectionBeCancelled, isBotMentioned, isHatingTheBot, isLovingTheBot, isPlayingRockPaperScissors, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot
+    isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedToFlipCoin, isAskedToRollDie, isAskedToRollSidedDie, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWhyNominationRemoved, isAskedWillElectionBeCancelled, isBotMentioned, isHatingTheBot, isLovingTheBot, isPlayingRockPaperScissors, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot, isAskedHowManyVotedPrevious
 } from "../../src/bot/guards.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
@@ -21,7 +21,7 @@ describe('Message Guards', () => {
     const pastElectionResultsMatches = [
         "What are the results of election #2?",
         "what were the results of election number 2",
-        "What are the election #2 results?"
+        "What are the election #2 results?",
     ];
 
     const electionStatusMatches = [
@@ -29,7 +29,7 @@ describe('Message Guards', () => {
         "What is the election status?",
         "What is the progress of election?",
         "how is election progressing?",
-        "what is election state?"
+        "what is election state?",
     ];
 
     const nextPhaseMatches = [
@@ -42,7 +42,7 @@ describe('Message Guards', () => {
         "When does the election phase end?",
         "When is nomination phase over?",
         "is election starting?",
-        "is nomination phase ended?"
+        "is nomination phase ended?",
     ];
 
     const missingBadgesMatches = [
@@ -54,7 +54,7 @@ describe('Message Guards', () => {
     const electionEndMatches = [
         "When does the election end?",
         "when the election ends?",
-        "when it ends?"
+        "when it ends?",
     ];
 
     const listPhasesMatches = [
@@ -62,7 +62,7 @@ describe('Message Guards', () => {
         "What are the phases?",
         "what are election phases",
         "What are the election's phases?",
-        "list election phases"
+        "list election phases",
     ];
 
     const whatIsElectionMatches = [
@@ -70,21 +70,21 @@ describe('Message Guards', () => {
         "what's an election?",
         "what is election",
         "How does election work",
-        "How do elections work?"
+        "How do elections work?",
     ];
 
     const whyAreElectionsCancelledMatches = [
         "Why are elections cancelled?",
         "why would an election be cancelled?!",
         "Why are some elections cancelled",
-        "Why are elections canceled" // intentional typo
+        "Why are elections canceled", // intentional typo
     ];
 
     const willElectionBeCancelledMatches = [
         "Will the election be cancelled?",
         "would election be canceled?!", // intentional typo
         "Is the election going to be cancelled?",
-        "Would this election be cancelled?"
+        "Would this election be cancelled?",
     ];
 
     const electionTypeMatches = [
@@ -99,13 +99,13 @@ describe('Message Guards', () => {
     const howManyNomineesMatches = [
         "how many candidates are here?",
         "are there any nominees in the room?",
-        "how many nominees are in the room?"
+        "how many nominees are in the room?",
     ];
 
     const howManyModsMatches = [
         "How many mods are here?",
         "how many moderators are in the room?",
-        "How many mods are in this room"
+        "How many mods are in this room",
     ];
 
     const howManyNomineesWithdrawnMatches = [
@@ -159,7 +159,7 @@ describe('Message Guards', () => {
         "Who is best moderator?",
         "Which is the coolest mod",
         "who is the most loved mod?",
-        "Who will be the best mod?"
+        "Who will be the best mod?",
     ];
 
     const bestCandidateMatches = [
@@ -168,7 +168,7 @@ describe('Message Guards', () => {
         "who were the bestest candidates ever?",
         "what is the best nomination?",
         // https://chat.stackoverflow.com/transcript/message/53289881#53289881
-        "Who's the best candidate?"
+        "Who's the best candidate?",
     ];
 
     const moderatorDutiesMatches = [
@@ -188,7 +188,7 @@ describe('Message Guards', () => {
         "why would I want to be a moderator?",
         "Why would anyone want to be a mod",
         "why would somebody want to become a moderator?",
-        "Why would anyone wish to become a mod?"
+        "Why would anyone wish to become a mod?",
     ];
 
     const whoMadeMeMatches = [
@@ -210,15 +210,14 @@ describe('Message Guards', () => {
         // https://chat.stackexchange.com/transcript/message/59433679#59433679
         "are you a daemon?",
         "Are you a robot?",
-        "Are you bot?"
-
+        "Are you bot?",
     ];
 
     const howAmImatches = [
         "Hello, how are you?",
         "Hi bot how are you",
         "hello bot, how are you today?",
-        "how are you?"
+        "how are you?",
     ];
 
     const aliveMatches = [
@@ -226,7 +225,7 @@ describe('Message Guards', () => {
         "Where are you?",
         "alive?",
         "dead?",
-        "Are you alive?"
+        "Are you alive?",
     ];
 
     const ownScoreMatches = [
@@ -244,7 +243,7 @@ describe('Message Guards', () => {
         "what's the candidate score of 404?",
         "candidate score for 65535",
         "what is the candidate score of -1?",
-        "what is the score of @42"
+        "what is the score of @42",
     ];
 
     const scoreFormulaMatches = [
@@ -260,7 +259,7 @@ describe('Message Guards', () => {
         "who to vote for?",
         "who should i vote for",
         "how to choose who to vote for?",
-        "who shouldn't I vote for"
+        "who shouldn't I vote for",
     ];
 
     const aboutVotingMatches = [
@@ -279,13 +278,13 @@ describe('Message Guards', () => {
         "have I voted?",
         "did I vote",
         "Have I voted in this election?",
-        "did I vote in the election?"
+        "did I vote in the election?",
     ];
 
     const canIvoteMatches = [
         "Can I vote?",
         "can I vote in the election",
-        "Can I vote in this election?"
+        "Can I vote in this election?",
     ];
 
     const listRequiredBadgesMatches = [
@@ -293,7 +292,7 @@ describe('Message Guards', () => {
         "which badges are required?",
         "What badges are necessary?",
         "Which of the badges are mandatory?",
-        "list the mandatory badges"
+        "list the mandatory badges",
     ];
 
     const listBadgeTypeMatches = [
@@ -309,13 +308,13 @@ describe('Message Guards', () => {
         "can user 123 be elected?",
         "can user 456 be nominated?",
         "can user 789 be eligible?",
-        "is user 012 eligible?"
+        "is user 012 eligible?",
     ];
 
     const eligibleUserCountMatches = [
         "how many users can vote?",
         "how many can vote?",
-        "how many people can vote in the election?"
+        "how many people can vote in the election?",
     ];
 
     const alreadyVotedMatches = [
@@ -324,7 +323,16 @@ describe('Message Guards', () => {
         "How many voters are there",
         "how many have voted already?!",
         "How many participated in the election?",
-        "how many users participated"
+        "how many users participated",
+    ];
+
+    const previousVotedMatches = [
+        "how many users participated in the last election",
+        "How many participated in the previous election?",
+        "how many users voted in the previous election",
+        "how many voted in the last election",
+        "How many voters in last election",
+        "how many people voted in last election ?",
     ];
 
     const howManyVisitedMatches = [
@@ -332,7 +340,7 @@ describe('Message Guards', () => {
         "How many visited the election?",
         "how many users have visited this election?",
         "how many users seen the election?",
-        "How many visited election page?"
+        "How many visited election page?",
     ];
 
     const currentModsHaveToRunMatches = [
@@ -350,7 +358,7 @@ describe('Message Guards', () => {
         "how many mods are elected today?",
         "how many moderators are elected",
         "how many mods will be elected?",
-        "how many mods were elected?"
+        "how many mods were elected?",
     ];
 
     const currentWinnersMatches = [
@@ -365,7 +373,7 @@ describe('Message Guards', () => {
         "how to nominate",
         "where can i register",
         "how to be a mod",
-        "how can i be mod"
+        "how can i be mod",
     ];
 
     const otherNomiationMatches = [
@@ -373,7 +381,7 @@ describe('Message Guards', () => {
         "How can one nominate another?",
         "Can one user nominate another user?",
         "can users nominate other users",
-        "how to register someone?"
+        "how to register someone?",
     ];
 
     const thankingBotMatches = [
@@ -383,7 +391,7 @@ describe('Message Guards', () => {
         "thank you?",
         "thank you!",
         "thank bot?",
-        "thanks, bot!"
+        "thanks, bot!",
     ];
 
     const lovingBotMatches = [
@@ -399,32 +407,32 @@ describe('Message Guards', () => {
 
     const happyBirthdayMatches = [
         "Happy Birthday, Andy!!",
-        "happy birthday, bot"
+        "happy birthday, bot",
     ];
 
     const whatCanDoMatches = [
         "what can you do?",
         "What can the bot do",
         "what can you answer?",
-        "What can you help with"
+        "What can you help with",
     ];
 
     const whyBotMatches = [
         "Why are you?",
-        "what is your purpose?"
+        "what is your purpose?",
     ];
 
     const botPronounsMatches = [
         "What is your pronouns?",
         "What are your pronouns?",
         "what's your pronouns",
-        "what are your preferred pronouns?"
+        "what are your preferred pronouns?",
     ];
 
     const insaneBotMatches = [
         "The Bot is insane. Don't worry.",
         "ElectionBot is just a crazy old bot.",
-        "Insane the bot definitely is"
+        "Insane the bot definitely is",
     ];
 
     const hatingBotMatches = [
@@ -440,7 +448,7 @@ describe('Message Guards', () => {
         "i dislike this bot!",
         "i hate this bot already",
         "i hate electionbot",
-        "this is a terrible idea for a bot, I hate it"
+        "this is a terrible idea for a bot, I hate it",
     ];
 
     const tellJokeMatches = [
@@ -448,7 +456,7 @@ describe('Message Guards', () => {
         "tell us a joke",
         "make us laugh",
         "make me laugh",
-        "tell a joke"
+        "tell a joke",
     ];
 
     const lightbulbMatches = [
@@ -462,7 +470,7 @@ describe('Message Guards', () => {
         "say a Jon Skeet joke",
         "Can you tell us a Jon Skeet joke?",
         "Tell a Jon Skeet fact",
-        "tell us about the Jon Skeet meme"
+        "tell us about the Jon Skeet meme",
     ];
 
     const modsPaidMatches = [
@@ -486,7 +494,7 @@ describe('Message Guards', () => {
         "what is Meek STV?",
         "how does STV work?",
         "how STV works?",
-        "How many votes will we have in the Meek STV system?"
+        "How many votes will we have in the Meek STV system?",
     ];
 
     const helpMatches = [
@@ -497,7 +505,7 @@ describe('Message Guards', () => {
         "help",
         "halp!",
         "info",
-        "Please help me"
+        "Please help me",
     ];
 
     const fullHelpMatches = [
@@ -505,6 +513,8 @@ describe('Message Guards', () => {
         "topics all",
         "complete help",
         "Help all",
+        "list help",
+        "help list",
     ];
 
     const questionnaireQuestionMatches = [
@@ -536,20 +546,20 @@ describe('Message Guards', () => {
         "where can the ballot file be found?",
         "where is the BLT file",
         "where can I find BLT file?",
-        "Is BLT file available?"
+        "Is BLT file available?",
     ];
 
     const electionResultsMatches = [
         "Where can I find the results?",
         "where results can be found?",
         "How can I find election results?",
-        "where can the election results be found?"
+        "where can the election results be found?",
     ];
 
     const meaningOfLifeMatches = [
         "What is the meaning of life?",
         "what is 42?",
-        "what is the answer to life"
+        "what is the answer to life",
     ];
 
     const cannedResponsesMatches = [
@@ -581,7 +591,7 @@ describe('Message Guards', () => {
         "How many former moderators are there?",
         "How many former mods do we have?",
         "which mods stepped down",
-        "which moderators resigned?"
+        "which moderators resigned?",
     ];
 
     const currentNomineesMatches = [
@@ -594,7 +604,7 @@ describe('Message Guards', () => {
         "what were the nominations",
         "any new nominees?",
         "is there a nomination",
-        "are there nominations?"
+        "are there nominations?",
     ];
 
     const usernameDiamondMatches = [
@@ -634,7 +644,7 @@ describe('Message Guards', () => {
         "i can't find the comments",
         "i can't find the election comments",
         "are the comments hidden",
-        "where did the comments go"
+        "where did the comments go",
     ];
 
     const scoreLeaderboardMatches = [
@@ -710,6 +720,7 @@ describe('Message Guards', () => {
         [isAskedAboutBadgesOfType, listBadgeTypeMatches],
         [isAskedHowManyVisitedElection, howManyVisitedMatches],
         [isAskedHowManyVoted, alreadyVotedMatches],
+        [isAskedHowManyVotedPrevious, previousVotedMatches],
         [isAskedForUserEligibility, userEligibilityMatches],
         [isAskedHowManyAreEligibleToVote, eligibleUserCountMatches],
         [isAskedIfModsHaveToRun, currentModsHaveToRunMatches],

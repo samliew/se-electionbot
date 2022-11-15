@@ -1337,10 +1337,18 @@ export default class Election {
 
                 // Election ended
                 if (!isCancelled) {
+
                     // Get election stats
                     this.statVoters = $(statsElem).contents().map((_i, { data, type }) =>
                         type === 'text' ? data?.trim() : ""
                     ).get().join(' ').trim();
+
+                    // Get num of eligible voters, active voters, visited voters, and voters
+                    const [numEligible, numActive, numVisited, numVoted] = this.statVoters.replace(/,/g, '').split(/\s+/).filter(Number);
+                    this.numEligible = numEligible;
+                    this.numActive = numActive;
+                    this.numVisited = numVisited;
+                    this.numVoted = numVoted;
 
                     // Get winners
                     const winnerIds = $(statsElem).find('a').map((_i, el) => +( /** @type {string} */($(el).attr('href')?.split('/')[2]))).get();

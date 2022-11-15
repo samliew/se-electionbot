@@ -99,6 +99,23 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
 };
 
 /**
+ * @summary builds a response to a query about last election's voters
+ * @type {MessageBuilder}
+ */
+export const sayVotedPrevious = async (config, es, election) => {
+    const { electionNum } = election;
+
+    if (!electionNum || electionNum === 1) {
+        return `There was no previous election.`;
+    }
+
+    const prevElection = es.get(electionNum - 1);
+
+    return prevElection?.statVoters || "";
+};
+
+
+/**
  * @summary builds a response to how many candidates are in the room query
  * @param {BotConfig} config bot configuration
  * @param {Map<number, Election>} _elections election history

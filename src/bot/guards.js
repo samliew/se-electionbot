@@ -351,7 +351,7 @@ export const isAskedAboutJonSkeetJokes = (text) => {
 export const isAskedAboutJokes = (text) => {
     return someMatch([
         /(?:tell|make|say|humou?r)\b.+?\b(?:me|us)?\b.+?(?:(?: a)? joke|laugh)/i
-    ], text) && !/jon\s?skeet/i.test(text);
+    ], text) && !/\bjon\s?skeet\b/i.test(text);
 };
 
 /**
@@ -359,7 +359,7 @@ export const isAskedAboutJokes = (text) => {
  * @type {MessageGuard}
  */
 export const isAskedIfResponsesAreCanned = (text) => {
-    return /bot\b.+?canned/i.test(text);
+    return /\bbot\b.+?canned\b/i.test(text);
 };
 
 /**
@@ -522,7 +522,7 @@ export const isAskedForHelp = (text) => {
  */
 export const isAskedForFullHelp = (text) => {
     return someMatch([
-        /^(?:(?:help|info|topics) (full|all|complete)|(full|all|complete) (?:help|info|topics))/i,
+        /^(?:(?:help|info|topics) (full|all|complete|list)|(full|all|complete|list) (?:help|info|topics))/i,
     ], text);
 };
 
@@ -623,7 +623,18 @@ export const isAskedHowManyVoted = (text) => {
     return someMatch([
         /^how\s+(?:many|much)(?:\s+(?:people|users))?(?:\s+have)?(?:\s+not)?\s+(?:vote|participate)d/i,
         /^how\s+(?:many|much)\s+(?:participant|voter)s/i
-    ], text);
+    ], text) && !/\b(?:last|previous)\b/.test(text);
+};
+
+/**
+ * @summary checks if a message is asking how many users voted in the last election
+ * @type {MessageGuard}
+ */
+export const isAskedHowManyVotedPrevious = (text) => {
+    return someMatch([
+        /^how\s+(?:many|much)(?:\s+(?:people|users))?(?:\s+have)?(?:\s+not)?\s+(?:vote|participate)d/i,
+        /^how\s+(?:many|much)\s+(?:participant|voter)s/i
+    ], text) && /\b(?:last|previous)\b/.test(text);
 };
 
 /**
