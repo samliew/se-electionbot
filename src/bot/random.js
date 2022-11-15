@@ -23,8 +23,11 @@ export class RandomArray extends Array {
         // If only one item, return it
         if (this.length === 1) return this[0];
 
-        // Ensure that the max value is < 248. See crypto.randomInt documentation
-        const rnd = randomInt(0, this.length >= 248 ? 247 : this.length);
+        // If there are less than 248 items, use crypto.randomInt
+        if (this.length < 248) return this[randomInt(this.length)];
+
+        // Otherwise, use Math.random
+        const rnd = Math.floor(Math.random() * this.length);
         return this[rnd];
     }
 
