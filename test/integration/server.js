@@ -21,7 +21,7 @@ import { getMockBotConfig } from "../mocks/bot.js";
  */
 
 describe("Dashboard", function () {
-    this.timeout(1e4); // route rendering can be slow
+    this.timeout(3e4); // route rendering can be very slow
 
     /** @type {Client} */
     const client = new Client["default"]("stackoverflow.com");
