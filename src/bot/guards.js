@@ -783,3 +783,23 @@ export const isAskedIfModsHaveToRun = (text) => {
         /(?:do|must)\s+(?:current|existing)\s+mod(?:erator)?s(?:\s+have\s+to)?\s+(?:run|nominate|step\s+down)/i
     ], text);
 };
+
+/**
+ * @summary checks if a message is about rolling a die
+ * @type {MessageGuard}
+ */
+export const isAskedToRollDie = (text) => {
+    return someMatch([
+        /^roll\s+a\s+dic?e/i
+    ], text);
+};
+
+/**
+ * @summary checks if a message is about flipping a coin
+ * @type {MessageGuard}
+ */
+export const isAskedToFlipCoin = (text) => {
+    return someMatch([
+        /^(?:flip|toss)\s+a\s+coin/i
+    ], text);
+};

@@ -48,7 +48,7 @@ About candidates:
 
 - do current moderators have to run
 - how many users are eligible to vote
-- how to nominate `[myself\|someone\|others]`
+- how to nominate `<myself\|someone\|others>`
 - who are the `<candidates\|nominees>`
 - who are the `<winners\|new moderators>`
 - who of the moderators is running
@@ -101,6 +101,11 @@ ElectionBot info _(requires mention)_:
 - about
 - alive
 - who made me/ who are the developers
+
+Other stuff:
+
+- roll a die
+- `<toss\|flip>` a coin
 
 ## Privileged commands
 
