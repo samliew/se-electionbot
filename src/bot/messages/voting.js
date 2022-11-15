@@ -4,7 +4,7 @@ import { matchISO8601 } from "../../shared/utils/expressions.js";
 import { has } from "../../shared/utils/maps.js";
 import { formatNumber, percentify } from "../../shared/utils/strings.js";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "../api.js";
-import { getCandidateOrNominee, getRandomSoFar, RandomArray } from "../random.js";
+import { getCandidateOrNominee, getRandomOops, getRandomSoFar, RandomArray } from "../random.js";
 import { calculateScore } from "../score.js";
 import { linkToRelativeTimestamp, listify, makeURL, pluralize, scrapeAwardedBadge } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
@@ -103,15 +103,21 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
  * @type {MessageBuilder}
  */
 export const sayVotedPrevious = async (config, es, election) => {
-    const { electionNum } = election;
+    const { electionNum: currElectionNum } = election;
 
-    if (!electionNum || electionNum === 1) {
+    if (!currElectionNum || currElectionNum === 1) {
         return `There was no previous election.`;
     }
 
-    const prevElection = es.get(electionNum - 1);
+    const prevElection = es.get(currElectionNum - 1);
 
-    return prevElection?.statVoters || "";
+    if (!prevElection?.statVoters) {
+        return `I could not fetch the previous election stats.`;
+    }
+
+    const { electionNum, electionUrl } = prevElection;
+
+    return `In the ${makeURL(electionNum + ' election', electionUrl)}, ${prevElection.statVoters}.`;
 };
 
 
