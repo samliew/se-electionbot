@@ -35,11 +35,11 @@ export const sayHappyBirthday = () => {
  * @summary builds a response to a n-sided die roll
  * @type {MessageBuilder}
  */
-export const getRandomSidedDieRoll = (config, _elections, election, _text) => {
-    const num = matchNumber(/(\d+)/, _text);
+export const getRandomSidedDieRoll = (_config, _elections, _election, text) => {
+    const num = matchNumber(/(\d+)/, text);
 
     if (!num || num <= 0 || num > 1000) {
-        return `I don't understand. Please specify a valid number of sides, e.g.: "roll a d20" or "roll a 20-sided die".`;
+        return `Please specify a valid number of sides between 1 and 1000 inclusive, e.g.: "roll a D20" or "roll a 20-sided die".`;
     }
 
     const arr = new RandomArray(
