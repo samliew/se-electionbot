@@ -359,7 +359,7 @@ export const isAskedAboutJokes = (text) => {
  * @type {MessageGuard}
  */
 export const isAskedIfResponsesAreCanned = (text) => {
-    return /bot\b.+?says?\b.+?canned/i.test(text);
+    return /bot\b.+?canned/i.test(text);
 };
 
 /**
@@ -801,5 +801,15 @@ export const isAskedToRollDie = (text) => {
 export const isAskedToFlipCoin = (text) => {
     return someMatch([
         /^(?:flip|toss)\s+a\s+coin/i
+    ], text);
+};
+
+/**
+ * @summary checks if a message is about rock, paper, or scissors
+ * @type {MessageGuard}
+ */
+export const isPlayingRockPaperScissors = (text) => {
+    return someMatch([
+        /^(?:rock|paper|scissors)$/i
     ], text);
 };

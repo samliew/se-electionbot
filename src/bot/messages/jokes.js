@@ -30,10 +30,14 @@ export const sayAJoke = () => {
  * @returns {string}
  */
 export const sayCannedResponses = () => new RandomArray(
-    "Sometimes all you have is a can",
+    "I have no cans to give.",
+    "This is not a canned message.",
+    "Sometimes all you have is a can.",
     "I am a bot, what did you expect?",
-    "Some only deserve canned responses",
-    "How do I know *your* message is not canned?"
+    "Some only deserve canned responses.",
+    "This is an example of a canned message.",
+    "How do I know *your* message is not canned?",
+    "When life gives you canned messages, make canned responses.",
 ).getRandom();
 
 /**
@@ -58,7 +62,13 @@ export const sayHowManyModsItTakesToFixLightbulb = (_config, _elections, electio
  * @summary builds a response to accusations that bot is insane
  * @returns {string}
  */
-export const sayInsaneComeback = () => new RandomArray("What did you just call me?", "Who isn't insane these days?", "Sanity is overrated").getRandom();
+export const sayInsaneComeback = () => new RandomArray(
+    "Sanity is overrated.",
+    "What did you just call me?",
+    "Who isn't insane these days?",
+    "Nah I'm just a little unwell...",
+    "I'm not insane, my mother had me tested.",
+).getRandom();
 
 /**
  * @fun
@@ -66,8 +76,8 @@ export const sayInsaneComeback = () => new RandomArray("What did you just call m
  * @returns {string}
  */
 export const sayAnswerToLifeUniverseAndEverything = () => new RandomArray(
+    "I will answer only if you know the question.",
     "The answer to life, the universe, and everything is the number 42.",
-    "I will answer only if you know the question"
 ).getRandom();
 
 /**
@@ -85,9 +95,9 @@ export const sayPreferredPronouns = () => new RandomArray(
  * @returns {string}
  */
 export const sayLoveYou = () => new RandomArray(
+    "What is love?",
     "I love you 3000",
     "I love you too!",
-    "What is love?"
 ).getRandom();
 
 /**
@@ -96,10 +106,8 @@ export const sayLoveYou = () => new RandomArray(
  * @returns {string}
  */
 export const sayHowIsBot = () => getRandomStatus([
+    "Like I am alive!",
     `I'm bored. Amuse me.`,
-    `Why don't you come up sometime and see me?`,
-    `Today, I consider myself the luckiest bot on the face of the earth.`,
     "Manically depressed...",
     "Jolly good, jolly good!",
-    "Like I am alive!",
 ]);

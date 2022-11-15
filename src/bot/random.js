@@ -4,25 +4,32 @@ import { randomInt } from 'crypto';
  * @template {unknown} T
  */
 export class RandomArray extends Array {
+
     /**
      * @param {...T} init
      */
     constructor(...init) {
         super(...init);
+
+        // Ensure that the array contains at least one element
+        if (this.length === 0) throw new Error('RandomArray must contain at least one element.');
     }
 
     /**
-     * @summary gets a random element
+     * @summary gets a random item
      * @returns {T}
      */
     getRandom() {
-        // Ensure that the length is < 248. See crypto.randomInt documentation
-        const max = this.length >= 248 ? 247 : this.length;
-        return this[randomInt(0, max)];
+        // If only one item, return it
+        if (this.length === 1) return this[0];
+
+        // Ensure that the max value is < 248. See crypto.randomInt documentation
+        const rnd = randomInt(0, this.length >= 248 ? 247 : this.length);
+        return this[rnd];
     }
 
     /**
-     * @summary sorts in random order
+     * @summary sorts items in random order
      * @returns {RandomArray<T>}
      */
     sortByRandom() {
@@ -32,7 +39,6 @@ export class RandomArray extends Array {
             .map(({ value }) => value);
         return this;
     };
-
 }
 
 export const getCandidateOrNominee = () => new RandomArray(`candidate`, `nominee`).getRandom();
@@ -272,4 +278,10 @@ export const getRandomDieRoll = () => new RandomArray(
 export const getRandomCoinToss = () => new RandomArray(
     "heads",
     "tails",
+).getRandom();
+
+export const getRandomRockPaperScissors = () => new RandomArray(
+    "rock",
+    "paper",
+    "scissors",
 ).getRandom();

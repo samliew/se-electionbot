@@ -550,7 +550,9 @@ describe('Message Guards', () => {
 
     const cannedResponsesMatches = [
         "hey, bot, say something canned!",
-        "Everything the bot says is canned.what do you expect from a tin box?"
+        "This bot is full of canned messages",
+        "I think the bot only says canned messages",
+        "Everything the bot says is canned. What do you expect from a tin box?",
     ];
 
     const howToSaveVotesMatches = [
