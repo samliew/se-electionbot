@@ -4,7 +4,7 @@ import { matchISO8601 } from "../../shared/utils/expressions.js";
 import { has } from "../../shared/utils/maps.js";
 import { formatNumber, percentify } from "../../shared/utils/strings.js";
 import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "../api.js";
-import { getCandidateOrNominee, getRandomOops, getRandomSoFar, RandomArray } from "../random.js";
+import { getCandidateOrNominee, getRandomSoFar, RandomArray } from "../random.js";
 import { calculateScore } from "../score.js";
 import { linkToRelativeTimestamp, listify, makeURL, pluralize, scrapeAwardedBadge } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
