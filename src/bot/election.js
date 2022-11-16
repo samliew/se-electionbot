@@ -1411,6 +1411,13 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
         const { apiSlug, electionBadges, hasRequiredBadges } = this;
 
         const allNamedBadges = await getNamedBadges(config, apiSlug);
+
+        // Validate API response
+        if (!allNamedBadges) {
+            console.error(`[API] Could not get named badges.`);
+            return this;
+        }
+
         const badgeMap = mapify(allNamedBadges, "name");
 
         electionBadges.forEach((electionBadge) => {
@@ -1432,7 +1439,7 @@ primary threshold ${this.primaryThreshold}` : `\nnominees: ${this.numNominees}; 
         });
 
         if (config.debugOrVerbose) {
-            console.log(`[election] updated badges\n${electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n")}`);
+            console.log(`[election] Updated badges\n${electionBadges.map(({ name, badge_id }) => `${name}: ${badge_id}`).join("\n")}`);
         }
 
         return this;

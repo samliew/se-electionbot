@@ -44,6 +44,12 @@ export const sayGreeting = async (config, elections, election, botUser, room, gr
         const numEligible = await getNumberOfUsersEligibleToVote(config, election);
         const numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, { from: dateElection || now });
 
+        // In case the API failed
+        if (!numEligible || !numVoters) {
+            await pingDevelopers(`${getRandomOops()} couldn't get numEligible or numVoters in sayGreeting(), cc`, config, room);
+            return "";
+        }
+
         const format = partialRight(formatNumber, [3]);
         const eligible = `${percentify(numVoters, numEligible, 2)} of ${format(numEligible)} eligible`;
         alreadyVoted = `${format(numVoters)} (${eligible}) user${pluralize(numVoters)} ha${pluralize(numVoters, "ve", "s")} already voted`;

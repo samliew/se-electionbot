@@ -873,6 +873,7 @@ export const getModsVotedCommand = async (args) => {
 
     // In case the API failed
     if (!modBadges || !numVoted) {
+        console.error(`[API] Couldn't identify the "${electionBadgeName}" badge`);
         return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
     }
 

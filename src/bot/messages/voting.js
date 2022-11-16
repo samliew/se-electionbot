@@ -137,6 +137,11 @@ export const sayHowManyAreEligibleToVote = async (config, _elections, election) 
     const { phase } = election;
     const numEligible = await getNumberOfUsersEligibleToVote(config, election);
 
+    // In case the API failed
+    if (!numEligible) {
+        return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
+    }
+
     const isAre = pluralize(numEligible, "are", "is");
     const wasWere = pluralize(numEligible, "were", "was");
 
@@ -179,7 +184,15 @@ export const sayIfOneCanVote = async (config, _elections, election, _text, user)
     const electionBadgeId = election.getBadgeId(electionBadgeName);
     if (!electionBadgeId) return `${message}.${addendum && ` FYI, ${addendum}`}`; // just in case
 
-    const [badgeURL, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
+    let badgeURL, awards;
+    try {
+        [badgeURL, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
+    }
+    // In case the API failed
+    catch (err) {
+        return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
+    }
+
     const foundBadge = awards[electionNum || 1];
 
     const postfix = foundBadge ? ` but looks like you have already voted, as you have the ${makeURL(electionBadgeName, badgeURL)} badge!` : ".";
@@ -205,7 +218,14 @@ export const sayIfOneHasVoted = async (config, _elections, election, _text, user
     const electionBadgeId = election.getBadgeId(electionBadgeName);
     if (!electionBadgeId) return "Time will tell..."; // just in case
 
-    const [badgeURL, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
+    let badgeURL, awards;
+    try {
+        [badgeURL, awards] = await scrapeAwardedBadge(config, siteHostname, electionBadgeId, user);
+    }
+    // In case the API failed
+    catch (err) {
+        return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
+    }
 
     if (config.debugOrVerbose) {
         console.log(awards);
@@ -271,8 +291,9 @@ export const sayUserEligibility = async (config, election, text) => {
 
     const users = await getUserInfo(config, [userId], apiSlug);
 
+    // In case the API failed
     if (!has(users, userId)) {
-        return `Can't answer now, please ask me about it later`;
+        return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
     };
 
     const user = users.get(userId);

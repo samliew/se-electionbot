@@ -269,8 +269,9 @@ export const sayHowManyVisitedElection = async (config, _es, election, text, _u,
     const [badge] = await getNamedBadges(config, apiSlug, { name: electionBadgeName });
 
     if (!badge) {
+        console.error(`[API] Couldn't identify the "${electionBadgeName}" badge`);
         await pingDevelopers(`${getRandomOops()} couldn't identify the "${electionBadgeName}" badge`, config, room);
-        return "";
+        return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
     }
 
     const now = config.nowOverride || new Date();
