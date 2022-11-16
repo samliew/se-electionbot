@@ -69,6 +69,14 @@ export const getRandomOops = () => new RandomArray(
     `Apologies,`,
     `I'm terribly sorry.`,
 ).getRandom();
+export const getRandomGameLoss = () => new RandomArray(
+    "You win. This time.",
+    "I let you win this time.",
+    "You win. I'm bored already.",
+    "You win. This isn't fun at all.",
+    "Okay you win. Go do something else.",
+    "You win. I'm going to go cry in the corner.",
+).getRandom()
 export const getRandomOpinionPrefix = () => new RandomArray(
     `I feel that`,
     `I heard that`,

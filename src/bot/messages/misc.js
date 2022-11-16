@@ -1,5 +1,5 @@
 import { matchNumber } from "../../shared/utils/expressions.js";
-import { getRandomOops, RandomArray } from "../random.js";
+import { getRandomGameLoss, getRandomOops, RandomArray } from "../random.js";
 import { makeURL } from "../utils.js";
 
 /**
@@ -69,14 +69,6 @@ export const sayRandomRockPaperScissors = (_config, _elections, _election, text)
         return `*${guess}* - ${getRandomOops()} I win!`;
     }
     else {
-        const randomWinResponse = new RandomArray(
-            "You win. This time.",
-            "I let you win this time.",
-            "You win. I'm bored already.",
-            "You win. This isn't fun at all.",
-            "Okay you win. Go do something else.",
-            "You win. I'm going to go cry in the corner.",
-        ).getRandom();
-        return `*${guess}* - ${randomWinResponse}`;
+        return `*${guess}* - ${getRandomGameLoss()}`;
     }
 };
