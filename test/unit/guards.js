@@ -3,6 +3,7 @@ import {
     isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhaseDuration, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutLightbulb, isAskedAboutMissingBadges, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting, isAskedAmIAlive, isAskedForCurrentMods, isAskedForCurrentNominees,
     isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp, isAskedForHelp, isAskedForNominatingInfo, isAskedForOtherScore, isAskedForOwnScore, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedWhoToVote, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedToFlipCoin, isAskedToRollDie, isAskedToRollSidedDie, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWhyNominationRemoved, isAskedWillElectionBeCancelled, isBotMentioned, isHatingTheBot, isLovingTheBot, isPlayingRockPaperScissors, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot, isAskedHowManyVotedPrevious
 } from "../../src/bot/guards.js";
+import { isAskingAboutSourceCode } from "../../src/bot/guards/metadata.js";
 import { getMockUserProfile } from "../mocks/user.js";
 
 /**
@@ -201,6 +202,13 @@ describe('Message Guards', () => {
         "who is your developer?",
         "who is your maintainer?",
         "who is your owner",
+    ];
+
+    const sourceCodeMatches = [
+        "where can your codebase be found?",
+        "Where is your source code?",
+        "where is the bot's codebase?",
+        "where can bot source code be found",
     ];
 
     const whoAmImatches = [
@@ -760,6 +768,7 @@ describe('Message Guards', () => {
         [isAskedToRollSidedDie, randomSidedDieRollMatches],
         [isAskedToFlipCoin, randomCoinTossMatches],
         [isPlayingRockPaperScissors, randomRockPaperScissorsMatches],
+        [isAskingAboutSourceCode, sourceCodeMatches]
     ]);
 
     before(() => {

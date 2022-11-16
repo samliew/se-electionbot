@@ -141,6 +141,16 @@ export const sayWhoMadeMe = async (config) => {
 };
 
 /**
+ * @summary builds response to a query about the bot's source code
+ * @type {MessageBuilder}
+ */
+export const saySourceCode = (config) => {
+    const { repoUrl } = config;
+    const repoLink = makeURL( "GitHub", repoUrl);
+    return `My source code can be found on ${repoLink}.`;
+}
+
+/**
  * @summary builds a project contribution response
  * @param {BotConfig} config bot configuration
  * @returns {string}
