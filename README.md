@@ -101,6 +101,7 @@ ElectionBot info _(requires mention)_:
 - about
 - alive
 - who made me/ who are the developers
+- where is your source code
 
 Other stuff:
 
