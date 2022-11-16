@@ -4,7 +4,7 @@ import { formatNumber, percentify } from "../../shared/utils/strings.js";
 import { getNumberOfUsersEligibleToVote, getNumberOfVoters } from "../api.js";
 import { User } from "../commands/user.js";
 import { sendMessage } from "../queue.js";
-import { getRandomAnnouncement, getRandomNow } from "../random.js";
+import { getRandomAnnouncement, getRandomNow, getRandomOops } from "../random.js";
 import { pingDevelopers } from "../reports.js";
 import { makeURL, pluralize, pluralizePhrase } from "../utils.js";
 import { sayCommonlyAskedQuestions } from "./metadata.js";
@@ -33,7 +33,7 @@ export const sayGreeting = async (config, elections, election, botUser, room, gr
     const electionBadgeName = "Constituent";
     const electionBadgeId = election.getBadgeId(electionBadgeName);
     if (!electionBadgeId) {
-        await pingDevelopers(`Sorry, couldn't identify the "${electionBadgeName}" badge, cc`, config, room);
+        await pingDevelopers(`${getRandomOops()} couldn't identify the "${electionBadgeName}" badge, cc`, config, room);
         return "";
     }
 

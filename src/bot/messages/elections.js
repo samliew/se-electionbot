@@ -2,8 +2,8 @@ import { datesToDuration, dateToRelativeTime, dateToShortISO8601Timestamp, getSe
 import { matchISO8601, matchNumber, safeCapture } from "../../shared/utils/expressions.js";
 import { findInMap, mapMap } from "../../shared/utils/maps.js";
 import { formatOrdinal } from "../../shared/utils/strings.js";
-import { getAwardedBadges, getNamedBadges } from "../api.js";
-import { getCandidateOrNominee, getRandomNow } from "../random.js";
+import { API_ERROR_MESSAGE, getAwardedBadges, getNamedBadges } from "../api.js";
+import { getCandidateOrNominee, getRandomNow, getRandomOops } from "../random.js";
 import { pingDevelopers } from "../reports.js";
 import { listify, makeURL, pluralize } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
@@ -54,7 +54,7 @@ export const sayElectionPage = (config, _elections, election) => {
     const nthElection = formatOrdinal(electionNum || 1);
     const electionPage = makeURL("here", electionUrl);
 
-    return isValidUrl ? `The information on the ${nthElection} ${siteName} election can be found ${electionPage}.` : `Sorry, the election page is missing.`;
+    return isValidUrl ? `The information on the ${nthElection} ${siteName} election can be found ${electionPage}.` : `${getRandomOops()} the election page is missing.`;
 };
 
 /**
@@ -269,7 +269,7 @@ export const sayHowManyVisitedElection = async (config, _es, election, text, _u,
     const [badge] = await getNamedBadges(config, apiSlug, { name: electionBadgeName });
 
     if (!badge) {
-        await pingDevelopers(`Sorry, couldn't identify the "${electionBadgeName}" badge`, config, room);
+        await pingDevelopers(`${getRandomOops()} couldn't identify the "${electionBadgeName}" badge`, config, room);
         return "";
     }
 
@@ -291,6 +291,11 @@ export const sayHowManyVisitedElection = async (config, _es, election, text, _u,
         config, apiSlug, [badge_id],
         { from: dateNomination, to }
     );
+
+    // In case the API failed
+    if (!numAwarded) {
+        return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
+    }
 
     /** @type {Partial<Record<Exclude<ElectionPhase, null>, string>>} */
     const responses = {

@@ -35,6 +35,8 @@ import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
  */
 export let allNetworkSites = [];
 
+export const API_ERROR_MESSAGE = `The Stack Exchange API took too long to respond. Try again later.`;
+
 let currentQuota = 10000;
 
 export const getCurrentAPIQuota = () => currentQuota;

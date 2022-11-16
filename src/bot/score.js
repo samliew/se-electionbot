@@ -8,6 +8,7 @@ import { sayDoesNotMeetRequirements } from "./messages/candidates.js";
 import { sayLacksPrivilege } from "./messages/metadata.js";
 import { sayDiamondAlready } from "./messages/moderators.js";
 import { sayHasMaximumCandidateScore, sayNoAccountToCalcScore } from "./messages/score.js";
+import { getRandomOops } from "./random.js";
 import { getSiteUserIdFromChatStackExchangeId, makeURL, mapToId, mapToName, matchesOneOfChatHosts, NO_ACCOUNT_ID } from "./utils.js";
 
 /**
@@ -33,7 +34,7 @@ export const getScoreText = (score, max) => `**${score}** (out of ${max})`;
  * @param {boolean} [isAskingForOtherUser] is asking for another user
  * @returns {string}
  */
-export const sayCalcFailed = (isAskingForOtherUser = false) => `Sorry, an error occurred when calculating ${isAskingForOtherUser ? `the user's` : `your`} score.`;
+export const sayCalcFailed = (isAskingForOtherUser = false) => `${getRandomOops()} an error occurred when calculating ${isAskingForOtherUser ? `the user's` : `your`} score.`;
 
 /**
  * @typedef {{
@@ -194,7 +195,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         // If not Chat.SO, resolve election site user id from requestor's chat id (chat has different ids)
         if (isChatId && !isStackOverflow) {
             userId = await getSiteUserIdFromChatStackExchangeId(
-                config, userId, chatDomain, siteHostname, 
+                config, userId, chatDomain, siteHostname,
                 getStackApiKey(config.apiKeyPool)
             );
 
@@ -269,14 +270,14 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
             if (numMissingRequiredBadges > 0) {
                 responseText += buildMissingElectionBadgesResponse(
-                    missingRequiredBadgeNames, 
-                    numMissingRequiredBadges, 
+                    missingRequiredBadgeNames,
+                    numMissingRequiredBadges,
                     "required"
                 );
             } else if (numMissingBadges > 0) {
                 responseText += buildMissingElectionBadgesResponse(
-                    missingBadgeNames, 
-                    numMissingBadges, 
+                    missingBadgeNames,
+                    numMissingBadges,
                     ""
                 );
             }
@@ -294,8 +295,8 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
             if (numMissingBadges > 0) {
                 responseText += buildMissingElectionBadgesResponse(
-                    missingBadgeNames, 
-                    numMissingBadges, 
+                    missingBadgeNames,
+                    numMissingBadges,
                     "", true
                 );
             }

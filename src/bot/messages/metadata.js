@@ -1,5 +1,5 @@
 import { parsePackage } from "../../shared/utils/package.js";
-import { getRandomFAQ } from "../random.js";
+import { getRandomFAQ, getRandomOops } from "../random.js";
 import { listify, makeURL } from "../utils.js";
 
 /**
@@ -42,8 +42,8 @@ export const sayHowAmI = (_c, _es, election) => {
  * @returns {string}
  */
 export const sayLacksPrivilege = (action, alternative) => {
-    const suggestion = alternative ? ` I can ${alternative} if you want` : "";
-    return `You can only ${action || "perform sensitive actions"} as a privileged user, sorry.${suggestion}`;
+    const suggestion = alternative ? ` I can ${alternative} if you want.` : "";
+    return `${getRandomOops()} You can only ${action || "perform sensitive actions"} as a privileged user.${suggestion}`;
 };
 
 /**

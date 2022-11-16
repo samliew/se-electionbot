@@ -7,13 +7,13 @@ import { dateToUtcTimestamp, getDateFromUTCstring, getMilliseconds } from "../..
 import { matchISO8601, matchNumber, safeCapture } from "../../shared/utils/expressions.js";
 import { mapMap, mergeMaps } from "../../shared/utils/maps.js";
 import { capitalize, formatNumber } from "../../shared/utils/strings.js";
-import { getBadges, getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
+import { API_ERROR_MESSAGE, getBadges, getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
 import Election, { getSiteElections, getVotingGraph } from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
 import { sayUptime } from "../messages/metadata.js";
 import { sayOtherSiteMods } from "../messages/moderators.js";
 import { sendMessage } from "../queue.js";
-import { getCandidateOrNominee, RandomArray } from "../random.js";
+import { getCandidateOrNominee, getRandomOops, RandomArray } from "../random.js";
 import { fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, listify, makeURL, pluralize, wait } from "../utils.js";
 
 /**
@@ -870,6 +870,11 @@ export const getModsVotedCommand = async (args) => {
             return b.badge_id === electionBadgeId ? a + 1 : a;
         },
         0);
+
+    // In case the API failed
+    if (!modBadges || !numVoted) {
+        return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
+    }
 
     const badgeLink = makeURL(electionBadgeName, `${siteUrl}/help/badges/${electionBadgeId}`);
 

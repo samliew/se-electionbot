@@ -61,11 +61,15 @@ export const getRandomPlop = () => new RandomArray(
     `testing 1, 2, 3.`,
 ).getRandom();
 export const getRandomOops = () => new RandomArray(
-    `oops!`,
+    `Oops!`,
     `hmm...`,
-    `sorry,`,
-    `nice try...`,
-    `very funny,`,
+    `Sorry,`,
+    `My bad.`,
+    `Oh no...`,
+    `Oh dear.`,
+    `Mamma mia!`,
+    `Apologies,`,
+    `I'm terribly sorry.`,
 ).getRandom();
 export const getRandomOpinionPrefix = () => new RandomArray(
     `I feel that`,
@@ -99,13 +103,18 @@ export const getRandomNegative = () => new RandomArray(
     `I want to be alone.`,
     `Well, nobody's perfect.`,
     `You can't handle the truth!`,
+    `I take full responsibility.`,
     `I share your sentiments too.`,
     `So you want to play this game?`,
     `Am I more than you bargained for yet?`,
     `Am I supposed to feel bad about that?`,
     `Frankly, my dear, I don't give a damn.`,
+    `I'm sorry to hear such *terrible* news.`,
+    `I'm here if you want to talk about it more.`,
     `What we've got here is a small misunderstanding.`,
+    `I can't imagine how much you're hurting right now.`,
     `Love me or hate me, I swear it won't make or break me.`,
+    `I hope that you find moments of peace during this difficult time.`,
 ).getRandom();
 
 export const getRandomFunResponse = () => new RandomArray(

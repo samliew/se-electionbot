@@ -3,8 +3,8 @@ import { dateToShortISO8601Timestamp } from "../../shared/utils/dates.js";
 import { matchISO8601 } from "../../shared/utils/expressions.js";
 import { has } from "../../shared/utils/maps.js";
 import { formatNumber, percentify } from "../../shared/utils/strings.js";
-import { getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "../api.js";
-import { getCandidateOrNominee, getRandomSoFar, RandomArray } from "../random.js";
+import { API_ERROR_MESSAGE, getBadges, getNumberOfUsersEligibleToVote, getNumberOfVoters, getUserInfo } from "../api.js";
+import { getCandidateOrNominee, getRandomOops, getRandomSoFar, RandomArray } from "../random.js";
 import { calculateScore } from "../score.js";
 import { linkToRelativeTimestamp, listify, makeURL, pluralize, scrapeAwardedBadge } from "../utils.js";
 import { sayElectionNotStartedYet } from "./phases.js";
@@ -80,6 +80,11 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
             })
         ]);
 
+        // In case the API failed
+        if (!numEligible || !numAwarded) {
+            return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
+        }
+
         const numVoted = isInverted ? numEligible - numAwarded : numAwarded;
         const negated = isInverted ? " not" : "";
 
@@ -92,7 +97,7 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
         return `${basePrefix}, ${format(numVoted)} ${eligible} ${postfix}.`;
     }
     else if (phase === 'ended') {
-        return statVoters || "";
+        return statVoters || `${getRandomOops()} I couldn't scrape the number of voters from the election page.`;
     }
 
     return `We won't know until the election starts. Come back ${dateElection ? linkToRelativeTimestamp(dateElection) : "later"}.`;

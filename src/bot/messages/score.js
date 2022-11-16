@@ -1,5 +1,5 @@
 import { partialRight } from "ramda";
-import { getRandomNominationSynonym } from "../random.js";
+import { getRandomNominationSynonym, getRandomOops } from "../random.js";
 import { listify, makeURL, pluralize } from "../utils.js";
 import { formatNumber } from "../../shared/utils/strings.js";
 
@@ -97,5 +97,5 @@ export const sayHasMaximumCandidateScore = (election, candidateScore, hasNominat
  * @returns {string}
  */
 export const sayNoAccountToCalcScore = (isAskingForOtherUser) => {
-    return `Sorry, ${isAskingForOtherUser ? "the user" : "you"} must have an account on the site to get the score!`;
+    return `${getRandomOops()} ${isAskingForOtherUser ? "the user" : "you"} must have an account on the site to get the score!`;
 };
