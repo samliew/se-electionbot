@@ -5,13 +5,13 @@
 
 import { isAskedAboutBadgesOfType, isAskedAboutBallotFile, isAskedAboutBotPronouns, isAskedAboutElectionPhaseDuration, isAskedAboutElectionPhases, isAskedAboutElectionResults, isAskedAboutJokes, isAskedAboutJonSkeetJokes, isAskedAboutLightbulb, isAskedAboutMissingBadges, isAskedAboutMissingComments, isAskedAboutModsOrModPowers, isAskedAboutRequiredBadges, isAskedAboutSTV, isAskedAboutUsernameDiamond, isAskedAboutVoting, isAskedAmIAlive, isAskedForCurrentNominees, isAskedForCurrentPositions, isAskedForCurrentWinners, isAskedForElectionPage, isAskedForElectionSchedule, isAskedForFormerMods, isAskedForFullHelp, isAskedForHelp, isAskedForNominatingInfo, isAskedForQuestionnaireQuestion, isAskedForScoreFormula, isAskedForWithdrawnNominees, isAskedHowAmI, isAskedHowManyAreEligibleToVote, isAskedHowManyVisitedElection, isAskedHowManyVoted, isAskedHowManyVotedPrevious, isAskedHowToSaveVotes, isAskedIfCanNominateOthers, isAskedIfCanVote, isAskedIfModsArePaid, isAskedIfModsHaveToRun, isAskedIfOneHasVoted, isAskedIfResponsesAreCanned, isAskedMeaningOfLife, isAskedToFlipCoin, isAskedToRollDie, isAskedToRollSidedDie, isAskedWhatBotCanDo, isAskedWhatElectionIs, isAskedWhatIsElectionStatus, isAskedWhatIsElectionType, isAskedWhatModsAreRunning, isAskedWhenIsTheNextPhase, isAskedWhenTheElectionEnds, isAskedWhereToFindResults, isAskedWhoAmI, isAskedWhoIsTheBestCandidate, isAskedWhoIsTheBestMod, isAskedWhoMadeMe, isAskedWhyAreElectionsCancelled, isAskedWhyBeAMod, isAskedWhyIsBot, isAskedWhyNominationRemoved, isAskedWillElectionBeCancelled, isHatingTheBot, isLovingTheBot, isPlayingRockPaperScissors, isSayingBotIsInsane, isSayingHappyBirthday, isThankingTheBot } from "../guards.js";
 import { isAskingAboutSourceCode } from "../guards/metadata.js";
-import { getRandomAlive, getRandomCoinToss, getRandomDieRoll, getRandomGoodThanks, getRandomNegative, getRandomRockPaperScissors, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "../random.js";
+import { getRandomAlive, getRandomCoinToss, getRandomDieRoll, getRandomGoodThanks, getRandomNegative, getRandomThanks, getRandomWhoAmI, getRandomWhyAmI } from "../random.js";
 import { sayBadgesByType, sayMissingBadges, sayRequiredBadges } from "./badges.js";
 import { sayBestCandidate, sayCurrentCandidates, sayHowToNominate, sayHowToNominateOthers, sayIfModsHaveToRun, sayWhatModsAreRunning, sayWhyNominationRemoved, sayWithdrawnNominations } from "./candidates.js";
 import { sayCurrentWinners, sayElectionPage, sayElectionPhaseDuration, sayElectionResults, sayElectionType, sayHowManyVisitedElection, sayNumberOfPositions, sayWhatIsAnElection, sayWhenAreElectionsCancelled, sayWhereToFindElectionResults, sayWillElectionBeCancelled } from "./elections.js";
 import { sayAJoke, sayAJonSkeetJoke, sayAnswerToLifeUniverseAndEverything, sayCannedResponses, sayHowIsBot, sayHowManyModsItTakesToFixLightbulb, sayInsaneComeback, sayLoveYou, sayPreferredPronouns } from "./jokes.js";
 import { sayCommonlyAskedQuestions, sayFullHelp, sayHowAmI, sayShortHelp, saySourceCode, sayWhoAmI, sayWhoMadeMe } from "./metadata.js";
-import { getRandomSidedDieRoll, sayHappyBirthday, sayMissingComments } from "./misc.js";
+import { getRandomSidedDieRoll, sayHappyBirthday, sayMissingComments, sayRandomRockPaperScissors } from "./misc.js";
 import { sayAreModsPaid, sayBestModerator, sayCanEditDiamond, sayFormerMods, sayWhatModsDo, sayWhyBeAMod } from "./moderators.js";
 import { sayAboutElectionStatus, sayAboutThePhases, sayElectionIsEnding, sayElectionSchedule, sayNextPhase } from "./phases.js";
 import { sayQuestionnaireQuestion } from "./questionnaire.js";
@@ -81,7 +81,7 @@ export const unprivilegedRules = [
     [isAskedToRollDie, getRandomDieRoll],
     [isAskedToRollSidedDie, getRandomSidedDieRoll],
     [isAskedToFlipCoin, getRandomCoinToss],
-    [isPlayingRockPaperScissors, getRandomRockPaperScissors],
+    [isPlayingRockPaperScissors, sayRandomRockPaperScissors],
     [isAskingAboutSourceCode, saySourceCode],
 ];
 

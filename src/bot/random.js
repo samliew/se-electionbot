@@ -62,9 +62,7 @@ export const getRandomPlop = () => new RandomArray(
 ).getRandom();
 export const getRandomOops = () => new RandomArray(
     `Oops!`,
-    `hmm...`,
     `Sorry,`,
-    `My bad.`,
     `Oh no...`,
     `Oh dear.`,
     `Mamma mia!`,
@@ -286,10 +284,4 @@ export const getRandomDieRoll = () => new RandomArray(
 export const getRandomCoinToss = () => new RandomArray(
     "*heads*",
     "*tails*",
-).getRandom();
-
-export const getRandomRockPaperScissors = () => new RandomArray(
-    "*rock*",
-    "*paper*",
-    "*scissors*",
 ).getRandom();

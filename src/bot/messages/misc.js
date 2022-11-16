@@ -1,5 +1,5 @@
 import { matchNumber } from "../../shared/utils/expressions.js";
-import { RandomArray } from "../random.js";
+import { getRandomOops, RandomArray } from "../random.js";
 import { makeURL } from "../utils.js";
 
 /**
@@ -47,4 +47,36 @@ export const getRandomSidedDieRoll = (_config, _elections, _election, text) => {
     ).getRandom();
 
     return `*${arr}*`;
+};
+
+/**
+ * @summary builds a response to rock paper scissors
+ * @type {MessageBuilder}
+ */
+export const sayRandomRockPaperScissors = (_config, _elections, _election, text) => {
+    const play = text.match(/^(rock|paper|scissors)$/i)?.[1]?.toLowerCase();
+
+    if (!play) {
+        return `I'm not in the mood for games now.`;
+    }
+
+    const guess = new RandomArray("rock", "paper", "scissors").getRandom();
+
+    if (guess === play) {
+        return `*${guess}* - ${getRandomOops()} It's a tie!`;
+    }
+    else if (guess === 'rock' && play === 'scissors' || guess === 'paper' && play === 'rock' || guess === 'scissors' && play === 'paper') {
+        return `*${guess}* - ${getRandomOops()} I win!`;
+    }
+    else {
+        const randomWinResponse = new RandomArray(
+            "You win. This time.",
+            "I let you win this time.",
+            "You win. I'm bored already.",
+            "You win. This isn't fun at all.",
+            "Okay you win. Go do something else.",
+            "You win. I'm going to go cry in the corner.",
+        ).getRandom();
+        return `*${guess}* - ${randomWinResponse}`;
+    }
 };
