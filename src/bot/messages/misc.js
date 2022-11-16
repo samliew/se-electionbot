@@ -54,18 +54,18 @@ export const getRandomSidedDieRoll = (_config, _elections, _election, text) => {
  * @type {MessageBuilder}
  */
 export const sayRandomRockPaperScissors = (_config, _elections, _election, text) => {
-    const play = text.match(/^(rock|paper|scissors)$/i)?.[1]?.toLowerCase();
+    const user = text.match(/^(rock|paper|scissors)$/i)?.[1]?.toLowerCase();
 
-    if (!play) {
+    if (!user) {
         return `I'm not in the mood for games now.`;
     }
 
     const guess = new RandomArray("rock", "paper", "scissors").getRandom();
 
-    if (guess === play) {
+    if (guess === user) {
         return `*${guess}* - ${getRandomOops()} It's a tie!`;
     }
-    else if (guess === 'rock' && play === 'scissors' || guess === 'paper' && play === 'rock' || guess === 'scissors' && play === 'paper') {
+    else if (guess === 'rock' && user === 'scissors' || guess === 'paper' && user === 'rock' || guess === 'scissors' && user === 'paper') {
         return `*${guess}* - ${getRandomOops()} I win!`;
     }
     else {
