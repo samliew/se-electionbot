@@ -137,20 +137,18 @@ export const sayElectionPhaseDuration = (config, _elections, election, text) => 
 export const sayNumberOfPositions = (_config, _elections, election, _text) => {
     const { numPositions = 0 } = election;
 
-    const suffix = pluralize(numPositions, "s", "");
     const pastBe = pluralize(numPositions, "were", "was");
-    const currBe = pluralize(numPositions, "are being", "is");
     const future = pluralize(numPositions, "will be", "shall be");
 
     const rules = [
-        [election.isActive(), currBe],
         [election.isNotStartedYet(), future],
+        [election.isActive(), future],
         [election.isEnded(), pastBe]
     ];
 
-    const [_rule, modal] = rules.find(([rule]) => rule) || [, `${currBe}/${pastBe}/${future}`];
+    const [_rule, modal] = rules.find(([rule]) => rule) || [, `${pastBe}/${future}`];
 
-    return `${numPositions} mod${suffix} ${modal} elected`;
+    return `${numPositions} mod${pluralize(numPositions, "s", "")} ${modal} elected.`;
 };
 
 /**
