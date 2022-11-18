@@ -54,6 +54,12 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
 
     const { phase, dateElection, statVoters, apiSlug, siteUrl } = election;
 
+    // dateElection cannot be null for this query
+    if (!dateElection) {
+        console.error("[sayAlreadyVoted] dateElection is null");
+        return `${getRandomOops()} I do not know when the election is starting.`;
+    }
+
     // Badge that is awarded for voting in elections
     const electionBadgeName = "Constituent";
     const electionBadgeId = election.getBadgeId(electionBadgeName);
@@ -62,11 +68,11 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
 
     const now = config.nowOverride || new Date();
 
-    const todate = matchISO8601(text, { preMatches: /\b(?:to|till)\s+/ }) ||
-        dateToShortISO8601Timestamp(now);
+    const todateMatch = matchISO8601(text, { preMatches: /\b(?:to|till)\s+/ })
+    const todate = todateMatch || dateToShortISO8601Timestamp(now);
 
     if (config.debugOrVerbose) {
-        console.log("voting date bounds", { todate, fromdate: dateElection });
+        console.log("[sayAlreadyVoted] voting date bounds", { todate, fromdate: dateElection });
     }
 
     if (phase === 'election' && electionBadgeId) {
@@ -75,13 +81,13 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
         const [numEligible, numAwarded] = await Promise.all([
             getNumberOfUsersEligibleToVote(config, election),
             getNumberOfVoters(config, apiSlug, electionBadgeId, {
-                from: dateElection || now,
+                from: dateElection,
                 to: todate
             })
         ]);
 
         // In case the API failed
-        if (!numEligible || !numAwarded) {
+        if (!numEligible) {
             return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
         }
 
@@ -89,6 +95,11 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
         const negated = isInverted ? " not" : "";
 
         const badgeLink = makeURL(electionBadgeName, `${siteUrl}/help/badges/${electionBadgeId}`);
+
+        // In case no badges were awarded yet
+        if (!numAwarded) {
+            return `Based on the number of ${badgeLink} badges awarded, no one has voted yet.`;
+        }
 
         const basePrefix = `Based on the number of ${badgeLink} badges awarded`;
         const eligible = `(${percentify(numVoted, numEligible, 2)} of ${format(numEligible)} eligible)`;
@@ -98,6 +109,9 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
     }
     else if (phase === 'ended') {
         return statVoters || `${getRandomOops()} I couldn't scrape the number of voters from the election page.`;
+    }
+    else if (phase === 'cancelled') {
+        return statVoters || `The election has been cancelled.`;
     }
 
     return `We won't know until the election starts. Come back ${dateElection ? linkToRelativeTimestamp(dateElection) : "later"}.`;
