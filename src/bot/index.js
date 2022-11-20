@@ -142,7 +142,7 @@ use defaults ${defaultChatNotSet}`
 
     // Debug mode is on, warn and log initial BotConfig
     if (config.debug) {
-        console.error('WARNING - Debug mode is on!');
+        console.error('[init] debug mode is on!');
         console.log('electionUrl:', electionUrl);
         Object.entries(config).forEach(([key, val]) => typeof val !== 'function' ? console.log(key, val) : 0);
     }
@@ -166,12 +166,12 @@ use defaults ${defaultChatNotSet}`
         const election = elections.get(electionNum);
 
         if (!election) {
-            console.error(`FATAL - missing election #${electionNum}`);
+            console.error(`[fatal] missing election #${electionNum}`);
             return;
         }
 
         if (errors.size) {
-            console.error(`FATAL - Invalid election data:\n${[...errors].map(([electionNum, errors]) => `#${electionNum}\n${errors.join("\n")}`
+            console.error(`[fatal] invalid election data:\n${[...errors].map(([electionNum, errors]) => `#${electionNum}\n${errors.join("\n")}`
             ).join("\n")
                 }`);
             return;
@@ -234,7 +234,7 @@ use defaults ${defaultChatNotSet}`
 
             // If chat domain or room changed, warn and log new values
             if (originalChatDomain !== config.chatDomain || originalChatRoomId !== config.chatRoomId) {
-                console.log(`INIT - App is in production with active election - redirected to live room:
+                console.log(`[init] production mode with an active election, redirected to live room:
                 DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
                 ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
             }
@@ -258,19 +258,18 @@ use defaults ${defaultChatNotSet}`
             await client.login(accountEmail, accountPassword);
         }
         catch (e) {
-            console.error('FATAL - Unable to login to site!');
-            console.log(client);
+            console.error('[fatal] unable to login to chat', e);
             return;
         }
 
         // Get bot's chat profile
         const me = await client.getMe();
-        console.log(`INIT - Logged in to ${config.chatDomain} as ${await me.name} (${me.id})`);
+        console.log(`[init] logged in to ${config.chatDomain} as ${await me.name} (${me.id})`);
 
         // Join the election chat room
         const joinedRoom = await client.joinRoom(config.chatRoomId);
         if (!joinedRoom) {
-            console.error(`FATAL - failed to join room ${config.chatRoomId}`);
+            console.error(`[fatal] failed to join room ${config.chatRoomId}`);
             return;
         }
 
@@ -308,7 +307,7 @@ use defaults ${defaultChatNotSet}`
          * Sync state from chat transcript on startup
          * - activityCounter, lastActivityTime, lastMessageTime, lastBotMessage, (botSentLastMessage)
          */
-        const transcriptMessages = await fetchChatTranscript(config, `https://chat.${config.chatDomain}/transcript/${config.chatRoomId}`);
+        const transcriptMessages = await fetchChatTranscript(config, room.transcriptURL);
 
         const botMessageFilter = await onlyBotMessages(me);
 
@@ -331,11 +330,8 @@ use defaults ${defaultChatNotSet}`
 
         config.activityCounter = await countValidBotMessages(config, transcriptMessages, me);
 
-        const { currentNomineePostIds } = election;
-
         if (config.verbose) {
-            console.log(`INIT - Current nominees:`, election.nominees);
-            console.log(`INIT - Current nominee post ids:`, currentNomineePostIds);
+            console.log(`[init] Current nominees:`, election.nominees);
         }
 
         /*
@@ -639,7 +635,7 @@ use defaults ${defaultChatNotSet}`
                 }
                 // Bot mentioned, no response, not fun mode or can't have fun - we might be interested
                 else {
-                    const permalink = msgId ? `https://chat.${config.chatDomain}/transcript/message/${msgId}#message-${msgId}` : '';
+                    const permalink = msgId ? `${client.root}transcript/message/${msgId}#message-${msgId}` : '';
                     await pingDevelopers(`You might want to ${makeURL('take a look at this', permalink)},`, config, controlRoom ?? room);
                 }
             }
@@ -657,7 +653,7 @@ use defaults ${defaultChatNotSet}`
 
         // Connect to the room, and listen for new events
         await room.watch();
-        console.log(`INIT - Joined and listening in room https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`);
+        console.log(`[init] watching room ${client.root}rooms/${config.chatRoomId}`);
 
         // Catch all handler to swallow non-crashing rejections
         process.on("unhandledRejection", (reason) => {

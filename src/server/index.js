@@ -14,7 +14,7 @@ import { ping } from './routes/ping.js';
 import { realtime } from "./routes/realtime.js";
 import { say } from "./routes/say.js";
 import { server } from "./routes/server.js";
-import { configureApp, farewell, start } from './utils.js';
+import { configureApp, farewell, getAppAddress, start } from './utils.js';
 
 /**
  * @typedef {import("../bot/announcement.js").default} Announcer
@@ -106,17 +106,20 @@ export const startServer = async (client, room, config, election, scheduler, res
 
     const { graceful = true, portOverride } = options;
 
+    /** @type {number} */
     const port = portOverride !== void 0 ? portOverride : app.get("port");
     const info = `${config.scriptHostname || "the server"} (port ${port})`;
 
     const started = await start(app, port, info);
-    if (started) {
-        console.log(`[server] started
+    const address = getAppAddress(app);
+
+    if (started && address) {
+        console.log(`[server] server info
 dirname  ${__dirname}
 partials ${partialsPath}
 static   ${staticPath}
 views    ${viewsPath}
-port     ${port}`);
+address  ${address}`);
     }
 
     if (!graceful) return app;
