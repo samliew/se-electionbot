@@ -11,6 +11,7 @@ import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
  * @typedef {import("@userscripters/stackexchange-api-types").User} User
  * @typedef {import("@userscripters/stackexchange-api-types").Badge} Badge
  * @typedef {import("./config.js").BotConfig} BotConfig
+ * @typedef {import("../shared/utils/api").PagingOptions} PagingOptions
  */
 
 /**
@@ -23,10 +24,6 @@ import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
  *  from?: Date | string | number;
  *  to?: Date | string | number;
  * }} DateTimeOptions
- *
- * @typedef {{
- *  page?: number
- * }} PagingOptions
  */
 
 /**
@@ -52,6 +49,48 @@ export const getStackApiKey = (keyPool) => {
     keyPool.push(/** @type {string} */(keyPool.shift()));
     return newKey;
 };
+
+/**
+ * @typedef {PagingOptions & DateTimeOptions & {
+ *  filter?: string,
+ *  keys: string[],
+ *  order?: "asc" | "desc",
+ *  site?: string,
+ *  sort?: string,
+ * }} ApiSearchParamsOptions
+ * 
+ * @summary builds a query string for SE API requests
+ * @param {ApiSearchParamsOptions} options 
+ * @returns {URLSearchParams}
+ */
+export const getApiQueryString = (options) => {
+    const { 
+        filter = "default", 
+        from,
+        keys,
+        page, 
+        pageSize, 
+        order,
+        site,
+        sort,
+        to,
+    } = options;
+
+    const params = new URLSearchParams({ filter, key: getStackApiKey(keys) });
+    
+    if(page) params.append("page", page.toString());
+    if(pageSize) params.append("pagesize", pageSize.toString());
+    
+    if(site) params.append("site", site);
+    
+    if(order) params.append("order", order);
+    if(sort) params.append("sort", sort);
+    
+    if(from) params.append("fromdate", getSeconds(from).toString());
+    if(to) params.append("todate", getSeconds(to).toString());
+
+    return params;
+}
 
 /**
  * @template V
