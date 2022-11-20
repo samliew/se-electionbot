@@ -197,3 +197,30 @@ export const onMountAddToRoutes = (subapp) => {
             .forEach((info) => parentRoutes.set(info.path, info));
     });
 };
+
+/**
+ * @summary gets the Express app server
+ * @param {ExpressApp} app Express app
+ * @returns {HttpServer|undefined} 
+ */
+export const getServer = (app) => {
+    return app.get("server");
+};
+
+/**
+ * @summary extracts the Express app address
+ * @param {ExpressApp} app Express app
+ * @returns {string|undefined}
+ */
+export const getAppAddress = (app) => {
+    const info = getServer(app)?.address();
+    
+    if(typeof info === "object" && info) {
+        const { address, port } = info;
+        return `${address}:${port}`;
+    }
+
+    if(typeof info === "string") {
+        return info;
+    }
+}
