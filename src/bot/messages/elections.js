@@ -1,8 +1,9 @@
+import Badge from "../../shared/entities/badges.js";
 import { datesToDuration, dateToRelativeTime, dateToShortISO8601Timestamp, getSeconds } from "../../shared/utils/dates.js";
 import { matchISO8601, matchNumber, safeCapture } from "../../shared/utils/expressions.js";
 import { findInMap, mapMap } from "../../shared/utils/maps.js";
 import { formatOrdinal } from "../../shared/utils/strings.js";
-import { API_ERROR_MESSAGE, getAwardedBadges, getNamedBadges } from "../api.js";
+import { API_ERROR_MESSAGE, getNamedBadges, getNumberOfElectionVisitors } from "../api.js";
 import { getCandidateOrNominee, getRandomNow, getRandomOops } from "../random.js";
 import { pingDevelopers } from "../reports.js";
 import { listify, makeURL, pluralize } from "../utils.js";
@@ -259,15 +260,15 @@ export const sayWillElectionBeCancelled = (config, _es, election) => {
  * @type {MessageBuilder}
  */
 export const sayHowManyVisitedElection = async (config, _es, election, text, _u, _b, room) => {
-    const { apiSlug, dateNomination, repVote, siteUrl } = election;
+    const { apiSlug, dateNomination, repVote, siteHostname } = election;
 
     // Badge that is awarded for visiting the election page
     const electionBadgeName = "Caucus";
 
-    const [badge] = await getNamedBadges(config, apiSlug, { name: electionBadgeName });
+    const [apiBadgeDTO] = await getNamedBadges(config, apiSlug, { name: electionBadgeName });
 
-    if (!badge) {
-        console.error(`[API] Couldn't identify the "${electionBadgeName}" badge`);
+    if (!apiBadgeDTO) {
+        console.error(`[api] failed to identify the "${electionBadgeName}" badge`);
         await pingDevelopers(`${getRandomOops()} couldn't identify the "${electionBadgeName}" badge`, config, room);
         return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
     }
@@ -284,15 +285,14 @@ export const sayHowManyVisitedElection = async (config, _es, election, text, _u,
     const to = matchISO8601(text, { preMatches: /\b(?:to|till)\s+/ }) ||
         dateToShortISO8601Timestamp(now);
 
-    const { badge_id } = badge;
+    const badge = new Badge(siteHostname, apiBadgeDTO);
 
-    const { length: numAwarded } = await getAwardedBadges(
-        config, apiSlug, [badge_id],
-        { from: dateNomination, to }
+    const { total, error } = await getNumberOfElectionVisitors(
+        config, badge.id, { from: dateNomination, site: apiSlug, to }
     );
 
-    // In case the API failed
-    if (!numAwarded) {
+    if (error) {
+        console.error(error);
         return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
     }
 
@@ -302,11 +302,11 @@ export const sayHowManyVisitedElection = async (config, _es, election, text, _u,
         ended: "before it ended",
     };
 
-    const badgeLink = makeURL(electionBadgeName, `${siteUrl}/help/badges/${badge_id}`);
+    const badgeLink = makeURL(electionBadgeName, badge.siteURL);
 
     const basePrefix = `Based on the number of ${badgeLink} badges awarded`;
 
-    const visited = `${numAwarded} user${pluralize(numAwarded)} visited ${electionOrdinalName}`;
+    const visited = `${total} user${pluralize(total)} visited ${electionOrdinalName}`;
 
     const enoughRep = `and had enough reputation (${repVote})`;
 
