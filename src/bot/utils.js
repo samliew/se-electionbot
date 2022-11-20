@@ -116,7 +116,7 @@ export const fetchUrl = async (_config, url, json = false) => {
         return data;
     }
     catch (error) {
-        console.error(`fetch error - ${url}:\n${error}`);
+        console.error(`[fetch] ${url}:\n${error}`);
         return null;
     }
 };
