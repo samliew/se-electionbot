@@ -66,7 +66,9 @@ export const getStackApiKey = (keyPool) => {
 export const handleResponse = async (response, backoffCallback, successCallback) => {
     const { backoff, quota_remaining } = response;
     if (backoff) {
+        console.log(`[api] backing off for ${backoff}s`);
         await wait(backoff);
+        console.log(`[api] backoff of ${backoff}s expired`);
         return backoffCallback(response);
     }
 
