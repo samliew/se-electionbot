@@ -1,3 +1,4 @@
+import { ApiError } from "../shared/errors/ApiError.js";
 import { getSeconds } from "../shared/utils/dates.js";
 import { has, mergeMaps } from "../shared/utils/maps.js";
 import { apiBase, apiVer, fetchUrl, wait } from "./utils.js";
@@ -254,6 +255,32 @@ export const getAwardedBadges = async (config, site, badgeIds, options) => {
 
             return items;
         });
+};
+
+/**
+ * @summary gets the number of awarded Caucus badges from the API
+ * @param {BotConfig} config bot configuration 
+ * @param {number} badgeId id of the visitor badge
+ * @param {Omit<ApiSearchParamsOptions, "keys">} options request configuration
+ * @returns {Promise<{ total: number, error?: ApiError }>}
+ */
+export const getNumberOfElectionVisitors = async (config, badgeId, options) => {
+    const badgeURI = new URL(`${apiBase}/${apiVer}/badges/${badgeId}/recipients`);
+    badgeURI.search = getApiQueryString({
+        ...options, filter: "!AH)b5UpuK07x", keys: config.apiKeyPool,
+    }).toString();
+
+    /**@type {ApiWrapper<Badge>} */
+    const response = await fetchUrl(config, badgeURI, true) || {};
+
+    const { total = 0, error_id } = response;
+
+    if (config.debugOrVerbose) console.log(`[api] election visitors: ${total}`);
+
+    return { 
+        error: error_id && new ApiError("failed to get number of election visitors", response),
+        total, 
+    };
 };
 
 /**
