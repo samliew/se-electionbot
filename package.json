@@ -65,7 +65,7 @@
         "@types/cheerio": "^0.22.31",
         "@types/express": "^4.17.14",
         "@types/heroku-client": "^3.1.0",
-        "@types/jsdom": "^16.2.15",
+        "@types/jsdom": "^20.0.1",
         "@types/markdown-it": "^12.2.3",
         "@types/mocha": "^9.1.1",
         "@types/node-cron": "^3.0.6",
