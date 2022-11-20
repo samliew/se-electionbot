@@ -127,6 +127,33 @@ export const scrapeQuestionnaire = ($, el) => {
     return questions;
 };
 
+/**
+ * @summary list of badges used in the election
+ * @type {ElectionBadge[]}
+ */
+export const ElectionBadges = [
+    { name: 'Civic Duty', required: true, type: 'moderation', badge_id: 32 },
+    { name: 'Cleanup', required: false, type: 'moderation', badge_id: 4 },
+    { name: 'Constituent', required: false, type: 'participation', badge_id: 1974 },
+    { name: 'Convention', required: true, type: 'participation', badge_id: 901 },
+    { name: 'Copy Editor', required: false, type: 'editing', badge_id: 223 },
+    { name: 'Deputy', required: true, type: 'moderation', badge_id: 1002 },
+    { name: 'Electorate', required: false, type: 'moderation', badge_id: 155 },
+    { name: 'Enthusiast', required: false, type: 'participation', badge_id: 71 },
+    { name: 'Explainer', required: false, type: 'editing', badge_id: 4368 },
+    { name: 'Investor', required: false, type: 'participation', badge_id: 219 },
+    { name: 'Marshal', required: false, type: 'moderation', badge_id: 1298 },
+    { name: 'Organizer', required: false, type: 'editing', badge_id: 5 },
+    { name: 'Quorum', required: false, type: 'participation', badge_id: 900 },
+    { name: 'Refiner', required: false, type: 'editing', badge_id: 4369 },
+    { name: 'Reviewer', required: false, type: 'moderation', badge_id: 1478 },
+    { name: 'Sportsmanship', required: false, type: 'moderation', badge_id: 805 },
+    { name: 'Steward', required: false, type: 'moderation', badge_id: 2279 },
+    { name: 'Strunk & White', required: true, type: 'editing', badge_id: 12 },
+    { name: 'Tag Editor', required: false, type: 'editing', badge_id: 254 },
+    { name: 'Yearling', required: false, type: 'participation', badge_id: 13 },
+];
+
 export default class Election {
 
     /**
@@ -190,30 +217,9 @@ export default class Election {
 
     /**
      * @description Site election badges, defaults to Stack Overflow's
-     * @type {ElectionBadge[]}
+     * @type {ElectionBadges}
      */
-    electionBadges = [
-        { name: 'Civic Duty', required: true, type: 'moderation', badge_id: 32 },
-        { name: 'Cleanup', required: false, type: 'moderation', badge_id: 4 },
-        { name: 'Constituent', required: false, type: 'participation', badge_id: 1974 },
-        { name: 'Convention', required: true, type: 'participation', badge_id: 901 },
-        { name: 'Copy Editor', required: false, type: 'editing', badge_id: 223 },
-        { name: 'Deputy', required: true, type: 'moderation', badge_id: 1002 },
-        { name: 'Electorate', required: false, type: 'moderation', badge_id: 155 },
-        { name: 'Enthusiast', required: false, type: 'participation', badge_id: 71 },
-        { name: 'Explainer', required: false, type: 'editing', badge_id: 4368 },
-        { name: 'Investor', required: false, type: 'participation', badge_id: 219 },
-        { name: 'Marshal', required: false, type: 'moderation', badge_id: 1298 },
-        { name: 'Organizer', required: false, type: 'editing', badge_id: 5 },
-        { name: 'Quorum', required: false, type: 'participation', badge_id: 900 },
-        { name: 'Refiner', required: false, type: 'editing', badge_id: 4369 },
-        { name: 'Reviewer', required: false, type: 'moderation', badge_id: 1478 },
-        { name: 'Sportsmanship', required: false, type: 'moderation', badge_id: 805 },
-        { name: 'Steward', required: false, type: 'moderation', badge_id: 2279 },
-        { name: 'Strunk & White', required: true, type: 'editing', badge_id: 12 },
-        { name: 'Tag Editor', required: false, type: 'editing', badge_id: 254 },
-        { name: 'Yearling', required: false, type: 'participation', badge_id: 13 },
-    ];
+    electionBadges = ElectionBadges;
 
     /** @type {{ [phase in Exclude<ElectionPhase, null>] ?: string}} */
     #dates = {};
