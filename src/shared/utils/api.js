@@ -1,5 +1,6 @@
 /**
  * @typedef {{
+ *  pageSize?: number,
  *  page?: number
  * }} PagingOptions
  */
