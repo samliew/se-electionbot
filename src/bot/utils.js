@@ -37,6 +37,8 @@ let _apiBackoff = Date.now();
  * @typedef {import("./election").ElectionPhase} ElectionPhase
  * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {import("./commands/user").User} ChatUser
+ * @typedef {import("../shared/utils/api.js").PagingOptions} PagingOptions
+ * @typedef {PagingOptions} ChatSearchOptions
  */
 
 /**
@@ -124,18 +126,21 @@ export const fetchUrl = async (_config, url, json = false) => {
 /**
  * @summary searches chat and retrieve messages
  * @param {BotConfig} config bot configuration
- * @param {string} chatDomain which chat server to search on (stackoverflow.com|stackexchange.com|meta.stackexchange.com)
  * @param {string} query what to search for
  * @param {number|string} roomId if omitted, searches all chat
+ * @param {ChatSearchOptions} [options] configuration options
  * @returns {Promise<ChatMessage[]>}
  */
-export const searchChat = async (config, chatDomain, query, roomId = '', pagesize = 100, page = 1) => {
-    console.log(`[chat search] room ${roomId} (${chatDomain})\nquery: "${query}"`);
+export const searchChat = async (config, query, roomId = '', options = {}) => {
+    const { chatDomain } = config;
+    const { pageSize = 100, page = 1} = options;
+
+    console.log(`[chat] searching room ${roomId} (${chatDomain})\nquery: "${query}"`);
 
     const url = new URL(`https://chat.${chatDomain}/search`);
     url.search = new URLSearchParams({
         page: page.toString(),
-        pagesize: pagesize.toString(),
+        pagesize: pageSize.toString(),
         room: roomId.toString(),
         q: query,
         user: "",

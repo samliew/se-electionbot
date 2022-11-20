@@ -72,7 +72,7 @@ describe("Stack Exchange Chat integration", function () {
 
     describe(searchChat.name, async () => {
         testIf('should be able to search chat correctly', async () => {
-            const chatMessages = await searchChat(getMockBotConfig(), "stackoverflow.com", "We have a new nomination Please welcome our latest candidate", 238039);
+            const chatMessages = await searchChat(getMockBotConfig(), "We have a new nomination Please welcome our latest candidate", 238039);
 
             expect(chatMessages).to.not.be.empty;
 

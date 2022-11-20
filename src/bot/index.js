@@ -345,7 +345,7 @@ use defaults ${defaultChatNotSet}`
         console.log(`[init] added announced: ${addedWithdrawn} withdrawn, ${addedAnnounced} nominated`);
 
         // TODO: check if not posted yet
-        const metaAnnouncements = await searchChat(config, config.chatDomain, "moderator election results", config.chatRoomId);
+        const metaAnnouncements = await searchChat(config, "moderator election results", config.chatRoomId);
         if (election.isEnded() && config.canAnnounceMetaPost && !metaAnnouncements.length) {
             const status = await postResultsAnnouncement({ config, election, room, content: "" });
             console.log(`[init] posted meta election results: ${status}`);

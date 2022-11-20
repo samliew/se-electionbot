@@ -26,7 +26,7 @@ import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } f
  */
 export const findNominationAnnouncementsInChat = async (config, user) => {
     const nominationsQuery = "We have a new nomination Please welcome our latest candidate";
-    const nominationAnnouncements = await searchChat(config, config.chatDomain, nominationsQuery, config.chatRoomId);
+    const nominationAnnouncements = await searchChat(config, nominationsQuery, config.chatRoomId);
     const botMessageFilter = await onlyBotMessages(user);
     return nominationAnnouncements.filter(botMessageFilter);
 };
@@ -39,7 +39,7 @@ export const findNominationAnnouncementsInChat = async (config, user) => {
  */
 export const findWithdrawalAnnouncementsInChat = async (config, user) => {
     const withdrawalsQuery = "Attention Candidate has withdrawn from the election";
-    const withdrawalAnnouncements = await searchChat(config, config.chatDomain, withdrawalsQuery, config.chatRoomId);
+    const withdrawalAnnouncements = await searchChat(config, withdrawalsQuery, config.chatRoomId);
     const botMessageFilter = await onlyBotMessages(user);
     return withdrawalAnnouncements.filter(botMessageFilter);
 };
