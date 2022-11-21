@@ -55,6 +55,7 @@ export const getStackApiKey = (keyPool) => {
  * @typedef {PagingOptions & DateTimeOptions & {
  *  filter?: string,
  *  keys: string[],
+ *  min?: number,
  *  order?: "asc" | "desc",
  *  site?: string,
  *  sort?: string,
@@ -69,6 +70,7 @@ export const getApiQueryString = (options) => {
         filter = "default", 
         from,
         keys,
+        min,
         page, 
         pageSize, 
         order,
@@ -82,6 +84,7 @@ export const getApiQueryString = (options) => {
     if(page) params.append("page", page.toString());
     if(pageSize) params.append("pagesize", pageSize.toString());
     
+    if(min) params.append("min", min.toString());
     if(site) params.append("site", site);
     
     if(order) params.append("order", order);

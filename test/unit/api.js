@@ -13,6 +13,7 @@ describe('SE API', () => {
                 filter: "abc123",
                 from: "2022-09-03T00:00:00Z",
                 keys: ["key1"],
+                min: 2000,
                 order: "desc",
                 page: 2,
                 pageSize: 50,
@@ -24,6 +25,7 @@ describe('SE API', () => {
             const qs = getApiQueryString(options);
 
             expect(qs.get("key")).to.equal("key1");
+            expect(qs.get("min")).to.equal("2000");
             expect(qs.get("site")).to.equal("stackoverflow");
             
             expect(qs.get("fromdate")).to.equal("1662163200");
@@ -45,7 +47,10 @@ describe('SE API', () => {
         it("should not append unset parameters", () => {
             const qs = getApiQueryString({ keys: [] });
 
-            const unset = ["site", "fromdate", "todate", "page", "pagesize", "order", "sort"];
+            const unset = [
+                "site", "fromdate", "min", "todate", 
+                "page", "pagesize", "order", "sort"
+            ];
 
             unset.forEach((p) => {
                 expect(qs.has(p), `expected unset ${p}, got "${qs.get(p)}"`).to.be.false;
