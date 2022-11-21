@@ -106,9 +106,16 @@ export const getVotingGraph = async (config, election, fromdate, todate) => {
     for (let i = 0; i < days; i++) {
         const to = addDates(fromdate, i + 1);
 
-        const voters = await getNumberOfVoters(config, apiSlug, electionBadgeId, { from: fromdate, to });
+        const { total, error } = await getNumberOfVoters(
+            config, electionBadgeId, { from: fromdate, site: apiSlug, to }
+        );
 
-        dailyGraph.set(dateToUtcTimestamp(to), voters);
+        if(error) {
+            console.error(error);
+            return dailyGraph;
+        }
+
+        dailyGraph.set(dateToUtcTimestamp(to), total);
     }
 
     return dailyGraph;

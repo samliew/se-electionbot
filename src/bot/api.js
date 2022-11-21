@@ -284,35 +284,31 @@ export const getNumberOfElectionVisitors = async (config, badgeId, options) => {
 };
 
 /**
- * @summary gets number of awarded Constituent badges from the API for current election
- * @param {BotConfig} config
- * @param {string} site election site slug
- * @param {number} badgeId Constituent badge id
- * @param {Required<Pick<DateTimeOptions, "from">> & DateTimeOptions} options configuration
- * @returns {Promise<number>}
+ * @summary gets number of awarded Constituent badges from the API
+ * @param {BotConfig} config bot configuration
+ * @param {number} badgeId id of the visitor badge
+ * @param {Omit<ApiSearchParamsOptions, "keys">} options request options
+ * @returns {Promise<{ total: number, error?: ApiError }>}
  */
-export const getNumberOfVoters = async (config, site, badgeId, options) => {
-    const { from, to } = options;
-
-    const params = new URLSearchParams({
-        site,
-        fromdate: getSeconds(from).toString(),
-        key: getStackApiKey(config.apiKeyPool),
-        filter: "total"
+export const getNumberOfVoters = async (config, badgeId, options) => {
+    const params = getApiQueryString({
+        ...options, filter: "!AH)b5UpuK07x", keys: config.apiKeyPool,
     });
-
-    if (to) params.append("todate", getSeconds(to).toString());
 
     const badgeURI = new URL(`${apiBase}/${apiVer}/badges/${badgeId}/recipients`);
     badgeURI.search = params.toString();
 
-    if (config.debug) console.log(badgeURI.toString());
+    /** @type {ApiWrapper<Badge>} */
+    const response = await fetchUrl(config, badgeURI, true) || {};
 
-    const { total = 0 } = /**@type {ApiWrapper<User>} */(await fetchUrl(config, badgeURI, true)) || {};
+    const { total = 0, error_id } = response;
 
-    if (config.verbose) console.log(`API - ${getNumberOfVoters.name}\n`, total);
+    if (config.debugOrVerbose) console.log(`[api] election voters: ${total}`);
 
-    return total === 1 ? 2 : total; // Avoid the extremely unlikely singular scenario
+    return { 
+        error: error_id && new ApiError("failed to get number of election voters", response),
+        total, 
+    };
 };
 
 /**

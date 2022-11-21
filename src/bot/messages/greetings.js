@@ -42,10 +42,12 @@ export const sayGreeting = async (config, elections, election, botUser, room, gr
     let alreadyVoted = "";
     if (election.getPhase(now) === "election") {
         const numEligible = await getNumberOfUsersEligibleToVote(config, election);
-        const numVoters = await getNumberOfVoters(config, apiSlug, electionBadgeId, { from: dateElection || now });
+        const { total: numVoters, error } = await getNumberOfVoters(
+            config, electionBadgeId, { from: dateElection || now, site: apiSlug }
+        );
 
-        // In case the API failed
-        if (!numEligible || !numVoters) {
+        if (error) {
+            console.error(error);
             await pingDevelopers(`${getRandomOops()} couldn't get numEligible or numVoters in sayGreeting(), cc`, config, room);
             return "";
         }

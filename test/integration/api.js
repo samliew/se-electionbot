@@ -50,14 +50,17 @@ describe("Stack Exchange API integration", function () {
 
     describe(getNumberOfVoters.name, () => {
         testIf('should return number of awarded badges on success', async () => {
-            const totalAwarded = await getNumberOfVoters(
+            const { total, error } = await getNumberOfVoters(
                 getMockBotConfig(),
-                "stackoverflow",
-                1974, // Constituent
-                { from: '2021-10-18 20:00:00Z' } // 11 Oct 2021 - start of election 13
+                1974, // Constituent badge id
+                { 
+                    from: '2021-10-18 20:00:00Z', // 11 Oct 2021 - start of election 13 
+                    site: "stackoverflow" 
+                }
             );
 
-            expect(totalAwarded).to.gt(0);
+            expect(error).to.be.undefined;
+            expect(total).to.be.greaterThan(0);
         });
     });
 });

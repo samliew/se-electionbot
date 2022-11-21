@@ -78,16 +78,18 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
     if (phase === 'election' && electionBadgeId) {
         const format = partialRight(formatNumber, [3]);
 
-        const [numEligible, numAwarded] = await Promise.all([
+        const [numEligible, { total: numAwarded, error }] = await Promise.all([
             getNumberOfUsersEligibleToVote(config, election),
-            getNumberOfVoters(config, apiSlug, electionBadgeId, {
+            getNumberOfVoters(config, electionBadgeId, {
                 from: dateElection,
+                site: apiSlug,
                 to: todate
             })
         ]);
 
         // In case the API failed
-        if (!numEligible) {
+        if (error) {
+            console.error(error);
             return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
         }
 
