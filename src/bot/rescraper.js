@@ -229,7 +229,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 const { canIdleGreet, canBusyGreet } = config;
                 if (canIdleGreet) await sayIdleGreeting(config, elections, election, bot, room);
                 if (canBusyGreet) await sayBusyGreeting(config, elections, election, bot, room);
-                console.log(`[rescraper] activity greeting\n`, { canIdleGreet, canBusyGreet });
+                console.log(`[rescraper] activity greeting: idle ${canIdleGreet}, busy ${canBusyGreet}`);
             }
 
             else if (election.isInactive()) {

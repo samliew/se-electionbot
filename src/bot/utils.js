@@ -288,7 +288,7 @@ export const fetchChatTranscript = async (config, url, options = {}) => {
 
     const utcDate = formatAsTranscriptPath(now);
 
-    console.log(`[transcript] fetching ${url}${utcDate}`);
+   if(config.debugOrVerbose) console.log(`[transcript] fetching ${url}${utcDate}`);
 
     const chatTranscript = await fetchUrl(config, url + utcDate);
     const { window: { document } } = new JSDOM(chatTranscript);

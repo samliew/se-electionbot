@@ -9,15 +9,19 @@
  * @returns {void}
  */
 export const logActivity = (config, { ignored = false } = {}) => {
-    const { activityCounter, roomReachedMinActivityCount, roomReachedMaxActivityCount, lowActivityCheckMins } = config;
+    const { 
+        activityCounter, 
+        roomReachedMinActivityCount, 
+        roomReachedMaxActivityCount,
+        maxActivityCountThreshold,
+        minActivityCountThreshold,
+    } = config;
 
     const prefix = ignored ? `ignored ` : "";
 
-    console.log(`[${prefix}event]
-low activity threshold: ${lowActivityCheckMins}
-current activity:       ${activityCounter}
-reached minimum:        ${roomReachedMinActivityCount}
-reached maximum:        ${roomReachedMaxActivityCount}`);
+    console.log(`[${prefix}event] activity count:
+min: ${activityCounter}/${minActivityCountThreshold} (${roomReachedMinActivityCount})
+max: ${activityCounter}/${maxActivityCountThreshold} (${roomReachedMaxActivityCount})`);
 };
 
 /**
