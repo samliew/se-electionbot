@@ -318,27 +318,30 @@ export const getNumberOfVoters = async (config, badgeId, options) => {
  * @summary gets a number of users eligible to vote from the API
  * @param {BotConfig} config bot configuration
  * @param {Election} election current election
- * @returns {Promise<number>}
+ * @returns {Promise<{ total: number, error?: ApiError }>}
  */
 export const getNumberOfUsersEligibleToVote = async (config, election) => {
     const { repVote = 1, apiSlug: site } = election;
 
-    const userURL = new URL(`${apiBase}/${apiVer}/users`);
-    userURL.search = new URLSearchParams({
-        pagesize: "100",
-        order: "desc",
-        sort: "reputation",
+    const params = getApiQueryString({
+        filter: "!AH)b5UpuK07x", 
+        keys: config.apiKeyPool, 
+        min: repVote,
         site,
-        filter: "!40CXOUq0axmHYcgDp", // only the total field
-        min: repVote.toString(),
-        key: getStackApiKey(config.apiKeyPool)
-    }).toString();
+    });
 
-    if (config.debug) console.log(userURL.toString());
+    const userURL = new URL(`${apiBase}/${apiVer}/users`);
+    userURL.search = params.toString();
 
-    const { total = 0 } = /** @type {ApiWrapper<User>} */(await fetchUrl(config, userURL, true)) || {};
+    /** @type {ApiWrapper<User>} */
+    const response = await fetchUrl(config, userURL, true) || {};
 
-    return total;
+    const { total = 0, error_id } = response;
+
+    return {
+        error: error_id && new ApiError("failed to get number of eligible users", response),
+        total,
+    }
 };
 
 /**

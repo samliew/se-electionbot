@@ -41,13 +41,18 @@ export const sayGreeting = async (config, elections, election, botUser, room, gr
 
     let alreadyVoted = "";
     if (election.getPhase(now) === "election") {
-        const numEligible = await getNumberOfUsersEligibleToVote(config, election);
-        const { total: numVoters, error } = await getNumberOfVoters(
-            config, electionBadgeId, { from: dateElection || now, site: apiSlug }
-        );
+        const [
+            { total: numEligible, error: EligibleError },
+            { total: numVoters, error: VotersError },
+        ] = await Promise.all([
+            getNumberOfUsersEligibleToVote(config, election),
+            getNumberOfVoters(
+                config, electionBadgeId, { from: dateElection || now, site: apiSlug }
+            )
+        ]);
 
-        if (error) {
-            console.error(error);
+        if (EligibleError || VotersError) {
+            console.error(EligibleError || VotersError);
             await pingDevelopers(`${getRandomOops()} couldn't get numEligible or numVoters in sayGreeting(), cc`, config, room);
             return "";
         }

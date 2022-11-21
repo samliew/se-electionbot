@@ -78,7 +78,10 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
     if (phase === 'election' && electionBadgeId) {
         const format = partialRight(formatNumber, [3]);
 
-        const [numEligible, { total: numAwarded, error }] = await Promise.all([
+        const [
+            { total: numEligible, error: EligibleError }, 
+            { total: numAwarded, error: VotersError }
+        ] = await Promise.all([
             getNumberOfUsersEligibleToVote(config, election),
             getNumberOfVoters(config, electionBadgeId, {
                 from: dateElection,
@@ -87,9 +90,8 @@ export const sayAlreadyVoted = async (config, _es, election, text) => {
             })
         ]);
 
-        // In case the API failed
-        if (error) {
-            console.error(error);
+        if (EligibleError || VotersError) {
+            console.error(EligibleError || VotersError);
             return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
         }
 
@@ -151,15 +153,15 @@ export const sayVotedPrevious = async (config, es, election) => {
  */
 export const sayHowManyAreEligibleToVote = async (config, _elections, election) => {
     const { phase } = election;
-    const numEligible = await getNumberOfUsersEligibleToVote(config, election);
+    const { total, error } = await getNumberOfUsersEligibleToVote(config, election);
 
-    // In case the API failed
-    if (!numEligible) {
+    if (error) {
+        console.error(error);
         return `${getRandomOops()} ${API_ERROR_MESSAGE}`;
     }
 
-    const isAre = pluralize(numEligible, "are", "is");
-    const wasWere = pluralize(numEligible, "were", "was");
+    const isAre = pluralize(total, "are", "is");
+    const wasWere = pluralize(total, "were", "was");
 
     const phaseMap = {
         nomination: "will be",
@@ -170,7 +172,7 @@ export const sayHowManyAreEligibleToVote = async (config, _elections, election) 
 
     const modal = phaseMap[phase] || isAre;
 
-    return `${formatNumber(numEligible, 3)} user${pluralize(numEligible)} ${modal} eligible to vote in the election.`;
+    return `${formatNumber(total, 3)} user${pluralize(total)} ${modal} eligible to vote in the election.`;
 };
 
 /**
