@@ -118,6 +118,18 @@ export const fetchUrl = async (_config, url, json = false) => {
         return data;
     }
     catch (error) {
+        if(axios.isAxiosError(error)) {
+            const { code, message, name, response } = error;
+            console.error(`[fetch] ${name} ${code}: ${message}`);
+
+            if(response) {
+                const { data, status, statusText } = response;
+                console.log(`[fetch] error response ${status}: ${statusText}${data ? `\n${data}` : ""}`);
+            }
+
+            return null;
+        }
+
         console.error(`[fetch] ${url}:\n${error}`);
         return null;
     }
