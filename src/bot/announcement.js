@@ -9,6 +9,7 @@ import { getFormattedElectionSchedule, listify, makeURL, pluralize } from "./uti
 
 export const NOMINATION_ENDING_SOON_TEXT = "is ending soon. This is a reminder to submit your last-minute nominations.";
 export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chance to cast or modify your votes!";
+export const PRIMARY_ENDING_SOON_TEXT = "is ending soon. This is your last chance to rate the candidates!";
 
 /**
  * @template {string} T
@@ -25,6 +26,8 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
  * @typedef {"cancelled"|"ended"|"nomination"|"nominees"|"feedback"} AnnouncementType
  * @typedef {"nominees"|"winners"|"withdrawals"} ParticipantAnnouncementType
  * @typedef {import("./utils.js").ChatMessage} ChatMessage
+ * @typedef {import("./election").ElectionPhase} ElectionPhase
+ * @typedef {Extract<ElectionPhase, 'nomination'|'election'|'primary'>} FiniteElectionPhase
  */
 
 /**
@@ -82,6 +85,24 @@ export default class Announcer {
      */
     get participantAnnouncementTypes() {
         return propertyKeys(this.#announced);
+    }
+
+    /**
+     * @summary checks if the {@link phase} ending has been announced in chat
+     * @param {FiniteElectionPhase} phase election phase to check for
+     * @param {ChatMessage[]} messages bot messages from the transcript
+     * @returns {boolean}
+     */
+    announcedPhaseEndingSoon(phase, messages) {
+        /** @type {Record<FiniteElectionPhase, string>} */
+        const phaseTexts = {
+            nomination: NOMINATION_ENDING_SOON_TEXT,
+            election: ELECTION_ENDING_SOON_TEXT,
+            primary: PRIMARY_ENDING_SOON_TEXT,
+        };
+
+        const endingSoonExpr = new RegExp(phaseTexts[phase]);
+        return messages.some(({ message }) => endingSoonExpr.test(message));
     }
 
     /**

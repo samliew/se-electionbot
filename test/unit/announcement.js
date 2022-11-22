@@ -2,7 +2,7 @@ import { expect } from "chai";
 import Client from "chatexchange";
 import Room from "chatexchange/dist/Room.js";
 import sinon from "sinon";
-import Announcer from "../../src/bot/announcement.js";
+import Announcer, { ELECTION_ENDING_SOON_TEXT, NOMINATION_ENDING_SOON_TEXT, PRIMARY_ENDING_SOON_TEXT } from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
@@ -11,6 +11,8 @@ import { getMockNominee } from "../mocks/nominee.js";
 
 /**
  * @typedef {import("../../src/bot/config.js").default} BotConfig
+ * @typedef {import("../mocks/chat.js").ChatMessage} ChatMessage
+ * @typedef {import("../../src/bot/announcement.js").FiniteElectionPhase} FiniteElectionPhase
  * @typedef {import("chatexchange/dist/WebsocketEvent").WebsocketEvent} Message
  * @typedef {import("../../src/bot/announcement.js").ParticipantAnnouncementType} ParticipantAnnouncementType
  */
@@ -53,6 +55,34 @@ describe(Announcer.name, () => {
                 expect(participantAnnouncementTypes).to.include("nominees");
                 expect(participantAnnouncementTypes).to.include("winners");
                 expect(participantAnnouncementTypes).to.include("withdrawals");
+            });
+        });
+    });
+
+    describe(Announcer.prototype.announcedPhaseEndingSoon.name, () => {
+        /** @type {[FiniteElectionPhase, ChatMessage][]} */
+        const messageMap = [
+            [
+                "nomination",
+                getMockChatMessage({ message: `nomination is ${NOMINATION_ENDING_SOON_TEXT}` })
+            ],
+            [
+                "election", 
+                getMockChatMessage({ message: `election is ${ELECTION_ENDING_SOON_TEXT}` })
+            ],
+            [
+                "primary", 
+                getMockChatMessage({ message: `primary is ${PRIMARY_ENDING_SOON_TEXT}` })
+            ]
+        ];
+
+        messageMap.forEach(([phase, message]) => {
+            it(`should correctly determine if ${phase} ending has been announced in chat`, () => {
+                const withEndingSoon = announcer.announcedPhaseEndingSoon(phase, [message]);
+                expect(withEndingSoon).to.be.true;
+    
+                const withoutEndingSoon = announcer.announcedPhaseEndingSoon(phase, []);
+                expect(withoutEndingSoon).to.be.false;
             });
         });
     });
