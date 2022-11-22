@@ -11,6 +11,13 @@ import { capitalize, formatOrdinal, prettify } from "../shared/utils/strings.js"
 /** @type {(source: unknown) => source is unknown[]} */
 export const isArr = (source) => Array.isArray(source);
 
+/**
+ * @summary checks if a value is not undefined
+ * @param {unknown} source value to check
+ * @returns {boolean}
+ */
+export const isDef = (source) => typeof source !== "undefined";
+
 /** @type {(source: unknown) => boolean} */
 export const isObj = (source) => !!source && typeof source === "object";
 
