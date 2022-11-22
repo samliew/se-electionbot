@@ -7,7 +7,7 @@ import Cache from "node-cache";
 import sanitize from "sanitize-html";
 import { findLast } from "../shared/utils/arrays.js";
 import { formatAsChatCode, formatAsTranscriptPath, parseTimestamp, validateChatTranscriptURL } from "../shared/utils/chat.js";
-import { addDates, dateToRelativeTime, dateToUtcTimestamp, toEndOfDay, toTimeAndDateIsoFormat } from "../shared/utils/dates.js";
+import { addDates, dateToRelativeTime, dateToUtcTimestamp, MS_IN_SECOND, toEndOfDay, toTimeAndDateIsoFormat } from "../shared/utils/dates.js";
 import { matchNumber, safeCapture } from "../shared/utils/expressions.js";
 import { constructUserAgent } from "../shared/utils/fetch.js";
 import { getOrInit, has } from "../shared/utils/maps.js";
@@ -112,7 +112,7 @@ export const fetchUrl = async (_config, url, json = false) => {
 
         // Store backoff if SE API
         if (isStackExchangeApi && data.backoff) {
-            _apiBackoff = Date.now() + data.backoff * 1e4 + 50; // 50ms buffer
+            _apiBackoff = Date.now() + data.backoff * MS_IN_SECOND + 50; // 50ms buffer
         }
 
         return data;
