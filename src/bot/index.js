@@ -10,7 +10,7 @@ import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcer, { ELECTION_ENDING_SOON_TEXT, NOMINATION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
-import { announceNewNominees, announceNominees, announceWinners, brewCoffeeCommand, changeElection, shutdownCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postResultsAnnouncement, postWinnersAnnouncement, rescrapeCommand, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand, updateConfigVarCommand, updateElection, warnOffTopicCommand } from "./commands/commands.js";
+import { announceNewNominees, announceNominees, announceWinners, brewCoffeeCommand, changeElection, shutdownCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postResultsAnnouncement, postWinnersAnnouncement, rescrapeCommand, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand, updateConfigVarCommand, updateElection, warnOffTopicCommand, resetSiteElectionsCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -398,7 +398,8 @@ use defaults ${defaultChatNotSet}`
             "post meta": ["posts an official Meta announcement", postResultsAnnouncement, /^post meta(?:\s+announcement)?/, AccessLevel.privileged],
             "rescrape": ["runs the rescraper immediately", rescrapeCommand, /^rescrape/, AccessLevel.dev],
             "restart server": ["restarts the server", restartServerCommand, /^restart\s+server/, AccessLevel.dev],
-            "rm_election": ["resets the current election", resetElection, /^reset election/, AccessLevel.dev],
+            "reset elections": ["resets election history for a site", resetSiteElectionsCommand, /^reset elections/, AccessLevel.dev],
+            "rm_election": ["resets the current election", resetElection, /^reset election(?!s)/, AccessLevel.dev],
             "say": ["bot echoes something", echoSomething, /say/, AccessLevel.privileged],
             "set access": ["sets user's access level", setAccessCommand, /set (?:access|level)/, AccessLevel.dev],
             "set throttle": ["set throttle value (secs)", setThrottleCommand, /set throttle/, AccessLevel.privileged],

@@ -8,7 +8,7 @@ import { matchISO8601, matchNumber, safeCapture } from "../../shared/utils/expre
 import { mapMap, mergeMaps } from "../../shared/utils/maps.js";
 import { capitalize, formatNumber } from "../../shared/utils/strings.js";
 import { API_ERROR_MESSAGE, getBadges, getMetaResultAnnouncements, getMetaSite, getModerators } from "../api.js";
-import Election, { getSiteElections, getVotingGraph } from "../election.js";
+import Election, { getSiteElections, getVotingGraph, resetElectionsCache } from "../election.js";
 import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
 import { sayUptime } from "../messages/metadata.js";
 import { sayOtherSiteMods } from "../messages/moderators.js";
@@ -340,6 +340,26 @@ export const resetAnnouncerCommand = (args) => {
     // TODO: reset other announcement types too
     announcement.resetAnnouncedParticipants();
     return "Successfully reset the announcer";
+};
+
+/**
+ * @summary resets site elections history for a given {@link Election}
+ * @param {Pick<CommandArguments, "config"|"election">} args command arguments
+ * @returns {Promise<string>}
+ */
+export const resetSiteElectionsCommand = async (args) => {
+    const { config, election } = args;
+
+    const { electionNum, siteUrl } = election;
+    if(!electionNum) {
+        return "Got an unknown election number";
+    }
+
+    resetElectionsCache(siteUrl);
+
+    await getSiteElections(config, siteUrl, electionNum, true);
+
+    return "Successfully reset site elections";
 };
 
 /**
