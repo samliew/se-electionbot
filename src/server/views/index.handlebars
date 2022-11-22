@@ -196,36 +196,7 @@
         </table>
 
         {{#if @root/authenticated}}
-        <h2 class="fs-4">Bot Users</h2>
-        <table>
-            <tr>
-                <td>Privileged</td>
-                <td>
-                    <table class="nested">
-                        <tr>
-                            <td>Admins</td>
-                            <td>
-                                <table class="nested">
-                                    {{#each @root/data/admins}}
-                                    <tr><td>{{{url link label=display_name}}}</td></tr>
-                                    {{/each}}
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Devs</td>
-                            <td>
-                                <table class="nested">
-                                    {{#each @root/data/devs}}
-                                    <tr><td>{{{url link label=display_name}}}</td></tr>
-                                    {{/each}}
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
+            {{> botUsers header="Bot Users" users=@root/data }}
         {{/if}}
 
         <h2 class="fs-4">Scheduled Announcements</h2>
