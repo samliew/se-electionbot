@@ -6,6 +6,7 @@ import Announcer from "../../src/bot/announcement.js";
 import Election from "../../src/bot/election.js";
 import { dateToUtcTimestamp } from "../../src/shared/utils/dates.js";
 import { getMockBotConfig } from "../mocks/bot.js";
+import { getMockChatMessage } from "../mocks/chat.js";
 import { getMockNominee } from "../mocks/nominee.js";
 
 /**
@@ -53,6 +54,24 @@ describe(Announcer.name, () => {
                 expect(participantAnnouncementTypes).to.include("winners");
                 expect(participantAnnouncementTypes).to.include("withdrawals");
             });
+        });
+    });
+
+    describe(Announcer.prototype.announcedWinnersInChat.name, () => {
+        it("should correctly determine if winners have been announced in chat", () => {            
+            const withWinners = announcer.announcedWinnersInChat([
+                getMockChatMessage(),
+                getMockChatMessage({ message: "Congratulations to the winners" }),
+            ]);
+
+            expect(withWinners).to.be.true;
+
+            const withoutWinners = announcer.announcedWinnersInChat([
+                getMockChatMessage({ message: "who are the winners?" }),
+                getMockChatMessage({ message: "when will the winners be announced?" }),
+            ]);
+
+            expect(withoutWinners).to.be.false;
         });
     });
 

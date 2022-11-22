@@ -24,6 +24,7 @@ export const ELECTION_ENDING_SOON_TEXT = "is ending soon. This is the final chan
  * @typedef {"start"|"end"|"primary"|"nomination"|"feedback"|"test"} TaskType
  * @typedef {"cancelled"|"ended"|"nomination"|"nominees"|"feedback"} AnnouncementType
  * @typedef {"nominees"|"winners"|"withdrawals"} ParticipantAnnouncementType
+ * @typedef {import("./utils.js").ChatMessage} ChatMessage
  */
 
 /**
@@ -81,6 +82,16 @@ export default class Announcer {
      */
     get participantAnnouncementTypes() {
         return propertyKeys(this.#announced);
+    }
+
+    /**
+     * @summary checks if winners are already announced in chat
+     * @param {ChatMessage[]} botMessages bot messages from the transcript
+     * @returns {boolean} 
+     */
+    announcedWinnersInChat(botMessages) {
+        const expr = /^(?:The winners? (?:are|is):|Congratulations to the winners?)/i;
+        return botMessages.some(({ message }) => expr.test(message));
     }
 
     /**
