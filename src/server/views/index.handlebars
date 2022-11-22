@@ -113,6 +113,10 @@
                     <th>Nominees</th>
                     <th>Withdrawn</th>
                     <th>Winners</th>
+                    <th>Eligible</th>
+                    <th>Active</th>
+                    <th>Visited</th>
+                    <th>Voted</th>
                 </tr>
             </thead>
             <tbody>
@@ -129,6 +133,10 @@
                 <td>{{len val/nominees}}</td>
                 <td>{{len val/withdrawnNominees}}</td>
                 <td>{{len val/winners}}</td>
+                <td>{{#if (isDef val/numEligible)}}{{accounting val/numEligible}}{{/if}}</td>
+                <td>{{#if (isDef val/numActive)}}{{accounting val/numActive}}{{/if}}</td>
+                <td>{{#if (isDef val/numVisited)}}{{accounting val/numVisited}}{{/if}}</td>
+                <td>{{#if (isDef val/numVoted)}}{{accounting val/numVoted}}{{/if}}</td>
             </tr>
             {{/iterate}}
             </tbody>
