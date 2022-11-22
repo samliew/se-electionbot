@@ -176,10 +176,22 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 scheduler.stopAll();
                 const status = await announcement?.announceWinners();
                 console.log(`[rescraper] announced winners: ${status}`);
-                this.stop();
 
-                // After calling stop(), we need to return here otherwise start() will be called below!
-                return;
+                if (config.autoLeaveRoom) {
+                    scheduler.initLeave(
+                        addMinutes(nowOverride || new Date(), config.electionAfterpartyMins),
+                        room,
+                        async () => {
+                            const heroku = new HerokuClient(config);
+                            if (config.autoscaleHeroku && await heroku.hasPaidDynos()) {
+                                // Scale Heroku dynos to free (restarts app)
+                                await heroku.scaleFree();
+                            }
+                        }
+                    );
+                }
+
+                return this.stop();
             }
 
             // Election just over, there are no winners yet (waiting for CM)
@@ -237,20 +249,6 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 if (config.scrapeIntervalMins < 5) {
                     config.scrapeIntervalMins = 5;
                     console.log(`[rescraper] scrape interval increased to ${config.scrapeIntervalMins}.`);
-                }
-
-                if (config.autoLeaveRoom) {
-                    scheduler.initLeave(
-                        addMinutes(nowOverride || new Date(), config.electionAfterpartyMins),
-                        room,
-                        async () => {
-                            const heroku = new HerokuClient(config);
-                            if (config.autoscaleHeroku && await heroku.hasPaidDynos()) {
-                                // Scale Heroku dynos to free (restarts app)
-                                await heroku.scaleFree();
-                            }
-                        }
-                    );
                 }
             }
 
