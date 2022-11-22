@@ -2,7 +2,7 @@ import Hbs from "handlebars";
 import { partition } from "../shared/utils/arrays.js";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { isEmptyObj } from "../shared/utils/objects.js";
-import { capitalize, formatNumber, formatOrdinal, prettify } from "../shared/utils/strings.js";
+import { capitalize, formatNumber, formatOrdinal, percentify, prettify } from "../shared/utils/strings.js";
 
 /**
  * @typedef {Hbs.HelperOptions} HelperOptions
@@ -153,7 +153,7 @@ export const query = (link, options) => {
     return `${link}?${new URLSearchParams(hash).toString()}`;
 };
 
-export { capitalize, dateToUtcTimestamp as utcTimestamp, prettify, partition };
+export { capitalize, dateToUtcTimestamp as utcTimestamp, prettify, partition, percentify };
 
 /** @type {(data: string) => string} */
 export const json = (data) => {
