@@ -117,6 +117,7 @@
                     <th>Active</th>
                     <th>Visited</th>
                     <th>Voted</th>
+                    <th>Voters/Visitors %</th>
                 </tr>
             </thead>
             <tbody>
@@ -137,6 +138,11 @@
                 <td>{{#if (isDef val/numActive)}}{{accounting val/numActive}}{{/if}}</td>
                 <td>{{#if (isDef val/numVisited)}}{{accounting val/numVisited}}{{/if}}</td>
                 <td>{{#if (isDef val/numVoted)}}{{accounting val/numVoted}}{{/if}}</td>
+                <td>
+                    {{#if (all (isDef val/numVoted) (isDef val/numVisited))}}
+                        {{percentify val/numVoted val/numVisited 1 ""}}
+                    {{/if}}
+                </td>
             </tr>
             {{/iterate}}
             </tbody>
