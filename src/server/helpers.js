@@ -2,7 +2,7 @@ import Hbs from "handlebars";
 import { partition } from "../shared/utils/arrays.js";
 import { dateToUtcTimestamp, validateDate } from "../shared/utils/dates.js";
 import { isEmptyObj } from "../shared/utils/objects.js";
-import { capitalize, formatOrdinal, prettify } from "../shared/utils/strings.js";
+import { capitalize, formatNumber, formatOrdinal, prettify } from "../shared/utils/strings.js";
 
 /**
  * @typedef {Hbs.HelperOptions} HelperOptions
@@ -259,6 +259,13 @@ export const years = (seconds) => {
 
 /** @type {(n: number) => string} */
 export const ordinal = (num) => `${num}<sup>${formatOrdinal(num).replace(/^\d+/, "")}</sup>`;
+
+/**
+ * @summary formats a number as an accounting value 
+ * @param {number} num value to format 
+ * @returns {string}
+ */
+export const accounting = (num) => formatNumber(num, 3);
 
 /**
  * @summary iterates over a collection
