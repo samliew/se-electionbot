@@ -42,6 +42,17 @@ import { fetchUrl } from './utils.js';
 const electionsCache = new Map();
 
 /**
+ * @summary clears the site {@link Election}s cache
+ * @param {string} siteUrl URL of the network site to get {@link Election}s for
+ * @returns {Map<number, Election>}
+ */
+export const resetElectionsCache = (siteUrl) =>{ 
+    const siteCache = getOrInit(electionsCache, siteUrl, new Map());
+    siteCache.clear();
+    return siteCache;
+};
+
+/**
  * @summary gets all {@link Election}s for a given site
  * @param {BotConfig} config bot configuration
  * @param {string} siteUrl URL of the network site to get {@link Election}s for
