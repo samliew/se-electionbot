@@ -24,6 +24,18 @@ import { fetchUrl } from './utils.js';
  * @typedef {import("./index").UserProfile} UserProfile
  * @typedef {import("./commands/user").User} ChatUser
  * @typedef {import("./elections/moderators.js").ModeratorUser} ModeratorUser
+ * 
+ * @typedef {{
+ *  active?: number,
+ *  eligible: number,
+ *  visited: number,
+ *  voted: number
+ * }} ParticipationStats
+ * 
+ * @typedef {ParticipationStats & {
+ *  text: string,
+ *  winnerIds: number[],
+ * }} ElectionStats
  */
 
 /** @type {Map<string, Map<number, Election>>} */
@@ -1196,6 +1208,64 @@ export default class Election {
     }
 
     /**
+     * @summary parses election stats text
+     * @param {string} text stats text to parse
+     * @returns {ParticipationStats}
+     */
+    parseElectionStats(text) {
+        const stats = text
+            .replace(/,/g, "")
+            .split(/\s+/)
+            .filter(Number);
+
+        // Stack Overflow election #1 doesn't have site visitors
+        const [
+            numEligible, 
+            numActive, 
+            numVisited, 
+            numVoted
+        ] = text.includes("visited the site") ? 
+            stats : 
+            [stats[0], void 0, stats[1], stats[2]];
+
+        return {
+            active: numActive !== void 0 ? +numActive : void 0,
+            eligible: +numEligible,
+            visited: +numVisited,
+            voted: +numVoted,
+        };
+    }
+
+    /**
+     * @summary scrapes ended election stats
+     * @param {cheerio.Root} $ Cheerio root element
+     * @param {cheerio.Element} el stats element
+     * @returns {ElectionStats}
+    */
+    scrapeElectionStats($, el) {
+        const element = $(el);
+    
+        const children = element.contents();
+
+        const text = children
+            .map((_, { data, type }) => type === 'text' ? data?.trim() : "")
+            .get()
+            .join(" ")
+            .replace(/\s+called up.*$/, '').trim();
+    
+        const winnerIds = element
+            .find("a")
+            .map((_, c) => +( /** @type {string} */($(c).attr('href')?.split("/")[2])))
+            .get();
+    
+        return {
+            ...this.parseElectionStats(text),
+            text,
+            winnerIds,
+        };
+    }
+
+    /**
      * @summary pushes an election state to history
      * @returns {Election}
      */
@@ -1350,22 +1420,14 @@ export default class Election {
 
                 // Election ended
                 if (!isCancelled) {
+                    const stats = this.scrapeElectionStats($, statsElem);
 
-                    // Get election stats
-                    this.statVoters = $(statsElem).contents().map((_i, { data, type }) =>
-                        type === 'text' ? data?.trim() : ""
-                    ).get().join(' ').replace(/\s+called up.*$/, '').trim();
-
-                    // Get num of eligible voters, active voters, visited voters, and voters
-                    const [numEligible, numActive, numVisited, numVoted] = this.statVoters.replace(/,/g, '').split(/\s+/).filter(Number);
-                    this.numEligible = numEligible;
-                    this.numActive = numActive;
-                    this.numVisited = numVisited;
-                    this.numVoted = numVoted;
-
-                    // Get winners
-                    const winnerIds = $(statsElem).find('a').map((_i, el) => +( /** @type {string} */($(el).attr('href')?.split('/')[2]))).get();
-                    this.winners = this.getWinners(winnerIds);
+                    this.statVoters = stats.text; 
+                    this.numActive = stats.active;
+                    this.numEligible = stats.eligible;
+                    this.numVisited = stats.visited;
+                    this.numVoted = stats.voted;
+                    this.winners = this.getWinners(stats.winnerIds);
                 }
             }
 
