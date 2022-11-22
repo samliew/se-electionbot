@@ -287,6 +287,13 @@ export const iterate = (source, options) => {
 /** @type {(...sources: unknown[]) => boolean} */
 export const either = (...sources) => sources.slice(0, -1).some(Boolean);
 
+/**
+ * @summary checks if all conditions are truthy
+ * @param  {...unknown[]} sources conditions
+ * @returns {boolean} 
+ */
+export const all = (...sources) => sources.slice(0, -1).every(Boolean);
+
 /** @type {(a:unknown,b:unknown) => boolean} */
 export const eq = (a, b) => a === b;
 
