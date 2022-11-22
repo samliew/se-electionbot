@@ -8,7 +8,7 @@ import { isOneboxedMessage, prepareMessageForMatching } from "../shared/utils/ch
 import { getMilliseconds, MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
-import Announcer, { ELECTION_ENDING_SOON_TEXT, NOMINATION_ENDING_SOON_TEXT } from './announcement.js';
+import Announcer from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
 import { announceNewNominees, announceNominees, announceWinners, brewCoffeeCommand, changeElection, shutdownCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postResultsAnnouncement, rescrapeCommand, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand, updateConfigVarCommand, updateElection, warnOffTopicCommand, resetSiteElectionsCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
@@ -313,18 +313,9 @@ use defaults ${defaultChatNotSet}`
 
         const botMessages = transcriptMessages.filter(botMessageFilter);
 
-        const electionEndingSoonExpr = new RegExp(ELECTION_ENDING_SOON_TEXT);
-
-        // Check for saidElectionEndingSoon
-        config.flags.saidElectionEndingSoon = botMessages
-            .filter(({ message }) => electionEndingSoonExpr.test(message)).length > 0;
-
-        const nominationEndingSoonExpr = new RegExp(NOMINATION_ENDING_SOON_TEXT);
-
-        // Check for saidNominationEndingSoon
-        config.flags.saidNominationEndingSoon = botMessages
-            .filter(({ message }) => nominationEndingSoonExpr.test(message)).length > 0;
-
+        config.flags.saidElectionEndingSoon = announcement.announcedPhaseEndingSoon("election", botMessages);
+        config.flags.saidNominationEndingSoon = announcement.announcedPhaseEndingSoon("nomination", botMessages);
+        
         // Loops through messages by latest first
         transcriptMessages.reverse();
 
