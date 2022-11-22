@@ -178,10 +178,15 @@ export const boolean = (data) => {
     );
 }
 
-/** @type {(data: unknown) => string} */
+/** 
+ * @summary displays a given {@link data} as a yes/no indicator
+ * @param {unknown} data data to display as "yes"/"no"
+ * @returns {Handlebars.SafeString}
+ */
 export const yesno = (data) => {
     const isYes = typeof data === "string" ? data === 'yes' : !!data;
-    return `<span class="${isYes ? 'yes' : 'no'}">${isYes ? 'yes' : 'no'}</span>`;
+    const type = isYes ? "yes" : "no";
+    return new Hbs.SafeString(`<span class="${type}">${type}</span>`);
 };
 
 /** @type {(data: unknown) => string} */
