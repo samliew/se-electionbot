@@ -10,7 +10,7 @@ import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
 import Announcer, { ELECTION_ENDING_SOON_TEXT, NOMINATION_ENDING_SOON_TEXT } from './announcement.js';
 import { AccessLevel } from "./commands/access.js";
-import { announceNewNominees, announceNominees, announceWinners, brewCoffeeCommand, changeElection, shutdownCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postResultsAnnouncement, postWinnersAnnouncement, rescrapeCommand, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand, updateConfigVarCommand, updateElection, warnOffTopicCommand, resetSiteElectionsCommand } from "./commands/commands.js";
+import { announceNewNominees, announceNominees, announceWinners, brewCoffeeCommand, changeElection, shutdownCommand, echoSomething, getConfirmationsCommand, getCronCommand, getElectionRoomURL, getModeReport, getModsVotedCommand, getThrottleCommand, getTimeCommand, getVoterReportCommand, greetCommand, ignoreUserCommand, impersonateUserCommand, isAliveCommand, joinRoomCommand, leaveRoomCommand, listRoomsCommand, listSiteModerators, muteCommand, postResultsAnnouncement, rescrapeCommand, resetElection, restartServerCommand, sayFeedback, scheduleTestCronCommand, setAccessCommand, setThrottleCommand, switchMode, timetravelCommand, unmuteCommand, updateConfigVarCommand, updateElection, warnOffTopicCommand, resetSiteElectionsCommand } from "./commands/commands.js";
 import { CommandManager } from './commands/index.js';
 import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
@@ -311,18 +311,18 @@ use defaults ${defaultChatNotSet}`
 
         const botMessageFilter = await onlyBotMessages(me);
 
+        const botMessages = transcriptMessages.filter(botMessageFilter);
+
         const electionEndingSoonExpr = new RegExp(ELECTION_ENDING_SOON_TEXT);
 
         // Check for saidElectionEndingSoon
-        config.flags.saidElectionEndingSoon = transcriptMessages
-            .filter(botMessageFilter)
+        config.flags.saidElectionEndingSoon = botMessages
             .filter(({ message }) => electionEndingSoonExpr.test(message)).length > 0;
 
         const nominationEndingSoonExpr = new RegExp(NOMINATION_ENDING_SOON_TEXT);
 
         // Check for saidNominationEndingSoon
-        config.flags.saidNominationEndingSoon = transcriptMessages
-            .filter(botMessageFilter)
+        config.flags.saidNominationEndingSoon = botMessages
             .filter(({ message }) => nominationEndingSoonExpr.test(message)).length > 0;
 
         // Loops through messages by latest first
@@ -344,17 +344,21 @@ use defaults ${defaultChatNotSet}`
         const addedWithdrawn = await addWithdrawnNomineesFromChat(config, election, announcement, withdrawalAnnouncements);
         console.log(`[init] added announced: ${addedWithdrawn} withdrawn, ${addedAnnounced} nominated`);
 
-        // TODO: check if not posted yet
         const metaAnnouncements = await searchChat(config, "moderator election results", config.chatRoomId);
         if (election.isEnded() && config.canAnnounceMetaPost && !metaAnnouncements.length) {
             const status = await postResultsAnnouncement({ config, election, room, content: "" });
             console.log(`[init] posted meta election results: ${status}`);
         }
 
-        // If election is over within an past hour (36e5) with winners, and bot has not announced winners yet, announce immediately upon startup
-        if (election.isEnded(config.nowOverride) && Date.now() < getMilliseconds(election.dateEnded) + 36e5) {
-            const status = await postWinnersAnnouncement(config, election, announcement, transcriptMessages, me);
-            console.log(`[init] posted winners announcement: ${status}`);
+        const overdueWinnersAnnouncementConditions = [
+            election.isEnded(config.nowOverride),
+            Date.now() < getMilliseconds(election.dateEnded) + 36e5,
+            !announcement.announcedWinnersInChat(botMessages),            
+        ];
+
+        if (overdueWinnersAnnouncementConditions.every(Boolean)) {
+            const status = await announcement.announceWinners();
+            console.log(`[init] announced winners on startup: ${status}`);
         }
 
         // Announce join room if in debug mode

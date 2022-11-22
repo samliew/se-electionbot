@@ -518,27 +518,6 @@ export const postResultsAnnouncement = async (args) => {
 };
 
 /**
- * @summary announces election winners
- * @param {BotConfig} config bot config
- * @param {Election} election current election instance
- * @param {Announcer} announcement announcement controller
- * @param {ChatMessage[]} messages transcript messages
- * @param {ChatUser} botUser bot user
- * @returns {Promise<boolean>}
- */
-export const postWinnersAnnouncement = async (config, election, announcement, messages, botUser) => {
-    const { id } = botUser;
-
-    const expr = /^(?:The winners? (?:are|is):|Congratulations to the winners?)/;
-
-    const winnersAnnounced = messages.filter(({ message, chatUserId }) => expr.test(message) && chatUserId === id);
-
-    if (config.debug) console.log(`announced ${winnersAnnounced.length} winner${pluralize(winnersAnnounced.length)}`);
-
-    return !!winnersAnnounced || election.numWinners <= 0 || announcement.announceWinners();
-};
-
-/**
  * @summary makes the bot echo a message
  * @param {Pick<CommandArguments, "config"|"room"|"content">} args command arguments
  * @returns {Promise<void>}
