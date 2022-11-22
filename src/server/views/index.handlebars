@@ -127,8 +127,8 @@
                     {{#ifEquals (getter val "electionNum") (getter @root/data/election "electionNum")}}<span title="Current Election">*</span>{{/ifEquals}}
                 </td>
                 <td>{{year (getter val "dateNomination")}}</td>
-                <td>{{{yesno (getter val "datePrimary")}}}</td>
-                <td>{{{yesno (contextCall "isCancelled" val)}}}</td>
+                <td>{{yesno (contextCall "isWithPrimary" val)}}</td>
+                <td>{{yesno (contextCall "isCancelled" val)}}</td>
                 <td>{{val/numPositions}}</td>
                 <td>{{len val/nominees}}</td>
                 <td>{{len val/withdrawnNominees}}</td>

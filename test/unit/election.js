@@ -757,6 +757,20 @@ describe(Election.name, () => {
         });
     });
 
+    describe(Election.prototype.isWithPrimary.name, () => {
+        it("should correctly determine if the election has a primary phase", () => {
+            expect(election.isWithPrimary()).to.be.false;
+
+            election.primaryThreshold = 0;
+            election.addActiveNominee(getMockNominee(election));
+
+            expect(election.isWithPrimary()).to.be.false;
+
+            election.datePrimary = Date.now();
+
+            expect(election.isWithPrimary()).to.be.true;
+        })
+    });
 });
 
 describe(getNominationInfoFromChatMessageMarkdown.name, () => {

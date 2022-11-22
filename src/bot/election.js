@@ -1065,6 +1065,17 @@ export default class Election {
     }
 
     /**
+     * @summary checks if the election has a primary phase
+     * @returns {boolean}
+     */
+    isWithPrimary() {
+        return [
+            this.reachedPrimaryThreshold,
+            this.datePrimary !== void 0,
+        ].every(Boolean);
+    }
+
+    /**
      * @summary gets current phase given election dates
      * @param {Date} [today] current date
      * @returns {ElectionPhase}
