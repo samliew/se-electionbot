@@ -5,6 +5,17 @@
  */
 
 /**
+ * @summary clips a given string
+ * @param {string} text text to clip
+ * @param {number} max maximum chars to show
+ * @param {string} [ending] clip indicator
+ * @returns {string}
+ */
+export const clip = (text, max, ending = "...") => {
+    return text.slice(0, max) + ending;
+};
+
+/**
  * @summary formats a number accorting to the number of didits to group and a separator
  * @param {number} num number to format
  * @param {number} group number of sequential digits to separate
