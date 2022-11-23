@@ -35,7 +35,7 @@ import Rescraper from "./rescraper.js";
 import Scheduler from "./scheduler.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
-    fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, makeURL, onlyBotMessages, roomKeepAlive, searchChat
+    fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, makeURL, onlyBotMessages, roomKeepAlive, searchChat, wait
 } from './utils.js';
 
 /**
@@ -330,13 +330,17 @@ use defaults ${defaultChatNotSet}`
          * (assuming ElectionBot managed to announce all the nominations from start of election)
          */
         const nominationAnnouncements = await findNominationAnnouncementsInChat(config, me);
+        await wait(3);
         const withdrawalAnnouncements = await findWithdrawalAnnouncementsInChat(config, me);
+        await wait(3);
         const addedAnnounced = await addAnnouncedNomineesFromChat(config, election, announcement, nominationAnnouncements);
+        await wait(3);
         const addedWithdrawn = await addWithdrawnNomineesFromChat(config, election, announcement, withdrawalAnnouncements);
         console.log(`[init] added announced: ${addedWithdrawn} withdrawn, ${addedAnnounced} nominated`);
 
         const metaAnnouncements = await searchChat(config, "moderator election results", config.chatRoomId);
         if (election.isEnded() && config.canAnnounceMetaPost && !metaAnnouncements.length) {
+            await wait(3);
             const status = await postResultsAnnouncement({ config, election, room, content: "" });
             console.log(`[init] posted meta election results: ${status}`);
         }
