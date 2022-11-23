@@ -5,7 +5,7 @@ import { capitalize } from '../shared/utils/strings.js';
 // https://devcenter.heroku.com/articles/platform-api-reference
 
 /**
- * @typedef {"free" | "hobby" | "standard-1X" | "standard-2X" | "performance-M" | "performance-L"} FormationSize
+ * @typedef {"eco" | "hobby" | "standard-1X" | "standard-2X" | "performance-M" | "performance-L"} FormationSize
  *
  * @typedef {{
  *  app: App,
@@ -187,18 +187,18 @@ export class HerokuClient {
      */
     async scaleNone(type = "web") {
         return this.#scale({
-            [type]: { quantity: 0, size: "free" }
+            [type]: { quantity: 0, size: "eco" }
         });
     };
 
     /**
-     * @summary scale app's dynos to free
+     * @summary scale app's dynos to eco
      * @param {Formation["type"]} [type] process type to scale
      * @return {Promise<boolean>}
      */
-    async scaleFree(type = "web") {
+    async scaleEco(type = "web") {
         return this.#scale({
-            [type]: { quantity: 1, size: "free" }
+            [type]: { quantity: 1, size: "eco" }
         });
     };
 
@@ -233,13 +233,13 @@ export class HerokuClient {
     };
 
     /**
-     * @summary check if the app has paid dynos
+     * @summary check if the app has paid dynos (not free or eco)
      * @param {Formation[]} [dynos] prefetched dynos
      * @returns {Promise<boolean>}
      */
     async hasPaidDynos(dynos) {
         const toCheck = dynos || await this.getDynos();
-        return toCheck.some(({ size }) => !/free/i.test(size));
+        return toCheck.some(({ size }) => !/(?:free|eco)/i.test(size));
     }
 }
 

@@ -33,7 +33,7 @@ export const getMockFormation = (overrides = {}) => {
         created_at: new Date().toISOString(),
         id: "mock-dyno",
         quantity: 1,
-        size: "free",
+        size: "eco",
         type: "web",
         updated_at: new Date().toISOString(),
         ...overrides,

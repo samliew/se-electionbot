@@ -192,7 +192,7 @@ use defaults ${defaultChatNotSet}`
 
         /*
          * If autoscaleHeroku enabled, and is an active election,
-         * scale Heroku dyno to Hobby (paid) if it's using free dynos only (restarts app)
+         * scale Heroku dyno to Hobby (paid) if it's using Eco dynos only (restarts app)
          */
         const hasPaidDyno = await heroku.hasPaidDynos();
         const { autoscaleHeroku } = config;
@@ -201,10 +201,10 @@ use defaults ${defaultChatNotSet}`
                 const status = await heroku.scaleHobby();
                 console.log(`[heroku] scaled up to hobby dyno: ${status}`);
             }
-            // Otherwise, scale down to free dynos
+            // Otherwise, scale down to eco dynos
             else if (hasPaidDyno) {
-                const status = await heroku.scaleFree();
-                console.log(`[heroku] scaled down to free dyno: ${status}`);
+                const status = await heroku.scaleEco();
+                console.log(`[heroku] scaled down to eco dyno: ${status}`);
             }
         }
 
@@ -315,7 +315,7 @@ use defaults ${defaultChatNotSet}`
 
         config.flags.saidElectionEndingSoon = announcement.announcedPhaseEndingSoon("election", botMessages);
         config.flags.saidNominationEndingSoon = announcement.announcedPhaseEndingSoon("nomination", botMessages);
-        
+
         // Loops through messages by latest first
         transcriptMessages.reverse();
 
@@ -344,7 +344,7 @@ use defaults ${defaultChatNotSet}`
         const overdueWinnersAnnouncementConditions = [
             election.isEnded(config.nowOverride),
             Date.now() < getMilliseconds(election.dateEnded) + 36e5,
-            !announcement.announcedWinnersInChat(botMessages),            
+            !announcement.announcedWinnersInChat(botMessages),
         ];
 
         if (overdueWinnersAnnouncementConditions.every(Boolean)) {
@@ -663,7 +663,7 @@ use defaults ${defaultChatNotSet}`
     // If keep alive or running on Heroku, and scriptHostname is defined
     if (config.scriptHostname && (config.keepAlive || config.scriptHostname.includes('herokuapp'))) {
 
-        // Heroku free dyno will shutdown when idle for 30 mins, so keep-alive is necessary
+        // Heroku free/eco dyno will shutdown when idle for 30 mins, so keep-alive is necessary
         keepAlive(`${config.scriptHostname}/ping`);
     }
 

@@ -161,10 +161,10 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 console.log(`[rescraper] announced cancellation: ${status}`);
                 this.stop();
 
-                // Scale Heroku dynos to free (restarts app)
+                // Scale Heroku dynos to eco (restarts app)
                 const heroku = new HerokuClient(config);
                 if (config.autoscaleHeroku && await heroku.hasPaidDynos()) {
-                    await heroku.scaleFree();
+                    await heroku.scaleEco();
                 }
 
                 // After calling stop(), we need to return here otherwise start() will be called below!
@@ -183,8 +183,8 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                         async () => {
                             const heroku = new HerokuClient(config);
                             if (config.autoscaleHeroku && await heroku.hasPaidDynos()) {
-                                // Scale Heroku dynos to free (restarts app)
-                                await heroku.scaleFree();
+                                // Scale Heroku dynos to eco (restarts app)
+                                await heroku.scaleEco();
                             }
                         }
                     );

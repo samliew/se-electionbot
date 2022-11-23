@@ -57,9 +57,9 @@ describe('Heroku API integration', function () {
 
     testIf("should correctly determine if has paid dynos", async () => {
         const paid = await heroku.hasPaidDynos([getMockFormation({ size: "hobby" })]);
-        const free = await heroku.hasPaidDynos([getMockFormation({ size: "free" })]);
+        const eco = await heroku.hasPaidDynos([getMockFormation({ size: "eco" })]);
 
         expect(paid).to.be.true;
-        expect(free).to.be.false;
+        expect(eco).to.be.false;
     });
 });
