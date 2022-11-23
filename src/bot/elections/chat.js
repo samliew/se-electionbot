@@ -6,7 +6,7 @@ import { has } from "../../shared/utils/maps.js";
 import { getBadges, getUserInfo } from "../api.js";
 import Nominee from "../elections/nominees.js";
 import { calculateScore } from "../score.js";
-import { fetchUrl, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from "../utils.js";
+import { fetchUrl, getSiteDefaultChatroom, onlyBotMessages, scrapeChatUserParentUserInfo, searchChat } from "../utils.js";
 
 /**
  * @typedef {import("../announcement.js").default} Announcer
@@ -217,4 +217,65 @@ export const listNomineesInRoom = async (config, election, host, users) => {
         // TODO: add the heavy getSiteUserIdFromChatStackExchangeId
     }
     return nomineesInRoom;
+};
+
+/**
+ * @typedef {{
+ *  defaultChatNotSet: boolean,
+ *  defaultChatDomain: string,
+ *  defaultChatRoomId: number,
+ * }} LiveElectionRoomRedirectOptions
+ * 
+ * @summary redirects the bot to live election chat room in production mode
+ * @param {BotConfig} config bot configuration
+ * @param {Election} election current election
+ * @param {LiveElectionRoomRedirectOptions} options redirect configuration
+ * @returns {Promise<{ 
+ *  from?: string, 
+ *  status: boolean, 
+ *  to?: string 
+ * }>}
+ */
+export const redirectToLiveElectionChat = async (config, election, options) => {
+    const { defaultChatNotSet } = options;
+    
+    const earlyExitConditions = [
+        config.debug,
+        !defaultChatNotSet,
+        election.isInactive(),
+    ];
+
+    if(earlyExitConditions.some(Boolean)) {
+        return { status: false };
+    }
+
+    const originalChatDomain = config.chatDomain;
+    const originalChatRoomId = config.chatRoomId;
+    
+    // Election chat room found on election page
+    if (election.chatRoomId && election.chatDomain) {
+        config.chatRoomId = election.chatRoomId;
+        config.chatDomain = election.chatDomain;
+    }
+    // Default to site's default chat room
+    else {
+        const defaultRoom = await getSiteDefaultChatroom(config, election.siteHostname);
+        if (defaultRoom?.chatRoomId && defaultRoom?.chatDomain) {
+            config.chatRoomId = defaultRoom.chatRoomId;
+            config.chatDomain = defaultRoom.chatDomain;
+        }
+    }
+
+    const redirectedConditions = [
+        originalChatDomain !== config.chatDomain,
+        originalChatRoomId !== config.chatRoomId,
+    ];
+
+    const redirectHappened = redirectedConditions.some(Boolean);
+
+    return { 
+        status: redirectHappened, 
+        from: `https://chat.${originalChatDomain}/rooms/${originalChatRoomId}`,
+        to: `https://chat.${config.chatDomain}/rooms/${config.chatRoomId}`,
+    };
 };

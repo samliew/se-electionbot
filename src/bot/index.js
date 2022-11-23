@@ -16,7 +16,7 @@ import { User } from "./commands/user.js";
 import BotConfig from "./config.js";
 import { joinControlRoom } from "./control/index.js";
 import { getSiteElections } from './election.js';
-import { addAnnouncedNomineesFromChat, addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, findWithdrawalAnnouncementsInChat } from "./elections/chat.js";
+import { addAnnouncedNomineesFromChat, addWithdrawnNomineesFromChat, findNominationAnnouncementsInChat, findWithdrawalAnnouncementsInChat, redirectToLiveElectionChat } from "./elections/chat.js";
 import BotEnv from "./env.js";
 import {
     isAskedForCurrentMods, isAskedForOtherScore, isAskedForOwnScore, isAskedForScoreLeaderboard, isAskedForUserEligibility, isAskedHowManyCandidatesInTheRoom, isAskedHowManyModsInTheRoom, isAskedWhoToVote, isBotMentioned
@@ -35,7 +35,7 @@ import Rescraper from "./rescraper.js";
 import Scheduler from "./scheduler.js";
 import { makeCandidateScoreCalc } from "./score.js";
 import {
-    fetchChatTranscript, fetchRoomOwners, getSiteDefaultChatroom, getUser, keepAlive, makeURL, onlyBotMessages, roomKeepAlive, searchChat, wait
+    fetchChatTranscript, fetchRoomOwners, getUser, keepAlive, makeURL, onlyBotMessages, roomKeepAlive, searchChat
 } from './utils.js';
 
 /**
@@ -208,36 +208,16 @@ use defaults ${defaultChatNotSet}`
             }
         }
 
-        /*
-         * If is in production mode, default chatroom not set, and is an active election,
-         * auto-detect and set chat domain & room to join
-         */
-        if (!config.debug && defaultChatNotSet && election.isActive()) {
+        const { status, from, to } = await redirectToLiveElectionChat(config, election, {
+            defaultChatDomain,
+            defaultChatNotSet,
+            defaultChatRoomId,
+        });
 
-            // Store original values so we know if it's changed
-            const originalChatDomain = config.chatDomain;
-            const originalChatRoomId = config.chatRoomId;
-
-            // Election chat room found on election page
-            if (election.chatRoomId && election.chatDomain) {
-                config.chatRoomId = election.chatRoomId;
-                config.chatDomain = election.chatDomain;
-            }
-            // Default to site's default chat room
-            else {
-                const defaultRoom = await getSiteDefaultChatroom(config, election.siteHostname);
-                if (defaultRoom && defaultRoom.chatRoomId && defaultRoom.chatDomain) {
-                    config.chatRoomId = defaultRoom.chatRoomId;
-                    config.chatDomain = defaultRoom.chatDomain;
-                }
-            }
-
-            // If chat domain or room changed, warn and log new values
-            if (originalChatDomain !== config.chatDomain || originalChatRoomId !== config.chatRoomId) {
-                console.log(`[init] production mode with an active election, redirected to live room:
-                DOMAIN:  ${defaultChatDomain} -> ${config.chatDomain}
-                ROOMID:  ${defaultChatRoomId} -> ${config.chatRoomId}`);
-            }
+        if(status) {
+            console.log(`[init] production mode with an active election, redirected to live room:
+            from: ${from}
+            to:   ${to}`);
         }
 
         // Add non-mod room owners to list of admins (privileged users)
@@ -329,18 +309,14 @@ use defaults ${defaultChatNotSet}`
          * Sync withdrawn nominees on startup using past ElectionBot announcements
          * (assuming ElectionBot managed to announce all the nominations from start of election)
          */
-        const nominationAnnouncements = await findNominationAnnouncementsInChat(config, me);
-        await wait(3);
-        const withdrawalAnnouncements = await findWithdrawalAnnouncementsInChat(config, me);
-        await wait(3);
+        const nominationAnnouncements = await findNominationAnnouncementsInChat(config, me, botMessages);
+        const withdrawalAnnouncements = await findWithdrawalAnnouncementsInChat(config, me, botMessages);
         const addedAnnounced = await addAnnouncedNomineesFromChat(config, election, announcement, nominationAnnouncements);
-        await wait(3);
         const addedWithdrawn = await addWithdrawnNomineesFromChat(config, election, announcement, withdrawalAnnouncements);
         console.log(`[init] added announced: ${addedWithdrawn} withdrawn, ${addedAnnounced} nominated`);
 
         const metaAnnouncements = await searchChat(config, "moderator election results", config.chatRoomId);
         if (election.isEnded() && config.canAnnounceMetaPost && !metaAnnouncements.length) {
-            await wait(3);
             const status = await postResultsAnnouncement({ config, election, room, content: "" });
             console.log(`[init] posted meta election results: ${status}`);
         }
