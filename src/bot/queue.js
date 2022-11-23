@@ -49,9 +49,13 @@ const _sendTheMessage = async function (config, room, responseText, options = {}
         responseText = config.duplicateResponseText;
     }
 
-    await room.sendMessage((
-        inResponseTo && !/^\s{4}/.test(responseText) ? `:${inResponseTo} ` : ""
-    ) + responseText);
+    try {
+        await room.sendMessage((
+            inResponseTo && !/^\s{4}/.test(responseText) ? `:${inResponseTo} ` : ""
+        ) + responseText);            
+    } catch (error) {
+        console.error(`[queue] failed to send chat message:\n"${responseText}"`, error);  
+    }
 
     // Record last sent message and time so we don't flood the room
     config.updateLastMessage(responseText);
