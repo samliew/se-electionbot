@@ -309,8 +309,11 @@ use defaults ${defaultChatNotSet}`
          * Sync withdrawn nominees on startup using past ElectionBot announcements
          * (assuming ElectionBot managed to announce all the nominations from start of election)
          */
-        const nominationAnnouncements = await findNominationAnnouncementsInChat(config, me, botMessages);
-        const withdrawalAnnouncements = await findWithdrawalAnnouncementsInChat(config, me, botMessages);
+        const [ nominationAnnouncements, withdrawalAnnouncements ] = await Promise.all([
+            findNominationAnnouncementsInChat(config, me, botMessages),
+            findWithdrawalAnnouncementsInChat(config, me, botMessages),
+        ]);
+
         const addedAnnounced = await addAnnouncedNomineesFromChat(config, election, announcement, nominationAnnouncements);
         const addedWithdrawn = await addWithdrawnNomineesFromChat(config, election, announcement, withdrawalAnnouncements);
         console.log(`[init] added announced: ${addedWithdrawn} withdrawn, ${addedAnnounced} nominated`);
