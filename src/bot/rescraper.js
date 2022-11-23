@@ -173,7 +173,6 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
 
             // Official results out
             if (election.hasResults(nowOverride)) {
-                scheduler.stopAll();
                 const status = await announcement?.announceWinners();
                 console.log(`[rescraper] announced winners: ${status}`);
 
