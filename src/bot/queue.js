@@ -12,6 +12,7 @@
  */
 
 import { logResponse } from "../shared/utils/bot.js";
+import { clip } from "../shared/utils/strings.js";
 import { wait } from "./utils.js";
 
 // TODO: implement message queue
@@ -54,7 +55,11 @@ const _sendTheMessage = async function (config, room, responseText, options = {}
             inResponseTo && !/^\s{4}/.test(responseText) ? `:${inResponseTo} ` : ""
         ) + responseText);            
     } catch (error) {
-        console.error(`[queue] failed to send chat message:\n"${responseText}"`, error);  
+        console.error(`[queue] failed to send chat message:
+text: "${clip(responseText, 70)}"
+room: https://chat.${config.chatDomain}/rooms/${room.id}
+
+${error}`);  
     }
 
     // Record last sent message and time so we don't flood the room
