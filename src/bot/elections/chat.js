@@ -22,11 +22,13 @@ import { fetchUrl, getSiteDefaultChatroom, onlyBotMessages, scrapeChatUserParent
  * @summary finds all nomination bot announcements in chat transcript
  * @param {BotConfig} config bot configuration
  * @param {BotUser} user current bot user
+ * @param {ChatMessage[]} [messages] transcript messages
  * @returns {Promise<ChatMessage[]>}
  */
-export const findNominationAnnouncementsInChat = async (config, user) => {
+export const findNominationAnnouncementsInChat = async (config, user, messages) => {
+    const { chatRoomId } = config;
     const nominationsQuery = "We have a new nomination Please welcome our latest candidate";
-    const nominationAnnouncements = await searchChat(config, nominationsQuery, config.chatRoomId);
+    const nominationAnnouncements = messages || await searchChat(config, nominationsQuery, chatRoomId);
     const botMessageFilter = await onlyBotMessages(user);
     return nominationAnnouncements.filter(botMessageFilter);
 };
@@ -35,11 +37,13 @@ export const findNominationAnnouncementsInChat = async (config, user) => {
  * @summary finds all withdrawn bot announcements in chat transcript
  * @param {BotConfig} config bot configuration
  * @param {BotUser} user current bot user
+ * @param {ChatMessage[]} [messages] transcript messages
  * @returns {Promise<ChatMessage[]>}
  */
-export const findWithdrawalAnnouncementsInChat = async (config, user) => {
+export const findWithdrawalAnnouncementsInChat = async (config, user, messages) => {
+    const { chatRoomId } = config;
     const withdrawalsQuery = "Attention Candidate has withdrawn from the election";
-    const withdrawalAnnouncements = await searchChat(config, withdrawalsQuery, config.chatRoomId);
+    const withdrawalAnnouncements = messages || await searchChat(config, withdrawalsQuery, chatRoomId);
     const botMessageFilter = await onlyBotMessages(user);
     return withdrawalAnnouncements.filter(botMessageFilter);
 };
