@@ -42,7 +42,7 @@
         "node": "16.x"
     },
     "dependencies": {
-        "axios": "^0.27.2",
+        "axios": "^1.2.0",
         "chatexchange": "^0.7.4",
         "cheerio": "^1.0.0-rc.12",
         "dotenv": "^16.0.3",
