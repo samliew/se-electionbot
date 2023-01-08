@@ -55,7 +55,7 @@
         "markdown-it": "^13.0.1",
         "node-cache": "^5.1.2",
         "node-cron": "^3.0.2",
-        "patch-package": "^6.5.0",
+        "patch-package": "^6.5.1",
         "ramda": "^0.28.0",
         "sanitize-html": "^2.8.1"
     },
