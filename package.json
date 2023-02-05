@@ -57,13 +57,13 @@
         "node-cron": "^3.0.2",
         "patch-package": "^6.5.1",
         "ramda": "^0.28.0",
-        "sanitize-html": "^2.8.1"
+        "sanitize-html": "^2.9.0"
     },
     "devDependencies": {
         "@types/chai": "^4.3.4",
         "@types/chai-as-promised": "^7.1.5",
         "@types/cheerio": "^0.22.31",
-        "@types/express": "^4.17.16",
+        "@types/express": "^4.17.17",
         "@types/heroku-client": "^3.1.0",
         "@types/jsdom": "^16.2.15",
         "@types/markdown-it": "^12.2.3",
@@ -81,7 +81,7 @@
         "rimraf": "^3.0.2",
         "sinon": "^14.0.2",
         "ts-node": "^10.9.1",
-        "typescript": "^4.9.4",
+        "typescript": "^4.9.5",
         "handlebars": "^4.7.7",
         "node-sass": "^7.0.3",
         "node-sass-package-importer": "^5.3.2"
