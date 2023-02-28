@@ -340,7 +340,7 @@ export default class Announcer {
         const toAnnounce = filterMap(withdrawnNominees, (n) => !announced.has(n.userId));
         if (!toAnnounce.size) {
             console.log(`[announcer] no withdrawn nominees to announce`);
-            return true;
+            return false;
         }
 
         const onlyWithUsernames = getValidParticipants(toAnnounce);
