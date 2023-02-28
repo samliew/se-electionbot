@@ -108,7 +108,7 @@ export default class Announcer {
     /**
      * @summary checks if winners are already announced in chat
      * @param {ChatMessage[]} botMessages bot messages from the transcript
-     * @returns {boolean} 
+     * @returns {boolean}
      */
     announcedWinnersInChat(botMessages) {
         const expr = /^(?:The winners? (?:are|is):|Congratulations to the winners?)/i;
@@ -293,10 +293,20 @@ export default class Announcer {
         const { nominees, electionUrl } = _election;
 
         const announced = this.#announced.nominees;
-        const toAnnounce = filterMap(nominees, (n) => !announced.has(n.userId));
+
+        // Nominees that have not been announced yet
+        // TODO - We have a chat search bug and may announce all the nominees again on script startup
+        // const toAnnounce = filterMap(nominees, (n) => !announced.has(n.userId));
+
+        // Announce nominees with nomination dates within the past scrape interval
+        const pastScrapeDate = Date.now() - config.scrapeIntervalMins * 60 * 1000;
+        const toAnnounce = filterMap(nominees, (n) => {
+            return n.nominationDate.getTime() > pastScrapeDate;
+        });
+
         if (!toAnnounce.size) {
             console.log(`[announcer] no new nominees to announce`);
-            return true;
+            return false;
         }
 
         const nominationTab = `${electionUrl}?tab=nomination`;
