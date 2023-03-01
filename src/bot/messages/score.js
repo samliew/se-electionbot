@@ -97,5 +97,5 @@ export const sayHasMaximumCandidateScore = (election, candidateScore, hasNominat
  * @returns {string}
  */
 export const sayNoAccountToCalcScore = (isAskingForOtherUser) => {
-    return `${getRandomOops()} ${isAskingForOtherUser ? "the user" : "you"} must have an account on the site to get the score!`;
+    return `${getRandomOops()} ${isAskingForOtherUser ? "the user" : "you"} must have sufficient rep on the site to get the score!`;
 };
