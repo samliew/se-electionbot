@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import entities from 'html-entities';
 import { startServer } from "../server/index.js";
 import { logActivity, logResponse } from "../shared/utils/bot.js";
-import { isOneboxedMessage, prepareMessageForMatching } from "../shared/utils/chat.js";
+import { isMovedSystemAutoMessage, isOneboxedMessage, prepareMessageForMatching } from "../shared/utils/chat.js";
 import { getMilliseconds, MS_IN_SECOND, SEC_IN_MINUTE } from "../shared/utils/dates.js";
 import { matchNumber } from "../shared/utils/expressions.js";
 import { countValidBotMessages } from "./activity/index.js";
@@ -214,7 +214,7 @@ use defaults ${defaultChatNotSet}`
             defaultChatRoomId,
         });
 
-        if(status) {
+        if (status) {
             console.log(`[init] production mode with an active election, redirected to live room:
             from: ${from}
             to:   ${to}`);
@@ -309,7 +309,7 @@ use defaults ${defaultChatNotSet}`
          * Sync withdrawn nominees on startup using past ElectionBot announcements
          * (assuming ElectionBot managed to announce all the nominations from start of election)
          */
-        const [ nominationAnnouncements, withdrawalAnnouncements ] = await Promise.all([
+        const [nominationAnnouncements, withdrawalAnnouncements] = await Promise.all([
             findNominationAnnouncementsInChat(config, me, botMessages),
             findWithdrawalAnnouncementsInChat(config, me, botMessages),
         ]);
@@ -415,7 +415,7 @@ use defaults ${defaultChatNotSet}`
 
             const { eventType, userId: originalUserId, targetUserId, id: msgId } = msg;
 
-            // allows the bot to get messages as if they were coming from another user
+            // Allows the bot to get messages as if they were coming from another user
             const userId = config.impersonatingUserId || originalUserId;
 
             // Ignore events from self
@@ -431,10 +431,13 @@ use defaults ${defaultChatNotSet}`
             // Ignore messages with oneboxes
             if (isOneboxedMessage(encodedMessage)) return;
 
+            // Ignore system messages generated from moving messages between rooms
+            if (isMovedSystemAutoMessage(decodedMessage)) return;
+
             // Get details of user who triggered the message
             const profile = await getUser(client, userId);
 
-            //if user is null, we have a problem
+            // If user is null, we have a problem
             if (!profile) return console.log(`missing user ${userId}`);
 
             const user = new User(profile);
@@ -445,7 +448,7 @@ use defaults ${defaultChatNotSet}`
 
             await user.updateAccess(config);
 
-            // update the user to check the commands against
+            // Update the user to check the commands against
             commander.user = user;
 
             const isPrivileged = user.isMod() || user.isPrivileged();

@@ -115,3 +115,12 @@ export const isOneboxedMessage = (htmlContent) => {
         return false;
     }
 };
+
+/**
+ * @summary checks if a chat message is a system message generated from moving messages
+ * @param {string} content string content of the message
+ * @returns {boolean}
+ */
+export const isMovedSystemAutoMessage = (content) => {
+    return /^← \*\d+ messages moved (?:to|from)/.test(content);
+};
