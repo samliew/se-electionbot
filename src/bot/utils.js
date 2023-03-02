@@ -118,11 +118,11 @@ export const fetchUrl = async (_config, url, json = false) => {
         return data;
     }
     catch (error) {
-        if(axios.isAxiosError(error)) {
+        if (axios.isAxiosError(error)) {
             const { code, message, name, response } = error;
             console.error(`[fetch] ${name} ${code}: ${message}`);
 
-            if(response) {
+            if (response) {
                 const { data, status, statusText } = response;
                 console.log(`[fetch] error response ${status}: ${statusText}${data ? `\n${data}` : ""}`);
             }
@@ -145,7 +145,7 @@ export const fetchUrl = async (_config, url, json = false) => {
  */
 export const searchChat = async (config, query, roomId = '', options = {}) => {
     const { chatDomain } = config;
-    const { pageSize = 100, page = 1} = options;
+    const { pageSize = 100, page = 1 } = options;
 
     console.log(`[chat] searching room ${roomId} (${chatDomain})\nquery: "${query}"`);
 
@@ -300,7 +300,7 @@ export const fetchChatTranscript = async (config, url, options = {}) => {
 
     const utcDate = formatAsTranscriptPath(now);
 
-   if(config.debugOrVerbose) console.log(`[transcript] fetching ${url}${utcDate}`);
+    if (config.debugOrVerbose) console.log(`[transcript] fetching ${url}${utcDate}`);
 
     const chatTranscript = await fetchUrl(config, url + utcDate);
     const { window: { document } } = new JSDOM(chatTranscript);
@@ -762,7 +762,7 @@ export const NO_ACCOUNT_ID = -42;
 export const matchesOneOfChatHosts = (text, path) => {
     /** @type {Host[]} */
     const hosts = ["meta.stackexchange.com", "stackexchange.com", "stackoverflow.com"];
-    return hosts.some((host) => text.includes(host)) && (!path || text.includes(path));
+    return hosts.some((host) => text.includes(`chat.${host}`)) && (!path || text.includes(path));
 };
 
 /**
