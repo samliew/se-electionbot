@@ -171,9 +171,9 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         }
 
         if (isAskingForOtherUser) {
-            userId = isUsingChatLink ?
-                matchNumber(/\/users\/(\d+).*(?:\?|$)/, content) :
-                matchNumber(/(-?\d+)(?:\?|$)/, content);
+            userId = (isUsingChatLink ?
+                matchNumber(/\/users\/(\d+)(\/.*)?(?:\?|$)/, content) :
+                matchNumber(/(-?\d+)(\/.*)?(?:\?|$)/, content));
         }
 
         if (config.debug) {
