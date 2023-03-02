@@ -137,7 +137,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         let { userId, content } = message;
 
         if (isNaN(userId)) {
-            console.error(`Invalid user id: ${userId}`);
+            console.error(`Invalid chat message user id: ${userId}`);
             return sayCalcFailed(false);
         }
 
@@ -186,7 +186,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         // Do not attempt to get badges for invalid users
         if (!userId) {
-            console.error(`Invalid user id: ${userId}`);
+            console.error(`Invalid user id #1: ${userId}`);
             return sayCalcFailed(isAskingForOtherUser);
         }
 
@@ -213,7 +213,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
         // Do not attempt to get badges for invalid users
         if (!userId) {
-            console.error(`Invalid user id: ${userId}`);
+            console.error(`Invalid user id #2: ${userId}`);
             return sayCalcFailed(isAskingForOtherUser);
         }
 
