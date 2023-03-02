@@ -266,7 +266,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
             responseText = `The candidate score for user ${makeURL(display_name || userId.toString(),
                 `${siteUrl}/users/${userId}`)
-                } is ${getScoreText(score, maxScore)}.`;
+                } is ${getScoreText(score, maxScore)}. `; // intentional space after this sentence
 
             if (numMissingRequiredBadges > 0) {
                 responseText += buildMissingElectionBadgesResponse(
@@ -291,7 +291,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
         }
         // All others
         else {
-            responseText = `Your candidate score is ${getScoreText(score, maxScore)}.`;
+            responseText = `Your candidate score is ${getScoreText(score, maxScore)}. `; // intentional space after this sentence
 
             if (numMissingBadges > 0) {
                 responseText += buildMissingElectionBadgesResponse(
@@ -303,7 +303,7 @@ export const makeCandidateScoreCalc = (config, modIds) =>
 
             // Already nominated, and not ended/cancelled
             if (hasNominated && ['nomination', 'primary', 'election'].includes(/** @type {string} */(phase))) {
-                responseText += ` I can see you're already a candidate. Good luck!`;
+                responseText += `I can see you're already a candidate. Good luck!`;
             }
             // If have not begun, or nomination phase, ask user to nominate themselves
             else if (['null', 'nomination'].includes(/** @type {string} */(phase))) {
@@ -311,8 +311,8 @@ export const makeCandidateScoreCalc = (config, modIds) =>
                 const perhapsNominateThreshold = maxScore / 2;
 
                 responseText += score >= perhapsNominateThreshold ?
-                    ` Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
-                    ` Having a high score is not a requirement - you can still nominate yourself!`;
+                    `Perhaps consider nominating in the ${makeURL("election", electionUrl)}?` :
+                    `Having a high score is not a requirement - you can still nominate yourself!`;
             }
         }
 
