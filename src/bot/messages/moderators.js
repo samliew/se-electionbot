@@ -176,7 +176,7 @@ export const sayDiamondAlready = (candidateScore, isModerator, wasModerator) => 
     ];
 
     const [, message] = messageMap.find(([condition]) => condition) || [];
-    return `${message || `diamonds are forever!`} Just so you know, your score is **${score}** (out of ${maxScore}).${missingReqBadges}${missingBadges}`;
+    return `${message || `diamonds are forever!`} Just so you know, your score is **${score}** (out of ${maxScore}). ${missingReqBadges} ${missingBadges}`;
 };
 
 /**
