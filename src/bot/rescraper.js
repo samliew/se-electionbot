@@ -216,7 +216,7 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
                 // Scale Heroku dynos to paid (restarts app)
                 if (config.autoscaleHeroku) {
                     const heroku = new HerokuClient(config);
-                    await heroku.scaleHobby();
+                    await heroku.scaleBasic();
                 }
 
                 const status = await announcement?.announceElectionEndingSoon();

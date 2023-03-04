@@ -343,7 +343,7 @@ export class BotConfig {
     }
 
     /**
-     * @summary whether to autoscale Heroku to Hobby
+     * @summary whether to autoscale Heroku to Basic (paid)
      * @type {boolean}
      */
     get autoscaleHeroku() {

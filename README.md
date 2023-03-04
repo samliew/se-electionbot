@@ -187,7 +187,7 @@ All array-like values must be specified as a pipe-delimited list (i.e. `A|B|C`)
 | `ACCOUNT_PASSWORD`             | string   | yes       | -                          | password of bot account                                                                                   |
 | `ADMIN_IDS`                    | number[] | no        | -                          | user network account ids to grant admin privileges (pipe-delimited) (mods and ROs are already privileged) |
 | `AUTO_LEAVE_ROOM`              | boolean  | no        | `true`                     | should the bot leave the room when the election has ended, after ELECTION_AFTERPARTY_MINS                 |
-| `AUTOSCALE_HEROKU`             | boolean  | no        | `true`                     | if hosted on Heroku, autoscale the bot to Hobby if tracking an active election and `DEBUG` is `false`     |
+| `AUTOSCALE_HEROKU`             | boolean  | no        | `true`                     | if hosted on Heroku, autoscale the bot to Basic if tracking an active election and `DEBUG` is `false`     |
 | `CHAT_DOMAIN`                  | string   | no        | -                          | default chat domain (stackexchange.com \| stackoverflow.com)                                              |
 | `CHAT_ROOM_ID`                 | number   | no        | -                          | default chat room ID that the bot will join                                                               |
 | `CONTROL_ROOM_ID`              | number   | no        | -                          | flight control room for the bot to join                                                                   |

@@ -192,14 +192,14 @@ use defaults ${defaultChatNotSet}`
 
         /*
          * If autoscaleHeroku enabled, and is an active election,
-         * scale Heroku dyno to Hobby (paid) if it's using Eco dynos only (restarts app)
+         * scale Heroku dyno to Basic (paid) if it's using Eco dynos only (restarts app)
          */
         const hasPaidDyno = await heroku.hasPaidDynos();
         const { autoscaleHeroku } = config;
         if (autoscaleHeroku) {
             if (election.isActive() && !hasPaidDyno) {
-                const status = await heroku.scaleHobby();
-                console.log(`[heroku] scaled up to hobby dyno: ${status}`);
+                const status = await heroku.scaleBasic();
+                console.log(`[heroku] scaled up to basic dyno: ${status}`);
             }
             // Otherwise, scale down to eco dynos
             else if (hasPaidDyno) {
@@ -214,7 +214,7 @@ use defaults ${defaultChatNotSet}`
             defaultChatRoomId,
         });
 
-        if(status) {
+        if (status) {
             console.log(`[init] production mode with an active election, redirected to live room:
             from: ${from}
             to:   ${to}`);
@@ -309,7 +309,7 @@ use defaults ${defaultChatNotSet}`
          * Sync withdrawn nominees on startup using past ElectionBot announcements
          * (assuming ElectionBot managed to announce all the nominations from start of election)
          */
-        const [ nominationAnnouncements, withdrawalAnnouncements ] = await Promise.all([
+        const [nominationAnnouncements, withdrawalAnnouncements] = await Promise.all([
             findNominationAnnouncementsInChat(config, me, botMessages),
             findWithdrawalAnnouncementsInChat(config, me, botMessages),
         ]);

@@ -5,7 +5,7 @@ import { capitalize } from '../shared/utils/strings.js';
 // https://devcenter.heroku.com/articles/platform-api-reference
 
 /**
- * @typedef {"eco" | "hobby" | "standard-1X" | "standard-2X" | "performance-M" | "performance-L"} FormationSize
+ * @typedef {"eco" | "basic" | "standard-1X" | "standard-2X" | "performance-M" | "performance-L"} FormationSize
  *
  * @typedef {{
  *  app: App,
@@ -203,13 +203,13 @@ export class HerokuClient {
     };
 
     /**
-     * @summary scale app's dynos to hobby
+     * @summary scale app's dynos to basic
      * @param {Formation["type"]} [type] process type to scale
      * @return {Promise<boolean>}
      */
-    async scaleHobby(type = "web") {
+    async scaleBasic(type = "web") {
         return this.#scale({
-            [type]: { quantity: 1, size: "hobby" }
+            [type]: { quantity: 1, size: "basic" }
         });
     };
 
