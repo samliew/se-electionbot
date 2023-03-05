@@ -67,7 +67,7 @@
         "@types/heroku-client": "^3.1.0",
         "@types/jsdom": "^16.2.15",
         "@types/markdown-it": "^12.2.3",
-        "@types/mocha": "^9.1.1",
+        "@types/mocha": "^10.0.1",
         "@types/node-cron": "^3.0.7",
         "@types/ramda": "^0.28.23",
         "@types/sanitize-html": "^2.8.1",
