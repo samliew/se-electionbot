@@ -439,7 +439,9 @@ export default class Announcer {
     async announceFeedbackAsk() {
         const { _room, config } = this;
 
-        const messages = [...sayFeedback({ config })];
+        const messages = [
+            sayFeedback({ config })
+        ];
 
         await sendMessageList(config, _room, messages, { isPrivileged: true });
 
