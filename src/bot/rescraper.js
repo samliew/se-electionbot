@@ -256,6 +256,9 @@ roomBecameIdleHoursAgo: ${roomBecameIdleHoursAgo}`);
             console.error(`RESCRAPER - Failure`, error);
         }
 
+        // Try rejoin room in case bot was disconnected
+        await client.joinRoom(room);
+
         if (config.debugOrVerbose) {
             console.log(`[rescraper] rescrape function completed.`);
         }
