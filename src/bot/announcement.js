@@ -460,7 +460,7 @@ export default class Announcer {
         const { config, _election, _room } = this;
 
         const messages = [
-            `**The ${makeURL(label, `${_election.electionUrl}?tab=${tab}`)} ${changeDesc}.** ${actionDesc}.`
+            `**The ${makeURL(label, `${_election.electionUrl}?tab=${tab}`)} ${changeDesc}.** ${actionDesc}` // actionDesc may contain punctuation
         ];
 
         await sendMessageList(config, _room, messages, { isPrivileged: true });
