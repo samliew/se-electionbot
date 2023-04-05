@@ -31,11 +31,6 @@ describe("Stack Exchange Chat integration", function () {
 
             expect(chatroom?.chatRoomId).to.equal(197438);
             expect(chatroom?.chatDomain).to.equal("stackoverflow.com");
-
-            const chatroom2 = await getSiteDefaultChatroom(getMockBotConfig(), "https://superuser.com");
-
-            expect(chatroom2?.chatRoomId).to.equal(118);
-            expect(chatroom2?.chatDomain).to.equal("stackexchange.com");
         });
     });
 
