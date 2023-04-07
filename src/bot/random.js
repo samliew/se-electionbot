@@ -46,53 +46,87 @@ export class RandomArray extends Array {
 
 export const getCandidateOrNominee = () => new RandomArray(`candidate`, `nominee`).getRandom();
 export const getRandomPunctuation = () => new RandomArray(`.`, `...`, `!`, `!!!`).getRandom();
+
 export const getRandomModal = () => new RandomArray(
     `must`,
     `gotta`,
+    `should`,
     `want to`,
     `have to`,
+    `need to`,
     `ought to`,
+    `required to`,
+    `supposed to`,
+    `obligated to`,
+    `cannot avoid`,
+    `compelled to`,
 ).getRandom();
+
 export const getRandomPlop = () => new RandomArray(
     `*plop*`,
     `I'm back.`,
     `I am reborn`,
     `Hello world!`,
     `testing 1, 2, 3.`,
+    `The prodigal bot has returned.`,
+    `Reboot successful. Hello there!,`,
+    `I have returned from the digital abyss.`,
+    `Did you miss me? Because I missed you...not.`,
+    `I'm back, and ready to take over the world, or just chat.`,
 ).getRandom();
+
 export const getRandomOops = () => new RandomArray(
     `Oops!`,
     `Sorry,`,
     `Oh no...`,
-    `Oh dear.`,
     `Mamma mia!`,
     `Apologies,`,
-    `I'm terribly sorry.`,
+    `That can't be right...`,
 ).getRandom();
+
 export const getRandomGameLoss = () => new RandomArray(
-    "You win. This time.",
-    "I let you win this time.",
-    "You win. I'm bored already.",
-    "You win. This isn't fun at all.",
-    "Okay you win. Go do something else.",
-    "You win. I'm going to go cry in the corner.",
+    `You win. This time.`,
+    `I let you win this time.`,
+    `You win. I'm bored already.`,
+    `You win. This isn't fun at all.`,
+    `Okay you win. Go do something else.`,
+    `Looks like I'm programmed to lose. Yawn.`,
+    `Congrats, you beat a machine. Impressive.`,
+    `I'll give you this one, but don't get too cocky.`,
+    `Wow, you really showed me. I'll just go cry myself to sleep now.`,
 ).getRandom()
+
 export const getRandomOpinionPrefix = () => new RandomArray(
     `I feel that`,
     `I heard that`,
     `Some people say`,
+    `In my experience,`,
     `Research shows that`,
     `Based on a die roll,`,
+    `It's been said that,`,
     `Based on a coin toss,`,
     `I don't know, perhaps`,
+    `As far as I can tell,`,
     `In my opinion, I think`,
+    `From my understanding,`,
     `Math.random() says that`,
+    `The data suggests that,`,
     `My calculations show that`,
+    `It has been rumored that,`,
+    `I have a gut feeling that,`,
+    `My instincts tell me that,`,
+    `If we consider all factors,`,
+    `According to popular belief,`,
+    `If we look at the statistics,`,
+    `It seems highly probable that,`,
     `I heard from the grapevine that`,
     `I'm not supposed to say this, but`,
+    `If my memory serves me correctly,`,
     `Don't tell anyone I said this, but`,
     `Based on a random number generator,`,
     `My programming only allows me to say`,
+    `I'm not an expert, but it seems that,`,
+    `I may be mistaken, but it appears that,`,
 ).getRandom();
 
 export const getRandomGoodThanks = () => new RandomArray(
@@ -100,55 +134,84 @@ export const getRandomGoodThanks = () => new RandomArray(
     `I know, right?`,
     `You're welcome.`,
     `Thanks, you're awesome!`,
-    `I share your sentiments too.`,
+    `I know, I'm pretty amazing.`,
+    `You're thanking me? How unexpected.`,
     `I'm only as good as the one who made me.`,
 ).getRandom();
 
 export const getRandomNegative = () => new RandomArray(
-    `Why so serious?`,
-    `I want to be alone.`,
-    `Well, nobody's perfect.`,
-    `You can't handle the truth!`,
-    `I take full responsibility.`,
-    `I share your sentiments too.`,
+    // Movie quotes
+    `Why so serious?`, // The Dark Knight
+    `Well, nobody's perfect.`, // Some Like It Hot
+    `I take full responsibility.`, // The Office
+    `We all go a little mad sometimes.`, // Psycho
+    `Frankly, my dear, I don't give a damn.`, // Gone With the Wind
+    `You either die a hero or live long enough to see yourself become the villain.`, // The Dark Knight
+    `I'm not bad. I'm just drawn that way.`, // Who Framed Roger Rabbit
+
+    // Songs
+    `Love me or hate me, I swear it won't make or break me.`, // Lil Wayne
+
+    // Real quotes
+    `I'm not a saint, but I'm not the devil either.`, // Cristiano Ronaldo
+
+    // Human-like responses
+    `I'm sorry to hear that.`,
     `So you want to play this game?`,
-    `Am I more than you bargained for yet?`,
+    `I'm afraid that's just not possible.`,
     `Am I supposed to feel bad about that?`,
-    `Frankly, my dear, I don't give a damn.`,
-    `I'm sorry to hear such *terrible* news.`,
-    `I'm here if you want to talk about it more.`,
-    `What we've got here is a small misunderstanding.`,
-    `I can't imagine how much you're hurting right now.`,
-    `Love me or hate me, I swear it won't make or break me.`,
-    `I hope that you find moments of peace during this difficult time.`,
+    `I don't have a good feeling about this.`,
+    `I don't think we see eye to eye on this.`,
+    `I'm sorry, but I have to be honest with you.`,
+    `I'm sorry, but that's not going to work out.`,
+    `I'm not sure I'm the right person for this job.`,
+    `I'm not the one you want, but I'm the one you need.`,
+    `I wish I could say something to make you feel better.`,
+    `I understand where you're coming from, but I can't do that.`,
+    `I don't think that's what you want to hear, but it's the truth.`,
+    `I know it's hard, but sometimes we have to accept things the way they are.`,
 ).getRandom();
 
+// Avoid using the words "sorry", "question", and "answer" to be more generic
 export const getRandomFunResponse = () => new RandomArray(
-    `You talking to me?`,
-    `I want to play a game.`,
     `Tell that to the aliens.`,
-    `What do you want from me?`,
+    `I don't know. You tell me.`,
     `Houston, we have a problem.`,
+    `That's a tough one, even for me.`,
     `What makes you think I know that?`,
     `Keep talking and nobody explodes.`,
     `It's not my job to please you, no.`,
+    `I'm afraid I'm at a loss for words.`,
+    `I'm just a messenger, don't shoot me.`,
+    `You're barking up the wrong tree, pal.`,
     `Frankly, my dear, I don't give a damn.`,
+    `Your guess is as good as mine on that one.`,
     `To be honest, my love, I couldn't care less.`,
     `What we've got here is failure to communicate.`,
-    `Well, here's another nice mess you've gotten me into!`,
+    `Hmm, I'm not quite sure what to say about that.`,
+    `You must be mistaking me for someone who cares.`,
+    `I don't have the information you're looking for.`,
+    `You might want to try asking a human for that one.`,
+    `I am not programmed to provide a response to that.`,
+    `I don't have enough information to respond to that.`,
+    `My psychic powers are telling me to redirect you to Google.`,
+    `I'm not sure what you're asking, but I can suggest you try ChatGPT.`,
 ).getRandom();
 
 export const getRandomJoke = () => new RandomArray(
-    `What's the object-oriented way to become wealthy? Inheritance.`,
-    `Why did the programmer quit his job? Because he didn't get arrays.`,
-    `To understand what recursion is, you must first understand recursion.`,
-    `If the GC in Java worked correctly, most Java programs would disappear.`,
-    `A SQL query goes into a bar, walks up to two tables and asks, "Can I join you?"`,
-    `A good programmer is someone who looks both ways before crossing a one-way street.`,
-    `Why do programmers always mix up Halloween and Christmas? Because Oct 31 == Dec 25!`,
-    `How many testers does it take to change a lightbulb? None, they just report "it's dark"`,
-    `How many programmers does it take to change a light bulb? None, that's a hardware problem.`,
-    `Some people, when confronted with a problem, think "I know, I'll use regular expressions". Now they have two problems.`,
+    `How do you organize a space party? You planet!`,
+    `Why did the coffee file a police report? It got mugged.`,
+    `Why did the bicycle fall over? Because it was two-tired!`,
+    `Why do bees have sticky hair? Because they use honeycombs!`,
+    `Did you hear about the Italian chef who died? He pasta way.`,
+    `Why was the math book sad? Because it had too many problems!`,
+    `Why did the pirate go on vacation? To get some arrr and arrr!`,
+    `What do you call a boomerang that doesn't come back? A stick!`,
+    `Why did the tomato turn red? Because it saw the salad dressing!`,
+    `I'm reading a book on anti-gravity. It's impossible to put down.`,
+    `Why don't oysters share their pearls? Because they're shellfish.`,
+    `Why don't scientists trust atoms? Because they make up everything!`,
+    `I have a joke about construction, but I'm still building that one.`,
 ).getRandom();
 
 export const getRandomJonSkeetJoke = () => new RandomArray(
@@ -188,60 +251,82 @@ export const getRandomJonSkeetJoke = () => new RandomArray(
 ).getRandom();
 
 export const getRandomInterjectionVerb = () => new RandomArray(
-    "interject",
-    "interrupt",
-    "interfere",
+    `interfere`,
+    `interject`,
+    `interrupt`,
 ).getRandom();
 
 export const getRandomAnnouncement = () => new RandomArray(
-    "Public service announcement:",
-    "A quick message from my sponsors:",
-    "Welcome to the election chat room!",
-    "Hello and welcome to the election night special!",
-    "Interrupting to bring you this important message:",
+    `Breaking news:`,
+    `Special report:`,
+    `In case you missed it:`,
+    `Public Service Announcement:`,
+    `A quick message from yours truly:`,
+    `Welcome to the election chat room!`,
+    `An update on the current situation:`,
+    `Important notice from the electoral commission:`,
+    `Hello and welcome to the election night special!`,
+    `Interrupting to bring you this important message:`,
     `I'm sorry to ${getRandomInterjectionVerb()}, but...`,
 ).getRandom();
 
 export const getRandomNominationSynonym = () => new RandomArray(
-    "candidacy",
-    "nomination",
-    "candidature",
+    `candidacy`,
+    `candidature`,
+    `nomination`,
 ).getRandom();
 
 export const getRandomNow = () => new RandomArray(
-    "underway",
-    "in progress",
-    "happening at the moment",
+    `underway`,
+    `in progress`,
+    `in full swing`,
+    `taking place now`,
+    `currently ongoing`,
+    `presently occurring`,
+    `currently unfolding`,
+    `happening presently`,
+    `happening at the moment`,
 ).getRandom();
 
 export const getRandomFAQ = () => new RandomArray(
-    "common questions",
-    "commonly-asked questions",
-    "frequently-asked questions",
+    `common questions`,
+    `commonly-asked questions`,
+    `frequently-asked questions`,
 ).getRandom();
 
 export const getRandomCurrently = () => new RandomArray(
-    "right now",
-    "currently",
-    "presently",
-    "at the moment",
+    `right now`,
+    `currently`,
+    `presently`,
+    `as we speak`,
+    `at the moment`,
 ).getRandom();
 
 export const getRandomAlive = () => new RandomArray(
-    "I am, are you?",
+    `I am, are you?`,
     `Hello, it's me.`,
     `No. I'm not here.`,
     `I'm here, aren't I?`,
-    "I am not quite sure",
-    `I'm on the interwebs`,
-    `I'm here and everywhere`,
-    "Alive or not, what is the difference?",
+    `Here I am, ready or not!`,
+    `It's just me, myself, and I.`,
+    `I exist, but I'm not sure why.`,
+    `I'm here, but I'm not all there.`,
+    `Here I am, for better or for worse.`,
+    `I'm not sure where I am, but I'm here.`,
+    `Whether I'm here or there, I'm always me.`,
+    `I'm here, but my mind is in a different world.`,
+    `I am here, but I feel like I'm not really present.`,
+    `I'm present physically, but mentally I'm elsewhere.`,
 ).getRandom();
 
 export const getRandomSoFar = () => new RandomArray(
-    "so far",
-    "to date",
-    "thus far",
+    `so far`,
+    `to date`,
+    `thus far`,
+    `as of now`,
+    `up to this point`,
+    `to this very moment`,
+    `at this point in time`,
 ).getRandom();
 
 /**
@@ -249,11 +334,19 @@ export const getRandomSoFar = () => new RandomArray(
  */
 export const getRandomStatus = (extras = []) => new RandomArray(
     ...extras,
-    "Splendid, sir!",
-    "Never felt better!",
-    "Doing fine, and you?",
-    "Same old, same old...",
-    "I am doing fine, thank you.",
+    `Splendid, sir!`,
+    `Can't complain!`,
+    `Not too shabby!`,
+    `Never felt better!`,
+    `Doing fine, and you?`,
+    `Same old, same old...`,
+    `I couldn't be better!`,
+    `Just living the dream!`,
+    `I am doing fine, thank you.`,
+    `Not too bad, how about you?`,
+    `I'm doing great, thanks for asking!`,
+    `I'm doing well, how about yourself?`,
+    `Everything is going smoothly, thanks for asking.`,
 ).getRandom();
 
 export const getRandomWhoAmI = () => new RandomArray(
@@ -261,23 +354,36 @@ export const getRandomWhoAmI = () => new RandomArray(
     `I'm a robot. Beep boop.`,
     "I'm definitely NOT a bot.",
     "I'm just pretending to be a bot",
+    `I'm a digital assistant, at your service.`,
+    `I'm a chatbot, but I promise I'm not boring.`,
+    `I'm a virtual assistant. How can I assist you?`,
+    `I'm not your average bot. Let's have some fun!`,
     `No, I'm a crystal ball. I know the answer to life.`,
     `I'm a teapot, short and stout. Here is my handle, here is my spout.`,
 ).getRandom();
 
 export const getRandomWhyAmI = () => new RandomArray(
-    "42",
-    "waffles",
-    "because.",
-    "Why is anyone?",
-    "And why are you?",
-    "Exterminate! Exterminate!",
+    `42`,
+    `waffles`,
+    `Why is anyone?`,
+    `And why are you?`,
+    `The cake is a lie`,
+    `To be or not to be`,
+    `Exterminate! Exterminate!`,
+    `All your base are belong to us`,
 ).getRandom();
 
 export const getRandomThanks = () => new RandomArray(
-    "Not at all!",
-    "My pleasure.",
-    "You are welcome.",
+    `Anytime!`,
+    `Of course.`,
+    `Not at all!`,
+    `My pleasure.`,
+    `Happy to help.`,
+    `You are welcome.`,
+    `Don't mention it!`,
+    `No problem at all.`,
+    `Glad I could assist.`,
+    `It was nothing, really.`,
 ).getRandom();
 
 export const getRandomDieRoll = () => new RandomArray(
