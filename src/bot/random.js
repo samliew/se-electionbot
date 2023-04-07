@@ -112,7 +112,7 @@ export const getRandomOpinionPrefix = () => new RandomArray(
     `Math.random() says that`,
     `The data suggests that,`,
     `My calculations show that`,
-    `It has been rumored that,`,
+    `It has been rumoured that,`,
     `I have a gut feeling that,`,
     `My instincts tell me that,`,
     `If we consider all factors,`,
@@ -145,9 +145,8 @@ export const getRandomNegative = () => new RandomArray(
     `Well, nobody's perfect.`, // Some Like It Hot
     `I take full responsibility.`, // The Office
     `We all go a little mad sometimes.`, // Psycho
-    `Frankly, my dear, I don't give a damn.`, // Gone With the Wind
-    `You either die a hero or live long enough to see yourself become the villain.`, // The Dark Knight
     `I'm not bad. I'm just drawn that way.`, // Who Framed Roger Rabbit
+    `Frankly, my dear, I don't give a damn.`, // Gone With the Wind
 
     // Songs
     `Love me or hate me, I swear it won't make or break me.`, // Lil Wayne
@@ -156,13 +155,14 @@ export const getRandomNegative = () => new RandomArray(
     `I'm not a saint, but I'm not the devil either.`, // Cristiano Ronaldo
 
     // Human-like responses
+    `My bad.`,
+    `Whoopsie daisy.`,
+    `That's just not true.`,
     `I'm sorry to hear that.`,
     `So you want to play this game?`,
     `I'm afraid that's just not possible.`,
     `Am I supposed to feel bad about that?`,
-    `I don't have a good feeling about this.`,
     `I don't think we see eye to eye on this.`,
-    `I'm sorry, but I have to be honest with you.`,
     `I'm sorry, but that's not going to work out.`,
     `I'm not sure I'm the right person for this job.`,
     `I'm not the one you want, but I'm the one you need.`,
