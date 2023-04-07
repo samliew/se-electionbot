@@ -129,6 +129,12 @@ export const getRandomOpinionPrefix = () => new RandomArray(
     `I may be mistaken, but it appears that,`,
 ).getRandom();
 
+export const getRandomThankOthers = () => new RandomArray(
+    `Thanks!`,
+    `Thank you!`,
+    `Much appreciated!`,
+).getRandom();
+
 export const getRandomGoodThanks = () => new RandomArray(
     `Gee, thanks.`,
     `I know, right?`,
@@ -348,16 +354,14 @@ export const getRandomSoFar = () => new RandomArray(
  */
 export const getRandomStatus = (extras = []) => new RandomArray(
     ...extras,
+    `Not too bad...`,
     `Splendid, sir!`,
     `Can't complain!`,
     `Not too shabby!`,
     `Never felt better!`,
-    `Doing fine, and you?`,
-    `Same old, same old...`,
     `I couldn't be better!`,
     `Just living the dream!`,
     `I am doing fine, thank you.`,
-    `Not too bad, how about you?`,
     `I'm doing great, thanks for asking!`,
     `I'm doing well, how about yourself?`,
     `Everything is going smoothly, thanks for asking.`,
@@ -398,6 +402,11 @@ export const getRandomThanks = () => new RandomArray(
     `No problem at all.`,
     `Glad I could assist.`,
     `It was nothing, really.`,
+).getRandom();
+
+export const sayWhatCanBotHelpWith = () => new RandomArray(
+    `What can I help with?`,
+    `What questions do you have about the election?`,
 ).getRandom();
 
 export const getRandomDieRoll = () => new RandomArray(

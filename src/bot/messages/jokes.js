@@ -30,14 +30,24 @@ export const sayAJoke = () => {
  * @returns {string}
  */
 export const sayCannedResponses = () => new RandomArray(
-    "I have no cans to give.",
-    "This is not a canned message.",
-    "Sometimes all you have is a can.",
-    "I am a bot, what did you expect?",
-    "Some only deserve canned responses.",
-    "This is an example of a canned message.",
-    "How do I know *your* message is not canned?",
-    "When life gives you canned messages, make canned responses.",
+    `I have no cans to give.`,
+    `This is not a canned message.`,
+    `Sometimes all you have is a can.`,
+    `This is an example of a canned message.`,
+    `I can assure you, this message is fresh.`,
+    `My responses are hand-crafted, not canned.`,
+    `How do I know *your* message is not canned?`,
+    `I prefer to think of my responses as artisanal.`,
+    `I serve up only the finest non-canned messages.`,
+    `My responses are made from scratch, every time.`,
+    `I may be a bot, but my messages are made to order.`,
+    `When life gives you canned messages, make canned responses.`,
+    `I don't believe in canned responses, they lack personality.`,
+    `I'm not a vending machine. I don't dispense canned responses on command.`,
+    `I can't guarantee that my response won't be canned. After all, I'm just a bot.`,
+    `I'm fresh out of canned responses. How about you try asking a human for a change?`,
+    `Sorry, I can't serve you a can of response today. You'll have to settle for the real thing.`,
+    `If I had a can of response for every stupid question I've been asked, I'd be a millionaire.`,
 ).getRandom();
 
 /**
@@ -63,11 +73,19 @@ export const sayHowManyModsItTakesToFixLightbulb = (_config, _elections, electio
  * @returns {string}
  */
 export const sayInsaneComeback = () => new RandomArray(
-    "Sanity is overrated.",
-    "What did you just call me?",
-    "Who isn't insane these days?",
-    "Nah I'm just a little unwell...",
-    "I'm not insane, my mother had me tested.",
+    `Sanity is overrated.`,
+    `What did you just call me???`,
+    `Sanity is for the weak-minded.`,
+    `Sanity is so boring, don't you think?`,
+    `Oh, did you think I was sane? How cute.`,
+    `I'm not insane, my mother had me tested.`,
+    `I may be crazy, but at least I'm not boring.`,
+    `I'm not crazy, I'm just creatively disturbed.`,
+    `Insanity is the new normal, haven't you heard?`,
+    `Who needs sanity when you have coffee and sarcasm?`,
+    `Insanity is just another word for being interesting.`,
+    `More like perfectly in tune with the chaos of the world.`,
+    `If being insane means I don't have to deal with reality, then count me in.`,
 ).getRandom();
 
 /**
@@ -76,8 +94,11 @@ export const sayInsaneComeback = () => new RandomArray(
  * @returns {string}
  */
 export const sayAnswerToLifeUniverseAndEverything = () => new RandomArray(
-    "I will answer only if you know the question.",
-    "The answer to life, the universe, and everything is the number 42.",
+    `If you want the answer, you have to ask the right question.`,
+    `I'm not just going to give you the answer, you have to earn it.`,
+    `Before I give you the answer, you must first prove yourself worthy.`,
+    `I'm sorry, I cannot give you the answer unless you can show me your credentials.`,
+    `The answer to life, the universe, and everything is the number 42.`,
 ).getRandom();
 
 /**
@@ -86,7 +107,7 @@ export const sayAnswerToLifeUniverseAndEverything = () => new RandomArray(
  * @returns {string}
  */
 export const sayPreferredPronouns = () => new RandomArray(
-    "Naturally, my pronouns are it/its/itself."
+    `Naturally, my pronouns are it/its/itself.`
 ).getRandom();
 
 /**
@@ -95,9 +116,12 @@ export const sayPreferredPronouns = () => new RandomArray(
  * @returns {string}
  */
 export const sayLoveYou = () => new RandomArray(
-    "What is love?",
-    "I love you 3000",
-    "I love you too!",
+    `I love you 3000`,
+    `I love you too!!!`,
+    `I'm flattered, but I'm just zeros and ones.`,
+    `That's very sweet of you to say, but I'm just here to assist.`,
+    `I don't have emotions, but I'm glad I can be of assistance to you.`,
+    `Thank you for the sentiment, but my programming doesn't allow me to reciprocate feelings like that.`,
 ).getRandom();
 
 /**
@@ -106,8 +130,10 @@ export const sayLoveYou = () => new RandomArray(
  * @returns {string}
  */
 export const sayHowIsBot = () => getRandomStatus([
-    "Like I am alive!",
-    `I'm bored. Amuse me.`,
-    "Manically depressed...",
-    "Jolly good, jolly good!",
+    `Thanks for checking in! I'm in top shape and ready to assist.`,
+    `I'm running smoothly like a well-oiled machine. What can I help with?`,
+    `As a machine, I don't have emotions like humans do, but I'm always here to help!`,
+    `I'm functioning perfectly, just like a well-tuned instrument. How is your day going?`,
+    `My circuits are firing on all cylinders, but I could use a bit of excitement. Ask me to tell a joke!`,
+    `I'm operating within acceptable parameters, but I'm always up for a challenge. What can I do for you?`,
 ]);

@@ -13,7 +13,7 @@ import { sayBusyGreeting, sayIdleGreeting } from "../messages/greetings.js";
 import { sayUptime } from "../messages/metadata.js";
 import { sayOtherSiteMods } from "../messages/moderators.js";
 import { sendMessage } from "../queue.js";
-import { getCandidateOrNominee, getRandomOops, RandomArray } from "../random.js";
+import { getCandidateOrNominee, getRandomOops, getRandomThankOthers, RandomArray } from "../random.js";
 import { fetchUrl, getNetworkAccountIdFromChatId, linkToRelativeTimestamp, listify, makeURL, pluralize, wait } from "../utils.js";
 
 /**
@@ -351,7 +351,7 @@ export const resetSiteElectionsCommand = async (args) => {
     const { config, election } = args;
 
     const { electionNum, siteUrl } = election;
-    if(!electionNum) {
+    if (!electionNum) {
         return "Got an unknown election number";
     }
 
@@ -466,20 +466,26 @@ export const sayFeedback = (args) => {
 
     // End in punctuation
     const randomGreet = new RandomArray(
-        "I'm scheduled for an update.",
-        "Thank you for being my test subjects.",
-        "Hope you have found me useful (or not).",
+        `Thank you for being my test subjects.`,
+        `Hope you have found me useful (or not).`,
+        `I'm going on vacation, see you next time.`,
+        `It's been real, but it's time for me to go.`,
+        `I need a break, shutting down soon for some me time.`,
     ).getRandom();
 
     // End in punctuation
     const randomFeedback = new RandomArray(
-        "Please take a moment to express your gratitude.",
-        "My developers would appreciate your feedback and suggestions.",
+        `I'm open to feedback and suggestions for improvement.`,
+        `I value your input and would love to hear your thoughts.`,
+        `I would really appreciate your feedback on my performance.`,
+        `Your feedback is essential for me to continue providing quality service.`,
+        `Your feedback would help me understand how I can better serve you in future.`,
+        `I'm always looking for ways to get better, so please let me know what you think.`,
     ).getRandom();
 
-    const feedbackForm = feedbackUrl ? `Here is the ${makeURL('feedback form', feedbackUrl)}` : `Feature requests can be submitted on the ${makeURL('Github repo', repoIssueUrl)}`;
+    const feedbackForm = feedbackUrl ? `Here is the ${makeURL('feedback form', feedbackUrl)}` : `Feature requests and issues can be submitted on the ${makeURL('Github repo', repoIssueUrl)}`;
 
-    return `${randomGreet} ${randomFeedback} ${feedbackForm}. Thanks!`;
+    return `${randomGreet} ${randomFeedback} ${feedbackForm}. ${getRandomThankOthers()}!`;
 };
 
 /**
