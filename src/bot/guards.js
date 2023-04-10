@@ -556,8 +556,11 @@ export const isAskedWhatIsElectionStatus = (text) => {
 export const isAskedWhenIsTheNextPhase = (text) => {
     return someMatch([
         /^when(?:'s| is| does) (?:the )?next phase/i,
+        /^when can i\b.*\bvote(?:\?\!?|$)/i,
+        /^when(?:'s| is| does) (?:the )?voting (?:phase )?(?:start|beginn?|end)(?:ing)?(?:\?\!?|$)/i,
+        /^when(?:'s| is) (?:the )?(?:last|final)\b.+\bday\b.+(?:vote)(?:\?\!?|$)/i,
         /^when(?:'s| is| does) (?:the )?(?:nomination|election) (?:phase )(?:start|end|over)(?:ing|ed)?/i,
-        /is (?:it|election|nomination) (?:phase )?(?:start|end)(?:ing|ed)\s?(soon|yet)?/i,
+        /is (?:the )?(?:it|election|nomination) (?:phase )?(?:start|end)(?:ing|ed)\s?(soon|yet)?/i,
     ], text);
 };
 

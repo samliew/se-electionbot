@@ -44,7 +44,15 @@ describe('Message Guards', () => {
         "When does the election phase end?",
         "When is nomination phase over?",
         "is election starting?",
+        "is the election starting soon?",
         "is nomination phase ended?",
+        "when does voting end?",
+        "when is the voting phase starting?",
+        "when is the voting phase beginning",
+        "when is the voting phase ending?",
+        "when is the last day to vote?",
+        "when is the final day to vote?",
+        "when can I vote?",
     ];
 
     const missingBadgesMatches = [
