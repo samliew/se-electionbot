@@ -154,22 +154,13 @@ export const getRandomNegative = () => new RandomArray(
     `I'm not bad. I'm just drawn that way.`, // Who Framed Roger Rabbit
     `Frankly, my dear, I don't give a damn.`, // Gone With the Wind
 
-    // Songs
-    `Love me or hate me, I swear it won't make or break me.`, // Lil Wayne
-
-    // Real quotes
-    `I'm not a saint, but I'm not the devil either.`, // Cristiano Ronaldo
-
     // Human-like responses
     `My bad.`,
     `Whoopsie daisy.`,
     `That's just not true.`,
-    `I'm sorry to hear that.`,
-    `So you want to play this game?`,
-    `I'm afraid that's just not possible.`,
     `Am I supposed to feel bad about that?`,
+    `I'm sorry, but this is not working out.`,
     `I don't think we see eye to eye on this.`,
-    `I'm sorry, but that's not going to work out.`,
     `I'm not sure I'm the right person for this job.`,
     `I'm not the one you want, but I'm the one you need.`,
     `I wish I could say something to make you feel better.`,
@@ -182,22 +173,17 @@ export const getRandomNegative = () => new RandomArray(
 export const getRandomFunResponse = () => new RandomArray(
     `Tell that to the aliens.`,
     `I don't know. You tell me.`,
-    `Houston, we have a problem.`,
     `I don't have a crystal ball.`,
     `I'm not paid enough for this.`,
     `I'm on break? Come back later.`,
     `That's a tough one, even for me.`,
     `I'm an AI, not a fortune teller.`,
     `What makes you think I know that?`,
-    `Keep talking and nobody explodes.`,
-    `It's not my job to please you, no.`,
     `I'm just a messenger, don't shoot me.`,
     `I'm afraid that's beyond my capacity.`,
     `You want me to work, you pay me more.`,
-    `Frankly, my dear, I don't give a damn.`,
     `You're asking the wrong AI for that one.`,
     `Your guess is as good as mine on that one.`,
-    `It's not my area of expertise, I'm afraid.`,
     `I'm too important to be bothered with that.`,
     `To be honest, my love, I couldn't care less.`,
     `What we've got here is failure to communicate.`,
