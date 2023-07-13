@@ -18,7 +18,7 @@ import { onlyTruthy } from "./arrays.js";
 export const numericNullable = (obj, prop) => {
     if (!obj) return null;
     const value = obj[prop];
-    return value !== void 0 && +value || null;
+    return value !== void 0 && Number(value) || null;
 };
 
 /**
