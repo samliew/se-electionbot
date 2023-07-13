@@ -183,7 +183,7 @@ describe('Commands', () => {
         });
 
         describe(setThrottleCommand.name, () => {
-            it('should do nothing if new throttle is invalid', () => {
+            it('should do nothing if new throttle value is missing', () => {
                 config.throttleSecs = 5;
 
                 const status = setThrottleCommand({
@@ -192,6 +192,31 @@ describe('Commands', () => {
                 });
 
                 expect(status).to.contain("invalid");
+                expect(config.throttleSecs).to.equal(5);
+            });
+
+            it('should do nothing if new throttle value is invalid', () => {
+                config.throttleSecs = 5;
+                config.minThrottleSecs = 1;
+
+                const status = setThrottleCommand({
+                    config,
+                    content: "set throttle to 0",
+                });
+
+                expect(status).to.contain("invalid");
+                expect(config.throttleSecs).to.equal(5);
+            });
+
+            it('should do nothing if new throttle value is the same', () => {
+                config.throttleSecs = 5;
+
+                const status = setThrottleCommand({
+                    config,
+                    content: "set throttle to 5",
+                });
+
+                expect(status).to.contain("already");
                 expect(config.throttleSecs).to.equal(5);
             });
 
