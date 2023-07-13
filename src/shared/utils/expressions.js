@@ -15,7 +15,7 @@ export const safeCapture = (expression, text) => {
  * @param {{ preMatches?: RegExp, postMatches?: RegExp; }} [options] additional config
  * @returns {string | undefined}
  */
-export const matchISO8601 = (text, { preMatches, postMatches } = {}) => {
+export const matchISO8601 = (text, { preMatches, postMatches } = { preMatches: undefined, postMatches: undefined }) => {
     const isoRegex = /(\d{4}-\d{2}-\d{2}(?:(?:\s+|T)\d{2}:\d{2}:\d{2}(?=Z|))?)/i;
     const expression = new RegExp((preMatches?.source || "") + isoRegex.source + (postMatches?.source || ""), "i");
     const timestamp = safeCapture(expression, text);
