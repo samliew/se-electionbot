@@ -2,13 +2,13 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     rebase-strategy: "auto"
     target-branch: "dependencies"
     labels:
-      - "chores"
+      - "dependencies"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "monday"
       time: "00:00"
       timezone: "UTC"
