@@ -134,13 +134,17 @@ export const setThrottleCommand = (args) => {
     const { config, content } = args;
 
     const [match] = content.match(/(?:\d+\.)?\d+$/) || [];
-    const newThrottle = +match;
+    const newThrottle = Number(match) || config.throttleSecs;
 
     const isValid = !isNaN(newThrottle) && newThrottle >= config.minThrottleSecs;
 
     if (isValid) {
+        if (config.throttleSecs === newThrottle) {
+            return `*throttle was already ${newThrottle} second${pluralize(newThrottle)}*`;
+        }
+
         config.throttleSecs = newThrottle;
-        return `*throttle set to ${newThrottle} seconds*`;
+        return `*throttle set to ${newThrottle} second${pluralize(newThrottle)}*`;
     }
 
     return `*invalid throttle value*`;
