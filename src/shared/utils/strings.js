@@ -104,6 +104,9 @@ export const longestLength = (strings) => Math.max(...strings.map(({ length }) =
  * @returns {string}
  */
 export const normalizeSpaces = (text) => {
-    // https://regex101.com/r/Wj7Ng4/1
-    return text.replace(/^\s+|(\s)\s+|^\s+|\s+$/gm, "$1");
+    return text
+        // https://regex101.com/r/Wj7Ng4/1
+        .replace(/^\s+|(\s)\s+|^\s+|\s+$/gm, "$1")
+        // https://regex101.com/r/SHVU3g/2
+        .replace(/\s+([':;,.!?])/gm, '$1');
 };
