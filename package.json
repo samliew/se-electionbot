@@ -74,7 +74,7 @@
         "@types/markdown-it": "^12.2.3",
         "@types/mocha": "^9.1.1",
         "@types/node-cron": "^3.0.11",
-        "@types/ramda": "^0.29.8",
+        "@types/ramda": "^0.29.9",
         "@types/sanitize-html": "^2.9.4",
         "@types/sinon": "^10.0.20",
         "@userscripters/stackexchange-api-types": "^3.4.0",
