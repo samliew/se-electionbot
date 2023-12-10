@@ -88,7 +88,7 @@
         "node-sass-package-importer": "^5.3.3",
         "rimraf": "^3.0.2",
         "sinon": "^14.0.2",
-        "ts-node": "^10.9.1",
+        "ts-node": "^10.9.2",
         "typescript": "^4.9.5"
     },
     "type": "module"
