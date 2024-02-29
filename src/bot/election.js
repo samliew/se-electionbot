@@ -86,6 +86,7 @@ export const getSiteElections = async (config, siteUrl, maxElectionNumber, scrap
         elections.set(electionNum, election);
 
         if (scrape) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 2s delay
             await election.scrapeElection(config);
             const { errors } = election.validate();
             if (errors.length) {
