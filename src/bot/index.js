@@ -570,7 +570,7 @@ use defaults ${defaultChatNotSet}`
             else if (isPrivileged && isAskedForUserEligibility(preparedMessage)) {
                 responseText = await sayUserEligibility(config, election, preparedMessage);
             }
-            else if (isPrivileged && isAskedHowManyModsInTheRoom(preparedMessage)) {
+            else if (isAskedHowManyModsInTheRoom(preparedMessage)) {
                 const modNumResponse = await sayHowManyModsAreHere(config, client, room);
                 await sendMultipartMessage(config, room, modNumResponse, { isPrivileged: true, inResponseTo: msg.id });
                 return;
