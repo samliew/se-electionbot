@@ -83,7 +83,7 @@
         "chai-as-promised": "^7.1.2",
         "copyfiles": "^2.4.1",
         "handlebars": "^4.7.8",
-        "mocha": "^10.4.0",
+        "mocha": "^10.5.2",
         "node-sass": "^7.0.3",
         "node-sass-package-importer": "^5.3.3",
         "rimraf": "^3.0.2",
