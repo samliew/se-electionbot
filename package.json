@@ -64,7 +64,7 @@
         "uuid": "^8.3.2"
     },
     "devDependencies": {
-        "@types/chai": "^4.3.16",
+        "@types/chai": "^4.3.17",
         "@types/chai-as-promised": "^7.1.8",
         "@types/cheerio": "^0.22.35",
         "@types/chess.js": "^0.13.7",
