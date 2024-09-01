@@ -64,7 +64,7 @@
         "uuid": "^8.3.2"
     },
     "devDependencies": {
-        "@types/chai": "^4.3.17",
+        "@types/chai": "^4.3.19",
         "@types/chai-as-promised": "^7.1.8",
         "@types/cheerio": "^0.22.35",
         "@types/chess.js": "^0.13.7",
@@ -74,7 +74,7 @@
         "@types/markdown-it": "^12.2.3",
         "@types/mocha": "^9.1.1",
         "@types/node-cron": "^3.0.11",
-        "@types/ramda": "^0.30.1",
+        "@types/ramda": "^0.30.2",
         "@types/sanitize-html": "^2.13.0",
         "@types/sinon": "^10.0.20",
         "@userscripters/stackexchange-api-types": "^3.4.0",
